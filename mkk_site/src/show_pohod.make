@@ -1,0 +1,2 @@
+dmd show_pohod.d ../../webtank/src/datctrl/record.d ../../webtank/src/db/postgresql.d ../../webtank/src/db/database.d ../../webtank/src/db/datctrl_joint.d ../../webtank/src/datctrl/record_set.d ../../webtank/src/datctrl/data_cell.d ../../webtank/src/datctrl/data_field.d ../../webtank/src/datctrl/field_type.d ../../webtank/src/view_logic/record_set_view.d -op
+cp ./show_pohod /home/test_serv/web_projects/mkk_site/cgi-bin/
