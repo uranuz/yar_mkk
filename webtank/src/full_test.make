@@ -1,0 +1,2 @@
+dmd full_test.d datctrl/record.d db/postgresql.d db/database.d db/datctrl_joint.d datctrl/record_set.d datctrl/data_cell.d datctrl/data_field.d datctrl/field_type.d view_logic/record_set_view.d -op
+cp ./full_test ../cgi-bin/
