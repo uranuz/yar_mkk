@@ -21,8 +21,8 @@ int main()
 	with(FieldType) {
 	touristRecFormat = RecordFormat(
 	[IntKey, Str, Str, Str, Str, Str, Str, Str, Str],
-	//["Ключ", "Имя", "Дата рождения", "Контакты", "Комментарий"],
-	[null, null, null, null, null, null,null, null, null],
+	["Ключ", "Номер", "Сроки <br> похода", "Вид, кс","Район","Руководитель","Город,<br>организация", "Комментарий","Статус<br> похода"],
+	//[null, null, null, null, null, null,null, null, null],
 	[true, true, true, true, true, true, true, true, true] //Разрешение нулевого значения
 	);
 	}
@@ -34,16 +34,21 @@ int main()
 	
 	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
 	string queryStr = 
-		`select num, (kod_mkk||'<br>'||nomer_knigi) as nomer_knigi, `
-		`(begin_date::text||'<br>'||finish_date::text) as date , `
-		`(vid||'<br>'||ks||' с эл '|| element) as vid , `
-		`(prepare||'<br>'||status) as status ,region_pohod, `
-		`chef_grupp, `
-		`(region_group||'<br>'||organization) as organization, `
-		`(marchrut||'<br>'||chef_coment) as marchrut `
+	  `select pohod.num, (coalesce(kod_mkk,'')||'<br>'||coalesce(nomer_knigi,'')) as nomer_knigi, `  
+     `(coalesce(begin_date::text,'')||'<br>'||coalesce(finish_date::text,'')) as date , ` 
+     `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||coalesce( element::text, '' ) ) as vid,`
+
+     `region_pohod ,`
+     `(tourist.family_name||'<br>'||coalesce(tourist.given_name,'')||'<br>'||coalesce(patronymic,'')),`
+     `(coalesce(organization,'')||'<br>'||coalesce(region_group,'')),`
+     `(coalesce(marchrut,'')||'<br>'||coalesce(chef_coment,'')),`
+     `(coalesce(prepare::text,'')||'<br>'||coalesce(status::text,''))  `
+             `from pohod `
+                   `JOIN tourist `
+                          `on pohod.chef_grupp = tourist.num`
+
+;
 		
-		
-		` from pohod `;
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	

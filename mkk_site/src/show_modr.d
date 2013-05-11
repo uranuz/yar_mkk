@@ -20,10 +20,10 @@ int main()
 	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
 	with(FieldType) {
 	touristRecFormat = RecordFormat(
-	[IntKey, Str, Str, Str, Str, Str],
-	["Ключ", "Имя", "Дата рождения", "Контакты", "Комментарий"],
+	[IntKey, Str, Str, Str, Str],
+	["Ключ", "ФИО", "Город,клуб и т.п.", "Контакты", "Статус"],
 	//[null, null, null, null, null, null],
-	[true, true, true, true, true, true] //Разрешение нулевого значения
+	[true, true, true, true, true] //Разрешение нулевого значения
 	);
 	}
 	
@@ -34,24 +34,16 @@ int main()
 	
 	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
 	string queryStr = 
-		`select num, (family_name||'<br>'||given_name||'<br>'||patronymic) as name, `
-		`(birth_date||'<br>'||birth_year) as birth_date , exp, `
-		`(case `
-			`when( show_phone = true ) then phone||'<br> ' `
-			`else '' `
-		`end || `
-		`case `
-			`when( show_email = true ) then email `
-			`else '' `
-		`end ) as contact, `
-		`comment from tourist `;
+		`select num, name,(phone||'<br>'||contact_info) as contact,post `
+		
+		` from modr `;
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
 	auto rsView = new RecordSetView(rs);
 	with( FieldOutputMode )
 		rsView._outputModes = [visible, visible, visible, visible, visible, visible];
-	rsView._viewManner = [FieldViewManner.plainText, FieldViewManner.plainText/*, FieldViewManner.simpleControls*/];
+	rsView._viewManners = [FieldViewManner.plainText, FieldViewManner.plainText/*, FieldViewManner.simpleControls*/];
 	rsView._HTMLClasses = [`cod`, `book-name`, `author`];
 	string html = `<html><body><head><link rel="stylesheet" type="text/css" href="` ~ projectPath ~ `/css/full_test.css">` 
 		~ rsView.getHTMLStr() ~ `</head></body></html>`; //превращаем RecordSet в строку html-кода
