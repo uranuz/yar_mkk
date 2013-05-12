@@ -2,41 +2,43 @@ module webtank.auth_test;
 
 import std.stdio;
 import std.process;
+import std.conv;
 
-import webtank.auth;
-import webtank.core.http.cookies;
+import webtank.core.web_application;
+import webtank.core.auth;
+//import webtank.core.cookies;
 
-//void AuthenticateUser()
-//{
+WebApplication webApp; //Обявление глобального объекта приложения
+
+void webMain(WebApplication webApp)  //Определение главной функции приложения
+{
+	try {
+	auto auth = new Auth;
+	webApp.name = `Тестовое приложение`;
+	auto rp = webApp.response;
+	auto rq = webApp.request;
 	
-	
-//}
-
-
-int main()
-{	
-	/*writeln(
-		"Content-type: text/html\r\n"
-		"Set-Cookie: username=aaa13; path=/\r\n"
-		"Set-Cookie: password=pass\r\n"
-		"Set-Cookie: surname=Vasukov\r\n"
-	);
-	auto cookies = parseResponseCookieStr( getenv(`HTTP_COOKIE`) );
-	foreach(key, val; cookies)
-	{	writeln(key ~ `: "` ~ val ~ `"` );
+	auth.authUser(`petechkinv`, `pet12345`);
+	auth.getUserInfo
 	}
-	writeln(cookies[`username`]);*/
-	//writeln(getenv(`HTTP_COOKIE`));
-	//char[] buf; while (stdin.readln(buf)) write(buf);
-	auto cook = new Cookies;
-	cook[`vasya`] = `aaa`;
-	cook.setDomain(`.localhost`, `vasya`);
-	cook.setPath(`/cgi-bin/webtank`, `vasya`);
-	cook.setHTTPOnly(true, `vasya`);
-	write(cook.getStr());
-	write("Content-type: text/html; charset=UTF-8\r\n\r\n");
-	
-	writeln(`<hr>`);
-	writeln(getenv(`HTTP_COOKIE`));
+	catch(Exception e)
+	{	webApp.response.write(typeid(e).to!string);
+		
+	}
+	//auth.getUser
+	//rp.write(webApp.name ~ "\r\n");
+	//rp.write("<hr>");
+	//rp.write(userInfo.login ~ ` `);
+	//rp.write(userInfo.group ~ ` `);
+	//rp.write(userInfo.name ~ ` `);
+}
+
+
+///Обычная функция main. В ней изменения НЕ ВНОСИМ
+int main()
+{	//Конструируем объект приложения. Передаём ему нашу "главную" функцию
+	webApp = new WebApplication(&webMain); 
+	webApp.run(); //Запускаем приложение
+	webApp.finalize(); //Завершаем приложение
 	return 0;
 }

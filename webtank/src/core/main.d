@@ -11,8 +11,9 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 	auto rp = webApp.response;
 	auto rq = webApp.request;
 	rp.write(webApp.name ~ "\r\n");
-	rp.cookies["Дровосек"] = "Илья";
-
+	rp.write( webApp.auth.sessionId );
+	rp.write( "\r\n" ~ webApp.auth.userInfo.login );
+	rp.write( "\r\n" ~ webApp.auth.userInfo.group );
 }
 
 

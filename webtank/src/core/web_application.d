@@ -1,9 +1,7 @@
 module webtank.core.web_application; 
 
 import webtank.core.cookies;
-
-import std.process;
-
+import webtank.core.authentication;
 
 class Request  //Запрос к приложению
 {	
@@ -11,8 +9,7 @@ protected:
 	Cookies _cookies; //Куки из запроса
 public:
 	this()
-	{	_cookies = new Cookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
-	}
+	{	_cookies = getCookies(); }
 	Cookies cookies() @property
 	{	return _cookies; }
 }
@@ -51,12 +48,12 @@ public:
 	alias void function(WebApplication) AppMainT;
 protected:
 	AppMainT _appMain;
-	string _output;
 public:
 	this( AppMainT appMain )
 	{	_appMain = appMain; 
 		response = new Response;
 		request = new Request;
+		auth = new Authentication;
 	}
 
 	void run()  //Функция запуска приложения
@@ -70,4 +67,5 @@ public:
 	string name;
 	Request request;
 	Response response;
+	Authentication auth;
 }
