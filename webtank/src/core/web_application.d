@@ -2,16 +2,41 @@ module webtank.core.web_application;
 
 import webtank.core.cookies;
 import webtank.core.authentication;
+import webtank.core.uri;
 
 class Request  //Запрос к приложению
 {	
 protected:
 	Cookies _cookies; //Куки из запроса
+	string[string] _POST;
+	string[string] _GET;
 public:
 	this()
 	{	_cookies = getCookies(); }
 	Cookies cookies() @property
 	{	return _cookies; }
+	
+	string getStdInput()
+	{	import std.stdio;
+		string result;
+		string buf;
+		while ((buf = stdin.readln()) !is null)
+			result ~= buf;
+		return result;
+	}
+	
+	string[string] POST() @property
+	{	if( _POST.length <= 0 )
+			_POST = extractURIData( getStdInput() );
+		return _POST;
+	}
+	
+	string[string] GET() @property
+	{	import std.process;
+		if( _GET.length <= 0 )
+			_GET = extractURIData( getenv("QUERY_STRING") );
+		return _GET;
+	}
 }
 
 class Response  //Ответ приложения
