@@ -26,64 +26,68 @@ struct FieldViewFormat
 class RecordSetView
 {	
 //protected:
-	FieldViewManner[] _viewManners;
-	FieldOutputMode[] _outputModes;
-	bool[] _writeableFlags;
-	RecordSet _recordSet;
-	bool _showHeader = true;
+	FieldViewManner[] viewManners;
+	FieldOutputMode[] outputModes;
+	bool[] writeableFlags;
+	RecordSet recordSet;
+	bool showHeader = true;
 	
-	string[] _HTMLClasses;
-	string _HTMLTableClass;
-	//string[] _nullCellStrings;
-	//string[] _trueCellStrings; 
-	//string[] _falseCellStrings;
+	string[] FieldHTMLClasses;
+	string HTMLTableClass;
+	//string[] nullStrings;
+	//string[] trueStrings; 
+	//string[] falseStrings;
 	
-	string _nullCellDefaultStr = `Не задано`;
-	string _trueCellDefaultStr = `Да`;
-	string _falseCellDefaultStr = `Нет`;
+	//alias void function(size_t key) CellHandler;
+	
+	//CellHandler[] handlers;
+	
+	string nullStrDefault = `Не задано`;
+	string trueStrDefault = `Да`;
+	string falseStrDefault = `Нет`;
 
 public:
-	this( RecordSet recordSet )
-	{	_recordSet = recordSet; }
+	this( RecordSet recSet )
+	{	recordSet = recSet; }
 	
 	
 	string getHTMLStr()
-	{	string resultStr = `<table` ~ ( ( _HTMLTableClass.length > 0 ) ? (` class="` ~ _HTMLTableClass ~ `"`) : `` ) ~ `>`;
+	{	string resultStr = `<table` ~ ( ( HTMLTableClass.length > 0 ) ? (` class="` ~ HTMLTableClass ~ `"`) : `` ) ~ `>`;
 		resultStr ~= `<tr>`;
-		if( _showHeader )
-		{	for( int k = 0; k < _recordSet.fieldCount; ++k )
-			{	if( ( _outputModes.length <= k ) || (_outputModes[k] == FieldOutputMode.none) ) //Не делаем вывод поля
+		if( showHeader )
+		{	for( int k = 0; k < recordSet.fieldCount; ++k )
+			{	if( ( outputModes.length <= k ) || (outputModes[k] == FieldOutputMode.none) ) //Не делаем вывод поля
 					continue;
-				resultStr ~= `<th>` ~ _recordSet.getField(k).name ~ `</th>`; 
+				resultStr ~= `<th>` ~ recordSet.getField(k).name ~ `</th>`; 
 			}
 		}
 		resultStr ~= `</tr>`;
 		
 		//TODO: Добавить окошечки для фильтрации, если надо
-		foreach( rec; _recordSet )
+		foreach( rec; recordSet )
 		{	resultStr ~= `<tr>`;
-			for( size_t j = 0; j <_recordSet.fieldCount; ++j )
-			{	if( ( _outputModes.length <= j ) || (_outputModes[j] == FieldOutputMode.none) ) //Не делаем вывод поля
+			for( size_t j = 0; j <recordSet.fieldCount; ++j )
+			{	if( ( outputModes.length <= j ) || (outputModes[j] == FieldOutputMode.none) ) //Не делаем вывод поля
 					continue;
 				auto curCell = rec[j];
-				auto curViewManner = ( j < _viewManners.length ) ? _viewManners[j] : FieldViewManner.plainText;
-				bool curIsWriteable = ( j < _writeableFlags.length ) ? _writeableFlags[j] : false; //По-умолчанию не записываемый
+				auto curViewManner = ( j < viewManners.length ) ? viewManners[j] : FieldViewManner.plainText;
+				bool curIsWriteable = ( j < writeableFlags.length ) ? writeableFlags[j] : false; //По-умолчанию не записываемый
 				resultStr ~= `<td`
-					~ ( ( (j < _HTMLClasses.length) && (_HTMLClasses[j].length > 0) ) ? (` class="` ~ _HTMLClasses[j] ~ `"`) : "" ) ~ `>`;
+					~ ( ( (j < FieldHTMLClasses.length) && (FieldHTMLClasses[j].length > 0) ) ? (` class="` ~ FieldHTMLClasses[j] ~ `"`) : "" ) ~ `>`;
 				with( FieldViewManner ) {
 				switch( curViewManner )
 				{	case plainText:
 					{	if( curCell.isNull() )
-							resultStr ~= _nullCellDefaultStr;
+							resultStr ~= nullStrDefault;
 						else
 							resultStr ~= curCell.getStr();
 						break;
 					}
 					case simpleControls: 
-					{	string nameAttribStr = ` name="` ~ _recordSet.getField(j).name ~ `_` ~ _recordSet._frontKey.to!string ~ `"`;
+					{	string nameAttribStr = ` name="` ~ recordSet.getField(j).name ~ `_` ~ recordSet._frontKey.to!string ~ `"`;
 						if( curCell.type == FieldType.Int || curCell.type == FieldType.Str || curCell.type == FieldType.IntKey )
 						{	resultStr ~= `<input type="text"` ~ nameAttribStr ~ ` value="`
-								~ ( ( curCell.isNull() ) ? _nullCellDefaultStr : curCell.getStr ) ~`"` 
+								~ ( ( curCell.isNull() ) ? nullStrDefault : curCell.getStr() ) ~`"` 
 								~ ( ( !curIsWriteable ) ? ` disabled` : `` ) ~ `>`;
 						}
 						if( curCell.type == FieldType.Bool )
@@ -91,16 +95,16 @@ public:
 							string yesSelStr = ``;
 							string noSelStr = ``;
 							if( !curCell.isNull() )
-							{	if( curCell.getBool ) yesSelStr = ` selected`;
+							{	if( curCell.getBool() ) yesSelStr = ` selected`;
 								else noSelStr = ` selected`;
 							}
 							resultStr ~= `<select` ~ nameAttribStr ~ ( ( !curIsWriteable ) ? ` disabled` : `` ) ~ `>`;
 							if( curCell.isNullable )
-								resultStr ~= `<option value="null"` ~ nullSelStr ~ `>` ~ _nullCellDefaultStr ~ `</option>`;
+								resultStr ~= `<option value="null"` ~ nullSelStr ~ `>` ~ nullStrDefault ~ `</option>`;
 								
 							resultStr ~= 
-							`<option value="yes"` ~ yesSelStr ~ `>` ~ _trueCellDefaultStr ~`</option>`
-							`<option value="no"` ~ noSelStr ~ `>` ~ _falseCellDefaultStr ~`</option>`
+							`<option value="yes"` ~ yesSelStr ~ `>` ~ trueStrDefault ~`</option>`
+							`<option value="no"` ~ noSelStr ~ `>` ~ falseStrDefault ~`</option>`
 							`</select>`;
 						}
 						break;

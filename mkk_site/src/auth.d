@@ -31,7 +31,7 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 	//if( "user_login" in rq.POST ) input ~= rq.POST["user_login"] ~ "   ";
 	//if( "user_password" in rq.POST ) input ~= rq.POST["user_password"];
 	foreach( key, value; rq.POST)
-	{	rp.write("#>> "); rp.write( key ~ " : " ~ value );
+	{	rp.write(" #>> "); rp.write( key ~ " : " ~ value );
 	}
 	//rp.write( input );
 	rp.write(`</body></html>`);
