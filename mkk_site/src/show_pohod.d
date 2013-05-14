@@ -77,9 +77,9 @@ group by num
 	
 	auto rsView = new RecordSetView(rs);
 	with( FieldOutputMode )
-		rsView._outputModes = [visible, visible, visible, visible,visible, visible, visible, visible, visible, visible];
-	rsView._viewManners = [FieldViewManner.plainText, FieldViewManner.plainText/*, FieldViewManner.simpleControls*/];
-	rsView._HTMLClasses = [`cod`, `book-name`, `author`];
+		rsView.outputModes = [visible, visible, visible, visible,visible, visible, visible, visible, visible, visible];
+	rsView.viewManners = [FieldViewManner.plainText, FieldViewManner.plainText/*, FieldViewManner.simpleControls*/];
+	rsView.fieldHTMLClasses = [`cod`, `book-name`, `author`];
 	string html = `<html><body><head><link rel="stylesheet" type="text/css" href="` ~ projectPath ~ `/css/full_test.css">` 
 		~ rsView.getHTMLStr() ~ `</head></body></html>`; //превращаем RecordSet в строку html-кода
 	output ~= html;

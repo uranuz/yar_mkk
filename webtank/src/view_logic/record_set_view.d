@@ -32,7 +32,7 @@ class RecordSetView
 	RecordSet recordSet;
 	bool showHeader = true;
 	
-	string[] FieldHTMLClasses;
+	string[] fieldHTMLClasses;
 	string HTMLTableClass;
 	//string[] nullStrings;
 	//string[] trueStrings; 
@@ -73,7 +73,7 @@ public:
 				auto curViewManner = ( j < viewManners.length ) ? viewManners[j] : FieldViewManner.plainText;
 				bool curIsWriteable = ( j < writeableFlags.length ) ? writeableFlags[j] : false; //По-умолчанию не записываемый
 				resultStr ~= `<td`
-					~ ( ( (j < FieldHTMLClasses.length) && (FieldHTMLClasses[j].length > 0) ) ? (` class="` ~ FieldHTMLClasses[j] ~ `"`) : "" ) ~ `>`;
+					~ ( ( (j < fieldHTMLClasses.length) && (fieldHTMLClasses[j].length > 0) ) ? (` class="` ~ fieldHTMLClasses[j] ~ `"`) : "" ) ~ `>`;
 				with( FieldViewManner ) {
 				switch( curViewManner )
 				{	case plainText:
