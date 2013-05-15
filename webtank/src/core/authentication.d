@@ -1,5 +1,7 @@
 module webtank.core.authentication;
 
+import std.conv;
+
 import webtank.core.cookies;
 import webtank.db.postgresql;
 
@@ -25,6 +27,8 @@ struct UserInfo
 	
 */
 
+enum string dbLibLogFile = `/home/test_serv/sites/test/logs/webtank.log`;
+
 ///Класс "Аутентификация"
 class Authentication
 {	
@@ -33,6 +37,7 @@ protected:
 	string _sessionId;  //Ид сессии
 	bool _hasUserInfo = false; //true, если получение информации о пользователе не требуется
 	bool _hasSID = false; //true, если получение Ид сессии не требуется
+	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
 
 
 public:
@@ -45,12 +50,12 @@ public:
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	void enterUser(string login, string password)
+	string enterUser(string login, string password)
 	{	
 		//Делаем запрос к БД за информацией о пользователе
 		auto dbase = new DBPostgreSQL(dbConnStr);
 		if ( !dbase.isConnected )
-			return;
+			return null;
 		
 		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
 			` select id, user_group, name, password `
@@ -60,7 +65,7 @@ public:
 		);
 		
 		if( query_res.recordCount <= 0 )
-			return;
+			return null;
 		
 		_userInfo.login = login;
 		string user_id = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
@@ -68,14 +73,34 @@ public:
 		_userInfo.name = ( query_res.getIsNull(0, 2) ) ? null : query_res.getValue(0, 2);
 		string found_password = ( query_res.getIsNull(0, 3) ) ? null : query_res.getValue(0, 3);
 		
+		try { //Логирование запросов к БД для отладки
+			import std.file;
+			std.file.append( dbLibLogFile, 
+				"--------------------\r\n"
+				"Authentication.enterUser()\r\n"
+				"user_id: " ~ user_id ~ ";  _userInfo.group: " ~ _userInfo.group
+				~ ";  _userInfo.name: " ~ _userInfo.name ~ ";  found_password: " ~ found_password
+				~ "\r\n"
+			);
+		} catch(Exception) {}
+		
 		if( (found_password.length > 0) && (password == found_password) )
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
 			string sid = _generateSessionId(login);
+			try { //Логирование запросов к БД для отладки
+				import std.file;
+				std.file.append( dbLibLogFile, 
+					"sid: " ~ sid ~ "\r\n"
+				);
+			} catch(Exception) {}
 			string query = 
-				`insert into "session" ("id", "user_id") values ( ( '`
-				~ sid ~ `' )::uuid, ` ~ user_id ~ ` );`;
+				`insert into "session" ("id", "user_id", "expires") values ( ( '`
+				~ sid ~ `' )::uuid, ` ~ user_id 
+				~ `, ( current_timestamp + interval '` ~ _sessionLifetime.to!string ~ ` minutes' )  );`;
 			dbase.query(query);
+			return sid;
 		}
+		return null;
 	}
 
 	//Свойство "Информация о пользователе"
@@ -102,7 +127,6 @@ public:
 	
 protected:
 	//Служебная функция для генерации Ид сессии
-	//TODO: возможно, лучше перенести в защищенную секцию, чтобы никто не мог взломать и вызвать
 	string _generateSessionId(string baseStr)
 	{	import std.digest.md;
 		import std.datetime;
@@ -127,23 +151,15 @@ protected:
 		if ( !dbase.isConnected ) return; //Не доступа к базе
 
 		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
-			//Получаем время в нужном формате (с точностью до секунд, без учёта врем. зон)
-			` select to_char("expires", 'YYYY-Mon-DD HH:MM:SS') ` 
-			` from session `
-			` where id = '` ~ cookieSID ~ `'::uuid;`
+			//Получим 1, если срок действия не истек или ничего
+			`select 1 from session 
+			where id = '` ~ cookieSID ~ `'::uuid and current_timestamp < "expires";`
 		);
 		
-		if( query_res.recordCount <= 0 ) return; //Нет записей
-		
-		//Получаем строку со сроком годности сессии
-		string expireStr = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
-		
-		if( expireStr.length <= 0 ) return; //TODO: Подумать над этим
-		import std.datetime;
-		auto expiresDate = DateTime.fromSimpleString(expireStr);
-		auto currentTime = cast(DateTime) Clock.currTime();
-		if( currentTime <= expiresDate  ) //Проверяем срок годности
-		{	_sessionId = cookieSID; }
+		if( query_res.recordCount > 0 )
+			_sessionId = cookieSID; 
+		else
+			return; //Нет записей
 	}
 	
 	void _updateUserInfo()
