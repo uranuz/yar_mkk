@@ -57,15 +57,20 @@ public:
 		if ( !dbase.isConnected )
 			return null;
 		
-		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
-			` select id, user_group, name, password `
-			` from "user" `
-			` where login='`
-			~ login ~ `';`
-		);
-		
-		if( query_res.recordCount <= 0 )
+		PostgreSQLQueryResult query_res;
+		try {
+			query_res = cast(PostgreSQLQueryResult) dbase.query(
+				` select id, user_group, name, password `
+				` from "user" `
+				` where login='`
+				~ login ~ `';`
+			);
+			if( query_res.recordCount <= 0 )
 			return null;
+		} catch(Exception) 
+		{	return null; }
+		
+		
 		
 		_userInfo.login = login;
 		string user_id = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
@@ -84,7 +89,7 @@ public:
 			);
 		} catch(Exception) {}
 		
-		if( (found_password.length > 0) && (password == found_password) )
+		if( (found_password.length > 0) && (password == found_password) ) //Проверка пароля
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
 			string sid = _generateSessionId(login);
 			try { //Логирование запросов к БД для отладки
@@ -94,11 +99,18 @@ public:
 				);
 			} catch(Exception) {}
 			string query = 
-				`insert into "session" ("id", "user_id", "expires") values ( ( '`
+				` insert into "session" ("id", "user_id", "expires") values ( ( '`
 				~ sid ~ `' )::uuid, ` ~ user_id 
-				~ `, ( current_timestamp + interval '` ~ _sessionLifetime.to!string ~ ` minutes' )  );`;
-			dbase.query(query);
-			return sid;
+				~ `, ( current_timestamp + interval '` ~ _sessionLifetime.to!string ~ ` minutes' )  )`
+				~ ` returning 'authenticated';`;
+			auto newSIDStatusRes = cast(PostgreSQLQueryResult) dbase.query(query);
+			if( newSIDStatusRes.recordCount <= 0 )
+				return null;
+			string statusStr = ( newSIDStatusRes.getIsNull(0, 0) ) ? null : newSIDStatusRes.getValue(0, 0);
+			if( statusStr == "authenticated" )
+				return sid;  //Аутентификация завершена успешно
+			else 
+				return null;
 		}
 		return null;
 	}

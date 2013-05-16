@@ -33,8 +33,11 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 		rp.write(
 //HTML
 `<html><body>
-<h2>Аутентификация</h2>
-<hr>
+<h2>Аутентификация</h2>`);
+		if( webApp.auth.sessionId.length > 0 )
+			rp.write("Вход на сайт уже выполен");
+		rp.write(
+`<hr>
 <form method="post" action="#"><table>
   <tr>
     <th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td> 
@@ -44,8 +47,7 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 </table></form> <br>`
 //HTML
 		);
-		if( webApp.auth.sessionId.length > 0 )
-			rp.write("Вход на сайт уже выполен");
+		
 	}
 	
 	//rp.write( input );
