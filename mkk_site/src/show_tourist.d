@@ -10,18 +10,19 @@ import webtank.db.datctrl_joint;
 import webtank.datctrl.record;
 //import webtank.datctrl.record_set;
 
-import webtank.view_logic.record_set_view;
+//import webtank.view_logic.record_set_view;
 
 immutable(string) projectPath = `/webtank`;
 
 int main()
-{	string output = "Content-type: text/html; charset=\"utf-8\" \r\n\r\n"; //"Выхлоп" программы
+{	string fem='';
+   string output = "Content-type: text/html; charset=\"utf-8\" \r\n\r\n"; //"Выхлоп" программы
 	try {
 	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
 	with(FieldType) {
 	touristRecFormat = RecordFormat(
 	[IntKey, Str, Str, Str, Str, Str],
-	["Ключ", "Имя", "Дата рождения", "Опыт", "Контакты", "Комментарий"],
+	["Ключ", "Имя", "Дата рожд", "Опыт", "Контакты", "Комментарий"],
 	//[null, null, null, null, null, null],
 	[true, true, true, true, true, true] //Разрешение нулевого значения
 	);
@@ -34,8 +35,8 @@ int main()
 	
 	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
 	string queryStr = 
-		`select num, (family_name||'<br>'||given_name||'<br>'||patronymic) as name, `
-		`( birth_date||'<br>'||birth_year ) as birth_date , exp, `
+		`select num, (family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
+		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date , exp, `
 		`( case `
 			` when( show_phone = true ) then phone||'<br> ' `
 			` else '' `
@@ -43,20 +44,79 @@ int main()
 		` case `
 			` when( show_email = true ) then email `
 			` else '' `
-		` end ) as contact, `
-		` comment from tourist `;
+		   ` end ) as contact, `
+		   ` comment from tourist order by num`;
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	/*foreach(rec; rs)
-	{	output ~= rec[1].getStr() ~ `<hr>`;
+	string table = `<table>`;
+	table ~= `<tr>`;
+	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Ключ</td><td> Комментарий</td>`; 
+	foreach(rec; rs)
+	{	table ~= `<tr>`;
+		table ~= `<td>` ~ ( ( rec["Ключ"].isNull() ) ? "Не задано" : rec["Ключ"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ ( ( rec["Имя"].isNull() ) ? "Не задано" : rec["Имя"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ ( ( rec["Дата рожд"].isNull() ) ? "Не задано" : rec["Дата рожд"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ ( ( rec["Опыт"].isNull() ) ? "Не задано" : rec["Опыт"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ ( ( rec["Контакты"].isNull() ) ? "Не задано" : rec["Контакты"].getStr() ) ~ `</td>`;
+		
+		table ~= `<td>` ~ ( ( rec["Комментарий"].isNull() ) ? "Не задано" : rec["Комментарий"].getStr() ) ~ `</td>`;
+		
+		
+		
+		
+		
+		
+		table ~= `</tr>`;
+	}
+	table ~= `</table>`;
 	
-	}*/
 	
-	auto rsView = new RecordSetView(rs);
+	/*auto rsView = new RecordSetView(rs);
+	rsView.outputModes.length = 6;
 	with( FieldOutputMode )
-		rsView._outputModes = [visible, visible, visible, visible, visible, visible];
-	string html = `<html><body><head><link rel="stylesheet" type="text/css" href="` ~ projectPath ~ `/css/full_test.css">` 
-		~ rsView.getHTMLStr() ~ `</head></body></html>`; //превращаем RecordSet в строку html-кода
+		rsView.outputModes[0..$] = visible;
+	rsView.viewManners.length = 6;
+	rsView.viewManners[0..$] = FieldViewManner.plainText;*/
+	string html = 
+	`<html>`~ "\r\n"
+	~`<meta http-equiv="Выберите расширение для парковки" content="text/html; charset=windows-1251">`~ "\r\n"
+	~`<title>Список туристов</title>`~ "\r\n"
+	~`<head><link rel="stylesheet" type="text/css" href="` 
+	~`../../css/baza.css">`
+	//~ projectPath 
+	//~`/css/full_test.css">`
+	~`</head>` ~ "\r\n"
+	
+	~`<body>`~ "\r\n"
+	
+	~`<h1><img src="/img/znak.png" width="130" height="121" alt="ТССР">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;База данных Ярославской МКК.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>  
+<h2>Список туристов &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="show_pohod">Список походов</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="baza_glavnaya.php">Главная</a></h2>`~ "\r\n"
+~`<form name="form1" method="post" action="show_turistov">
+  <p>
+    <label>Найти по фамилии
+      <input name="fem" type="text" id="fem" size="32"  value="   
+     "  >
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="submit" name="button" id="button" value="Найти">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    
+  </p>
+ 
+</form>
+<form name="form2" method="post" action="baza_turistov.php">
+
+ <input name="fem" type="hidden"    value=''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <label>Показать всех
+  <input type="submit" name="fam" id="fam" value=""></label>
+ 
+</form>
+
+
+	
+		~ table  ~ `</body></html>`; //превращаем RecordSet в строку html-кода
 	output ~= html;
 	}
 	//catch(Exception e) {
