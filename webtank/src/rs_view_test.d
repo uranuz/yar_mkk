@@ -38,10 +38,10 @@ int main()
 	//output ~= response.recordCount.to!(string);
 	//writeln(response.recordCount);
 	auto rsView = new RecordSetView(rs);
-	//with( FieldViewManner )
-		//rsView.viewManners = [plainText, plainText, simpleControls, plainText, plainText, simpleControls, simpleControls];
-	//rsView.FieldHTMLClasses = [`cod`, `book-name`, `author`];
-	//rsView.HTMLTableClass = `book-table`;
+	with( FieldViewManner )
+		rsView.viewManners = [plainText, plainText, simpleControls, plainText, plainText, simpleControls, simpleControls];
+	rsView.FieldHTMLClasses = [`cod`, `book-name`, `author`];
+	rsView.HTMLTableClass = `book-table`;
 	rsView.outputModes.length = 7;
 	with( FieldOutputMode ) 
 		rsView.outputModes[0..$] = visible;

@@ -94,7 +94,7 @@ unittest
 string[string] extractURIData(string queryStr)
 {	string[string] result;
 	foreach( key, value; parseURIQuery2( queryStr ) )
-		result[ key ] = value;
+		result[ decodeURI(key) ] = decodeURI(value);
 	return result;
 }
 

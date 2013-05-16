@@ -12,27 +12,42 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 	webApp.name = `Тестовое приложение`;
 	auto rp = webApp.response;
 	auto rq = webApp.request;
-	rp.write(
+	
+	
+	if( ("user_login" in rq.POST) && ("user_password" in rq.POST) )
+	{	string sid = webApp.auth.enterUser(rq.POST["user_login"], rq.POST["user_password"]);
+		rp.cookies["sid"] = sid;
+		rp.cookies["user_login"] = rq.POST["user_login"];
+		if( sid.length > 0 ) 
+		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
+			//Добавляем перенаправление на другую страницу
+			rp.redirect("http://google.com");
+		}
+		else
+		{	rp.write("Вход завершился с ошибкой");
+		}
+	}
+	else
+	{	
+		string login = ( rq.cookies.hasName("user_login") ) ? rq.cookies["user_login"] : "";
+		rp.write(
 //HTML
 `<html><body>
 <h2>Аутентификация</h2>
 <hr>
 <form method="post" action="#"><table>
   <tr>
-    <th>Логин</th> <td><input name="user_login" type="text"></td> 
+    <th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td> 
     <td rowspan="2"><input value="     Войти     " type="submit"></td>
   </tr>
   <tr><th>Пароль</th> <td><input name="user_password" type="password"></td></tr>
-</table></form>`
+</table></form> <br>`
 //HTML
-	);
-	string input;
-	input ~= rq.POST.length.to!string ~ "   "  ;
-	//if( "user_login" in rq.POST ) input ~= rq.POST["user_login"] ~ "   ";
-	//if( "user_password" in rq.POST ) input ~= rq.POST["user_password"];
-	foreach( key, value; rq.POST)
-	{	rp.write(" #>> "); rp.write( key ~ " : " ~ value );
+		);
+		if( webApp.auth.sessionId.length > 0 )
+			rp.write("Вход на сайт уже выполен");
 	}
+	
 	//rp.write( input );
 	rp.write(`</body></html>`);
 	} catch (Throwable e)
