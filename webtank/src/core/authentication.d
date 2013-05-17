@@ -2,8 +2,26 @@ module webtank.core.authentication;
 
 import std.conv;
 
-import webtank.core.cookies;
+import webtank.core.http.cookies;
 import webtank.db.postgresql;
+
+
+///В разработке: Политика аутентификации
+class AuthPolicy
+{	//Два режима: разрешать (allow) или запрещать (deny)
+	enum Mode {allow, deny};
+	Mode mode;
+	/**
+		Три вида пользователей или групп:
+		1. Обычные пользователи или группы:
+			Этим пользователям разрешается доступ, если mode = Mode.allow и запрещается
+			если mode = Mode.deny
+		2. Особые пользователи (привелигированные) или группы:
+			Для этих пользователей обратная ситуация. Если mode = Mode.allow, то доступ
+			запрещается и, если mode = Mode.deny, то разрешается
+		3. 
+	*/
+}
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -11,7 +29,6 @@ class AuthException : Exception {
 		super(msg, file, line);
 		//message = msg ~ "  <" ~ file ~ ", " ~ line.to!string ~ ">";
 	}
-	//string message;
 }
 
 //Структура с информацией о пользователе
@@ -46,6 +63,11 @@ public:
 	this() //Конструктор
 	{	_updateSessionId(); //При запуске пытаемся получить Ид сессии
 		_updateUserInfo();  //Получаем информацию о пользователе
+	}
+	
+	bool isLoggedIn() @property
+	{	import std.string;
+		return ( std.string.strip(sessionId).length > 0 );
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
@@ -126,6 +148,8 @@ public:
 		assert(0); //Сюда не ходи
 	}
 	
+	
+	//TODO: Привести sessionId к ubyte[16]
 	//свойство "Ид сессии"
 	string sessionId() @property
 	{	if( _hasSID )

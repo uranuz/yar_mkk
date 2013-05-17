@@ -1,4 +1,4 @@
-module webtank.core.uri;
+module webtank.core.http.uri;
 
 import std.string;
 import std.exception;
