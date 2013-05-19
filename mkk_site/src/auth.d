@@ -1,9 +1,9 @@
 module webtank.core.main;
 
-import webtank.core.web_application;
-
 import std.process;
 import std.conv;
+
+enum string dbLibLogFile = `/home/test_serv/sites/test/logs/webtank.log`;
 
 WebApplication webApp; //Обявление глобального объекта приложения
 
@@ -21,7 +21,17 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 		if( sid.length > 0 ) 
 		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
 			//Добавляем перенаправление на другую страницу
-			rp.redirect("http://google.com");
+			try { //Логирование запросов к БД для отладки
+				import std.file;
+				std.file.append( dbLibLogFile, 
+					"--------------------\r\n"
+					"mkk_site.auth\r\n"
+					"returnTo: " ~ rq.GET.get("returnTo", "") ~ ";"
+					~ "\r\n"
+				);
+			} catch(Exception) {}
+			string returnTo = rq.GET.get("returnTo", "");
+			rp.redirect(returnTo);
 		}
 		else
 		{	rp.write("Вход завершился с ошибкой");
@@ -33,19 +43,23 @@ void webMain(WebApplication webApp)  //Определение главной ф�
 		rp.write(
 //HTML
 `<html><body>
-<h2>Аутентификация</h2>
-<hr>
+<h2>Аутентификация</h2>`);
+		if( webApp.auth.sessionId.length > 0 )
+			rp.write("Вход на сайт уже выполен");
+		rp.write(
+`<hr>
 <form method="post" action="#"><table>
   <tr>
     <th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td> 
     <td rowspan="2"><input value="     Войти     " type="submit"></td>
   </tr>
   <tr><th>Пароль</th> <td><input name="user_password" type="password"></td></tr>
-</table></form> <br>`
+</table>`
+//`<input type="hidden" name="returnTo" value="` ~ rq.POST ~ `"
+`</form> <br>`
 //HTML
 		);
-		if( webApp.auth.sessionId.length > 0 )
-			rp.write("Вход на сайт уже выполен");
+		
 	}
 	
 	//rp.write( input );

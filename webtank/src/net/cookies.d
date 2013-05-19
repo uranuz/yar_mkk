@@ -1,4 +1,4 @@
-module webtank.core.cookies;
+module webtank.core.http.cookies;
 
 class Cookies
 {	

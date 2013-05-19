@@ -2,8 +2,26 @@ module webtank.core.authentication;
 
 import std.conv;
 
-import webtank.core.cookies;
+import webtank.core.http.cookies;
 import webtank.db.postgresql;
+
+
+///В разработке: Политика аутентификации
+class AuthPolicy
+{	//Два режима: разрешать (allow) или запрещать (deny)
+	enum Mode {allow, deny};
+	Mode mode;
+	/**
+		Три вида пользователей или групп:
+		1. Обычные пользователи или группы:
+			Этим пользователям разрешается доступ, если mode = Mode.allow и запрещается
+			если mode = Mode.deny
+		2. Особые пользователи (привелигированные) или группы:
+			Для этих пользователей обратная ситуация. Если mode = Mode.allow, то доступ
+			запрещается и, если mode = Mode.deny, то разрешается
+		3. 
+	*/
+}
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -11,7 +29,6 @@ class AuthException : Exception {
 		super(msg, file, line);
 		//message = msg ~ "  <" ~ file ~ ", " ~ line.to!string ~ ">";
 	}
-	//string message;
 }
 
 //Структура с информацией о пользователе
@@ -34,13 +51,16 @@ class Authentication
 {	
 protected:
 	UserInfo _userInfo; //Информация о пользователе (не вся, только основная)
-	string _sessionId;  //Ид сессии
+	SessionIdType _sessionId;  //Ид сессии
 	bool _hasUserInfo = false; //true, если получение информации о пользователе не требуется
 	bool _hasSID = false; //true, если получение Ид сессии не требуется
 	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
 
 
 public:
+	enum SessionIdSize = 16;
+	alias ubyte[SIDSize] SessionIdType;
+	
 	string dbConnStr = "dbname=postgres host=localhost user=postgres password=postgres";
 	
 	this() //Конструктор
@@ -48,30 +68,40 @@ public:
 		_updateUserInfo();  //Получаем информацию о пользователе
 	}
 	
+	bool isLoggedIn() @property
+	{	import std.string;
+		return ( std.string.strip(sessionId).length > 0 );
+	}
+	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	string enterUser(string login, string password)
+	SessionIdType enterUser(string login, string password)
 	{	
 		//Делаем запрос к БД за информацией о пользователе
 		auto dbase = new DBPostgreSQL(dbConnStr);
 		if ( !dbase.isConnected )
 			return null;
 		
-		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
-			` select id, user_group, name, password `
-			` from "user" `
-			` where login='`
-			~ login ~ `';`
-		);
-		
-		if( query_res.recordCount <= 0 )
+		PostgreSQLQueryResult query_res;
+		try {
+			query_res = cast(PostgreSQLQueryResult) dbase.query(
+				` select id, user_group, name, password `
+				` from "user" `
+				` where login='`
+				~ login ~ `';`
+			);
+			
+			if( query_res.recordCount <= 0 )
 			return null;
+			
+			_userInfo.login = login;
+			string user_id = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
+			_userInfo.group = ( query_res.getIsNull(0, 1) ) ? null : query_res.getValue(0, 1);
+			_userInfo.name = ( query_res.getIsNull(0, 2) ) ? null : query_res.getValue(0, 2);
+			string found_password = ( query_res.getIsNull(0, 3) ) ? null : query_res.getValue(0, 3);
+		} catch(Exception) 
+		{	return null; }
 		
-		_userInfo.login = login;
-		string user_id = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
-		_userInfo.group = ( query_res.getIsNull(0, 1) ) ? null : query_res.getValue(0, 1);
-		_userInfo.name = ( query_res.getIsNull(0, 2) ) ? null : query_res.getValue(0, 2);
-		string found_password = ( query_res.getIsNull(0, 3) ) ? null : query_res.getValue(0, 3);
 		
 		try { //Логирование запросов к БД для отладки
 			import std.file;
@@ -84,21 +114,30 @@ public:
 			);
 		} catch(Exception) {}
 		
-		if( (found_password.length > 0) && (password == found_password) )
+		if( (found_password.length > 0) && (password == found_password) ) //Проверка пароля
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
-			string sid = _generateSessionId(login);
+			SessionIdType sid = _generateSessionId(login);
 			try { //Логирование запросов к БД для отладки
 				import std.file;
 				std.file.append( dbLibLogFile, 
 					"sid: " ~ sid ~ "\r\n"
 				);
 			} catch(Exception) {}
+			
+			import std.digest.digest;
 			string query = 
-				`insert into "session" ("id", "user_id", "expires") values ( ( '`
-				~ sid ~ `' )::uuid, ` ~ user_id 
-				~ `, ( current_timestamp + interval '` ~ _sessionLifetime.to!string ~ ` minutes' )  );`;
-			dbase.query(query);
-			return sid;
+				` insert into "session" ("id", "user_id", "expires") values ( ( '`
+				~ std.digest.digest.toHexString(sid) ~ `' )::uuid, ` ~ user_id 
+				~ `, ( current_timestamp + interval '` ~ _sessionLifetime.to!string ~ ` minutes' )  )`
+				~ ` returning 'authenticated';`;
+			auto newSIDStatusRes = cast(PostgreSQLQueryResult) dbase.query(query);
+			if( newSIDStatusRes.recordCount <= 0 )
+				return null;
+			string statusStr = ( newSIDStatusRes.getIsNull(0, 0) ) ? null : newSIDStatusRes.getValue(0, 0);
+			if( statusStr == "authenticated" )
+				return sid;  //Аутентификация завершена успешно
+			else 
+				return null;
 		}
 		return null;
 	}
@@ -114,8 +153,10 @@ public:
 		assert(0); //Сюда не ходи
 	}
 	
+	
+	//TODO: Привести sessionId к ubyte[16]
 	//свойство "Ид сессии"
-	string sessionId() @property
+	SessionIdType sessionId() @property
 	{	if( _hasSID )
 			return _sessionId;
 		else
@@ -127,13 +168,11 @@ public:
 	
 protected:
 	//Служебная функция для генерации Ид сессии
-	string _generateSessionId(string baseStr)
+	SessionIdType _generateSessionId(string baseStr)
 	{	import std.digest.md;
 		import std.datetime;
 		string idSource = baseStr ~ Clock.currTime().toISOString(); //Создаём исходную строку 
-		auto md5 = new MD5Digest(); 
-		ubyte[] hash = md5.digest(idSource); 
-		return toHexString( hash ); //Возвращаем идентификатор сессии
+		return md5Of(idSource); //Возвращаем идентификатор сессии
 	}
 	
 	void _updateSessionId()
@@ -141,10 +180,13 @@ protected:
 		_hasSID = true; //Больше не ищем Ид сессии
 	
 		auto cookies = getCookies();
-		string cookieSID = 
+		string cookieSIDStr = 
 			( !cookies.hasName(`sid`) || ( cookies[`sid`].length <= 0 ) ) ? null : cookies[`sid`];
 		//Прерываем, если нет Ид сессии нет в браузере
-		if( cookieSID.length <= 0 ) return;
+		if( cookieSIDStr.length <= 0 ) return;
+		
+		import webtank.core.common.conv;
+		SessionIdType cookieSID = 
 			
 		//Делаем запрос к БД за информацией о сессии
 		auto dbase = new DBPostgreSQL(dbConnStr);
@@ -153,11 +195,11 @@ protected:
 		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
 			//Получим 1, если срок действия не истек или ничего
 			`select 1 from session 
-			where id = '` ~ cookieSID ~ `'::uuid and current_timestamp < "expires";`
+			where id = '` ~ cookieSIDStr ~ `'::uuid and current_timestamp < "expires";`
 		);
 		
 		if( query_res.recordCount > 0 )
-			_sessionId = cookieSID; 
+			_sessionId = cookieSIDStr; 
 		else
 			return; //Нет записей
 	}
