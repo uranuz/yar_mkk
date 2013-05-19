@@ -1,6 +1,4 @@
-module webtank.core.cookies;
-
-import std.array;
+module webtank.core.http.cookies;
 
 class Cookies
 {	
@@ -75,10 +73,17 @@ public:
 
 string[string] parseResponseCookieStr(string cookieStr)
 {	string[string] result;
+	import std.array;
 	string[] rawVars = split(cookieStr, `; `);
 	foreach(var; rawVars)
 	{	auto varParts = split(var, `=`);
 		result[ varParts[0] ] = varParts[1];
 	}
 	return result;
+}
+
+Cookies getCookies()
+{	import std.process;
+	return new Cookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
+	
 }

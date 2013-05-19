@@ -1,18 +1,36 @@
-module webtank.core.main;
+module webtank.auth_test;
+
+import std.stdio;
+import std.process;
+import std.conv;
 
 import webtank.core.web_application;
-
-import std.process;
+import webtank.core.auth;
+//import webtank.core.cookies;
 
 WebApplication webApp; //Обявление глобального объекта приложения
 
 void webMain(WebApplication webApp)  //Определение главной функции приложения
-{	webApp.name = `Тестовое приложение`;
+{
+	try {
+	auto auth = new Auth;
+	webApp.name = `Тестовое приложение`;
 	auto rp = webApp.response;
 	auto rq = webApp.request;
-	rp.write(webApp.name ~ "\r\n");
-	rp.cookies["Дровосек"] = "Илья";
-
+	
+	auth.authUser(`petechkinv`, `pet12345`);
+	auth.getUserInfo
+	}
+	catch(Exception e)
+	{	webApp.response.write(typeid(e).to!string);
+		
+	}
+	//auth.getUser
+	//rp.write(webApp.name ~ "\r\n");
+	//rp.write("<hr>");
+	//rp.write(userInfo.login ~ ` `);
+	//rp.write(userInfo.group ~ ` `);
+	//rp.write(userInfo.name ~ ` `);
 }
 
 

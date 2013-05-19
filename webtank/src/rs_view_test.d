@@ -34,11 +34,14 @@ int main()
 	auto response = dbase.query(`select * from book`); //запрос к БД
 	auto rs = response.getRecordSet(bookRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
+	//import std.conv;
+	//output ~= response.recordCount.to!(string);
+	//writeln(response.recordCount);
 	auto rsView = new RecordSetView(rs);
 	with( FieldViewManner )
 		rsView.viewManners = [plainText, plainText, simpleControls, plainText, plainText, simpleControls, simpleControls];
-	//rsView._HTMLClasses = [`cod`, `book-name`, `author`];
-	//rsView._HTMLTableClass = `book-table`;
+	rsView.FieldHTMLClasses = [`cod`, `book-name`, `author`];
+	rsView.HTMLTableClass = `book-table`;
 	rsView.outputModes.length = 7;
 	with( FieldOutputMode ) 
 		rsView.outputModes[0..$] = visible;

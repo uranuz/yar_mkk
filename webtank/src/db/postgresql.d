@@ -55,7 +55,7 @@ extern (C)
 	int PQstatus(const PGconn *conn);
 }
 
-
+enum string dbQueryLogFile = `/home/test_serv/sites/test/logs/db_query.log`;
 
 ///Класс работы с СУБД PostgreSQL
 class DBPostgreSQL : IDatabase
@@ -70,36 +70,47 @@ public:
 	
 	this() {}
 	
-	override bool connect(string connStr)
-	{	_conn=PQconnectdb(toStringz(connStr));
-		if (_conn is null) return false; //TODO: Сделать что-нибудь
-		else return true; 
-	}
-	
-	override bool isConnected() @property
-	{	return (PQstatus(_conn)==CONNECTION_OK);
-	}
-	
-	override IDBQueryResult query(string sql)
-	{	PGresult* Res=PQexec(_conn, toStringz(sql));
-		//if (Res is null) return null;
-		//else 
-		return new PostgreSQLQueryResult(this, Res);
-		//else ; //TODO: Add error there or doing nothing
-	}
-	
-	override string getLastError()
-	{	return PQerrorMessage(_conn).to!string;
+	override {
+		bool connect(string connStr)
+		{	_conn=PQconnectdb(toStringz(connStr));
+			if (_conn is null) return false; //TODO: Сделать что-нибудь
+			else return true; 
+		}
 		
-	}
-	
-	override DBMSType type() @property
-	{	return DBMSType.postgreSQL; }
-	
-	override void disconnect()
-	{	if( _conn !is null )
-		{	PQfinish(_conn); 
-			_conn = null;
+		bool isConnected() @property
+		{	return (PQstatus(_conn)==CONNECTION_OK);
+		}
+		
+		IDBQueryResult query(string sql)
+		{	try { //Логирование запросов к БД для отладки
+				import std.file;
+				std.file.append( dbQueryLogFile, 
+					"--------------------\r\n"
+					~ sql ~ "\r\n"
+				);
+			} catch(Exception)
+			{}
+			
+			PGresult* Res=PQexec(_conn, toStringz(sql));
+			//if (Res is null) return null;
+			//else 
+			return new PostgreSQLQueryResult(this, Res);
+			//else ; //TODO: Add error there or doing nothing
+		}
+		
+		string getLastError()
+		{	return PQerrorMessage(_conn).to!string;
+			
+		}
+		
+		DBMSType type() @property
+		{	return DBMSType.postgreSQL; }
+		
+		void disconnect()
+		{	if( _conn !is null )
+			{	PQfinish(_conn); 
+				_conn = null;
+			}
 		}
 	}
 	
@@ -132,25 +143,27 @@ public:
 	}
 	
 	///ПЕРЕОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСНЫХ ФУНКЦИЙ
-	override DBMSType type() @property
-	{	return _database.type; }
-	
-	override size_t recordCount()
-	{	if( _queryResult )
-			return ( PQntuples(_queryResult) ).to!size_t;
-		else return 0;
+	override {
+		DBMSType type() @property
+		{	return _database.type; }
 		
-	}
-	override size_t fieldCount()
-	{	if( _queryResult )
-			return ( PQnfields(_queryResult) ).to!size_t;
-		else return 0;
-	}
-	
-	override void clear()
-	{	if( _queryResult !is null )
-		{	PQclear(_queryResult); 
-			_queryResult = null;
+		size_t recordCount()
+		{	if( _queryResult )
+				return ( PQntuples(_queryResult) ).to!size_t;
+			else return 0;
+			
+		}
+		size_t fieldCount()
+		{	if( _queryResult )
+				return ( PQnfields(_queryResult) ).to!size_t;
+			else return 0;
+		}
+		
+		void clear()
+		{	if( _queryResult !is null )
+			{	PQclear(_queryResult); 
+				_queryResult = null;
+			}
 		}
 	}
 	

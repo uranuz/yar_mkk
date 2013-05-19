@@ -57,8 +57,7 @@ protected:
 	size_t[size_t] _indexes;
 	immutable string _name;
 	size_t _iter = 0; //Итератор, который проходит по всем ключам массива индексов
-	
-	size_t[] _keys;
+	size_t[] _keys;   //Массив ключей
 
 public:
 	this( string name )
@@ -83,14 +82,13 @@ public:
 		
 		//Методы и свойства по работе с диапазоном
 		ICell front() @property
-		{	if( (_keys is null) )
-				_keys = _indexes.keys;
-			return new Cell( this, _keys[_iter]  );
+		{	if( _iter < _keys.length )
+				return new Cell( this, _keys[_iter]  );
+			assert(0, "Выход за границы дипазона") ;
 		}
 		bool empty() @property
 		{	if ( _iter >= _indexes.length )
 			{	_iter = 0;
-				_keys = null;
 				return true; 
 			}
 			else return false;
@@ -107,17 +105,17 @@ public:
 
 		int getInt(size_t key)
 		{	if( keyExists(key) ) 
-				return fldConv!( FieldType.Int )( _indexes[key] ); 
+				return fldConv!( FieldType.Int )( key ); 
 			assert(0);
 		}
 		string getStr(size_t key)
 		{	if( keyExists(key) ) 
-				return fldConv!( FieldType.Str )( _indexes[key] ); 
+				return fldConv!( FieldType.Str )( key ); 
 			assert(0);
 		}
 		bool getBool(size_t key)
 		{	if( keyExists(key) ) 
-				return fldConv!( FieldType.Bool )( _indexes[key] ); 
+				return fldConv!( FieldType.Bool )( key ); 
 			assert(0);
 		}
 		
@@ -134,15 +132,16 @@ public:
 		{	assert(0, `Поле только для чтения`); }
 		
 		size_t _frontKey() @property
-		{	if( ( _keys.length == 0 ) || (_iter == 0) )
-				_keys = _indexes.keys;
-			return _keys[_iter]; 
+		{	if( _iter < _keys.length )
+				return _keys[_iter];
+			assert(0, "Выход за границы дипазона") ;
 		}
 	} //override
 	
 	void add(size_t key) //Добавление ключа к концу списка
 	{	size_t count = _indexes.length;
 		_indexes[key] = count;
+		_keys ~= key;
 	}
 	
 	//Добавление массивов с данными к полю данных
@@ -151,6 +150,7 @@ public:
 		{	size_t count = _indexes.length;
 			_indexes[key] = count;
 		}
+		_keys ~= keys;
 	}
 	
 	bool keyExists(size_t key)
