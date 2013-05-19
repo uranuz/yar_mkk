@@ -1,2 +1,2 @@
-dmd protected_page.d ../../webtank/src/datctrl/record.d ../../webtank/src/db/postgresql.d ../../webtank/src/db/database.d ../../webtank/src/db/datctrl_joint.d ../../webtank/src/datctrl/record_set.d ../../webtank/src/datctrl/data_cell.d ../../webtank/src/datctrl/data_field.d ../../webtank/src/datctrl/field_type.d ../../webtank/src/net/web_application.d ../../webtank/src/net/cookies.d ../../webtank/src/net/uri.d ../../webtank/src/net/response.d ../../webtank/src/net/request.d ../../webtank/src/net/authentication.d -op
-cp ./protected_page /home/test_serv/web_projects/mkk_site/cgi-bin/ 
+$(./webtank_list.sh) && $(dmd protected_page.d `cat webtank.list` -op) \
+&& $(cp ./protected_page /home/test_serv/web_projects/mkk_site/cgi-bin/ )
