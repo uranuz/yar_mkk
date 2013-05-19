@@ -10,7 +10,7 @@ import webtank.db.datctrl_joint;
 import webtank.datctrl.record;
 //import webtank.datctrl.record_set;
 
-import webtank.view_logic.record_set_view;
+//import webtank.view_logic.record_set_view;
 
 immutable(string) projectPath = `/webtank`;
 

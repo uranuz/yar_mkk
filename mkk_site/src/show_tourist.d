@@ -2,13 +2,12 @@ module mkk_site.full_test;
 
 import std.conv;
 
-//import webtank.db.database;
 import webtank.datctrl.field_type;
 import webtank.db.postgresql;
 import webtank.db.datctrl_joint;
 
 import webtank.datctrl.record;
-import webtank.core.web_application;
+import webtank.net.application;
 
 
 immutable(string) projectPath = `/webtank`;
