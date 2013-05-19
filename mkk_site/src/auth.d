@@ -1,7 +1,5 @@
 module webtank.core.main;
 
-import webtank.core.web_application;
-
 import std.process;
 import std.conv;
 
