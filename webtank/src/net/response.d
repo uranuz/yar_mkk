@@ -1,7 +1,7 @@
-module webtank.core.http.response;
+module webtank.net.response;
 
-import webtank.core.http.cookies;
-import webtank.core.http.uri;
+import webtank.net.cookies;
+import webtank.net.uri;
 
 class Response  //Ответ приложения
 {

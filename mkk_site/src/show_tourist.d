@@ -12,21 +12,21 @@ import webtank.net.application;
 
 immutable(string) projectPath = `/webtank`;
 
-WebApplication webApp; //Обявление глобального объекта приложения
+Application netApp; //Обявление глобального объекта приложения
 
 ///Обычная функция main. В ней изменения НЕ ВНОСИМ
 int main()
 {	//Конструируем объект приложения. Передаём ему нашу "главную" функцию
-	webApp = new WebApplication(&webMain); 
-	webApp.run(); //Запускаем приложение
-	webApp.finalize(); //Завершаем приложение
+	netApp = new Application(&netMain); 
+	netApp.run(); //Запускаем приложение
+	netApp.finalize(); //Завершаем приложение
 	return 0;
 }
 
-void webMain(WebApplication webApp)  //Определение главной функции приложения
+void netMain(Application netApp)  //Определение главной функции приложения
 {	
-	auto rp = webApp.response;
-	auto rq = webApp.request;
+	auto rp = netApp.response;
+	auto rq = netApp.request;
 	string queryStr ;
 	string fem = ( ( "fem" in rq.POST ) ? rq.POST["fem"] : "" ) ;
 	string num_page = "15";

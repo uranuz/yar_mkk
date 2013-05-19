@@ -201,3 +201,11 @@ public:
 	}
 }
 
+string pgEscapeStr(string str)
+{	string result;
+	foreach(s; str)
+	{	if( s == '\'' ) result ~= "\'\'";
+		else result ~= s;
+	}
+	return result;
+}

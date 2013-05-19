@@ -1,7 +1,7 @@
-module webtank.core.http.request;
+module webtank.net.request;
 
-import webtank.core.http.cookies;
-import webtank.core.http.uri;
+import webtank.net.cookies;
+import webtank.net.uri;
 
 class Request  //Запрос к приложению
 {	

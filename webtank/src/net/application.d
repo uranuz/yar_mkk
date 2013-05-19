@@ -1,15 +1,15 @@
-module webtank.core.web_application; 
+module webtank.net.application; 
 
-import webtank.core.http.cookies;
-import webtank.core.http.uri;
-import webtank.core.http.request;
-import webtank.core.http.response;
-import webtank.core.authentication;
+import webtank.net.cookies;
+import webtank.net.uri;
+import webtank.net.request;
+import webtank.net.response;
+import webtank.net.authentication;
 
-class WebApplication
+class Application
 {
 public:
-	alias void function(WebApplication) AppMainT;
+	alias void function(Application) AppMainT;
 protected:
 	AppMainT _appMain;
 public:

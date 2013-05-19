@@ -1,4 +1,4 @@
-module webtank.core.common.conv;
+module webtank.common.conv;
 
 //Преобразование символа соотв. шестнадцатеричной цифре в байт
 ubyte hexSymbolToByte(in char symbol)
