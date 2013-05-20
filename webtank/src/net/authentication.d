@@ -177,7 +177,7 @@ protected:
 	}
 	
 	void _updateSessionId()
-	{	_sessionId = null; //Сбрасываем в начале Ид сессии
+	{	_sessionId = SessionIdType.init; //Сбрасываем в начале Ид сессии
 		_hasSID = true; //Больше не ищем Ид сессии
 	
 		auto cookies = getCookies();
@@ -211,7 +211,7 @@ protected:
 	
 	void _updateUserInfo()
 	{	_updateSessionId(); //Обновляем Ид сессии
-		if( _sessionId.length <= 0 )
+		if( _sessionId == SessionIdType.init )
 			return;
 		//TODO: Добавить проверку, что у нас корректный Ид сессии
 		
@@ -219,10 +219,7 @@ protected:
 		auto dbase = new DBPostgreSQL(dbConnStr);
 		if ( !dbase.isConnected )
 			return;
-		
-		if( _sessionId == SessionIdType.init )
-			return;
-		
+			
 		import std.digest.digest;
 		string sessionIdStr = toHexString( _sessionId );
 		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
