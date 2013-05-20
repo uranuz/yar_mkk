@@ -1,0 +1,38 @@
+h1 {
+	color:#309
+}
+
+h2 {
+	color:#009
+}
+
+h3 {
+	color:#03F
+}
+
+
+table {
+	border: ridge 7pt;
+	border-color:#069;
+	border-spacing:0pt;
+	color: #006;
+	background-color: #9FC;
+	border-collapse: collapse;
+}
+
+td {
+	border: ridge 2pt;
+	border-color:#069;
+	border-spacing:0pt;
+	color: #006;
+	background-color: #9FC;	
+}
+
+ 
+ body{
+	background-color:#EAD082;
+	border:double;
+	border-bottom-color:#30F;
+ }
+ a{color:#30C}
+ 
