@@ -1,2 +1,1 @@
-dmd show_tourist.d ../../webtank/src/datctrl/record.d ../../webtank/src/db/postgresql.d ../../webtank/src/db/database.d ../../webtank/src/db/datctrl_joint.d ../../webtank/src/datctrl/record_set.d ../../webtank/src/datctrl/data_cell.d ../../webtank/src/datctrl/data_field.d ../../webtank/src/datctrl/field_type.d ../../webtank/src/net/application.d ../../webtank/src/net/request.d ../../webtank/src/net/response.d  ../../webtank/src/net/cookies.d ../../webtank/src/net/uri.d ../../webtank/src/net/authentication.d ../../webtank/src/common/conv.d -op
-cp ./show_tourist /home/test_serv/web_projects/mkk_site/cgi-bin/
+$(./make.py show_tourist.d) && $(cp ./show_tourist /home/test_serv/web_projects/mkk_site/cgi-bin/ )
