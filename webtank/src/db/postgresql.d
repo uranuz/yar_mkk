@@ -64,23 +64,29 @@ protected:
 	PGconn *_conn;
 	
 public:
-	this( string connStr ) 
+	//Конструктор объекта, принимает строку подключения как параметр
+	this( string connStr ) //Конструктор объекта, принимает строку подключения
 	{	/*if (connStr !is null)*/ connect(connStr);
 	}
 	
+	//Конструктор "ничегонеделанья"
 	this() {}
 	
 	override {
+		//Ф-ция подключения к БД
 		bool connect(string connStr)
 		{	_conn=PQconnectdb(toStringz(connStr));
 			if (_conn is null) return false; //TODO: Сделать что-нибудь
 			else return true; 
 		}
 		
+		//Проверить, что подключены
 		bool isConnected() @property
 		{	return (PQstatus(_conn)==CONNECTION_OK);
 		}
 		
+		//Запрос к БД, строка запроса в качестве параметра
+		//Возвращает объект унаследованный от интерфейса результата запроса
 		IDBQueryResult query(string sql)
 		{	try { //Логирование запросов к БД для отладки
 				import std.file;
@@ -98,14 +104,15 @@ public:
 			//else ; //TODO: Add error there or doing nothing
 		}
 		
+		//Получение строки с недавней ошибкой
 		string getLastError()
-		{	return PQerrorMessage(_conn).to!string;
-			
-		}
+		{	return PQerrorMessage(_conn).to!string; }
 		
+		//Тип СУБД
 		DBMSType type() @property
 		{	return DBMSType.postgreSQL; }
 		
+		//Отключиться от БД
 		void disconnect()
 		{	if( _conn !is null )
 			{	PQfinish(_conn); 
@@ -121,6 +128,8 @@ public:
 		}
 	}
 	
+	
+	//TODO: Этот метод дублирует метод getLastError
 	string errorMessage()
 	{	if( _conn !is null )
 			return to!string(PQerrorMessage(_conn));
@@ -144,21 +153,27 @@ public:
 	
 	///ПЕРЕОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСНЫХ ФУНКЦИЙ
 	override {
+		//Получение типа СУБ
+		//
 		DBMSType type() @property
 		{	return _database.type; }
 		
+		
+		//Количество записей
 		size_t recordCount()
 		{	if( _queryResult )
 				return ( PQntuples(_queryResult) ).to!size_t;
 			else return 0;
-			
 		}
+		
+		//Количество полей данных (столбцов)
 		size_t fieldCount()
 		{	if( _queryResult )
 				return ( PQnfields(_queryResult) ).to!size_t;
 			else return 0;
 		}
 		
+		//Очистить результат запроса
 		void clear()
 		{	if( _queryResult !is null )
 			{	PQclear(_queryResult); 
@@ -168,30 +183,43 @@ public:
 	}
 	
 	///СВОИ СОБСТВЕННЫЕ ФУНКЦИИ КЛАССА
+	//Получение имени поля по индексу
 	string getFieldName(size_t index) 
 	{	if( _queryResult )
 			return ( PQfname( _queryResult, index.to!int ) ).to!string;
 		else return null;
 	}
 	
+	//Получение индекса поля по имени
 	size_t getFieldIndex(string name)
 	{	if( _queryResult )
 			return ( PQfnumber(_queryResult, toStringz(name) ) ).to!size_t;
 		else return -1;
 	}
 	
+	//Вернёт true, если поле пустое, и false иначе
 	bool getIsNull(size_t recIndex, size_t fieldIndex)
 	{	if( _queryResult )
 			return ( PQgetisnull(_queryResult, recIndex.to!int, fieldIndex.to!int ) == 1 ) ? true : false;
 		assert(0);
 	}
 	
+	//Получение значения ячейки данных в виде строки
+	//Неопределённое поведение, если ячейка пуста или её нет
 	string getValue(size_t recIndex, size_t fieldIndex)
 	{	if( _queryResult )
 			return ( PQgetvalue(_queryResult, recIndex.to!int, fieldIndex.to!int ) ).to!string;
 		else return null;
 	}
 	
+	//Получение значения ячейки данных в виде строки
+	//Если ячейка пуста то вернёт значение параметра defaultValue
+	string getValue(size_t recIndex, size_t fieldIndex, string defaultValue)
+	{	if( getIsNull(recIndex, fieldIndex) ) 
+			return defaultValue;
+		else
+			return getValue(recIndex, fieldIndex);
+	}
 
 	~this() //Освобождаем результат запроса
 	{	if( _queryResult !is null )
@@ -201,6 +229,7 @@ public:
 	}
 }
 
+//Функция возвращает переданную строку, но с удвоенными кавычками
 string pgEscapeStr(string str)
 {	string result;
 	foreach(s; str)

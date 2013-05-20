@@ -2,14 +2,13 @@ module protected_page;
 
 import webtank.net.application;
 
-webtank.net.application.Application netApp; //Обявление глобального объекта приложения
+Application netApp; //Обявление глобального объекта приложения
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	netApp.name = `Тестовое приложение`;
 	auto rp = netApp.response;
 	auto rq = netApp.request;
-	string aaa = "vasya";
-	char b = aaa[50];
+
 	if( netApp.auth.isLoggedIn )
 	{	rp.write("Добро пожаловать!!!");
 	}

@@ -69,7 +69,7 @@ public:
 	}
 	
 	bool isLoggedIn() @property
-	{	return ( _sessionId == SessionIdType.init );
+	{	return ( _sessionId != SessionIdType.init ); //TODO: Улучшить проверку
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
@@ -96,10 +96,10 @@ public:
 		{	return SessionIdType.init; }
 			
 		_userInfo.login = login;
-		string user_id = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
-		_userInfo.group = ( query_res.getIsNull(0, 1) ) ? null : query_res.getValue(0, 1);
-		_userInfo.name = ( query_res.getIsNull(0, 2) ) ? null : query_res.getValue(0, 2);
-		string found_password = ( query_res.getIsNull(0, 3) ) ? null : query_res.getValue(0, 3);
+		string user_id = query_res.getValue(0, 0, null);
+		_userInfo.group = query_res.getValue(0, 1, null);
+		_userInfo.name = query_res.getValue(0, 2, null);
+		string found_password = query_res.getValue(0, 3, null);
 		
 		
 		
@@ -134,7 +134,7 @@ public:
 			auto newSIDStatusRes = cast(PostgreSQLQueryResult) dbase.query(query);
 			if( newSIDStatusRes.recordCount <= 0 )
 				return SessionIdType.init;
-			string statusStr = ( newSIDStatusRes.getIsNull(0, 0) ) ? null : newSIDStatusRes.getValue(0, 0);
+			string statusStr = newSIDStatusRes.getValue(0, 0, null);
 			if( statusStr == "authenticated" )
 				return sid;  //Аутентификация завершена успешно
 			else 
@@ -235,9 +235,9 @@ protected:
 			return;
 		
 		//Получаем информацию о пользователе из результата запроса
-		_userInfo.login = ( query_res.getIsNull(0, 0) ) ? null : query_res.getValue(0, 0);
-		_userInfo.group = ( query_res.getIsNull(0, 1) ) ? null : query_res.getValue(0, 1);
-		_userInfo.name = ( query_res.getIsNull(0, 2) ) ? null : query_res.getValue(0, 2);
+		_userInfo.login = query_res.getValue(0, 0, null);
+		_userInfo.group = query_res.getValue(0, 1, null);
+		_userInfo.name = query_res.getValue(0, 2, null);
 	}
 }
 
