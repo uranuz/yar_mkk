@@ -56,7 +56,6 @@ protected:
 	bool _hasSID = false; //true, если получение Ид сессии не требуется
 	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
 
-
 public:
 	enum SessionIdSize = 16;
 	alias ubyte[SessionIdSize] SessionIdType;
@@ -68,8 +67,9 @@ public:
 		_updateUserInfo();  //Получаем информацию о пользователе
 	}
 	
+	//Функция возвращает true, если вход пользователя выполнен и false иначе
 	bool isLoggedIn() @property
-	{	return ( _sessionId != SessionIdType.init ); //TODO: Улучшить проверку
+	{	return ( sessionId != SessionIdType.init ); //TODO: Улучшить проверку
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
@@ -81,40 +81,31 @@ public:
 		if ( !dbase.isConnected )
 			return SessionIdType.init;
 		
-		PostgreSQLQueryResult query_res;
-		try {
-			query_res = cast(PostgreSQLQueryResult) dbase.query(
-				` select id, user_group, name, password `
-				` from "user" `
-				` where login='`
-				~ pgEscapeStr( login ) ~ `';`
-			);
-			
-			if( query_res.recordCount <= 0 )
+		auto query_res = cast(PostgreSQLQueryResult) dbase.query(
+			` select id, password `
+			` from "user" `
+			` where login='`
+			~ pgEscapeStr( login ) ~ `';`
+		);
+		
+		if( query_res.recordCount <= 0 )
 			return SessionIdType.init;
-		} catch(Exception) 
-		{	return SessionIdType.init; }
 			
-		_userInfo.login = login;
 		string user_id = query_res.getValue(0, 0, null);
-		_userInfo.group = query_res.getValue(0, 1, null);
-		_userInfo.name = query_res.getValue(0, 2, null);
-		string found_password = query_res.getValue(0, 3, null);
-		
-		
+		string found_password = query_res.getValue(0, 1, null);
 		
 		try { //Логирование запросов к БД для отладки
 			import std.file;
 			std.file.append( dbLibLogFile, 
 				"--------------------\r\n"
 				"Authentication.enterUser()\r\n"
-				"user_id: " ~ user_id ~ ";  _userInfo.group: " ~ _userInfo.group
-				~ ";  _userInfo.name: " ~ _userInfo.name ~ ";  found_password: " ~ found_password
-				~ "\r\n"
+				"user_id: " ~ user_id 
+				~ ";  found_password: " ~ found_password ~ "\r\n"
 			);
 		} catch(Exception) {}
 		
-		if( (found_password.length > 0) && (password == found_password) ) //Проверка пароля
+		//Проверка пароля
+		if( (found_password.length > 0) && (password.length > 0) && (password == found_password) ) 
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
 			import std.digest.digest;
 			SessionIdType sid = _generateSessionId(login);
@@ -129,14 +120,18 @@ public:
 			string query = 
 				` insert into "session" ("id", "user_id", "expires") values ( ( '`
 				~ sidStr ~ `' )::uuid, ` ~ pgEscapeStr( user_id  )
-				~ `, ( current_timestamp + interval '` ~ pgEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
+				~ `, ( current_timestamp + interval '` 
+				~ pgEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
 				~ ` returning 'authenticated';`;
 			auto newSIDStatusRes = cast(PostgreSQLQueryResult) dbase.query(query);
 			if( newSIDStatusRes.recordCount <= 0 )
 				return SessionIdType.init;
-			string statusStr = newSIDStatusRes.getValue(0, 0, null);
+			string statusStr = newSIDStatusRes.getValue(0, 0, "");
 			if( statusStr == "authenticated" )
+			{	_sessionId = sid;
+				_hasUserInfo = false;
 				return sid;  //Аутентификация завершена успешно
+			}
 			else 
 				return SessionIdType.init;
 		}
@@ -176,23 +171,22 @@ protected:
 		return md5Of(idSource); //Возвращаем идентификатор сессии
 	}
 	
+	//Служебная функция обновления Ид сессии
 	void _updateSessionId()
 	{	_sessionId = SessionIdType.init; //Сбрасываем в начале Ид сессии
-		_hasSID = true; //Больше не ищем Ид сессии
-	
 		auto cookies = getCookies();
-		string cookieSIDStr = 
-			( !cookies.hasName(`sid`) || ( cookies[`sid`].length <= 0 ) ) ? null : cookies[`sid`];
+		string cookieSIDStr = ( !cookies.hasName(`sid`) ) ? null : cookies[`sid`];
 		//Прерываем, если нет Ид сессии нет в браузере
 		if( cookieSIDStr.length <= 0 ) return;
 		
 		import std.digest.digest;
 		import webtank.common.conv;
 		auto cookieSID = hexStringToByteArray(cookieSIDStr);
-		if( cookieSID.length != SessionIdSize )
+		if( cookieSID == SessionIdType.init )
 			return;
 		cookieSIDStr = toHexString( cookieSID );
 		
+		_hasSID = false; //Если будет сбой работы с БД, то будем искать снова
 		//Делаем запрос к БД за информацией о сессии
 		auto dbase = new DBPostgreSQL(dbConnStr);
 		if ( !dbase.isConnected ) return; //Не доступа к базе
@@ -203,14 +197,18 @@ protected:
 			where id = '` ~ cookieSIDStr ~ `'::uuid and current_timestamp < "expires";`
 		);
 		
+		//К БД подключились
+		_hasSID = true; //Больше не ищем Ид сессии
 		if( query_res.recordCount > 0 )
 			_sessionId = cookieSID; 
 		else
 			return; //Нет записей
 	}
 	
+	//Служебная функция обновления информации о пользователе
 	void _updateUserInfo()
-	{	_updateSessionId(); //Обновляем Ид сессии
+	{	_hasUserInfo = false;
+		_updateSessionId(); //Обновляем Ид сессии
 		if( _sessionId == SessionIdType.init )
 			return;
 		//TODO: Добавить проверку, что у нас корректный Ид сессии
@@ -238,6 +236,7 @@ protected:
 		_userInfo.login = query_res.getValue(0, 0, null);
 		_userInfo.group = query_res.getValue(0, 1, null);
 		_userInfo.name = query_res.getValue(0, 2, null);
+		_hasUserInfo = true;
 	}
 }
 

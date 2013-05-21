@@ -13,19 +13,15 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	immutable(string) thisPagePath = "";
 	
-	uint pageCount = 10;
-	uint curPageNum = 1;
+	uint pageCount = 10; //Количество страниц
+	uint curPageNum = 1; //Номер текущей страницы
 	try {
-		if( "cur_page_num" in rq.POST )
-			curPageNum = rq.POST.get("cur_page_num", "1").to!uint;
-		else
-			curPageNum = rq.GET.get("cur_page_num", "1").to!uint;
+		if( "cur_page_num" in rq.postVars )
+			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
-	string filter = "";
-	if( "filter" in rq.POST ) 
-		filter = rq.POST.get("filter", "");
-	else
-		filter = rq.GET.get("filter", "");
+	string filter = "";  //Фильтр поиска
+	if( "filter" in rq.postVars ) 
+		filter = rq.postVars.get("filter", "");
 		
 	string js_file = "../../mkk_site/js/page_view.js";
 	

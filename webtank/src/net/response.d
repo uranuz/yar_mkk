@@ -3,28 +3,31 @@ module webtank.net.response;
 import webtank.net.cookies;
 import webtank.net.uri;
 
-class Response  //Ответ приложения
+class Response  //Ответ от нашего приложения
 {
 protected:
 	string _respBody = "";
 	string[] _headers;
-	Cookies _cookies; //Куки в ответ
+	ResponseCookies _cookies; //Куки в ответ
 public:
 	this()
-	{	_cookies = new Cookies; 
-	}
+	{	_cookies = new ResponseCookies; }
 	
+	//Записывает данные в буфер для отдачи
 	void write(string str)
 	{	_respBody ~= str; }
 	
+	//То же самое, но в виде оператора приклеивания ~=
 	void opOpAssign(string op: "~")(string str)
 	{	_respBody ~= str; }
 	
+	//Перенаправление пользователя по указанному адресу
 	void redirect(string location)
 	{	addHeader("Status: 302 Found");
 		addHeader("Location: " ~ location);
 	}
 	
+	//Добавление HTTP-заголовка в ответ приложения
 	void addHeader(string header)
 	{	_headers ~= header; }
 	
@@ -34,8 +37,9 @@ public:
 		std.stdio.write( responseStr );
 	}
 	
-	Cookies cookies() @property
-	{ return _cookies; }
+	//Куки ответа приложения (в них только пишем)
+	ResponseCookies cookies() @property
+	{	return _cookies; }
 
 protected:
 	string _getCustomHeaderStr()

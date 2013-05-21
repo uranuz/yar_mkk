@@ -3,10 +3,10 @@ module webtank.net.request;
 import webtank.net.cookies;
 import webtank.net.uri;
 
-class Request  //Запрос к приложению
+class Request  //Запрос к нашему приложению
 {	
 protected:
-	Cookies _cookies; //Куки из запроса
+	RequestCookies _cookies; //Куки из запроса
 	string[string] _POST;
 	string[string] _GET;
 	string _stdInputStr;
@@ -19,20 +19,24 @@ public:
 		userAgent = getenv("HTTP_HOST");
 	}
 	
-	Cookies cookies() @property
+	//Получение кукев из запроса (сюда записывать нельзя)
+	RequestCookies cookies() @property
 	{	return _cookies; }
 		
-	string[string] POST() @property
+	//Данные переданные через стандартный ввод (методом POST)
+	string[string] postVars() @property
 	{	if( _POST.length <= 0 )
 			_POST = extractURIData( _getStdInput() );
 		return _POST;
 	}
 	
+	//Некоторые данные из HTTP-заголовков запроса к приложению
 	immutable(string) referer;
 	immutable(string) host;
 	immutable(string) userAgent;
 	
-	string[string] GET() @property
+	//Данные из URI строки запроса
+	string[string] queryVars() @property
 	{	import std.process;
 		if( _GET.length <= 0 )
 			_GET = extractURIData( getenv("QUERY_STRING") );

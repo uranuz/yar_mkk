@@ -153,8 +153,7 @@ public:
 	
 	///ПЕРЕОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСНЫХ ФУНКЦИЙ
 	override {
-		//Получение типа СУБ
-		//
+		//Получение типа СУБД
 		DBMSType type() @property
 		{	return _database.type; }
 		
@@ -216,7 +215,7 @@ public:
 	//Если ячейка пуста то вернёт значение параметра defaultValue
 	string getValue(size_t recIndex, size_t fieldIndex, string defaultValue)
 	{	if( getIsNull(recIndex, fieldIndex) ) 
-			return defaultValue;
+			return "";
 		else
 			return getValue(recIndex, fieldIndex);
 	}

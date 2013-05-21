@@ -5,6 +5,7 @@ import std.exception;
 import std.uri;
 import std.utf;
 
+
 //Эта функция принимает строку похожую на URI-запрос и анализирует. Результат 
 //возращается в ассоциативный массив типа  значение[ключ]. Осторожно, функция 
 //кидается исключениями, если что-то не так. Если запрос пуст, то возвращается
@@ -94,16 +95,18 @@ unittest
 string[string] extractURIData(string queryStr)
 {	string[string] result;
 	foreach( key, value; parseURIQuery2( queryStr ) )
-		result[ decodeURI(key) ] = decodeURI(value);
+		result[ std.uri.decodeComponent(key) ] = std.uri.decodeComponent(value);
 	return result;
 }
 
 //Декодировать URI. Прослойка на случай, если захотим написать свою версию, отличную
 //от стандартной. TODO: Может переписать через alias? (однако неудобно смотреть аргументы)
-string decodeURI(string src) 
+/*string decodeURI(string src) 
 {	char[] result = src.dup;
 	for ( int i = 0; i < src.length; ++i )
 	{	if ( src[i] == '+' ) result[i] = ' '; //Заменяем плюсики на пробелы
 	}
 	return decodeComponent(result.idup);
-}
+}*/
+
+
