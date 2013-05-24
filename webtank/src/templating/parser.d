@@ -1,4 +1,4 @@
-module webtank.faint_templator.parser;
+module webtank.templating.parser;
 //apsychia, syncope, deliquium, pantamorphia- вариант названия
 
 import std.stdio;
