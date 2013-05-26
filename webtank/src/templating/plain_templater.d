@@ -41,6 +41,12 @@ struct Config
 	dstring matchOp = ":=";
 }
 
+class Lexeme
+{	dstring lexStr
+	
+	
+}
+
 class PlainTemplater
 {	
 //protected:
@@ -74,33 +80,46 @@ public:
 		size_t matchOpPos = size_t.max;
 		dstring elemName;
 		bool markPreFound = false;
+		bool varMatchOpFound = false;
 		bool varPreFound = false;
 		_sourceStr = templateStr;
-		auto markPre = _config.markPre;
-		auto markSuf = _config.markSuf;
-		auto varPre = _config.varPre;
-		auto varSuf = _config.varSuf;
-		auto matchOp = _config.matchOp;
-		size_t minPreLen = 
-			( markPre.length < varPre.length ) ? markPre.length : varPre.length;
+		dstring[dstring] lexems = 
+		[	"markPre": "{{", "markSuf": "}}", "varPre": "{{?",
+			"varSuf": "}}", "matchOp": ":="
+		];
+		
 		
 		for( size_t i = 0; i < templateStr.length; ++i )
 		{	
-			bool isLexeme(dstring lex)
-			{	if( lex.length > 0 )
+			bool isLexeme(dstring lexName)
+			{	auto lex = lexems[lexName];
+				if( lex.length > 0 )
 					if( (i + lex.length) < templateStr.length )
-						return ( templateStr[i .. (i + lex.length) ] == lex );
+						if( templateStr[i .. (i + lex.length) ] == lex )
+						{	size_t bestMatchLen = 0;
+							dstring bestMatchLexName;
+							dstring matchedLexems;
+							foreach( otherLexName, otherLex; lexems )
+							{	if( (i + otherLex.length) < templateStr.length )
+									if( 
+										(templateStr[i .. (i + lex.length) ] == lex) 
+										&& (otherLex.length > bestMatchLen )
+									)
+									{	bestMatchLen = otherLex.length;
+										bestMatchLexName = otherLexName;
+									}
+							}
+						}
 				return false;
 			}
 			
-			if( isLexeme(markPre) )
+			if (  )
+			
+			if( isLexeme("markPre") )
 			{	prefixPos = i;
-				if( varPreFound )
-				{	
-				}
 				markPreFound = true;
 			}
-			if( isLexeme(markSuf) && (matchOpPos == size_t.max) )
+			if( isLexeme("markSuf") && markPreFound  )
 			{	import std.string;
 				elemName = std.string.strip(
 					templateStr[ (prefixPos + markPre.length) .. i ]
@@ -108,12 +127,17 @@ public:
 				auto elem = new Element(prefixPos, i);
 				_namedEls[elemName] ~= elem;
 				_indexedEls ~= elem;
+				markPreFound = false;
 			}
-			if( isLexeme(varPre) )
-			{	prefixPos = i; }
-			if( isLexeme(matchOp) )
-			{	matchOpPos = i; }
-			if( isLexeme(varSuf) && (matchOpPos != size_t.max) )
+			if( isLexeme("varPre") )
+			{	prefixPos = i; 
+				varPreFound = true;
+			}
+			if( isLexeme("matchOp") && varPreFound )
+			{	matchOpPos = i; 
+				varMatchOpFound = true;
+			}
+			if( isLexeme("varSuf") && varMatchOpFound )
 			{	import std.string;
 				elemName = std.string.strip(
 					templateStr[ (prefixPos + varPre.length) .. matchOpPos ]
@@ -121,7 +145,8 @@ public:
 				auto elem = new Element(prefixPos, i, matchOpPos);
 				_namedEls[elemName] ~= elem;
 				_indexedEls ~= elem;
-				matchOpPos = size_t.max;
+				varMatchOpFound = false;
+				varPreFound = false;
 			}
 		}
 	}

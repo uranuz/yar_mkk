@@ -1,0 +1,51 @@
+html {
+	width: 100%;
+}
+
+body {
+	width: 100%
+	min-width: 950px;
+	margin: 0;
+	padding: 0;
+	background: rgb(230, 230, 230);
+}
+
+#page {
+	background: rgb(200, 200, 200);
+	min-height: 100%;
+}
+
+
+#top {
+	background: rgb(200, 170, 150);
+}
+/* Блоки верхней части страницы */
+	#siteTitle {
+		background: rgb(170, 200, 150);
+	}
+	#horMenu {
+		background: rgb(130, 200, 170);
+	}
+
+#middle {
+	background: rgb(100, 130, 130);
+	width: 1280px;
+	margin: auto;
+}
+/* Блоки средней части страницы */
+	#sidebar {
+		width: 250px;
+		float: right;
+		background: rgb(150, 120, 120);
+	}
+	
+	#content {
+		margin-right: 270px;
+		background: rgb(140, 170, 140);
+	}
+
+
+#footer {
+	background: rgb(160, 150, 150);
+}
+/* Блоки нижней части страницы */
