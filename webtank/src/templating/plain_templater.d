@@ -7,7 +7,7 @@ dstring testTemplateStr = `
 	<html>
 	<head>
 	<title>{{browserTitle}}</title>
-	<meta charset="{{encoding}}"
+	<meta charset="{{encoding}}">
 	<link rel="stylesheet" type="text/css" href="{{stylesheet}}"/>
 	</head>
 	{{?page_title:=hello}}
@@ -33,13 +33,18 @@ class Element
 	}
 }
 
-struct Config
-{	dstring markPre = "{{";
-	dstring markSuf = "}}";
-	dstring varPre = "{{?";
-	dstring varSuf = "}}";
-	dstring matchOp = ":=";
-}
+enum dstring[dstring] defaultConfig = 
+[	"markPre": "{{", "markSuf": "}}", "varPre": "{{?",
+	"varSuf": "}}", "matchOp": ":="
+];
+
+// struct Config
+// {	dstring markPre = "{{";
+// 	dstring markSuf = "}}";
+// 	dstring varPre = "{{?";
+// 	dstring varSuf = "}}";
+// 	dstring matchOp = ":=";
+// }
 
 struct Lexeme
 {	dstring name;
@@ -57,31 +62,26 @@ class PlainTemplater
 	Element[][dstring] _namedEls;
 	Element[] _indexedEls;
 	dstring _sourceStr;
-	Config _config;
+// 	Config _config;
+	dstring[dstring] _config;
 public:
-	this( dstring templateStr, Config config = Config.init )
+	this( dstring templateStr, dstring[dstring] config = defaultConfig )
 	{	_config = config;
 		parseTemplateStr(templateStr);
 	}
 	
-	/*void setSubst(dstring value, dstring name, size_t index = size_t.max)
-	{	if( index == size_t.max )
-		{	foreach(el; _namedEls[name])
-			{	el.subst = value;
-			}
-			
-			
+	void substitude(dstring value, dstring name)
+	{	foreach(el; _namedEls[name])
+		{	el.subst = value;
 		}
-				
-	}*/
+	}
 	
 	Lexeme[] _prepareLexems(
-		dstring[dstring] lexems, 
 		Lexeme.CheckFuncT[dstring] checkFuncs,
 		Lexeme.FixFuncT[dstring] fixFuncs
 	)
 	{	Lexeme[] result;
-		foreach( name, value; lexems )
+		foreach( name, value; _config )
 		{	result ~= Lexeme(
 				name, value, 
 				checkFuncs.get(name, null),
@@ -90,6 +90,23 @@ public:
 		}
 // 		import std.algorithm;
 // 		std.algorithm.sort!("a.value.length > b.value.length")(result);
+		return result;
+	}
+	
+	dstring getStr()
+	{	dstring result;
+		size_t textStart = 0;
+		foreach(el; _indexedEls)
+		{	if( el.isVar )
+			{	result ~= _sourceStr[textStart .. el.prePos];
+				textStart = el.sufPos + _config["varSuf"].length;
+			}
+			else
+			{	result ~= _sourceStr[textStart .. el.prePos] ~ el.subst;
+				textStart = el.sufPos + _config["markSuf"].length;
+			}
+		}
+		result ~= _sourceStr[textStart .. $];
 		return result;
 	}
 	
@@ -102,10 +119,6 @@ public:
 		bool varPreFound = false;
 		
 		_sourceStr = templateStr;
-		dstring[dstring] rawLexems = 
-		[	"markPre": "{{", "markSuf": "}}", "varPre": "{{?",
-			"varSuf": "}}", "matchOp": ":="
-		];
 		
 		Lexeme.CheckFuncT[dstring] checkFuncs = 
 		[	"matchOp": (size_t i){
@@ -142,7 +155,7 @@ public:
 		];
 		
 		
-		auto lexems = _prepareLexems(rawLexems, checkFuncs, fixFuncs);
+		auto lexems = _prepareLexems(checkFuncs, fixFuncs);
 // 		import std.stdio;
 // 		writeln(lexems);
 // 		writeln("\r\n------------------------------\r\n");
@@ -180,7 +193,7 @@ public:
 				if( selLexemes[selIndex].name == "markSuf"  )
 				{	import std.string;
 					elemName = std.string.strip(
-						templateStr[ (prefixPos + rawLexems["markPre"].length) .. i ]
+						templateStr[ (prefixPos + _config["markPre"].length) .. i ]
 					);
 					auto elem = new Element(prefixPos, i);
 					_namedEls[elemName] ~= elem;
@@ -195,7 +208,7 @@ public:
 // 					writeln("\r\n------------------------------\r\n");
 				
 					elemName = std.string.strip(
-						templateStr[ (prefixPos + rawLexems["varPre"].length) .. matchOpPos ]
+						templateStr[ (prefixPos + _config["varPre"].length) .. matchOpPos ]
 					);
 					auto elem = new Element(prefixPos, i, matchOpPos);
 					_namedEls[elemName] ~= elem;
@@ -213,16 +226,17 @@ public:
 void main()
 {	import std.stdio;
 	auto tempter = new PlainTemplater(testTemplateStr);
-	foreach(el; tempter._indexedEls)
-	{	
-		writeln(el);
-		writeln(tempter._sourceStr[
-			(  ( ( el.matchOpPos == size_t.max ) ? tempter._config.markPre.length : tempter._config.varPre.length ) + el.prePos  ) .. ( ( el.matchOpPos == size_t.max ) ? el.sufPos : el.matchOpPos )
-		]);
-		writeln(el.prePos);
-		writeln(el.sufPos);
-		writeln(el.matchOpPos);
-	}
-	
+// 	foreach(el; tempter._indexedEls)
+// 	{	
+// 		//writeln(el);
+// 		writeln(tempter._sourceStr[
+// 			(  ( ( el.matchOpPos == size_t.max ) ? tempter._config.markPre.length : tempter._config.varPre.length ) + el.prePos  ) .. ( ( el.matchOpPos == size_t.max ) ? el.sufPos : el.matchOpPos )
+// 		]);
+// 		//writeln(el.prePos);
+// 		//writeln(el.sufPos);
+// 		//writeln(el.matchOpPos);
+// 	}
+	tempter.substitude("Вася", "content");
+	writeln( tempter.getStr() );
 	
 }
