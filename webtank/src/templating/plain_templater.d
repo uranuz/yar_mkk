@@ -41,10 +41,13 @@ struct Config
 	dstring matchOp = ":=";
 }
 
-class Lexeme
-{	dstring lexStr
-	
-	
+struct Lexeme
+{	dstring name;
+	dstring value;
+	alias bool delegate(size_t i) CheckFuncT;
+	alias void delegate(size_t i) FixFuncT;
+	CheckFuncT check;
+	FixFuncT fix;
 }
 
 class PlainTemplater
@@ -61,7 +64,7 @@ public:
 		parseTemplateStr(templateStr);
 	}
 	
-	void setSubst(dstring value, dstring name, size_t index = size_t.max)
+	/*void setSubst(dstring value, dstring name, size_t index = size_t.max)
 	{	if( index == size_t.max )
 		{	foreach(el; _namedEls[name])
 			{	el.subst = value;
@@ -70,84 +73,137 @@ public:
 			
 		}
 				
+	}*/
+	
+	Lexeme[] _prepareLexems(
+		dstring[dstring] lexems, 
+		Lexeme.CheckFuncT[dstring] checkFuncs,
+		Lexeme.FixFuncT[dstring] fixFuncs
+	)
+	{	Lexeme[] result;
+		foreach( name, value; lexems )
+		{	result ~= Lexeme(
+				name, value, 
+				checkFuncs.get(name, null),
+				fixFuncs.get(name, null)
+			);
+		}
+// 		import std.algorithm;
+// 		std.algorithm.sort!("a.value.length > b.value.length")(result);
+		return result;
 	}
-	
-	
 	
 	void parseTemplateStr( dstring templateStr )
 	{	
 		size_t prefixPos;
-		size_t matchOpPos = size_t.max;
-		dstring elemName;
+		size_t matchOpPos;
 		bool markPreFound = false;
 		bool varMatchOpFound = false;
 		bool varPreFound = false;
+		
 		_sourceStr = templateStr;
-		dstring[dstring] lexems = 
+		dstring[dstring] rawLexems = 
 		[	"markPre": "{{", "markSuf": "}}", "varPre": "{{?",
 			"varSuf": "}}", "matchOp": ":="
 		];
 		
+		Lexeme.CheckFuncT[dstring] checkFuncs = 
+		[	"matchOp": (size_t i){
+				return varPreFound;
+			},
+			"varSuf": (size_t i){
+				return varPreFound && varMatchOpFound;
+			},
+			"markSuf": (size_t i){
+				return markPreFound;
+			}
+		];
 		
-		for( size_t i = 0; i < templateStr.length; ++i )
-		{	
-			bool isLexeme(dstring lexName)
-			{	auto lex = lexems[lexName];
-				if( lex.length > 0 )
-					if( (i + lex.length) < templateStr.length )
-						if( templateStr[i .. (i + lex.length) ] == lex )
-						{	size_t bestMatchLen = 0;
-							dstring bestMatchLexName;
-							dstring matchedLexems;
-							foreach( otherLexName, otherLex; lexems )
-							{	if( (i + otherLex.length) < templateStr.length )
-									if( 
-										(templateStr[i .. (i + lex.length) ] == lex) 
-										&& (otherLex.length > bestMatchLen )
-									)
-									{	bestMatchLen = otherLex.length;
-										bestMatchLexName = otherLexName;
-									}
-							}
-						}
-				return false;
-			}
-			
-			if (  )
-			
-			if( isLexeme("markPre") )
-			{	prefixPos = i;
-				markPreFound = true;
-			}
-			if( isLexeme("markSuf") && markPreFound  )
-			{	import std.string;
-				elemName = std.string.strip(
-					templateStr[ (prefixPos + markPre.length) .. i ]
-				);
-				auto elem = new Element(prefixPos, i);
-				_namedEls[elemName] ~= elem;
-				_indexedEls ~= elem;
-				markPreFound = false;
-			}
-			if( isLexeme("varPre") )
-			{	prefixPos = i; 
-				varPreFound = true;
-			}
-			if( isLexeme("matchOp") && varPreFound )
-			{	matchOpPos = i; 
+		Lexeme.FixFuncT[dstring] fixFuncs = 
+		[	"matchOp": (size_t i){
 				varMatchOpFound = true;
-			}
-			if( isLexeme("varSuf") && varMatchOpFound )
-			{	import std.string;
-				elemName = std.string.strip(
-					templateStr[ (prefixPos + varPre.length) .. matchOpPos ]
-				);
-				auto elem = new Element(prefixPos, i, matchOpPos);
-				_namedEls[elemName] ~= elem;
-				_indexedEls ~= elem;
+				matchOpPos = i;
+			},
+			"varPre": (size_t i){
+				varPreFound = true;
+				prefixPos = i;
+			},
+			"varSuf": (size_t i){
 				varMatchOpFound = false;
 				varPreFound = false;
+			},
+			"markPre": (size_t i){
+				markPreFound = true;
+				prefixPos = i;
+			},
+			"markSuf": (size_t i){
+				markPreFound = false;
 			}
+		];
+		
+		
+		auto lexems = _prepareLexems(rawLexems, checkFuncs, fixFuncs);
+// 		import std.stdio;
+// 		writeln(lexems);
+// 		writeln("\r\n------------------------------\r\n");
+		dstring elemName;
+		
+		for( size_t i = 0; i < templateStr.length; ++i )
+		{	Lexeme[] selLexemes;
+			foreach( curLex; lexems )
+			{	if( (i + curLex.value.length) < templateStr.length )
+				{	if( templateStr[i .. (i + curLex.value.length) ] == curLex.value )
+					{	//Если нашли, то добавляем в сортированный список новый элемент
+						if( ( curLex.check is null ) ? true : curLex.check(i) )
+						{	selLexemes ~= curLex;
+						}
+					}
+				}
+			}
+			
+			if( selLexemes.length > 0 )
+			{
+				size_t largestLexLen;
+				size_t selIndex = 0;
+				foreach( k, curLex; selLexemes )
+				{	if( curLex.value.length > largestLexLen )
+					{	largestLexLen = curLex.value.length;
+						selIndex = k;
+					}
+				}
+				selLexemes[selIndex].fix(i);
+
+//  				import std.stdio;
+//  				writeln(selLexemes);
+//  				writeln("\r\n------------------------------\r\n");
+				
+				if( selLexemes[selIndex].name == "markSuf"  )
+				{	import std.string;
+					elemName = std.string.strip(
+						templateStr[ (prefixPos + rawLexems["markPre"].length) .. i ]
+					);
+					auto elem = new Element(prefixPos, i);
+					_namedEls[elemName] ~= elem;
+					_indexedEls ~= elem;
+				}
+			
+				if( selLexemes[selIndex].name == "varSuf" )
+				{	import std.string;
+				
+// 					import std.stdio;
+// 					writeln(matchOpPos);
+// 					writeln("\r\n------------------------------\r\n");
+				
+					elemName = std.string.strip(
+						templateStr[ (prefixPos + rawLexems["varPre"].length) .. matchOpPos ]
+					);
+					auto elem = new Element(prefixPos, i, matchOpPos);
+					_namedEls[elemName] ~= elem;
+					_indexedEls ~= elem;
+				}
+			}
+			//else if( selLexemes.length > 1 )
+				//assert(0, "Обнаружена неоднозначность при разборе", selLexemes.length);
 		}
 	}
 }
@@ -159,6 +215,7 @@ void main()
 	auto tempter = new PlainTemplater(testTemplateStr);
 	foreach(el; tempter._indexedEls)
 	{	
+		writeln(el);
 		writeln(tempter._sourceStr[
 			(  ( ( el.matchOpPos == size_t.max ) ? tempter._config.markPre.length : tempter._config.varPre.length ) + el.prePos  ) .. ( ( el.matchOpPos == size_t.max ) ? el.sufPos : el.matchOpPos )
 		]);
