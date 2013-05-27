@@ -27,11 +27,12 @@ void netMain(Application netApp)  //Определение главной фун
 {	
 	auto rp = netApp.response;
 	auto rq = netApp.request;
+	
+	string js_file = "../../js/page_view.js";
+	
 	string queryStr ;
-	string fem = ( ( "fem" in rq.POST ) ? rq.POST["fem"] : "" ) ;
-	string num_page = "15";
-	string col_str;
-	string col_page;
+	string fem = ( ( "fem" in rq.postVars ) ? rq.postVars["fem"] : "" ) ;
+	uint limit = 10;
 	int page;
 	//try {
 	//	num_page = rq.POST.get("num_page", "0");
@@ -56,16 +57,25 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
 	
-	col_str=; 
 	auto col_str_qres = cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist`);
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
-	int col_str = ( ( query_res.getIsNull(0, 0) ) ? "0" : query_res.getValue(0, 0) ).to!int;
+	//Количество строк в таблице
+	uint col_str = ( ( col_str_qres.getIsNull(0, 0) ) ? "0" : col_str_qres.getValue(0, 0) ).to!uint;
 	
+	uint pageCount = (col_str)/limit+1; //Количество страниц
+	uint curPageNum = 1; //Номер текущей страницы
+	try {
+		if( "cur_page_num" in rq.postVars )
+ 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+	} catch (Exception) { curPageNum = 1; }
+	string filter = "";  //Фильтр поиска
+	if( "filter" in rq.postVars ) 
+		filter = rq.postVars.get("filter", "");
 	
-	page=(col_str)/10+1;
+	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
-	if(fem=="")
+	if(filter=="")
 	
 	queryStr=`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
@@ -78,7 +88,7 @@ void netMain(Application netApp)  //Определение главной фун
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist order by num LIMIT 10 OFFSET `~ num_page~` `;
+		   ` comment from tourist order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
 		  
    else
     
@@ -93,7 +103,7 @@ void netMain(Application netApp)  //Определение главной фун
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist WHERE family_name='`~fem~`'  order by num `;   
+		   ` comment from tourist WHERE family_name='`~filter~`'  order by num `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
@@ -109,11 +119,6 @@ void netMain(Application netApp)  //Определение главной фун
 		table ~= `<td>` ~ ( ( rec["Контакты"].isNull() ) ? "Не задано" : rec["Контакты"].getStr() ) ~ `</td>`;
 		
 		table ~= `<td>` ~ ( ( rec["Комментарий"].isNull() ) ? "Не задано" : rec["Комментарий"].getStr() ) ~ `</td>`;
-		
-		
-		
-		
-		
 		
 		table ~= `</tr>`;
 	}
@@ -140,35 +145,28 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	~`<h1><img src="/img/znak.png" width="130" height="121" alt="ТССР">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;База данных Ярославской МКК.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>  
 <h2>Список туристов &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="show_pohod">Список походов</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="baza_glavnaya.php">Главная</a></h2>`~ "\r\n"
-~`<form name="form1" method="post" action="show_tourist">
-  <p>
-    <label>Найти по фамилии
-      <input name="fem" type="text" id="fem" size="32" `
-     ~ ( ( fem.length > 0 ) ? ` value="` ~ fem ~ `"` : "" ) 
-  ~  `>
-    </label>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="submit" name="button" id="button" value="Найти">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="hidden" name="num_page" value="`
-  ~ num_page.to!string ~
-  `">
-  </p>
- 
-</form>
-<form name="form2" method="post" action="baza_turistov.php">
-
- <input name="fem" type="hidden"    value=''>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <label>Показать всех
-  <input type="submit" name="fam" id="fam" value=""></label>
- 
-</form>`
-
-
+~
+	`<form id="main_form" method="post">
+		Фамилия: <input name="filter" type="text" value="` ~ filter ~ `">
+		<input type="submit" name="act" value="Найти"><br>`;
 	
-		~ table  ~ `</body></html>`; //превращаем RecordSet в строку html-кода
+	
+	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
+	{	if( curPageNum != 1 )
+			html ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
+		
+		html ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `"> из ` 
+			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `;
+		
+		if( curPageNum != pageCount )
+			html ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
+	}
+	
+	html ~= 
+`	</form>
+	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
+
+	html ~= table  ~ `</body></html>`; //превращаем RecordSet в строку html-кода
 	output ~= html;
 	}
 	//catch(Exception e) {

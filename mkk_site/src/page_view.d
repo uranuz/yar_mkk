@@ -17,13 +17,13 @@ void netMain(Application netApp)  //Определение главной фун
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
-			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+ 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
 	string filter = "";  //Фильтр поиска
 	if( "filter" in rq.postVars ) 
 		filter = rq.postVars.get("filter", "");
 		
-	string js_file = "../../mkk_site/js/page_view.js";
+	string js_file = "../../js/page_view.js";
 	
 	rp ~= 
 `<html><body>
