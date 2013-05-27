@@ -63,8 +63,8 @@ public:
 		_parseTemplateStr();
 	}
 	
-	void substitude(dstring value, dstring name)
-	{	foreach(el; _namedEls[name])
+	void setContent(dstring markName, dstring value)
+	{	foreach(el; _namedEls[markName])
 		{	el.subst = value;
 		}
 	}
@@ -95,7 +95,7 @@ public:
 		result ~= _sourceStr[textStart .. $];
 		return result;
 	}
-	
+protected:
 	void _parseTemplateStr()
 	{	
 		size_t prefixPos;
