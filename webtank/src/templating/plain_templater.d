@@ -33,41 +33,34 @@ class Element
 	}
 }
 
-enum dstring[dstring] defaultConfig = 
-[	"markPre": "{{", "markSuf": "}}", "varPre": "{{?",
-	"varSuf": "}}", "matchOp": ":="
-];
+enum LexemeType 
+{	markPre, markSuf, varPre, matchOp, varSuf };
 
-// struct Config
-// {	dstring markPre = "{{";
-// 	dstring markSuf = "}}";
-// 	dstring varPre = "{{?";
-// 	dstring varSuf = "}}";
-// 	dstring matchOp = ":=";
-// }
+dstring[LexemeType] defaultLexems;
 
-struct Lexeme
-{	dstring name;
-	dstring value;
-	alias bool delegate(size_t i) CheckFuncT;
-	alias void delegate(size_t i) FixFuncT;
-	CheckFuncT check;
-	FixFuncT fix;
+static this()
+{	with( LexemeType )
+	{
+	defaultLexems = [
+		markPre: "{{", markSuf: "}}", 
+		varPre: "{{?", matchOp: ":=", varSuf: "}}" 
+	];
+	} //with( LexemeType )
 }
 
 class PlainTemplater
 {	
-//protected:
-	
+protected:
 	Element[][dstring] _namedEls;
 	Element[] _indexedEls;
 	dstring _sourceStr;
-// 	Config _config;
-	dstring[dstring] _config;
+	dstring[LexemeType] _lexValues;
+	
 public:
-	this( dstring templateStr, dstring[dstring] config = defaultConfig )
-	{	_config = config;
-		parseTemplateStr(templateStr);
+	this( dstring templateStr, dstring[LexemeType] lexems = defaultLexems )
+	{	_lexValues = lexems;
+		_sourceStr = templateStr;
+		_parseTemplateStr();
 	}
 	
 	void substitude(dstring value, dstring name)
@@ -76,21 +69,14 @@ public:
 		}
 	}
 	
-	Lexeme[] _prepareLexems(
-		Lexeme.CheckFuncT[dstring] checkFuncs,
-		Lexeme.FixFuncT[dstring] fixFuncs
-	)
-	{	Lexeme[] result;
-		foreach( name, value; _config )
-		{	result ~= Lexeme(
-				name, value, 
-				checkFuncs.get(name, null),
-				fixFuncs.get(name, null)
-			);
+	dstring getValue(dstring name)
+	{	if( (name in _namedEls) && (_namedEls[name].length > 0) )
+		{	auto el = _namedEls[name][0];
+			return 
+				_sourceStr[ (el.matchOpPos + _lexValues[LexemeType.matchOp].length) .. el.sufPos ];
 		}
-// 		import std.algorithm;
-// 		std.algorithm.sort!("a.value.length > b.value.length")(result);
-		return result;
+		else 
+			return null;
 	}
 	
 	dstring getStr()
@@ -99,18 +85,18 @@ public:
 		foreach(el; _indexedEls)
 		{	if( el.isVar )
 			{	result ~= _sourceStr[textStart .. el.prePos];
-				textStart = el.sufPos + _config["varSuf"].length;
+				textStart = el.sufPos + _lexValues[LexemeType.varSuf].length;
 			}
 			else
 			{	result ~= _sourceStr[textStart .. el.prePos] ~ el.subst;
-				textStart = el.sufPos + _config["markSuf"].length;
+				textStart = el.sufPos + _lexValues[LexemeType.markSuf].length;
 			}
 		}
 		result ~= _sourceStr[textStart .. $];
 		return result;
 	}
 	
-	void parseTemplateStr( dstring templateStr )
+	void _parseTemplateStr()
 	{	
 		size_t prefixPos;
 		size_t matchOpPos;
@@ -118,125 +104,109 @@ public:
 		bool varMatchOpFound = false;
 		bool varPreFound = false;
 		
-		_sourceStr = templateStr;
-		
-		Lexeme.CheckFuncT[dstring] checkFuncs = 
-		[	"matchOp": (size_t i){
-				return varPreFound;
-			},
-			"varSuf": (size_t i){
-				return varPreFound && varMatchOpFound;
-			},
-			"markSuf": (size_t i){
-				return markPreFound;
-			}
-		];
-		
-		Lexeme.FixFuncT[dstring] fixFuncs = 
-		[	"matchOp": (size_t i){
-				varMatchOpFound = true;
-				matchOpPos = i;
-			},
-			"varPre": (size_t i){
-				varPreFound = true;
-				prefixPos = i;
-			},
-			"varSuf": (size_t i){
-				varMatchOpFound = false;
-				varPreFound = false;
-			},
-			"markPre": (size_t i){
-				markPreFound = true;
-				prefixPos = i;
-			},
-			"markSuf": (size_t i){
-				markPreFound = false;
-			}
-		];
-		
-		
-		auto lexems = _prepareLexems(checkFuncs, fixFuncs);
-// 		import std.stdio;
-// 		writeln(lexems);
-// 		writeln("\r\n------------------------------\r\n");
-		dstring elemName;
-		
-		for( size_t i = 0; i < templateStr.length; ++i )
-		{	Lexeme[] selLexemes;
-			foreach( curLex; lexems )
-			{	if( (i + curLex.value.length) < templateStr.length )
-				{	if( templateStr[i .. (i + curLex.value.length) ] == curLex.value )
+		for( size_t i = 0; i < _sourceStr.length; ++i )
+		{	dstring[LexemeType] selLexemes;
+			foreach( lexType, curLexValue; _lexValues )
+			{	if( (i + curLexValue.length) < _sourceStr.length )
+				{	if( _sourceStr[i .. (i + curLexValue.length) ] == curLexValue )
 					{	//Если нашли, то добавляем в сортированный список новый элемент
-						if( ( curLex.check is null ) ? true : curLex.check(i) )
-						{	selLexemes ~= curLex;
+						bool checked = true;
+						with( LexemeType )
+						{
+						switch( lexType )
+						{	
+							case matchOp: {
+								checked = varPreFound;
+								break;
+							}
+							case varSuf: {
+								checked = varPreFound && varMatchOpFound;
+								break;
+							}
+							case markSuf: {
+								checked = markPreFound;
+								break;
+							}
+							default:
+							
+							break;
 						}
+						} //with( LexemeType )
+						if( checked )
+							selLexemes[lexType] ~= curLexValue;
 					}
 				}
 			}
 			
-			if( selLexemes.length > 0 )
-			{
-				size_t largestLexLen;
-				size_t selIndex = 0;
-				foreach( k, curLex; selLexemes )
-				{	if( curLex.value.length > largestLexLen )
-					{	largestLexLen = curLex.value.length;
-						selIndex = k;
-					}
+			//Если ни одной лексемы не найдено, то идём дальше
+			if( selLexemes.length <= 0 )
+				continue;
+			//Из всех найденных лексем будем брать самую длинную
+			size_t largestLexLen;
+			LexemeType selLexType;
+			foreach( lexType, curLexValue; selLexemes )
+			{	if( curLexValue.length > largestLexLen )
+				{	largestLexLen = curLexValue.length;
+					selLexType = lexType;
 				}
-				selLexemes[selIndex].fix(i);
-
-//  				import std.stdio;
-//  				writeln(selLexemes);
-//  				writeln("\r\n------------------------------\r\n");
-				
-				if( selLexemes[selIndex].name == "markSuf"  )
-				{	import std.string;
-					elemName = std.string.strip(
-						templateStr[ (prefixPos + _config["markPre"].length) .. i ]
-					);
-					auto elem = new Element(prefixPos, i);
-					_namedEls[elemName] ~= elem;
-					_indexedEls ~= elem;
-				}
+			}
 			
-				if( selLexemes[selIndex].name == "varSuf" )
-				{	import std.string;
-				
-// 					import std.stdio;
-// 					writeln(matchOpPos);
-// 					writeln("\r\n------------------------------\r\n");
-				
-					elemName = std.string.strip(
-						templateStr[ (prefixPos + _config["varPre"].length) .. matchOpPos ]
+			with( LexemeType )
+			{
+			switch( selLexType )
+			{
+				case matchOp: {
+					varMatchOpFound = true;
+					matchOpPos = i;
+					break;
+				}
+				case varPre: {
+					varPreFound = true;
+					prefixPos = i;
+					break;
+				}
+				case varSuf: {
+					import std.string;
+					auto elemName = std.string.strip(
+						_sourceStr[ (prefixPos + _lexValues[varPre].length) .. matchOpPos ]
 					);
 					auto elem = new Element(prefixPos, i, matchOpPos);
 					_namedEls[elemName] ~= elem;
 					_indexedEls ~= elem;
+					varMatchOpFound = false;
+					varPreFound = false;
+					break;
 				}
+				case markPre: {
+					markPreFound = true;
+					prefixPos = i;
+					break;
+				}
+				case markSuf: {
+					import std.string;
+					auto elemName = std.string.strip(
+						_sourceStr[ (prefixPos + _lexValues[markPre].length) .. i ]
+					);
+					auto elem = new Element(prefixPos, i);
+					_namedEls[elemName] ~= elem;
+					_indexedEls ~= elem;
+					markPreFound = false;
+					break;
+				}
+				default:
+				
+				break;
 			}
-			//else if( selLexemes.length > 1 )
-				//assert(0, "Обнаружена неоднозначность при разборе", selLexemes.length);
+			} //with( LexemeType )
 		}
 	}
 }
 
-
-
 void main()
 {	import std.stdio;
 	auto tempter = new PlainTemplater(testTemplateStr);
-// 	foreach(el; tempter._indexedEls)
-// 	{	
-// 		//writeln(el);
-// 		writeln(tempter._sourceStr[
-// 			(  ( ( el.matchOpPos == size_t.max ) ? tempter._config.markPre.length : tempter._config.varPre.length ) + el.prePos  ) .. ( ( el.matchOpPos == size_t.max ) ? el.sufPos : el.matchOpPos )
-// 		]);
-// 		//writeln(el.prePos);
-// 		//writeln(el.sufPos);
-// 		//writeln(el.matchOpPos);
-// 	}
 	tempter.substitude("Вася", "content");
 	writeln( tempter.getStr() );
+	writeln(tempter.getValue("page_title"));
 	
 }
