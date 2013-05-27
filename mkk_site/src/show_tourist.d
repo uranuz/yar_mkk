@@ -56,9 +56,14 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
 	
-	col_str=`select count(1) from tourist`; 
+	col_str=; 
+	auto col_str_qres = cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist`);
 	
-	page=(col_page.to!int)/10+1;
+	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
+	int col_str = ( ( query_res.getIsNull(0, 0) ) ? "0" : query_res.getValue(0, 0) ).to!int;
+	
+	
+	page=(col_str)/10+1;
 	
 	if(fem=="")
 	
