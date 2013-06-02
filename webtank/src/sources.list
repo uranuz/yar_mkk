@@ -13,3 +13,4 @@
 ./db/datctrl_joint.d
 ./db/database.d
 ./db/postgresql.d
+./templating/plain_templater.d

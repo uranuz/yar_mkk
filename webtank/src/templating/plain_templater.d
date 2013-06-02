@@ -57,30 +57,35 @@ protected:
 	dstring[LexemeType] _lexValues;
 	
 public:
-	this( dstring templateStr, dstring[LexemeType] lexems = defaultLexems )
-	{	_lexValues = lexems;
-		_sourceStr = templateStr;
+	this( string templateStr, dstring[LexemeType] lexems = defaultLexems )
+	{	import std.utf;
+		_lexValues = lexems;
+		_sourceStr = std.utf.toUTF32(templateStr);
 		_parseTemplateStr();
 	}
 	
-	void setContent(dstring markName, dstring value)
-	{	foreach(el; _namedEls[markName])
-		{	el.subst = value;
+	void setContent(string markName, string value)
+	{	import std.utf;
+		foreach(el; _namedEls[std.utf.toUTF32(markName)])
+		{	el.subst = std.utf.toUTF32(value);
 		}
 	}
 	
-	dstring getValue(dstring name)
-	{	if( (name in _namedEls) && (_namedEls[name].length > 0) )
-		{	auto el = _namedEls[name][0];
+	string getValue(string name)
+	{	import std.utf;
+		dstring nameUTF32 = std.utf.toUTF32(name);
+		if( (nameUTF32 in _namedEls) && (_namedEls[nameUTF32].length > 0) )
+		{	auto el = _namedEls[nameUTF32][0];
 			return 
-				_sourceStr[ (el.matchOpPos + _lexValues[LexemeType.matchOp].length) .. el.sufPos ];
+				std.utf.toUTF8( _sourceStr[ (el.matchOpPos + _lexValues[LexemeType.matchOp].length) .. el.sufPos ] );
 		}
 		else 
 			return null;
 	}
 	
-	dstring getStr()
-	{	dstring result;
+	string getStr()
+	{	import std.utf;
+		dstring result;
 		size_t textStart = 0;
 		foreach(el; _indexedEls)
 		{	if( el.isVar )
@@ -93,7 +98,7 @@ public:
 			}
 		}
 		result ~= _sourceStr[textStart .. $];
-		return result;
+		return std.utf.toUTF8(result);
 	}
 protected:
 	void _parseTemplateStr()
@@ -202,11 +207,11 @@ protected:
 	}
 }
 
-void main()
+/*void main()
 {	import std.stdio;
 	auto tempter = new PlainTemplater(testTemplateStr);
 	tempter.substitude("Вася", "content");
 	writeln( tempter.getStr() );
 	writeln(tempter.getValue("page_title"));
 	
-}
+}*/

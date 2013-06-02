@@ -290,7 +290,7 @@ public:
 	}
 	
 	///СОБСТВЕННЫЕ НЕИНТЕРФЕЙСНЫЕ МЕТОДЫ КЛАССА ПОЛЯ
-	void set( size_t key, T value )
+	void set( T value, size_t key )
 	{	if( !keyExists(key) ) assert(0);
 		_nullFlags[ _getIndex(key) ] = false;
 		//Значение должно копироваться (для текста)

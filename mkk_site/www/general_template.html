@@ -1,41 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta charset="utf-8">
-		<title>Маршрутно-квалификационная комиссия Ярославской области</title>
-		<link rel="stylesheet" type="text/css" href="css/general_template.css">
-	</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta charset="utf-8">
+	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
+	<link rel="stylesheet" type="text/css" href="css/general_template.css">
+</head>
 
-	<body>
-		<div id="page">
-			<div id="top"> 
-				<div id="siteTitle">
+<body>
+<div id="page_framing">
+	<div id="page_bg"> &nbsp;
+	</div>
+	<div id="page">
+		<div id="top"> 
+			<div id="header">
+				<div id="pic_frame_left"></div>
+				<div id="pic_frame_right"></div>
+				<div id="header_pics">
+					<img src="img/pic/1.jpg">
+					<img src="img/pic/2.png">
+					<img src="img/pic/3.jpg">
+					<img src="img/pic/4.jpg">
+					<img src="img/pic/5.jpg">
+					<img src="img/pic/6.jpg">
+					<img src="img/pic/7.jpg">
+					<img src="img/pic/8.jpg">
+					<img src="img/pic/9.jpg">
+					<img src="img/pic/10.jpg">
+					<img src="img/pic/11.jpg">
+				</div>
+				<div id="pic_frame_bottom"></div>
+				<div id="site_title">
 					<h1>Маршрутно-квалификационная комиссия Ярославской области</h1>
-				</div> <!-- #siteTitle -->
-				
-				<div id="horMenu">
-					Походы
-					Туристы
-					Отчёты и файлы
-					Статьи
-				</div> <!-- #horMenu -->
-			</div> <!-- #top -->
+				</div>
+			</div> <!-- #header -->
 			
-			<div id="middle">
-				<div id="sidebar">
-					<h3>Полезные ссылки:</h3>
-				</div> <!-- #sidebar -->
-				<div id="content">
-					<h2> Добро пожаловать! </h2>
-					Перед вами содержимое страницы
-					{{content}}
-				</div> <!-- #content -->
-			</div> <!-- #middle -->
-			
-			<div id="footer">
-				Все ходы записаны!!! г. Ярославль, 2013 г.
-			</div> <!-- #footer -->
-		</div>
+			<div id="menu_bg_left"></div>
+			<div id="menu_bg_right"></div>
+			<div id="main_menu">
+				<a href="{{cgi-bin}}show_pohod"><span>Походы</span></a>
+				<a href="{{cgi-bin}}show_tourist"><span>Туристы</span></a>
+				<a href="">Отчёты и файлы</a>
+				<a href="">Статьи</a>
+			</div> <!-- #main_menu -->
+			<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
+		</div> <!-- #top -->
 		
-	</body>
+		<div id="middle">
+			<div id="sidebar">
+				<h3>Полезные ссылки:</h3>
+				{{useful links}}
+			</div> <!-- #sidebar -->
+			<div id="content">
+				<h2> Добро пожаловать! </h2>
+				Перед вами содержимое страницы
+				{{content}}
+				
+
+			</div> <!-- #content -->
+		</div> <!-- #middle -->
+		<div id="footer_pusher"></div> <!-- Толкатель footer'а -->
+	</div> <!-- #page -->
+	
+</div> <!-- #page_framing -->
+<div id="footer_framing">
+<div id="footer">
+	Все ходы записаны!!! г. Ярославль, 2013 г.
+</div>
+</div> <!-- #footer_framing -->
+</body>
+<script type="text/javascript" src="js/page_view.js"></script>
 </html>
