@@ -64,26 +64,31 @@ public:
 		_parseTemplateStr();
 	}
 	
-	void setContent(string markName, string value)
+	//Устанавливает замещающее значение value для метки с именем markName
+	void set(string markName, string value)
 	{	import std.utf;
 		foreach(el; _namedEls[std.utf.toUTF32(markName)])
 		{	el.subst = std.utf.toUTF32(value);
 		}
 	}
 	
-	string getValue(string name)
+	//Получение значения из переменной с именем name
+	string get(string name)
 	{	import std.utf;
 		dstring nameUTF32 = std.utf.toUTF32(name);
 		if( (nameUTF32 in _namedEls) && (_namedEls[nameUTF32].length > 0) )
 		{	auto el = _namedEls[nameUTF32][0];
-			return 
-				std.utf.toUTF8( _sourceStr[ (el.matchOpPos + _lexValues[LexemeType.matchOp].length) .. el.sufPos ] );
+			if( el.isVar )
+				return 
+					std.utf.toUTF8( _sourceStr[ (el.matchOpPos + _lexValues[LexemeType.matchOp].length) .. el.sufPos ] );
+			else 
+				return null;
 		}
 		else 
 			return null;
 	}
 	
-	string getStr()
+	string getResult()
 	{	import std.utf;
 		dstring result;
 		size_t textStart = 0;

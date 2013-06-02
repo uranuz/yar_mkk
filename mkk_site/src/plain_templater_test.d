@@ -21,9 +21,9 @@ void netMain(Application netApp)  //Определение главной фун
 	string filter = "";  //Фильтр поиска
 	if( "filter" in rq.postVars ) 
 		filter = rq.postVars.get("filter", "");
-		
-	string js_file = "../../js/page_view.js";
+
 	
+	/*string templFileName = "/ramdisk/general_template.html";*/
 	string templFileName = "/home/test_serv/sites/test/www/mkk_site/general_template.html";
 	import std.stdio;
 	auto f = File(templFileName, "r");
@@ -55,11 +55,13 @@ void netMain(Application netApp)  //Определение главной фун
 	content_block ~= `</form>`;
 	
 	
-	tpl.setContent("content", content_block);
-	tpl.setContent("cgi-bin", "/cgi-bin/mkk_site/");
-	tpl.setContent("useful links", "Куча хороших ссылок");
-	rp ~= tpl.getStr();
-
+	tpl.set("img folder", "../../mkk_site/img/");
+	tpl.set("css folder", "../../mkk_site/css/");
+	tpl.set("content", content_block);
+	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
+	tpl.set("useful links", "Куча хороших ссылок");
+	tpl.set("js folder", "../../mkk_site/js/");
+	rp ~= tpl.getResult();
 }
 
 
