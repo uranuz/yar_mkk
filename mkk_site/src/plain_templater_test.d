@@ -32,7 +32,7 @@ void netMain(Application netApp)  //Определение главной фун
 	while ((buf = f.readln()) !is null)
 		templateStr ~= buf;
 	
-		
+	//Создаем шаблон по файлу
 	auto tpl = new PlainTemplater( templateStr );
 	
 	string content_block =
@@ -53,6 +53,7 @@ void netMain(Application netApp)  //Определение главной фун
 	}
 	
 	content_block ~= `</form>`;
+	
 	
 	
 	tpl.set("img folder", "../../mkk_site/img/");

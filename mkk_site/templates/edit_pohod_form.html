@@ -1,0 +1,117 @@
+<form name="form1" method="post" action="{{edit pohod form action}}">
+<table>
+  <tr>
+    <td>код мкк</td>
+    <td>
+      <input name="kod_MKK" type="text" id="kod_MKK">
+    </td>
+    <td>номер книжки</td>
+    <td><input type="text" name="nomer_knigi" id="nomer_knigi"></td>
+  </tr>
+  <tr>
+    <td>район похода</td>
+    <td>
+      <input name="raion" type="text" id="raion">
+    </td>
+    <td>вид туризма</td>
+    <td>
+		<select name="vid"></select>
+    </td>
+  </tr>
+  <tr>
+    <td>организация,клуб,команда</td>
+    <td><input name="organiz" type="text" id="organiz"></td>
+    <td>Область,город, пр.</td>
+    <td><input name="territori" type="text" id="territori"></td>
+  </tr>
+  <tr>
+    <td>категория сложности</td>
+    <td>
+    <select name="ks"></select >
+    </td>
+    <td>с элемнтами </td>
+    <td><select name="element"></select ></td>
+  </tr>
+  <tr>
+    <td>дата начала похода</td>
+    <td><input name="begin_data1" type="text" id="begin_data1" value="">
+число
+<input name="begin_data2" type="text" id="begin_data2" value="" >
+месяц
+<input name="begin_data3" type="text" id="begin_data3" value="">
+год </td>
+
+
+    <td>конец похода</td>
+    <td><input name="finich_data1" type="text" id="finich_data1" value="">
+      число
+      <input name="finich_data2" type="text" id="finich_data2" value="">
+      месяц
+      <input name="finich_data3" type="text" id="finich_data2" value="">
+      год </td>
+  </tr>
+ 
+  <tr>
+    <td>Руководитель похода</td>
+    <td><input name="chef_grupp" type="text" id="chef_grupp" value="">
+номер в базе туристов </br>
+</td>
+    <td>Заместитель</td>
+    <td><input name="daw_chef" type="text" id="daw_chef" value="">
+номер в базе туристов</br>
+</td>
+  </tr>
+  </table>
+<table>
+  <tr>
+    <td>Краткий маршрут</td>
+    <td><textarea name="marchrut" id="marchrut"></textarea></td>
+  </tr>
+  <tr>
+    <td>Участники</td>
+    <td><textarea name="unitt" id="unitt"></textarea></td>
+  </tr>
+  <tr>
+    <td><p>Комннтарий </br>
+    
+    руководителя</p></td>
+    <td><textarea name="chef_coment" id="chef_coment"></textarea></td>
+  </tr>
+  <tr>
+    <td>Коментарий МКК</td>
+    <td><textarea name="MKK_coment" id="MKK_coment"></textarea></td>
+  </tr>
+  <tr>
+    <td>Выпускающие</td>
+    <td><input name="emitter" type="text" id="emitter"></td>
+  </tr>
+</table>
+<table >
+  <tr>
+    <td><p>Состояние подготовки похода </br>
+    (планируется, готовится, набор группы, </br> 
+    набор завершон,на маршруте,пройден)</p>
+    
+    </td>
+    <td><select name="prepare">
+      
+    </select ></td>
+  </tr>
+  <tr>
+    <td>Заявка </br>
+   (рассматривается,заявлен,на контроле,пройден,засчитан)</td>
+    <td><select name="status">
+      
+    </select ></td>
+  </tr>
+</table>
+<p>
+  <input type="submit" name="button" id="button" value="Отправить">
+</p>
+<p>&nbsp;</p>
+<p>
+  <input type="reset" name="button2" id="button2" value="Сброс">
+</p>
+<p>&nbsp;</p>
+<input type="hidden" name="MM_insert" value="form1">
+</form>

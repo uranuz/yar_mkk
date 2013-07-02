@@ -8,6 +8,7 @@ import webtank.db.datctrl_joint;
 
 import webtank.datctrl.record;
 import webtank.net.application;
+import webtank.templating.plain_templater;
 
 
 immutable(string) projectPath = `/webtank`;
@@ -28,40 +29,26 @@ void netMain(Application netApp)  //Определение главной фун
 	auto rp = netApp.response;
 	auto rq = netApp.request;
 	
+	string output; //"Выхлоп" программы
 	string js_file = "../../js/page_view.js";
 	
-	string queryStr ;
-	string fem = ( ( "fem" in rq.postVars ) ? rq.postVars["fem"] : "" ) ;
+	//Создаём подключение к БД
+	string connStr = "dbname=baza_MKK host=192.168.0.72 user=postgres password=postgres";
+	auto dbase = new DBPostgreSQL(connStr);
+	if ( !dbase.isConnected )
+		output ~= "Ошибка соединения с БД";
+	
+	
+	string fem = ( ( "fem" in rq.postVars ) ? rq.postVars["fem"] : "" ) ; 
 	uint limit = 10;
 	int page;
-	//try {
-	//	num_page = rq.POST.get("num_page", "0");
-	//} catch(Exception) { num_page = "0"; }
 	
-   string output; //"Выхлоп" программы
-	try {
-	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
-	with(FieldType) {
-	touristRecFormat = RecordFormat(
-	[IntKey, Str, Str, Str, Str, Str],
-	["Ключ", "Имя", "Дата рожд", "Опыт", "Контакты", "Комментарий"],
-	//[null, null, null, null, null, null],
-	[true, true, true, true, true, true] //Разрешение нулевого значения
-	);
-	}
 	
-	string connStr = "dbname=baza_MKK host=localhost user=postgres password=postgres";
-	auto dbase = new DBPostgreSQL(connStr);
-	if (dbase.isConnected) output ~= "Соединение с БД установлено";
-	else  output ~= "Ошибка соединения с БД";
-	
-	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
-	
-	auto col_str_qres = cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist`);
+	auto col_str_qres = cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where`);
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	uint col_str = ( ( col_str_qres.getIsNull(0, 0) ) ? "0" : col_str_qres.getValue(0, 0) ).to!uint;
+	uint col_str = ( col_str_qres.getValue(0, 0, "0") ).to!uint;
 	
 	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
@@ -75,9 +62,45 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
-	if(filter=="")
 	
-	queryStr=`select num, 
+	
+	string content = 
+	`<form id="main_form" method="post">
+		Фамилия: <input name="filter" type="text" value="` ~ filter ~ `">
+		<input type="submit" name="act" value="Найти"><br>`;
+	
+	
+	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
+	{	if( curPageNum != 1 )
+			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
+		
+		content ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `"> из ` 
+			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `;
+		
+		if( curPageNum != pageCount )
+			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
+	}
+	
+	content ~= 
+`	</form>
+	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
+	
+   ///Начинаем оформлять таблицу с данными
+	try {
+	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
+	with(FieldType) {
+	touristRecFormat = RecordFormat(
+	[IntKey, Str, Str, Str, Str, Str],
+	["Ключ", "Имя", "Дата рожд", "Опыт", "Контакты", "Комментарий"],
+	//[null, null, null, null, null, null],
+	[true, true, true, true, true, true] //Разрешение нулевого значения
+	);
+	}
+	
+	string queryStr;
+	if( filter.length == 0 )
+	
+		queryStr=`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
 		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date , exp, `
 		`( case `
@@ -103,7 +126,7 @@ void netMain(Application netApp)  //Определение главной фун
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist WHERE family_name='`~filter~`'  order by num `;   
+		   ` comment from tourist WHERE family_name='` ~ filter ~`'  order by num `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
@@ -124,50 +147,28 @@ void netMain(Application netApp)  //Определение главной фун
 	}
 	table ~= `</table>`;
 	
+	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	/*auto rsView = new RecordSetView(rs);
-	rsView.outputModes.length = 6;
-	with( FieldOutputMode )
-		rsView.outputModes[0..$] = visible;
-	rsView.viewManners.length = 6;
-	rsView.viewManners[0..$] = FieldViewManner.plainText;*/
-	string html = 
-	`<html>`~ "\r\n"
-	~`<meta http-equiv="Выберите расширение для парковки" content="text/html; charset=windows-1251">`~ "\r\n"
-	~`<title>Список туристов</title>`~ "\r\n"
-	~`<head><link rel="stylesheet" type="text/css" href="` 
-	~`../../css/baza.css">`
-	//~ projectPath 
-	//~`/css/full_test.css">`
-	~`</head>` ~ "\r\n"
-	
-	~`<body>`~ "\r\n"
-	
-	~`<h1><img src="/img/znak.png" width="130" height="121" alt="ТССР">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;База данных Ярославской МКК.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>  
-<h2>Список туристов &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="show_pohod">Список походов</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="baza_glavnaya.php">Главная</a></h2>`~ "\r\n"
-~
-	`<form id="main_form" method="post">
-		Фамилия: <input name="filter" type="text" value="` ~ filter ~ `">
-		<input type="submit" name="act" value="Найти"><br>`;
-	
-	
-	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
-	{	if( curPageNum != 1 )
-			html ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
+	//Чтение шаблона страницы из файла
+	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
+	import std.stdio;
+	auto f = File(templFileName, "r");
+	string templateStr; //Строка с содержимым файла шаблона страницы 
+	string buf;
+	while ((buf = f.readln()) !is null)
+		templateStr ~= buf;
 		
-		html ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `"> из ` 
-			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `;
-		
-		if( curPageNum != pageCount )
-			html ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
-	}
+	//Создаем шаблон по файлу
+	auto tpl = new PlainTemplater( templateStr );
+	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
+	//Задаём местоположения всяких файлов
+	tpl.set("img folder", "../../mkk_site/img/");
+	tpl.set("css folder", "../../mkk_site/css/");
+	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
+	tpl.set("useful links", "Куча хороших ссылок");
+	tpl.set("js folder", "../../mkk_site/js/");
 	
-	html ~= 
-`	</form>
-	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
-
-	html ~= table  ~ `</body></html>`; //превращаем RecordSet в строку html-кода
-	output ~= html;
+	output ~= tpl.getResult(); //Получаем результат обработки шаблона с выполненными подстановками
 	}
 	//catch(Exception e) {
 		//output ~= "\r\nНепредвиденная ошибка в работе сервера";

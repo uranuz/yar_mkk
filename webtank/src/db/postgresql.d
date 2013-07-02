@@ -215,7 +215,7 @@ public:
 	//Если ячейка пуста то вернёт значение параметра defaultValue
 	string getValue(size_t recIndex, size_t fieldIndex, string defaultValue)
 	{	if( getIsNull(recIndex, fieldIndex) ) 
-			return "";
+			return defaultValue;
 		else
 			return getValue(recIndex, fieldIndex);
 	}
