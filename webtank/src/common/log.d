@@ -12,68 +12,72 @@ enum EntryType
 	error, /// Нормальная обычная ошибка в ходе работы (например, неверные данные)
 	critError,  /// Критическая ошибка (дальнейшая работа существенно затруднена, либо ведёт к неизвестным последствиям)
 	fatalError  /// Фатальная ошибка (продолжение работы приложения невозможно)   
-}
+};
 
 ///"Уровень логирования" (степень детализации журнала)
 enum LogLevel 
 {	none,
 	errors,
 	all
-}
+};
 
 ///Запись в журнал
 struct LogEntry 
 {	EntryType type;   ///Тип записи в журнал
-	SysTyme time;     ///Время записи
-	string header;    ///Заголовок записи (краткое описание)
+	//SysTyme time;     ///Время записи
+	string title;    ///Заголовок записи о событии (очень краткое описание)
 	string text;      ///Текст записи (подробности)
-	
-	///Детализация информации. Не больше 2. 0 - сжато, 1 - стандартно, 2 - подробно
-	ubyte detail = 1;  
-	string mod;       ///Имя модуля
-	string func;      ///Имя функции или метода
-	size_t line;      ///Номер строки
+	//string longText;  ///Детальное описание
+	//string mod;       ///Имя модуля
+	//string func;      ///Имя функции или метода
+	//size_t line;      ///Номер строки
 	
 }
 
 
 interface ILogger
 {	///Свойства позволяют прочитать или установить уровень логирования
-	LogLevel level() @property;
-	void level( LogLevel level ) @property;
+// 	LogLevel level() @property;
+// 	void level( LogLevel level ) @property;
 	
 	///Добавление записи в лог
-	void log( ref LogEntry logEntry  );
+	void log( /*ref*/ LogEntry logEntry  );
 	
 }
 
 class FileLogger: ILogger
 {	
+	import std.stdio;
 private:
-		import std.stdio;
+		
 		
 		File _errorFile; ///Лог-файл ошибок
 		File _eventFile; ///Лог-файл событий
+		LogLevel _logLevel;
 		
 		//Выводимые в файл названия типов событий
-		enum prefixes[EntryType] = 
-		{	EntryType.traceMsg: "TRACE", EntryType.debugMsg: "DEBUG", EntryType.info: "INFO",
+		enum string[EntryType] prefixes  =
+		[	
+		
+		EntryType.traceMsg: "TRACE", EntryType.debugMsg: "DEBUG", EntryType.info: "INFO",
+		
+		
+		
 			EntryType.warning: "WARN", EntryType.error: "ERROR", EntryType.critError: "CRIT",
 			EntryType.fatalError: "FATAL"
-		};
+		];
 		
 public:
 	
-	this( File errorFile, File eventFile )
+	this( File errorFile, File eventFile, LogLevel logLevel )
 	{	_errorFile = errorFile;
 		_eventFile = eventFile;
+		_logLevel = logLevel;
 	}
 	
 	///Добавление записи в лог
-	void log( ref LogEntry logEntry  )
-	{	File logFile;
-		
-		
+	void log( /*ref*/ LogEntry logEntry  )
+	{	
 		bool isError =
 		(	logEntry.type == EntryType.error || 
 			logEntry.type == EntryType.critError || 
@@ -82,13 +86,10 @@ public:
 		
 		with( LogLevel )
 		{
-		final switch( logEntry.level )
+		final switch( _logLevel )
 		{	case errors: //Только ошибки
 				if( isError )
-				{	logFile.write(prefixes[logEntry.type] ~ ": " ~ header ~ "\r\n" ~ text );
-					
-					
-				}
+					_errorFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
 			break;
 			
 // 			case verbose:  //Подробно
@@ -96,7 +97,9 @@ public:
 // 			break;
 			
 			case all: //Вся информация
-				
+				if( isError )
+					_errorFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
+					_eventFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
 			break;
 			
 			case none:  //Не журналировать
@@ -106,5 +109,16 @@ public:
 		} //with( LogLevel )
 		
 	}
+	
+}
+
+void main()
+{	import std.stdio;
+	
+	auto logger = new FileLogger(stdout, stdout, LogLevel.errors);
+	auto entry = LogEntry(EntryType.error, "Абсолютно неизвестная ошибка");
+	logger.log(LogEntry(EntryType.error, "Абсолютно неизвестная ошибка"));
+	
+	
 	
 }
