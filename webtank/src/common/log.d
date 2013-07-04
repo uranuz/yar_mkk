@@ -3,35 +3,68 @@ module webtank.common.log;
 ///событий, происходящих во время работы. Полученная информация должна
 ///использоваться для диагностики и отладки системы.
 
-///Тип записи в журнале событий
-enum EntryType 
-{	traceMsg, /// Сообщение для трассировки
-	debugMsg,   /// Отладочное сообщение
-	info,  /// Информационное сообщение 
-	warning,  /// Предупреждение о возможных неприятных последствиях
+///Тип события
+enum EventType
+{	crit,  /// Критическая ошибка (дальнейшая работа существенно затруднена, либо ведёт к неизвестным последствиям)
 	error, /// Нормальная обычная ошибка в ходе работы (например, неверные данные)
-	critError,  /// Критическая ошибка (дальнейшая работа существенно затруднена, либо ведёт к неизвестным последствиям)
-	fatalError  /// Фатальная ошибка (продолжение работы приложения невозможно)   
+	warn,  /// Предупреждение о возможных неприятных последствиях
+	info,  /// Информационное сообщение 
+	dbg,   /// Отладочное сообщение
+	trace /// Сообщение для трассировки  
 };
 
-///"Уровень логирования" (степень детализации журнала)
+//Степень подробности описания события
+enum Verbosity
+{	none,  ///Не записываем в журнал
+	low,   ///Сжато
+	norm,  ///Стандартно
+	high   ///Подробно
+};
+
+///"Уровень логирования" (общая степень детализации журнала)
 enum LogLevel 
 {	none,
-	errors,
+	crit,
+	error,
+	warn,
+	info,
+	dbg,
+	tracing,
 	all
 };
 
+
+
+immutable Verbosity[EventType] verbosityMappingDefault;
+
+static this()
+{	
+	alias Verbosity v;
+	alias EventType e;
+	
+	verbosityMappingDefault =
+	[	e.crit: v.high,
+		e.error: v.norm,
+		e.warn: v.norm,
+		e.info: v.low,
+		e.dbg: v.none,
+		e.trace: v.none
+	];
+	
+}
+
+
 ///Запись в журнал
-struct LogEntry 
-{	EntryType type;   ///Тип записи в журнал
-	//SysTyme time;     ///Время записи
+struct LogEvent 
+{	import std.datetime: SysTime;
+	EventType type;   ///Тип записи в журнал
 	string title;    ///Заголовок записи о событии (очень краткое описание)
 	string text;      ///Текст записи (подробности)
-	//string longText;  ///Детальное описание
-	//string mod;       ///Имя модуля
-	//string func;      ///Имя функции или метода
-	//size_t line;      ///Номер строки
-	
+	string longText;  ///Детальное описание
+	string file;       ///Имя файла
+	size_t line;      ///Номер строки
+// 	string func;      ///Имя функции или метода
+	SysTime time;     ///Время записи
 }
 
 
@@ -41,7 +74,7 @@ interface ILogger
 // 	void level( LogLevel level ) @property;
 	
 	///Добавление записи в лог
-	void log( /*ref*/ LogEntry logEntry  );
+// 	void log( /*ref*/ LogEvent event  );
 	
 }
 
@@ -53,18 +86,12 @@ private:
 		
 		File _errorFile; ///Лог-файл ошибок
 		File _eventFile; ///Лог-файл событий
-		LogLevel _logLevel;
+		Verbosity[EventType] _vbMap;  //Карта степени подробности
 		
 		//Выводимые в файл названия типов событий
-		enum string[EntryType] prefixes  =
-		[	
-		
-		EntryType.traceMsg: "TRACE", EntryType.debugMsg: "DEBUG", EntryType.info: "INFO",
-		
-		
-		
-			EntryType.warning: "WARN", EntryType.error: "ERROR", EntryType.critError: "CRIT",
-			EntryType.fatalError: "FATAL"
+		enum string[EventType] prefixes  =
+		[	EventType.trace: "TRACE", EventType.dbg: "DEBUG", EventType.info: "INFO",
+			EventType.warn: "WARN", EventType.error: "ERROR", EventType.crit: "CRIT"
 		];
 		
 public:
@@ -72,53 +99,92 @@ public:
 	this( File errorFile, File eventFile, LogLevel logLevel )
 	{	_errorFile = errorFile;
 		_eventFile = eventFile;
-		_logLevel = logLevel;
+		
+		foreach( key, val;  verbosityMappingDefault)
+			_vbMap[key] = val;
 	}
 	
 	///Добавление записи в лог
-	void log( /*ref*/ LogEntry logEntry  )
+	private void _log( /*ref*/ LogEvent event  )
 	{	
-		bool isError =
-		(	logEntry.type == EntryType.error || 
-			logEntry.type == EntryType.critError || 
-			logEntry.type == EntryType.fatalError 
-		);
+		Verbosity verb = _vbMap[event.type];
 		
-		with( LogLevel )
-		{
-		final switch( _logLevel )
-		{	case errors: //Только ошибки
-				if( isError )
-					_errorFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
+		if( verb == Verbosity.none ) //Не выводим
+			return;
+			
+		bool isError =
+		(	event.type == EventType.error || 
+			event.type == EventType.crit
+		);
+		import std.datetime;
+		auto timeString = event.time.toSimpleString();
+		import std.conv;
+		string output = timeString ~ ": " ~ event.file ~ "(" ~ std.conv.to!(string)(event.line) ~ "): " ~ prefixes[event.type] ~ ": " ~ event.title ~ "\n";
+
+		final switch( verb )
+		{	case Verbosity.none:
+				
 			break;
 			
-// 			case verbose:  //Подробно
-// 			
-// 			break;
-			
-			case all: //Вся информация
-				if( isError )
-					_errorFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
-					_eventFile.write(prefixes[logEntry.type] ~ ": " ~ logEntry.title ~ "\r\n" ~ logEntry.text );
+			case Verbosity.low:
+				
 			break;
 			
-			case none:  //Не журналировать
+			case Verbosity.norm:
+				output ~= event.text ~ "\n";
+			break;
 			
+			case Verbosity.high:
+				output ~= event.longText ~ "\n";
 			break;
 		}
-		} //with( LogLevel )
+		
+		if( isError )
+			_errorFile.write(output);
+			_eventFile.write(output);
 		
 	}
+	
+	void log( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		( EventType eventType, string title, string text = null, string longText = null )
+	{	LogEvent event;
+		event.type = eventType;
+		event.title = title;
+		event.text = text;
+		event.longText = longText;
+		event.file = file;
+		event.line = line;
+// 		event.func = func;
+		import std.datetime;
+		event.time = std.datetime.Clock.currTime();
+		_log( event );
+	}
+	
+	void crit( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.crit, title, text, longText); }
+	void error( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.error, title, text, longText); }
+	void warn( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.warn, title, text, longText); }
+	void info( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.info, title, text, longText); }
+	void dbg( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.dbg, title, text, longText); }
+	void trace( string file = __FILE__, int line = __LINE__/*, string func = __FUNCTION__*/ )
+		(string title, string text = null, string longText = null)
+	{	log!(file, line)(EventType.trace, title, text, longText); }
 	
 }
 
 void main()
 {	import std.stdio;
 	
-	auto logger = new FileLogger(stdout, stdout, LogLevel.errors);
-	auto entry = LogEntry(EntryType.error, "Абсолютно неизвестная ошибка");
-	logger.log(LogEntry(EntryType.error, "Абсолютно неизвестная ошибка"));
-	
-	
+	auto logger = new FileLogger(stdout, stdout, LogLevel.error);
+	logger.warn("Абсолютно неизвестная ошибка", "Произошла страшно непонятная ошибка!!!");
 	
 }
