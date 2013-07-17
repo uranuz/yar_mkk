@@ -2,6 +2,7 @@ module webtank.net.authentication;
 
 import std.conv;
 
+import webtank.common.log;
 import webtank.net.cookies;
 import webtank.db.postgresql;
 
