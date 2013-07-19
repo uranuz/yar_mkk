@@ -10,7 +10,6 @@
 ./net/cookies.d
 ./net/application.d
 ./common/conv.d
-./common/log.d
 ./db/datctrl_joint.d
 ./db/database.d
 ./db/postgresql.d
