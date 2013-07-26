@@ -86,6 +86,30 @@ string[string] parseURIQuery2(string queryStr)
 }
 
 
+dstring[][dstring] parseURIQuery2Array(dstring queryStr)
+{	dstring[][dstring] result;
+	size_t LexStart = 0;
+	dstring curKey;
+	dstring curValue;
+	for( size_t i = 0; i < queryStr.length; ++i )
+	{	if( queryStr[i] == '=' )
+		{	curKey = queryStr[LexStart..i].idup;
+			curValue = null;
+			LexStart = i+1;
+		}
+		if( (queryStr[i] == '&') || (i+1 == queryStr.length) )
+		{	curValue = queryStr[ LexStart .. (i+1 == queryStr.length) ? ++i : i ].idup;
+			if( curKey.length > 0)
+			{	result[curKey] ~= curValue;
+			}
+			curKey = null;
+			LexStart = i+1;
+		}
+	}
+	return result;
+}
+
+
 unittest
 {	string Query="ff=adfggg&text_inp1=kirpich&text_inp2=another_text&opinion=kupi_konya";
 	string[string] Res=parseURIQuery(Query);
@@ -99,6 +123,16 @@ string[string] extractURIData(string queryStr)
 {	string[string] result;
 	foreach( key, value; parseURIQuery2( queryStr ) )
 		result[ std.uri.decodeComponent(key) ] = std.uri.decodeComponent(value);
+	return result;
+}
+
+string[string] extractURIDataArray(string queryStr)
+{	string[string] result;
+	foreach( key, values; parseURIQuery2Array( queryStr ) )
+	{	string decodedKey = std.uri.decodeComponent(key);
+		foreach( val; values )
+			result[ decodedKey ] ~= std.uri.decodeComponent(val);
+	}
 	return result;
 }
 

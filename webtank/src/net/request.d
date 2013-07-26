@@ -10,6 +10,9 @@ protected:
 	string[string] _POST;
 	string[string] _GET;
 	string _stdInputStr;
+	
+	string[][string] _POSTArray;
+	string[][string] _GETArray;
 public:
 	this()
 	{	_cookies = getCookies(); 
@@ -30,6 +33,12 @@ public:
 		return _POST;
 	}
 	
+	string[][string] postVarsArray() @property
+	{	if( _POSTArray.length <= 0 )
+			_POSTArray = extractURIDataArray( _getStdInput() );
+		return _POSTArray;
+	}
+	
 	//Некоторые данные из HTTP-заголовков запроса к приложению
 	immutable(string) referer;
 	immutable(string) host;
@@ -41,6 +50,13 @@ public:
 		if( _GET.length <= 0 )
 			_GET = extractURIData( getenv("QUERY_STRING") );
 		return _GET;
+	}
+	
+	string[][string] queryVarsArray() @property
+	{	import std.process;
+		if( _GETArray.length <= 0 )
+			_GETArray = extractURIDataArray( getenv("QUERY_STRING") );
+		return _GETArray;
 	}
 	
 protected:
