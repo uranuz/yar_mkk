@@ -1,25 +1,36 @@
-import std.socket, std.string, std.conv, std.stdio, /*std.concurrency,*/ core.thread;
+import std.socket, std.string, std.conv, std.stdio, std.datetime, /*std.concurrency,*/ core.thread;
+
+// class TimeoutException: Exception
+// {	
+// 	
+// }
 
 class WorkingThread: Thread
 {
 public:
 	this(Socket socket)
 	{	_sock = socket;
-		super(&processRequest);
+		super(&_run);
 	};
 	
-	void run()
-	{	this.start();
-	}
+	
+	
+	SysTime startTime() @property
+	{	return _startTime; }
 
 private:
 	Socket _sock;
 
 	string _content;
 	string[string] _headerAttributes;
+	SysTime _startTime;  //Время запуска нити исполнения
 	
+	void _run()
+	{	_startTime = Clock.currTime(); //Определяем время запуска нити исполнения
+		_processRequest();  
+	}
 	
-	void processHeaders()
+	void _processHeaders()
 	{	size_t bytesRead;
 		char[] headerBuf;
 		headerBuf.length = 1024;
@@ -106,9 +117,9 @@ private:
 		return "text/plain";
 	}
 	
-	void processRequest()
+	void _processRequest()
 	{	
-		processHeaders();
+		_processHeaders();
 		
 		import std.file, std.stdio;
 		string fileRootDir = "/home/test_serv/sites/test/www";
@@ -116,7 +127,7 @@ private:
 		
 		string fullFileName = fileRootDir ~ _headerAttributes["HTTP_PATH"];
 		string fileContent;
-		string MIMEType;
+		string MIMEType = "text/html";
 		string HTTPStatus = "200 OK";
 // 		
 // 		if( std.file.exists(fullFileName) )
@@ -131,7 +142,10 @@ private:
 
 // 		_content = fileContent;
 
-		_content = "<html><body><table border=1><tr><th>Имя</th><th>Значение</th></tr>";
+		_content = "<html><head>"
+		~ `<meta name="google-site-verification" content="_zeDp8DaxCac1bXRAc2NPmVNNWhO5z0Yrfzs70QLITE" />`
+		~ `<meta name='yandex-verification' content='4173c2c1fae1a68c' />`
+		~ "</head><body><table border=1><tr><th>Имя</th><th>Значение</th></tr>";
 // 		_content ~= "<tr><td>HTTP_METHOD</td><td>" ~ HTTPMethod ~ "</td></tr>";
 // 		_content ~= "<tr><td>URI_PATH</td><td>" ~ URIPath ~ "</td></tr>";
 // 		_content ~= "<tr><td>HTTP_VER</td><td>" ~ HTTPVersionStr ~ "</td></tr>";
@@ -161,36 +175,163 @@ private:
 	}
 
 }
+
+class ListenningThread: Thread
+{	
+	this(std.socket.Address addr, ThreadManager threadManager)
+	{	super(&_listen);
+		_address = addr;
+		_threadManager = threadManager;
+	};
+	
+
+protected:
+	std.socket.Address _address;
+	ThreadManager _threadManager;
+
+	void _listen()
+	{	Socket listener = new TcpSocket;
+		scope(exit) 
+		{	listener.shutdown(SocketShutdown.BOTH);
+			listener.close();
+		}
+		assert(listener.isAlive);
+		listener.bind(_address);
+		listener.listen(1);
+		
+		while(true) 
+		{	if(_threadManager.isStopped) return; //Завершение приёма соединений
+		
+			while( _threadManager.isPaused )  //Приостанавливаем прием соединений
+				this.sleep( dur!("seconds")( 3 ) );
+			
+			Socket currSock = listener.accept(); //Принимаем соединение
+			_threadManager.startThread( new WorkingThread(currSock) );
+		}
+	}
+}
+
+
+immutable workingThreadLimit = 150;
+
+class ThreadManager: Thread
+{	
+	this()
+	{	super(&_watch);
+	};
+	
+	void startThread(WorkingThread workThread)
+	{	synchronized (this) 
+		{	if( (_workingThreads.length < workingThreadLimit) && !_isPaused && !_isStopped ) //Проверяем предельное число потоков
+			{	_workingThreads ~= workThread;
+				workThread.start();
+			}
+		}
+	}
+	
+	void pause()
+	{	synchronized(this)
+			_isPaused = true;
+	}
+	
+	void resume()
+	{	synchronized(this)
+			_isPaused = false;
+	}
+	
+	bool isPaused() @property
+	{	synchronized(this)
+			return _isPaused;
+	}
+	
+	void stop()
+	{	synchronized(this)
+			_isStopped = true;
+	}
+	
+	bool isStopped() @property
+	{	synchronized(this)
+			return _isStopped;
+	}
+	
+protected:
+	WorkingThread[] _workingThreads;
+	bool _isPaused = false; //Обрабатываем соединения или нет?
+	bool _isStopped = false;
+	
+	void _watch()
+	{		
+		while(1) 
+		{	if(_isStopped)
+			{	//Присоединяем все потоки
+				//Выходим из функции
+				foreach( th; _workingThreads )
+					th.join();
+				return; //Останов обработки
+			}
+			this.sleep( dur!("seconds")( 5 ) );
+		
+			WorkingThread[] updatedWorkingThreads;
+			foreach( th; _workingThreads )
+			{	if( th.isRunning() )
+				{	_workingThreads ~= th;
+				}
+			}
+			_workingThreads.length = 0;
+			_workingThreads = updatedWorkingThreads;
+		}
+	}
+}
+	
+
 	
 void main() {
+	//Основной поток - поток управления потоками
 	
-	ushort port = 8082;
-	auto address = new InternetAddress(port);
-	Socket listener = new TcpSocket;
-	assert(listener.isAlive);
-	listener.bind(address);
-	listener.listen(1);
+	/**
+	Какие нужны в принципе потоки, если исходить из работы на потоках?
+	 - Нужен слушающий поток, который будет прослушивать порт на предмет входящих соединений
+	   и запускать рабочие потоки
+	 - Нужны рабочие потоки, которые будут обрабатывать запросы пользователей и отвечать им
+	 - Нужен поток мониторинга рабочих потоков, который будет следить за их состоянием
+	 - Можно выделить поток логирования (или даже в отдельный процесс)
+	 - Можно выделить поток загрузки ресурсов, кэширования и управления кэшем ресурсов
 	
-// 	WorkingThread[] threads;
+	Вопрос: что из этого, возможно, лучше выделить в отдельные процессы для простоты или надежности?
+	*/
 
-	while(1) 
+	auto thManager = new ThreadManager;
+	thManager.start();
+	scope(exit) thManager.join();
+	
+	ushort port = 8085;
+	
+	auto listenThread = new ListenningThread( new InternetAddress(port), thManager );
+	listenThread.isDaemon = true;
+	listenThread.start();
+// 	scope(exit) listenThread.join();
+	
+	
+	while(true)
 	{	
-		
-		Socket currSock = listener.accept();
-		auto th = new WorkingThread(currSock);
-// 		threads ~= new WorkingThread(/+currSock+/);
-		th.run();
-// 		threads[$-1].run();
-		
-// 		if( threads.length >= 20 )
-// 		{	for( size_t i = 0; i < 20; i++)
-// 			{	threads[i].join();
-// 				delete threads[i];
-// 			}
-// 			threads.length = 0;
-// 		}
-		
-// 		listener.shutdown(SocketShutdown.BOTH);		
+		string buf = readln();
+		if( buf == "pause\n" )
+		{	writeln("Приостанавливаем обработку соединений");
+			thManager.pause() ;
+		}
+		else if( buf == "resume\n" )
+		{	writeln("Запускаем обработку соединений");
+			thManager.resume();
+		}
+		else if( buf == "stop\n" )
+		{	writeln("Останавливаем сервер");
+			thManager.stop();
+			return;
+		}
+		//Закрываем потоки
+		//Блокируем запуск новых рабочих потоков
+		//Посылаем сообщения старым рабочим потокам о закрытии
+		//Посылаем сообщения служебным потокам о закрытии
 	}
 }
 
