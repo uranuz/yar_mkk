@@ -23,7 +23,7 @@ void netMain(Application netApp)  //Определение главной фун
 	if( "filter" in rq.postVars ) 
 		filter = rq.postVars.get("filter", "");
 		
-	string js_file = "../../mkk_site/js/page_view.js";
+	string js_file = "../../js/page_view.js";
 	
 	rp ~= 
 `<html><body>
