@@ -1,6 +1,7 @@
 module mkk_site.full_test;
 
 import std.conv;
+import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type;
 import webtank.db.postgresql;
@@ -11,7 +12,9 @@ import webtank.net.application;
 import webtank.templating.plain_templater;
 
 
+
 immutable(string) projectPath = `/webtank`;
+immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";
 
 Application netApp; //Обявление глобального объекта приложения
 
@@ -33,18 +36,24 @@ void netMain(Application netApp)  //Определение главной фун
 	string js_file = "../../js/page_view.js";
 	
 	//Создаём подключение к БД
-	string connStr = "dbname=baza_MKK host=192.168.0.72 user=postgres password=postgres";
+	string connStr = "dbname=baza_MKK host=localhost user=postgres password=postgres";
 	auto dbase = new DBPostgreSQL(connStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 	
 	
-	string fem = ( ( "fem" in rq.postVars ) ? rq.postVars["fem"] : "" ) ; 
-	uint limit = 10;
+	string fem = ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ; 
+	
+	try { //Логирование запросов к БД для отладки
+	std.file.append( LogFile, 
+		"--------------------\r\n"
+		"Фамилия: " ~ fem ~ "\r\n"
+	);
+	} catch(Exception) {}
+	uint limit = 10;// максимальное  чмсло строк на странице
 	int page;
-	
-	
-	auto col_str_qres = cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where`);
+	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist` ):
+	cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
@@ -56,18 +65,23 @@ void netMain(Application netApp)  //Определение главной фун
 		if( "cur_page_num" in rq.postVars )
  			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
-	string filter = "";  //Фильтр поиска
-	if( "filter" in rq.postVars ) 
-		filter = rq.postVars.get("filter", "");
-	
+
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
 	
 	
 	string content = 
 	`<form id="main_form" method="post">
-		Фамилия: <input name="filter" type="text" value="` ~ filter ~ `">
+		Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
 		<input type="submit" name="act" value="Найти"><br>`;
+	
+	try { //Логирование запросов к БД для отладки
+		std.file.append( LogFile, 
+			"--------------------\r\n"
+			"Количество записей: " ~ col_str.to!string ~ "\r\n"
+			"Текущий номер страницы: "~ curPageNum.to!string ~ ", всего страниц: " ~ pageCount.to!string ~ "\r\n"
+		);
+	} catch(Exception) {}
 	
 	
 	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
@@ -98,7 +112,7 @@ void netMain(Application netApp)  //Определение главной фун
 	}
 	
 	string queryStr;
-	if( filter.length == 0 )
+	if( fem.length == 0 )
 	
 		queryStr=`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
@@ -126,11 +140,11 @@ void netMain(Application netApp)  //Определение главной фун
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist WHERE family_name='` ~ filter ~`'  order by num `;   
+		   ` comment from tourist WHERE family_name='` ~ fem ~`'  order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	string table = `<table>`;
+	string table = `<table border="1">`;
 	table ~= `<tr>`;
 	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`; 
 	foreach(rec; rs)
@@ -162,11 +176,11 @@ void netMain(Application netApp)  //Определение главной фун
 	auto tpl = new PlainTemplater( templateStr );
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	//Задаём местоположения всяких файлов
-	tpl.set("img folder", "../../mkk_site/img/");
-	tpl.set("css folder", "../../mkk_site/css/");
+	tpl.set("img folder", "../../img/");
+	tpl.set("css folder", "../../css/");
 	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
 	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", "../../mkk_site/js/");
+	tpl.set("js folder", "../../js/");
 	
 	output ~= tpl.getResult(); //Получаем результат обработки шаблона с выполненными подстановками
 	}
