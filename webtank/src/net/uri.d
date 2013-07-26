@@ -109,6 +109,17 @@ dstring[][dstring] parseURIQuery2Array(dstring queryStr)
 	return result;
 }
 
+string[][string] parseURIQuery2Array(string queryStr)
+{	string[][string] result;
+	import std.utf;
+	foreach( key, values; parseURIQuery2Array( toUTF32(queryStr) ) )
+	{	string decodedKey = toUTF8(key);
+		foreach( val; values )
+			result[ decodedKey ] ~= toUTF8(val);
+	}
+	return result;
+}
+
 
 unittest
 {	string Query="ff=adfggg&text_inp1=kirpich&text_inp2=another_text&opinion=kupi_konya";
@@ -126,8 +137,8 @@ string[string] extractURIData(string queryStr)
 	return result;
 }
 
-string[string] extractURIDataArray(string queryStr)
-{	string[string] result;
+string[][string] extractURIDataArray(string queryStr)
+{	string[][string] result;
 	foreach( key, values; parseURIQuery2Array( queryStr ) )
 	{	string decodedKey = std.uri.decodeComponent(key);
 		foreach( val; values )

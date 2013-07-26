@@ -41,9 +41,10 @@ void netMain(Application netApp)  //Определение главной фун
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 	
+	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
 	
 	string fem = ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ; 
-	
+
 	try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"

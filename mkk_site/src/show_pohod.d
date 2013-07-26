@@ -2,7 +2,7 @@ module mkk_site.show_pohod;
 
 import std.stdio;
 import std.conv;
-
+import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
 import webtank.datctrl.field_type;
 import webtank.db.postgresql;
@@ -51,13 +51,25 @@ void netMain(Application netApp)  //Определение главной фун
 		
 		
 		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ; 
-		string ks = ( ( "ks" in rq.postVars ) ? rq.postVars["ks"] : "" ) ; 
+		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; 
 		string dat1 = ( ( "begin_data3" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
 		            ~ ( ( "begin_data2" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
 		            ~ `01`; 
 	   string dat2 = ( ( "begin_data6" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
 		            ~ ( ( "begin_data5" in rq.postVars ) ? rq.postVars["begin_data5"] : "01" )~`-`
 		            ~ `01`; 
+		  auto long_ks= ks.length;         
+		string all_ks;
+		foreach( kkkk; ks )
+			all_ks ~= kkkk;
+		            
+		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
+		   try { //Логирование запросов к БД для отладки
+	std.file.append( LogFile, 
+		"--------------------\r\n"
+		"ks " ~ long_ks.to!string ~"  "~ all_ks ~ "\r\n"
+	);
+	} catch(Exception) {}         
 		
 		// Запрос на число строк
 	//	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from pohod` ):
@@ -147,13 +159,13 @@ group by num
 	  tablefiltr ~= `</td>`;
 	       
 	      
-	      
-	      
+	 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу     
+	     
 	      
 	tablefiltr ~=` <td> "Категория сложности"</td>
 	
 	<td>
-	     <select name="ks[]" size="3" multiple>
+	     <select name="ks" size="3" multiple>
 	     <option value='' selected></option>
 	     <option value='н.к.'selected >н.к.</option>
 	     <option value='первая'selected >первая </option>
