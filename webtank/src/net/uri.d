@@ -54,6 +54,7 @@ string[string] parseURIQuery(string queryStr)
 
 dstring[dstring] parseURIQuery2(dstring queryStr)
 {	dstring[dstring] result;
+	//dstring[][dstring] result;
 	size_t LexStart = 0;
 	dstring curKey;
 	dstring curValue;
@@ -66,7 +67,9 @@ dstring[dstring] parseURIQuery2(dstring queryStr)
 		if( (queryStr[i] == '&') || (i+1 == queryStr.length) )
 		{	curValue = queryStr[ LexStart .. (i+1 == queryStr.length) ? ++i : i ].idup;
 			if( curKey.length > 0)
-			{	result[curKey] = curValue; }
+			{	result[curKey] = curValue; 
+				//result[curKey] ~= curValue;
+			}
 			curKey = null;
 			LexStart = i+1;
 		}

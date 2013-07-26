@@ -35,10 +35,36 @@ void netMain(Application netApp)  //Определение главной фун
 	string js_file = "../../js/page_view.js";
 	
 	//Создаём подключение к БД
-	string connStr = "dbname=baza_MKK host=192.168.0.72 user=postgres password=postgres";
+	string connStr = "dbname=baza_MKK host=localhost user=postgres password=postgres";
 	auto dbase = new DBPostgreSQL(connStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
+		
+		string [10] v=["", "пеший","лыжный","горный","водный","велосипедный","автомото","спелео","парусный","конный" ];
+		// виды туризма
+		
+		
+		string [9] k=["", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
+		// категории сложности
+		
+		 
+		
+		
+		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ; 
+		string ks = ( ( "ks" in rq.postVars ) ? rq.postVars["ks"] : "" ) ; 
+		string dat1 = ( ( "begin_data3" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
+		            ~ ( ( "begin_data2" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
+		            ~ `01`; 
+	   string dat2 = ( ( "begin_data6" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
+		            ~ ( ( "begin_data5" in rq.postVars ) ? rq.postVars["begin_data5"] : "01" )~`-`
+		            ~ `01`; 
+		
+		// Запрос на число строк
+	//	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from pohod` ):
+	//cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
+	
+		uint limit = 10;// максимальное  чмсло строк на странице
+	   int page;
 	
 	
 	try {
@@ -52,7 +78,12 @@ void netMain(Application netApp)  //Определение главной фун
 	);
 	}
 	
-	//SELECT num, femelu, neim, otchectv0, brith_date, god, adrec, telefon, tel_viz FROM turistbl;
+
+	
+	
+	
+	
+	
 	string queryStr = 
 	`with 
 tourist_nums as (
@@ -99,7 +130,83 @@ group by num
 	
 	//uint aaa = cast(uint) rs.recordCount;
 	//output ~= aaa.to!string;
-		string table = `<table>`;
+	
+	
+	string tablefiltr = `  <form id="main_form" method="post">
+	<table border="1" >`;
+	
+	tablefiltr ~=`<tr> <td> "Вид туризма" </td> 
+	     <td>
+	     <select name="vid" size="1">`;
+// 	     foreach( i; 0..10 )
+	     for( int i=0; i<10;i++)
+	     tablefiltr ~=`<option value="`~v[i] ~`"`~
+	     ( ( v[i]==vid ) ? " selected": "" )//если условие выполняется возвращается(вклеивается) selected
+	     ~`>`~v[i]~`</option>`;
+	     
+	  tablefiltr ~= `</td>`;
+	       
+	      
+	      
+	      
+	      
+	tablefiltr ~=` <td> "Категория сложности"</td>
+	
+	<td>
+	     <select name="ks[]" size="3" multiple>
+	     <option value='' selected></option>
+	     <option value='н.к.'selected >н.к.</option>
+	     <option value='первая'selected >первая </option>
+	     <option value='вторая' >вторая</option>
+	     <option value='третья' >третья</option>
+	     <option value='четвёртая' >четвёртая</option>
+	     <option value='пятая' >пятая</option>
+	     <option value='шестая' >шестая</option>
+	     <option value='путешествие' >путешествие</option>
+	         
+	          < /select >
+	      </td> 
+	</tr>`;
+	tablefiltr ~=`<tr> <td> "Время начала похода ( с)" </td>
+	<td>
+	 
+	 <input neim="begin_data2" type="text" value="" size="2" maxlength="2"> месяц
+	 <input neim="begin_data3" type="text" value="" size="4" maxlength="4"> год
+	</td>  `;
+	tablefiltr ~=`<td> "Время начала похода ( по)" </td>  
+	<td>
+	 
+	 <input neim="begin_data5" type="text" value="" size="2" maxlength="2"> месяц
+	 <input neim="begin_data6" type="text" value="" size="4" maxlength="4"> год 
+	</td> </tr>`;
+	
+	  tablefiltr ~= `</table>`;
+	  //------------------------------------кнопки-----------------------------------
+	 string buton= `
+	
+	 
+	 <input width="2000"type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;">
+	                
+	 </form> 
+	 
+	 
+	     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	            <form id="main_form" method="post">
+	            
+	            
+	                <input width="2000"type="submit" neim="button2" value="Показать всё">
+	                <input neim="vid" type="hidden" value="">
+	                <input neim="ks[]" type="hidden" value="">
+	                <input neim="begin_data2" type="hidden" value="">
+	                <input neim="begin_data3" type="hidden" value="">
+	                <input neim="begin_data5" type="hidden" value="">
+	                <input neim="begin_data6" type="hidden" value="">
+	               
+	                
+	             </form>   
+	                `;
+	            
+		string table = `<table border="1">`;
 		
 		table ~= `<td>"Ключ"</td><td> "Номер"</td><td> "Сроки <br> похода"</td><td> "Вид, кс"</td><td>"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td> "Нитка маршрута"</td><td>"Статус<br> похода"</td>`;
 	foreach(rec; rs)
@@ -126,6 +233,8 @@ group by num
 	}
 	table ~= `</table>`;
 	
+	string content = tablefiltr ~`<p>&nbsp</p>`~buton~`<p>&nbsp</p>`~table; //Тобавляем таблицу с данными к содержимому страницы
+	
 	//Чтение шаблона страницы из файла
 	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
 	import std.stdio;
@@ -137,13 +246,13 @@ group by num
 		
 	//Создаем шаблон по файлу
 	auto tpl = new PlainTemplater( templateStr );
-	tpl.set( "content", table ); //Устанваливаем содержимое по метке в шаблоне
+	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	//Задаём местоположения всяких файлов
-	tpl.set("img folder", "../../mkk_site/img/");
-	tpl.set("css folder", "../../mkk_site/css/");
+	tpl.set("img folder", "../../img/");
+	tpl.set("css folder", "../../css/");
 	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
 	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", "../../mkk_site/js/");
+	tpl.set("js folder", "../../js/");
 	
 	output ~= tpl.getResult(); //Получаем результат обработки шаблона с выполненными подстановками
 	}
