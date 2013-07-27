@@ -18,7 +18,7 @@ void main() {
 	Вопрос: что из этого, возможно, лучше выделить в отдельные процессы для простоты или надежности?
 	*/
 
-	ushort port = 8085;
+	ushort port = 8082;
 	
 	Socket listener = new TcpSocket;
 	scope(exit) 
@@ -32,9 +32,9 @@ void main() {
 	
 	while(true)
 	{	Socket currSock = listener.accept(); //Принимаем соединение
-		_connHandler = new HTTPConnectionHandler(socket);
+		writeln("Принято!");
+		auto _connHandler = new HTTPConnectionHandler(currSock);
 		auto th = new Thread(&_connHandler.run);
-		th.isDaemon = true;
 		th.start();
 	}
 }

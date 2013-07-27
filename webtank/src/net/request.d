@@ -21,7 +21,7 @@ public:
 		messageBody = messageBodyParam;
 		
 		
-		queryString = separateQuery( headers["request-uri"] )
+		queryString = separateQuery( headers["request-uri"] );
 		_cookies = new RequestCookies( headers["cookie"] );
 		referer = headers["referer"];
 		host = headers["host"];
@@ -41,7 +41,7 @@ public:
 	
 	string[][string] postVarsArray() @property
 	{	if( _POSTArray.length <= 0 )
-			_POST = extractURIDataArray( messageBody );
+			_POSTArray = extractURIDataArray( messageBody );
 		return _POSTArray;
 	}
 	

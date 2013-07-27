@@ -57,9 +57,12 @@ protected:
 	}
 	
 	string _getHeaderStr()
-	{	return 
-			_getCustomHeaderStr()
+	{	import std.conv;
+		return 
+			"HTTP/1.0 200 OK"
+			~ _getCustomHeaderStr()
 			~ _cookies.getResponseStr() 
-			~ "Content-type: text/html; charset=\"utf-8\" \r\n\r\n"; 
+			~ "Content-Length: " ~ std.conv.to!string(_respBody.length) ~ "\r\n"
+			~ "Content-type: text/html; charset=\"utf-8\"\r\n\r\n"; 
 	}
 }

@@ -1,16 +1,15 @@
 module webtank.net.connection_handler;
 
-import std.conv;
+import std.conv, std.stdio;
 
-import webtank.net.application, webtank.net.uri, webtank.net.http_headers;
-
-IConnectionHandler connectionHandler;
+import webtank.net.application, webtank.net.uri, webtank.net.http_headers, 
+webtank.net.request, webtank.net.response;
 
 alias void function(Application) handlerFuncType;
 
 interface IConnectionHandler
 {	
-	void setHandler(handlerFuncType connHandler, string path);
+	//static void setHandler(handlerFuncType connHandler, string path);
 	void write(string message);
 	void run();
 	void finalize();
@@ -21,20 +20,20 @@ class HTTPConnectionHandler: IConnectionHandler
 	import std.socket;
 	this(Socket socket)
 	{	_socket = socket;
-		connectionHandler = this;
 	}
 
-	override {
-		void setHandler(handlerFuncType connHandler, string path)
+	
+		static void setHandler(handlerFuncType connHandler, string path)
 		{	if( path in _handlerFunctions )
 				assert(0, "Обработчик для пути: '" ~ path ~ "' уже зарегистрирован!!!");
 			else
 				_handlerFunctions[path] = connHandler;
 		}
 		
+	override {
 		//Выводит данные в сокет
 		void write(string message)
-		{	_socket.sendTo(message):
+		{	_socket.sendTo(message);
 		}
 		
 		void run()
@@ -43,7 +42,7 @@ class HTTPConnectionHandler: IConnectionHandler
 			headerBuf.length = 1024;
 			
 			//Читаем из сокета в буфер
-			bytesRead = _sock.receive(headerBuf);
+			bytesRead = _socket.receive(headerBuf);
 			//TODO: Проверить сколько байт прочитано
 			
 			auto headers = new HTTPHeaders(headerBuf.idup);
@@ -51,9 +50,19 @@ class HTTPConnectionHandler: IConnectionHandler
 			string path;
 			if( headers["request-uri"] !is null )
 			{	path = separatePath( headers["request-uri"] );
+				writeln(path);
 			}
 			
-			if( path !in _handlerFunctions ) return;
+			if( path !in _handlerFunctions ) 
+			{	string content = "<h2>Ошибка 404!!!</h1><br><h3>Запрашиваемый ресурс не найден!!!</h3>";
+				string webpage = "HTTP/1.0 404 Not Found\r\n"
+				~ "Content-Length: " ~ content.length.to!string ~ "\r\n"
+				~ "Content-type: text/html; charset=\"utf-8\"\r\n\r\n"
+				~ content;
+				_socket.sendTo(webpage);
+				finalize();
+				return;
+			}
 			
 			//Определяем длину тела запроса
 			size_t contentLength = 0;
@@ -69,7 +78,7 @@ class HTTPConnectionHandler: IConnectionHandler
 			//Нужно определить сколько ещё нужно прочитать
 			if( contentLength > extraBytesInHeaderBuf )
 			{	bodyBuf.length = contentLength - extraBytesInHeaderBuf;
-				_sock.receive(bodyBuf);
+				_socket.receive(bodyBuf);
 				messageBody = headers.extraData ~ bodyBuf.idup;
 			}
 			else
@@ -81,9 +90,12 @@ class HTTPConnectionHandler: IConnectionHandler
 			auto app = new Application( _handlerFunctions[path] );
 			app.request = new Request( headers, messageBody );
 			app.response = new Response( &this.write );
-			
+// 			writeln("Перед app.run();");
 			app.run(); //Запускаем объект
+// 			writeln("Перед app.finalize();");
 			app.finalize(); //Завершаем объект
+// 			writeln("После app.finalize();");
+			finalize();
 		}
 		
 		void finalize()
@@ -94,7 +106,7 @@ class HTTPConnectionHandler: IConnectionHandler
 	}
 		
 protected:
-	immutable(handlerFuncType[string]) _handlerFunctions;
+	static handlerFuncType[string] _handlerFunctions;
 	Socket _socket;
 }
 

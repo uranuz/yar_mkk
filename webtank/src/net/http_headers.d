@@ -130,7 +130,7 @@ protected:
 		_pos = 0;
 		_headersFinished = false;
 		_headers = null;
-		_headerLength = 0;
+		_headersLength = 0;
 		_currLineStart = 0;
 		_parsedLinesCount = 0;
 	}

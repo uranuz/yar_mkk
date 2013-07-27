@@ -1,9 +1,9 @@
 module webtank.net.application; 
 
-import webtank.net.http_headers, 
+import webtank.net.http_headers;
 import webtank.net.request;
 import webtank.net.response;
-import webtank.net.authentication;
+//import webtank.net.authentication;
 
 class Application
 {
