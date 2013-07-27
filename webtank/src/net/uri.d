@@ -5,6 +5,20 @@ import std.exception;
 import std.uri;
 import std.utf;
 
+string separateQuery(const string URIString)
+{	for( size_t i = 0; i < URIString.length; i++ )
+		if( URIString[i] == '?' ) 
+			return URIString[i+1..$].idup;
+	return null;
+}
+
+string separatePath(const string URIString)
+{	for( size_t i = 0; i < URIString.length; i++ )
+		if( URIString[i] == '?' ) 
+			return URIString[0..i].idup;
+	return URIString;
+}
+
 
 //Эта функция принимает строку похожую на URI-запрос и анализирует. Результат 
 //возращается в ассоциативный массив типа  значение[ключ]. Осторожно, функция 

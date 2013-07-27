@@ -79,8 +79,8 @@ string[string] parseRequestCookieStr(string cookieStr)
 	return result;
 }
 
-RequestCookies getCookies()
-{	import std.process;
-	return new RequestCookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
-	
-}
+// RequestCookies getCookies()
+// {	import std.process;
+// 	return new RequestCookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
+// 	
+// }

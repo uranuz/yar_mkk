@@ -10,8 +10,10 @@ protected:
 	string[] _headers;
 	ResponseCookies _cookies; //Куки в ответ
 public:
-	this()
-	{	_cookies = new ResponseCookies; }
+	this( void delegate(string) write )
+	{	_cookies = new ResponseCookies; 
+		_write = write;
+	}
 	
 	//Записывает данные в буфер для отдачи
 	void write(string str)
@@ -31,10 +33,12 @@ public:
 	void addHeader(string header)
 	{	_headers ~= header; }
 	
-	void _submit()
-	{	import std.stdio;
-		string responseStr = _getHeaderStr() ~ _respBody;
-		std.stdio.write( responseStr );
+	void flush()
+	{	if( !_headersSent ) 
+		{	_headersSent = true;
+			_write( _getHeaderStr() );
+		}
+		_write( _respBody );
 	}
 	
 	//Куки ответа приложения (в них только пишем)
@@ -42,6 +46,9 @@ public:
 	{	return _cookies; }
 
 protected:
+	void delegate(string) _write;
+	bool _headersSent = false;
+	
 	string _getCustomHeaderStr()
 	{	string result;
 		foreach(header; _headers)

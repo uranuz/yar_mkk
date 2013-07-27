@@ -1,7 +1,6 @@
 module webtank.net.application; 
 
-import webtank.net.cookies;
-import webtank.net.uri;
+import webtank.net.http_headers, 
 import webtank.net.request;
 import webtank.net.response;
 import webtank.net.authentication;
@@ -15,9 +14,6 @@ protected:
 public:
 	this( AppMainT appMain )
 	{	_appMain = appMain; 
-		response = new Response;
-		request = new Request;
-		auth = new Authentication;
 	}
 
 	void run()  //Функция запуска приложения
@@ -38,10 +34,8 @@ public:
 		}
 	}
 	void finalize()
-	{	response._submit();
+	{	response.flush();
 	}
-	string name;
 	Request request;
 	Response response;
-	Authentication auth;
 }
