@@ -1,8 +1,7 @@
 ./net/uri.d
 ./net/response.d
-./net/connection_handler.d
 ./net/request.d
-./net/cookies.d
+./net/http_cookie.d
 ./net/application.d
 ./net/http_headers.d
 ./net/web_server.d

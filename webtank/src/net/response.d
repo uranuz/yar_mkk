@@ -1,17 +1,16 @@
 module webtank.net.response;
 
-import webtank.net.cookies;
-import webtank.net.uri;
+import webtank.net.http_cookie, webtank.net.uri;
 
 class Response  //Ответ от нашего приложения
 {
 protected:
 	string _respBody = "";
 	string[] _headers;
-	ResponseCookies _cookies; //Куки в ответ
+	ResponseCookie _cookie; //Куки в ответ
 public:
 	this( void delegate(string) write )
-	{	_cookies = new ResponseCookies; 
+	{	_cookie = new ResponseCookie; 
 		_write = write;
 	}
 	
@@ -42,8 +41,8 @@ public:
 	}
 	
 	//Куки ответа приложения (в них только пишем)
-	ResponseCookies cookies() @property
-	{	return _cookies; }
+	ResponseCookie cookie() @property
+	{	return _cookie; }
 
 protected:
 	void delegate(string) _write;
@@ -61,7 +60,7 @@ protected:
 		return 
 			"HTTP/1.0 200 OK"
 			~ _getCustomHeaderStr()
-			~ _cookies.getResponseStr() 
+			~ _cookie.getResponseStr() 
 			~ "Content-Length: " ~ std.conv.to!string(_respBody.length) ~ "\r\n"
 			~ "Content-type: text/html; charset=\"utf-8\"\r\n\r\n"; 
 	}

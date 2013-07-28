@@ -1,7 +1,6 @@
 module webtank.net.request;
 
-import webtank.net.cookies;
-import webtank.net.uri, webtank.net.http_headers;
+import webtank.net.http_cookie, webtank.net.uri, webtank.net.http_headers;
 
 // version = cgi_script;
 
@@ -9,7 +8,7 @@ class Request  //Запрос к нашему приложению
 {	HTTPHeaders headers;
 
 protected:
-	RequestCookies _cookies; //Куки из запроса
+	RequestCookie _cookie; //Куки из запроса
 	string[string] _POST;
 	string[string] _GET;
 	
@@ -22,15 +21,15 @@ public:
 		
 		
 		queryString = separateQuery( headers["request-uri"] );
-		_cookies = new RequestCookies( headers["cookie"] );
+		_cookie = new RequestCookie( headers["cookie"] );
 		referer = headers["referer"];
 		host = headers["host"];
 		userAgent = headers["user-agent"];
 	}
 	
 	//Получение кукев из запроса (сюда записывать нельзя)
-	RequestCookies cookies() @property
-	{	return _cookies; }
+	RequestCookie cookie() @property
+	{	return _cookie; }
 		
 	//Данные переданные через стандартный ввод (методом POST)
 	string[string] postVars() @property

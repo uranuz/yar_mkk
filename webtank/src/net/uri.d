@@ -1,9 +1,6 @@
 module webtank.net.uri;
 
-import std.string;
-import std.exception;
-import std.uri;
-import std.utf;
+import std.string, std.exception, std.uri, std.utf;
 
 string separateQuery(const string URIString)
 {	for( size_t i = 0; i < URIString.length; i++ )

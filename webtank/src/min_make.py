@@ -27,7 +27,7 @@ all_sources = extra_files + import_files
 #sys.stdout.write("\n\n------------------------------\n")
 #sys.stdout.write( "\n".join( all_sources ) ) #Можно посмотреть список компилируемых файлов
 
-cmd = 'dmd ' + " ".join( all_sources ) + ' -op'
+cmd = 'dmd ' + " ".join( all_sources ) + ' -op -O -release -inline -noboundscheck'
 #Запускаем компиляцию
 import subprocess
 PIPE = subprocess.PIPE

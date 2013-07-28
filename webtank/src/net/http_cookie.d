@@ -1,8 +1,8 @@
-module webtank.net.cookies;
+module webtank.net.http_cookie;
 
 import webtank.net.uri;
 
-class ResponseCookies
+class ResponseCookie
 {	
 protected:
 	string[string] _values;
@@ -52,7 +52,7 @@ public:
 	}
 }
 
-class RequestCookies
+class RequestCookie
 {	
 protected:
 	string[string] _values;
@@ -78,9 +78,3 @@ string[string] parseRequestCookieStr(string cookieStr)
 	}
 	return result;
 }
-
-// RequestCookies getCookies()
-// {	import std.process;
-// 	return new RequestCookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
-// 	
-// }

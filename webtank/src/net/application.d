@@ -1,18 +1,13 @@
 module webtank.net.application; 
 
-import webtank.net.http_headers;
-import webtank.net.request;
-import webtank.net.response;
-//import webtank.net.authentication;
+import webtank.net.request, webtank.net.response;
 
 class Application
 {
 public:
-	alias void function(Application) AppMainT;
-protected:
-	AppMainT _appMain;
-public:
-	this( AppMainT appMain )
+	alias void function(Application) handlerFuncType;
+	
+	this( handlerFuncType appMain )
 	{	_appMain = appMain; 
 	}
 
@@ -38,4 +33,18 @@ public:
 	}
 	Request request;
 	Response response;
+	
+	static void setHandler(handlerFuncType connHandler, string path)
+	{	if( path in _handlerFunctions )
+			assert(0, "Обработчик для пути: '" ~ path ~ "' уже зарегистрирован!!!");
+		else
+			_handlerFunctions[path] = connHandler;
+	}
+	
+	static handlerFuncType getHandler(string path)
+	{	return _handlerFunctions.get( path, null );
+	}
+protected:
+	handlerFuncType _appMain;
+	static handlerFuncType[string] _handlerFunctions;
 }
