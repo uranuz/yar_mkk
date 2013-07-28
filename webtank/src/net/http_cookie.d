@@ -66,6 +66,13 @@ public:
 	string opIndex(string name)
 	{	return _values.get( name, null ); 
 	}
+	
+	string get(string name, string defaultValue)
+	{	return _values.get( name, defaultValue ); 
+	}
+	
+	size_t length() @property
+	{	return _values.length; }
 }
 
 string[string] parseRequestCookieStr(string cookieStr)

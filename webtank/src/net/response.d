@@ -58,7 +58,7 @@ protected:
 	string _getHeaderStr()
 	{	import std.conv;
 		return 
-			"HTTP/1.0 200 OK"
+			"HTTP/1.0 200 OK\r\n"
 			~ _getCustomHeaderStr()
 			~ _cookie.getResponseStr() 
 			~ "Content-Length: " ~ std.conv.to!string(_respBody.length) ~ "\r\n"
