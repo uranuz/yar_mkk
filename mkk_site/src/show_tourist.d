@@ -1,6 +1,6 @@
 module mkk_site.full_test;
 
-import std.conv;
+import std.conv, std.string;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type;
@@ -42,8 +42,8 @@ void netMain(Application netApp)  //Определение главной фун
 		output ~= "Ошибка соединения с БД";
 	
 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
-	
-	string fem = ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ; 
+	//  strip()       Уибират начальные и конечные пробелы   
+	string fem = strip(( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
 
 	try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 

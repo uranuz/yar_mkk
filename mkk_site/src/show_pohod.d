@@ -1,7 +1,7 @@
 module mkk_site.show_pohod;
 
 import std.stdio;
-import std.conv;
+import std.conv, std.string;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
 import webtank.datctrl.field_type;
@@ -47,27 +47,67 @@ void netMain(Application netApp)  //Определение главной фун
 		string [9] k=["", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
 		// категории сложности
 		
-		 
+		//int [string] month =[0:"","январь":1,"февраль":2,"март":3,"апрель":4,"май":5,"июнь":6,
+		     //  "июль":7,"август":8,"сентябрь":9,"октябрь":10,"ноябрь":11,"декабрь":12];
+		     
+		 string[] month =["","январь","февраль","март","апрель","май","июнь",
+		       "июль","август","сентябрь","октябрь","ноябрь","декабрь"];     
+		
+		
 		
 		
 		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ; 
 		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; 
-		string dat1 = ( ( "begin_data3" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
-		            ~ ( ( "begin_data2" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
-		            ~ `01`; 
-	   string dat2 = ( ( "begin_data6" in rq.postVars ) ? rq.postVars["begin_data2"] : "" )~`-`
-		            ~ ( ( "begin_data5" in rq.postVars ) ? rq.postVars["begin_data5"] : "01" )~`-`
-		            ~ `01`; 
-		  auto long_ks= ks.length;         
+		 
+		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );
+		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");
+		string start_dat =s_year ~ s_month; 
+		
+		string s_dat =s_year.to!string ~`-`;		
+		foreach( i, word; month)
+		{	if( s_month == word ) 
+			{	 if(i<10)s_dat ~=`0`;  s_dat ~= i.to!string ~`01`;
+				break;
+			}
+		}
+		 
+	   
+	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" );
+		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
+		string end_dat = e_year ~ e_month;
+		string e_dat;
+		if(e_month!="декабрь")
+		{
+		 e_dat =e_year.to!string ~`-`;		
+		foreach( i, word; month)
+		{	if( e_month == word ) 
+			{	 if(i<10) e_dat ~=`0`;  e_dat ~= (i+1).to!string ~`01`;
+				break;
+			}
+		}
+		}
+		
+		else		 e_dat =(e_year.to!int+1).to!string ~`-01-01`;		
+		
+		
+		
+		
+		//  strip()       Убирает начальные и конечные пробелы   
+		auto long_ks= ks.length;// выдаёт число элементов массива         
 		string all_ks;
-		foreach( kkkk; ks )
-			all_ks ~= kkkk;
+		foreach( kkkk; ks ) all_ks ~= kkkk;// перебирает элемкнты массива
+			 
+			 
+		string nou_filtr; // котроль необходимости фильтрации
+		nou_filtr= s_year ~ e_month ~ s_year ~ s_month ~ vid ~ all_ks;
+		
+		
 		            
 		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
 		   try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"
-		"ks " ~ long_ks.to!string ~"  "~ all_ks ~ "\r\n"
+		"год переменная " ~ s_year~"год окно  "~  all_ks ~ "\r\n"
 	);
 	} catch(Exception) {}         
 		
@@ -75,8 +115,45 @@ void netMain(Application netApp)  //Определение главной фун
 	//	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from pohod` ):
 	//cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
 	
-		uint limit = 10;// максимальное  чмсло строк на странице
-	   int page;
+	
+	
+	
+	uint limit = 2;// максимальное  число строк на странице
+	int page;
+	
+	string select1 =`select count(1) from pohod`;
+	string select2 =`select count(1) from pohod where`;
+	if (vid !="") select2~= ` vid='`~vid~`' `;
+	
+	if (long_ks !=0)  
+	foreach( kkkk; ks ) select2 ~= ` OR  ks='` ~kkkk~`' `;// перебирает элементы массива
+	
+	if ((start_dat !="")||(end_dat =="") ) all_ks ~= ` OR brgin_date>'`~s_dat~`' `;
+	if ((start_dat =="")||(end_dat !="")) all_ks ~= ` OR brgin_date<'`~e_dat~`' `;
+	if ((start_dat =="")||(end_dat =="")) all_ks ~= ` OR (brgin_date<'`~e_dat~`' OR `~`brgin_date>'`~s_dat~`' `;
+	
+	auto col_str_qres = ( nou_filtr.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(select1 ):
+	cast(PostgreSQLQueryResult) dbase.query(select2);
+	
+	
+	
+	
+	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
+	//Количество строк в таблице
+	uint col_str = ( col_str_qres.getValue(0, 0, "0") ).to!uint;
+	
+	uint pageCount = (col_str)/limit+1; //Количество страниц
+	uint curPageNum = 1; //Номер текущей страницы
+	try {
+		if( "cur_page_num" in rq.postVars )
+ 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+	} catch (Exception) { curPageNum = 1; }
+
+	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
+	
+	
+	
+	
 	
 	
 	try {
@@ -144,7 +221,7 @@ group by num
 	//output ~= aaa.to!string;
 	
 	
-	string tablefiltr = `  <form id="main_form" method="post">
+	string tablefiltr = `  <form id="main_form" method="post"  inline >
 	<table border="1" >`;
 	
 	tablefiltr ~=`<tr> <td> "Вид туризма" </td> 
@@ -156,7 +233,7 @@ group by num
 	     ( ( v[i]==vid ) ? " selected": "" )//если условие выполняется возвращается(вклеивается) selected
 	     ~`>`~v[i]~`</option>`;
 	     
-	  tablefiltr ~= `</td>`;
+	  tablefiltr ~= `</select> </td>`;
 	       
 	      
 	 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу     
@@ -165,58 +242,96 @@ group by num
 	tablefiltr ~=` <td> "Категория сложности"</td>
 	
 	<td>
-	     <select name="ks" size="3" multiple>
-	     <option value='' selected></option>
-	     <option value='н.к.'selected >н.к.</option>
-	     <option value='первая'selected >первая </option>
-	     <option value='вторая' >вторая</option>
-	     <option value='третья' >третья</option>
-	     <option value='четвёртая' >четвёртая</option>
-	     <option value='пятая' >пятая</option>
-	     <option value='шестая' >шестая</option>
-	     <option value='путешествие' >путешествие</option>
+	     <select name="ks" size="3" multiple>`;
+	     
+	      for( int i=0; i<9;i++)
+	      
+	      {tablefiltr ~=`<option value="`~k[i] ~`" `;
+	     
+	                for( int j=0;j<long_ks;j++) {if(k[i]==ks[j]) tablefiltr ~=`selected` ; }//если условие выполняется возвращается(вклеивается) selected
+	                                     
+	    
+	    tablefiltr ~=`>`~k[i]~`</option>`; }
+	 
+	    
 	         
-	          < /select >
-	      </td> 
-	</tr>`;
-	tablefiltr ~=`<tr> <td> "Время начала похода ( с)" </td>
-	<td>
-	 
-	 <input neim="begin_data2" type="text" value="" size="2" maxlength="2"> месяц
-	 <input neim="begin_data3" type="text" value="" size="4" maxlength="4"> год
-	</td>  `;
-	tablefiltr ~=`<td> "Время начала похода ( по)" </td>  
-	<td>
-	 
-	 <input neim="begin_data5" type="text" value="" size="2" maxlength="2"> месяц
-	 <input neim="begin_data6" type="text" value="" size="4" maxlength="4"> год 
-	</td> </tr>`;
+	      tablefiltr ~=  `< /select >`;    
+	      
+	   tablefiltr ~= `</td>`;
+	tablefiltr ~= `</tr>`;
 	
-	  tablefiltr ~= `</table>`;
+	
+	tablefiltr ~=`<tr> <td> "Время начала похода ( с)" </td>
+	<td>`;
+	//окно первы месяц диапазона
+	tablefiltr ~=` <select name="start_month" size="1" >`;
+	  for( int i=0; i<13;i++)
+	  tablefiltr ~=`<option value="`~month[i] ~`"`~
+	     ( ( month[i]==s_month ) ? " selected ": "" )//если условие выполняется возвращается(вклеивается) selected
+	     ~` >`~month[i]~`</option>`;
+	     
+	  tablefiltr ~= `</select> `;    
+	 
+	 // окно первый год диапазона
+	 tablefiltr ~=`<input name="start_year" type="text" value="`~ s_year ~`" size="4" maxlength="4"> год	</td>  `;
+	 
+	 
+	 
+	tablefiltr ~=`<td> "Время начала похода ( по)" </td>  
+	<td>`;
+	
+	//окно последний месяц диапазона 
+	tablefiltr ~=`<select name="end_month" size="1" >`;
+	  for( int i=0; i<13;i++)
+	  tablefiltr ~=`<option value="`~month[i] ~`"`~
+	     ( ( month[i]==e_month ) ? " selected ": "" )//если условие выполняется возвращается(вклеивается) selected
+	     ~` >`~month[i]~`</option>`;	     
+	  tablefiltr ~= `</select>`;
+	  
+	  // окно последниий год диапазона
+	 tablefiltr ~=`<input name="end_year" type="text" value="`~e_year~`" size="4" maxlength="4"> год 
+	</td> </tr>
+	<tr>
+	
+	     <td>
+	      <input type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;"></form> 
+	       <form style="display: inline;"> <input type="submit" value="&nbsp;&nbsp;<<&nbsp;Назад &nbsp;&nbsp;&nbsp;"></form>
+	      </td>
+	      <td>
+	      
+	       страница `~curPageNum.to!string~`из `~ pageCount.to!string~ 
+	       
+	      `</td>
+	      <td>
+	       <form style="display: inline;">
+	       перейти на 
+	       <input name="str" type="text" value="" size="4" maxlength="4">
+	       <input type="submit" value="&nbsp;&nbsp;&nbsp;Вперёд&nbsp;>>&nbsp;&nbsp;"></form>
+	      </td>
+	      <td>
+	      <form > <input type="submit" value="&nbsp;&nbsp;&nbsp;Показать всё!&nbsp;&nbsp;&nbsp;"></form>
+       </td>
+	</tr>
+	`;
+	//pageCount номер страницы
+	 
+	  tablefiltr ~= "</table>\r\n";
 	  //------------------------------------кнопки-----------------------------------
 	 string buton= `
 	
 	 
-	 <input width="2000"type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;">
-	                
-	 </form> 
+	
 	 
 	 
-	     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	            <form id="main_form" method="post">
-	            
-	            
-	                <input width="2000"type="submit" neim="button2" value="Показать всё">
-	                <input neim="vid" type="hidden" value="">
-	                <input neim="ks[]" type="hidden" value="">
-	                <input neim="begin_data2" type="hidden" value="">
-	                <input neim="begin_data3" type="hidden" value="">
-	                <input neim="begin_data5" type="hidden" value="">
-	                <input neim="begin_data6" type="hidden" value="">
-	               
+	 
 	                
-	             </form>   
-	                `;
+	 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	
+	
+	 
+	 
+	     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+	          
 	            
 		string table = `<table border="1">`;
 		
