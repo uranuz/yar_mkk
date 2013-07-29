@@ -32,7 +32,7 @@ public:
 	void setHTTPOnly(bool value, string name)
 	{	if( name in _values ) _HTTPOnlyFlags[name] = value; }
 	
-	string getResponseStr()
+	string getString()
 	{	string result;
 		foreach( name, value; _values )
 		{	result ~= `Set-Cookie: ` ~ name  ~ `=` ~ value;
@@ -46,9 +46,21 @@ public:
 				result ~= `; HttpOnly`;
 			if( (name in _secureFlags) && (_secureFlags[name]) )
 				result ~= `; Secure`;
-			result ~= "\r\n";
 		}
 		return result;
+	}
+	
+	size_t length() @property
+	{	return _values.length;
+	}
+	
+	void clear()
+	{	_values = null;
+		_domains = null;
+		_paths = null;
+		_expires = null;
+		_HTTPOnlyFlags = null;
+		_secureFlags = null;
 	}
 }
 

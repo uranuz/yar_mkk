@@ -26,7 +26,7 @@ protected:
 		bytesRead = _socket.receive(startBuf);
 		//TODO: Проверить сколько байт прочитано
 		
-		auto headers = new HTTPHeaders(startBuf.idup);
+		auto headers = new RequestHeaders(startBuf.idup);
 		
 		if( headers.errorCode != 0 )
 		{	_socket.sendTo( generateServicePage(headers.errorCode) );
@@ -98,35 +98,6 @@ protected:
 	}
 	
 }
-
-enum string[2][ushort] HTTPStatusInfo =
-[	400: ["Bad Request", "Некорректный запрос к серверу"],
-	401: ["Unauthorized", "Не авторизован"],
-	403: ["Forbidden", "Доступ запрещён"],
-	404: ["Not Found", "Запрашиваемый ресурс не найден"],
-	413: ["Request Entity Too Large", "Размер тела запроса слишком велик"],
-	
-	500: ["Internal Server Error", "Внутренняя ошибка сервера"],
-	501: ["Not Implemented", "Метод не поддерживается сервером"],
-	505: ["HTTP Version Not Supported", "Версия протокола HTTP не поддерживается"]
-];
-
-string generateServicePage(ushort statusCode)
-{	import std.conv;
-
-	string content = "<html><body><h3>Код " ~ statusCode.to!string 
-	~ ". " ~ HTTPStatusInfo[statusCode][1] ~ "</h3>"
-	~`<hr><p style="text-align: right;">webtank.net.web_server</p></body></html>`;
-	
-	return 
-	"HTTP/1.0 " ~ statusCode.to!string ~ " " 
-	~ HTTPStatusInfo[statusCode][0] ~ "\r\n"
-	~ "Content-Length: " ~ content.length.to!string ~ "\r\n"
-	~ "Content-type: text/html; charset=\"utf-8\"\r\n\r\n"
-	~ content;
-}
-
-
 
 void main() {
 	//Основной поток - поток управления потоками

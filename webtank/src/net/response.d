@@ -1,16 +1,19 @@
 module webtank.net.response;
 
-import webtank.net.http_cookie, webtank.net.uri;
+import webtank.net.http_cookie, webtank.net.uri, webtank.net.http_headers;
 
 class Response  //Ответ от нашего приложения
 {
+	ResponseHeaders headers;
 protected:
-	string _respBody = "";
-	string[] _headers;
+	string _respBody;
 	ResponseCookie _cookie; //Куки в ответ
 public:
+	
+
 	this( void delegate(string) write )
-	{	_cookie = new ResponseCookie; 
+	{	_cookie = new ResponseCookie;
+		headers = new ResponseHeaders;
 		_write = write;
 	}
 	
@@ -24,13 +27,10 @@ public:
 	
 	//Перенаправление пользователя по указанному адресу
 	void redirect(string location)
-	{	addHeader("Status: 302 Found");
-		addHeader("Location: " ~ location);
+	{	headers["status-code"] = "302";
+		headers["reason-phrase"] = "Found";
+		headers["location"] = location;
 	}
-	
-	//Добавление HTTP-заголовка в ответ приложения
-	void addHeader(string header)
-	{	_headers ~= header; }
 	
 	void flush()
 	{	if( !_headersSent ) 
@@ -38,6 +38,17 @@ public:
 			_write( _getHeaderStr() );
 		}
 		_write( _respBody );
+	}
+	
+	//Пытаемся очистить ответ, возвращает true, если получилось
+	bool tryClear()
+	{	if( !_headersSent )
+		{	_respBody = null;
+			headers.clear();
+			_cookie.clear();
+			return true;
+		}
+		return false;
 	}
 	
 	//Куки ответа приложения (в них только пишем)
@@ -48,20 +59,12 @@ protected:
 	void delegate(string) _write;
 	bool _headersSent = false;
 	
-	string _getCustomHeaderStr()
-	{	string result;
-		foreach(header; _headers)
-			result ~= header ~ "\r\n";
-		return result;
-	}
-	
 	string _getHeaderStr()
 	{	import std.conv;
-		return 
-			"HTTP/1.0 200 OK\r\n"
-			~ _getCustomHeaderStr()
-			~ _cookie.getResponseStr() 
-			~ "Content-Length: " ~ std.conv.to!string(_respBody.length) ~ "\r\n"
-			~ "Content-type: text/html; charset=\"utf-8\"\r\n\r\n"; 
+		headers["content-length"] = std.conv.to!string(_respBody.length);
+		if( _cookie.length > 0 )
+			headers["set-cookie"] = _cookie.getString();
+		headers["content-type"] = "text/html; charset=\"utf-8\"";
+		return headers.getString();
 	}
 }

@@ -3,7 +3,7 @@ module webtank.net.http_headers;
 //TODO: Подумать, нужно ли делать URI декодировку заголовков
 
 //Все ключи в заголовках храним в нижнем регистре
-class HTTPHeaders
+class RequestHeaders
 {	
 	this(string data, uint count = uint.max)
 	{	appendData(data);
@@ -110,16 +110,6 @@ class HTTPHeaders
 	{	return _errorCode;
 	}
 	
-// 	bool isRequest() @property
-// 	{	
-// 		
-// 	}
-// 	
-// 	bool isResponse() @property
-// 	{	
-// 		
-// 	}
-	
 	bool isFinished() @property
 	{	return _headersFinished;
 	}
@@ -150,6 +140,56 @@ protected:
 		_parsedLinesCount = 0;
 	}
 
+}
+
+
+class ResponseHeaders
+{	
+	this()
+	{	_headers["http-version"] = "HTTP/1.0";
+		_headers["status-code"] = "200";
+		_headers["reason-phrase"] = "OK";
+	}
+	
+	string getString()
+	{	string result;
+		//Прописываем Status-Line
+		result ~= _headers["http-version"] ~ " " 
+		~ _headers["status-code"] ~ " "
+		~ _headers.get("reason-phrase", "") ~ "\r\n";
+		
+		foreach( name, value; _headers )
+		{	if( name == "http-version" || name == "status-code" || name == "reason-phrase")
+				continue;
+			result ~= name ~ ": " ~ value ~ "\r\n";
+		}
+		result ~= "\r\n";
+		return result;
+	}
+	
+	void opIndexAssign(string value, string name) 
+	{	import std.string;
+		if( strip( value ).length > 0 ) //Пустые значения не добавляем
+			_headers[ toLower( strip( name ) ) ] = value;
+	}
+	
+	string opIndex(string name)
+	{	import std.string;
+		return _headers.get( toLower( strip( name ) ), null );
+	}
+	
+	string get(string name, string defaultValue)
+	{	import std.string;
+		return _headers.get( toLower( strip( name ) ), defaultValue );
+	}
+	
+	void clear()
+	{	_headers = null;
+	}
+	
+	
+protected:
+	string[string] _headers;
 }
 
 // void main()
