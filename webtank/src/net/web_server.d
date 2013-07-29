@@ -3,6 +3,7 @@ import std.socket, std.string, std.conv, core.thread, std.stdio;
 import webtank.net.application, webtank.net.http_headers, webtank.net.uri,
 webtank.net.request, webtank.net.response;
 
+immutable(ushort) port = 8082;
 immutable(size_t) startBufLength = 1024;
 immutable(size_t) messageBodyLimit = 4_194_304;
 
@@ -26,6 +27,11 @@ protected:
 		//TODO: Проверить сколько байт прочитано
 		
 		auto headers = new HTTPHeaders(startBuf.idup);
+		
+		if( headers.errorCode != 0 )
+		{	_socket.sendTo( generateServicePage(headers.errorCode) );
+			return;
+		}
 		
 		string path;
 		if( headers["request-uri"] !is null )
@@ -77,7 +83,7 @@ protected:
 		app.response = new Response( &this._write );
 		
 		app.run(); //Запускаем объект
-		scope(exit) app.finalize(); //Завершаем объект
+		scope(exit) app._finalize(); //Завершаем объект
 	}
 	
 	//Выводит данные в сокет
@@ -100,8 +106,8 @@ enum string[2][ushort] HTTPStatusInfo =
 	404: ["Not Found", "Запрашиваемый ресурс не найден"],
 	413: ["Request Entity Too Large", "Размер тела запроса слишком велик"],
 	
-	
 	500: ["Internal Server Error", "Внутренняя ошибка сервера"],
+	501: ["Not Implemented", "Метод не поддерживается сервером"],
 	505: ["HTTP Version Not Supported", "Версия протокола HTTP не поддерживается"]
 ];
 
@@ -136,8 +142,6 @@ void main() {
 	
 	Вопрос: что из этого, возможно, лучше выделить в отдельные процессы для простоты или надежности?
 	*/
-
-	ushort port = 8083;
 	
 	Socket listener = new TcpSocket;
 	scope(exit) 

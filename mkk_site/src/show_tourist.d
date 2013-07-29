@@ -1,31 +1,24 @@
-module mkk_site.full_test;
+module mkk_site.show_tourist;
 
-import std.conv;
-import std.file; //Стандартная библиотека по работе с файлами
+//Импорты стандартных модулей
+import std.conv, std.file;
 
-import webtank.datctrl.field_type;
-import webtank.db.postgresql;
-import webtank.db.datctrl_joint;
+//Импорты из библиотеки webtank
+import webtank.datctrl.field_type, webtank.db.postgresql, webtank.db.datctrl_joint,
+webtank.datctrl.record, webtank.net.application, webtank.templating.plain_templater;
 
-import webtank.datctrl.record;
-import webtank.net.application;
-import webtank.templating.plain_templater;
-
-
+//Импорты модулей сайта МКК
+import mkk_site.site_data;
 
 immutable(string) projectPath = `/webtank`;
 immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";
 
-Application netApp; //Обявление глобального объекта приложения
-
-///Обычная функция main. В ней изменения НЕ ВНОСИМ
-int main()
-{	//Конструируем объект приложения. Передаём ему нашу "главную" функцию
-	netApp = new Application(&netMain); 
-	netApp.run(); //Запускаем приложение
-	netApp.finalize(); //Завершаем приложение
-	return 0;
+static this()
+{	Application.setHandler( &netMain, "/dynamic/show_tourist" ); 
+	Application.setHandler( &netMain, "/dynamic/show_tourist/" ); 
 }
+
+Application netApp; //Обявление глобального объекта приложения
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
@@ -33,11 +26,11 @@ void netMain(Application netApp)  //Определение главной фун
 	auto rq = netApp.request;
 	
 	string output; //"Выхлоп" программы
+	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
 	
 	//Создаём подключение к БД
-	string connStr = "dbname=baza_MKK host=localhost user=postgres password=postgres";
-	auto dbase = new DBPostgreSQL(connStr);
+	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 	
@@ -101,7 +94,6 @@ void netMain(Application netApp)  //Определение главной фун
 	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
 	
    ///Начинаем оформлять таблицу с данными
-	try {
 	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
 	with(FieldType) {
 	touristRecFormat = RecordFormat(
@@ -165,9 +157,8 @@ void netMain(Application netApp)  //Определение главной фун
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
 	//Чтение шаблона страницы из файла
-	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
 	import std.stdio;
-	auto f = File(templFileName, "r");
+	auto f = File( generalTemplateFileName, "r" );
 	string templateStr; //Строка с содержимым файла шаблона страницы 
 	string buf;
 	while ((buf = f.readln()) !is null)
@@ -184,12 +175,5 @@ void netMain(Application netApp)  //Определение главной фун
 	tpl.set("js folder", "../../js/");
 	
 	output ~= tpl.getResult(); //Получаем результат обработки шаблона с выполненными подстановками
-	}
-	//catch(Exception e) {
-		//output ~= "\r\nНепредвиденная ошибка в работе сервера";
-	//}
-	finally {
-		rp.write(output);
-	}
 }
 

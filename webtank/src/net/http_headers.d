@@ -40,16 +40,24 @@ class HTTPHeaders
 			if( n == 1 )
 			{	//Разбираем первую строку
 				import std.array;
-				auto firstLineAttr = split(_dataLines[0], " ");
-				if( firstLineAttr.length >= 3 )
-				{	
+				auto startLineAttr = split(_dataLines[0], " ");
+				if( startLineAttr.length < 3 )
+				{	_errorCode = 400; //501 Not Implemented
+					return;
+				}
+				if( startLineAttr.length >= 3 )
+				{	string HTTPMethod = toLower( strip( startLineAttr[0] ) );
+					if( HTTPMethod != "get" && HTTPMethod != "post" )
+					{	_errorCode = 501; //501 Not Implemented
+						return;
+					}
 					//TODO: Добавить проверку начальной строки
 					//Проверить методы по списку
 					//Проверить URI (не знаю как)
 					//Проверить версию HTTP. Поддерживаем 1.0, 1.1 (0.9 фтопку)
-					_headers["method"] = firstLineAttr[0];
-					_headers["request-uri"] = firstLineAttr[1];
-					_headers["http-version"] = firstLineAttr[2];
+					_headers["method"] = startLineAttr[0];
+					_headers["request-uri"] = startLineAttr[1];
+					_headers["http-version"] = startLineAttr[2];
 				}
 				else //Плохой запрос
 				{	//TODO: Добавить ошибку о плохом запросе
@@ -96,6 +104,12 @@ class HTTPHeaders
 	{	return _headersLength;
 	}
 	
+	//Возвращает код ошибки
+	//Пока коды ошибки соотвествуют HTTP кодам состояния
+	ushort errorCode() @property
+	{	return _errorCode;
+	}
+	
 // 	bool isRequest() @property
 // 	{	
 // 		
@@ -124,6 +138,7 @@ protected:
 	public string[string] _headers;
 	size_t _currLineStart;
 	size_t _parsedLinesCount = 0;
+	ushort _errorCode = 0;
 	
 	void _partialClear()
 	{	_dataLines = null;

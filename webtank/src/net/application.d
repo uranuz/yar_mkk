@@ -28,7 +28,7 @@ public:
 			
 		}
 	}
-	void finalize()
+	void _finalize()
 	{	response.flush();
 	}
 	Request request;
