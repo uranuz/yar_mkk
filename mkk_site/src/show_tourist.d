@@ -18,8 +18,6 @@ static this()
 	Application.setHandler( &netMain, "/dynamic/show_tourist/" ); 
 }
 
-Application netApp; //Обявление глобального объекта приложения
-
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
 	auto rp = netApp.response;
