@@ -30,9 +30,9 @@ if( out_file_name == None ):
 	if( out_file_name == "." ):
 		out_file_name = "a"
 		
-print(projects_dir)
-print(out_file_name)
-print(source_lists_rel)
+#print(projects_dir)
+#print(out_file_name)
+#print(source_lists_rel)
 
 import_dirs = [] #Директории для импорта файлов в соответствии с файлом-списком
 source_lists = [] #Полные имена файлов-списков исходников
