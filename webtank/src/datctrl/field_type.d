@@ -2,7 +2,6 @@ module webtank.datctrl.field_type;
 ///Модуль по работе с типами полей
 
 import std.conv;
-import std.string;
 
 enum FieldType { Str, Int, Bool, IntKey, Text, Enum /*, Date*/  };
 
@@ -34,6 +33,7 @@ template GetFieldValueType(FieldType FieldT)
 ///указанному в параметре шаблона FieldT
 template fldConv(FieldType FieldT)
 {	alias GetFieldValueType!(FieldT) ValueT;
+	// int --> GetFieldValueType!(FieldT)
 	ValueT fldConv( int value )
 	{	with( FieldType ) {
 		static if( FieldT == Int /*|| FieldT == Enum*/ )
@@ -49,6 +49,8 @@ template fldConv(FieldType FieldT)
 		}  //with( FieldType )
 		assert(0);
 	}
+	
+	// string --> GetFieldValueType!(FieldT)
 	ValueT fldConv( string value )
 	{	with( FieldType ) {
 		static if( FieldT == Int /*|| FieldT == Enum*/ )
@@ -56,8 +58,9 @@ template fldConv(FieldType FieldT)
 		else static if( FieldT == Str )
 		{	return value; }
 		else static if( FieldT == Bool )
-		{	foreach(logVal; _logicFalseValues) 
-				if ( logVal == value.toLower() ) return false;
+		{	import std.string;
+			foreach(logVal; _logicFalseValues) 
+				if ( logVal == toLower( strip( value ) ) ) return false;
 			return true;
 		}
 		else static if( FieldT == IntKey )
@@ -67,6 +70,8 @@ template fldConv(FieldType FieldT)
 		}  //with( FieldType )
 		assert(0);
 	}
+	
+	// bool --> GetFieldValueType!(FieldT)
 	ValueT fldConv( bool value )
 	{	with( FieldType ) {
 		static if( FieldT == Int /*|| FieldT == Enum*/ )
@@ -82,6 +87,8 @@ template fldConv(FieldType FieldT)
 		}  //with( FieldType )
 		assert(0);
 	}
+	
+	// size_t --> GetFieldValueType!(FieldT)
 	ValueT fldConv( size_t value )
 	{	with( FieldType ) {
 		static if( FieldT == Int /*|| FieldT == Enum*/ )
