@@ -1,17 +1,21 @@
 module webtank.net.response;
 
-import webtank.net.cookies;
-import webtank.net.uri;
+import webtank.net.http_cookie, webtank.net.uri, webtank.net.http_headers;
 
 class Response  //Ответ от нашего приложения
 {
+	ResponseHeaders headers;
 protected:
-	string _respBody = "";
-	string[] _headers;
-	ResponseCookies _cookies; //Куки в ответ
+	string _respBody;
+	ResponseCookie _cookie; //Куки в ответ
 public:
-	this()
-	{	_cookies = new ResponseCookies; }
+	
+
+	this( void delegate(string) write )
+	{	_cookie = new ResponseCookie;
+		headers = new ResponseHeaders;
+		_write = write;
+	}
 	
 	//Записывает данные в буфер для отдачи
 	void write(string str)
@@ -23,36 +27,44 @@ public:
 	
 	//Перенаправление пользователя по указанному адресу
 	void redirect(string location)
-	{	addHeader("Status: 302 Found");
-		addHeader("Location: " ~ location);
+	{	headers["status-code"] = "302";
+		headers["reason-phrase"] = "Found";
+		headers["location"] = location;
 	}
 	
-	//Добавление HTTP-заголовка в ответ приложения
-	void addHeader(string header)
-	{	_headers ~= header; }
+	void flush()
+	{	if( !_headersSent ) 
+		{	_headersSent = true;
+			_write( _getHeaderStr() );
+		}
+		_write( _respBody );
+	}
 	
-	void _submit()
-	{	import std.stdio;
-		string responseStr = _getHeaderStr() ~ _respBody;
-		std.stdio.write( responseStr );
+	//Пытаемся очистить ответ, возвращает true, если получилось
+	bool tryClear()
+	{	if( !_headersSent )
+		{	_respBody = null;
+			headers.clear();
+			_cookie.clear();
+			return true;
+		}
+		return false;
 	}
 	
 	//Куки ответа приложения (в них только пишем)
-	ResponseCookies cookies() @property
-	{	return _cookies; }
+	ResponseCookie cookie() @property
+	{	return _cookie; }
 
 protected:
-	string _getCustomHeaderStr()
-	{	string result;
-		foreach(header; _headers)
-			result ~= header ~ "\r\n";
-		return result;
-	}
+	void delegate(string) _write;
+	bool _headersSent = false;
 	
 	string _getHeaderStr()
-	{	return 
-			_getCustomHeaderStr()
-			~ _cookies.getResponseStr() 
-			~ "Content-type: text/html; charset=\"utf-8\" \r\n\r\n"; 
+	{	import std.conv;
+		headers["content-length"] = std.conv.to!string(_respBody.length);
+		if( _cookie.length > 0 )
+			headers["set-cookie"] = _cookie.getString();
+		headers["content-type"] = "text/html; charset=\"utf-8\"";
+		return headers.getString();
 	}
 }

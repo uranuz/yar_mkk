@@ -1,0 +1,1 @@
+./make.py --projdir=../../ --outfname=mkk_site webtank/src/sources.list mkk_site/src/sources.list

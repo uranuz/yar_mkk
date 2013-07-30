@@ -1,8 +1,8 @@
-module webtank.net.cookies;
+module webtank.net.http_cookie;
 
 import webtank.net.uri;
 
-class ResponseCookies
+class ResponseCookie
 {	
 protected:
 	string[string] _values;
@@ -32,7 +32,7 @@ public:
 	void setHTTPOnly(bool value, string name)
 	{	if( name in _values ) _HTTPOnlyFlags[name] = value; }
 	
-	string getResponseStr()
+	string getString()
 	{	string result;
 		foreach( name, value; _values )
 		{	result ~= `Set-Cookie: ` ~ name  ~ `=` ~ value;
@@ -46,13 +46,25 @@ public:
 				result ~= `; HttpOnly`;
 			if( (name in _secureFlags) && (_secureFlags[name]) )
 				result ~= `; Secure`;
-			result ~= "\r\n";
 		}
 		return result;
 	}
+	
+	size_t length() @property
+	{	return _values.length;
+	}
+	
+	void clear()
+	{	_values = null;
+		_domains = null;
+		_paths = null;
+		_expires = null;
+		_HTTPOnlyFlags = null;
+		_secureFlags = null;
+	}
 }
 
-class RequestCookies
+class RequestCookie
 {	
 protected:
 	string[string] _values;
@@ -66,6 +78,19 @@ public:
 	string opIndex(string name)
 	{	return _values.get( name, null ); 
 	}
+	
+	string get(string name, string defaultValue)
+	{	return _values.get( name, defaultValue ); 
+	}
+	
+	//Определяем оператор in для класса
+	//TODO: Разобраться как работает inout
+	inout(string)* opBinaryRight(string op)(string name) inout if(op == "in")
+	{	return ( name in _values );
+	}
+	
+	size_t length() @property
+	{	return _values.length; }
 }
 
 string[string] parseRequestCookieStr(string cookieStr)
@@ -77,10 +102,4 @@ string[string] parseRequestCookieStr(string cookieStr)
 		result[ varParts[0] ] = varParts[1];
 	}
 	return result;
-}
-
-RequestCookies getCookies()
-{	import std.process;
-	return new RequestCookies( getenv(`HTTP_COOKIE`) ); //Актуально для Apache
-	
 }
