@@ -30,7 +30,7 @@ void netMain(Application netApp)  //Определение главной фун
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
-	
+		
 	//Создаём подключение к БД
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
@@ -107,22 +107,7 @@ void netMain(Application netApp)  //Определение главной фун
 	}
 	
 	string queryStr;
-	if( fem.length == 0 )
 	
-		queryStr=`select num, 
-		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
-		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date , exp, `
-		`( case `
-			` when( show_phone = true ) then phone||'<br> ' `
-			` else '' `
-		` end || `
-		` case `
-			` when( show_email = true ) then email `
-			` else '' `
-		   ` end ) as contact, `
-		   ` comment from tourist order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
-		  
-   else
     
 		queryStr=`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
@@ -135,7 +120,7 @@ void netMain(Application netApp)  //Определение главной фун
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist WHERE family_name='` ~ fem ~`'  order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
+		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name='` ~ fem ~"'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
@@ -144,13 +129,13 @@ void netMain(Application netApp)  //Определение главной фун
 	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
-		table ~= `<td>` ~ ( ( rec["Ключ"].isNull() ) ? "Не задано" : rec["Ключ"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Имя"].isNull() ) ? "Не задано" : rec["Имя"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Дата рожд"].isNull() ) ? "Не задано" : rec["Дата рожд"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Опыт"].isNull() ) ? "Не задано" : rec["Опыт"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Контакты"].isNull() ) ? "Не задано" : rec["Контакты"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ rec["Ключ"].getStr("") ~ `</td>`;
+		table ~= `<td>` ~ rec["Имя"].getStr("") ~ `</td>`;
+		table ~= `<td>` ~ rec["Дата рожд"].getStr("") ~ `</td>`;
+		table ~= `<td>` ~rec["Опыт"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec["Контакты"].getStr("нет") ~ `</td>`;
 		
-		table ~= `<td>` ~ ( ( rec["Комментарий"].isNull() ) ? "Не задано" : rec["Комментарий"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ rec["Комментарий"].getStr("нет") ~ `</td>`;
 		
 		table ~= `</tr>`;
 	}

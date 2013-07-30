@@ -20,11 +20,13 @@ static this()
 }
 
 immutable(string) projectPath = `/webtank`;
+immutable(string) thisPagePath = dynamicPath ~ "show_pohod";
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
 	auto rp = netApp.response;
 	auto rq = netApp.request;
+
 	
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
@@ -59,6 +61,8 @@ void netMain(Application netApp)  //Определение главной фун
 		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");
 	
 		string start_dat =  s_year ~ s_month; 
+		bool _start_dat=true;if ( s_year=="") _start_dat=false;
+		
 		
 		string s_dat =s_year.to!string ~`-`;		
 		foreach( i, word; month)
@@ -73,6 +77,10 @@ void netMain(Application netApp)  //Определение главной фун
 		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
 		string end_dat = e_year ~ e_month;
 		string e_dat;
+		
+		bool _end_dat=true;if ( e_year=="") _end_dat=false;
+		
+		
 		if(e_month!="декабрь")
 		{
 		 e_dat =e_year.to!string ~`-`;		
@@ -98,7 +106,7 @@ void netMain(Application netApp)  //Определение главной фун
 		string nou_filtr; // котроль необходимости фильтрации
 		nou_filtr= s_year ~ e_month ~ s_year ~ s_month ~ vid ~ all_ks;
 		
-		
+		bool _filtr=true;if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
 		            
 		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
 		   try { //Логирование запросов к БД для отладки
@@ -118,11 +126,14 @@ void netMain(Application netApp)  //Определение главной фун
 	uint limit = 2;// максимальное  число строк на странице
 	int page;
 	//-----------------формируем варианты запросов на число строк-------------------------
-	string select1 =`select count(1) from pohod`; 	// при отсутствии фильтрации
-	string select_str =`select count(1) from pohod where`;
+	string select_str1 =`select count(1) from pohod`; 	// при отсутствии фильтрации 
+	string select_str2;
 	
 	
-	if (vid.length !=0) select_str~= ` vid='`~vid~`' `;
+	if(_filtr)
+	{
+	select_str2=` where (`;
+	if (vid.length !=0) select_str2~= ` vid='`~vid~`' `;
 	
 	
 	bool isAnyKs = false;// булева перемеенная  отвечающая за  фильтрацию  по признаку категории ссложности
@@ -144,21 +155,24 @@ void netMain(Application netApp)  //Определение главной фун
 				break;
 			}
 			
-		if (vid.length !=0  )	select_str ~=" and ";
+		if (vid.length !=0  )	select_str2 ~=" and ";
 	
-		select_str ~= " ( ";
+		select_str2 ~= " ( ";
 		foreach( n, kkkk; ks ) 
-			select_str ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива
-		select_str ~= " ) ";
+			select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива
+		select_str2 ~= " ) ";
 	}
 	
-	select_str~=((s_year !="") || (e_year !=""))?" and ": "";
+	select_str2~=((s_year !="") || (e_year !=""))?" and ": "";
 	
-  	if ((s_year !="")&&(e_year =="")) select_str ~= `  begin_date<='` ~s_dat~`' `;
+  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date<='` ~s_dat~`' `;
   	
-	if ((s_year =="")&&(e_year !="")) select_str ~= `  end_dat>'` ~e_dat~`' `;
- 	if ((s_year !="")&&(e_year !="")) select_str ~= `  (begin_date>'`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
+	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  end_dat>'` ~e_dat~`' `;
+ 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>'`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
+ 	select_str2~=`) `;
+ 	}
 	
+	string select_str= select_str1 ~ select_str2; 
 	
 	try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
@@ -169,8 +183,7 @@ void netMain(Application netApp)  //Определение главной фун
 	} catch(Exception) {}     
 	
 	
-	auto col_str_qres = ( nou_filtr.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(select1 ):
-	cast(PostgreSQLQueryResult) dbase.query(select_str);
+	auto col_str_qres = 	cast(PostgreSQLQueryResult) dbase.query(select_str);
 	
 	
 	
@@ -202,11 +215,6 @@ void netMain(Application netApp)  //Определение главной фун
 	[true, true, true, true, true, true, true, true,true, true, true] //Разрешение нулевого значения
 	);
 	}
-	
-
-	
-	
-	
 	
 	
 	string queryStr = 
@@ -246,19 +254,22 @@ group by num
         ` JOIN tourist   `
       `on pohod.chef_grupp = tourist.num `
       ` LEFT OUTER JOIN  U `
-      `on U.num = pohod.num order by pohod.num `        
-
-;
+      `on U.num = pohod.num  `;     
+      
+		if(_filtr){	queryStr~=select_str2;}	
 		
+		queryStr~=` order by pohod.num  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
+	
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
+	
+
 	
 	//uint aaa = cast(uint) rs.recordCount;
 	//output ~= aaa.to!string;
 	
 	
-	string tablefiltr = `  <form id="main_form" method="post"  inline >
-	<table border="1" >`;
+	string tablefiltr = `<table border="1" >`;
 	
 	tablefiltr ~=`<tr> <td> "Вид туризма" </td> 
 	     <td>
@@ -328,35 +339,32 @@ group by num
 	 tablefiltr ~=`<input name="end_year" type="text" value="`~e_year~`" size="4" maxlength="4"> год 
 	</td> </tr>
 	<tr>
-	
 	     <td>
-	      <input type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;"> 
-	        <input type="submit" value="&nbsp;&nbsp;<<&nbsp;Назад &nbsp;&nbsp;&nbsp;">
+	      <input type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;">       
 	      </td>
+	      <td> </td>
+	      <td>  </td>
 	      <td>
-	      
-	       страница `~curPageNum.to!string~`из `~ pageCount.to!string~ 
-	       
-	      `</td>
-	      <td>
-	       
-	       перейти на 
-	       <input name="str" type="text" value="" size="4" maxlength="4">
-	       <input type="submit" value="&nbsp;&nbsp;&nbsp;Вперёд&nbsp;>>&nbsp;&nbsp;">
-	       
-	       
-	       </form>
-	       
-	      </td>
-	      <td>
-	      <form > <input type="submit" value="&nbsp;&nbsp;&nbsp;Показать всё!&nbsp;&nbsp;&nbsp;"></form>
+	      <a href="` ~ thisPagePath ~`" > <input type="button" value="&nbsp;&nbsp;&nbsp;Показать всё!&nbsp;&nbsp;&nbsp;"> </a>
        </td>
 	</tr>
+	
+	
 	`;
 	//pageCount номер страницы
 	 
 	  tablefiltr ~= "</table>\r\n";
 	  //------------------------------------конец формирования-tablefiltr----------------------------------
+	string pageSelector = `<table><tr><td style='width: 100px;'>`
+	~ ( (curPageNum > 1) ? `<a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a>` : "" )
+	
+	~"</td><td>"
+	~` Страница <input name="cur_page_num" type="text" size="4" maxlength="4" value="` ~ curPageNum.to!string ~ `"> из ` 
+			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `
+	~"</td><td>"
+	
+	~  ( (curPageNum < pageCount ) ? `<a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a>` : "")
+	~"</td></tr></table>";
 	 
 	          
 	            
@@ -366,28 +374,29 @@ group by num
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 	  
-		table ~= `<td>` ~ ( ( rec["Ключ"].isNull() ) ? "Не задано" : rec["Ключ"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Номер"].isNull() ) ? "Не задано" : rec["Номер"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Сроки <br> похода"].isNull() ) ? "Не задано" : rec["Сроки <br> похода"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Вид, кс"].isNull() ) ? "Не задано" : rec["Вид, кс"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Район"].isNull() ) ? "Не задано" : rec["Район"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Руководитель"].isNull() ) ? "Не задано" : rec["Руководитель"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ rec["Ключ"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~rec["Номер"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec["Сроки <br> похода"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec["Вид, кс"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec["Район"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec["Руководитель"].getStr("нет")  ~ `</td>`;
 		
-		table ~= `<td  title="`~ ( ( rec["Уч"].isNull() ) ? "Не задано" : rec["Уч"].getStr() )~`">` ~`<font color="red">`~  ( ( rec["Участники"].isNull() ) ? "Не задано" : rec["Участники"].getStr() ) ~ `</font ></td>`;
+		table ~= `<td style="text-align: center;" title="`~ rec["Уч"].getStr("нет")~`">` ~`<font color="red">`~  ( ( rec["Участники"].isNull() ) ? "Не задано" : rec["Участники"].getStr() ) ~ `</font ></td>`;
 		
 		
-		table ~= `<td>` ~ ( ( rec["Город,<br>организация"].isNull() ) ? "Не задано" : rec["Город,<br>организация"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ rec["Город,<br>организация"].getStr("нет")  ~ `</td>`;
 		
 		
 	
-		table ~= `<td>` ~ ( ( rec["Нитка маршрута"].isNull() ) ? "Не задано" : rec["Нитка маршрута"].getStr() ) ~ `</td>`;
-		table ~= `<td>` ~ ( ( rec["Статус<br> похода"].isNull() ) ? "Не задано" : rec["Статус<br> похода"].getStr() ) ~ `</td>`;
+		table ~= `<td>` ~ rec["Нитка маршрута"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec["Статус<br> похода"].getStr("нет")  ~ `</td>`;
 		table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
 	}
 	table ~= `</table>`;
 	
-	string content = tablefiltr ~`<p>&nbsp</p>`~`<p>&nbsp</p>`~table; //Тобавляем таблицу с данными к содержимому страницы
+	string content = `<form id="main_form" method="post">`
+	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~table; //Тобавляем таблицу с данными к содержимому страницы
 	
 	//Чтение шаблона страницы из файла
 	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
@@ -402,11 +411,11 @@ group by num
 	auto tpl = new PlainTemplater( templateStr );
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	//Задаём местоположения всяких файлов
-	tpl.set("img folder", "../../img/");
-	tpl.set("css folder", "../../css/");
-	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
+	tpl.set("img folder", imgPath);
+	tpl.set("css folder", cssPath);
+	tpl.set("cgi-bin", dynamicPath);
 	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", "../../js/");
+	tpl.set("js folder", jsPath);
 	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
