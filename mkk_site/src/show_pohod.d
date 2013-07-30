@@ -44,7 +44,7 @@ void netMain(Application netApp)  //Определение главной фун
 		// виды туризма
 		
 		
-		string [9] k=["", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
+		string [9] k=["любая", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
 		// категории сложности
 		
 		//int [string] month =[0:"","январь":1,"февраль":2,"март":3,"апрель":4,"май":5,"июнь":6,
@@ -61,12 +61,13 @@ void netMain(Application netApp)  //Определение главной фун
 		 
 		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );
 		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");
-		string start_dat =s_year ~ s_month; 
+	
+		string start_dat =  s_year ~ s_month; 
 		
 		string s_dat =s_year.to!string ~`-`;		
 		foreach( i, word; month)
 		{	if( s_month == word ) 
-			{	 if(i<10)s_dat ~=`0`;  s_dat ~= i.to!string ~`01`;
+			{	 if(i<10)s_dat ~=`0`;  s_dat ~= i.to!string ~`-01`;
 				break;
 			}
 		}
@@ -81,7 +82,7 @@ void netMain(Application netApp)  //Определение главной фун
 		 e_dat =e_year.to!string ~`-`;		
 		foreach( i, word; month)
 		{	if( e_month == word ) 
-			{	 if(i<10) e_dat ~=`0`;  e_dat ~= (i+1).to!string ~`01`;
+			{	 if(i<10) e_dat ~=`0`;  e_dat ~= (i+1).to!string ~`-01`;
 				break;
 			}
 		}
@@ -107,7 +108,7 @@ void netMain(Application netApp)  //Определение главной фун
 		   try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"
-		"год переменная " ~ s_year~"год окно  "~  all_ks ~ "\r\n"
+		"год переменная " ~ vid~"год окно  "~  all_ks ~ "\r\n"
 	);
 	} catch(Exception) {}         
 		
@@ -120,20 +121,60 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	uint limit = 2;// максимальное  число строк на странице
 	int page;
+	//-----------------формируем варианты запросов на число строк-------------------------
+	string select1 =`select count(1) from pohod`; 	// при отсутствии фильтрации
+	string select_str =`select count(1) from pohod where`;
 	
-	string select1 =`select count(1) from pohod`;
-	string select2 =`select count(1) from pohod where`;
-	if (vid !="") select2~= ` vid='`~vid~`' `;
 	
-	if (long_ks !=0)  
-	foreach( kkkk; ks ) select2 ~= ` OR  ks='` ~kkkk~`' `;// перебирает элементы массива
+	if (vid.length !=0) select_str~= ` vid='`~vid~`' `;
 	
-	if ((start_dat !="")||(end_dat =="") ) all_ks ~= ` OR brgin_date>'`~s_dat~`' `;
-	if ((start_dat =="")||(end_dat !="")) all_ks ~= ` OR brgin_date<'`~e_dat~`' `;
-	if ((start_dat =="")||(end_dat =="")) all_ks ~= ` OR (brgin_date<'`~e_dat~`' OR `~`brgin_date>'`~s_dat~`' `;
+	
+	bool isAnyKs = false;// булева перемеенная  отвечающая за  фильтрацию  по признаку категории ссложности
+	
+	if (long_ks != 0 )
+	{	foreach(kkkk; ks)
+		if( kkkk == "любая" )
+		{	isAnyKs = true;
+			break;
+		}
+	}
+	else
+		isAnyKs = true;
+	
+	if( !isAnyKs )
+	{	foreach(kkkk; ks)
+			if( kkkk == "любая" )
+			{	isAnyKs = true;
+				break;
+			}
+			
+		if (vid.length !=0  )	select_str ~=" and ";
+	
+		select_str ~= " ( ";
+		foreach( n, kkkk; ks ) 
+			select_str ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива
+		select_str ~= " ) ";
+	}
+	
+	select_str~=((s_year !="") || (e_year !=""))?" and ": "";
+	
+  	if ((s_year !="")&&(e_year =="")) select_str ~= `  begin_date<='` ~s_dat~`' `;
+  	
+	if ((s_year =="")&&(e_year !="")) select_str ~= `  end_dat>'` ~e_dat~`' `;
+ 	if ((s_year !="")&&(e_year !="")) select_str ~= `  (begin_date>'`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
+	
+	
+	try { //Логирование запросов к БД для отладки
+	std.file.append( LogFile, 
+		"--------------------\r\n"
+		"select_str: " ~ select_str ~ "\r\n"
+		"s_dat: " ~ end_dat.to!string ~ "\r\n"
+	);
+	} catch(Exception) {}     
+	
 	
 	auto col_str_qres = ( nou_filtr.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(select1 ):
-	cast(PostgreSQLQueryResult) dbase.query(select2);
+	cast(PostgreSQLQueryResult) dbase.query(select_str);
 	
 	
 	
@@ -294,8 +335,8 @@ group by num
 	<tr>
 	
 	     <td>
-	      <input type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;"></form> 
-	       <form style="display: inline;"> <input type="submit" value="&nbsp;&nbsp;<<&nbsp;Назад &nbsp;&nbsp;&nbsp;"></form>
+	      <input type="submit" neim="button1" value="&nbsp;&nbsp;&nbsp;&nbsp; Найти &nbsp;&nbsp;&nbsp;"> 
+	        <input type="submit" value="&nbsp;&nbsp;<<&nbsp;Назад &nbsp;&nbsp;&nbsp;">
 	      </td>
 	      <td>
 	      
@@ -303,10 +344,14 @@ group by num
 	       
 	      `</td>
 	      <td>
-	       <form style="display: inline;">
+	       
 	       перейти на 
 	       <input name="str" type="text" value="" size="4" maxlength="4">
-	       <input type="submit" value="&nbsp;&nbsp;&nbsp;Вперёд&nbsp;>>&nbsp;&nbsp;"></form>
+	       <input type="submit" value="&nbsp;&nbsp;&nbsp;Вперёд&nbsp;>>&nbsp;&nbsp;">
+	       
+	       
+	       </form>
+	       
 	      </td>
 	      <td>
 	      <form > <input type="submit" value="&nbsp;&nbsp;&nbsp;Показать всё!&nbsp;&nbsp;&nbsp;"></form>
@@ -316,21 +361,8 @@ group by num
 	//pageCount номер страницы
 	 
 	  tablefiltr ~= "</table>\r\n";
-	  //------------------------------------кнопки-----------------------------------
-	 string buton= `
-	
+	  //------------------------------------конец формирования-tablefiltr----------------------------------
 	 
-	
-	 
-	 
-	 
-	                
-	 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	
-	
-	 
-	 
-	     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
 	          
 	            
 		string table = `<table border="1">`;
@@ -360,7 +392,7 @@ group by num
 	}
 	table ~= `</table>`;
 	
-	string content = tablefiltr ~`<p>&nbsp</p>`~buton~`<p>&nbsp</p>`~table; //Тобавляем таблицу с данными к содержимому страницы
+	string content = tablefiltr ~`<p>&nbsp</p>`~`<p>&nbsp</p>`~table; //Тобавляем таблицу с данными к содержимому страницы
 	
 	//Чтение шаблона страницы из файла
 	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
