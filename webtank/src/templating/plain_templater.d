@@ -67,8 +67,15 @@ public:
 	//Устанавливает замещающее значение value для метки с именем markName
 	void set(string markName, string value)
 	{	import std.utf;
-		foreach(el; _namedEls[std.utf.toUTF32(markName)])
-		{	el.subst = std.utf.toUTF32(value);
+		dstring markNameUTF32 = std.utf.toUTF32(markName);
+		if( markNameUTF32 in _namedEls )
+		{	foreach(el; _namedEls[markNameUTF32])
+			{	el.subst = std.utf.toUTF32(value);
+			}
+		}
+		else
+		{	//TODO: Записать в лог ошибок, что данного элемента нету 
+			
 		}
 	}
 	
@@ -88,7 +95,7 @@ public:
 			return null;
 	}
 	
-	string getResult()
+	string getString()
 	{	import std.utf;
 		dstring result;
 		size_t textStart = 0;

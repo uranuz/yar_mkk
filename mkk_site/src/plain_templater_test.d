@@ -8,7 +8,7 @@ import webtank.templating.plain_templater;
 Application netApp; //Обявление глобального объекта приложения
 
 void netMain(Application netApp)  //Определение главной функции приложения
-{	netApp.name = `Тестовое приложение`;
+{	
 	auto rp = netApp.response;
 	auto rq = netApp.request;
 	

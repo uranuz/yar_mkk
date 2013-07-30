@@ -93,6 +93,12 @@ class RequestHeaders
 		return _headers.get( toLower( strip( name ) ), null ); 
 	}
 	
+	//Определяем оператор in для класса
+	//TODO: Разобраться как работает inout
+	inout(string)* opBinaryRight(string op)(string name) inout if(op == "in")
+	{	return ( name in _headers );
+	}
+	
 	string extraData() @property
 	{	if( _headersFinished ) 
 			return null;

@@ -83,6 +83,12 @@ public:
 	{	return _values.get( name, defaultValue ); 
 	}
 	
+	//Определяем оператор in для класса
+	//TODO: Разобраться как работает inout
+	inout(string)* opBinaryRight(string op)(string name) inout if(op == "in")
+	{	return ( name in _values );
+	}
+	
 	size_t length() @property
 	{	return _values.length; }
 }

@@ -24,12 +24,20 @@ interface IField
 	void popFront();
 	
 	//Методы чтения данных из поля
+	///Нужно проверять, пусто или нет, иначе можно получить исключение
 	bool isNull(size_t key); //Должно возвращать true, если значение null
 	ICell opIndex(size_t key);
 	//long getLong(size_t key);
 	int getInt(size_t key);
 	string getStr(size_t key);
 	bool getBool(size_t key);
+	
+	//Методы чтения данных из поля с указанием значения по-умолчанию
+	//для случая, если невозможно получить значение
+	//long getLong(size_t key, long defaultValue);
+	int getInt(size_t key, int defaultValue);
+	string getStr(size_t key, string defaultValue);
+	bool getBool(size_t key, bool defaultValue);
 	
 	size_t _frontKey() @property;
 	
@@ -55,9 +63,11 @@ class KeyField : IField
 {
 protected:
 	size_t[size_t] _indexes;
-	immutable string _name;
+	immutable(string) _name;
 	size_t _iter = 0; //Итератор, который проходит по всем ключам массива индексов
 	size_t[] _keys;   //Массив ключей
+	
+	immutable(string) _readOnyMessage = `Поле только для чтения`;
 
 public:
 	this( string name )
@@ -75,6 +85,7 @@ public:
 		{	return false; }
 		bool isWriteable() @property
 		{	return false; }
+		
 		bool isNull(size_t key)
 		{	if( key in _indexes ) return false; 
 			return true;
@@ -119,17 +130,36 @@ public:
 			assert(0);
 		}
 		
+		int getInt(size_t key, int defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Int )( key );
+		}
+		string getStr(size_t key, string defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Str )( key );
+		}
+		bool getBool(size_t key, bool defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Bool )( key );
+		}
+		
 		void setNull(size_t key) //Установить значение ячейки в null
-		{	assert(0, `Поле только для чтения`); }
+		{	assert(0, _readOnyMessage); }
 		void isNullable(bool nullable) @property //Установка возможности быть пустым
-		{	assert(0, `Поле только для чтения`); }
+		{	assert(0, _readOnyMessage); }
 
 		void opIndexAssign(int value, size_t key)
-		{	assert(0, `Поле только для чтения`); }
+		{	assert(0, _readOnyMessage); }
 		void opIndexAssign(string value, size_t key)
-		{	assert(0, `Поле только для чтения`); }
+		{	assert(0, _readOnyMessage); }
 		void opIndexAssign(bool value, size_t key)
-		{	assert(0, `Поле только для чтения`); }
+		{	assert(0, _readOnyMessage); }
 		
 		size_t _frontKey() @property
 		{	if( _iter < _keys.length )
@@ -166,13 +196,6 @@ public:
 			//TODO: Выдавать ошибку
 	}
 
-	/*void _printData()
-	{	foreach( key, value; _indexes )
-		{	writeln(key.to!string ~ `  =  ` ~ value.to!string);
-			
-		}
-		
-	}*/
 }
 
 
@@ -283,6 +306,25 @@ public:
 		bool getBool(size_t key)
 		{	if( isNull(key) ) assert(0);
 			return fldConv!( FieldType.Bool )( _values[ _getIndex(key) ] ); 
+		}
+		
+		int getInt(size_t key, int defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Int )( _values[ _getIndex(key) ] ); 
+		}
+		string getStr(size_t key, string defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Str )( _values[ _getIndex(key) ] ); 
+		}
+		bool getBool(size_t key, bool defaultValue)
+		{	if( isNull(key) ) 
+				return defaultValue;
+			else
+				return fldConv!( FieldType.Bool )( _values[ _getIndex(key) ] ); 
 		}
 		
 		size_t _frontKey()

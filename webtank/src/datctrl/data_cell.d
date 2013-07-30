@@ -26,6 +26,10 @@ interface ICell  ///Интерфейс ячейки
 	string getStr();
 	bool getBool();
 	
+	int getInt(int defaultValue);
+	string getStr(string defaultValue);
+	bool getBool(bool defaultValue);
+	
 	bool isNull() @property;   //Вернёт true, если значение отсутствует; иначе false
 	bool isNullable() @property;  //Вернёт true, если разрешено отсутствие значения; иначе false
 	bool isWriteable() @property;  //Вернёт true, если разрешена запись в ячейку
@@ -67,6 +71,13 @@ public:
 		{	return _field.getStr(_key); }
 		bool getBool()
 		{	return _field.getBool(_key); }
+		
+		int getInt(int defaultValue)
+		{	return _field.getInt(_key, defaultValue); }
+		string getStr(string defaultValue)
+		{	return _field.getStr(_key, defaultValue); }
+		bool getBool(bool defaultValue)
+		{	return _field.getBool(_key, defaultValue); }
 		
 		void setNull()
 		{	( cast(IField) _field ).setNull(_key); 
