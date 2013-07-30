@@ -12,19 +12,14 @@ import webtank.datctrl.record;
 import webtank.net.application;
 import webtank.templating.plain_templater;
 
+import mkk_site.site_data;
+
+static this()
+{	Application.setHandler(&netMain, dynamicPath ~ "show_pohod");
+	Application.setHandler(&netMain, dynamicPath ~ "show_pohod/");
+}
 
 immutable(string) projectPath = `/webtank`;
-
-Application netApp; //Обявление глобального объекта приложения
-
-///Обычная функция main. В ней изменения НЕ ВНОСИМ
-int main()
-{	//Конструируем объект приложения. Передаём ему нашу "главную" функцию
-	netApp = new Application(&netMain); 
-	netApp.run(); //Запускаем приложение
-	netApp.finalize(); //Завершаем приложение
-	return 0;
-}
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
@@ -32,6 +27,7 @@ void netMain(Application netApp)  //Определение главной фун
 	auto rq = netApp.request;
 	
 	string output; //"Выхлоп" программы
+	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
 	
 	//Создаём подключение к БД
@@ -197,7 +193,6 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	
 	
-	try {
 	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
 	with(FieldType) {
 	touristRecFormat = RecordFormat(
@@ -413,13 +408,6 @@ group by num
 	tpl.set("useful links", "Куча хороших ссылок");
 	tpl.set("js folder", "../../js/");
 	
-	output ~= tpl.getResult(); //Получаем результат обработки шаблона с выполненными подстановками
-	}
-	//catch(Exception e) {
-		//output ~= "\r\nНепредвиденная ошибка в работе сервера";
-	//}
-	finally {
-		rp.write(output);
-	}
+	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

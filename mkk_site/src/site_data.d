@@ -20,6 +20,6 @@ immutable(string) generalTemplateFileName = "/home/test_serv/web_projects/mkk_si
 immutable(string) cssPath = "/css/";  //Путь к директории таблиц стилей
 immutable(string) jsPath = "/js/";   //Путь к директории javascript'ов
 immutable(string) imgPath = "/img/";  //Путь к директории картинок
-immutable(string) publicPath = "/pub/";     //Путь к директории общедоступного статического содержимого
+immutable(string) publicPath = "/";     //Путь к директории общедоступного статического содержимого
 immutable(string) dynamicPath = "/dyn/";    //Путь к директории динамического содержимого
 immutable(string) restrictedPath = "/restricted/"; //Путь к директории содержимого с ограниченным доступом
