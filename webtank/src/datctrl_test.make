@@ -1,0 +1,1 @@
+./make.py --projdir=../../ --outfname=datctrl_test webtank/src/datctrl_test_sources.list
