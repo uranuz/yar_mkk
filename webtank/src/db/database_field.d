@@ -86,7 +86,7 @@ template DatabaseField(FieldType FieldT)
 				size_t getIndex(size_t key)
 				{	if( key in _indexes )
 						return _indexes[key];
-					assert(0);
+					assert(0, "Ключ не найден!!!");
 					//else
 						//TODO: Выдавать ошибку
 				}

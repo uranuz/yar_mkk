@@ -10,6 +10,7 @@ import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.recor
 template RecordSet(alias RecFormat)
 {
 	alias Tuple!( getTupleOfByFieldSpec!(IField, RecFormat.fieldSpecs) ) IFieldTupleType;
+	alias Record!RecFormat Rec;
 	
 	class RecordSet
 	{	
@@ -19,17 +20,23 @@ template RecordSet(alias RecFormat)
 		
 		
 	public:
+		Rec opIndex(size_t index) 
+		{	return new Rec(this, index);
+		}
 	
-		
 		template getValue(string fieldName)
 		{
 			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
 			
 			ValueType getValue(size_t recordKey)
 			{	auto fieldIndex = getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs);
 				foreach( i, field; _fields )
-				{	if( i == fieldIndex )
-					{	return field.getValue( getRecordIndex(recordKey) );
+				{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
+					static if( currFieldType == fieldType )
+					{	if( i == fieldIndex )
+						{	return field.getValue( getRecordIndex(recordKey) );
+						}
 					}
 				}
 				assert(0);
@@ -53,11 +60,6 @@ template RecordSet(alias RecFormat)
 		{	return _keyFieldIndex;
 		}
 		
-		void setKeyField(string name)
-		{	
-			
-		}
-		
 		void setKeyField(size_t index)
 		{	auto keyFieldIndexes = getKeyFieldIndexes!(RecFormat.fieldSpecs)();
 			foreach( i; keyFieldIndexes )
@@ -77,6 +79,26 @@ template RecordSet(alias RecFormat)
 			{	immutable fieldIndex = getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs);
 				_fields[fieldIndex] = field;
 			}
+		}
+		
+		bool isNull(string fieldName, size_t recordKey)
+		{	foreach( i, field; _fields )
+			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).name currFieldName;
+				if( currFieldName == fieldName )
+				{	return field.isNull( getRecordIndex(recordKey) );
+				}
+			}
+			assert(0);
+		}
+		
+		bool isNullable(string fieldName)
+		{	foreach( i, field; _fields )
+			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).name currFieldName;
+				if( currFieldName == fieldName )
+				{	return field.isNullable();
+				}
+			}
+			assert(0);
 		}
 		
 	}
