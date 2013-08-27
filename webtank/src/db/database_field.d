@@ -82,6 +82,14 @@ template DatabaseField(FieldType FieldT)
 // 						return _keys[_iter];
 // 					assert(0, "Выход за границы дипазона") ;
 // 				}
+
+				size_t getIndex(size_t key)
+				{	if( key in _indexes )
+						return _indexes[key];
+					assert(0);
+					//else
+						//TODO: Выдавать ошибку
+				}
 			} //override
 			
 			bool keyExists(size_t key)
@@ -89,13 +97,7 @@ template DatabaseField(FieldType FieldT)
 				return false;
 			}
 			
-			size_t getIndex(size_t key)
-			{	if( key in _indexes )
-					return _indexes[key];
-				assert(0);
-				//else
-					//TODO: Выдавать ошибку
-			}
+			
 			
 		protected:
 

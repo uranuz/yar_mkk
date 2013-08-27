@@ -1,4 +1,4 @@
-module webtank.datctrl.new_record;
+module webtank.datctrl.record_format;
 
 
 import std.typetuple, std.typecons, std.stdio, std.conv;
@@ -65,117 +65,55 @@ template getFieldSpecByName(string fieldName, FieldSpecs...)
 		alias getFieldSpecByName!(fieldName, FieldSpecs[1 .. $]) getFieldSpecByName;
 }
 
-//По кортежу элементов типа FieldSpec строит кортеж полей
-template getDatabaseFieldTuple(FieldSpecs...)
+//Получить из кортежа элементов типа FieldSpec нужный элемент по имени
+template getFieldSpecByIndex(size_t index, FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
-		alias TypeTuple!() getDatabaseFieldTuple;
-	else 
-		alias TypeTuple!(DatabaseField!(FieldSpecs[0].fieldType), getDatabaseFieldTuple!(FieldSpecs[1 .. $])) getDatabaseFieldTuple;
+		static assert(0, "Field with given index is not found in container!!!");
+	else static if( index == 0 )
+		alias FieldSpecs[0] getFieldSpecByIndex;
+	else
+		alias getFieldSpecByIndex!( index - 1, FieldSpecs[1 .. $]) getFieldSpecByIndex;
 }
 
+//По кортежу элементов типа FieldSpec строит кортеж полей
+template getTupleOfByFieldSpec(alias Element, FieldSpecs...)
+{	static if( FieldSpecs.length == 0 )
+		alias TypeTuple!() getTupleOfByFieldSpec;
+	else 
+		alias TypeTuple!(Element!(FieldSpecs[0].fieldType), getTupleOfByFieldSpec!(Element, FieldSpecs[1 .. $])) getTupleOfByFieldSpec;
+}
+
+//Получаем кортеж фактических типов значений по FieldSpec
 template getValueTypeTuple(FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
 		alias TypeTuple!() getValueTypeTuple;
 	else 
 		alias TypeTuple!(FieldSpecs[0].valueType, getValueTypeTuple!(FieldSpecs[1 .. $])) getValueTypeTuple;
 }
+
+template _workGetFieldSpecIndex(string fieldName, size_t index, FieldSpecs...)
+{	static if( FieldSpecs.length == 0 )
+		static assert(0, "Field with name \"" ~ fieldName ~ "\" is not found in container!!!");
+	else static if( FieldSpecs[0].name == fieldName )
+		alias index _workGetFieldSpecIndex;
+	else 
+		alias _workGetFieldSpecIndex!(fieldName, index + 1 , FieldSpecs[1 .. $]) _workGetFieldSpecIndex;
 	
-	
-template RecordSet(alias RecFormat)
-{
-	alias Tuple!( getDatabaseFieldTuple!(RecFormat.fieldSpecs) ) fieldTupleType;
-	
-	class RecordSet
-	{	
-	protected:
-		fieldTupleType _fields;
-		
-		
-	public:
-	
-		template _setField(string fieldName)
-		{	
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
-			alias IField!(fieldType) FieldIface;
-			void _setField(FieldIface field)
-			{	
-				
-			}
-		
-		
+}
+
+//Получение индекса элемента из кортежа FieldSpec по имени
+template getFieldSpecIndex(string fieldName, FieldSpecs...)
+{	alias _workGetFieldSpecIndex!(fieldName, 0 , FieldSpecs) getFieldSpecIndex;
+}
+
+//Получение списка индексов всех ключевых полей
+size_t[] getKeyFieldIndexes(FieldSpecs...)()
+{	size_t[] result;
+	foreach( i, spec; FieldSpecs )
+	{	if( spec.fieldType == FieldType.IntKey )
+		{	result ~= i;
 		}
-		
 	}
+	return result;
 }
 
-
-
-
-
-
-// class Record
-// {	
-// protected:
-// 	RecordSet _recordSet;
-// 	size_t _recKey;
-// 	
-// public:
-// 	this(RecordSet recordSet, size_t recordKey)
-// 	{	_recordSet = recordSet; _recKey = recordKey; }
-// 	
-// 	ICell opIndex(size_t index)  //Оператор получения ячейки по индексу поля
-// 	{	return ( _recordSet.getField(index) )[_recKey];
-// 	}
-// 	ICell opIndex(string name)  //Оператор получения ячейки по имени поля
-// 	{	return ( _recordSet.getField(name) )[_recKey];
-// 	}
-// 	
-// 	//Операторы присвоения ячейке по индексу
-// 	void opIndexAssign(string value, size_t index) 
-// 	{	( _recordSet.getField(index) )[_recKey] = value;
-// 	}
-// 	void opIndexAssign(int value, size_t index) 
-// 	{	( _recordSet.getField(index) )[_recKey] = value;
-// 	}
-// 	void opIndexAssign(bool value, size_t index) 
-// 	{	( _recordSet.getField(index) )[_recKey] = value;
-// 	}
-// 	//Оператор присвоения ячейке по имени
-// 	void opIndexAssign(string value, string name) 
-// 	{	( _recordSet.getField(name) )[_recKey] = value;
-// 	}
-// 	void opIndexAssign(int value, string name) 
-// 	{	( _recordSet.getField(name) )[_recKey] = value;
-// 	}
-// 	void opIndexAssign(bool value, string name) 
-// 	{	( _recordSet.getField(name) )[_recKey] = value;
-// 	}
-// 	
-// }
-
-
-
-
-void main()
-{	
-	alias FieldType ft;
-	auto format = RecordFormat!(ft.IntKey, "Количество", ft.Int, "Цена", ft.Str, "Название", ft.Bool, "Условие")
-		([true, true, true, false]);
-	
-	getFieldSpecByName!("Количество", format.fieldSpecs).valueType var;
-	writeln( typeid( var ).to!string );
-	writeln( format.types() );
-	writeln( format.names() );
-	writeln( format.nullableFlags );
-	
-	
-	writeln( typeid( getDatabaseFieldTuple!(format.fieldSpecs) ).to!string  );
-	alias  getDatabaseFieldTuple!(format.fieldSpecs)[2] DBFieldType;
-	auto field = new DBFieldType;
-	writeln( typeid( field ).to!string  );
-	writeln( field.isNullable() );
-	
-	alias RecordSet!format RSType;
-	
-	writeln( typeid( RSType ).to!string  );
-}

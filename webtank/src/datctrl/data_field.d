@@ -32,6 +32,10 @@ interface IField(FieldType FieldT)
 	T getValue(size_t index);
 // 	T getValue(size_t index, T defaultValue);
 
+	static if( FieldT == FieldType.IntKey )
+	{	size_t getIndex(size_t key);
+		
+	}
 	
 // 	size_t _frontKey() @property;
 	
