@@ -154,8 +154,8 @@ public:
 	///ПЕРЕОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСНЫХ ФУНКЦИЙ
 	override {
 		//Получение типа СУБД
-		DBMSType type() @property
-		{	return _database.type; }
+// 		DBMSType type() @property
+// 		{	return _database.type; }
 		
 		
 		//Количество записей
@@ -179,45 +179,45 @@ public:
 				_queryResult = null;
 			}
 		}
-	}
-	
-	///СВОИ СОБСТВЕННЫЕ ФУНКЦИИ КЛАССА
-	//Получение имени поля по индексу
-	string getFieldName(size_t index) 
-	{	if( _queryResult )
-			return ( PQfname( _queryResult, index.to!int ) ).to!string;
-		else return null;
-	}
-	
-	//Получение индекса поля по имени
-	size_t getFieldIndex(string name)
-	{	if( _queryResult )
-			return ( PQfnumber(_queryResult, toStringz(name) ) ).to!size_t;
-		else return -1;
-	}
-	
-	//Вернёт true, если поле пустое, и false иначе
-	bool getIsNull(size_t recIndex, size_t fieldIndex)
-	{	if( _queryResult )
-			return ( PQgetisnull(_queryResult, recIndex.to!int, fieldIndex.to!int ) == 1 ) ? true : false;
-		assert(0);
-	}
-	
-	//Получение значения ячейки данных в виде строки
-	//Неопределённое поведение, если ячейка пуста или её нет
-	string getValue(size_t recIndex, size_t fieldIndex)
-	{	if( _queryResult )
-			return ( PQgetvalue(_queryResult, recIndex.to!int, fieldIndex.to!int ) ).to!string;
-		else return null;
-	}
-	
-	//Получение значения ячейки данных в виде строки
-	//Если ячейка пуста то вернёт значение параметра defaultValue
-	string getValue(size_t recIndex, size_t fieldIndex, string defaultValue)
-	{	if( getIsNull(recIndex, fieldIndex) ) 
-			return defaultValue;
-		else
-			return getValue(recIndex, fieldIndex);
+		
+		
+		//Получение имени поля по индексу
+		string getFieldName(size_t index) 
+		{	if( _queryResult )
+				return ( PQfname( _queryResult, index.to!int ) ).to!string;
+			else return null;
+		}
+		
+		//Получение индекса поля по имени
+		size_t getFieldIndex(string name)
+		{	if( _queryResult )
+				return ( PQfnumber(_queryResult, toStringz(name) ) ).to!size_t;
+			else return -1;
+		}
+		
+		//Вернёт true, если поле пустое, и false иначе
+		bool getIsNull(size_t recordIndex, size_t fieldIndex)
+		{	if( _queryResult )
+				return ( PQgetisnull(_queryResult, recordIndex.to!int, fieldIndex.to!int ) == 1 ) ? true : false;
+			assert(0);
+		}
+		
+		//Получение значения ячейки данных в виде строки
+		//Неопределённое поведение, если ячейка пуста или её нет
+		string getValue(size_t recordIndex, size_t fieldIndex)
+		{	if( _queryResult )
+				return ( PQgetvalue(_queryResult, recordIndex.to!int, fieldIndex.to!int ) ).to!string;
+			else return null;
+		}
+		
+		//Получение значения ячейки данных в виде строки
+		//Если ячейка пуста то вернёт значение параметра defaultValue
+		string getValue(size_t recordIndex, size_t fieldIndex, string defaultValue)
+		{	if( getIsNull(recordIndex, fieldIndex) ) 
+				return defaultValue;
+			else
+				return getValue(recordIndex, fieldIndex);
+		}
 	}
 
 	~this() //Освобождаем результат запроса

@@ -5,8 +5,21 @@ import std.conv;
 
 //import std.stdio;
 
-import webtank.datctrl.data_field;
-import webtank.datctrl.record;
+import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.record_format;
+
+
+// template record!(alias RecFormat)
+// {	
+// 	alias 
+// 	
+// 	class RecordSet
+// 	{	
+// 		
+// 		
+// 	}
+// 	
+// 	
+// }
 
 class RecordSet   //: IRecordSet
 {	
