@@ -18,11 +18,16 @@ interface IDatabase ///Интерфейс БД
 }
 
 interface IDBQueryResult ///Интерфейс результата запроса к БД
-{	DBMSType type() @property; //Снова тип СУБД
+{	/+DBMSType type() @property; //Снова тип СУБД+/
 	size_t recordCount() @property; //Число записей
 	size_t fieldCount() @property;  //Число полей данных
 	void clear(); //Очистить объект
 	
+	string getFieldName(size_t index);
+	size_t getFieldIndex(string name);
+	bool isNull(size_t fieldIndex, size_t recordIndex);
+	string get(size_t fieldIndex, size_t recordIndex);
+	string get(size_t fieldIndex, size_t recordIndex, string defaultValue);
 }
 
 ///Класс исключений при работе с БД

@@ -1,54 +1,56 @@
 module webtank.datctrl.record;
 
-import webtank.datctrl.field_type;
-import webtank.datctrl.data_cell;
-import webtank.datctrl.record_set;
+import std.typetuple, std.typecons, std.conv;
 
-struct RecordFormat
-{	//alias EnumValuesType string[int];
-	
-	FieldType[] types;
-	string[] names;
-	bool[] nullableFlags;
-	//EnumValuesType[size_t] enumValues;
-}
+import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field;
 
-class Record
+
+template Record(alias RecFormat)
 {	
-protected:
-	RecordSet _recordSet;
-	size_t _recKey;
+	alias RecordSet!RecFormat RecSet;
 	
-public:
-	this(RecordSet recordSet, size_t recordKey)
-	{	_recordSet = recordSet; _recKey = recordKey; }
+	class Record
+	{
+	protected:
+		RecSet _recordSet;
+		size_t _recordKey;
 	
-	ICell opIndex(size_t index)  //Оператор получения ячейки по индексу поля
-	{	return ( _recordSet.getField(index) )[_recKey];
+	public:
+		this(RecSet recordSet, size_t recordKey)
+		{	_recordSet = recordSet;
+			_recordKey = recordKey;
+		}
+		
+		template get(string fieldName)
+		{	
+			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			ValueType get() @property
+			{	return _recordSet.get!(fieldName)(_recordKey);
+			}
+			
+		}
+		
+		template get(string fieldName)
+		{	
+			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			ValueType get(ValueType defaultValue)
+			{	return _recordSet.get!(fieldName)(_recordKey, defaultValue);
+			}
+			
+		}
+		
+		bool isNull(string fieldName)
+		{	return _recordSet.isNull(fieldName, _recordKey);
+		}
+		
+		bool isNullable(string fieldName)
+		{	return _recordSet.isNullable(fieldName);
+		}
+		
+		size_t length() @property
+		{	return RecFormat.fieldSpecs.length;
+			
+		}
 	}
-	ICell opIndex(string name)  //Оператор получения ячейки по имени поля
-	{	return ( _recordSet.getField(name) )[_recKey];
-	}
-	
-	//Операторы присвоения ячейке по индексу
-	void opIndexAssign(string value, size_t index) 
-	{	( _recordSet.getField(index) )[_recKey] = value;
-	}
-	void opIndexAssign(int value, size_t index) 
-	{	( _recordSet.getField(index) )[_recKey] = value;
-	}
-	void opIndexAssign(bool value, size_t index) 
-	{	( _recordSet.getField(index) )[_recKey] = value;
-	}
-	//Оператор присвоения ячейке по имени
-	void opIndexAssign(string value, string name) 
-	{	( _recordSet.getField(name) )[_recKey] = value;
-	}
-	void opIndexAssign(int value, string name) 
-	{	( _recordSet.getField(name) )[_recKey] = value;
-	}
-	void opIndexAssign(bool value, string name) 
-	{	( _recordSet.getField(name) )[_recKey] = value;
-	}
-	
 }
+
