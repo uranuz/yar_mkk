@@ -5,6 +5,7 @@ import std.conv, std.string;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
 import webtank.datctrl.field_type;
+import webtank.datctrl.record_format;
 import webtank.db.postgresql;
 import webtank.db.datctrl_joint;
 
@@ -33,8 +34,7 @@ void netMain(Application netApp)  //Определение главной фун
 	string js_file = "../../js/page_view.js";
 	
 	//Создаём подключение к БД
-	string connStr = "dbname=baza_MKK host=localhost user=postgres password=postgres";
-	auto dbase = new DBPostgreSQL(connStr);
+	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 		
@@ -117,7 +117,7 @@ void netMain(Application netApp)  //Определение главной фун
 	} catch(Exception) {}         
 		
 		// Запрос на число строк
-	//	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from pohod` ):
+	//	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from pohod` ):
 	//cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
 	
 	
@@ -183,14 +183,14 @@ void netMain(Application netApp)  //Определение главной фун
 	} catch(Exception) {}     
 	
 	
-	auto col_str_qres = 	cast(PostgreSQLQueryResult) dbase.query(select_str);
+	auto col_str_qres = 	dbase.query(select_str);
 	
 	
 	
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	uint col_str = ( col_str_qres.getValue(0, 0, "0") ).to!uint;
+	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
 	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
@@ -203,18 +203,14 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	
 	
+	alias FieldType ft;
 	
 	
-	
-	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
-	with(FieldType) {
-	touristRecFormat = RecordFormat(
-	[IntKey, Str, Str, Str, Str, Str, Str, Str, Str, Str, Str],
-	["Ключ", "Номер", "Сроки <br> похода", "Вид, кс","Район","Руководитель","Участники","Уч","Город,<br>организация", "Нитка маршрута","Статус<br> похода"],
-	//[null, null, null, null, null, null,null, null, null],
-	[true, true, true, true, true, true, true, true,true, true, true] //Разрешение нулевого значения
-	);
-	}
+	auto pohodRecFormat = RecordFormat!(
+	ft.IntKey, "Ключ",   ft.Str, "Номер", ft.Str, "Сроки <br> похода", 
+	ft.Str, "Вид, кс",   ft.Str,"Район",  ft.Str,"Руководитель", 
+	ft.Str,"Участники",  ft.Str,"Уч",     ft.Str,"Город,<br>организация", 
+	ft.Str, "Нитка маршрута", ft.Str, "Статус<br> похода")();
 	
 	
 	string queryStr = 
@@ -261,7 +257,7 @@ group by num
 		queryStr~=` order by pohod.num  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
 	
 	auto response = dbase.query(queryStr); //запрос к БД
-	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
+	auto rs = response.getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
 
 	
@@ -374,22 +370,22 @@ group by num
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 	  
-		table ~= `<td>` ~ rec["Ключ"].getStr("нет") ~ `</td>`;
-		table ~= `<td>` ~rec["Номер"].getStr("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec["Сроки <br> похода"].getStr("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec["Вид, кс"].getStr("нет") ~ `</td>`;
-		table ~= `<td>` ~ rec["Район"].getStr("нет") ~ `</td>`;
-		table ~= `<td>` ~ rec["Руководитель"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
+		table ~= `<td>` ~rec.get!"Номер"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Сроки <br> похода"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Вид, кс"("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Район"("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;
 		
-		table ~= `<td style="text-align: center;" title="`~ rec["Уч"].getStr("нет")~`">` ~`<font color="red">`~  ( ( rec["Участники"].isNull() ) ? "Не задано" : rec["Участники"].getStr() ) ~ `</font ></td>`;
+		table ~= `<td style="text-align: center;" title="`~ rec.get!"Уч"("нет")~`">` ~`<font color="red">`~  (  rec.get!"Участники"("Не задано") ) ~ `</font ></td>`;
 		
 		
-		table ~= `<td>` ~ rec["Город,<br>организация"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`;
 		
 		
 	
-		table ~= `<td>` ~ rec["Нитка маршрута"].getStr("нет") ~ `</td>`;
-		table ~= `<td>` ~ rec["Статус<br> похода"].getStr("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Статус<br> похода"("нет")  ~ `</td>`;
 		table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
 	}

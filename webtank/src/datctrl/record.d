@@ -24,15 +24,10 @@ template Record(alias RecFormat)
 		template get(string fieldName)
 		{	
 			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
-			ValueType get() @property
+			ValueType get()
 			{	return _recordSet.get!(fieldName)(_recordKey);
 			}
-			
-		}
-		
-		template get(string fieldName)
-		{	
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+
 			ValueType get(ValueType defaultValue)
 			{	return _recordSet.get!(fieldName)(_recordKey, defaultValue);
 			}

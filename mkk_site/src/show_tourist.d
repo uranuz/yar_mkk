@@ -4,6 +4,7 @@ import std.conv, std.string;//  strip()       Уибират начальные 
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type;
+import webtank.datctrl.record_format;
 import webtank.db.postgresql;
 import webtank.db.datctrl_joint;
 
@@ -48,12 +49,12 @@ void netMain(Application netApp)  //Определение главной фун
 	} catch(Exception) {}
 	uint limit = 10;// максимальное  чмсло строк на странице
 	int page;
-	auto col_str_qres = ( fem.length == 0 ) ? cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist` ):
-	cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
+	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
+	dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	uint col_str = ( col_str_qres.getValue(0, 0, "0") ).to!uint;
+	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
 	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
@@ -95,16 +96,12 @@ void netMain(Application netApp)  //Определение главной фун
 `	</form>
 	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
 	
+	alias FieldType ft;
+	
    ///Начинаем оформлять таблицу с данными
-	RecordFormat touristRecFormat; //объявляем формат записи таблицы book
-	with(FieldType) {
-	touristRecFormat = RecordFormat(
-	[IntKey, Str, Str, Str, Str, Str],
-	["Ключ", "Имя", "Дата рожд", "Опыт", "Контакты", "Комментарий"],
-	//[null, null, null, null, null, null],
-	[true, true, true, true, true, true] //Разрешение нулевого значения
-	);
-	}
+   auto touristRecFormat = RecordFormat!(
+	ft.IntKey, "Ключ",   ft.Str, "Имя", ft.Str, "Дата рожд", 
+	ft.Str,  "Опыт",   ft.Str, "Контакты",  ft.Str, "Комментарий")();
 	
 	string queryStr;
 	
@@ -129,13 +126,13 @@ void netMain(Application netApp)  //Определение главной фун
 	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
-		table ~= `<td>` ~ rec["Ключ"].getStr("") ~ `</td>`;
-		table ~= `<td>` ~ rec["Имя"].getStr("") ~ `</td>`;
-		table ~= `<td>` ~ rec["Дата рожд"].getStr("") ~ `</td>`;
-		table ~= `<td>` ~rec["Опыт"].getStr("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec["Контакты"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Ключ"().to!string ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
+		table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;
 		
-		table ~= `<td>` ~ rec["Комментарий"].getStr("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
 		
 		table ~= `</tr>`;
 	}

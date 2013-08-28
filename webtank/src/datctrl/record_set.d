@@ -31,12 +31,7 @@ template RecordSet(alias RecFormat)
 			ValueType get(size_t recordKey)
 			{	return _fields[fieldIndex].get( _getRecordIndex(recordKey) );
 			}
-		}
-		
-		template get(string fieldName)
-		{	alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
-			alias getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
-			
+
 			ValueType get(size_t recordKey, ValueType defaultValue)
 			{	return _fields[fieldIndex].get( _getRecordIndex(recordKey), defaultValue );
 			}
