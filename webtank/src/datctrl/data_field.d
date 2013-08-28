@@ -29,12 +29,15 @@ interface IField(FieldType FieldT)
 	//Методы чтения данных из поля
 	///Нужно проверять, пусто или нет, иначе можно получить исключение
 	bool isNull(size_t index); //Должно возвращать true, если значение null
-	T getValue(size_t index);
-// 	T getValue(size_t index, T defaultValue);
-
+	T get(size_t index);
+ 	T get(size_t index, T defaultValue);
+ 	
+ 	string getStr(size_t index);
+	string getStr(size_t index, string  defaultValue);
+	
 	static if( FieldT == FieldType.IntKey )
 	{	size_t getIndex(size_t key);
-		
+		size_t getKey(size_t index);
 	}
 	
 // 	size_t _frontKey() @property;

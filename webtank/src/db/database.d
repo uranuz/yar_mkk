@@ -25,9 +25,9 @@ interface IDBQueryResult ///Интерфейс результата запрос
 	
 	string getFieldName(size_t index);
 	size_t getFieldIndex(string name);
-	bool getIsNull(size_t recordIndex, size_t fieldIndex);
-	string getValue(size_t recordIndex, size_t fieldIndex);
-	string getValue(size_t recordIndex, size_t fieldIndex, string defaultValue);
+	bool isNull(size_t fieldIndex, size_t recordIndex);
+	string get(size_t fieldIndex, size_t recordIndex);
+	string get(size_t fieldIndex, size_t recordIndex, string defaultValue);
 }
 
 ///Класс исключений при работе с БД

@@ -18,44 +18,52 @@ template RecordSet(alias RecFormat)
 		IFieldTupleType _fields;
 		size_t _keyFieldIndex;
 		
-		
+		size_t _currRecIndex;
 	public:
-		Rec opIndex(size_t index) 
-		{	return new Rec(this, index);
+		Rec opIndex(size_t key) 
+		{	return new Rec(this, key);
 		}
 	
-		template getValue(string fieldName)
-		{
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
+		template get(string fieldName)
+		{	alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
 			
-			ValueType getValue(size_t recordKey)
-			{	auto fieldIndex = getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs);
-				foreach( i, field; _fields )
-				{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
-					static if( currFieldType == fieldType )
-					{	if( i == fieldIndex )
-						{	return field.getValue( getRecordIndex(recordKey) );
-						}
-					}
-				}
-				assert(0);
+			ValueType get(size_t recordKey)
+			{	return _fields[fieldIndex].get( _getRecordIndex(recordKey) );
 			}
-			
-			
 		}
 		
-		size_t getRecordIndex(size_t key)
-		{	foreach( i, field; _fields )
-			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
-				static if( currFieldType == FieldType.IntKey )
-				{	if( i == _keyFieldIndex )
-						return field.getIndex(key);
-				}
+		template get(string fieldName)
+		{	alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+			
+			ValueType get(size_t recordKey, ValueType defaultValue)
+			{	return _fields[fieldIndex].get( _getRecordIndex(recordKey), defaultValue );
 			}
-			assert(0);
 		}
-	
+		
+		Rec front() @property
+		{	return new Rec( this, _getRecordKey(_currRecIndex) );
+		}
+		
+		void popFront()
+		{	_currRecIndex++; }
+		
+		bool empty() @property
+		{	if( _currRecIndex < this.length  )
+				return false;
+			else
+			{	_currRecIndex = 0;
+				return true;
+			}
+		}
+		
+		
+// 		string getStr(string fieldName, size_t recordKey)
+// 		{	
+// 			
+// 		}
+		
 		size_t keyFieldIndex() @property
 		{	return _keyFieldIndex;
 		}
@@ -71,21 +79,11 @@ template RecordSet(alias RecFormat)
 			assert( 0, "Поле с индексом \"" ~ index.to!string ~ "\" не найдено или не может быть выбрано в качестве первичного ключа!" );
 		}
 		
-		template _setField(string fieldName)
-		{	
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
-			alias IField!(fieldType) FieldIface;
-			void _setField( FieldIface field )
-			{	immutable fieldIndex = getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs);
-				_fields[fieldIndex] = field;
-			}
-		}
-		
 		bool isNull(string fieldName, size_t recordKey)
 		{	foreach( i, field; _fields )
 			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).name currFieldName;
 				if( currFieldName == fieldName )
-				{	return field.isNull( getRecordIndex(recordKey) );
+				{	return field.isNull( _getRecordIndex(recordKey) );
 				}
 			}
 			assert(0);
@@ -96,6 +94,51 @@ template RecordSet(alias RecFormat)
 			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).name currFieldName;
 				if( currFieldName == fieldName )
 				{	return field.isNullable();
+				}
+			}
+			assert(0);
+		}
+		
+		size_t length() @property
+		{	foreach( i, field; _fields )
+			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
+				static if( currFieldType == FieldType.IntKey )
+				{	if( i == _keyFieldIndex )
+						return field.length;
+				}
+			}
+			assert(0);
+		}
+		
+		template _setField(string fieldName)
+		{	
+			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
+			alias getFieldSpecIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+			alias IField!(fieldType) FieldIface;
+			
+			void _setField( FieldIface field )
+			{	_fields[fieldIndex] = field;
+			}
+		}
+		
+	protected:
+		size_t _getRecordIndex(size_t key)
+		{	foreach( i, field; _fields )
+			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
+				static if( currFieldType == FieldType.IntKey )
+				{	if( i == _keyFieldIndex )
+						return field.getIndex(key);
+				}
+			}
+			assert(0);
+		}
+		
+		size_t _getRecordKey(size_t index)
+		{	foreach( i, field; _fields )
+			{	alias getFieldSpecByIndex!(i, RecFormat.fieldSpecs).fieldType currFieldType;
+				static if( currFieldType == FieldType.IntKey )
+				{	if( i == _keyFieldIndex )
+						return field.getKey(index);
 				}
 			}
 			assert(0);

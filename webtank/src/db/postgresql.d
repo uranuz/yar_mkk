@@ -193,7 +193,7 @@ public:
 		}
 		
 		//Вернёт true, если поле пустое, и false иначе
-		bool getIsNull(size_t recordIndex, size_t fieldIndex)
+		bool isNull(size_t fieldIndex, size_t recordIndex)
 		{	if( _queryResult )
 				return ( PQgetisnull(_queryResult, recordIndex.to!int, fieldIndex.to!int ) == 1 ) ? true : false;
 			assert(0);
@@ -201,7 +201,7 @@ public:
 		
 		//Получение значения ячейки данных в виде строки
 		//Неопределённое поведение, если ячейка пуста или её нет
-		string getValue(size_t recordIndex, size_t fieldIndex)
+		string get(size_t fieldIndex, size_t recordIndex)
 		{	if( _queryResult )
 				return ( PQgetvalue(_queryResult, recordIndex.to!int, fieldIndex.to!int ) ).to!string;
 			else return null;
@@ -209,11 +209,11 @@ public:
 		
 		//Получение значения ячейки данных в виде строки
 		//Если ячейка пуста то вернёт значение параметра defaultValue
-		string getValue(size_t recordIndex, size_t fieldIndex, string defaultValue)
-		{	if( getIsNull(recordIndex, fieldIndex) ) 
+		string get(size_t fieldIndex, size_t recordIndex, string defaultValue)
+		{	if( isNull(fieldIndex, recordIndex) ) 
 				return defaultValue;
 			else
-				return getValue(recordIndex, fieldIndex);
+				return get(fieldIndex, recordIndex);
 		}
 	}
 

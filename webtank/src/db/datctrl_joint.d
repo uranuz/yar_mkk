@@ -10,18 +10,15 @@ import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.datctr
 //junction, joint, link, coop
 
 
-template getRecordSet(alias RecFormat)
+
+auto getRecordSet(RecFormat)(IDBQueryResult queryResult, RecFormat format)
 {	alias RecordSet!RecFormat RecSet;
-	
-	auto getRecordSet(IDBQueryResult queryResult)
-	{	auto recordSet = new RecSet;
-		foreach( i, fldSpec; RecFormat.fieldSpecs )
-		{	auto field = new DatabaseField!(fldSpec.fieldType)(queryResult, i);
-			recordSet._setField!(fldSpec.name)( field );
-		}
-		recordSet.setKeyField(0);
-		return recordSet;
+	auto recordSet = new RecSet;
+	foreach( i, fldSpec; RecFormat.fieldSpecs )
+	{	auto field = new DatabaseField!(fldSpec.fieldType)(queryResult, i);
+		recordSet._setField!(fldSpec.name)( field );
 	}
-	
-	
+	recordSet.setKeyField(0);
+	return recordSet;
 }
+

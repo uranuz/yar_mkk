@@ -34,19 +34,15 @@ void main()
 	auto dbase = new DBPostgreSQL(connStr);
 	assert( dbase.isConnected );
 	
-	string query = `select * from book`;
-	auto queryResult = dbase.query(query);
-	
-	
-	
 	auto rs = new RSType;
 	auto countFld = new DatabaseField!(FieldType.IntKey);
 	
 	auto bookRecFormat = RecordFormat!(ft.IntKey, "Ключ", ft.Str, "Название", ft.Str, "Автор", ft.Str, "Жанр", ft.Int, "Цена", ft.Bool, "Скидка", ft.Bool, "Переплет")();
 	
-	auto bookRecSet = getRecordSet!(bookRecFormat)(queryResult);
-	writeln( bookRecSet[3].get!"Цена" );
-	writeln( bookRecSet.isNullable("Ключ") );
-	
-	
+	string query = `select * from book`;
+	auto book_rs = dbase.query(query).getRecordSet(bookRecFormat);
+	foreach( rec; book_rs )
+	{	write( rec.get!"Цена" );
+		writeln( " - " ~ typeid( rec.get!"Цена"() ).to!string );
+	}
 }

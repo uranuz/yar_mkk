@@ -50,8 +50,18 @@ template DatabaseField(FieldType FieldT)
 					return true;
 				}
 				
-				T getValue(size_t index)
-				{	return fldConv!( FieldT )( _queryResult.getValue(index, _fieldIndex) );
+				T get(size_t index)
+				{	return fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) );
+				}
+				T get(size_t index, T defaultValue)
+				{	return ( isNull(index) ? defaultValue : fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) ) );
+				}
+				
+				string getStr(size_t index)
+				{	return _queryResult.get(_fieldIndex, index);
+				}
+				string getStr(size_t index, string  defaultValue)
+				{	return ( isNull(index) ? defaultValue : _queryResult.get(_fieldIndex, index) );
 				}
 				
 		// 		//Методы и свойства по работе с диапазоном
@@ -90,6 +100,15 @@ template DatabaseField(FieldType FieldT)
 					//else
 						//TODO: Выдавать ошибку
 				}
+				
+				
+				size_t getKey(size_t index)
+				{	if( index < _keys.length )
+						return _keys[index];
+					assert(0, "Ключ не найден!!!");
+					//else
+						//TODO: Выдавать ошибку
+				}
 			} //override
 			
 			bool keyExists(size_t key)
@@ -104,7 +123,7 @@ template DatabaseField(FieldType FieldT)
 			void _readKeys()
 			{	auto recordCount = _queryResult.recordCount;
 				for( size_t i = 0; i < recordCount; i++ )
-				{	auto key = std.conv.to!(size_t)( _queryResult.getValue(i, _fieldIndex) );
+				{	auto key = std.conv.to!(size_t)( _queryResult.get(_fieldIndex, i) );
 					_keys ~= key;
 					_indexes[key] = i;
 				}
@@ -163,13 +182,25 @@ template DatabaseField(FieldType FieldT)
 				{	return _name; }
 				bool isNull(size_t index)
 				{	if( _isNullable )
-						return ( index < _queryResult.recordCount ) ? _queryResult.getIsNull( index, _fieldIndex ) : true;
+						return ( index < _queryResult.recordCount ) ? _queryResult.isNull( _fieldIndex, index ) : true;
 					else return false;
 				}
 				
-				T getValue(size_t index)  
+				T get(size_t index)  
 				{	if( isNull(index) ) assert(0);
-					else return fldConv!( FieldT )( _queryResult.getValue(index, _fieldIndex) );
+					else return fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) );
+				}
+				
+				T get(size_t index, T defaultValue)  
+				{	return ( isNull(index) ? defaultValue : fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) ) );
+				}
+				
+				string getStr(size_t index)
+				{	if( isNull(index) ) assert(0);
+					else return _queryResult.get(_fieldIndex, index);
+				}
+				string getStr(size_t index, string  defaultValue)
+				{	return ( isNull(index) ? defaultValue : _queryResult.get(_fieldIndex, index) );
 				}
 				
 		// 		void setNull(size_t key)
