@@ -1,7 +1,6 @@
 module webtank.datctrl.record_format;
 
-
-import std.typetuple, std.typecons, std.stdio, std.conv;
+import std.typetuple, std.typecons, std.conv;
 
 import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field;
 
@@ -14,7 +13,6 @@ struct RecordFormat(Args...)
 		foreach( i, spec ; fieldSpecs)
 		{	result ~= spec.fieldType;
 		}
-			
 		return result;
 	}
 	
