@@ -144,28 +144,28 @@ unittest
 string[string] extractURIData(string queryStr)
 {	string[string] result;
 	foreach( key, value; parseURIQuery2( queryStr ) )
-		result[ std.uri.decodeComponent(key) ] = std.uri.decodeComponent(value);
+		result[ decodeURI(key) ] = decodeURI(value);
 	return result;
 }
 
 string[][string] extractURIDataArray(string queryStr)
 {	string[][string] result;
 	foreach( key, values; parseURIQuery2Array( queryStr ) )
-	{	string decodedKey = std.uri.decodeComponent(key);
+	{	string decodedKey = decodeURI(key);
 		foreach( val; values )
-			result[ decodedKey ] ~= std.uri.decodeComponent(val);
+			result[ decodedKey ] ~= decodeURI(val);
 	}
 	return result;
 }
 
 //Декодировать URI. Прослойка на случай, если захотим написать свою версию, отличную
 //от стандартной. TODO: Может переписать через alias? (однако неудобно смотреть аргументы)
-/*string decodeURI(string src) 
+string decodeURI(string src) 
 {	char[] result = src.dup;
 	for ( int i = 0; i < src.length; ++i )
 	{	if ( src[i] == '+' ) result[i] = ' '; //Заменяем плюсики на пробелы
 	}
-	return decodeComponent(result.idup);
-}*/
+	return std.uri.decodeComponent(result.idup);
+}
 
 
