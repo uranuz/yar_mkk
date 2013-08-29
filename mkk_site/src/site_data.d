@@ -6,7 +6,7 @@ module mkk_site.site_data;
 //Строка подключения к базе с общими данными
 immutable(string) commonDBConnStr = "dbname=baza_MKK host=192.168.0.28 user=postgres password=postgres";
 //Строка подключения к базе с данными аутентификации
-immutable(string) authDBConnStr = "";
+immutable(string) authDBConnStr = "dbname=postgres host=192.168.0.100 user=postgres password=postgres";
 
 ///Пути в файловой системе
 //Путь к журналу ошибок сайта
