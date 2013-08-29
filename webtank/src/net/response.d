@@ -62,9 +62,12 @@ protected:
 	string _getHeaderStr()
 	{	import std.conv;
 		headers["content-length"] = std.conv.to!string(_respBody.length);
-		if( _cookie.length > 0 )
-			headers["set-cookie"] = _cookie.getString();
+// 		if( _cookie.length > 0 )
+// 			headers["set-cookie"] = _cookie.getString();
 		headers["content-type"] = "text/html; charset=\"utf-8\"";
-		return headers.getString();
+		return 
+		headers.getStatusLine() 
+		~ _cookie.getString() 
+		~ headers.getString() ~ "\r\n" ;
 	}
 }

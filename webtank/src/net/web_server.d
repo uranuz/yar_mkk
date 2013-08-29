@@ -1,4 +1,6 @@
-import std.socket, std.string, std.conv, core.thread, std.stdio;
+module webtank.net.web_server;
+
+import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime;
 
 import webtank.net.application, webtank.net.http_headers, webtank.net.uri,
 webtank.net.request, webtank.net.response;
@@ -113,6 +115,8 @@ void main() {
 	
 	Вопрос: что из этого, возможно, лучше выделить в отдельные процессы для простоты или надежности?
 	*/
+	
+// 	serverStartTime = Clock.currTime();
 	
 	Socket listener = new TcpSocket;
 	scope(exit) 

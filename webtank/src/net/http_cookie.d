@@ -46,6 +46,7 @@ public:
 				result ~= `; HttpOnly`;
 			if( (name in _secureFlags) && (_secureFlags[name]) )
 				result ~= `; Secure`;
+			result ~= "\r\n";
 		}
 		return result;
 	}

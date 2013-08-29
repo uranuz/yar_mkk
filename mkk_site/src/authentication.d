@@ -1,8 +1,8 @@
-module webtank.net.authentication;
+module mkk_site.authentication;
 
 import std.conv;
 
-import webtank.net.http_cookie, webtank.db.postgresql;
+import webtank.db.postgresql;
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -12,6 +12,12 @@ class AuthException : Exception {
 	}
 }
 
+enum uint sessionIdSize = 16;
+enum uint SIDStrMinSize = 2 * sessionIdSize; //Минимальная длина строкового представления Ид сессии
+enum uint loginMinLength = 3;  //Минимальная длина логина
+enum uint passwordMinLength = 6;  //Минимальная длина пароля
+alias ubyte[sessionIdSize] SessionIdType;
+
 //Структура с информацией о пользователе
 struct UserInfo
 {	string login;
@@ -19,49 +25,63 @@ struct UserInfo
 	string name;
 }
 
-/**
-	Сценарий работы с классом:
-	
-	
-*/
-
 ///Класс "Аутентификация"
 class Authentication
 {	
 protected:
 	UserInfo _userInfo = anonymousUI; //Информация о пользователе (не вся, только основная)
 	SessionIdType _sessionId;  //Ид сессии
-	bool _hasUserInfo = false; //true, если получение информации о пользователе не требуется
-	bool _hasSID = false; //true, если получение Ид сессии не требуется
+	bool _updateSID = true;
+	bool _updateUserInfo = true;
+	string _SIDString;
 	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
 	string _authDBConnStr;
 	string _errorLogFile;
 
 public:
-	enum uint sessionIdSize = 16;
-	enum uint SIDStrMinSize = 2 * sessionIdSize; //Минимальная длина строкового представления Ид сессии
-	enum uint loginMinLength = 3;  //Минимальная длина логина
-	enum uint passwordMinLength = 6;  //Минимальная длина пароля
-	alias ubyte[sessionIdSize] SessionIdType;
-	
 	enum UserInfo anonymousUI = UserInfo("anonymous", "anonymous", "anonymous");
 
-	
-	this(string dbConnStr, string errorLogFile) //Конструктор
-	{	_authDBConnStr = DBConnStr;
+	this(string SIDString, string dbConnStr, string errorLogFile) //Конструктор
+	{	_authDBConnStr = dbConnStr;
 		_errorLogFile = errorLogFile;
+		_SIDString = SIDString;
+		identify(_SIDString);
+	}
+	
+	this(string SIDString, string dbConnStr) //Конструктор
+	{	_authDBConnStr = dbConnStr;
+		_SIDString = SIDString;	
+		identify(_SIDString);
+	}
+	
+	void identify(string SIDString)
+	{	if( SIDString.length >= SIDStrMinSize )
+		{	auto db = new DBPostgreSQL(_authDBConnStr);
+			_sessionId = verifySessionId( SIDString, db );
+			if( _sessionId != SessionIdType.init )
+				_userInfo = getUserInfo( _sessionId, db, anonymousUI );
+		}
 	}
 	
 	//Функция возвращает true, если вход пользователя выполнен и false иначе
-	bool isLoggedIn() @property
-	{	return ( sessionId != SessionIdType.init ); //TODO: Улучшить проверку
+	bool isIdentified() @property
+	{	return ( ( _sessionId != SessionIdType.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	void enterUser(string login, string password)
-	{	auto dbase = new DBPostgreSQL(_authDBConnStr);
-		if( (dbase is null) || !dbase.isConnected )
+	void authenticate(string login, string password)
+	{	try { //Логирование запросов к БД для отладки
+			import std.file;
+			std.file.append( _errorLogFile, 
+				"--------------------\r\n"
+				"Authentication.authenticate: _authDBConnStr = \r\n"
+				~ _authDBConnStr ~ "\r\n"
+			);
+		} catch(Exception) {}
+	
+		auto dbase = new DBPostgreSQL(_authDBConnStr);
+		if( (dbase is null) || (!dbase.isConnected) )
 			return;
 			
 		if( login.length < loginMinLength ) //Проверяем длину логина
@@ -100,7 +120,7 @@ public:
 			SessionIdType sid = generateSessionId(login);
 			try { //Логирование запросов к БД для отладки
 				import std.file;
-				std.file.append( dbLibLogFile, 
+				std.file.append( _errorLogFile, 
 					"sid: " ~ toHexString(sid) ~ "\r\n"
 				);
 			} catch(Exception) {}
@@ -114,34 +134,33 @@ public:
 				~ ` returning 'authenticated';`;
 			auto newSIDStatusRes = dbase.query(query);
 			if( newSIDStatusRes.recordCount <= 0 )
-				return SessionIdType.init;
+				return;
 			string statusStr = newSIDStatusRes.get(0, 0, "");
 			if( statusStr == "authenticated" )
 			{	_sessionId = sid;
-				_hasUserInfo = false;
-				return sid;  //Аутентификация завершена успешно
+				_updateSID = false;
+				_updateUserInfo = true;
+				//Аутентификация завершена успешно
 			}
 		}
-		return SessionIdType.init;
 	}
 
 	//Свойство "Информация о пользователе"
 	UserInfo userInfo() @property
-	{	if( !_hasUserInfo )
-		{	_userInfo = getUserInfo( sessionId, new DBPostgreSQL(_authDBConnStr) );
-			_hasUserInfo = true;
+	{	if( _updateUserInfo )
+		{	_userInfo = getUserInfo( _sessionId, new DBPostgreSQL(_authDBConnStr) );
+			_updateUserInfo = false;
 		}
 		return _userInfo;
 	}
 	
 	//свойство "Ид сессии"
 	SessionIdType sessionId() @property
-	{	if( !_hasSID )
-		{	
-			_sessionId = verifySessionId( SIDString, new DBPostgreSQL(_authDBConnStr) );
+	{	if( _updateSID )
+		{	_sessionId = verifySessionId( _SIDString, new DBPostgreSQL(_authDBConnStr) );
 			_userInfo = anonymousUI;
-			_hasUserInfo = false; //Раз получили Ид сессии на всякий случай ставим флаг
-			_hasSID = true;
+			_updateUserInfo = true; //Раз получили Ид сессии на всякий случай ставим флаг
+			_updateSID = false;
 		}
 		return _sessionId;
 	}
@@ -162,15 +181,14 @@ SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
 		return SessionIdType.init; //Не доступа к базе
 		
 	//Прерываем, если нет Ид сессии нет в браузере
-	if( SIDString.length <= SIDStrMinSize ) 
+	if( SIDString.length < SIDStrMinSize ) 
 		return SessionIdType.init;
 	
-	import std.digest.digest;
 	import webtank.common.conv;
-	auto sessionId = hexStringToByteArray(SIDString);
-	if( sessionId == SessionIdType.init )
+	auto SID = hexStringToStaticByteArray!(sessionIdSize)(SIDString);
+	if( SID == SessionIdType.init )
 		return SessionIdType.init;
-	SIDString = toHexString( sessionId );  //Важно
+	SIDString = webtank.common.conv.toHexString( SID );  //Важно
 	
 	//Делаем запрос к БД за информацией о сессии
 	auto query_res = dbase.query(
@@ -181,7 +199,7 @@ SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
 	
 	//К БД подключились
 	if( ( query_res.recordCount == 1 ) && ( query_res.fieldCount == 1 ) )
-		return sessionId; 
+		return SID; 
 	else
 		return SessionIdType.init; //Нет записей
 }
@@ -190,7 +208,7 @@ SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
 UserInfo getUserInfo( 
 	SessionIdType sessionId, 
 	DBPostgreSQL dbase,
-	UserInfo anonymousUI = Authentication.anonymousUI ) 
+	UserInfo anonymousUI = Authentication.anonymousUI
 )
 {	if( (dbase is null) || !dbase.isConnected )
 		return anonymousUI;
@@ -200,14 +218,14 @@ UserInfo getUserInfo(
 	//TODO: Добавить проверку, что у нас корректный Ид сессии
 	
 	//Делаем запрос к БД за информацией о пользователе
-	import std.digest.digest;
+	import webtank.common.conv;
 	auto query_res = dbase.query(
 		` select U.login, U.user_group, U.name `
 		` from session `
 		` join "user" as U `
 		` on U.id = user_id `
 		` where session.id = '` 
-		~ std.digest.digest.toHexString( sessionId ) ~ `'::uuid;`
+		~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
 	);
 	
 	if( (query_res.recordCount != 1) && (query_res.fieldCount != 3) )
@@ -220,7 +238,3 @@ UserInfo getUserInfo(
 		query_res.get(2, 0, null)  //name
 	);
 }
-
-
-
-
