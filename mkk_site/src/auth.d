@@ -55,7 +55,7 @@ void netMain(Application netApp)  //Определение главной фун
 		if( auth.isIdentified() ) 
 		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
 			//Добавляем перенаправление на другую страницу
-			string returnTo = rq.queryVars.get("returnTo", "");
+			string returnTo = rq.queryVars.get("redirectTo", "");
 			rp.redirect(returnTo);
 		}
 		else

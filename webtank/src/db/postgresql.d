@@ -194,7 +194,7 @@ public:
 		
 		//Вернёт true, если поле пустое, и false иначе
 		bool isNull(size_t fieldIndex, size_t recordIndex)
-		{	if( _queryResult )
+		{	if( _queryResult !is null )
 				return ( PQgetisnull(_queryResult, recordIndex.to!int, fieldIndex.to!int ) == 1 ) ? true : false;
 			assert(0);
 		}
@@ -202,9 +202,10 @@ public:
 		//Получение значения ячейки данных в виде строки
 		//Неопределённое поведение, если ячейка пуста или её нет
 		string get(size_t fieldIndex, size_t recordIndex)
-		{	if( _queryResult )
+		{	if( _queryResult is null )
+				return null;
+			else 
 				return ( PQgetvalue(_queryResult, recordIndex.to!int, fieldIndex.to!int ) ).to!string;
-			else return null;
 		}
 		
 		//Получение значения ячейки данных в виде строки

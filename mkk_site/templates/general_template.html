@@ -41,6 +41,14 @@
 			<a href="">Отчёты и файлы</a>
 			<a href="">Статьи</a>
 		</div> <!-- #main_menu -->
+		<div id="auth_bar">
+			<form action="{{dynamic path}}auth?redirectTo={{this page path}}" id="auth_form" method="post" style="display: inline;">
+				Логин: <input name="user_login" type="text">
+				Пароль: <input name="user_password" type="password">
+				<input type="submit" value="Войти">
+			</form>
+			{{auth header message}}
+		</div>
 		<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
 	</div> <!-- #top -->
 	
