@@ -30,7 +30,7 @@ template DatabaseField(FieldType FieldT)
 				_readKeys();
 			}
 			
-			this() { _fieldIndex = 0; }
+// 			this() { _fieldIndex = 0; }
 			
 			override { //Переопределяем интерфейсные методы
 				FieldType type()

@@ -1,11 +1,10 @@
 module webtank.net.web_server;
 
-import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime;
+import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime, std.getopt;
 
 import webtank.net.application, webtank.net.http_headers, webtank.net.uri,
 webtank.net.request, webtank.net.response;
 
-immutable(ushort) port = 8082;
 immutable(size_t) startBufLength = 1024;
 immutable(size_t) messageBodyLimit = 4_194_304;
 
@@ -101,7 +100,7 @@ protected:
 	
 }
 
-void main() {
+void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
 	
 	/**
@@ -118,14 +117,21 @@ void main() {
 	
 // 	serverStartTime = Clock.currTime();
 	
+	
 	Socket listener = new TcpSocket;
 	scope(exit) 
 	{	listener.shutdown(SocketShutdown.BOTH);
 		listener.close();
 	}
 	assert(listener.isAlive);
+	
+	ushort port = 8082;
+	//Получаем порт из параметров командной строки
+	getopt( progAgs,
+		"port", &port );
 	listener.bind( new InternetAddress(port) );
 	listener.listen(1);
+	writeln("Сайт стартовал!");
 	
 	while(true)
 	{	Socket currSock = listener.accept(); //Принимаем соединение

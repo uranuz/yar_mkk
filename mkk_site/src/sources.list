@@ -4,3 +4,4 @@ show_pohod.d
 authentication.d
 auth.d
 admin.d
+edit_tourist.d

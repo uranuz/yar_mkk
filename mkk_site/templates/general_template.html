@@ -43,8 +43,8 @@
 		</div> <!-- #main_menu -->
 		<div id="auth_bar">
 			<form action="{{dynamic path}}auth?redirectTo={{this page path}}" id="auth_form" method="post" style="display: inline;">
-				Логин: <input name="user_login" type="text">
-				Пароль: <input name="user_password" type="password">
+				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
+				Пароль: <input name="user_password" type="password" size="15">
 				<input type="submit" value="Войти">
 			</form>
 			{{auth header message}}
@@ -71,6 +71,6 @@
 	Все ходы записаны!!! г. Ярославль, 2013 г.
 </div>
 </div> <!-- #footer_framing -->
-<script type="text/javascript" src="{{js folder}}page_view.js"></script>
+<script type="text/javascript" src="{{js folder}}components.js"></script>
 </body>
 </html>

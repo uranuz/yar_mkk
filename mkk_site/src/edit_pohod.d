@@ -1,16 +1,11 @@
 module mkk_site.edit_pohod;
 
-import std.stdio;
-import std.conv;
+import std.stdio, std.conv;
 
 //import webtank.db.database;
-import webtank.datctrl.field_type;
-import webtank.db.postgresql;
-import webtank.db.datctrl_joint;
+import webtank.datctrl.field_type, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.application, webtank.templating.plain_templater;
 
-import webtank.datctrl.record;
-import webtank.net.application;
-import webtank.templating.plain_templater;
+import mkk_site.site_data;
 
 
 immutable(string) projectPath = `/webtank`;
@@ -58,9 +53,8 @@ void netMain(Application netApp)  //Определение главной фун
 	`;
 	
 	//Чтение шаблона страницы из файла
-	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
 	import std.stdio;
-	auto f = File(templFileName, "r");
+	auto f = File(generalTemplateFileName, "r");
 	string templateStr; //Строка с содержимым файла шаблона страницы 
 	string buf;
 	while ((buf = f.readln()) !is null)

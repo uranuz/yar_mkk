@@ -44,7 +44,7 @@ void netMain(Application netApp)  //Определение главной фун
 			std.file.append( eventLogFileName, 
 				"--------------------\r\n"
 				"mkk_site.auth\r\n"
-				"returnTo: " ~ rq.queryVars.get("returnTo", "") 
+				"redirectTo: " ~ rq.queryVars.get("redirectTo", "") 
 				~ " sid: " ~ sidStr ~ ";"
 				~ "\r\n"
 				~ rp.cookie.getString()
@@ -55,8 +55,8 @@ void netMain(Application netApp)  //Определение главной фун
 		if( auth.isIdentified() ) 
 		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
 			//Добавляем перенаправление на другую страницу
-			string returnTo = rq.queryVars.get("redirectTo", "");
-			rp.redirect(returnTo);
+			string redirectTo = rq.queryVars.get("redirectTo", "");
+			rp.redirect(redirectTo);
 		}
 		else
 		{	rp.write("Вход завершился с ошибкой");
