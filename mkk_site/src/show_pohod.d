@@ -15,19 +15,16 @@ import webtank.templating.plain_templater;
 
 import mkk_site.site_data;
 
-
+immutable thisPagePath = dynamicPath ~ "show_pohod";
 
 
 
 
 
 static this()
-{	Application.setHandler(&netMain, dynamicPath ~ "show_pohod");
-	Application.setHandler(&netMain, dynamicPath ~ "show_pohod/");
+{	Application.setHandler(&netMain, thisPagePath );
+	Application.setHandler(&netMain, thisPagePath ~ "/");
 }
-
-immutable(string) projectPath = `/webtank`;
-immutable(string) thisPagePath = dynamicPath ~ "show_pohod";
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
@@ -418,6 +415,18 @@ group by num
 	tpl.set("cgi-bin", dynamicPath);
 	tpl.set("useful links", "Куча хороших ссылок");
 	tpl.set("js folder", jsPath);
+	tpl.set("this page path", thisPagePath);
+	
+	
+	import mkk_site.authentication;
+	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+	
+	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	}
+	else 
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
+	}
 	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }

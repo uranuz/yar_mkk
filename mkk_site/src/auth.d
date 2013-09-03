@@ -1,53 +1,62 @@
 module mkk_site.auth;
 
-import std.process;
-import std.conv;
+import std.process, std.conv;
 
 import webtank.net.application;
 
-enum string dbLibLogFile = `/home/test_serv/sites/test/logs/webtank.log`;
+import mkk_site.site_data, mkk_site.authentication;
 
-Application netApp; //Обявление глобального объекта приложения
+static this()
+{	Application.setHandler(&netMain, dynamicPath ~ "auth");
+	Application.setHandler(&netMain, dynamicPath ~ "auth/");
+}
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
-	netApp.name = `Тестовое приложение`;
 	auto rp = netApp.response;
 	auto rq = netApp.request;
 	
+	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+	
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
-	{	import std.digest.digest;
-		import webtank.net.authentication: Auth =  Authentication;
-		auto sid = netApp.auth.enterUser(rq.postVars["user_login"], rq.postVars["user_password"]);
+	{	import webtank.common.conv;
+		
+		auth.authenticate(rq.postVars["user_login"], rq.postVars["user_password"]);
 		string sidStr;
-		if( sid != Auth.SessionIdType.init )
-		{	//Костыли для правильного преобразования из char[32] в string
-			auto sidStrStatic = std.digest.digest.toHexString( sid ) ;
+		if( auth.isIdentified() )
+		{	sidStr = webtank.common.conv.toHexString( auth.sessionId ) ;
 			//TODO: Подумать, что делать с этими багами
-			foreach( s; sidStrStatic ) sidStr ~= s;
-			rp.cookies["sid"] = sidStr;
-			rp.cookies["user_login"] = rq.postVars["user_login"];
+			import std.file;
+			std.file.append( eventLogFileName, 
+				"--------------------\r\n"
+				"mkk_site.auth\r\n"
+				"auth.isIdentified(): sid: " ~ sidStr ~ ";"
+				~ "\r\n"
+			);
+			
+			rp.cookie["sid"] = sidStr;
+			rp.cookie["user_login"] = rq.postVars["user_login"];
 		}
 		
 		try { //Логирование запросов к БД для отладки
 			import std.file;
-			std.file.append( dbLibLogFile, 
+			std.file.append( eventLogFileName, 
 				"--------------------\r\n"
 				"mkk_site.auth\r\n"
-				"returnTo: " ~ rq.queryVars.get("returnTo", "") 
+				"redirectTo: " ~ rq.queryVars.get("redirectTo", "") 
 				~ " sid: " ~ sidStr ~ ";"
 				~ "\r\n"
-				~ rp.cookies.getResponseStr()
+				~ rp.cookie.getString()
 				~ "\r\n"
 			);
 		} catch(Exception) {}
 		
-		if( sid != Auth.SessionIdType.init ) 
+		if( auth.isIdentified() ) 
 		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
 			//Добавляем перенаправление на другую страницу
-			string returnTo = rq.queryVars.get("returnTo", "");
-			rp.redirect(returnTo);
+			string redirectTo = rq.queryVars.get("redirectTo", "");
+			rp.redirect(redirectTo);
 		}
 		else
 		{	rp.write("Вход завершился с ошибкой");
@@ -55,12 +64,12 @@ void netMain(Application netApp)  //Определение главной фун
 	}
 	else //Если не пришёл логин с паролем, то работаем в обычном режиме
 	{	
-		string login = ( rq.cookies.hasName("user_login") ) ? rq.cookies["user_login"] : "";
+		string login = rq.cookie.get("user_login", "");
 		rp.write(
 //HTML
 `<html><body>
 <h2>Аутентификация</h2>`);
-		if( netApp.auth.isLoggedIn )
+		if( auth.isIdentified() )
 			rp.write("Вход на сайт уже выполен");
 		rp.write(
 `<hr>
@@ -82,12 +91,3 @@ void netMain(Application netApp)  //Определение главной фун
 	rp.write(`</body></html>`);
 }
 
-
-///Обычная функция main. В ней изменения НЕ ВНОСИМ
-int main()
-{	//Конструируем объект приложения. Передаём ему нашу "главную" функцию
-	netApp = new Application(&netMain); 
-	netApp.run(); //Запускаем приложение
-	netApp.finalize(); //Завершаем приложение
-	return 0;
-} 

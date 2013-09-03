@@ -34,12 +34,9 @@ return result;
 //----------------------
 
 static this()
-{	Application.setHandler(&netMain, dynamicPath ~ "show_tourist");
-	Application.setHandler(&netMain, dynamicPath ~ "show_tourist/");
+{	Application.setHandler(&netMain, thisPagePath );
+	Application.setHandler(&netMain, thisPagePath ~ "/");
 }
-
-immutable(string) projectPath = `/webtank`;
-immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";
 
 void netMain(Application netApp)  //Определение главной функции приложения
 {	
@@ -62,7 +59,7 @@ void netMain(Application netApp)  //Определение главной фун
  
    
 	try { //Логирование запросов к БД для отладки
-	std.file.append( LogFile, 
+	std.file.append( eventLogFileName, 
 		"--------------------\r\n"
 		"Фамилия: " ~ fem ~ "\r\n"
 	);
@@ -93,7 +90,7 @@ void netMain(Application netApp)  //Определение главной фун
 		<input type="submit" name="act" value="Найти"><br>`;
 	
 	try { //Логирование запросов к БД для отладки
-		std.file.append( LogFile, 
+		std.file.append( eventLogFileName, 
 			"--------------------\r\n"
 			"Количество записей: " ~ col_str.to!string ~ "\r\n"
 			"Текущий номер страницы: "~ curPageNum.to!string ~ ", всего страниц: " ~ pageCount.to!string ~ "\r\n"
@@ -146,7 +143,7 @@ void netMain(Application netApp)  //Определение главной фун
 	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
-		table ~= `<td>` ~ rec.get!"Ключ"().to!string ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
 		table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
@@ -178,6 +175,17 @@ void netMain(Application netApp)  //Определение главной фун
 	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
 	tpl.set("useful links", "Куча хороших ссылок");
 	tpl.set("js folder", "../../js/");
+	tpl.set("this page path", thisPagePath);
+	
+	import mkk_site.authentication;
+	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+	
+	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	}
+	else 
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
+	}
 	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }

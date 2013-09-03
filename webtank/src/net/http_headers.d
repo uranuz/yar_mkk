@@ -157,19 +157,22 @@ class ResponseHeaders
 		_headers["reason-phrase"] = "OK";
 	}
 	
-	string getString()
-	{	string result;
-		//Прописываем Status-Line
-		result ~= _headers["http-version"] ~ " " 
+	
+	string getStatusLine()
+	{	//Прописываем Status-Line
+		return 
+		_headers["http-version"] ~ " " 
 		~ _headers["status-code"] ~ " "
 		~ _headers.get("reason-phrase", "") ~ "\r\n";
-		
+	}
+	
+	string getString()
+	{	string result;
 		foreach( name, value; _headers )
 		{	if( name == "http-version" || name == "status-code" || name == "reason-phrase")
 				continue;
 			result ~= name ~ ": " ~ value ~ "\r\n";
 		}
-		result ~= "\r\n";
 		return result;
 	}
 	

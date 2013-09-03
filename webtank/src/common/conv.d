@@ -32,11 +32,38 @@ ubyte[] hexStringToByteArray(string hexString)
 			low = !low; 
 		}
 	}
-	if( !low )
+	if( low )
 		throw new Exception("Количество значащих Hex-символов должно быть чётным");
 	//assert( !low, "Количество значащих Hex-символов должно быть чётным" );
  	result.length = i; //Сколько раз перешли, столько реально элементов
 	return result;
+}
+
+ubyte[arrayLen] hexStringToStaticByteArray(size_t arrayLen)(string hexString)
+{	ubyte[arrayLen] result;
+	size_t i = 0; //Индексация результирующего массива
+	bool low = false;
+	foreach( symbol; hexString )
+	{	if( isHexSymbol(symbol) )
+		{	if( i >= arrayLen )
+				new Exception( "Количество значащих символов слишком велико для соответствия размеру результата" );
+			if( low )
+			{	result[i] += cast(ubyte) hexSymbolToByte(symbol);
+				i++; //После добавления младшего символа переходим к след. элементу
+			}
+			else
+				 result[i] = cast(ubyte) ( hexSymbolToByte(symbol) * 16 );
+			low = !low; 
+		}
+	}
+	if( low )
+		throw new Exception("Количество значащих Hex-символов должно быть чётным");
+	return result;
+}
+
+string toHexString(uint arrayLen)(ubyte[arrayLen] srcArray)
+{	import std.digest.digest;
+	return std.digest.digest.toHexString(srcArray).idup;
 }
 
 //Набор тестов для функций преобразования

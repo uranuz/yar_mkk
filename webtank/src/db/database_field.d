@@ -30,7 +30,7 @@ template DatabaseField(FieldType FieldT)
 				_readKeys();
 			}
 			
-			this() { _fieldIndex = 0; }
+// 			this() { _fieldIndex = 0; }
 			
 			override { //Переопределяем интерфейсные методы
 				FieldType type()
@@ -45,9 +45,9 @@ template DatabaseField(FieldType FieldT)
 				bool isWriteable() @property
 				{	return false; }
 				
+				//Ключевое поле всегда не пустое
 				bool isNull(size_t index)
-				{	if( index in _indexes ) return false; 
-					return true;
+				{	return false;
 				}
 				
 				T get(size_t index)
