@@ -17,6 +17,10 @@ import mkk_site.site_data;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
+
+
+
+
 static this()
 {	Application.setHandler(&netMain, thisPagePath );
 	Application.setHandler(&netMain, thisPagePath ~ "/");
@@ -122,7 +126,7 @@ void netMain(Application netApp)  //Определение главной фун
 	
 	
 	
-	uint limit = 2;// максимальное  число строк на странице
+	uint limit = 5;// максимальное  число строк на странице
 	int page;
 	//-----------------формируем варианты запросов на число строк-------------------------
 	string select_str1 =`select count(1) from pohod`; 	// при отсутствии фильтрации 
@@ -161,13 +165,13 @@ void netMain(Application netApp)  //Определение главной фун
 			select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива
 		select_str2 ~= " ) ";
 	}
+	// фильтрация по дате
+	select_str2~=(((isAnyKs == true)||(vid.length !=0))&&((s_year !="") || (e_year !="")))?" and ": "";
 	
-	select_str2~=((s_year !="") || (e_year !=""))?" and ": "";
-	
-  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date<='` ~s_dat~`' `;
+  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;
   	
-	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  end_dat>'` ~e_dat~`' `;
- 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>'`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
+	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  begin_date<= '` ~e_dat~`' `;
+ 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
  	select_str2~=`) `;
  	}
 	
@@ -191,7 +195,7 @@ void netMain(Application netApp)  //Определение главной фун
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit+1; //Количество страниц
+	uint pageCount = (col_str)/limit; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
@@ -210,7 +214,7 @@ void netMain(Application netApp)  //Определение главной фун
 	ft.Str, "Вид, кс",   ft.Str,"Район",  ft.Str,"Руководитель", 
 	ft.Str,"Участники",  ft.Str,"Уч",     ft.Str,"Город,<br>организация", 
 	ft.Str, "Нитка маршрута", ft.Str, "Статус<br> похода")();
-	
+	//WHERE
 	
 	string queryStr = 
 	`with 
