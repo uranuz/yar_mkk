@@ -20,9 +20,6 @@ void main()
 	
 	writeln( typeid( getTupleOfByFieldSpec!(IField, format.fieldSpecs) ).to!string  );
 	alias  getTupleOfByFieldSpec!(DatabaseField, format.fieldSpecs)[2] DBFieldType;
-	auto field = new DBFieldType;
-	writeln( typeid( field ).to!string  );
-	writeln( field.isNullable() );
 	
 	alias RecordSet!format RSType;
 	
@@ -34,15 +31,12 @@ void main()
 	auto dbase = new DBPostgreSQL(connStr);
 	assert( dbase.isConnected );
 	
-	auto rs = new RSType;
-	auto countFld = new DatabaseField!(FieldType.IntKey);
-	
 	auto bookRecFormat = RecordFormat!(ft.IntKey, "Ключ", ft.Str, "Название", ft.Str, "Автор", ft.Str, "Жанр", ft.Int, "Цена", ft.Bool, "Скидка", ft.Bool, "Переплет")();
 	
 	string query = `select * from book`;
 	auto book_rs = dbase.query(query).getRecordSet(bookRecFormat);
 	foreach( rec; book_rs )
-	{	write( rec.get!"Цена" );
-		writeln( " - " ~ typeid( rec.get!"Цена"() ).to!string );
+	{	write( rec.getStr("Цена") );
+// 		writeln( " - " ~ typeid( rec.getS"Цена"() ).to!string );
 	}
 }

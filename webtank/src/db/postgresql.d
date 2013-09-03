@@ -225,13 +225,3 @@ public:
 		}
 	}
 }
-
-//Функция возвращает переданную строку, но с удвоенными кавычками
-string pgEscapeStr(string str)
-{	string result;
-	foreach(s; str)
-	{	if( s == '\'' ) result ~= "\'\'";
-		else result ~= s;
-	}
-	return result;
-}

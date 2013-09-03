@@ -29,7 +29,6 @@ interface IField(FieldType FieldT)
 	T get(size_t index);
  	T get(size_t index, T defaultValue);
  	
- 	string getStr(size_t index);
 	string getStr(size_t index, string  defaultValue);
 	
 	static if( FieldT == FieldType.IntKey )

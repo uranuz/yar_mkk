@@ -1,44 +1,44 @@
-<form id="edit_tourist_form" action="{{edit_tourist_form.action}}" method="POST">
-	<input type="hidden" name="num" value="{{num.value}}">
+<form id="edit_tourist_form" method="POST"{{edit_tourist_form}}>
+	<input type="hidden" name="num"{{num}}>
 	<table>
 		<tr><td>Фамилия</td>
-			<td><input type="text" name="family_name" value="{{family_name.value}}"></td>
+			<td><input type="text" name="family_name"{{family_name}}></td>
 		</tr>
 		<tr><td>Имя</td>
-			<td><input type="text" name="given_name" value="{{given_name.value}}"></td>
+			<td><input type="text" name="given_name"{{given_name}}></td>
 		</tr>
 		<tr><td>Отчество</td>
-			<td><input type="text" name="patronymic" value="{{patronymic.value}}"></td>
+			<td><input type="text" name="patronymic"{{patronymic}}></td>
 		</tr>
 		<tr><td>День рождения</td>
-			<td><input type="text" name="birth_day" value="{{birth_day.value}}"></td>
+			<td><input type="text" name="birth_day"{{birth_day}}></td>
 		</tr>
 		<tr><td>Месяц рождения</td>
-			<td><input type="text" name="birth_month" value="{{birth_month.value}}"></td>
+			<td><input type="text" name="birth_month"{{birth_month}}></td>
 		</tr>
 		<tr><td>Год рождения</td>
-			<td><input type="text" name="birth_year" value="{{birth_year.value}}"></td>
+			<td><input type="text" name="birth_year"{{birth_year}}></td>
 		</tr>
 		<tr><td>Адрес проживания</td>
-			<td><input type="text" name="address" value="{{address.value}}"></td>
+			<td><input type="text" name="address"{{address}}></td>
 		</tr>
 		<tr><td>Номер телефона</td>
-			<td><input type="text" name="phone" value="{{phone.value}}"></td>
+			<td><input type="text" name="phone"{{phone}}></td>
 		</tr>
 		<tr><td>Показывать номер телефона</td>
-			<td><input type="checkbox" name="show_phone" {{show_phone.flag}}></td>
+			<td><input type="checkbox" name="show_phone"{{show_phone}}></td>
 		</tr>
 		<tr><td>Электронная почта</td>
-			<td><input type="text" name="email" value="{{email.value}}"></td>
+			<td><input type="text" name="email"{{email}}"></td>
 		</tr>
 		<tr><td>Показывать адрес эл. почты</td>
-			<td><input type="checkbox" name="show_email" {{show_email.flag}}></td>
+			<td><input type="checkbox" name="show_email"{{show_email}}></td>
 		</tr>
 		<tr><td>Туристский опыт</td>
-			<td><input type="text" name="exp" value="{{exp.value}}"></td>
+			<td><input type="text" name="exp"{{exp}}></td>
 		</tr>
 		<tr><td>Комментарий</td>
-			<td><input type="text" name="comment" value="{{comment.value}}"></td>
+			<td><input type="text" name="comment"{{comment}}></td>
 		</tr>
 		<tr><td>Спортивный разряд</td>
 			<td>{{sports_grade}}</td>
@@ -46,6 +46,8 @@
 		<tr><td>Судейская категория</td>
 			<td>{{judge_category}}</td>
 		</tr>
-		
+		<tr><td> &nbsp; </td>
+			<td><input type="submit"{{submit_btn}}"></td>
+		</tr>
 	<table>
 </form>

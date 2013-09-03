@@ -2,7 +2,7 @@ module mkk_site.authentication;
 
 import std.conv;
 
-import webtank.db.postgresql;
+import webtank.db.postgresql, webtank.net.utils;
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
