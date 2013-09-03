@@ -1,6 +1,6 @@
 module mkk_site.full_test;
 
-import std.conv, std.string;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type;
@@ -14,6 +14,24 @@ import webtank.templating.plain_templater;
 
 import mkk_site.site_data;
 
+//Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
+string nou_SQL_injekt(string str)
+{
+dstring dstr = toUTF32(str);
+dstring dstr1;
+for (int i=0;i<dstr.length;i++)
+{
+if(dstr[i]==' ' ||  dstr[i]=='-' || dstr[i]=='_' || dstr[i]=='(' || dstr[i]==')' || (dstr[i]>='A' && dstr[i]<'Z'  ) || (dstr[i]>='a' && dstr[i]<='z'  ) ||
+(dstr[i]>='А' && dstr[i]<='я' ) || dstr[i]=='Ё' || dstr[i]=='ё' )
+dstr1~=dstr[i];
+//допустимые  символы А-Я,а-я,A-Z,f-z,-,_,),(.
+}
+//  strip()       Уибират начальные и конечные пробелы
+
+string result = strip(toUTF8(dstr1));
+return result;
+}
+//----------------------
 
 static this()
 {	Application.setHandler(&netMain, dynamicPath ~ "show_tourist");
@@ -38,9 +56,11 @@ void netMain(Application netApp)  //Определение главной фун
 		output ~= "Ошибка соединения с БД";
 	
 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
-	//  strip()       Уибират начальные и конечные пробелы   
-	string fem = strip(( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
-
+	   
+	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
+	
+ 
+   
 	try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"
@@ -56,7 +76,7 @@ void netMain(Application netApp)  //Определение главной фун
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit+1; //Количество страниц
+	uint pageCount = (col_str)/limit; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
