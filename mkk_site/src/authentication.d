@@ -92,7 +92,7 @@ public:
 			` select id, password `
 			` from "user" `
 			` where login='`
-			~ pgEscapeStr( login ) ~ `';`
+			~ PGEscapeStr( login ) ~ `';`
 		);
 		
 		if( ( query_res.recordCount == 1 ) && ( query_res.fieldCount == 1 ) )
@@ -128,9 +128,9 @@ public:
 			string sidStr = std.digest.digest.toHexString(sid);
 			string query = 
 				` insert into "session" ("id", "user_id", "expires") values ( ( '`
-				~ sidStr ~ `' )::uuid, ` ~ pgEscapeStr( user_id  )
+				~ sidStr ~ `' )::uuid, ` ~ PGEscapeStr( user_id  )
 				~ `, ( current_timestamp + interval '` 
-				~ pgEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
+				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
 				~ ` returning 'authenticated';`;
 			auto newSIDStatusRes = dbase.query(query);
 			if( newSIDStatusRes.recordCount <= 0 )

@@ -88,79 +88,23 @@ unittest
 	assert( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15] == digits);
 }
 
-/**
-Списочек важных, наиболее используемых типов:
-
-
-*/
-
-// template convDef(R)
-// {	import std.conv;
-// 	import std.string;
-// 	R convDef(string src, R defaultValue = R.init)
-// 	{	try
-// 		{	static if( is( R: bool ) )
-// 			{	
-// 				
-// 				foreach( val; _logicTrueValues  )
-// 					if( toLower( strip(src) ) == val ) 
-// 						return true;
-// 				foreach( val; _logicFalseValues  )
-// 					if( toLower( strip(src) ) == val ) 
-// 						return false;
-// 				return defaultValue;
-// 			}
-// 			else
-// 			{	return std.conv.to!R(src);
-// 			}
-// 		}
-// 		catch(std.conv.ConvException e)
-// 		{	return defaultValue;
-// 		}
-// 	}
-// }
-
-
 enum trueStrings = 
 [`true`, `t`, `yes`, `y`, `истина`, `и`, `да`, `д`, `on`, `1`];
 enum falseStrings = 
 [`false`, `f`, `no`, `n`, `ложь`, `л`, `нет`, `н`, `off`, `0`];
 
-//Функция пытается преобразовать исходное значение src в заданный тип и обратно
-//в случае неудачи возвращается defaultValue
-template verify(T, R)
-{	import std.conv;
-	R verify(R src, R defaultValue = R.init)
-	{	try
-		{	static if( is( R: string ) )
-			{	import std.string;
-				static if( is( T: bool ) )
-				{	foreach( logicStr; trueStrings )
-						if( toLower( strip(src) ) == logicStr )
-							return "да";
-					foreach( logicStr; falseStrings )
-						if( toLower( strip(src) ) == logicStr )
-							return "нет";
-					return defaultValue;
-				}
-				else static if( __traits(isScalar, T) )
-				{	auto convFvdValue = std.conv.to!T(src);
-					return std.conv!R(convFvdValue);
-				}
-				else
-					static assert(0, "Not implemented!");
-			}
-			else
-				static assert(0, "Not implemented!");
-		}
-		catch(std.conv.ConvException e)
-		{	return defaultValue;
-		}
-		
-	}
-	
+//Функция преобразования некоторых строковых значений в логическое
+bool toBool(string src)
+{	import std.string;
+	foreach( logicStr; trueStrings )
+		if( toLower( strip(src) ) == logicStr )
+			return true;
+	foreach( logicStr; falseStrings )
+		if( toLower( strip(src) ) == logicStr )
+			return false;
+	import std.conv;
+	throw new std.conv.ConvException("Can't convert string \"" ~ src ~ "\" to boolean type!!!");
 }
-
 
 // void main()
 // {	import std.stdio;

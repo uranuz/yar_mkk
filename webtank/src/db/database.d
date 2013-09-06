@@ -10,7 +10,7 @@ interface IDatabase ///Интерфейс БД
 	bool isConnected() @property;  //Вернёт true, если мы подключены к БД
 	IDBQueryResult query(string queryStr);  //Подача запроса к БД, возвращает результат
 	//DBStatus getStatus() @property; //Подробнее узнать как дела у базы
-	string getLastError(); //Прочитать последнюю ошибку
+	string lastErrorMessage() @property; //Прочитать последнюю ошибку
 	//string getVersionInfo();
 	DBMSType type() @property; //Тип системы управления БД
 	

@@ -3,7 +3,7 @@
  import std.utf;
 
 //Функция возвращает переданную строку с заменой экранированными кавычками для БД postgresql
-string pgEscapeStr(string srcStr, string quoteSubst = "'||chr(39)||'" )
+string PGEscapeStr(string srcStr, string quoteSubst = "''" )
 {	dstring result;
 	immutable dQuoteSubst = toUTF32(quoteSubst);
 	auto str = toUTF32(srcStr);
@@ -69,6 +69,28 @@ string replace(string src, in string[string] mapping)
 string HTMLEscapeValue(string src)
 {	return replace( src, [ "<": "&lt;", ">": "&gt;", "\"": "&#34;", "\'": "&#39;", "&": "&amp;" ] );
 }
+
+
+//Функция образует часть SQL запроса, которая переводит выражения expr1, expr2, находя символы
+//из строки fromStr и заменяя соответствующими символами из toStr. Затем сравнивает полученные результаты. 
+//expr1, expr2 - любые выражения SQL строкового типа.
+string PGCompareTranslated(string expr1, string expr2, string fromStr, string toStr)
+{	return `translate(` ~ expr1 ~ `, '` ~ fromStr ~ `', '` ~ toStr ~ `')=translate(` ~ expr2 ~ `, '` ~ fromStr ~ `', '` ~ toStr ~ `')`;
+	
+}
+
+string PGYotInsensCompare(string expr1, string expr2)
+{	return PGCompareTranslated(expr1, expr2, "ёй", "еи");
+}
+
+string PGYotInsensTrimCompare(string expr1, string expr2)
+{	return PGYotInsensCompare(`btrim(` ~ expr1 ~ `)`, `btrim(` ~ expr2 ~ `)`);
+}
+
+string PGYotCaseInsensTrimCompare(string expr1, string expr2)
+{	return PGYotInsensTrimCompare(`lower(` ~ expr1 ~ `)`, `lower(` ~ expr2 ~ `)`);
+}
+
 
 // void main()
 // {	import std.stdio;

@@ -59,15 +59,19 @@ class DBPostgreSQL : IDatabase
 {
 protected:
 	PGconn *_conn;
+	string _queryLogFileName;
+	string _errorLogFileName;
 	
 public:
 	//Конструктор объекта, принимает строку подключения как параметр
-	this( string connStr ) //Конструктор объекта, принимает строку подключения
-	{	/*if (connStr !is null)*/ connect(connStr);
+	this( string connStr, 
+		string errorLogFileName = dbQueryLogFile, 
+		string queryLogFileName =  dbQueryLogFile 
+	) //Конструктор объекта, принимает строку подключения
+	{	_errorLogFileName = errorLogFileName;
+		_queryLogFileName = queryLogFileName;
+		connect(connStr);
 	}
-	
-	//Конструктор "ничегонеделанья"
-	this() {}
 	
 	override {
 		//Ф-ция подключения к БД
@@ -87,22 +91,35 @@ public:
 		IDBQueryResult query(string sql)
 		{	try { //Логирование запросов к БД для отладки
 				import std.file;
-				std.file.append( dbQueryLogFile, 
+				std.file.append( _queryLogFileName, 
 					"--------------------\r\n"
 					~ sql ~ "\r\n"
 				);
 			} catch(Exception)
 			{}
 			
+			//Выполняем запрос
 			PGresult* Res=PQexec(_conn, toStringz(sql));
-			//if (Res is null) return null;
-			//else 
+			
+			auto errorMessage = lastErrorMessage;
+			import std.string;
+			if( std.string.strip(errorMessage).length > 0 )
+			{	try { //Логирование запросов к БД для отладки
+					import std.file;
+					std.file.append( _errorLogFileName,
+						"--------------------\r\n"
+						~ errorMessage ~ "\r\n"
+					);
+				} catch(Exception)
+				{}
+			}
+			//TODO: Возможно возвращать null, если запрос завершился с ошибкой
+			
 			return new PostgreSQLQueryResult(this, Res);
-			//else ; //TODO: Add error there or doing nothing
 		}
 		
 		//Получение строки с недавней ошибкой
-		string getLastError()
+		string lastErrorMessage()
 		{	return PQerrorMessage(_conn).to!string; }
 		
 		//Тип СУБД
@@ -123,14 +140,6 @@ public:
 		{	PQfinish(_conn);
 			_conn = null;
 		}
-	}
-	
-	
-	//TODO: Этот метод дублирует метод getLastError
-	string errorMessage()
-	{	if( _conn !is null )
-			return to!string(PQerrorMessage(_conn));
-		else return null;
 	}
 	
 }
