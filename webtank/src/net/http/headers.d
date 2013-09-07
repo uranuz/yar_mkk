@@ -1,4 +1,4 @@
-module webtank.net.http_headers;
+module webtank.net.http.headers;
 
 //TODO: Подумать, нужно ли делать URI декодировку заголовков
 
