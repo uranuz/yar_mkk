@@ -32,6 +32,7 @@ string result = strip(toUTF8(dstr1));
 return result;
 }
 //----------------------
+immutable thisPagePath = dynamicPath ~ "show_tourist";
 
 static this()
 {	Application.setHandler(&netMain, thisPagePath );

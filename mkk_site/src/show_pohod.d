@@ -17,10 +17,6 @@ import mkk_site.site_data;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
-
-
-
-
 static this()
 {	Application.setHandler(&netMain, thisPagePath );
 	Application.setHandler(&netMain, thisPagePath ~ "/");
@@ -66,16 +62,20 @@ void netMain(Application netApp)  //Определение главной фун
 		string start_dat =  s_year ~ s_month; 
 		bool _start_dat=true;if ( s_year=="") _start_dat=false;
 		
-		
-		string s_dat =s_year.to!string ~`-`;		
-		foreach( i, word; month)
+		//----------------------формирование начала диапозона дат
+		string s_dat =s_year.to!string ~`-`;
+		if(s_month!="")
+		{foreach( i, word; month)
 		{	if( s_month == word ) 
-			{	 if(i<10)s_dat ~=`0`;  s_dat ~= i.to!string ~`-01`;
+			{	 if(i<9)s_dat ~=`0`;
+			
+			s_dat ~= i.to!string ~`-01`;
 				break;
 			}
 		}
-		 
-	   
+		}
+		 else {s_dat ~=`01-01`;}
+	  ///////////////////////////////////// 
 	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" );
 		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
 		string end_dat = e_year ~ e_month;
@@ -83,20 +83,33 @@ void netMain(Application netApp)  //Определение главной фун
 		
 		bool _end_dat=true;if ( e_year=="") _end_dat=false;
 		
+		//----------------------формирование конца диапозона дат
 		
-		if(e_month!="декабрь")
+		{
+		if((e_month!="декабрь")&&(e_month!=""))
 		{
 		 e_dat =e_year.to!string ~`-`;		
 		foreach( i, word; month)
 		{	if( e_month == word ) 
-			{	 if(i<10) e_dat ~=`0`;  e_dat ~= (i+1).to!string ~`-01`;
+			{	 if(i<9) e_dat ~=`0`; 
+			
+		
+			e_dat ~= (i+1).to!string ~`-01`;
 				break;
 			}
 		}
+		}		
+		else		 
+		{	try {
+				e_dat =(e_year.to!int+1).to!string ~`-01-01`;
+			} catch(std.conv.ConvException e)
+			{	e_dat = "2050-01-01";
+			
+			}
+		
 		}
-		
-		else		 e_dat =(e_year.to!int+1).to!string ~`-01-01`;		
-		
+		}
+		////////////////////////////////////////////////////////////
 		
 		
 		
@@ -109,7 +122,8 @@ void netMain(Application netApp)  //Определение главной фун
 		string nou_filtr; // котроль необходимости фильтрации
 		nou_filtr= s_year ~ e_month ~ s_year ~ s_month ~ vid ~ all_ks;
 		
-		bool _filtr=true;if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
+		bool _filtr=true;
+		if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
 		            
 		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
 		   try { //Логирование запросов к БД для отладки
@@ -166,7 +180,7 @@ void netMain(Application netApp)  //Определение главной фун
 		select_str2 ~= " ) ";
 	}
 	// фильтрация по дате
-	select_str2~=(((isAnyKs == true)||(vid.length !=0))&&((s_year !="") || (e_year !="")))?" and ": "";
+	select_str2~=(((isAnyKs == false)||(vid.length !=0))&&((s_year !="") || (e_year !="")))?" and ": "";
 	
   	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;
   	
@@ -195,7 +209,7 @@ void netMain(Application netApp)  //Определение главной фун
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit; //Количество страниц
+	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
@@ -255,9 +269,9 @@ group by num
       ` LEFT OUTER JOIN  U `
       `on U.num = pohod.num  `;     
       
-		if(_filtr){	queryStr~=select_str2;}	
+		if( _filtr ){	queryStr~=select_str2;}	
 		
-		queryStr~=` order by pohod.num  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
+		queryStr~=` order by  pohod.begin_date DESC  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
 	
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
