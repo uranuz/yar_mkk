@@ -89,13 +89,13 @@ public:
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
-			` select id, password `
-			` from "user" `
+			` select num, password `
+			` from "site_user" `
 			` where login='`
 			~ PGEscapeStr( login ) ~ `';`
 		);
 		
-		if( ( query_res.recordCount == 1 ) && ( query_res.fieldCount == 1 ) )
+		if( ( query_res.recordCount != 1 ) || ( query_res.fieldCount != 2 ) )
 			return;
 			
 		string user_id = query_res.get(0, 0, null);
@@ -127,7 +127,7 @@ public:
 			
 			string sidStr = std.digest.digest.toHexString(sid);
 			string query = 
-				` insert into "session" ("id", "user_id", "expires") values ( ( '`
+				` insert into "session" ("num", "site_user_num", "expires") values ( ( '`
 				~ sidStr ~ `' )::uuid, ` ~ PGEscapeStr( user_id  )
 				~ `, ( current_timestamp + interval '` 
 				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
@@ -194,7 +194,7 @@ SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
 	auto query_res = dbase.query(
 		//Получим 1, если срок действия не истек или ничего
 		`select 1 from session 
-		where id = '` ~ SIDString ~ `'::uuid and current_timestamp < "expires";`
+		where num = '` ~ SIDString ~ `'::uuid and current_timestamp < "expires";`
 	);
 	
 	//К БД подключились
@@ -222,9 +222,9 @@ UserInfo getUserInfo(
 	auto query_res = dbase.query(
 		` select U.login, U.user_group, U.name `
 		` from session `
-		` join "user" as U `
-		` on U.id = user_id `
-		` where session.id = '` 
+		` join site_user as U `
+		` on U.num = user_num `
+		` where session.num = '` 
 		~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
 	);
 	
