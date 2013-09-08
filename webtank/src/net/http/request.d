@@ -1,10 +1,10 @@
-module webtank.net.request;
+module webtank.net.http.request;
 
 import webtank.net.http.cookie, webtank.net.uri, webtank.net.http.headers;
 
 // version = cgi_script;
 
-class Request  //Запрос к нашему приложению
+class ServerRequest  //Запрос к нашему приложению
 {	RequestHeaders headers;
 
 protected:

@@ -1,8 +1,8 @@
-module webtank.net.response;
+module webtank.net.http.response;
 
 import webtank.net.http_cookie, webtank.net.uri, webtank.net.http_headers;
 
-class Response  //Ответ от нашего приложения
+class ServerResponse  //Ответ от нашего приложения
 {
 	ResponseHeaders headers;
 protected:
