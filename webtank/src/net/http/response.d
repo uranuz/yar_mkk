@@ -1,6 +1,6 @@
 module webtank.net.http.response;
 
-import webtank.net.http_cookie, webtank.net.uri, webtank.net.http_headers;
+import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
 class ServerResponse  //Ответ от нашего приложения
 {
@@ -11,10 +11,10 @@ protected:
 public:
 	
 
-	this( void delegate(string) write )
+	this( void delegate(string) send )
 	{	_cookie = new ResponseCookie;
 		headers = new ResponseHeaders;
-		_write = write;
+		_send = send;
 	}
 	
 	//Записывает данные в буфер для отдачи
@@ -35,9 +35,9 @@ public:
 	void flush()
 	{	if( !_headersSent ) 
 		{	_headersSent = true;
-			_write( _getHeaderStr() );
+			_send( _getHeaderStr() );
 		}
-		_write( _respBody );
+		_send( _respBody );
 	}
 	
 	//Пытаемся очистить ответ, возвращает true, если получилось
@@ -56,7 +56,7 @@ public:
 	{	return _cookie; }
 
 protected:
-	void delegate(string) _write;
+	void delegate(string) _send;
 	bool _headersSent = false;
 	
 	string _getHeaderStr()

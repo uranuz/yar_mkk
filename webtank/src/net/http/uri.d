@@ -1,4 +1,4 @@
-module webtank.net.uri;
+module webtank.net.http.uri;
 
 import std.string, std.exception, std.uri, std.utf;
 

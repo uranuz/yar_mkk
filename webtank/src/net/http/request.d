@@ -1,6 +1,6 @@
 module webtank.net.http.request;
 
-import webtank.net.http.cookie, webtank.net.uri, webtank.net.http.headers;
+import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
 // version = cgi_script;
 

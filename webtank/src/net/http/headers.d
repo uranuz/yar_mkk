@@ -93,6 +93,11 @@ class RequestHeaders
 		return _headers.get( toLower( strip( name ) ), null ); 
 	}
 	
+	string get(string name, string defaultValue)
+	{	import std.string;
+		return _headers.get( toLower( strip( name ) ), defaultValue ); 
+	}
+	
 	//Определяем оператор in для класса
 	//TODO: Разобраться как работает inout
 	inout(string)* opBinaryRight(string op)(string name) inout if(op == "in")

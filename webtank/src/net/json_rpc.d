@@ -1,8 +1,6 @@
-module test.register_type;
+module webtank.net.json_rpc;
 
 import std.stdio, std.string, std.conv, std.traits, std.typecons, std.json;
-
-import webtank.net.http.connection;
 
 //Класс исключения для удалённого вызова процедур
 class JSON_RPC_Exception : Exception {

@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>AJAX Test</title>
+		<meta charset="utf-8">
+	</head>
+
+	<body>
+		Введите имя:  <input type="text" id="name_input" value="">
+		<input type="button" value="Отправить!" onclick="sendName();">
+		<div id="content_div"></div>
+	</body>
+	<script type="text/javascript">
+		function sendName()
+		{	var i = 100;
+			var xhr = new window.XMLHttpRequest();
+			xhr.open( 'POST', '/dyn/handlers/xhr_test', true );
+			xhr.onreadystatechange = function()
+			{	if (xhr.readyState == 4) 
+				{	var container = document.getElementById('content_div');
+					container.innerHTML = decodeURIComponent( xhr.responseText );
+				}
+			}
+			xhr.setRequestHeader("content-type", "application/json");
+			var jsonStr = '{ "jsonrpc": "2.0", "method": "Тестирование.Выполнить", "params": [12345.54321] }';
+			xhr.send( jsonStr );
+		}
+	</script>
+
+</html>

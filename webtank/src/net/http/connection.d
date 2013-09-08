@@ -1,6 +1,8 @@
 module webtank.net.http.connection;
 
-import std.socket;
+import std.socket, std.conv;
+
+import webtank.net.http.request, webtank.net.http.response, webtank.net.http.headers;
 
 immutable(size_t) startBufLength = 1024;
 immutable(size_t) messageBodyLimit = 4_194_304;
@@ -10,8 +12,8 @@ class ServerConnection
 {	
 protected:
 	Socket _socket;
-	http.ServerRequest _request;
-	http.ServerResponse _response;
+	ServerRequest _request;
+	ServerResponse _response;
 	char[] _requestBuffer;
 	
 public:
@@ -21,7 +23,7 @@ public:
 	}
 	
 	//Свойство формирует экземпляр запроса к серверу
-	http.ServerRequest request() @property
+	ServerRequest request() @property
 	{	if( _request is null )
 			receiveRequest();
 		return _request;
@@ -29,17 +31,18 @@ public:
 	
 	//Свойство формирует экземпляр класса для формирования
 	//ответа сервера на запрос
-	http.ServerResponse response() @property
+	ServerResponse response() @property
 	{	if( _response is null )
-			_response = new http.ServerResponse;
+			_response = new ServerResponse(&send);
+		return _response;
 	}
 	
-	void sendResponse()
-	{
-		
-	}
+// 	void sendResponse()
+// 	{
+// 		
+// 	}
 	
-	http.RequestHeaders receiveRequestHeaders()
+	RequestHeaders receiveRequestHeaders()
 	{	/+scope(exit) _finalize(); //Завершение потока при выходе из _run+/
 		size_t bytesRead;
 		char[] startBuf;
@@ -54,10 +57,10 @@ public:
 		return headers;
 	}
 	
-	void sendResponseHeaders()
-	{	
-		
-	}
+// 	void sendResponseHeaders()
+// 	{	
+// 		
+// 	}
 	
 	void receiveRequest()
 	{	auto headers = receiveRequestHeaders();
@@ -85,7 +88,7 @@ public:
 		
 		string messageBody;
 		char[] bodyBuf;
-		size_t extraBytesInHeaderBuf = startBuf.length - headers.strLength;
+		size_t extraBytesInHeaderBuf = startBufLength - headers.strLength;
 // 		write("extraBytesInHeaderBuf: "); writeln( extraBytesInHeaderBuf );
 		//Нужно определить сколько ещё нужно прочитать
 		if( contentLength > extraBytesInHeaderBuf )

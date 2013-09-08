@@ -21,7 +21,7 @@ public:
 		assert(listener.isAlive);
 		
 		listener.bind( new InternetAddress(_port) );
-		listener.listen(5);
+		listener.listen(1);
 		writeln("Сайт стартовал!");
 		
 		while(true)
@@ -46,9 +46,12 @@ public:
 	
 protected:
 	void _work()
-	{	auto conn = new http.Connection(_socket);
-		http.Router.getRPCMethod
-		
+	{	auto conn = new ServerConnection(_socket);
+		Router.processRequest(conn.request, conn.response);
+		scope(exit) 
+		{	_socket.shutdown(SocketShutdown.BOTH);
+			_socket.close();
+		}
 	}
 	
 	
