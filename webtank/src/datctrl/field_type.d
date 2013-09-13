@@ -7,8 +7,8 @@ enum FieldType { Str, Int, Bool, IntKey, Text, Enum /*, Date*/  };
 
 ///Строковые значения, которые трактуются как false при преобразовании
 ///типов. Любые другие трактуются как true
-immutable(string[]) _logicFalseValues = 
-		 [`false`, `f`, `no`, `n`, `ложь`, `л`, `нет`, `н`];
+immutable(string[]) _logicTrueValues = 
+		 [`true`, `t`, `yes`, `y`, `истина`, `и`, `да`, `д`];
 
 ///Строка ошибки времени компиляции - что, мол, облом
 immutable(string) _notImplementedErrorMsg = ` Данный тип не реализован: `;
@@ -59,9 +59,9 @@ template fldConv(FieldType FieldT)
 		{	return value; }
 		else static if( FieldT == Bool )
 		{	import std.string;
-			foreach(logVal; _logicFalseValues) 
-				if ( logVal == toLower( strip( value ) ) ) return false;
-			return true;
+			foreach(logVal; _logicTrueValues) 
+				if ( logVal == toLower( strip( value ) ) ) return true;
+			return false;
 		}
 		else static if( FieldT == IntKey )
 		{	return value.to!size_t; }

@@ -115,8 +115,6 @@ void main(string[] progAgs) {
 	Вопрос: что из этого, возможно, лучше выделить в отдельные процессы для простоты или надежности?
 	*/
 	
-// 	serverStartTime = Clock.currTime();
-	
 	
 	Socket listener = new TcpSocket;
 	scope(exit) 

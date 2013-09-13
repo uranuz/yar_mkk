@@ -88,15 +88,34 @@ unittest
 	assert( [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 10, 11, 12, 13, 14, 15] == digits);
 }
 
-/*void main()
-{	import std.stdio;
-	import std.digest.digest;
-	string hexStr2 = "b1e37dab-1c9a-faa5-6d03-9cb3e4399261";
-	ubyte[16] hash2 = hexStringToByteArray(hexStr2);
-	string restoredHexStr2 = toHexString(hash2);
-	ubyte[16] hash2_1 = hexStringToByteArray(restoredHexStr2);
-	writeln(hash2);
-	writeln(restoredHexStr2);
-	writeln( hash2_1 );
-}*/
+enum trueStrings = 
+[`true`, `t`, `yes`, `y`, `истина`, `и`, `да`, `д`, `on`, `1`];
+enum falseStrings = 
+[`false`, `f`, `no`, `n`, `ложь`, `л`, `нет`, `н`, `off`, `0`];
 
+//Функция преобразования некоторых строковых значений в логическое
+bool toBool(string src)
+{	import std.string;
+	foreach( logicStr; trueStrings )
+		if( toLower( strip(src) ) == logicStr )
+			return true;
+	foreach( logicStr; falseStrings )
+		if( toLower( strip(src) ) == logicStr )
+			return false;
+	import std.conv;
+	throw new std.conv.ConvException("Can't convert string \"" ~ src ~ "\" to boolean type!!!");
+}
+
+// void main()
+// {	import std.stdio;
+// 	import std.digest.digest;
+// 	string hexStr2 = "b1e37dab-1c9a-faa5-6d03-9cb3e4399261";
+// 	ubyte[16] hash2 = hexStringToByteArray(hexStr2);
+// 	string restoredHexStr2 = toHexString(hash2);
+// 	ubyte[16] hash2_1 = hexStringToByteArray(restoredHexStr2);
+// 	writeln(hash2);
+// 	writeln(restoredHexStr2);
+// 	writeln( hash2_1 );
+// 	writeln( convDef!bool(" p ", true) );
+// 	
+// }
