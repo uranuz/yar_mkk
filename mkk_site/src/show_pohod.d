@@ -379,7 +379,7 @@ group by num
 		
 		if(_sverka) table~= `<td>"Ключ"</td>`;
 		
-		table ~=`<td> "Номер"</td><td> "Сроки  похода"</td><td> "Вид, кс"</td><td >"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td>"Статус<br> похода"</td>`;
+		table ~=`<td> "Номер"</td><td> "Сроки  похода"</td><td> "Вид, кс"</td><td >"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td>"Статус<br> похода"</td><td>"Статус<br> похода"</td><td>"Править"</td>`;
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 	  
@@ -398,7 +398,13 @@ group by num
 		table ~= `<td>` ~ rec.get!"Статус<br> похода"("нет")  ~ `</td>`;
 		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
-		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"  > "Нитка маршрута"</td><td style="background-color:#8dc0de"  colspan="7"  >` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`;
+		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"  > "Нитка маршрута"</td><td style="background-color:#8dc0de"  colspan="`;
+		if(_sverka)
+		table ~=`9`;
+		else
+		table ~=`7`;
+		
+		table ~= `"  >` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`;
 	}
 	table ~= `</table>`;
 	
