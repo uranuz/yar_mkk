@@ -250,7 +250,7 @@ group by num
      `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||coalesce( element::text, ' ' ) ) as vid,`
 
      `region_pohod , `
-     `(tourist.family_name||'<br>'||coalesce(tourist.given_name,'')||'<br>'||coalesce(tourist.patronymic,'')||'<br>'||coalesce(tourist.birth_year::text,'')), `
+     `(tourist.family_name||' '||coalesce(tourist.given_name,'')||' '||coalesce(tourist.patronymic,'')||' '||coalesce(tourist.birth_year::text,'')), `
      `(coalesce(pohod.unit,'')),(coalesce(gr,'')), `
      
      `(coalesce(organization,'')||'<br>'||coalesce(region_group,'')), `
@@ -375,32 +375,30 @@ group by num
 	 
 	    // _sverka=true;    // наличие сверки     
 	            
-		string table = `<table border="1">`;
+		string table = `<table class="pohod">`;
 		
 		if(_sverka) table~= `<td>"Ключ"</td>`;
 		
-		table ~=`<td> "Номер"</td><td> "Сроки <br> похода"</td><td> "Вид, кс"</td><td>"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td> "Нитка маршрута"</td><td>"Статус<br> похода"</td>`;
+		table ~=`<td> "Номер"</td><td> "Сроки  похода"</td><td> "Вид, кс"</td><td >"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td>"Статус<br> похода"</td>`;
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Номер"("нет")  ~ `</td>`;
+		table ~= `<td >` ~rec.get!"Номер"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Сроки <br> похода"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Вид, кс"("нет") ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Район"("нет") ~ `</td>`;
+		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;
 		
 		table ~= `<td style="text-align: center;" title="`~ rec.get!"Уч"("нет")~`">` ~`<font color="red">`~  (  rec.get!"Участники"("Не задано") ) ~ `</font ></td>`;
 		
 		
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`;
-		
-		
-	
-		table ~= `<td>` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>`;
+
 		table ~= `<td>` ~ rec.get!"Статус<br> похода"("нет")  ~ `</td>`;
 		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
+		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"  > "Нитка маршрута"</td><td style="background-color:#8dc0de"  colspan="7"  >` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`;
 	}
 	table ~= `</table>`;
 	
