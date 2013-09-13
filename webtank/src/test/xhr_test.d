@@ -19,7 +19,7 @@ void netMain(ServerRequest rq, ServerResponse rp)
 	rp ~= "Доброго времени суток вам, г-н " ~ pVars.get("name", "");
 }
 
-void Выполнить(string arg, double arg2)
-{	/+return ( "ЗАРАБОТАЛО!!! - " ~ arg.to!string ~ arg2.to!string );+/
+string Выполнить(string arg, double arg2)
+{	return ( "ЗАРАБОТАЛО!!! - " ~ arg.to!string ~ arg2.to!string );
 // 	return 100 + arg2;
 }

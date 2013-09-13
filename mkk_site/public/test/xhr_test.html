@@ -11,19 +11,19 @@
 	</body>
 	<script type="text/javascript">
 		function sendName()
-		{	var i = 100;
-			var xhr = new window.XMLHttpRequest();
-			xhr.open( 'POST', '/dyn/handlers/xhr_test', true );
-			xhr.onreadystatechange = function()
-			{	if (xhr.readyState == 4) 
-				{	var container = document.getElementById('content_div');
-					container.innerHTML = decodeURIComponent( xhr.responseText );
+		{	webtank.json_rpc.invoke({
+				url: "/dyn/handlers",
+				method: "Тестирование.Выполнить",
+				params: '["dsfdf", 12.3]',
+				success: function(result){
+					var container = document.getElementById("content_div");
+					container.innerHTML = result;
 				}
-			}
-			xhr.setRequestHeader("content-type", "application/json");
-			var jsonStr = '{ "jsonrpc": "2.0", "method": "Тестирование.Выполнить", "params": ["dsfdf", 12.3] }';
+			});
+			
+			
 			xhr.send( jsonStr );
 		}
 	</script>
-
+	<script type="text/javascript" src="/webtank/js/components.js"></script>
 </html>

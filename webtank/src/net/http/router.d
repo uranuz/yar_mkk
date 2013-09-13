@@ -111,7 +111,9 @@ static {
 								} catch( std.json.JSONException e ) {
 									throw new JSON_RPC_Exception("Can't serialize method return value to JSON!!!\r\n" ~ e.msg);
 								}
-								response.write( toJSON( &resultJSONValue ) );
+								string jStr = toJSON( &resultJSONValue );
+								writeln(jStr);
+								response.write( jStr );
 								response.flush();
 							}
 						}
