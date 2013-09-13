@@ -5,7 +5,9 @@ import std.json, std.stdio;
 import webtank.net.json_rpc, webtank.net.http.request, webtank.net.http.response;
 
 alias void function(ServerRequest, ServerResponse) ServerRequestHandler;
-alias void delegate(JSONValue) JSON_RPC_Method;
+alias JSONValue delegate(JSONValue) JSON_RPC_Method;
+
+
 
 //Класс, выполняющий роль маршрутизатора для соединений
 //с сервером по протоколу HTTP
@@ -29,13 +31,20 @@ static {
 	{	import std.traits, std.json, std.conv, std.typecons;
 		alias ParameterTypeTuple!(MethodType) ParamTypes;
 		alias Tuple!(ParamTypes) ArgTupleType;
-	// 	alias ReturnType!(MethodType) ResultType;
+		alias ReturnType!(method) ResultType;
 		
-		void JSONMethod(JSONValue jsonArg)
-		{	writeln("What a hell?!");
-			auto argTuple = getJSONValue!( ArgTupleType )(jsonArg);
+		JSONValue JSONMethod(JSONValue jsonArg)
+		{	writeln("JSONMethod:  jsonArg");
+			writeln( toJSON(&jsonArg) );
+			auto argTuple = getDLangValue!( ArgTupleType )(jsonArg);
 			
-			method(argTuple.expand);
+			static if( is( ResultType == void ) )
+			{	JSONValue result;
+				result.type = JSON_TYPE.NULL;
+				return result;
+			}
+			else
+				return getJSONValue( method(argTuple.expand) );
 		}
 		
 		_jrpcMethods[methodName] = &JSONMethod;
@@ -52,24 +61,27 @@ static {
 	
 	void processRequest(ServerRequest request, ServerResponse response)
 	{	string contentType = request.headers.get("content-type", "");
-		writeln("processRequest");
 		if( contentType == "application/json" ) //Скорее всего JSON RPC
 		{	import std.json;
 			JSONValue jMessageBody;
+			writeln(request.messageBody);
 			try
-			{	jMessageBody = parseJSON( request.messageBody );
+			{	
+				jMessageBody = parseJSON( request.messageBody );
 			
 			}
 			catch(Exception e) 
-			{	
+			{	writeln("Ошибка при разборе строки JSON");
 				
 			}
+			writeln(jMessageBody.type);
 			if( jMessageBody.type == JSON_TYPE.ARRAY ) //Возможно, пакет пришёл
 			{	//Пока не реализуем
 				
 			}
 			else if( jMessageBody.type == JSON_TYPE.OBJECT )
 			{	string methodName;
+				writeln(_jrpcMethods);
 				if( "method" in jMessageBody.object )
 				{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
 						methodName = jMessageBody.object["method"].str;
@@ -84,18 +96,24 @@ static {
 				{	if( jMessageBody.object["id"].type == JSON_TYPE.STRING )
 						protocol = jMessageBody.object["id"].str;
 				}
-				writeln("jsonrpc");
+				writeln(protocol ~ "  " ~ methodName ~ "  " ~ id );
 				JSONValue params;
 				if( "params" in jMessageBody.object )
 				{	if( jMessageBody.object["params"].type == JSON_TYPE.ARRAY )
-					{	if( methodName.length > 0 && protocol.length > 0 )
+					{	params = jMessageBody.object["params"];
+						if( methodName.length > 0 && protocol.length > 0 )
 						{	auto method = getRPCMethod(methodName);
-							writeln("jsonrpc2");
-							writeln(methodName);
-							writeln(method);
-							writeln( method is null );
-// 							if( method !is null )
-								method( params );
+							writeln(params);
+							if( method !is null )
+							{	JSONValue resultJSONValue;
+								try {
+									resultJSONValue = method( params );
+								} catch( std.json.JSONException e ) {
+									throw new JSON_RPC_Exception("Can't serialize method return value to JSON!!!\r\n" ~ e.msg);
+								}
+								response.write( toJSON( &resultJSONValue ) );
+								response.flush();
+							}
 						}
 					}
 				}

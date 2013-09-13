@@ -9,59 +9,67 @@ class JSON_RPC_Exception : Exception {
 	}
 }
 
-auto getJSONValue(T, uint recursionLevel = 1)(JSONValue jvalue)
+auto getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
 	static if( is( T == JSONValue ) )
-		return jvalue; //Raw JSONValue
+	{	write("JSONValue - "); writeln(jValue.type);
+		return jValue; //Raw JSONValue
+	}
 	else static if( isBoolean!T )
-	{	if( jvalue.type == JSON_TYPE.TRUE )
+	{	write("Boolean - "); writeln(jValue.type);
+		if( jValue.type == JSON_TYPE.TRUE )
 			return true;
-		else if( jvalue.type == JSON_TYPE.FALSE )
+		else if( jValue.type == JSON_TYPE.FALSE )
 			return false;
 		else
 			throw new JSON_RPC_Exception("JSON value doesn't match boolean type!!!");
 	}
 	else static if( isIntegral!T )
 	{	static if( isUnsigned!T )
-		{	if( jvalue.type == JSON_TYPE.UINTEGER )
-				return jvalue.uinteger.to!T;
+		{	write("Unsigned integer - "); writeln(jValue.type);
+			if( jValue.type == JSON_TYPE.UINTEGER )
+				return jValue.uinteger.to!T;
 			else
 				throw new JSON_RPC_Exception("JSON value doesn't match unsigned integer type!!!");
 		}
 		else
-		{	if( jvalue.type == JSON_TYPE.INTEGER )
-				return jvalue.integer.to!T;
-			else if( jvalue.type == JSON_TYPE.UINTEGER  )
-				return jvalue.uinteger.to!T;
+		{	writeln("Integer - "); write(jValue.type);
+			if( jValue.type == JSON_TYPE.INTEGER )
+				return jValue.integer.to!T;
+			else if( jValue.type == JSON_TYPE.UINTEGER  )
+				return jValue.uinteger.to!T;
 			else
 				throw new JSON_RPC_Exception("JSON value doesn't match integer type!!!");
 		}
 	}
 	else static if( isFloatingPoint!T )
-	{	if( jvalue.type == JSON_TYPE.FLOAT )
-			return jvalue.floating.to!T;
-		else if( jvalue.type == JSON_TYPE.INTEGER )
-			return jvalue.integer.to!T;
-		else if( jvalue.type == JSON_TYPE.UINTEGER  )
-			return jvalue.uinteger.to!T;
+	{	write("Floating point - "); writeln(jValue.type);
+		if( jValue.type == JSON_TYPE.FLOAT )
+			return jValue.floating.to!T;
+		else if( jValue.type == JSON_TYPE.INTEGER )
+			return jValue.integer.to!T;
+		else if( jValue.type == JSON_TYPE.UINTEGER  )
+			return jValue.uinteger.to!T;
 		else
 			throw new JSON_RPC_Exception("JSON value doesn't match floating point type!!!");
 	}
 	else static if( isSomeString!T )
-	{	if( jvalue.type == JSON_TYPE.STRING )
-			return jvalue.str.to!T;
+	{	write("String - "); writeln(jValue.type);
+		if( jValue.type == JSON_TYPE.STRING )
+			return jValue.str.to!T;
 		else
 			throw new JSON_RPC_Exception("JSON value doesn't match string type!!!");
 	}
 	else static if( isAssociativeArray!T )
-	{	static assert( recursionLevel, "Recursion level limit!!!" );
+	{	write("Associative array - "); writeln(jValue.type);
+		static assert( recursionLevel, "Recursion level limit!!!" );
 		alias  KeyType!T AAKeyType;
 		static assert( isSomeString!AAKeyType, "JSON object's key must be of string type!!!" );
 		alias ValueType!T AAValueType;
-		if( jvalue.type == JSON_TYPE.OBJECT )
+		if( jValue.type == JSON_TYPE.OBJECT )
 		{	T result;
-			foreach( key, val; jvalue.object )
-			{	result[key.to!AAKeyType] = getJSONValue!( AAValueType, recursionLevel-1 )(val);
+			foreach( key, val; jValue.object )
+			{	result[key.to!AAKeyType] = getDLangValue!( AAValueType, recursionLevel-1 )(val);
 			}
 			return result;
 		}
@@ -69,13 +77,14 @@ auto getJSONValue(T, uint recursionLevel = 1)(JSONValue jvalue)
 			throw new JSON_RPC_Exception("JSON value doesn't match object type!!!");
 	}
 	else static if( isArray!T )
-	{	import std.range;
+	{	write("Array - "); writeln(jValue.type);
+		import std.range;
 		static assert( recursionLevel, "Recursion level limit!!!" );
 		alias ElementType!T AElementType;
-		if( jvalue.type == JSON_TYPE.ARRAY )
+		if( jValue.type == JSON_TYPE.ARRAY )
 		{	T array;
-			foreach( i, val; jvalue.array )
-			{	array[i] = getJSONValue!( AElementType, recursionLevel-1 )(val);
+			foreach( i, val; jValue.array )
+			{	array[i] = getDLangValue!( AElementType, recursionLevel-1 )(val);
 			}
 			return array;
 		}
@@ -83,18 +92,23 @@ auto getJSONValue(T, uint recursionLevel = 1)(JSONValue jvalue)
 			throw new JSON_RPC_Exception("JSON value doesn't match array type!!!");
 	}
 	else static if( isTuple!T )
-	{	T result;
-		if( jvalue.type == JSON_TYPE.ARRAY )
-		{	if( jvalue.array.length != T.length )
-				throw new JSON_RPC_Exception("JSON array length " ~ T.length.to!string ~ " expected but " ~ jvalue.array.length.to!string ~ " found!!!");
+	{	write("Tuple - "); writeln(jValue.type);
+		T result;
+		if( jValue.type == JSON_TYPE.ARRAY )
+		{	if( jValue.array.length != T.length )
+				throw new JSON_RPC_Exception("JSON array length " ~ T.length.to!string ~ " expected but " ~ jValue.array.length.to!string ~ " found!!!");
 			foreach( i, ref element; result )
-				element = getJSONValue!( typeof(element), recursionLevel-1 )(jvalue.array[i]);
+				element = getDLangValue!( typeof(element), recursionLevel-1 )(jValue.array[i]);
 		}
-		else if( jvalue.type != JSON_TYPE.OBJECT )
-		{	result[0] = getJSONValue!( T.Types[0], recursionLevel-1 )(jvalue);
+		else if( jValue.type != JSON_TYPE.OBJECT )
+		{	if( jValue.object.length != T.length )
+				throw new JSON_RPC_Exception("JSON array length " ~ T.length.to!string ~ " expected but " ~ jValue.object.length.to!string ~ " found!!!");
+			static if( T.length != 0 )
+				result[0] = getDLangValue!( T.Types[0], recursionLevel-1 )(jValue);
 		}
 		else
 			throw new JSON_RPC_Exception("JSON value doesn't match tuple type!!!");
+		writeln(result);
 		return result;
 	}
 	else
@@ -102,3 +116,58 @@ auto getJSONValue(T, uint recursionLevel = 1)(JSONValue jvalue)
 	//TODO: Добавить работу с Tuple
 }
 
+JSONValue getJSONValue(T)(T dValue)
+{	static if( is( T == JSONValue ) )
+		return dValue;
+	else
+	{	JSONValue jValue;
+		static if( isBoolean!T )
+		{	jValue.type = ( dValue ? JSON_TYPE.TRUE : JSON_TYPE.FALSE );
+		}
+		else static if( isIntegral!T )
+		{	static if( isSigned!T )
+			{	jValue.type = JSON_TYPE.INTEGER;
+				jValue.integer = dValue.to!long;
+			}
+			else static if( isUnsigned!T )
+			{	jValue.type = JSON_TYPE.UINTEGER;
+				jValue.uinteger = dValue.to!ulong;
+			}
+			else
+				static assert( 0, "This should never happen!!!" ); //Это не должно произойти))
+		}
+		else static if( isFloatingPoint!T )
+		{	jValue.type = JSON_TYPE.FLOAT;
+			jValue.floating = dValue.to!real;
+		}
+		else static if( isSomeString!T )
+		{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.STRING );
+			jValue.str = dValue.to!string;
+		}
+		else static if( isArray!T )
+		{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.ARRAY );
+			foreach( elem; dValue )
+				jValue.array ~= getJSONValue( elem );
+		}
+		else static if( isAssociativeArray!T )
+		{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.OBJECT );
+			foreach( key, val; dValue )
+				jValue.object[key] = getJSONValue( val );
+		}
+		else static if( isTuple!T )
+		{	jValue.type = JSON_TYPE.ARRAY;
+			foreach( elem; dValue )
+				jValue.array ~= getJSONValue( elem );
+		}
+		else
+			static assert( 0, "This value's type is not of one implemented JSON type!!!" );
+		return jValue;
+	}
+}
+
+// void main()
+// {	
+// 	auto vasya = Tuple!(double, "хрень", bool, "ыыы", string, "чо")(16, true, "ололо");
+// 	auto jValue = getJSONValue(vasya);
+// 	writeln(toJSON(&jValue));
+// }

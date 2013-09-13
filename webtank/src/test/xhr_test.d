@@ -9,17 +9,17 @@ immutable thisPagePath = asyncHandlersPath ~ "xhr_test";
 
 static this()
 {	Router.registerRequestHandler(thisPagePath, &netMain);
-	Router.registerRPCMethod("Тестирование.Выполнить", &testMethod);
+	Router.registerRPCMethod("Тестирование.Выполнить", &Выполнить);
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+void netMain(ServerRequest rq, ServerResponse rp)
 {	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
 	writeln("Трололо!");
 	rp ~= "Доброго времени суток вам, г-н " ~ pVars.get("name", "");
 }
 
-static void testMethod(string arg)
-{	writeln("ЗАРАБОТАЛО!!!" ~ arg);
-	
+void Выполнить(string arg, double arg2)
+{	/+return ( "ЗАРАБОТАЛО!!! - " ~ arg.to!string ~ arg2.to!string );+/
+// 	return 100 + arg2;
 }

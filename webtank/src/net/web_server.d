@@ -20,11 +20,18 @@ public:
 		}
 		assert(listener.isAlive);
 		
-		listener.bind( new InternetAddress(_port) );
+		bool isNotBinded = true;
+		writeln("Пытаемся привязать серверный сокет к порту " ~ _port.to!string );
+		while( isNotBinded )  //Заставляем ОСь дать нам порт
+		{	try {
+				listener.bind( new InternetAddress(_port) );
+				isNotBinded = false;
+			} catch(std.socket.SocketOSException) {}
+		}
 		listener.listen(1);
 		writeln("Сайт стартовал!");
 		
-		while(true)
+		while(true) //Цикл приёма соединений через серверный сокет
 		{	Socket currSock = listener.accept(); //Принимаем соединение
 			auto workingThread = new WorkingThread(currSock);
 			workingThread.start();
@@ -58,12 +65,15 @@ protected:
 }
 
 
+
+
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
 	
 	ushort port = 8082;
 	//Получаем порт из параметров командной строки
 	getopt( progAgs, "port", &port );
+	
 	auto server = new WebServer(port);
 	server.start();
 	
