@@ -12,17 +12,14 @@
 	<script type="text/javascript">
 		function sendName()
 		{	webtank.json_rpc.invoke({
-				url: "/dyn/handlers",
+				uri: "/dyn/handlers",
 				method: "Тестирование.Выполнить",
 				params: '["dsfdf", 12.3]',
-				success: function(result){
+				onresult: function(result){
 					var container = document.getElementById("content_div");
 					container.innerHTML = result;
 				}
 			});
-			
-			
-			xhr.send( jsonStr );
 		}
 	</script>
 	<script type="text/javascript" src="/webtank/js/components.js"></script>

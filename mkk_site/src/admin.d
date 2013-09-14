@@ -2,26 +2,23 @@ module mkk_site.admin;
 
 import std.process, std.conv, std.datetime;
 
-import webtank.net.application/+, webtank.net.web_server+/;
+import webtank.net.http.router, webtank.net.http.request, webtank.net.http.response;
 
 import mkk_site.site_data, mkk_site.authentication;
 
 static this()
-{	Application.setHandler(&netMain, dynamicPath ~ "adminka");
-	Application.setHandler(&netMain, dynamicPath ~ "adminka/");
+{	Router.setPathHandler(dynamicPath ~ "adminka", &netMain);
 }
 
-void netMain(Application netApp)  //Определение главной функции приложения
+void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	auto rp = netApp.response;
-	auto rq = netApp.request;
-	
 	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 	
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	rp.headers["status-code"] = "403";
 		rp.headers["reason-phrase"] = "Forbidden";
-		rp.write( generateServicePageContent(403) );
+// 		rp.write( generateServicePageContent(403) );
+		rp.write( "<h3>403 Forbidden</h3>" );
 		return;
 	}
 	else 

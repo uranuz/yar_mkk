@@ -8,7 +8,7 @@ immutable asyncHandlersPath = "/dyn/handlers/";
 immutable thisPagePath = asyncHandlersPath ~ "xhr_test";
 
 static this()
-{	Router.registerRequestHandler(thisPagePath, &netMain);
+{	Router.registerPathHandler(thisPagePath, &netMain);
 	Router.registerRPCMethod("Тестирование.Выполнить", &Выполнить);
 }
 

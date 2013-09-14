@@ -4,10 +4,15 @@ import std.json, std.stdio;
 
 import webtank.net.json_rpc, webtank.net.http.request, webtank.net.http.response;
 
-alias void function(ServerRequest, ServerResponse) ServerRequestHandler;
+alias void function(ServerRequest, ServerResponse) ServerPathHandler;
 alias JSONValue delegate(JSONValue) JSON_RPC_Method;
 
-
+//Класс исключения при маршрутизации
+class RoutingException : Exception {
+	this(string msg, string file = __FILE__, size_t line = __LINE__) {
+		super(msg, file, line);
+	}
+}
 
 //Класс, выполняющий роль маршрутизатора для соединений
 //с сервером по протоколу HTTP
@@ -16,22 +21,29 @@ class Router
 protected:
 	static {
 		JSON_RPC_Method[string] _jrpcMethods;
-		ServerRequestHandler[string] _requestHandlers;
+		ServerPathHandler[string] _requestHandlers;
 		bool _ignoreEndSlash = true;
 	}
 
 public:
 
 static {
-	void registerRequestHandler(string path, ServerRequestHandler handler)
+	//Регистрация обработчика HTTP запроса для заданного пути
+	void setPathHandler(string path, ServerPathHandler handler)
 	{	string clearPath = _normalizePagePath(path);
-		_requestHandlers[clearPath] = handler;
+		if( clearPath in _requestHandlers )
+			throw new RoutingException("Обработчик для пути \"" ~ clearPath ~ "\" уже зарегистрирован в системе!!!");
+		else
+			_requestHandlers[clearPath] = handler;
 	}
-	void registerRPCMethod(MethodType)(string methodName, MethodType method)
+	void setRPCMethod(MethodType)(string methodName, MethodType method)
 	{	import std.traits, std.json, std.conv, std.typecons;
 		alias ParameterTypeTuple!(MethodType) ParamTypes;
 		alias Tuple!(ParamTypes) ArgTupleType;
 		alias ReturnType!(method) ResultType;
+		
+		if( clearPath in _requestHandlers )
+			throw new RoutingException("JSON-RPC метод \"" ~ methodName ~ "\" уже зарегистрирован в системе!!!");
 		
 		JSONValue JSONMethod(JSONValue jsonArg)
 		{	writeln("JSONMethod:  jsonArg");
@@ -39,7 +51,8 @@ static {
 			auto argTuple = getDLangValue!( ArgTupleType )(jsonArg);
 			
 			static if( is( ResultType == void ) )
-			{	JSONValue result;
+			{	method(); //Вызываем метод
+				JSONValue result;
 				result.type = JSON_TYPE.NULL;
 				return result;
 			}
@@ -50,18 +63,32 @@ static {
 		_jrpcMethods[methodName] = &JSONMethod;
 	}
 	
-	ServerRequestHandler getRequestHandler(string path)
-	{	string clearPath = _normalizePagePath(path);
-		return _requestHandlers.get(clearPath, null);
+	//Получить 
+	ServerPathHandler getPathHandler(string path)
+	{	return _requestHandlers.get( _normalizePagePath(path), null );
 	}
 	
 	JSON_RPC_Method getRPCMethod(string methodName)
-	{	return _jrpcMethods.get(methodName, null);
+	{	return _jrpcMethods.get( methodName, null );
+	}
+	
+	bool hasRPCMethod(string methodName)
+	{	if( methodName in _jrpcMethods )
+			return true;
+		else
+			return false;
+	}
+	
+	bool hasPathHandler(string path)
+	{	if( _normalizePagePath(path) in _jrpcMethods )
+			return true;
+		else
+			return false;
 	}
 	
 	void processRequest(ServerRequest request, ServerResponse response)
 	{	string contentType = request.headers.get("content-type", "");
-		if( contentType == "application/json" ) //Скорее всего JSON RPC
+		if( contentType == "application/json-rpc" ) //Скорее всего JSON RPC
 		{	import std.json;
 			JSONValue jMessageBody;
 			writeln(request.messageBody);
@@ -94,14 +121,14 @@ static {
 				string id;
 				if( "id" in jMessageBody.object )
 				{	if( jMessageBody.object["id"].type == JSON_TYPE.STRING )
-						protocol = jMessageBody.object["id"].str;
+						id = jMessageBody.object["id"].str;
 				}
 				writeln(protocol ~ "  " ~ methodName ~ "  " ~ id );
 				JSONValue params;
 				if( "params" in jMessageBody.object )
 				{	if( jMessageBody.object["params"].type == JSON_TYPE.ARRAY )
 					{	params = jMessageBody.object["params"];
-						if( methodName.length > 0 && protocol.length > 0 )
+						if( methodName.length > 0 && protocol == "2.0" )
 						{	auto method = getRPCMethod(methodName);
 							writeln(params);
 							if( method !is null )
@@ -112,8 +139,11 @@ static {
 									throw new JSON_RPC_Exception("Can't serialize method return value to JSON!!!\r\n" ~ e.msg);
 								}
 								string jStr = toJSON( &resultJSONValue );
-								writeln(jStr);
-								response.write( jStr );
+								string responseStr = 
+									`{"jsonrpc":"2.0","result":` ~ jStr ~ `,"error":null`
+									~ ( id.length > 0 ? `,"id":"` ~ id ~ `"` : `` ) ~ `}`;
+								writeln(responseStr);
+								response.write( responseStr );
 								response.flush();
 							}
 						}
@@ -123,9 +153,7 @@ static {
 			//else //не JSON RPC
 		}
 		else //Какой-нибудь обычный text/html илм text/plain или application/x-www-form-urlencoded
-		{	auto path = request.headers.get("request-uri", "");
-			writeln(path);
-			auto handler = getRequestHandler(path);
+		{	auto handler = getPathHandler(request.path);
 			if( handler !is null )
 			{	handler(request, response);	
 				response.flush();

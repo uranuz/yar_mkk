@@ -21,6 +21,7 @@ public:
 		
 		
 		queryString = separateQuery( headers["request-uri"] );
+		path = separatePath( headers["request-uri"] );
 		_cookie = new RequestCookie( headers["cookie"] );
 		referer = headers["referer"];
 		host = headers["host"];
@@ -50,6 +51,7 @@ public:
 	immutable(string) userAgent;
 	immutable(string) messageBody;
 	immutable(string) queryString;
+	immutable(string) path;
 	
 	//Данные из URI строки запроса
 	string[string] queryVars() @property

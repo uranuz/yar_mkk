@@ -2,24 +2,19 @@ module mkk_site.edit_tourist;
 
 import std.conv, std.string, std.file, std.stdio;
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.application, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.request, webtank.net.http.response;
 
 import mkk_site.site_data, mkk_site.authentication;
-
-import webtank.net.web_server;
 
 immutable thisPagePath = dynamicPath ~ "edit_tourist";
 immutable authPagePath = dynamicPath ~ "auth";
 
 static this()
-{	Application.setHandler(&netMain, thisPagePath );
-	Application.setHandler(&netMain, thisPagePath ~ "/");
+{	Router.setPathHandler(thisPagePath, &netMain);
 }
 
-void netMain(Application netApp)  //Определение главной функции приложения
+void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	auto rp = netApp.response;
-	auto rq = netApp.request;
 	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
 	

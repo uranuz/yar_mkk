@@ -2,20 +2,16 @@ module mkk_site.auth;
 
 import std.process, std.conv;
 
-import webtank.net.application;
+import webtank.net.http.router, webtank.net.http.request, webtank.net.http.response;
 
 import mkk_site.site_data, mkk_site.authentication;
 
 static this()
-{	Application.setHandler(&netMain, dynamicPath ~ "auth");
-	Application.setHandler(&netMain, dynamicPath ~ "auth/");
+{	Router.setPathHandler(dynamicPath ~ "auth", &netMain);
 }
 
-void netMain(Application netApp)  //Определение главной функции приложения
+void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	auto rp = netApp.response;
-	auto rq = netApp.request;
-	
 	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 	
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию

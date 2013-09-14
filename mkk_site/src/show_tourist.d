@@ -3,14 +3,7 @@ module mkk_site.full_test;
 import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
-import webtank.datctrl.field_type;
-import webtank.datctrl.record_format;
-import webtank.db.postgresql;
-import webtank.db.datctrl_joint;
-
-import webtank.datctrl.record;
-import webtank.net.application;
-import webtank.templating.plain_templater;
+import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
 
 import mkk_site.site_data;
 
@@ -35,15 +28,11 @@ return result;
 immutable thisPagePath = dynamicPath ~ "show_tourist";
 
 static this()
-{	Application.setHandler(&netMain, thisPagePath );
-	Application.setHandler(&netMain, thisPagePath ~ "/");
+{	Router.setPathHandler(thisPagePath, &netMain);
 }
 
-void netMain(Application netApp)  //Определение главной функции приложения
+void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	auto rp = netApp.response;
-	auto rq = netApp.request;
-	
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
