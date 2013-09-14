@@ -173,12 +173,25 @@ body {
 		border-collapse: collapse;
 }
 
-.pohod td {
-	border: solid 2px;
+.tab
+{
 
+	border-collapse: collapse;
+
+}
+
+.tab td {
+	
+   padding: 3px; /* Поля вокруг содержимого таблицы */
+    border: 2px solid ; /* Параметры рамки */
 }
 
 .tab
 {
-	border-top:4px;
+	border: ridge2px ;
+
+	border-collapse: collapse;
+	
+
+	
 }

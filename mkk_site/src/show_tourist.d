@@ -156,7 +156,7 @@ void netMain(Application netApp)  //Определение главной фун
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	string table = `<table class="pohod">`;
+	string table = `<table class="tab">`;
 	table ~= `<tr>`;
 	if(_sverka) table ~= `<td> Ключ</td>`;
 	
@@ -176,6 +176,8 @@ void netMain(Application netApp)  //Определение главной фун
 		table ~= `</tr>`;
 	}
 	table ~= `</table>`;
+	
+	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`;
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
