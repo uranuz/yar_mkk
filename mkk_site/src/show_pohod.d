@@ -16,9 +16,11 @@ static this()
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	string output; //"Выхлоп" программы
+	//---------------------------
+	string output; //"Выхлоп" программы 
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
+	//------------------------------------
 	
 	//Создаём подключение к БД
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
@@ -27,74 +29,98 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		
 		string [10] v=["", "пеший","лыжный","горный","водный","велосипедный","автомото","спелео","парусный","конный" ];
 		// виды туризма
-		
-		
+				
 		string [9] k=["любая", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
 		// категории сложности
-		
-		//int [string] month =[0:"","январь":1,"февраль":2,"март":3,"апрель":4,"май":5,"июнь":6,
-		     //  "июль":7,"август":8,"сентябрь":9,"октябрь":10,"ноябрь":11,"декабрь":12];
-		     
-		 string[] month =["","январь","февраль","март","апрель","май","июнь",
+				     
+		string[] month =["","январь","февраль","март","апрель","май","июнь",
 		       "июль","август","сентябрь","октябрь","ноябрь","декабрь"];     
+		import mkk_site.authentication;
+		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 		
-		
-		
-		
-		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ; 
-		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; 
-		 
-		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );
-		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");
-	
-		string start_dat =  s_year ~ s_month; 
-		bool _start_dat=true;if ( s_year=="") _start_dat=false;
-		
-		
-		string s_dat =s_year.to!string ~`-`;		
-		foreach( i, word; month)
-		{	if( s_month == word ) 
-			{	 if(i<10)s_dat ~=`0`;  s_dat ~= i.to!string ~`-01`;
-				break;
-			}
-		}
-		 
-	   
-	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" );
-		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
-		string end_dat = e_year ~ e_month;
-		string e_dat;
-		
-		bool _end_dat=true;if ( e_year=="") _end_dat=false;
-		
-		
-		if(e_month!="декабрь")
-		{
-		 e_dat =e_year.to!string ~`-`;		
-		foreach( i, word; month)
-		{	if( e_month == word ) 
-			{	 if(i<10) e_dat ~=`0`;  e_dat ~= (i+1).to!string ~`-01`;
-				break;
-			}
-		}
-		}
-		
-		else		 e_dat =(e_year.to!int+1).to!string ~`-01-01`;		
-		
-		
-		
-		
+		bool _vid;    // наличие фильтрации вид туризма
+		bool _ks;    //  наличие фильтрации категория сложности
+		bool _start_dat; // наличие начального диапазона поиска
+		bool _end_dat;   // наличие конечного  диапазона поиска
+		bool _filtr;    // котроль необходимости фильтрации
+		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки
+		///////////////////////////////
+		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ;// вид туризма		
+		if (vid=="") _vid=false;
+		else _vid=true;
+		////////////////////
+		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; // категория сложности похода		
 		//  strip()       Убирает начальные и конечные пробелы   
 		auto long_ks= ks.length;// выдаёт число элементов массива         
 		string all_ks;
-		foreach( kkkk; ks ) all_ks ~= kkkk;// перебирает элемкнты массива
-			 
-			 
-		string nou_filtr; // котроль необходимости фильтрации
-		nou_filtr= s_year ~ e_month ~ s_year ~ s_month ~ vid ~ all_ks;
+		foreach( kkkk; ks )// перебирает элементы массива
+		    { if (kkkk=="любая") {_ks=false;break; }
+		     all_ks ~= kkkk;}
+		if (all_ks=="") _ks=false;          
+		else _ks=true;	
+		//////////////////////////////////
 		
-		bool _filtr=true;if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
-		            
+		
+		
+		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );// начальный год диапазона поиска		
+		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");// начальный месяц диапазона поиска                                      
+		if ( s_year=="") _start_dat=false;                  // наличие начального диапазона поиска если начального года нет "запрещено"
+		else _start_dat=true;
+		//----------------------формирование начала диапозона дат
+		string s_dat;   // начальная дата диапозона поиска
+		if(_start_dat)
+		
+		s_dat =s_year.to!string ~`-`;   // если месяц указан сформировать значение маска 2013-05-01
+		if(s_month!="")
+		{foreach( i, word; month)
+		{	if( s_month == word ) 
+			{	 if(i<9)s_dat ~=`0`; // если месяц меньше 10-го добавить 0 перед номером (сдвиг по значению на 1)
+			
+			s_dat ~= i.to!string ~`-01`; //-01 первое число месяца
+				break;
+			}
+		}
+		}
+		 else {s_dat ~=`01-01`;} // если месяца нет искать с первого января текущего года
+	
+	  ///////////////////////////////////// 
+	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" ); // конечный год диапазона поиска
+		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : ""); // конечный месяц диапазона поиска
+		
+				
+		if ( e_year=="") _end_dat=false;  // наличие конечного диапазона поиска если конечного года нет "запрещено"
+		else _end_dat=true;
+		//----------------------формирование конца диапозона дат
+		string e_dat; // конечная дата диапозона поиска
+		
+		if(e_year)
+		{
+		
+		      if((e_month=="декабрь")&&(e_month=="")) // если месяц  декабрь или  пустой ставим дату с начала следующего года
+		        {e_dat =(e_year.to!int+1).to!string ~`-01-01`;}
+		
+		      else		 
+		   {
+		      e_dat =e_year.to!string ~`-`;		
+		     foreach( i, word; month)
+		     {	if( e_month == word ) 
+			      {  if(i<9) e_dat ~=`0`; 
+					      	e_dat ~= (i+1).to!string ~`-01`;// добавляем единицу к номеру месяца для включение этого месяца в диапазон
+			    	break;}
+	      	}
+		   }
+	    }
+		////////////////////////////////////////////////////////////
+		
+		
+	
+		
+		
+		
+		_filtr=_start_dat||_end_dat||_ks||_vid;//переменная отвечающшая за необходимость фильтрации (true есть фильтрация)
+		
+		//if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
+		//-----------------------------            
 		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
 		   try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
@@ -102,8 +128,8 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		"год переменная " ~ vid~"год окно  "~  all_ks ~ "\r\n"
 	);
 	} catch(Exception) {}         
-		
-		// Запрос на число строк
+	 //----------------------------------------------------------	
+	// Запрос на число строк
 	//	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from pohod` ):
 	//cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
 	
@@ -116,58 +142,45 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	string select_str1 =`select count(1) from pohod`; 	// при отсутствии фильтрации 
 	string select_str2;
 	
-	
+	// формируем расширеенный запрос строки 153 - 194
 	if(_filtr)
 	{
 	select_str2=` where (`;
-	if (vid.length !=0) select_str2~= ` vid='`~vid~`' `;
+	if (_vid)
 	
-	
-	bool isAnyKs = false;// булева перемеенная  отвечающая за  фильтрацию  по признаку категории ссложности
-	
-	if (long_ks != 0 )
-	{	foreach(kkkk; ks)
-		if( kkkk == "любая" )
-		{	isAnyKs = true;
-			break;
-		}
-	}
-	else
-		isAnyKs = true;
-	
-	if( !isAnyKs )
-	{	foreach(kkkk; ks)
-			if( kkkk == "любая" )
-			{	isAnyKs = true;
-				break;
-			}
-			
-		if (vid.length !=0  )	select_str2 ~=" and ";
-	
-		select_str2 ~= " ( ";
+	        {select_str2~= ` vid='`~vid~`' `;// добавлние запроса по виду туризма
+				if (_ks)	select_str2 ~=" and ";}
+				
+	if (_ks)
+	{	select_str2 ~= " ( ";
 		foreach( n, kkkk; ks ) 
-			select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива
+		{	select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива ks
+		 }
 		select_str2 ~= " ) ";
-	}
+		select_str2~=((_start_dat) || (_end_dat))?" and ": "";
+		
+	}	
+		
 	// фильтрация по дате
-	select_str2~=(((isAnyKs == true)||(vid.length !=0))&&((s_year !="") || (e_year !="")))?" and ": "";
 	
-  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;
-  	
+	
+  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;  	
 	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  begin_date<= '` ~e_dat~`' `;
  	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
  	select_str2~=`) `;
  	}
+ 	
+		//----------- конец формировки расширеенного  запроса--------------------------
 	
-	string select_str= select_str1 ~ select_str2; 
+	string select_str= select_str1 ~ select_str2; // полный запрос
 	
 	try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"
 		"select_str: " ~ select_str ~ "\r\n"
-		"s_dat: " ~ end_dat.to!string ~ "\r\n"
+		"s_dat: " ~ e_dat.to!string ~ "\r\n"
 	);
-	} catch(Exception) {}     
+	} catch(Exception e) {}     
 	
 	
 	auto col_str_qres = 	dbase.query(select_str);
@@ -179,7 +192,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit; //Количество страниц
+	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
@@ -226,7 +239,7 @@ group by num
      `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||coalesce( element::text, ' ' ) ) as vid,`
 
      `region_pohod , `
-     `(tourist.family_name||'<br>'||coalesce(tourist.given_name,'')||'<br>'||coalesce(tourist.patronymic,'')||'<br>'||coalesce(tourist.birth_year::text,'')), `
+     `(tourist.family_name||' '||coalesce(tourist.given_name,'')||' '||coalesce(tourist.patronymic,'')||' '||coalesce(tourist.birth_year::text,'')), `
      `(coalesce(pohod.unit,'')),(coalesce(gr,'')), `
      
      `(coalesce(organization,'')||'<br>'||coalesce(region_group,'')), `
@@ -239,9 +252,9 @@ group by num
       ` LEFT OUTER JOIN  U `
       `on U.num = pohod.num  `;     
       
-		if(_filtr){	queryStr~=select_str2;}	
+		if( _filtr ){	queryStr~=select_str2;}	
 		
-		queryStr~=` order by pohod.num  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
+		queryStr~=` order by  pohod.begin_date DESC  LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;
 	
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
@@ -349,32 +362,39 @@ group by num
 	~  ( (curPageNum < pageCount ) ? `<a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a>` : "")
 	~"</td></tr></table>";
 	 
-	          
+	    // _sverka=true;    // наличие сверки     
 	            
-		string table = `<table border="1">`;
+		string table = `<table class="tab">`;
 		
-		table ~= `<td>"Ключ"</td><td> "Номер"</td><td> "Сроки <br> похода"</td><td> "Вид, кс"</td><td>"Район"</td><td>"Руководитель"</td><td>"Участники"</td><td>"Город,<br>организация"</td><td> "Нитка маршрута"</td><td>"Статус<br> похода"</td>`;
+		if(_sverka) table~= `<td>Ключ</td>`;
+		
+		table ~=`<td>&nbspНомер&nbsp</td><td>&nbsp&nbspСроки&nbsp похода&nbsp</td><td> Вид, кс</td><td >Район</td><td>Руководитель</td><td>Участники</td><td>Город,<br>организация</td><td>Статус<br> похода</td>`;
+		if(_sverka) table ~=`<td>Изменить</td>`;
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 	  
-		table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Номер"("нет")  ~ `</td>`;
+		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
+		table ~= `<td >` ~rec.get!"Номер"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Сроки <br> похода"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Вид, кс"("нет") ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Район"("нет") ~ `</td>`;
+		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;
 		
 		table ~= `<td style="text-align: center;" title="`~ rec.get!"Уч"("нет")~`">` ~`<font color="red">`~  (  rec.get!"Участники"("Не задано") ) ~ `</font ></td>`;
 		
 		
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`;
-		
-		
-	
-		table ~= `<td>` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>`;
+
 		table ~= `<td>` ~ rec.get!"Статус<br> похода"("нет")  ~ `</td>`;
-		table ~= `<td> <a href="#">Изменить</a>  </td>`;
+		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
+		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`;
+		if(_sverka)
+		table ~=`10`;
+		else
+		table ~=`8`;
+		
+		table ~= `"  >Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`;
 	}
 	table ~= `</table>`;
 	
@@ -400,11 +420,7 @@ group by num
 	tpl.set("useful links", "Куча хороших ссылок");
 	tpl.set("js folder", jsPath);
 	tpl.set("this page path", thisPagePath);
-	
-	
-	import mkk_site.authentication;
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
-	
+
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 	}

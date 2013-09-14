@@ -153,6 +153,7 @@ body {
 	margin: 20px  280px 16px 16px;
 	padding: 5px;
 	background: #e4e2bf;
+	
 }
 
 #footer_pusher {
@@ -168,6 +169,29 @@ body {
 	background: #809080;
 }
 
-table {
+.pohod {
+		border-collapse: collapse;
+}
+
+.tab
+{
+
+	border-collapse: collapse;
+
+}
+
+.tab td {
+	
+   padding: 3px; /* Поля вокруг содержимого таблицы */
+    border: 2px solid ; /* Параметры рамки */
+}
+
+.tab
+{
+	border: ridge2px ;
+
+	border-collapse: collapse;
+	
+
 	
 }

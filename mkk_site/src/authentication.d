@@ -90,7 +90,7 @@ public:
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
 			` select num, password `
-			` from "site_user" `
+			` from site_user `
 			` where login='`
 			~ PGEscapeStr( login ) ~ `';`
 		);
@@ -223,7 +223,7 @@ UserInfo getUserInfo(
 		` select U.login, U.user_group, U.name `
 		` from session `
 		` join site_user as U `
-		` on U.num = user_num `
+		` on U.num = site_user_num `
 		` where session.num = '` 
 		~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
 	);

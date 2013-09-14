@@ -32,7 +32,23 @@ static this()
 }
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+
+
+
+
+
+
+
+
+
+
 {	
+
+   
+	 import mkk_site.authentication;
+		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки
+	
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
@@ -128,22 +144,28 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	string table = `<table border="1">`;
+	string table = `<table class="tab">`;
 	table ~= `<tr>`;
-	table ~= `<td> Ключ</td><td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`; 
+	if(_sverka) table ~= `<td> Ключ</td>`;
+	
+	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`;
+	
+	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
-		table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
+		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
 		table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;
-		
+		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;		
 		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
+		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`;
 		
 		table ~= `</tr>`;
 	}
 	table ~= `</table>`;
+	
+	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`;
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
@@ -167,8 +189,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	tpl.set("js folder", "../../js/");
 	tpl.set("this page path", thisPagePath);
 	
-	import mkk_site.authentication;
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+
 	
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
