@@ -23,7 +23,7 @@ template Record(alias RecFormat)
 		
 		template get(string fieldName)
 		{	
-			alias getFieldSpecByName!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
 			ValueType get()
 			{	return _recordSet.get!(fieldName)(_recordKey);
 			}
@@ -32,6 +32,10 @@ template Record(alias RecFormat)
 			{	return _recordSet.get!(fieldName)(_recordKey, defaultValue);
 			}
 			
+		}
+		
+		string getStr(string fieldName, string defaultValue = null)
+		{	return _recordSet.getStr( fieldName, _recordKey, defaultValue );
 		}
 		
 		bool isNull(string fieldName)
@@ -44,7 +48,6 @@ template Record(alias RecFormat)
 		
 		size_t length() @property
 		{	return RecFormat.fieldSpecs.length;
-			
 		}
 	}
 }

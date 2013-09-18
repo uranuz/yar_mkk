@@ -8,18 +8,24 @@ struct RecordFormat(Args...)
 {	alias TypeTuple!Args templateArgs;
 	alias parseFieldSpecs!Args fieldSpecs;
 	
-	static FieldType[] types() @property
+	static pure FieldType[] types() @property
 	{	FieldType[] result;
-		foreach( i, spec ; fieldSpecs)
-		{	result ~= spec.fieldType;
-		}
+		foreach( spec; fieldSpecs )
+			result ~= spec.fieldType;
 		return result;
 	}
 	
-	static string[] names() @property
+	static pure string[] names() @property
 	{	string[] result;
-		foreach( i, spec ; fieldSpecs)
+		foreach( spec; fieldSpecs )
 			result ~= spec.name;
+		return result;
+	}
+	
+	static pure size_t[string] indexes() @property
+	{	size_t[string] result;
+		foreach( i, spec; fieldSpecs )
+			result[spec.name] = i;
 		return result;
 	}
 	
@@ -54,31 +60,31 @@ template parseFieldSpecs(Args...)
 }
 
 //Получить из кортежа элементов типа FieldSpec нужный элемент по имени
-template getFieldSpecByName(string fieldName, FieldSpecs...)
+template getFieldSpec(string fieldName, FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
 		static assert(0, "Field with name \"" ~ fieldName ~ "\" is not found in container!!!");
 	else static if( FieldSpecs[0].name == fieldName )
-		alias FieldSpecs[0] getFieldSpecByName;
+		alias FieldSpecs[0] getFieldSpec;
 	else
-		alias getFieldSpecByName!(fieldName, FieldSpecs[1 .. $]) getFieldSpecByName;
+		alias getFieldSpec!(fieldName, FieldSpecs[1 .. $]) getFieldSpec;
 }
 
 //Получить из кортежа элементов типа FieldSpec нужный элемент по имени
-template getFieldSpecByIndex(size_t index, FieldSpecs...)
+template getFieldSpec(size_t index, FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
 		static assert(0, "Field with given index is not found in container!!!");
 	else static if( index == 0 )
-		alias FieldSpecs[0] getFieldSpecByIndex;
+		alias FieldSpecs[0] getFieldSpec;
 	else
-		alias getFieldSpecByIndex!( index - 1, FieldSpecs[1 .. $]) getFieldSpecByIndex;
+		alias getFieldSpec!( index - 1, FieldSpecs[1 .. $]) getFieldSpec;
 }
 
 //По кортежу элементов типа FieldSpec строит кортеж полей
-template getTupleOfByFieldSpec(alias Element, FieldSpecs...)
+template getTupleTypeOf(alias Element, FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
-		alias TypeTuple!() getTupleOfByFieldSpec;
+		alias TypeTuple!() getTupleTypeOf;
 	else 
-		alias TypeTuple!(Element!(FieldSpecs[0].fieldType), getTupleOfByFieldSpec!(Element, FieldSpecs[1 .. $])) getTupleOfByFieldSpec;
+		alias TypeTuple!(Element!(FieldSpecs[0].fieldType), getTupleTypeOf!(Element, FieldSpecs[1 .. $])) getTupleTypeOf;
 }
 
 //Получаем кортеж фактических типов значений по FieldSpec
@@ -89,29 +95,27 @@ template getValueTypeTuple(FieldSpecs...)
 		alias TypeTuple!(FieldSpecs[0].valueType, getValueTypeTuple!(FieldSpecs[1 .. $])) getValueTypeTuple;
 }
 
-template _workGetFieldSpecIndex(string fieldName, size_t index, FieldSpecs...)
+template _workGetFieldIndex(string fieldName, size_t index, FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
 		static assert(0, "Field with name \"" ~ fieldName ~ "\" is not found in container!!!");
 	else static if( FieldSpecs[0].name == fieldName )
-		alias index _workGetFieldSpecIndex;
+		alias index _workGetFieldIndex;
 	else 
-		alias _workGetFieldSpecIndex!(fieldName, index + 1 , FieldSpecs[1 .. $]) _workGetFieldSpecIndex;
+		alias _workGetFieldIndex!(fieldName, index + 1 , FieldSpecs[1 .. $]) _workGetFieldIndex;
 	
 }
 
 //Получение индекса элемента из кортежа FieldSpec по имени
-template getFieldSpecIndex(string fieldName, FieldSpecs...)
-{	alias _workGetFieldSpecIndex!(fieldName, 0 , FieldSpecs) getFieldSpecIndex;
+template getFieldIndex(string fieldName, FieldSpecs...)
+{	alias _workGetFieldIndex!(fieldName, 0 , FieldSpecs) getFieldIndex;
 }
 
 //Получение списка индексов всех ключевых полей
 size_t[] getKeyFieldIndexes(FieldSpecs...)()
 {	size_t[] result;
 	foreach( i, spec; FieldSpecs )
-	{	if( spec.fieldType == FieldType.IntKey )
-		{	result ~= i;
-		}
-	}
+		if( spec.fieldType == FieldType.IntKey )
+			result ~= i;
 	return result;
 }
 

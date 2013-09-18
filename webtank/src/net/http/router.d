@@ -42,7 +42,7 @@ static {
 		alias Tuple!(ParamTypes) ArgTupleType;
 		alias ReturnType!(method) ResultType;
 		
-		if( clearPath in _requestHandlers )
+		if( methodName in _requestHandlers )
 			throw new RoutingException("JSON-RPC метод \"" ~ methodName ~ "\" уже зарегистрирован в системе!!!");
 		
 		JSONValue JSONMethod(JSONValue jsonArg)
@@ -126,7 +126,9 @@ static {
 				writeln(protocol ~ "  " ~ methodName ~ "  " ~ id );
 				JSONValue params;
 				if( "params" in jMessageBody.object )
-				{	if( jMessageBody.object["params"].type == JSON_TYPE.ARRAY )
+				{	//TODO: Сделать, чтобы кроме массива мог быть любой другой тип
+					//Для начала - любой кроме объекта
+					if( jMessageBody.object["params"].type == JSON_TYPE.ARRAY )
 					{	params = jMessageBody.object["params"];
 						if( methodName.length > 0 && protocol == "2.0" )
 						{	auto method = getRPCMethod(methodName);

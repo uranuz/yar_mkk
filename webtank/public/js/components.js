@@ -11,7 +11,7 @@ webtank.json_rpc =
 		params: null, //Параметры вызова удалённого метода
 		onresult: null, //Обработчик успешного вызова удалённого метода
 		onerror: null,  //Обработчик ошибки
-		id: null, //Идентификатор соединения
+		id: null //Идентификатор соединения
 	},
 	_counter: 0,
 	_responseQueue: [null],

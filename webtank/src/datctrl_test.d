@@ -11,21 +11,21 @@ void main()
 	auto format = RecordFormat!(ft.IntKey, "Количество", ft.Int, "Цена", ft.Str, "Название", ft.Bool, "Условие")
 		([true, true, true, false]);
 	
-	getFieldSpecByName!("Количество", format.fieldSpecs).valueType var;
+	getFieldSpec!("Количество", format.fieldSpecs).valueType var;
 	writeln( typeid( var ).to!string );
 	writeln( format.types() );
 	writeln( format.names() );
 	writeln( format.nullableFlags );
 	
 	
-	writeln( typeid( getTupleOfByFieldSpec!(IField, format.fieldSpecs) ).to!string  );
-	alias  getTupleOfByFieldSpec!(DatabaseField, format.fieldSpecs)[2] DBFieldType;
+	writeln( typeid( getTupleTypeOf!(IField, format.fieldSpecs) ).to!string  );
+	alias  getTupleTypeOf!(DatabaseField, format.fieldSpecs)[2] DBFieldType;
 	
-	alias RecordSet!format RSType;
+	alias RecordSet!( typeof(format) ) RSType;
 	
 	writeln( typeid( RSType ).to!string  );
 	
-	writeln( getFieldSpecIndex!("Количество", format.fieldSpecs) );
+	writeln( getFieldIndex!("Количество", format.fieldSpecs) );
 	
 	string connStr = "dbname=postgres host=localhost user=postgres password=postgres";
 	auto dbase = new DBPostgreSQL(connStr);
