@@ -1,115 +1,130 @@
 <form method="post" action="{{form_action}}">
-Маршрутная книжка
+
+<hr>
+<b>Маршрутная книжка</b>
 <table>
-	<tr>
-		<td>Код МКК</td>
-		<td>
-			<input name="kod_MKK" type="text"{{kod_MKK}}>
-		</td>
-		<td>номер книжки</td>
-		<td><input type="text" name="nomer_knigi"{{nomer_knigi}}></td>
-	</tr>
-	<tr>
-		<td>Статус заявки</td>
-		<td><select name="status">{{status}}</select ></td>
-	</tr>
-	<tr><td colspan="4">Коментарий МКК</td></tr>
-	<tr>
-		<td colspan="4"><textarea name="MKK_coment">{{MKK_coment}}</textarea></td>
-	</tr>
+<tr>
+	<td><label for="kod_MKK">Код МКК</label><br>
+		<input type="text" id="kod_MKK" name="kod_MKK"{{kod_MKK}}>
+	</td>
+	<td><label for="nomer_knigi">Номер книжки</label><br>
+		<input type="text" id="nomer_knigi" name="nomer_knigi"{{nomer_knigi}}>
+	</td>
+<!--</tr>
+<tr>-->
+	<td><label for="status">Статус заявки</label><br>
+		<select id="status" name="status">{{status}}</select> 
+	</td>
+</tr>
 </table>
-Поход
+<label for="MKK_coment">Коментарий МКК</label><br>
+<textarea id="MKK_coment" name="MKK_coment">{{MKK_coment}}</textarea>
+
+
+<hr>
+<b>Поход</b>
 <table>
 <tr>
-	<td>Район похода</td>
-	<td>
-		<input type="text" name="region_pohod"{{region_pohod}}>
-	</td>
-	<td>вид туризма</td>
-	<td>
-		<select name="vid">{{vid}}</select>
-	</td>
+	<td><label for="region_pohod">Район похода</label></td>
+	<td><input type="text" id="region_pohod" name="region_pohod"{{region_pohod}}></td>
 </tr>
 <tr>
-	<td>Нитка маршрута</td>
-	<td colspan="3"><input type="text" name="marchrut"{{marchrut}}></td>
+	<td><label for="vid">Вид туризма</label></td>
+	<td><select id="vid" name="vid">{{vid}}</select></td>
 </tr>
 <tr>
-	<td>Категория сложности</td>
-	<td colspan="3">
-		<select name="ks">{{ks}}</select>
-		<select name="element">{{element}}</select>
+	<td><label for="marchrut">Нитка маршрута</label></td>
+	<td colspan="999"><input type="text" id="marchrut" name="marchrut"{{marchrut}}></td>
+</tr>
+<tr>
+	<td><label for="ks">Категория сложности</label></td>
+	<td colspan="999">
+		<select id="ks" name="ks">{{ks}}</select>
+		<select id="element" name="element">{{element}}</select>
 	</td>
 </tr>
 <tr>
-	<td>Сроки проведения</td>
-	<td colspan="3">с
-		<input type="text" size="2" name="begin_day"{{begin_day}}>
+	<td><label for="begin_day">Сроки проведения</label></td>
+	<td colspan="999">с &nbsp;
+		<input type="text" size="2" id="begin_day" name="begin_day"{{begin_day}}>
 		<select name="begin_month">{{begin_month}}</select>
 		<input type="text" size="4" name="begin_year"{{begin_year}}>
-		по
-		<input type="text" size="2" name="finish_day"{{finish_day}}>
+		
+		<label for="finish_day">по</label>
+		<input type="text" size="2" id="finish_day" name="finish_day"{{finish_day}}>
 		<select name="finish_month">{{finish_month}}</select>
 		<input type="text" size="4" name="finish_year"{{finish_year}}>
 	</td>
 </tr>
 <tr>
-	<td>Состояние подготовки</td>
-	<td><select name="prepare">{{prepare}}</select ></td>
-</tr>
-
-<tr><td colspan="4">Коментарий руководителя</td></tr>
-<tr>
-	<td colspan="4"><textarea name="chef_coment">{{chef_coment}}</textarea></td>
-</tr>
-</table>
-
-Группа <br>
-<span>
-<table style="display: inline;">
-<tr>
-	<td>Организация, клуб, команда</td>
-	<td><input type="text" name="organization"{{organization}}></td>
-</tr>
-<tr>
-	<td>Область, город и т.д.</td>
-	<td><input type="text" name="region_group"{{region_group}}></td>
-</tr>
-<tr>
-	<td>Руководитель похода</td>
-	<td>
-		<input type="text" id="chef_grupp_inp">
-		<input type="button" value="Найти" onclick="getTouristList('chef_grupp_inp')">
-		<div id="chef_grupp_div">{{chef_grupp}}</div>
-	</td>
-</tr>
-<tr>
-	<td>Заместитель</td>
-	<td>
-		<input type="text" id="alt_chef_inp">
-		<input type="button" value="Найти" onclick="getTouristList('alt_chef_inp')">
-		<div id="alt_chef_div">{{alt_chef}}</div>
-	</td>
-</tr>
-
-<tr>
-	<td>Участники</td>
-	<td>
-		<input type="text" id="unit_inp">
-		<input type="button" value="Найти" onclick="getTouristList('unit_inp')">
-		<div id="unit_div">{{unit}}</div>
+	<td><label for="prepare">Состояние подготовки</label></td>
+	<td colspan="999">
+		<select id="prepare" name="prepare">{{prepare}}</select>
 	</td>
 </tr>
 </table>
-</span>
+<label for="chef_coment">Коментарий руководителя</label><br>
+<textarea id="chef_coment" name="chef_coment">{{chef_coment}}</textarea>
 
-<span id="tourist_list">
-	Выбор участников <br>
-	{{tourist_list}}
-</span>
-<br>
+<hr>
+<b>Группа</b>
+<!--Блок для вывода списка туристов при поиске-->
+<div id="tourist_select_div"></div>
+<div id="tourist_group_div">
+	<table>
+	<tr>
+		<td>Организация, клуб, команда</td>
+		<td><input type="text" name="organization"{{organization}}></td>
+	</tr>
+	<tr>
+		<td>Область, город и т.д.</td>
+		<td><input type="text" name="region_group"{{region_group}}></td>
+	</tr>
+	<tr>
+		<td>Руководитель похода</td>
+		<td><input type="text" id="chef_grupp_inp">
+			<input type="button" value="Найти" onclick="getTouristList('chef_grupp_inp')">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="999"><div id="chef_grupp_div">{{chef_grupp}}</div></td>
+	</tr>
+	<tr>
+		<td>Заместитель руководителя</td>
+		<td>
+			<input type="text" id="alt_chef_inp">
+			<input type="button" value="Найти" onclick="getTouristList('alt_chef_inp')">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="999"><div id="alt_chef_div">{{alt_chef}}</div></td>
+	</tr>
+	<tr>
+		<td>Участники</td>
+		<td>
+			<input type="text" id="unit_inp">
+			<input type="button" value="Найти" onclick="getTouristList('unit_inp')">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="999"><div id="unit_div">{{unit}}</div></td>
+	</tr>
+	</table>
+</div>
+<hr>
 <input type="submit" value="Отправить">
+<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 </form>
+<style type="text/css">
+	#tourist_group_div {
+		width: 50%;
+	}
+	#tourist_select_div {
+		float: right;
+		width: 50%;
+	}
+</style>
+
 
 <script type="text/javascript">
 	function getTouristList(inputId)
@@ -117,13 +132,17 @@
 		webtank.json_rpc.invoke({
 			uri: "/dyn/rpc",  //Адрес для отправки
 			method: "турист.список_по_фильтру", //Название удалённого метода для вызова в виде строки
-			params: '["' + filterInput.value + '"]', //Параметры вызова удалённого метода
+			params: filterInput.value, //Параметры вызова удалённого метода
 			onresult: function (responseJSON) { //Обработчик успешного вызова удалённого метода
-				var tour_list_div = document.getElementById("tourist_list");
+				var tour_list_div = document.getElementById("tourist_select_div");
 				tour_list_div.innerHTML = responseJSON;
 			}
 // 			onerror: null  //Обработчик ошибки
 		});
+	}
+	
+	function addTouristToGroup(divId)
+	{	var filterInput = document.getElementById(inputId);
 		
 	}
 	

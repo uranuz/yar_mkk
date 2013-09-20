@@ -26,6 +26,8 @@ webtank.json_rpc =
 		
 		if( args )
 			_args = args;
+		
+		_args.params = webtank.json_rpc._processParams(_args.params);
 
 		var xhr = new window.XMLHttpRequest;
 		xhr.open( "POST", _args.uri, true );
@@ -67,6 +69,16 @@ webtank.json_rpc =
 				}
 			}
 		}
+	},
+	_processParams: function(params) {
+		if( typeof params === "object" )
+			return JSON.stringify(params);
+		else if( (typeof params === "function") || (typeof params === "undefined") )
+			return '"null"';
+		else if( typeof params === "string" )
+			return '"' + params + '"';
+		else //Для boolean, number
+			return params; 
 	}
 };	
 

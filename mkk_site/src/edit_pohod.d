@@ -197,7 +197,9 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			}
 			
 			//Выводим месяц начала похода в форму
-			auto beginMonth = ( pohodRec.isNull("begin_date") ? 0 : pohodRec.get!("begin_date").month );
+			ubyte beginMonth;
+			if( action == ActionType.showUpdateForm )
+				beginMonth = ( pohodRec.isNull("begin_date") ? 0 : pohodRec.get!("begin_date").month );
 			auto beginMonthInp = `<option value=""` ~ ( ( beginMonth == 0 || beginMonth > 31 ) ? ` selected` : `` ) ~ `></option>`;
 			foreach( i; 1..12 )
 			{	beginMonthInp ~= `<option value="` ~ i.to!string ~ `"`
@@ -207,7 +209,9 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			pohodForm.set( "begin_month", beginMonthInp );
 			
 			//Выводим месяц окончания похода
-			auto finishMonth = ( pohodRec.isNull("finish_date") ? 0 : pohodRec.get!("finish_date").month );
+			ubyte finishMonth;
+			if( action == ActionType.showUpdateForm )
+				finishMonth = ( pohodRec.isNull("finish_date") ? 0 : pohodRec.get!("finish_date").month );
 			auto finishMonthInp = `<option value=""` ~ ( ( finishMonth == 0 || finishMonth > 31 ) ? ` selected` : `` ) ~ `></option>`;
 			foreach( i; 1..12 )
 			{	finishMonthInp ~= `<option value="` ~ i.to!string ~ `"`

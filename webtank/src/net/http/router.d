@@ -39,7 +39,6 @@ static {
 	void setRPCMethod(MethodType)(string methodName, MethodType method)
 	{	import std.traits, std.json, std.conv, std.typecons;
 		alias ParameterTypeTuple!(MethodType) ParamTypes;
-		alias Tuple!(ParamTypes) ArgTupleType;
 		alias ReturnType!(method) ResultType;
 		
 		if( methodName in _requestHandlers )
@@ -47,31 +46,52 @@ static {
 		
 		JSONValue JSONMethod(JSONValue jsonArg)
 		{	writeln("JSONMethod:  jsonArg");
+			writeln(jsonArg.type);
 			writeln( toJSON(&jsonArg) );
-			auto argTuple = getDLangValue!( ArgTupleType )(jsonArg);
 			
 			static if( is( ResultType == void ) )
-			{	method(); //Вызываем метод
+			{	static if( ParamTypes.length > 1 )
+				{	auto argTuple = getDLangValue!( Tuple!(ParamTypes) )(jsonArg);
+					method(argTuple.expand);
+				}
+				else static if( ParamTypes.length == 1 )
+				{	auto argument = getDLangValue!( ParamTypes[0] )(jsonArg);
+					method(argument);
+				}
+				else
+					method();
 				JSONValue result;
 				result.type = JSON_TYPE.NULL;
 				return result;
 			}
 			else
-				return getJSONValue( method(argTuple.expand) );
+			{	static if( ParamTypes.length > 1 )
+				{	auto argTuple = getDLangValue!( Tuple!(ParamTypes) )(jsonArg);
+					return getJSONValue( method(argTuple.expand) );
+				}
+				else static if( ParamTypes.length == 1 )
+				{	auto argument = getDLangValue!( ParamTypes[0] )(jsonArg);
+					return getJSONValue( method(argument) );
+				}
+				else
+					return getJSONValue( method() );
+			}
 		}
 		
 		_jrpcMethods[methodName] = &JSONMethod;
 	}
 	
-	//Получить 
+	//Получить обработчик для заданного пути
 	ServerPathHandler getPathHandler(string path)
 	{	return _requestHandlers.get( _normalizePagePath(path), null );
 	}
 	
+	//Получить RPC метод
 	JSON_RPC_Method getRPCMethod(string methodName)
 	{	return _jrpcMethods.get( methodName, null );
 	}
 	
+	//Возвращает true, если RPC метод с заданным именем уже зарегистрирован
 	bool hasRPCMethod(string methodName)
 	{	if( methodName in _jrpcMethods )
 			return true;
@@ -79,6 +99,7 @@ static {
 			return false;
 	}
 	
+	//Возвращает true, если обработчик для заданного пути уже зарегистрирован
 	bool hasPathHandler(string path)
 	{	if( _normalizePagePath(path) in _jrpcMethods )
 			return true;
@@ -127,8 +148,9 @@ static {
 				JSONValue params;
 				if( "params" in jMessageBody.object )
 				{	//TODO: Сделать, чтобы кроме массива мог быть любой другой тип
-					//Для начала - любой кроме объекта
-					if( jMessageBody.object["params"].type == JSON_TYPE.ARRAY )
+					//Для начала - любой, кроме объекта
+					auto paramsType = jMessageBody.object["params"].type;
+					if( paramsType != JSON_TYPE.OBJECT && paramsType != JSON_TYPE.NULL )
 					{	params = jMessageBody.object["params"];
 						if( methodName.length > 0 && protocol == "2.0" )
 						{	auto method = getRPCMethod(methodName);
@@ -150,6 +172,7 @@ static {
 							}
 						}
 					}
+					
 				}
 			}
 			//else //не JSON RPC
