@@ -80,5 +80,48 @@ webtank.json_rpc =
 		else //Для boolean, number
 			return params; 
 	}
-};	
+};
+
+webtank.wui = {
+	createModalWindow: function()
+	{	var 
+			blackout_div = document.createElement("div"),
+			window_div = document.createElement("div"),
+			window_header_div = document.createElement("div"),
+			content_div = document.createElement("div"),
+			close_button = document.createElement("a"),
+			title = document.createElement("span"),
+			body = document.getElementsByTagName("body")[0];
+		
+		blackout_div.className = "modal_window_blackout";
+		window_div.className = "modal_window";
+		window_header_div.className = "modal_window_header";
+		content_div.className = "modal_window_content";
+		
+		close_button.innerHTML = "Закрыть";
+		title.innerHTML = "Текст заголовка";
+		close_button.onclick = function() {
+			window_div.style.display = "none";
+			blackout_div.style.display = "none";
+		}
+		
+		//Создаём структуру модального окна
+		window_header_div.appendChild(title);
+		window_header_div.appendChild(close_button);
+		window_div.appendChild(window_header_div);
+		window_div.appendChild(content_div);
+		
+		body.appendChild(blackout_div);
+		body.appendChild(window_div);
+		
+		
+		
+			
+		return {
+			window: window_div,
+			blackout: blackout_div,
+			content: content_div
+		}
+	}
+}
 

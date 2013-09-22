@@ -68,6 +68,7 @@
 
 <hr>
 <b>Группа</b>
+<div style="clear: both;"></div><!--Чтобы предыдущее содержимое не обтекалось-->
 <!--Блок для вывода списка туристов при поиске-->
 <div id="tourist_select_div"></div>
 <div id="tourist_group_div">
@@ -83,6 +84,7 @@
 	<tr>
 		<td>Руководитель похода</td>
 		<td><input type="text" id="chef_grupp_inp">
+			<input type="hidden" name="chef_grupp">
 			<input type="button" value="Найти" onclick="getTouristList('chef_grupp_inp')">
 		</td>
 	</tr>
@@ -93,6 +95,7 @@
 		<td>Заместитель руководителя</td>
 		<td>
 			<input type="text" id="alt_chef_inp">
+			<input type="hidden" name="alt_chef">
 			<input type="button" value="Найти" onclick="getTouristList('alt_chef_inp')">
 		</td>
 	</tr>
@@ -103,6 +106,7 @@
 		<td>Участники</td>
 		<td>
 			<input type="text" id="unit_inp">
+			<input type="hidden" name="unit_neim">
 			<input type="button" value="Найти" onclick="getTouristList('unit_inp')">
 		</td>
 	</tr>
@@ -111,18 +115,22 @@
 	</tr>
 	</table>
 </div>
+
+<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 <hr>
 <input type="submit" value="Отправить">
-<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 </form>
+
 <style type="text/css">
 	#tourist_group_div {
 		width: 50%;
+		float: left;
 	}
 	#tourist_select_div {
 		float: right;
 		width: 50%;
 	}
+	
 </style>
 
 

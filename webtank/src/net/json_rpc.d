@@ -69,8 +69,7 @@ auto getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 		if( jValue.type == JSON_TYPE.OBJECT )
 		{	T result;
 			foreach( key, val; jValue.object )
-			{	result[key.to!AAKeyType] = getDLangValue!( AAValueType, recursionLevel-1 )(val);
-			}
+				result[key.to!AAKeyType] = getDLangValue!( AAValueType, recursionLevel-1 )(val);
 			return result;
 		}
 		else
@@ -83,8 +82,8 @@ auto getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 		alias ElementType!T AElementType;
 		if( jValue.type == JSON_TYPE.ARRAY )
 		{	T array;
-			foreach( val; jValue.array )
-				array = getDLangValue!( AElementType, recursionLevel-1 )(val);
+			foreach( i, val; jValue.array )
+				array[i] = getDLangValue!( AElementType, recursionLevel-1 )(val);
 			return array;
 		}
 		else

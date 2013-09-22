@@ -108,8 +108,11 @@ static {
 	}
 	
 	void processRequest(ServerRequest request, ServerResponse response)
-	{	string contentType = request.headers.get("content-type", "");
-		if( contentType == "application/json-rpc" ) //Скорее всего JSON RPC
+	{	import std.array;
+		string contentType = request.headers.get("content-type", "");
+		auto contentTypeParts = std.array.split(contentType, ";");
+		string MIMEType = ( contentTypeParts.length > 0 ? contentTypeParts[0] : "" );
+		if( MIMEType == "application/json-rpc" ) //Скорее всего JSON RPC
 		{	import std.json;
 			JSONValue jMessageBody;
 			writeln(request.messageBody);

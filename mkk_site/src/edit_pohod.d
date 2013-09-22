@@ -12,6 +12,7 @@ immutable authPagePath = dynamicPath ~ "auth";
 static this()
 {	Router.setPathHandler(thisPagePath, &netMain);
 	Router.setRPCMethod("турист.список_по_фильтру", &getTouristList);
+	Router.setRPCMethod("поход.окно_редактирования_участников", &getParticipantsEditWindow);
 }
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
@@ -25,8 +26,8 @@ string getTouristList(string filterStr)
 	}
 	writeln("Тест111");
 	
-	string queryStr1 = `select num, family_name, given_name, patronymic, birth_year from tourist where family_name='`
-		~ PGEscapeStr( filterStr ) ~ `';`;
+	string queryStr1 = `select num, family_name, given_name, patronymic, birth_year from tourist where family_name ILIKE '`
+		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`;
 	auto queryRes1 = dbase.query( queryStr1 );
 	if( queryRes1 is null || queryRes1.recordCount == 0 )
 		return null;
@@ -34,6 +35,11 @@ string getTouristList(string filterStr)
 	alias FieldType ft;
 	auto touristRecFormat = RecordFormat!( ft.IntKey, "num", ft.Str, "family_name", 
 		ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" )();
+	string scriptForThis =
+`
+
+
+`;
 	
 	auto touristRS = queryRes1.getRecordSet(touristRecFormat);
 	foreach( rec; touristRS )
@@ -44,6 +50,35 @@ string getTouristList(string filterStr)
 			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
 	}
 	return result;
+}
+
+string getParticipantsEditWindow(uint[] selectedTouristNums)
+{	string selectedTouristsDiv;
+	//TODO: Добавить вывод списка участников
+	string touristSearchInp =
+		`<input type="text" id="tourist_search_inp">`;
+	string touristSearchButton = 
+		`<input type="button" id="tourist_search_button" onclick="searchForTourist();">`;
+	string touristSearchDiv = 
+		`<div id="tourist_search_div"></div>`;
+	string scriptForThis =
+`		<script type="text/javascript">
+			function searchForTourist() {
+				var searchInp = document.getElementById("tourist_search_inp")
+				webtank.json_rpc.invoke({
+					uri: "/dyn/rpc",
+					method: "турист.список_по_фильтру",
+					params: searchInp.value,
+					onresult: function(result) {
+						var container = document.getElementById("tourist_search_div");
+						container.innerHTML = result.toString();
+					}
+				});
+			}
+		</script>
+`;
+	return selectedTouristsDiv ~ touristSearchInp
+		~ touristSearchButton ~ touristSearchDiv ~ scriptForThis;
 }
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
