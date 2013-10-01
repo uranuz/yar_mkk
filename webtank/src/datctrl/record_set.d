@@ -1,19 +1,31 @@
 module webtank.datctrl.record_set;
 
+import webtank._version;
+
+static if( isDatCtrlEnabled ) {
+
 import std.typetuple, std.typecons, std.stdio, std.conv;
 
 //import std.stdio;
 
 import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.record_format;
 
+interface IBaseRecordSet
+{	
+	
+}
 
 template RecordSet(alias RecFormat)
 {
-	alias Tuple!( getTupleTypeOf!(IField, RecFormat.fieldSpecs) ) IFieldTupleType;
-	alias Record!RecFormat Rec;
+// 	alias Tuple!( getTupleTypeOf!(IField, RecFormat.fieldSpecs) ) IFieldTupleType;
 	
-	class RecordSet
+	
+	class RecordSet: IBaseRecordSet
 	{	
+	public:
+		alias Record!RecFormat Rec;
+		alias RecFormat RecordFormatType;
+		
 	protected:
 		IBaseField[] _fields;
 		size_t _keyFieldIndex;
@@ -130,3 +142,4 @@ template RecordSet(alias RecFormat)
 }
 
 
+} //static if( isDatCtrlEnabled )

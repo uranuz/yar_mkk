@@ -83,7 +83,7 @@ public:
 		T get(size_t index)
 		{	static if( FieldT == FieldType.IntKey )
 			{	assert( index <= _indexes.length, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because _indexes.length is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
-				assert( isNull(index), "Key field value must not be null!!!" );
+				assert( !isNull(index), "Key field value must not be null!!!" );
 			}
 			else
 				assert( index <=  _queryResult.recordCount, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because record count is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );

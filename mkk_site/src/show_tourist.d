@@ -1,4 +1,4 @@
-module mkk_site.full_test;
+module mkk_site.show_tourist;
 
 import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами

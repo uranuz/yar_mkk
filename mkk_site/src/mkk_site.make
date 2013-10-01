@@ -1,1 +1,1 @@
-./make.py --projdir=../../ --outfname=mkk_site webtank/src/sources.list mkk_site/src/sources.list
+rdmd --force "-I../../import" -ofmkk_site _import.d

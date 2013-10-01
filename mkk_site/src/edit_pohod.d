@@ -2,7 +2,9 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.stdio, std.array;
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.request, webtank.net.http.response;
+import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+
+import webtank.net.javascript;
 
 import mkk_site.site_data, mkk_site.authentication;
 
@@ -16,7 +18,7 @@ static this()
 }
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-string getTouristList(string filterStr)
+auto getTouristList(string filterStr)
 {	string result;
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
@@ -42,14 +44,59 @@ string getTouristList(string filterStr)
 `;
 	
 	auto touristRS = queryRes1.getRecordSet(touristRecFormat);
-	foreach( rec; touristRS )
-	{	result ~= `<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
-			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
-			~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " "
-			~ HTMLEscapeValue( rec.get!"patronymic"("") ) ~ ", "
-			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
-	}
-	return result;
+// 	foreach( rec; touristRS )
+// 	{	result ~= `<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
+// 			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
+// 			~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " "
+// 			~ HTMLEscapeValue( rec.get!"patronymic"("") ) ~ ", "
+// 			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
+// 	}
+// 	return result;
+	return touristRS;
+}
+
+auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
+{	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	if ( !dbase.isConnected )
+		return null; //Завершаем
+	
+	uint maxLimit = 25;
+	uint limit = ( requestedLimit < maxLimit ? requestedLimit : maxLimit );
+	
+	auto queryRes = dbase.query(
+		`select num, family_name, given_name, patronymic, birth_year from tourist where num=`
+		~ pohodNum.to!string ~ ` limit ` ~ limit.to!string ~ `;`
+	);
+	if( queryRes is null || queryRes.recordCount == 0 )
+		return null;
+	
+	alias FieldType ft;
+	auto touristRecFormat = RecordFormat!( ft.IntKey, "num", ft.Str, "family_name", 
+		ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" )();
+	
+	auto touristRS = queryRes.getRecordSet(touristRecFormat);
+	
+// 	string result = `{`;
+// 	string nums = `[`;
+// 	string familyNames;
+// 	string givenNames;
+// 	string patronymics;
+// 	string birthYears;
+// 	
+// 	foreach( rec; touristRS )
+// 	{	familyNames ~= 
+// 			
+// 	`<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
+// 			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
+// 			~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " "
+// 			~ HTMLEscapeValue( rec.get!"patronymic"("") ) ~ ", "
+// 			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
+// 	}
+	
+// 	result ~= `]`;
+	
+// 	return result;
+	return touristRS;
 }
 
 string getParticipantsEditWindow(uint[] selectedTouristNums)
@@ -61,24 +108,8 @@ string getParticipantsEditWindow(uint[] selectedTouristNums)
 		`<input type="button" id="tourist_search_button" onclick="searchForTourist();">`;
 	string touristSearchDiv = 
 		`<div id="tourist_search_div"></div>`;
-	string scriptForThis =
-`		<script type="text/javascript">
-			function searchForTourist() {
-				var searchInp = document.getElementById("tourist_search_inp")
-				webtank.json_rpc.invoke({
-					uri: "/dyn/rpc",
-					method: "турист.список_по_фильтру",
-					params: searchInp.value,
-					onresult: function(result) {
-						var container = document.getElementById("tourist_search_div");
-						container.innerHTML = result.toString();
-					}
-				});
-			}
-		</script>
-`;
-	return selectedTouristsDiv ~ touristSearchInp
-		~ touristSearchButton ~ touristSearchDiv ~ scriptForThis;
+	
+	return selectedTouristsDiv ~ touristSearchInp ~ touristSearchButton ~ touristSearchDiv;
 }
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения

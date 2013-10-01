@@ -83,31 +83,21 @@
 	</tr>
 	<tr>
 		<td>Руководитель похода</td>
-		<td><input type="text" id="chef_grupp_inp">
-			<input type="hidden" name="chef_grupp">
-			<input type="button" value="Найти" onclick="getTouristList('chef_grupp_inp')">
+		<td colspan="999"><input type="hidden" name="chef_grupp">
+			<a href="#" onclick="">{{chef_grupp_text}}</a>
 		</td>
-	</tr>
-	<tr>
-		<td colspan="999"><div id="chef_grupp_div">{{chef_grupp}}</div></td>
 	</tr>
 	<tr>
 		<td>Заместитель руководителя</td>
-		<td>
-			<input type="text" id="alt_chef_inp">
-			<input type="hidden" name="alt_chef">
-			<input type="button" value="Найти" onclick="getTouristList('alt_chef_inp')">
+		<td colspan="999"><input type="hidden" name="alt_chef">
+			<a href="#" onclick="">{{alt_chef_text}}</a>
 		</td>
-	</tr>
-	<tr>
-		<td colspan="999"><div id="alt_chef_div">{{alt_chef}}</div></td>
 	</tr>
 	<tr>
 		<td>Участники</td>
 		<td>
-			<input type="text" id="unit_inp">
 			<input type="hidden" name="unit_neim">
-			<input type="button" value="Найти" onclick="getTouristList('unit_inp')">
+			<a href="#" onclick="mkk_site.edit_pohod.openParticipantsEditWindow()">Редактировать</a>
 		</td>
 	</tr>
 	<tr>
@@ -120,6 +110,7 @@
 <hr>
 <input type="submit" value="Отправить">
 </form>
+<script type="text/javascript" src="/js/edit_pohod.js"></script>
 
 <style type="text/css">
 	#tourist_group_div {
@@ -132,26 +123,3 @@
 	}
 	
 </style>
-
-
-<script type="text/javascript">
-	function getTouristList(inputId)
-	{	var filterInput = document.getElementById(inputId);
-		webtank.json_rpc.invoke({
-			uri: "/dyn/rpc",  //Адрес для отправки
-			method: "турист.список_по_фильтру", //Название удалённого метода для вызова в виде строки
-			params: filterInput.value, //Параметры вызова удалённого метода
-			onresult: function (responseJSON) { //Обработчик успешного вызова удалённого метода
-				var tour_list_div = document.getElementById("tourist_select_div");
-				tour_list_div.innerHTML = responseJSON;
-			}
-// 			onerror: null  //Обработчик ошибки
-		});
-	}
-	
-	function addTouristToGroup(divId)
-	{	var filterInput = document.getElementById(inputId);
-		
-	}
-	
-</script>

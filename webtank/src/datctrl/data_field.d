@@ -1,5 +1,9 @@
 module webtank.datctrl.data_field;
 
+import webtank._version;
+
+static if( isDatCtrlEnabled ) {
+
 import std.array, std.conv;
 
 import webtank.datctrl.field_type;
@@ -47,3 +51,6 @@ interface IField(FieldType FieldT) : IBaseField
 	}
 
 }
+
+
+} //static if( isDatCtrlEnabled )

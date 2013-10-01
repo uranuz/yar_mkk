@@ -1,5 +1,7 @@
 module webtank.net.json_rpc;
 
+import webtank._version;
+
 import std.stdio, std.string, std.conv, std.traits, std.typecons, std.json;
 
 //Класс исключения для удалённого вызова процедур
@@ -115,7 +117,8 @@ auto getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 }
 
 JSONValue getJSONValue(T)(T dValue)
-{	static if( is( T == JSONValue ) )
+{	pragma(msg, T);
+	static if( is( T == JSONValue ) )
 		return dValue;
 	else
 	{	JSONValue jValue;
@@ -156,6 +159,63 @@ JSONValue getJSONValue(T)(T dValue)
 		{	jValue.type = JSON_TYPE.ARRAY;
 			foreach( elem; dValue )
 				jValue.array ~= getJSONValue( elem );
+		}
+		else static if( isDatCtrlEnabled )
+		{	import webtank.datctrl._import;
+			static if( is( T: IBaseRecordSet ) || is( T: IBaseRecord ) )
+			{	//Переводим RecordSet в JSONValue
+				alias T.RecordFormatType RecFormat;
+				if( dValue is null )
+						jValue.type = JSON_TYPE.NULL;
+				else
+				{	jValue.type = JSON_TYPE.OBJECT;
+					
+					//Образуем JSON-массив описаний полей
+					JSONValue fieldsJSON;
+					fieldsJSON.type = JSON_TYPE.ARRAY;
+					foreach( spec; RecFormat.fieldSpecs )
+					{	JSONValue fldJSON;
+						fldJSON.type = JSON_TYPE.OBJECT;
+						
+						fldJSON.object["n"] = JSONValue(); 
+						fldJSON.object["t"] = JSONValue();
+						fldJSON["n"].str = spec.name;
+						fldJSON["t"].str = spec.fieldType.to!string;
+						fieldsJSON.array ~= fldJSON; //Добавляем описание поля
+					}
+					//Добавляем массив описаний полей к результату
+					jValue.object["f"] = fieldsJSON;
+					JSONValue recordToJSON(Record!(RecFormat) rec)
+					{	JSONValue recJSON;
+						recJSON.type = JSON_TYPE.ARRAY;
+						recJSON.array.length = RecFormat.fieldSpecs.length; 
+						foreach( j, spec; RecFormat.fieldSpecs )
+						{	if( rec.isNull(spec.name) )
+								recJSON[j].type = JSON_TYPE.NULL;
+							else
+								recJSON[j] = getJSONValue( rec.get!(spec.name) );
+						}
+						return recJSON;
+					}
+					static if( is( T: IBaseRecordSet ) )
+					{	//Образуем JSON-массив записей
+						JSONValue recordsJSON;
+						recordsJSON.type = JSON_TYPE.ARRAY;
+						foreach( rec; dValue )
+							recordsJSON.array ~= recordToJSON(rec);
+						jValue.object["d"] = recordsJSON; //Сегфолт, если не сделать
+						jValue.object["t"] = JSONValue();
+						jValue.object["t"].type = JSON_TYPE.STRING;
+						jValue.object["t"].str = "recordset";
+					}//Переводим Record в JSONValue
+					else static if( is( T: IBaseRecord ) )
+					{	jValue.object["d"] = recordToJSON(dValue);
+						jValue.object["t"] = JSONValue();
+						jValue.object["t"].type = JSON_TYPE.STRING;
+						jValue.object["t"].str = "record";
+					}
+				}
+			}
 		}
 		else
 			static assert( 0, "This value's type is not of one implemented JSON type!!!" );

@@ -1,5 +1,9 @@
 module webtank.datctrl.record_format;
 
+import webtank._version;
+
+static if( isDatCtrlEnabled ) {
+
 import std.typetuple, std.typecons, std.conv;
 
 import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field;
@@ -119,3 +123,5 @@ size_t[] getKeyFieldIndexes(FieldSpecs...)()
 	return result;
 }
 
+
+} //static if( isDatCtrlEnabled )
