@@ -150,7 +150,9 @@ body {
 }
 
 #content {
-	margin: 20px  280px 16px 16px;
+	
+	
+	margin: 50px  280px 16px 16px;
 	padding: 5px;
 	background: #e4e2bf;
 	
@@ -173,25 +175,20 @@ body {
 		border-collapse: collapse;
 }
 
-.tab
-{
 
-	border-collapse: collapse;
-
-}
 
 .tab td {
-	
+	word-break: break-all;
    padding: 3px; /* Поля вокруг содержимого таблицы */
     border: 2px solid ; /* Параметры рамки */
 }
 
 .tab
 {
-	border: ridge2px ;
-
+		width: 90%;
+	border: ridge 2px ;
 	border-collapse: collapse;
-	
+	font-size:85%;
+	}
 
 	
-}

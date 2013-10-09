@@ -1,6 +1,7 @@
 site_data.d
 show_tourist.d
 show_pohod.d
+show_moder.d
 authentication.d
 auth.d
 admin.d

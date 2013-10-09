@@ -1,11 +1,11 @@
-module mkk_site.show_tourist;
+module mkk_site.show_moder;
 
 import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data;
+import mkk_site.site_data;// фаил обших переменных сайта
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 string nou_SQL_injekt(string str)
@@ -25,7 +25,7 @@ string result = strip(toUTF8(dstr1));
 return result;
 }
 //----------------------
-immutable thisPagePath = dynamicPath ~ "show_tourist";
+immutable thisPagePath = dynamicPath ~ "show_moder";
 
 static this()
 {	Router.setPathHandler(thisPagePath, &netMain);
@@ -54,7 +54,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	string js_file = "../../js/page_view.js";
 		
 	//Создаём подключение к БД
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	auto dbase = new DBPostgreSQL(authDBConnStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 	
@@ -72,8 +72,8 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	} catch(Exception) {}
 	uint limit = 10;// максимальное  чмсло строк на странице
 	int page;
-	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
-	dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
+	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from site_user` ):
+	dbase.query(`select count(1) from site_user where family_name = '` ~ fem ~ "'");
 	
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
@@ -88,12 +88,12 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
+	string content;
 	
-	
-	string content = 
-	`<form id="main_form" method="post">
-		Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
-		<input type="submit" name="act" value="Найти"><br>`;
+	// content = 
+	//`<form id="main_form" method="post">
+	//	Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
+	//	<input type="submit" name="act" value="Найти"><br>`;
 	
 	try { //Логирование запросов к БД для отладки
 		std.file.append( eventLogFileName, 
@@ -123,24 +123,15 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "Имя", ft.Str, "Дата рожд", 
-	ft.Str,  "Опыт",   ft.Str, "Контакты",  ft.Str, "Комментарий")();
+	ft.IntKey, "Ключ",   ft.Str, "Ф.И.О.", ft.Str, "Регион", 
+	ft.Str,  "Контакты",   ft.Str, "Статус",  )();
 	
 	string queryStr;
 	
     
-		queryStr=`select num, 
-		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
-		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date , exp, `
-		`( case `
-			` when( show_phone = true ) then phone||'<br> ' `
-			` else '' `
-		` end || `
-		` case `
-			` when( show_email = true ) then email `
-			` else '' `
-		   ` end ) as contact, `
-		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name='` ~ fem ~"'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
+		queryStr=`select num,name,region,(email||'<br>'||contact_info) as contact_info ,status` 
+				
+		   `  from site_user `~ ( ( fem.length == 0 )?"": (` WHERE name='` ~ fem ~"'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
@@ -148,17 +139,17 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	table ~= `<tr>`;
 	if(_sverka) table ~= `<td> Ключ</td>`;
 	
-	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`;
+	table ~=`<td>Ф.И.О.</td><td> Регион</td><td>Контакты</td><td> Статус</td>`;
 	
 	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;		
-		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Ф.И.О."("") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Регион"("") ~ `</td>`;
+		table ~= `<td>` ~rec.get!"Контакты"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Статус"("нет") ~ `</td>`;		
+	
 		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`;
 		
 		table ~= `</tr>`;
