@@ -6,3 +6,4 @@ authentication.d
 auth.d
 admin.d
 edit_tourist.d
+edit_pohod.d

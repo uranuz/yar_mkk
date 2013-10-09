@@ -1,117 +1,125 @@
-<form name="form1" method="post" action="{{edit pohod form action}}">
+<form method="post" action="{{form_action}}">
+
+<hr>
+<b>Маршрутная книжка</b>
 <table>
-  <tr>
-    <td>код мкк</td>
-    <td>
-      <input name="kod_MKK" type="text" id="kod_MKK">
-    </td>
-    <td>номер книжки</td>
-    <td><input type="text" name="nomer_knigi" id="nomer_knigi"></td>
-  </tr>
-  <tr>
-    <td>район похода</td>
-    <td>
-      <input name="raion" type="text" id="raion">
-    </td>
-    <td>вид туризма</td>
-    <td>
-		<select name="vid"></select>
-    </td>
-  </tr>
-  <tr>
-    <td>организация,клуб,команда</td>
-    <td><input name="organiz" type="text" id="organiz"></td>
-    <td>Область,город, пр.</td>
-    <td><input name="territori" type="text" id="territori"></td>
-  </tr>
-  <tr>
-    <td>категория сложности</td>
-    <td>
-    <select name="ks"></select >
-    </td>
-    <td>с элемнтами </td>
-    <td><select name="element"></select ></td>
-  </tr>
-  <tr>
-    <td>дата начала похода</td>
-    <td><input name="begin_data1" type="text" id="begin_data1" value="">
-число
-<input name="begin_data2" type="text" id="begin_data2" value="" >
-месяц
-<input name="begin_data3" type="text" id="begin_data3" value="">
-год </td>
+<tr>
+	<td><label for="kod_MKK">Код МКК</label><br>
+		<input type="text" id="kod_MKK" name="kod_MKK"{{kod_MKK}}>
+	</td>
+	<td><label for="nomer_knigi">Номер книжки</label><br>
+		<input type="text" id="nomer_knigi" name="nomer_knigi"{{nomer_knigi}}>
+	</td>
+<!--</tr>
+<tr>-->
+	<td><label for="status">Статус заявки</label><br>
+		<select id="status" name="status">{{status}}</select> 
+	</td>
+</tr>
+</table>
+<label for="MKK_coment">Коментарий МКК</label><br>
+<textarea id="MKK_coment" name="MKK_coment">{{MKK_coment}}</textarea>
 
 
-    <td>конец похода</td>
-    <td><input name="finich_data1" type="text" id="finich_data1" value="">
-      число
-      <input name="finich_data2" type="text" id="finich_data2" value="">
-      месяц
-      <input name="finich_data3" type="text" id="finich_data2" value="">
-      год </td>
-  </tr>
- 
-  <tr>
-    <td>Руководитель похода</td>
-    <td><input name="chef_grupp" type="text" id="chef_grupp" value="">
-номер в базе туристов </br>
-</td>
-    <td>Заместитель</td>
-    <td><input name="daw_chef" type="text" id="daw_chef" value="">
-номер в базе туристов</br>
-</td>
-  </tr>
-  </table>
+<hr>
+<b>Поход</b>
 <table>
-  <tr>
-    <td>Краткий маршрут</td>
-    <td><textarea name="marchrut" id="marchrut"></textarea></td>
-  </tr>
-  <tr>
-    <td>Участники</td>
-    <td><textarea name="unitt" id="unitt"></textarea></td>
-  </tr>
-  <tr>
-    <td><p>Комннтарий </br>
-    
-    руководителя</p></td>
-    <td><textarea name="chef_coment" id="chef_coment"></textarea></td>
-  </tr>
-  <tr>
-    <td>Коментарий МКК</td>
-    <td><textarea name="MKK_coment" id="MKK_coment"></textarea></td>
-  </tr>
-  <tr>
-    <td>Выпускающие</td>
-    <td><input name="emitter" type="text" id="emitter"></td>
-  </tr>
+<tr>
+	<td><label for="region_pohod">Район похода</label></td>
+	<td><input type="text" id="region_pohod" name="region_pohod"{{region_pohod}}></td>
+</tr>
+<tr>
+	<td><label for="vid">Вид туризма</label></td>
+	<td><select id="vid" name="vid">{{vid}}</select></td>
+</tr>
+<tr>
+	<td><label for="marchrut">Нитка маршрута</label></td>
+	<td colspan="999"><input type="text" id="marchrut" name="marchrut"{{marchrut}}></td>
+</tr>
+<tr>
+	<td><label for="ks">Категория сложности</label></td>
+	<td colspan="999">
+		<select id="ks" name="ks">{{ks}}</select>
+		<select id="element" name="element">{{element}}</select>
+	</td>
+</tr>
+<tr>
+	<td><label for="begin_day">Сроки проведения</label></td>
+	<td colspan="999">с &nbsp;
+		<input type="text" size="2" id="begin_day" name="begin_day"{{begin_day}}>
+		<select name="begin_month">{{begin_month}}</select>
+		<input type="text" size="4" name="begin_year"{{begin_year}}>
+		
+		<label for="finish_day">по</label>
+		<input type="text" size="2" id="finish_day" name="finish_day"{{finish_day}}>
+		<select name="finish_month">{{finish_month}}</select>
+		<input type="text" size="4" name="finish_year"{{finish_year}}>
+	</td>
+</tr>
+<tr>
+	<td><label for="prepare">Состояние подготовки</label></td>
+	<td colspan="999">
+		<select id="prepare" name="prepare">{{prepare}}</select>
+	</td>
+</tr>
 </table>
-<table >
-  <tr>
-    <td><p>Состояние подготовки похода </br>
-    (планируется, готовится, набор группы, </br> 
-    набор завершон,на маршруте,пройден)</p>
-    
-    </td>
-    <td><select name="prepare">
-      
-    </select ></td>
-  </tr>
-  <tr>
-    <td>Заявка </br>
-   (рассматривается,заявлен,на контроле,пройден,засчитан)</td>
-    <td><select name="status">
-      
-    </select ></td>
-  </tr>
-</table>
-<p>
-  <input type="submit" name="button" id="button" value="Отправить">
-</p>
-<p>&nbsp;</p>
-<p>
-  <input type="reset" name="button2" id="button2" value="Сброс">
-</p>
-<p>&nbsp;</p>
-<input type="hidden" name="MM_insert" value="form1">
+<label for="chef_coment">Коментарий руководителя</label><br>
+<textarea id="chef_coment" name="chef_coment">{{chef_coment}}</textarea>
+
+<hr>
+<b>Группа</b>
+<div style="clear: both;"></div><!--Чтобы предыдущее содержимое не обтекалось-->
+<!--Блок для вывода списка туристов при поиске-->
+<div id="tourist_select_div"></div>
+<div id="tourist_group_div">
+	<table>
+	<tr>
+		<td>Организация, клуб, команда</td>
+		<td><input type="text" name="organization"{{organization}}></td>
+	</tr>
+	<tr>
+		<td>Область, город и т.д.</td>
+		<td><input type="text" name="region_group"{{region_group}}></td>
+	</tr>
+	<tr>
+		<td>Руководитель похода</td>
+		<td colspan="999"><input type="hidden" name="chef_grupp">
+			<a href="#" onclick="">{{chef_grupp_text}}</a>
+		</td>
+	</tr>
+	<tr>
+		<td>Заместитель руководителя</td>
+		<td colspan="999"><input type="hidden" name="alt_chef">
+			<a href="#" onclick="">{{alt_chef_text}}</a>
+		</td>
+	</tr>
+	<tr>
+		<td>Участники</td>
+		<td>
+			<input type="hidden" name="unit_neim">
+			<a href="#" onclick="mkk_site.edit_pohod.openParticipantsEditWindow()">Редактировать</a>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="999"><div id="unit_div">{{unit}}</div></td>
+	</tr>
+	</table>
+</div>
+
+<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
+<hr>
+<input type="submit" value="Отправить">
 </form>
+<script type="text/javascript" src="/js/edit_pohod.js"></script>
+
+<style type="text/css">
+	#tourist_group_div {
+		width: 50%;
+		float: left;
+	}
+	#tourist_select_div {
+		float: right;
+		width: 50%;
+	}
+	
+</style>

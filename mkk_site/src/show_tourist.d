@@ -32,19 +32,7 @@ static this()
 }
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
-
-
-
-
-
-
-
-
-
-
 {	
-
-   
 	 import mkk_site.authentication;
 		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки

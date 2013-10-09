@@ -10,6 +10,7 @@ net/http/response.d
 net/http/request.d
 net/http/router.d
 net/http/headers.d
+net/javascript.d
 net/json_rpc.d
 net/web_server.d
 net/utils.d

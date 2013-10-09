@@ -11,7 +11,7 @@ webtank.json_rpc =
 		params: null, //Параметры вызова удалённого метода
 		onresult: null, //Обработчик успешного вызова удалённого метода
 		onerror: null,  //Обработчик ошибки
-		id: null, //Идентификатор соединения
+		id: null //Идентификатор соединения
 	},
 	_counter: 0,
 	_responseQueue: [null],
@@ -26,6 +26,8 @@ webtank.json_rpc =
 		
 		if( args )
 			_args = args;
+		
+		_args.params = webtank.json_rpc._processParams(_args.params);
 
 		var xhr = new window.XMLHttpRequest;
 		xhr.open( "POST", _args.uri, true );
@@ -67,6 +69,59 @@ webtank.json_rpc =
 				}
 			}
 		}
+	},
+	_processParams: function(params) {
+		if( typeof params === "object" )
+			return JSON.stringify(params);
+		else if( (typeof params === "function") || (typeof params === "undefined") )
+			return '"null"';
+		else if( typeof params === "string" )
+			return '"' + params + '"';
+		else //Для boolean, number
+			return params; 
 	}
-};	
+};
+
+webtank.wui = {
+	createModalWindow: function()
+	{	var 
+			blackout_div = document.createElement("div"),
+			window_div = document.createElement("div"),
+			window_header_div = document.createElement("div"),
+			content_div = document.createElement("div"),
+			close_button = document.createElement("a"),
+			title = document.createElement("span"),
+			body = document.getElementsByTagName("body")[0];
+		
+		blackout_div.className = "modal_window_blackout";
+		window_div.className = "modal_window";
+		window_header_div.className = "modal_window_header";
+		content_div.className = "modal_window_content";
+		
+		close_button.innerHTML = "Закрыть";
+		title.innerHTML = "Текст заголовка";
+		close_button.onclick = function() {
+			window_div.style.display = "none";
+			blackout_div.style.display = "none";
+		}
+		
+		//Создаём структуру модального окна
+		window_header_div.appendChild(title);
+		window_header_div.appendChild(close_button);
+		window_div.appendChild(window_header_div);
+		window_div.appendChild(content_div);
+		
+		body.appendChild(blackout_div);
+		body.appendChild(window_div);
+		
+		
+		
+			
+		return {
+			window: window_div,
+			blackout: blackout_div,
+			content: content_div
+		}
+	}
+}
 
