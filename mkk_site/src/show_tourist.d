@@ -1,11 +1,11 @@
 module mkk_site.show_tourist;
 
-import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data;
+import mkk_site.site_data, mkk_site.utils;
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 string nou_SQL_injekt(string str)
@@ -33,7 +33,7 @@ static this()
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	 import mkk_site.authentication;
+	import mkk_site.authentication;
 		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки
 	
@@ -50,8 +50,6 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	   
 	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
 	
- 
-   
 	try { //Логирование запросов к БД для отладки
 	std.file.append( eventLogFileName, 
 		"--------------------\r\n"
@@ -62,7 +60,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	int page;
 	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
 	dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
-	
+
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
@@ -76,8 +74,6 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
-	
-	
 	string content = 
 	`<form id="main_form" method="post">
 		Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
@@ -90,7 +86,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			"Текущий номер страницы: "~ curPageNum.to!string ~ ", всего страниц: " ~ pageCount.to!string ~ "\r\n"
 		);
 	} catch(Exception) {}
-	
+
 	
 	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
 	{	if( curPageNum != 1 )
@@ -108,7 +104,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
 	
 	alias FieldType ft;
-	
+
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
 	ft.IntKey, "Ключ",   ft.Str, "Имя", ft.Str, "Дата рожд", 
@@ -137,7 +133,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	if(_sverka) table ~= `<td> Ключ</td>`;
 	
 	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`;
-	
+
 	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
@@ -152,32 +148,13 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		table ~= `</tr>`;
 	}
 	table ~= `</table>`;
-	
+
 	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`;
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	//Чтение шаблона страницы из файла
-	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
-	import std.stdio;
-	auto f = File(templFileName, "r");
-	string templateStr; //Строка с содержимым файла шаблона страницы 
-	string buf;
-	while ((buf = f.readln()) !is null)
-		templateStr ~= buf;
-		
-	//Создаем шаблон по файлу
-	auto tpl = new PlainTemplater( templateStr );
+	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	//Задаём местоположения всяких файлов
-	tpl.set("img folder", "../../img/");
-	tpl.set("css folder", "../../css/");
-	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
-	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", "../../js/");
-	tpl.set("this page path", thisPagePath);
-	
-
 	
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

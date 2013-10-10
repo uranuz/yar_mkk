@@ -8,27 +8,6 @@ immutable commonDBConnStr = "dbname=baza_MKK host=127.0.0.1 user=postgres passwo
 //Строка подключения к базе с данными аутентификации
 immutable authDBConnStr = "dbname=MKK_site_base host=127.0.0.1 user=postgres password=postgres";
 
-///Пути в файловой системе
-//Пути к директориям сайта в файловой системе
-immutable siteDir = "$HOME/sites/mkk_site/";  //Директория сайта
-
-//Пути к ресурсам. Имеются в виду файлы, которые используются сервером
-//но не отдаются клиенту непосредственно.
-immutable siteResDir = siteDir ~ "res/"; //Ресурсы сайта
-immutable webtankResDir = resourcesDir ~ "webtank/"; //Ресурсы библиотеки
-
-//Путь к файлу шаблона
-immutable pageTemplatesDir = siteResDir ~ "templates/";
-immutable generalTemplateFileName = pageTemplatesDir ~ "general_template.html";
-
-///Журналы ошибок и событий (логи)
-immutable siteLogsDir = siteDir ~ "logs/"
-immutable errorLogFileName = siteLogsDir ~ "error.log"; //Путь к журналу ошибок сайта
-immutable eventLogFileName = siteLogsDir ~ "event.log"; //Путь к журналу событий сайта
-immutable webtankErrorLogFileName = siteLogsDir ~ "webtank_error.log"; //Логи ошибок библиотеки
-immutable webtankEventLogFileName = siteLogsDir ~ "webtank_event.log"; //Логи событий библиотеки
-immutable dbQueryLogFileName = siteLogsDir ~ "db_query.log"; //Логи событий библиотеки
-
 ///Далее идут пути относительно сайта
 immutable publicPath = "/pub/";     //Путь к директории общедоступного статического содержимого
 immutable cssPath = publicPath ~ "css/";  //Путь к директории таблиц стилей
@@ -42,3 +21,49 @@ immutable webtankImgPath = webtankPublicPath ~ "img/";  //Путь к дирек
 
 immutable dynamicPath = "/dyn/";    //Путь к директории динамического содержимого
 immutable restrictedPath = "/restricted/"; //Путь к директории содержимого с ограниченным доступом
+
+
+///Пути в файловой системе
+//Пути к директориям сайта в файловой системе
+private immutable _siteDir = "~/sites/mkk_site/"; //Директория сайта относительно $HOME с тильдой
+
+immutable(string) siteDir; //Директория сайта
+
+//Пути к ресурсам. Имеются в виду файлы, которые используются сервером
+//но не отдаются клиенту непосредственно.
+immutable(string) siteResDir; //Ресурсы сайта
+immutable(string) webtankResDir; //Ресурсы библиотеки
+
+//Путь к файлу шаблона
+immutable(string) pageTemplatesDir;
+immutable(string) generalTemplateFileName;
+
+///Журналы ошибок и событий (логи)
+immutable(string) siteLogsDir;
+immutable(string) errorLogFileName; //Путь к журналу ошибок сайта
+immutable(string) eventLogFileName; //Путь к журналу событий сайта
+immutable(string) webtankErrorLogFileName; //Логи ошибок библиотеки
+immutable(string) webtankEventLogFileName; //Логи событий библиотеки
+immutable(string) dbQueryLogFileName; //Логи событий библиотеки
+
+static this()
+{	import std.path;
+	siteDir = std.path.expandTilde(_siteDir); //Расчёт директории сайта
+
+	siteResDir = siteDir ~ "res/"; //Ресурсы сайта
+	webtankResDir = siteResDir ~ "webtank/"; //Ресурсы библиотеки
+
+	pageTemplatesDir = siteResDir ~ "templates/";
+	generalTemplateFileName = pageTemplatesDir ~ "general_template.html";
+
+	siteLogsDir = siteDir ~ "logs/";
+	errorLogFileName = siteLogsDir ~ "error.log";
+	eventLogFileName = siteLogsDir ~ "event.log";
+	webtankErrorLogFileName = siteLogsDir ~ "webtank_error.log";
+	webtankEventLogFileName = siteLogsDir ~ "webtank_event.log";
+	dbQueryLogFileName = siteLogsDir ~ "db_query.log";
+}
+
+
+
+

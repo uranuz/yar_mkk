@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.stdio;
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data, mkk_site.authentication;
+import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 
 immutable thisPagePath = dynamicPath ~ "edit_tourist";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -26,15 +26,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
 		
 		//Создаем шаблон по файлу
-		auto tpl = new PlainTemplater( generalTplStr );
-// 		tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-		//Задаём местоположения всяких файлов
-		tpl.set("img folder", imgPath);
-		tpl.set("css folder", cssPath);
-		tpl.set("dynamic path", dynamicPath);
-		tpl.set("useful links", "Куча хороших ссылок");
-		tpl.set("js folder", jsPath);
-		tpl.set("this page path", thisPagePath);
+		auto tpl = getGeneralTemplate(thisPagePath);
 		tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
 		tpl.set("user login", auth.userInfo.login );
 	

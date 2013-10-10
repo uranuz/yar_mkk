@@ -6,7 +6,7 @@ import std.file; //Стандартная библиотека по работе
 //import webtank.db.database;
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data;
+import mkk_site.site_data, mkk_site.utils;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
@@ -400,26 +400,10 @@ group by num
 	
 	string content = `<form id="main_form" method="post">`
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~table; //Тобавляем таблицу с данными к содержимому страницы
-	
-	//Чтение шаблона страницы из файла
-	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
-	import std.stdio;
-	auto f = File(templFileName, "r");
-	string templateStr; //Строка с содержимым файла шаблона страницы 
-	string buf;
-	while ((buf = f.readln()) !is null)
-		templateStr ~= buf;
 		
 	//Создаем шаблон по файлу
-	auto tpl = new PlainTemplater( templateStr );
+	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	//Задаём местоположения всяких файлов
-	tpl.set("img folder", imgPath);
-	tpl.set("css folder", cssPath);
-	tpl.set("cgi-bin", dynamicPath);
-	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", jsPath);
-	tpl.set("this page path", thisPagePath);
 
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
