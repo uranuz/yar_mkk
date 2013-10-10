@@ -41,7 +41,18 @@ template RecordSet(alias RecFormat)
 			_fields.length = RecFormat.fieldSpecs.length; 
 		}
 	
-		Rec opIndex(size_t key) 
+		//Оператор получения записи по индексу
+		Rec opIndex(size_t index) 
+		{	return new Rec(this, _getRecordKey(index));
+		}
+		
+		//Получить запись на позиции с номером index
+		Rec getRecordAt(size_t index)
+		{	return new Rec(this, _getRecordKey(index));
+		}
+		
+		//Получить запись с заданным ключом key
+		Rec getRecord(size_t key)
 		{	return new Rec(this, key);
 		}
 	
@@ -94,7 +105,7 @@ template RecordSet(alias RecFormat)
 					return;
 				}
 			}
-			assert( 0, "Поле с индексом \"" ~ index.to!string ~ "\" не найдено или не может быть выбрано в качестве первичного ключа!" );
+			assert( 0, "Field with index \"" ~ index.to!string ~ "\" isn't found or can't be used as primary key!" );
 		}
 		
 		bool isNull(string fieldName, size_t recordKey)

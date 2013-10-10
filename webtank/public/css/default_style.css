@@ -10,15 +10,20 @@
 }
 
 .modal_window {
-	position:fixed;
+	position:absolute;
 	top:20%;
 	left:50%;
 	z-index:602;
-	width:400px;
+	width:600px;
 	background:#efefef;
 	border: 1px solid #ccc;
 	padding:10px 20px;
 	border-radius:10px;
 	margin-left:-210px;
 	/*display:none;*/
+}
+
+.modal_window_close_btn {
+	padding-left: 300px;
+	color: blue;
 }

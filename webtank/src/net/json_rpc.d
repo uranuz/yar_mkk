@@ -108,8 +108,11 @@ auto getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 		}
 		else
 			throw new JSON_RPC_Exception("JSON value doesn't match tuple type!!!");
-		writeln(result);
 		return result;
+	}
+	else static if( isDatCtrlEnabled )
+	{	
+		
 	}
 	else
 		static assert( 0, "This should never happen!!!" );

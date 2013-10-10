@@ -3,73 +3,88 @@ mkk_site = {
 };
 
 mkk_site.edit_pohod = {
+	selectedTouristsRS: null, //RecordSet с выбранными в поиске туристами
 	//Получение списка туристов для
 	searchForTourist: function() {
-		var searchInp = document.getElementById("tourist_search_inp")
+		var 
+			searchInp = $("#tourist_search_inp"),
+			pohod = mkk_site.edit_pohod;
+			
 		webtank.json_rpc.invoke({
 			uri: "/dyn/rpc",
 			method: "турист.список_по_фильтру",
 			params: searchInp.value,
 			onresult: function(responseJSON) {
 				var 
-					container = document.getElementById("tourist_search_div"),
-					touristTable = document.createElement("table"),
-					touristHeadTr = document.createElement("tr");
+					container = $("#tourist_search_div"),
+					rs = webtank.datctrl.fromJSON(responseJSON),
+					fmt = rs.getFormat(),
+					rec,
+					touristDiv;
 					
-				
-				for( i in responseJSON.f )
-				{	var fieldTh = document.createElement("th");
-					fieldTh.innerText = responseJSON.f[i].n;
-					touristHeadTr.appendChild( fieldTh );
-				}
-				touristTable.appendChild(touristHeadTr);
-				
-				for( i in responseJSON.d )
-				{	var
-						rec = responseJSON.d[i],
-						touristRecTr = document.createElement("tr");
-					for( j in rec )
-					{	var touristRecTd = document.createElement("td");
-						touristRecTd.innerText = rec[j];
-						touristRecTr.appendChild(touristRecTd);
-					}
-					touristTable.appendChild(touristRecTr);
+				while( rec = rs.next() )
+				{	touristDiv = $("<div>", {
+						onclick: function() {
+							pohod.addTouristToGroup(rec);
+						}
+					});
+					
+					$(touristDiv).text( rec.get("family_name") + " "
+						+ rec.get("given_name") + " " + rec.get("patronymic") + ", "
+						+ rec.get("birth_year") + " г.р"
+					);
+					
+					$(touristDiv).appendTo(container);
 				}
 				
-				container.appendChild(touristTable);
+// 				//Очистка контейнера
+// 				for( var i = 0; i < container.children.length; i++ )
+// 					container.removeChild( container.children[i] );
 			}
 		});
 	},
-	addTouristToGroup: function(touristData) {
+	addTouristToGroup: function(rec) {
 		var 
-			touristListDiv = document.getElementById("unit_div"),
-			touristListInp = document.getElementById("unit_inp");
+		touristSelectDiv = document.getElementById("tourist_select_div"),
+		touristDiv = this;
 			
-		touristListDiv.innerHTML += touristData.family_name + " " 
-			+ touristData.given_name + " " + touristData.patronymic + ", "
-			+ touristData.birth_year + " г.р";
-		touristListInp.innerHTML += touristData.num;
+		touristDiv.parentNode.removeChild(touristDiv);
+		touristSelectDiv.appendChild(touristDiv);
+		if( !touristSelectRS )
+		{	selectedTouristsRS = new RecordSet();
+			selectedTouristsRS._fmt = rec.getFormat();
+			
+			
+		}
 		
 	},
 	openParticipantsEditWindow: function() {
 		var 
-			modWin = webtank.wui.createModalWindow(),
-			touristSearchDiv = document.createElement("div"),
-			touristSearchInp = document.createElement("input"),
-			touristSearchButton = document.createElement("input");
-			
-		touristSearchInp.type = "text";
-		touristSearchInp.id = "tourist_search_inp";
-		touristSearchButton.type = "button";
-		touristSearchButton.value = "Найти";
+		searchWindow = webtank.wui.createModalWindow(),
+		windowContent = $(searchWindow).children(".modal_window_content")[0];
+		touristSearchDiv = $("<div/>", {
+			id: "tourist_search_div"
+		}),
+		touristSearchInp = $("<input/>", {
+			type: "text",
+			id: "tourist_search_inp"
+		}),
+		touristSearchButton = $("<input/>", {
+			type: "button",
+			value: "Найти"
+		}),
+		touristSelectDiv = $("<div/>", {
+			id: "tourist_select_div"
+		});
+		
 		touristSearchButton.onclick = function() {
 			mkk_site.edit_pohod.searchForTourist();
-		}
-		modWin.window.id = "tourists_win";
-		touristSearchDiv.id = "tourist_search_div";
-		modWin.content.appendChild(touristSearchInp);
-		modWin.content.appendChild(touristSearchButton);
-		modWin.content.appendChild(touristSearchDiv);
+		};
 		
+		searchWindow.id = "tourists_win";
+		$(windowContent).append(touristSearchInp);
+		$(windowContent).append(touristSearchButton);
+		$(windowContent).append(touristSearchDiv);
+		$(windowContent).append(touristSelectDiv);
 	}
 };
