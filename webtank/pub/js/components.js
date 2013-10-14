@@ -24,8 +24,26 @@ var webtank = {
 	},
 	isUnsigned: function(num) {
 		return Math.round(num) === num;
+	},
+	getXMLHTTP: function() {
+		var xmlhttp;
+		try {
+			xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch (e) {
+			try {
+				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch (E) {
+				xmlhttp = false;
+			}
+		}
+		if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+			xmlhttp = new XMLHttpRequest();
+		}
+		return xmlhttp;
 	}
 };
+
+
 
 //Определяем пространство имен для JSON-RPC
 webtank.json_rpc = 
@@ -33,8 +51,9 @@ webtank.json_rpc =
 	{	uri: "/",  //Адрес для отправки
 		method: null, //Название удалённого метода для вызова в виде строки
 		params: null, //Параметры вызова удалённого метода
-		onresult: null, //Обработчик успешного вызова удалённого метода
-		onerror: null,  //Обработчик ошибки
+		success: null, //Обработчик успешного вызова удалённого метода
+		error: null,  //Обработчик ошибки
+		complete: null, //Обработчик завершения (после success или error)
 		id: null //Идентификатор соединения
 	},
 	_counter: 0,
@@ -53,15 +72,13 @@ webtank.json_rpc =
 		
 		_args.params = webtank.json_rpc._processParams(_args.params);
 
-		var xhr = new window.XMLHttpRequest;
+		var xhr = webtank.getXMLHTTP();
 		xhr.open( "POST", _args.uri, true );
 		xhr.setRequestHeader("content-type", "application/json-rpc");
 		//
-		xhr.onreadystatechange = function()
-		{	webtank.json_rpc._handleResponse(xhr);
-		}
+		xhr.onreadystatechange = function() {	webtank.json_rpc._handleResponse(xhr); }
 		var idStr = "";
-		if( _args.onerror || _args.onresult )
+		if( _args.error || _args.success || _args.complete )
 		{	if( !_args.id )
 				_args.id = webtank.json_rpc._generateId(_args);
 			webtank.json_rpc._responseQueue[_args.id] = _args;
@@ -74,22 +91,25 @@ webtank.json_rpc =
 		{	var 
 				responseJSON = JSON.parse(xhr.responseText),
 				invokeArgs = null;
+			
 			if( responseJSON.id )
 			{	invokeArgs = webtank.json_rpc._responseQueue[responseJSON.id];
 				if( invokeArgs )
 				{	delete webtank.json_rpc._responseQueue[responseJSON.id];
 					if( responseJSON.error )
-					{	if( invokeArgs.onerror )
-							invokeArgs.onerror(responseJSON.error);
+					{	if( invokeArgs.error )
+							invokeArgs.error(responseJSON);
 						else
 						{	console.error("Ошибка при выполнении удалённого метода");
 							console.error(responseJSON.error.toString());
 						}
 					}
 					else
-					{	if( invokeArgs.onresult )
-							invokeArgs.onresult(responseJSON.result);
+					{	if( invokeArgs.success )
+							invokeArgs.success(responseJSON.result);
 					}
+					if( invokeArgs.complete )
+						invokeArgs.complete(responseJSON);
 				}
 			}
 		}
@@ -171,6 +191,12 @@ webtank.datctrl = {
 			getFormat: function() {
 				return webtank.deepCopy( rec._fmt );
 			},
+			getKey: function() {
+				return rec._d[ rec._fmt._keyFieldIndex ];
+			},
+			getKeyFieldIndex: function() {
+				return rec._fmt._keyFieldIndex;
+			},
 			set: function() {
 				
 			}
@@ -219,6 +245,18 @@ webtank.datctrl = {
 				var rec = new dctl.Record();
 				rec._d = webtank.deepCopy( rs._d[rs.index] );
 				rec._fmt = webtank.deepCopy( rs._fmt );
+			},
+			getKey: function(index) {
+				return rs._d[ rs._fmt._keyFieldIndex ][index];
+			},
+			hasKey: function(key) {
+				for( var i = 0; i < rs._d.length; i++ )
+					if( rs._d[ rs._fmt._keyFieldIndex ] === key )
+						return true;
+				return false;
+			},
+			getKeyFieldIndex: function() {
+				return rs._fmt._keyFieldIndex;
 			}
 		};
 		return rs;
@@ -230,6 +268,7 @@ webtank.datctrl = {
 		var fmt = {
 			_f: [],
 			_indexes: {},
+			_keyFieldIndex: 0,
 			//Функция расширяет текущий формат, добавляя к нему format
 			extend: function(format) {
 				for( var i=0; i<format._f.length; i++ )
@@ -251,6 +290,9 @@ webtank.datctrl = {
 					return fmt._f[ index ].t;
 				else
 					return fmt._f[ fmt.getFieldIndex(index) ].t;
+			},
+			getKeyFieldIndex: function() {
+				return fmt._keyFieldIndex;
 			}
 		}
 		return fmt;
@@ -265,6 +307,8 @@ webtank.datctrl = {
 		{	var fmt = new dctl.RecordFormat();
 			
 			fmt._f = jsonObj.f;
+			fmt._keyFieldIndex = jsonObj.kfi || 0;
+			
 			for( var i = 0; i < jsonObj.f.length; i++ )
 				fmt._indexes[ jsonObj.f[i].n ] = i;
 				

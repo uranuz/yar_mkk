@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.stdio, std.array;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
 
-import webtank.net.javascript;
+// import webtank.net.javascript;
 
 import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 
@@ -27,7 +27,7 @@ auto getTouristList(string filterStr)
 		return null; //Завершаем
 	}
 	writeln("Тест111");
-	
+	writeln("filterStr=" ~ filterStr);
 	string queryStr1 = `select num, family_name, given_name, patronymic, birth_year from tourist where family_name ILIKE '`
 		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`;
 	auto queryRes1 = dbase.query( queryStr1 );
@@ -37,13 +37,16 @@ auto getTouristList(string filterStr)
 	alias FieldType ft;
 	auto touristRecFormat = RecordFormat!( ft.IntKey, "num", ft.Str, "family_name", 
 		ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" )();
-	string scriptForThis =
-`
-
-
-`;
+// 	string scriptForThis =
+// `
+// 
+// 
+// `;
 	
 	auto touristRS = queryRes1.getRecordSet(touristRecFormat);
+	foreach( rec; touristRS )
+	{	writeln(rec.get!"family_name" ~ rec.get!"given_name");
+	}
 // 	foreach( rec; touristRS )
 // 	{	result ~= `<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
 // 			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "

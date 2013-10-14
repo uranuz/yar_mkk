@@ -166,12 +166,19 @@ JSONValue getJSONValue(T)(T dValue)
 		else static if( isDatCtrlEnabled )
 		{	import webtank.datctrl._import;
 			static if( is( T: IBaseRecordSet ) || is( T: IBaseRecord ) )
-			{	//Переводим RecordSet в JSONValue
+			{	pragma(msg, "RecordSet or Record recognized");
+				//Переводим RecordSet в JSONValue
 				alias T.RecordFormatType RecFormat;
+				pragma(msg, "RecFormat ", RecFormat);
 				if( dValue is null )
-						jValue.type = JSON_TYPE.NULL;
+				{	writeln("Record or RecordSet value is empty!!!");
+					jValue.type = JSON_TYPE.NULL;
+				}
 				else
 				{	jValue.type = JSON_TYPE.OBJECT;
+					jValue.object["kfi"] = JSONValue();
+					jValue.object["kfi"].type = JSON_TYPE.UINTEGER;
+					jValue.object["kfi"].uinteger = dValue.keyFieldIndex;
 					
 					//Образуем JSON-массив описаний полей
 					JSONValue fieldsJSON;
@@ -193,7 +200,9 @@ JSONValue getJSONValue(T)(T dValue)
 						recJSON.type = JSON_TYPE.ARRAY;
 						recJSON.array.length = RecFormat.fieldSpecs.length; 
 						foreach( j, spec; RecFormat.fieldSpecs )
-						{	if( rec.isNull(spec.name) )
+						{	pragma(msg, spec);
+							write(spec.name); writeln(rec.isNull(spec.name));
+							if( rec.isNull(spec.name) )
 								recJSON[j].type = JSON_TYPE.NULL;
 							else
 								recJSON[j] = getJSONValue( rec.get!(spec.name) );
@@ -201,7 +210,8 @@ JSONValue getJSONValue(T)(T dValue)
 						return recJSON;
 					}
 					static if( is( T: IBaseRecordSet ) )
-					{	//Образуем JSON-массив записей
+					{	pragma(msg, "RecordSet recognized");
+						//Образуем JSON-массив записей
 						JSONValue recordsJSON;
 						recordsJSON.type = JSON_TYPE.ARRAY;
 						foreach( rec; dValue )
@@ -212,7 +222,8 @@ JSONValue getJSONValue(T)(T dValue)
 						jValue.object["t"].str = "recordset";
 					}//Переводим Record в JSONValue
 					else static if( is( T: IBaseRecord ) )
-					{	jValue.object["d"] = recordToJSON(dValue);
+					{	pragma(msg, "Record recognized");
+						jValue.object["d"] = recordToJSON(dValue);
 						jValue.object["t"] = JSONValue();
 						jValue.object["t"].type = JSON_TYPE.STRING;
 						jValue.object["t"].str = "record";

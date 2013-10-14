@@ -65,6 +65,10 @@ template Record(alias RecFormat)
 			}
 		
 		} //override
+		
+		size_t keyFieldIndex() @property
+		{	return _recordSet.keyFieldIndex();
+		}
 	}
 }
 
