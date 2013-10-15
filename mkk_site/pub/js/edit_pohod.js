@@ -9,7 +9,7 @@ $(window.document).ready( function() {
 } );
 
 mkk_site.edit_pohod = {
-	selTouristKeys: [], //RecordSet с выбранными в поиске туристами
+	selTouristsRS: null, //RecordSet с выбранными в поиске туристами
 	//Получение списка туристов для
 	searchForTourist: function() {
 		var
@@ -35,8 +35,8 @@ mkk_site.edit_pohod = {
 						.on( "click", function() {
 							pohod.toggleTouristSelState.call(touristDiv, _rec);
 						})
-						.text( rec.get("family_name") + " " + rec.get("given_name") + " " 
-							+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р"
+						.text( _rec.get("family_name") + " " + _rec.get("given_name") + " " 
+							+ _rec.get("patronymic") + ", " + _rec.get("birth_year") + " г.р"
 						)
 						.appendTo("#tourist_search_div");
 					})( $("<div>")[0], rec );
@@ -55,8 +55,6 @@ mkk_site.edit_pohod = {
 		touristDivParent = touristDiv.parentNode,
 		pohod = mkk_site.edit_pohod;
 		
-// 		if( )
-		
 		//Перемещение DOM узла между окнами
 		$(touristDiv).appendTo(  (
 				touristDivParent.id === "tourist_search_div" ?
@@ -64,13 +62,17 @@ mkk_site.edit_pohod = {
 			)
 		);
 		
-		var 
-			keysArrayIndex = pohod.selTouristKeys.indexOf( rec.getKey() );
 		
-		if( keysArrayIndex === -1 ) {
-			pohod.selTouristKeys.splice(-1, 0, rec.getKey() );
+		//TODO: Убрать потом, наверное
+		if( !pohod.selTouristsRS )
+		{	pohod.selTouristsRS = new webtank.datctrl.RecordSet();
+			pohod.selTouristsRS._fmt = rec._fmt;
+		}
+		
+		if( pohod.selTouristsRS.hasKey( rec.getKey() ) ) {
+			pohod.selTouristsRS.remove( rec.getKey() );
 		} else {
-			pohod.selTouristKeys.splice(keysArrayIndex, 1);
+			pohod.selTouristsRS.append( rec );
 		}
 		
 	},
@@ -89,13 +91,14 @@ mkk_site.edit_pohod = {
 			type: "button",
 			value: "Найти"
 		})[0],
-		окButton = $("<input>", {
+		okButton = $("<input>", {
 			type: "button",
-			value: "OK"
+			value: "     OK     "
 		})[0],
 		touristSelectDiv = $("<div>", {
 			id: "tourist_select_div"
-		})[0];
+		})[0],
+		pohod = mkk_site.edit_pohod;
 		
 		$(touristSearchButton).on( "click", function() { 
 			mkk_site.edit_pohod.searchForTourist(); 
@@ -103,15 +106,39 @@ mkk_site.edit_pohod = {
 		
 		//Подтверждение выбора группы
 		$(okButton).on( "click", function() { 
+			var 
+				unitDiv = $("#unit_div")[0],
+				unitNeimInput = $("#unit_neim")[0];
+				
+			$(unitDiv).empty();
+			unitNeimInput.value = "";
 			
+			pohod.selTouristsRS.rewind();
+			while( rec = pohod.selTouristsRS.next() )
+			{	(function(touristDiv, _rec) {
+					unitNeimInput.value += ( unitNeimInput.value.length ? "," : "" ) + _rec.getKey();
+					$(touristDiv)
+// 					.on( "click", function() {
+// 						pohod.toggleTouristSelState.call(touristDiv, _rec);
+// 					})
+					.text( rec.get("family_name") + " " + rec.get("given_name") + " " 
+						+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р"
+					)
+					.appendTo("#unit_div");
+				})( $("<div>")[0], rec );
+			}
 			
+			$(searchWindow).remove();
+			$(".modal_window_blackout").remove();
 			
 		} );
 		
 		searchWindow.id = "tourists_win";
-		$(windowContent).append(touristSearchInp);
-		$(windowContent).append(touristSearchButton);
-		$(windowContent).append(touristSearchDiv);
-		$(windowContent).append(touristSelectDiv);
+		$(windowContent)
+		.append(touristSearchInp)
+		.append(touristSearchButton)
+		.append(okButton)
+		.append(touristSearchDiv)
+		.append(touristSelectDiv);
 	}
 };

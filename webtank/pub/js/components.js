@@ -250,13 +250,27 @@ webtank.datctrl = {
 				return rs._d[ rs._fmt._keyFieldIndex ][index];
 			},
 			hasKey: function(key) {
-				for( var i = 0; i < rs._d.length; i++ )
-					if( rs._d[ rs._fmt._keyFieldIndex ] === key )
+				for( var i = 0; i < rs._d.length; i++ ) {
+					if( rs._d[i][ rs._fmt._keyFieldIndex ] === key )
 						return true;
+				}
 				return false;
 			},
 			getKeyFieldIndex: function() {
 				return rs._fmt._keyFieldIndex;
+			},
+			append: function(rec) {
+				if( rs._fmt.equals(rec._fmt) )
+					rs._d.push(rec._d);
+				else
+					console.error("Формат записи не совпадает с форматом набора данных!!!");
+			},
+			remove: function(key) {
+				for( var i=0; i < rs._d.length; i++)
+				{	if( rs._d[i][ rs._fmt._keyFieldIndex ] === key )
+						return rs._d.splice(i, 1);
+				}
+				console.error("Запись с ключом " + key + " не содержится в наборе данных!!!");
 			}
 		};
 		return rs;
@@ -293,6 +307,9 @@ webtank.datctrl = {
 			},
 			getKeyFieldIndex: function() {
 				return fmt._keyFieldIndex;
+			},
+			equals: function(format) {
+				return fmt._f.length === format._f.length;
 			}
 		}
 		return fmt;
