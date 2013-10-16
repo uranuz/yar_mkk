@@ -33,10 +33,13 @@ struct RecordFormat(Args...)
 		return result;
 	}
 	
-	bool[] nullableFlags;
-	//EnumValuesType[size_t] enumValues;
-	
+	//Флаги для полей, показывающие может ли значение поля быть пустым (null)
+	//(если значение = true) или нет (false)
+	bool[string] nullableFlags; //Флаги "обнулябельности"
+	string[][string] enumValues; //Возможные значения для перечислимых полей
 }
+
+
 
 //В шаблоне хранится соответсвие между именем и типом поля
 template FieldSpec( FieldType ft, string s = null )

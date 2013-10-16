@@ -72,6 +72,24 @@ template RecordSet(alias RecFormat)
 			}
 		}
 		
+		//Шаблон метода получения значений перечислимого типа
+		//Определена только для полей, имеющих перечислимый тип, что логично
+		template getEnumValues(string fieldName)()
+		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
+			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+			
+			static if( fieldType == FieldType.StrEnum )
+			{	auto getEnumValues()
+				{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
+					return currField.getEnumValues(fieldIndex);
+				}
+			}
+			else
+				static assert( 0, "Getting enum values is only available for enum field types!!!" );
+		}
+		
+		
 		string getStr(string fieldName, size_t recordKey, string defaultValue = null)
 		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
 			return currField.getStr( _getRecordIndex(recordKey), defaultValue );

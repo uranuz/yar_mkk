@@ -47,6 +47,11 @@ template Record(alias RecFormat)
 			
 		}
 		
+		//Шаблон функции получения значений перечислимого типа
+		auto getEnumValues(string fieldName)()
+		{	return _recordSet.getEnumValues(fieldName);
+		}
+		
 		override {
 			string getStr(string fieldName, string defaultValue = null)
 			{	return _recordSet.getStr( fieldName, _recordKey, defaultValue );

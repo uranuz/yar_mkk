@@ -3,7 +3,7 @@ module webtank.datctrl.field_type;
 
 import std.conv, std.datetime;
 
-enum FieldType { Str, Int, Bool, IntKey, Date, Text, Enum };
+enum FieldType { Str, Int, Bool, IntKey, Date, StrEnum, Text };
 
 ///Строковые значения, которые трактуются как false при преобразовании
 ///типов. Любые другие трактуются как true
@@ -16,9 +16,9 @@ immutable(string) _notImplementedErrorMsg = `This conversion is not implemented:
 ///Шаблон для получения реального типа поля по перечислимому 
 ///значению семантического типа поля
 template GetFieldValueType(FieldType FieldT) 
-{	static if( FieldT == FieldType.Int || FieldT == FieldType.Enum )
+{	static if( FieldT == FieldType.Int )
 		alias int GetFieldValueType;
-	else static if( FieldT == FieldType.Str )
+	else static if( FieldT == FieldType.Str || FieldT == FieldType.StrEnum )
 		alias string GetFieldValueType;
 	else static if( FieldT == FieldType.Bool )
 		alias bool GetFieldValueType;
@@ -34,38 +34,34 @@ template GetFieldValueType(FieldType FieldT)
 ///тип, который соотвествует семантическому типу поля, 
 ///указанному в параметре шаблона FieldT
 auto fldConv(FieldType FieldT, S)( S value )
-{	// int --> GetFieldType!(FieldT)
-	static if( is( S : int ) )
+{	
+	import std.traits;
+	// целые числа --> GetFieldType!(FieldT)
+	static if( isIntegral!(S) )
 	{	with( FieldType ) {
-		static if( FieldT == Int /*|| FieldT == Enum*/ )
-		{	return value; }
-		else static if( FieldT == Str )
-		{	return value.to!string; }
-		else static if( FieldT == Bool )
+		//Стандартное преобразование
+		static if( FieldT == Int || FieldT == Str || FieldT == IntKey )
+		{	return value.to!( GetFieldValueType!FieldT ); }
+		else static if( FieldT == Bool ) //Для уверенности
 		{	return ( value == 0 ) ? false : true ; }
-		else static if( FieldT == IntKey )
-		{	return value.to!size_t; }
 		else
 			static assert( 0, _notImplementedErrorMsg ~ typeof(value).stringof ~ " --> " ~ FieldT.to!string );
 		}  //with( FieldType )
 		assert(0);
 	}
 	
-	// string --> GetFieldType!(FieldT)
-	else static if( is( S : string ) )
+	// строки --> GetFieldType!(FieldT)
+	else static if( isSomeString!(S) )
 	{	with( FieldType ) {
-		static if( FieldT == Int /*|| FieldT == Enum*/ )
-		{	return value.to!int; }
-		else static if( FieldT == Str )
-		{	return value; }
+		//Стандартное преобразование
+		static if( FieldT == Int || FieldT == Str || FieldT == IntKey )
+		{	return value.to!( GetFieldValueType!FieldT ); }
 		else static if( FieldT == Bool )
 		{	import std.string;
 			foreach(logVal; _logicTrueValues) 
 				if ( logVal == toLower( strip( value ) ) ) return true;
 			return false;
 		}
-		else static if( FieldT == IntKey )
-		{	return value.to!size_t; }
 		else static if( FieldT == Date )
 		{	return std.datetime.Date.fromISOExtString(value); }
 		else
@@ -77,35 +73,25 @@ auto fldConv(FieldType FieldT, S)( S value )
 	// bool --> GetFieldType!(FieldT)
 	else static if( is( S : bool ) )
 	{	with( FieldType ) {
-		static if( FieldT == Int /*|| FieldT == Enum*/ )
+		static if( FieldT == Int || FieldT == IntKey )
 		{	return ( value ) ? 1 : 0; }
-		else static if( FieldT == Str )
+		else static if( FieldT == Str || FieldT == StrEnum )
 		{	return ( value ) ? "да" : "нет"; }
 		else static if( FieldT == Bool )
 		{	return value; }
-		else static if( FieldT == IntKey )
-		{	return ( value ) ? 1 : 0; }
 		else
 			static assert( 0, _notImplementedErrorMsg ~ typeof(value).stringof ~ " --> " ~ FieldT.to!string );
 		}  //with( FieldType )
 		assert(0);
 	}
-	
-	// size_t --> GetFieldType!(FieldT)
-	else static if( is( S : size_t ) )
-	{	with( FieldType ) {
-		static if( FieldT == Int /*|| FieldT == Enum*/ )
-		{	return value.to!int; }
-		else static if( FieldT == Str )
-		{	return value.to!string; }
-		else static if( FieldT == Bool )
-		{	return ( value == 0 ) ? false : true ; }
-		else static if( FieldT == IntKey )
-		{	return value; }
-		else
-			static assert( 0, _notImplementedErrorMsg ~ typeof(value).stringof ~ " --> " ~ FieldT.to!string );
-		}  //with( FieldType )
-		assert(0);
-	}
-	
+
+}
+
+
+//Возвращает true если данный тип поля является типом ключевого поля
+template isKeyFieldType(FieldType fieldType)
+{	static if( fieldType == FieldType.IntKey )
+		enum isKeyFieldType = true;
+	else
+		enum isKeyFieldType = false;
 }
