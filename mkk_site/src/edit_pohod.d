@@ -71,6 +71,14 @@ auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
 // 	string, "kod_mkk", string, "nomer_knigi", string, "region_pohod", string, "organization", string, "organization", string, "vid", string, "element", string, "ks", string, "marchrut", string, "begin_date", string, "finish_date", string, "chef_grupp", string, "alt_chef", string, "unit", string, "prepare", string, "status", string, "emitter", string, "chef_coment", string, "MKK_coment", size_t[], "unit_neim"
 // ) PohodTupleType;
 
+enum pohodEnumValues = [
+	"vid": [ 1:"пешеходный", 2:"лыжный", 3:"горный", 4:"водный", 5:"велосипедный", 6:"автомото", 7:"спелео", 8:"парусрый", 9:"конный", 10:"комбинированный" ],
+	"element": [ 1:"с эл.1", 2:"с эл.2", 3:"с эл.3", 4:"с эл.4", 5:"с эл.5", 6:"с эл.6" ],
+	"ks": [ 10:"п.в.д.", 1:"н.к.", 1:"первая", 2:"вторая", 3:"третья", 4:"четвёртая", 5:"пятая", 6:"шестая", 11:"путешествие" ],
+	"prepare": [ 1:"планируется", 2:"готовится", 3:"набор группы", 4:"набор завершон", 5:"на маршруте", 6:"пройден" ],
+	"status": [ 1:"рассматривается", 2:"заявлен", 3:"на контроле", 4:"пройден", 5:"засчитан" ]
+];
+
 
 RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
@@ -80,22 +88,10 @@ RecordFormat!(
 	ft.Int, "unit", ft.Str, "prepare", ft.Str, "status",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
 ) pohodRecFormat = 
-{	enumValues: [
-		"ks": [ "", "п.в.д.", "н.к.", "первая", "вторая", "третья", "четвёртая", "пятая", "шестая", "путешествие" ],
-		"vid": [ "", "пешеходный", "лыжный", "горный", "водный", "велосипедный", "автомото", "спелео", "парусрый", "конный", "комбинированный" ],
-		"element": [ "", "с эл.1", "с эл.2", "с эл.3", "с эл.4", "с эл.5", "с эл.6" ],
-		"ks": [ "", "п.в.д.", "н.к.", "первая", "вторая", "третья", "четвёртая", "пятая", "шестая", "путешествие" ],
-		"prepare": [ "", "планируется", "готовится", "набор группы", "набор завершон", "на маршруте", "пройден" ],
-		"status": [ "", "рассматривается", "заявлен", "на контроле", "пройден", "засчитан" ]
-	]
-
+{	enumValues: pohodEnumValues
 };
 
 enum string[] months = [ "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь" ];
-		
-enum string[][string] enumValueBlocks = [
-	
-];
 
 enum strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
 
@@ -104,12 +100,12 @@ enum strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization",
 void createPohodEditForm()
 {	if( action == ActionType.showUpdateForm )
 	{	
-		writeln("Тест12");
+		
 		//Выводим в браузер значения строковых полей (<input type="text">)
 		foreach( fieldName; strFieldNames )
 			pohodForm.set( fieldName, ` value="` ~ HTMLEscapeValue( pohodRec.getStr(fieldName, "") ) ~ `"` );
 
-		writeln("Тест13");
+		
 		/+pohodForm.set( "num.value", pohodRec.get!"ключ"(0).to!string );+/
 		//Выводим дату начала похода
 		pohodForm.set( "begin_day", ` value="` ~ pohodRec.get!("begin_date").day.to!string ~ `"` );
@@ -198,8 +194,15 @@ void showPohod()
 	}
 	
 	//Формируем часть запроса для вывода перечислимых полей
-	foreach( fieldName, valueBlock; enumValueBlocks )
-	{	if( find( valueBlock, pVars.get(fieldName, "") ).length > 0  )
+	foreach( fieldName, valueBlock;  pohodEnumValues )
+	{	int enumKey = 0;
+		try {
+			enumKey = pVars.get(fieldName, "").to!int;
+		} catch (std.conv.ConvException e) {
+			
+		}
+		
+		if( enumKey in valueBlock )
 		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
 			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
 		}
@@ -308,53 +311,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		
 		
 		
-		if( action == ActionType.insertData || action == ActionType.updateData )
-		{	import std.conv, std.algorithm;
-			string queryStr;
-			try
-			{	
-				
- 
-// 				size_t moderKey = postVars.get("moder", "").to!size_t;
-// 				~ moderKey.to!string ~ ", "
-				if( fieldNamesStr.length > 0 && fieldValuesStr.length > 0 )
-				{	if( action == ActionType.insertData )
-						queryStr = "insert into pohod ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
-					else
-						queryStr = "update pohod set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ pohodKey.to!string ~ "';";
-				}
-					
-			}
-			catch(std.conv.ConvException e)
-			{	//TODO: Выдавать ошибку
-				content = "<h3>Ошибка при разборе данных формы!!!</h3><br>\r\n";
-				content ~= e.msg;
-				tpl.set( "content", content );
-				rp ~= tpl.getString();
-				return;
-			}
-			dbase.query(queryStr);
-			if( action == ActionType.insertData )
-			{	if( dbase.lastErrorMessage is null )
-					content = "<h3>Данные о походе успешно добавлены в базу данных!!!</h3>"
-					~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
-				else
-					content = "<h3>Произошла ошибка при добавлении данных в базу данных!!!</h3>"
-					~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
-					~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>";
-			}
-			else
-			{	if( dbase.lastErrorMessage is null )
-					content = "<h3>Данные о походе успешно обновлены!!!</h3>"
-					~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
-					~ "или перейти <a href=\"" ~ dynamicPath ~ "show_pohod\">к списку походов</a>";
-				else
-					content = "<h3>Произошла ошибка при обновлении данных!!!</h3>"
-					~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
-					~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
-					~ "или перейти <a href=\"" ~ dynamicPath ~ "show_pohod\">к списку походов</a>";
-			}
-		}
+		
 		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();
