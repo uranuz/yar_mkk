@@ -17,7 +17,7 @@ auto getRecordSet(RecFormat)(IDBQueryResult queryResult, RecFormat format)
 	foreach( i, fldSpec; RecFormat.fieldSpecs )
 	{	auto field = new DatabaseField!(fldSpec.fieldType)(queryResult, i);
 		recordSet._setField!(fldSpec.name)( field );
-		static if( fldSpec.fieldType == FieldType.StrEnum )
+		static if( fldSpec.fieldType == FieldType.Enum )
 		{	recordSet._initEnum( format.enumValues.get( fieldSpec.name, null ) );
 		}
 	}

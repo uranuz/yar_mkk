@@ -45,11 +45,17 @@ interface IField(FieldType FieldT) : IBaseField
  	T get(size_t index, T defaultValue);
  	
 
-	static if( FieldT == FieldType.IntKey )
+	static if( isKeyFieldType(FieldT) )
 	{	size_t getIndex(size_t key);
 		size_t getKey(size_t index);
 	}
 
+	static if( FieldT == FieldType.Enum )
+	{	string[int] getEnumValues();
+		
+		
+	}
+	
 }
 
 

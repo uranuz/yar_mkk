@@ -3,7 +3,7 @@ module webtank.datctrl.field_type;
 
 import std.conv, std.datetime;
 
-enum FieldType { Str, Int, Bool, IntKey, Date, StrEnum, Text };
+enum FieldType { Str, Int, Bool, IntKey, Date, Enum, Text };
 
 ///Строковые значения, которые трактуются как false при преобразовании
 ///типов. Любые другие трактуются как true
@@ -16,9 +16,9 @@ immutable(string) _notImplementedErrorMsg = `This conversion is not implemented:
 ///Шаблон для получения реального типа поля по перечислимому 
 ///значению семантического типа поля
 template GetFieldValueType(FieldType FieldT) 
-{	static if( FieldT == FieldType.Int )
+{	static if( FieldT == FieldType.Int || FieldT == FieldType.Enum )
 		alias int GetFieldValueType;
-	else static if( FieldT == FieldType.Str || FieldT == FieldType.StrEnum )
+	else static if( FieldT == FieldType.Str )
 		alias string GetFieldValueType;
 	else static if( FieldT == FieldType.Bool )
 		alias bool GetFieldValueType;
@@ -73,9 +73,9 @@ auto fldConv(FieldType FieldT, S)( S value )
 	// bool --> GetFieldType!(FieldT)
 	else static if( is( S : bool ) )
 	{	with( FieldType ) {
-		static if( FieldT == Int || FieldT == IntKey )
+		static if( FieldT == Int || FieldT == IntKey || FieldT == Enum )
 		{	return ( value ) ? 1 : 0; }
-		else static if( FieldT == Str || FieldT == StrEnum )
+		else static if( FieldT == Str )
 		{	return ( value ) ? "да" : "нет"; }
 		else static if( FieldT == Bool )
 		{	return value; }

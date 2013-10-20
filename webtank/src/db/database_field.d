@@ -30,7 +30,7 @@ protected: ///ВНУТРЕННИЕ ПОЛЯ КЛАССА
 		bool _isWriteable = false;
 	}
 	
-	static if( FieldT == FieldType.StrEnum )
+	static if( FieldT == FieldType.Enum )
 	{	string[int] _enumValues;
 	}
 
@@ -109,7 +109,7 @@ public:
 			return ( isNull(index) ? defaultValue : _queryResult.get(_fieldIndex, index) );
 		}
 		
-		static if( FieldT == FieldType.StrEnum )
+		static if( FieldT == FieldType.Enum )
 		{	EnumType getEnumValues()
 			{	return _enumValues.dup;
 			}

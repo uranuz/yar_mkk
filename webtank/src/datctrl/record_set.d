@@ -79,7 +79,7 @@ template RecordSet(alias RecFormat)
 			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
 			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
 			
-			static if( fieldType == FieldType.StrEnum )
+			static if( fieldType == FieldType.Enum )
 			{	auto getEnumValues()
 				{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
 					return currField.getEnumValues(fieldIndex);

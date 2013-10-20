@@ -36,7 +36,7 @@ struct RecordFormat(Args...)
 	//Флаги для полей, показывающие может ли значение поля быть пустым (null)
 	//(если значение = true) или нет (false)
 	bool[string] nullableFlags; //Флаги "обнулябельности"
-	string[][string] enumValues; //Возможные значения для перечислимых полей
+	string[int][string] enumValues; //Возможные значения для перечислимых полей
 }
 
 
