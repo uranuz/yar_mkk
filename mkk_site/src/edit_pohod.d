@@ -14,8 +14,8 @@ immutable authPagePath = dynamicPath ~ "auth";
 static this()
 {	Router.setPathHandler(thisPagePath, &netMain);
 	Router.setRPCMethod("турист.список_по_фильтру", &getTouristList);
-	Router.setRPCMethod("поход.окно_редактирования_участников", &getParticipantsEditWindow);
-	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
+// 	Router.setRPCMethod("поход.окно_редактирования_участников", &getParticipantsEditWindow);
+	Router.setRPCMethod("поход.список_участников", &getPohodParticipants);
 }
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
