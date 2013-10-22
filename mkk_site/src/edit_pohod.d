@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.stdio, std.array;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
 
-import webtank.net.javascript;
+// import webtank.net.javascript;
 
 import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 
@@ -14,20 +14,18 @@ immutable authPagePath = dynamicPath ~ "auth";
 static this()
 {	Router.setPathHandler(thisPagePath, &netMain);
 	Router.setRPCMethod("турист.список_по_фильтру", &getTouristList);
-	Router.setRPCMethod("поход.окно_редактирования_участников", &getParticipantsEditWindow);
+// 	Router.setRPCMethod("поход.окно_редактирования_участников", &getParticipantsEditWindow);
+	Router.setRPCMethod("поход.список_участников", &getPohodParticipants);
 }
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
 auto getTouristList(string filterStr)
 {	string result;
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
-	if ( !dbase.isConnected )
-	{	/+tpl.set( "content", "<h3>База данных МКК не доступна!</h3>" );
-		rp ~= tpl.getString();+/
-		return null; //Завершаем
-	}
-	writeln("Тест111");
 	
+	if ( !dbase.isConnected )
+		return null; //Завершаем
+
 	string queryStr1 = `select num, family_name, given_name, patronymic, birth_year from tourist where family_name ILIKE '`
 		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`;
 	auto queryRes1 = dbase.query( queryStr1 );
@@ -37,21 +35,8 @@ auto getTouristList(string filterStr)
 	alias FieldType ft;
 	auto touristRecFormat = RecordFormat!( ft.IntKey, "num", ft.Str, "family_name", 
 		ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" )();
-	string scriptForThis =
-`
-
-
-`;
 	
 	auto touristRS = queryRes1.getRecordSet(touristRecFormat);
-// 	foreach( rec; touristRS )
-// 	{	result ~= `<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
-// 			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
-// 			~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " "
-// 			~ HTMLEscapeValue( rec.get!"patronymic"("") ) ~ ", "
-// 			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
-// 	}
-// 	return result;
 	return touristRS;
 }
 
@@ -76,41 +61,11 @@ auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
 	
 	auto touristRS = queryRes.getRecordSet(touristRecFormat);
 	
-// 	string result = `{`;
-// 	string nums = `[`;
-// 	string familyNames;
-// 	string givenNames;
-// 	string patronymics;
-// 	string birthYears;
-// 	
-// 	foreach( rec; touristRS )
-// 	{	familyNames ~= 
-// 			
-// 	`<a href="#" onclick="addGroupMember(` ~ rec.get!"num"(0).to!string ~ `)">`
-// 			~ HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
-// 			~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " "
-// 			~ HTMLEscapeValue( rec.get!"patronymic"("") ) ~ ", "
-// 			~ rec.get!"birth_year"(0).to!string ~ " г.р </a><br>\r\n";
-// 	}
-	
-// 	result ~= `]`;
-	
-// 	return result;
+
 	return touristRS;
 }
 
-string getParticipantsEditWindow(uint[] selectedTouristNums)
-{	string selectedTouristsDiv;
-	//TODO: Добавить вывод списка участников
-	string touristSearchInp =
-		`<input type="text" id="tourist_search_inp">`;
-	string touristSearchButton = 
-		`<input type="button" id="tourist_search_button" onclick="searchForTourist();">`;
-	string touristSearchDiv = 
-		`<div id="tourist_search_div"></div>`;
-	
-	return selectedTouristsDiv ~ touristSearchInp ~ touristSearchButton ~ touristSearchDiv;
-}
+
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
