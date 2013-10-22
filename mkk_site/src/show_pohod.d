@@ -27,7 +27,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 		
-		string [10] v=["", "пеший","лыжный","горный","водный","велосипедный","автомото","спелео","парусный","конный" ];
+		string [10] v=["", "пешеходный","лыжный","горный","водный","велосипедный","автомото","спелео","парусный","конный" ];
 		// виды туризма
 				
 		string [9] k=["любая", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
@@ -207,7 +207,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
 	
 	auto pohodRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "Номер", ft.Str, "Сроки <br> похода", 
+	ft.IntKey, "Ключ",   ft.Str, "Номер книги", ft.Str, "Сроки", 
 	ft.Str, "Вид, кс",   ft.Str,"Район",  ft.Str,"Руководитель", 
 	ft.Str,"Участники",  ft.Str,"Уч",     ft.Str,"Город,<br>организация", 
 	ft.Str, "Нитка маршрута", ft.Str, "Статус<br> похода")();
@@ -235,8 +235,18 @@ group by num
 ) `
 
 	  `select pohod.num, (coalesce(kod_mkk,'')||'<br>'||coalesce(nomer_knigi,'')) as nomer_knigi, `  
-     `(coalesce(begin_date::text,'')||'<br>'||coalesce(finish_date::text,'')) as date , ` 
-     `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||coalesce( element::text, ' ' ) ) as vid,`
+     `(
+    date_part('day', begin_date)||'.'||
+    date_part('month', begin_date)||'.'||
+    date_part('YEAR', begin_date) 
+
+    
+      ||' <br> '||
+    date_part('day', finish_date)||'.'||
+    date_part('month', finish_date)||'.'||
+    date_part('YEAR', finish_date)
+ ) as date , ` 
+     `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||'<br>'||coalesce( element::text, ' ' ) ) as vid,`
 
      `region_pohod , `
      `(tourist.family_name||' '||coalesce(tourist.given_name,'')||' '||coalesce(tourist.patronymic,'')||' '||coalesce(tourist.birth_year::text,'')), `
@@ -374,8 +384,8 @@ group by num
 	{	table ~= `<tr>`;
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td >` ~rec.get!"Номер"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Сроки <br> похода"("нет")  ~ `</td>`;
+		table ~= `<td >` ~rec.get!"Номер книги"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Вид, кс"("нет") ~ `</td>`;
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;

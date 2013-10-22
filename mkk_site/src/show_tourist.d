@@ -124,7 +124,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact, `
-		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name='` ~ fem ~"'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
+		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name ILIKE'` ~ fem ~"%'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
