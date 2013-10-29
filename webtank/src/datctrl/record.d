@@ -6,7 +6,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.typetuple, std.typecons, std.conv;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field;
+import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field, webtank.common.serialization;
 
 interface IBaseRecord
 {	string getStr(string fieldName, string defaultValue);
@@ -29,6 +29,18 @@ template Record(alias RecFormat)
 		size_t _recordKey;
 	
 	public:
+		
+		JSONValue getStdJSON()
+		{	JSONValue jValue = _format.getStdJSON();
+			
+			jValue.object["d"] = _recordSet.serializeDataAt(_recordKey);
+			jValue.object["t"] = JSONValue();
+			jValue.object["t"].type = JSON_TYPE.STRING;
+			jValue.object["t"].str = "record";
+
+			return jValue;
+		}
+		
 		this(RecSet recordSet, size_t recordKey)
 		{	_recordSet = recordSet;
 			_recordKey = recordKey;
@@ -47,9 +59,10 @@ template Record(alias RecFormat)
 			
 		}
 		
-		//Шаблон функции получения значений перечислимого типа
-		auto getEnumValues(string fieldName)()
-		{	return _recordSet.getEnumValues(fieldName);
+		//Функция получения формата для перечислимого типа
+		//Значения отсортированы по возрастанию
+		auto getEnum(string fieldName)()
+		{	return _recordSet.getEnum!(fieldName)();
 		}
 		
 		override {

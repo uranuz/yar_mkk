@@ -4,23 +4,23 @@ import webtank._version;
 
 static if( isDatCtrlEnabled ) {
 
-import std.typetuple, std.typecons, std.stdio, std.conv;
+import std.typetuple, std.typecons, std.stdio, std.conv, std.json;
 
 //import std.stdio;
 
-import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.record_format;
+import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.record_format, webtank.common.serialization;
 
-interface IBaseRecordSet
-{	
-	
-}
+// interface IBaseRecordSet
+// {	
+// 	
+// }
 
 template RecordSet(alias RecFormat)
 {
 // 	alias Tuple!( getTupleTypeOf!(IField, RecFormat.fieldSpecs) ) IFieldTupleType;
 	
 	
-	class RecordSet: IBaseRecordSet
+	class RecordSet: /+IBaseRecordSet,+/ IStdJSONSerializeable
 	{	
 	public:
 		alias Record!RecFormat Rec;
@@ -28,13 +28,43 @@ template RecordSet(alias RecFormat)
 		
 	protected:
 		IBaseField[] _fields;
-		size_t _keyFieldIndex;
 		RecFormat _format;
 		
 		
 		size_t _currRecIndex;
 	public:
 
+		//Сериализация данных записи с индексом index в std.json
+		JSONValue serializeDataAt(size_t index)
+		{	JSONValue recJSON;
+			recJSON.type = JSON_TYPE.ARRAY;
+			recJSON.array.length = RecFormat.fieldSpecs.length; 
+			foreach( j, spec; RecFormat.fieldSpecs )
+			{	if( rec.isNull(spec.name) )
+					recJSON[j].type = JSON_TYPE.NULL;
+				else
+					recJSON[j] = getStdJSON( this.get!(spec.name)(index) );
+			}
+			return recJSON;
+		}
+		
+		//Сериализация объекта в std.json
+		JSONValue getStdJSON()
+		{	
+			jValue = _format.getStdJSON();
+			JSONValue recordsJSON;
+				recordsJSON.type = JSON_TYPE.ARRAY;
+			foreach( i; 0..this.length )
+				recordsJSON.array ~= this.serializeDataAt(i);
+			
+			jValue.object["d"] = recordsJSON;
+			jValue.object["t"] = JSONValue();
+			jValue.object["t"].type = JSON_TYPE.STRING;
+			jValue.object["t"].str = "recordset";
+
+			return jValue;
+		}
+		
 		this(RecFormat fieldFormat)
 		{	_format = fieldFormat;
 			//Устанавливаем размер массива полей
@@ -72,24 +102,22 @@ template RecordSet(alias RecFormat)
 			}
 		}
 		
-		//Шаблон метода получения значений перечислимого типа
+		//Функция получения формата для перечислимого типа
 		//Определена только для полей, имеющих перечислимый тип, что логично
-		template getEnumValues(string fieldName)()
-		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
-			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
+		template getEnum(string fieldName)
+		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
 			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
 			
 			static if( fieldType == FieldType.Enum )
-			{	auto getEnumValues()
+			{	auto getEnum()
 				{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
-					return currField.getEnumValues(fieldIndex);
+					return currField.getEnum(fieldIndex);
 				}
 			}
 			else
-				static assert( 0, "Getting enum values is only available for enum field types!!!" );
+				static assert( 0, "Getting enum data is only available for enum field types!!!" );
 		}
-		
-		
+
 		string getStr(string fieldName, size_t recordKey, string defaultValue = null)
 		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
 			return currField.getStr( _getRecordIndex(recordKey), defaultValue );
@@ -112,14 +140,14 @@ template RecordSet(alias RecFormat)
 		}
 		
 		size_t keyFieldIndex() @property
-		{	return _keyFieldIndex;
+		{	return _format.keyFieldIndex;
 		}
 		
 		void setKeyField(size_t index)
 		{	auto keyFieldIndexes = getKeyFieldIndexes!(RecFormat.fieldSpecs)();
 			foreach( i; keyFieldIndexes )
 			{	if( i == index )
-				{	_keyFieldIndex = index;
+				{	_format.keyFieldIndex = index;
 					return;
 				}
 			}
@@ -137,9 +165,9 @@ template RecordSet(alias RecFormat)
 		}
 		
 		size_t length() @property
-		{	assert( _fields[_keyFieldIndex].type == FieldType.IntKey, "Field with index " 
-				~ _keyFieldIndex.to!string ~ " is not a key field!!!" ); 
-			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_keyFieldIndex];
+		{	assert( _fields[_format.keyFieldIndex].type == FieldType.IntKey, "Field with index " 
+				~ _format.keyFieldIndex.to!string ~ " is not a key field!!!" ); 
+			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_format.keyFieldIndex];
 			return keyField.length;
 		}
 		
@@ -154,16 +182,16 @@ template RecordSet(alias RecFormat)
 		
 	protected:
 		size_t _getRecordIndex(size_t key)
-		{	assert( _fields[_keyFieldIndex].type == FieldType.IntKey, "Field with index " 
-				~ _keyFieldIndex.to!string ~ " is not a key field!!!" ); 
-			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_keyFieldIndex];
+		{	assert( _fields[_format.keyFieldIndex].type == FieldType.IntKey, "Field with index " 
+				~ _format.keyFieldIndex.to!string ~ " is not a key field!!!" ); 
+			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_format.keyFieldIndex];
 			return keyField.getIndex(key);
 		}
 		
 		size_t _getRecordKey(size_t index)
-		{	assert( _fields[_keyFieldIndex].type == FieldType.IntKey, "Field with index " 
-				~ _keyFieldIndex.to!string ~ " is not a key field!!!" ); 
-			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_keyFieldIndex];
+		{	assert( _fields[_format.keyFieldIndex].type == FieldType.IntKey, "Field with index " 
+				~ _format.keyFieldIndex.to!string ~ " is not a key field!!!" ); 
+			auto keyField = cast( IField!(FieldType.IntKey) ) _fields[_format.keyFieldIndex];
 			return keyField.getKey(index);
 		}
 		

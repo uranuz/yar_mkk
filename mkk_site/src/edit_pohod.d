@@ -82,10 +82,10 @@ enum pohodEnumValues = [
 
 RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
-	ft.Str, "organization", ft.Str, "region_group", ft.Str, "vid", ft.Str, "element",
-	ft.Str, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
+	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "element",
+	ft.Enum, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
 	ft.Date, "finish_date", ft.Str, "chef_group", ft.Str, "alt_chef",
-	ft.Int, "unit", ft.Str, "prepare", ft.Str, "status",
+	ft.Int, "unit", ft.Enum, "prepare", ft.Enum, "status",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
 ) pohodRecFormat = 
 {	enumValues: pohodEnumValues
@@ -94,6 +94,10 @@ RecordFormat!(
 enum string[] months = [ "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь" ];
 
 enum strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
+
+
+string 
+
 
 
 //Функция формирует форму редактирования похода

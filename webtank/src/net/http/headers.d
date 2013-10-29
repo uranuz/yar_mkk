@@ -207,7 +207,7 @@ protected:
 }
 
 // void main()
-// {	auto headers = new HTTPHeaders;
+// {	auto headers = new Headers;
 // 	string headerStr = "GET / HTTP/1.1\r\nHost: translate.google.ru\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36\r\nX-Chrome-Variations: COu1yQEIh7bJAQiptskBCJqEygEIqYXKAQi3hcoB\r\nAccept-Encoding: gzip,deflate,sdch\r\nAccept-Language: ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4\r\n\r\n";
 // 	headers.appendData(headerStr);
 // 	headers.process();

@@ -6,7 +6,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.typetuple, std.typecons, std.conv;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field;
+import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization;
 
 struct RecordFormat(Args...)
 {	alias TypeTuple!Args templateArgs;
@@ -33,10 +33,105 @@ struct RecordFormat(Args...)
 		return result;
 	}
 	
+	JSONValue getStdJSON()
+	{	JSONValue jValue = void;
+		jValue.type = JSON_TYPE.OBJECT;
+		jValue.object["kfi"] = JSONValue();
+		jValue.object["kfi"].type = JSON_TYPE.UINTEGER;
+		jValue.object["kfi"].uinteger = keyFieldIndex;
+		
+		//Образуем JSON-массив описаний полей
+		JSONValue fieldsJSON = void;
+		fieldsJSON.type = JSON_TYPE.ARRAY;
+		foreach( spec; fieldSpecs )
+		{	JSONValue fldJSON;
+			fldJSON.type = JSON_TYPE.OBJECT;
+			
+			fldJSON.object["n"] = JSONValue(); 
+			fldJSON.object["t"] = JSONValue();
+			fldJSON["n"].str = spec.name;
+			fldJSON["t"].str = spec.fieldType.to!string;
+			fieldsJSON.array ~= fldJSON; //Добавляем описание поля
+		}
+		//Добавляем массив описаний полей к результату
+		jValue.object["f"] = fieldsJSON;
+		return jValue;
+	}
+	
+	size_t keyFieldIndex = 0; //Номер основного ключевого поля (если их несколько)
 	//Флаги для полей, показывающие может ли значение поля быть пустым (null)
 	//(если значение = true) или нет (false)
 	bool[string] nullableFlags; //Флаги "обнулябельности"
 	string[int][string] enumValues; //Возможные значения для перечислимых полей
+	
+}
+
+class EnumFormat
+{	
+protected:
+	string[int] _map;
+	string[] _names;
+	int[] _values;
+
+
+public:
+	this(string[int] map)
+	{	_map = map.dup;
+		import std.algorithm;
+		_values = _map.keys;
+		sort!("a < b")(_values);
+		
+		foreach( i; _values )
+			_names ~= _map[i];
+	}
+	
+	string getName(int value)
+	{	if( value in _map )
+			return _map[value];
+		else
+			throw new Exception("Value " ~ value.to!string ~ " is not valid enum value!!!");
+	}
+	
+	//Определяем оператор in для класса
+	//TODO: Разобраться как работает inout
+// 	inout(string)* opBinaryRight(string op)(int value) inout if(op == "in")
+// 	{	return ( value in _map );
+// 	}
+
+	bool hasValue(int value)
+	{	if( value in _map )
+			return true;
+		else
+			return false;
+	}
+	
+	string[] names() @property
+	{	return _names.dup;
+	}
+	
+	int[] values() @property
+	{	return _values.dup;
+	}
+
+
+	int opApply(int delegate(ref string name, ref int i) dg)
+	{	for( size_t i = 0; i < values.length; i++ )
+		{	auto result = dg(names[i], values[i]);
+			if(result)
+				return result;
+		}
+		
+		return 0;
+	}
+	
+	int opApply(int delegate(ref int i) dg)
+	{	for( size_t i = 0; i < values.length; i++ )
+		{	auto result = dg(values[i]);
+			if(result)
+				return result;
+		}
+		return 0;
+	}
 }
 
 

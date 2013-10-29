@@ -40,6 +40,58 @@ public:
 	}
 }
 
+import std.socket, std.conv;
+
+import webtank.net.http.request, webtank.net.http.response, webtank.net.http.headers;
+
+immutable(size_t) startBufLength = 1024;
+immutable(size_t) messageBodyLimit = 4_194_304;
+
+void receiveHTTPRequest()
+{	auto headers = receiveRequestHeaders();
+	
+	if( headers.errorCode != 0 )
+	{	/+_socket.sendTo( generateServicePage(headers.errorCode) );+/
+		return;
+	}
+	
+	//Определяем длину тела запроса
+	size_t contentLength = 0;
+	if( headers["content-length"] !is null )
+	{	try {
+			contentLength = headers["content-length"].to!size_t;
+		} catch(Exception e) { contentLength = 0; }
+	}
+	
+	//Проверяем размер тела запроса
+	if( contentLength > messageBodyLimit )
+	{	/+_socket.sendTo( generateServicePage(413) );+/
+		return;
+	}
+	
+// 		write("headers.strLength: "); writeln( headers.strLength );
+	
+	string messageBody;
+	char[] bodyBuf;
+	size_t extraBytesInHeaderBuf = startBufLength - headers.strLength;
+// 		write("extraBytesInHeaderBuf: "); writeln( extraBytesInHeaderBuf );
+	//Нужно определить сколько ещё нужно прочитать
+	if( contentLength > extraBytesInHeaderBuf )
+	{	bodyBuf.length = contentLength - extraBytesInHeaderBuf;
+		_socket.receive(bodyBuf);
+		messageBody = headers.extraData ~ bodyBuf.idup;
+// 			writeln("contentLength > extraBytesInHeaderBuf");
+	}
+	else
+	{	messageBody = headers.extraData[0..contentLength];
+// 			writeln("contentLength < extraBytesInHeaderBuf");
+	}
+// 		write("messageBody.length: "); writeln( messageBody.length ); 
+	
+	_request = new ServerRequest( headers, messageBody );
+}
+
+
 class WorkingThread: Thread
 {	
 protected:
@@ -53,7 +105,9 @@ public:
 	
 protected:
 	void _work()
-	{	auto conn = new ServerConnection(_socket);
+	{	
+		
+		auto conn = new ServerConnection(_socket);
 		Router.processRequest(conn.request, conn.response);
 		scope(exit) 
 		{	_socket.shutdown(SocketShutdown.BOTH);
