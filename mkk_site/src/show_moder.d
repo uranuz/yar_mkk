@@ -1,29 +1,13 @@
 module mkk_site.show_moder;
 
-import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data;// фаил обших переменных сайта
+import mkk_site.site_data, mkk_site.utils;
 
-//Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
-string nou_SQL_injekt(string str)
-{
-dstring dstr = toUTF32(str);
-dstring dstr1;
-for (int i=0;i<dstr.length;i++)
-{
-if(dstr[i]==' ' ||  dstr[i]=='-' || dstr[i]=='_' || dstr[i]=='(' || dstr[i]==')' || (dstr[i]>='A' && dstr[i]<'Z'  ) || (dstr[i]>='a' && dstr[i]<='z'  ) ||
-(dstr[i]>='А' && dstr[i]<='я' ) || dstr[i]=='Ё' || dstr[i]=='ё' )
-dstr1~=dstr[i];
-//допустимые  символы А-Я,а-я,A-Z,f-z,-,_,),(.
-}
-//  strip()       Уибират начальные и конечные пробелы
 
-string result = strip(toUTF8(dstr1));
-return result;
-}
 //----------------------
 immutable thisPagePath = dynamicPath ~ "show_moder";
 
@@ -32,22 +16,10 @@ static this()
 }
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
-
-
-
-
-
-
-
-
-
-
 {	
-
-   
-	 import mkk_site.authentication;
+	import mkk_site.authentication;
 		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
-		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки
+	    
 	
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
@@ -60,135 +32,90 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
 	   
-	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
+	string fem = ( ( "name" in rq.postVars ) ? rq.postVars["name"] : "" ) ; 
 	
- 
-   
-	try { //Логирование запросов к БД для отладки
+	/*try { //Логирование запросов к БД для отладки
 	std.file.append( eventLogFileName, 
 		"--------------------\r\n"
 		"Фамилия: " ~ fem ~ "\r\n"
 	);
-	} catch(Exception) {}
-	uint limit = 10;// максимальное  чмсло строк на странице
-	int page;
-	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from site_user` ):
-	dbase.query(`select count(1) from site_user where family_name = '` ~ fem ~ "'");
-	
+	} catch(Exception) {}*/
+	//uint limit = 10;// максимальное  чмсло строк на странице
+	//int page;
+	//auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
+	//dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
+
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
+	//uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit; //Количество страниц
-	uint curPageNum = 1; //Номер текущей страницы
-	try {
-		if( "cur_page_num" in rq.postVars )
- 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
-	} catch (Exception) { curPageNum = 1; }
+	//uint pageCount = (col_str)/limit; //Количество страниц
+	//uint curPageNum = 1; //Номер текущей страницы
+	//try {
+	//	if( "cur_page_num" in rq.postVars )
+ 	//		curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+	//} catch (Exception) { curPageNum = 1; }
 
-	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
+	//uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
-	string content;
+	string content = ``;
 	
-	// content = 
-	//`<form id="main_form" method="post">
-	//	Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
-	//	<input type="submit" name="act" value="Найти"><br>`;
-	
-	try { //Логирование запросов к БД для отладки
+	/*try { //Логирование запросов к БД для отладки
 		std.file.append( eventLogFileName, 
 			"--------------------\r\n"
 			"Количество записей: " ~ col_str.to!string ~ "\r\n"
-			"Текущий номер страницы: "~ curPageNum.to!string ~ ", всего страниц: " ~ pageCount.to!string ~ "\r\n"
+			//"Текущий номер страницы: "~ curPageNum.to!string ~ ", всего страниц: " ~ pageCount.to!string ~ "\r\n"
 		);
-	} catch(Exception) {}
-	
-	
-	if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
-	{	if( curPageNum != 1 )
-			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
-		
-		content ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `"> из ` 
-			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `;
-		
-		if( curPageNum != pageCount )
-			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
-	}
-	
-	content ~= 
-`	</form>
-	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
+	} catch(Exception) {}*/
+
+
+	content ~= `<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
 	
 	alias FieldType ft;
-	
+
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "Ф.И.О.", ft.Str, "Регион", 
-	ft.Str,  "Контакты",   ft.Str, "Статус",  )();
+	ft.IntKey, "Ключ",   ft.Str, "ФИО", ft.Str, "Статус",  ft.Str, "Контакты")();
 	
 	string queryStr;
 	
     
-		queryStr=`select num,name,region,(email||'<br>'||contact_info) as contact_info ,status` 
-				
-		   `  from site_user `~ ( ( fem.length == 0 )?"": (` WHERE name='` ~ fem ~"'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
+		queryStr=`select num,name,region,(status||'<br>'||region) as stat,(email||'<br>'||contact_info) as contact from site_user order by num `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	string table = `<table class="tab">`;
 	table ~= `<tr>`;
-	if(_sverka) table ~= `<td> Ключ</td>`;
+		
+	table ~=`<td>ФИО</td><td> Статус</td><td> Контакты</td>`;
 	
-	table ~=`<td>Ф.И.О.</td><td> Регион</td><td>Контакты</td><td> Статус</td>`;
-	
-	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
 	{	table ~= `<tr>`;
-		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Ф.И.О."("") ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Регион"("") ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Контакты"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Статус"("нет") ~ `</td>`;		
-	
-		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`;
 		
+		table ~= `<td>` ~ rec.get!"ФИО"("") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Статус"("") ~ `</td>`;
+	      //table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;		
+	      //table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
+				
 		table ~= `</tr>`;
 	}
 	table ~= `</table>`;
+
 	
-	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`;
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	//Чтение шаблона страницы из файла
-	string templFileName = "/home/test_serv/web_projects/mkk_site/templates/general_template.html";
-	import std.stdio;
-	auto f = File(templFileName, "r");
-	string templateStr; //Строка с содержимым файла шаблона страницы 
-	string buf;
-	while ((buf = f.readln()) !is null)
-		templateStr ~= buf;
-		
-	//Создаем шаблон по файлу
-	auto tpl = new PlainTemplater( templateStr );
+	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	//Задаём местоположения всяких файлов
-	tpl.set("img folder", "../../img/");
-	tpl.set("css folder", "../../css/");
-	tpl.set("cgi-bin", "/cgi-bin/mkk_site/");
-	tpl.set("useful links", "Куча хороших ссылок");
-	tpl.set("js folder", "../../js/");
-	tpl.set("this page path", thisPagePath);
-	
-
-	
+	/*
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
 	}
-	
+	*/
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

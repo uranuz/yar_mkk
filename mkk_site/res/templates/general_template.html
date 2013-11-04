@@ -41,8 +41,8 @@
 			<a href="{{dynamic path}}show_pohod"><span>Походы</span></a>
 			<a href="{{dynamic path}}show_tourist"><span>Туристы</span></a>
 			<a href="{{dynamic path}}show_moder"><span>Модераторы</span></a>
-			<a href="">Отчёты и файлы</a>
-			<a href="">Статьи</a>
+			<a href="{{dynamic path}}reports">Отчёты</a>
+			<a href="{{dynamic path}}stati">Статьи и документы</a>
 		</div> <!-- #main_menu -->
 		<div id="auth_bar">
 			<form action="{{dynamic path}}auth?redirectTo={{this page path}}" id="auth_form" method="post" style="display: inline;">
@@ -56,9 +56,11 @@
 	</div> <!-- #top -->
 	
 	<div id="middle">
-		<div id="sidebar">
+		<div id="sidebar"><!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
 			<h3>Полезные ссылки:</h3>
-			{{useful links}}
+			<a href="http://tssr.ru">Туристско-спортивный союз России</a> <br>
+			<a href="http://tkirbis.ru">Турклуб "Ирбис"</a> <br>
+			<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a> <br>
 		</div> <!-- #sidebar -->
 		<div id="content"><!-- основное содержание страницы -->
 			{{content}}
