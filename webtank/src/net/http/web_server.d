@@ -2,7 +2,7 @@ module webtank.net.web_server;
 
 import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime, std.getopt;
 
-import webtank.net.http.connection, webtank.net.http.router;
+import webtank.net.http.http_routing, webtank.net.routing;
 
 class WebServer
 {	
@@ -47,12 +47,26 @@ import webtank.net.http.request, webtank.net.http.response, webtank.net.http.hea
 immutable(size_t) startBufLength = 1024;
 immutable(size_t) messageBodyLimit = 4_194_304;
 
-void receiveHTTPRequest()
-{	auto headers = receiveRequestHeaders();
+//Функция принимает запрос из сокета и возвращает экземпляр ServerRequest
+//или кидается исключениями при ошибках
+ServerRequest receiveHTTPRequest(Socket sock)
+{	
+// 	size_t bytesRead;
+	char[] startBuf;
+	startBuf.length = startBufLength;
+	
+	//Читаем из сокета в буфер
+// 	bytesRead = 
+	sock.receive(startBuf);
+	//TODO: Проверить сколько байт прочитано
+	
+	auto headers = new RequestHeaders(startBuf.idup);
 	
 	if( headers.errorCode != 0 )
-	{	/+_socket.sendTo( generateServicePage(headers.errorCode) );+/
-		return;
+	{	/+sock.sendTo( generateServicePage(headers.errorCode) );+/
+		//TODO: Исправить на генерацию осмысленных исключений,
+		//их обработку и создание запроса маршрутизатору на страницу с ошибкой
+		return null;
 	}
 	
 	//Определяем длину тела запроса
@@ -65,8 +79,9 @@ void receiveHTTPRequest()
 	
 	//Проверяем размер тела запроса
 	if( contentLength > messageBodyLimit )
-	{	/+_socket.sendTo( generateServicePage(413) );+/
-		return;
+	{	/+sock.sendTo( generateServicePage(413) );+/
+		//TODO: Аналогично предыдущему
+		return null;
 	}
 	
 // 		write("headers.strLength: "); writeln( headers.strLength );
@@ -78,7 +93,7 @@ void receiveHTTPRequest()
 	//Нужно определить сколько ещё нужно прочитать
 	if( contentLength > extraBytesInHeaderBuf )
 	{	bodyBuf.length = contentLength - extraBytesInHeaderBuf;
-		_socket.receive(bodyBuf);
+		sock.receive(bodyBuf);
 		messageBody = headers.extraData ~ bodyBuf.idup;
 // 			writeln("contentLength > extraBytesInHeaderBuf");
 	}
@@ -88,10 +103,11 @@ void receiveHTTPRequest()
 	}
 // 		write("messageBody.length: "); writeln( messageBody.length ); 
 	
-	_request = new ServerRequest( headers, messageBody );
+	return new ServerRequest( headers, messageBody );
 }
 
 
+//Рабочий процесс веб-сервера
 class WorkingThread: Thread
 {	
 protected:
@@ -105,31 +121,38 @@ public:
 	
 protected:
 	void _work()
-	{	
+	{	auto request = receiveHTTPRequest(_socket);
 		
-		auto conn = new ServerConnection(_socket);
-		Router.processRequest(conn.request, conn.response);
+		//TODO: Исправить на передачу запроса на страницу
+		//с ошибкой маршрутизатору, а не просто падение сервера
+		if( request is null )
+			return; 
+		
+		auto response = new ServerResponse(&_socket.writeTo);
+		auto context = new HTTPContext(request, response);
+		
+		//Запуск обработки HTTP-запроса через маршрутизатор
+		router.process( context );
 		scope(exit) 
 		{	_socket.shutdown(SocketShutdown.BOTH);
 			_socket.close();
 		}
 	}
-	
-	
 }
-
-
-
 
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
-	
+
 	ushort port = 8082;
 	//Получаем порт из параметров командной строки
 	getopt( progAgs, "port", &port );
 	
+	
+	//TODO: Исправить это временное решение
+	//Отстраиваем дерево маршрутизации
+	buildRoutingTree();
+	
 	auto server = new WebServer(port);
 	server.start();
-	
 }
 

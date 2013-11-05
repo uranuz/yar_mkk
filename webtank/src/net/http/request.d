@@ -14,6 +14,8 @@ protected:
 	
 	string[][string] _POSTArray;
 	string[][string] _GETArray;
+	JSONValue _JSON_Body;
+	bool _isJSONParsed = false;
 public:
 	this(RequestHeaders headersParam, string messageBodyParam)
 	{	headers = headersParam;
@@ -64,6 +66,20 @@ public:
 	{	if( _GETArray.length <= 0 )
 			_GETArray = extractURIDataArray( queryString );
 		return _GETArray;
+	}
+	
+	JSONValue JSON_Body() @property
+	{	import std.json;
+		if( !_isJSONParsed)
+		{	try { //Пытаемся распарсить messageBody в JSON
+				_JSON_Body = parseJSON(messageBody);
+			} catch (JSONException e) {
+				_JSON_Body = JSONValue.init;
+			} finally {
+				_isJSONParsed = true;
+			}
+		}
+		return _JSON_Body;
 	}
 
 } 
