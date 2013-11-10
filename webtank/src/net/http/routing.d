@@ -3,7 +3,6 @@ module webtank.net.http.routing;
 import std.stdio;
 import webtank.net.routing, webtank.net.http.context;
 
-
 private {
 	__gshared HTTPRouterRule _rootRule;
 	__gshared IRoutingRule[] _routingRules;
@@ -19,9 +18,7 @@ void processServerRequest(Object context)
 {	if( _rootRule is null )
 		buildRoutingTree();
 		
-	auto routeSeg = _rootRule.getRouteSegment(context, null);
-	if( routeSeg )
-		routeSeg.moveAlongRoute();
+	auto status = _rootRule.doRouting(context);
 }
 
 //Функция построения дерева маршрутизации
@@ -36,31 +33,72 @@ void buildRoutingTree()
 
 		foreach( rule; _routingRules)
 			_rootRule.joinRule(rule);
+			
+		writeln( _rootRule.toString() );
 	}
 }
 
-//Участок маршрута HTTP-роутера
-class HTTPRouterSegment: BaseRouteSegmentTpl!(HTTPRouterRule, HTTPContext, IRouteSegment)
+shared static this()
+{	joinRoutingRule(new URIRouterRule);
+	
+}
+
+class HTTPForwardRoutingRule(ChildRuleT): ForwardRoutingRule!(ChildRuleT)
 {	
 public:
-	this(HTTPRouterRule routeRule, HTTPContext context, IRouteSegment prevSegment)
-	{	super(routeRule, context, prevSegment);
+	this(string thisRouteName) 
+	{	super(thisRouteName); }
+
+	override RoutingStatus doRouting(Object context)
+	{	auto ctx = cast(HTTPContext) context;
+	
+		if( ctx is null )
+			return RoutingStatus.continued;
+		
+		//Проверяем инициализированы ли запрос и ответ,
+		//чтобы не было болезненных сегфолтов в процессе работы
+		if( ctx.request is null || ctx.response is null )
+			return RoutingStatus.continued;
+		
+		auto status = doHTTPRouting(ctx); //Заменяем вызов общей функции на частную
+		
+		writeln( "HTTPForwardRoutingRule.doRouting: response.getString(): ", ctx.response.getString() );
+		
+		return status;
 	}
 	
-	override void moveAlongRoute()
-	{	writeln("Move along ", _routingRule.routeName, " rule");
-		foreach( rule; _routingRule )
-		{	auto currentSegment = rule.getRouteSegment(_context, _parentSegment);
-			if( currentSegment )
-			{	currentSegment.moveAlongRoute();
-				break;
-			}
-		}
+	abstract RoutingStatus doHTTPRouting(HTTPContext context);
+}
+
+class HTTPEndPointRoutingRule: EndPointRoutingRule
+{	
+public:
+	this(string thisRouteName) 
+	{	super(thisRouteName); }
+
+	override RoutingStatus doRouting(Object context)
+	{	auto ctx = cast(HTTPContext) context;
+
+		if( ctx is null )
+			return RoutingStatus.continued;
+		
+		//Проверяем инициализированы ли запрос и ответ,
+		//чтобы не было болезненных сегфолтов в процессе работы
+		if( ctx.request is null || ctx.response is null )
+			return RoutingStatus.continued;
+		
+		auto status = doHTTPRouting(ctx); //Заменяем вызов общей функции на частную
+		
+		writeln( "HTTPEndPointRoutingRule.doRouting: response.getString(): ", ctx.response.getString() );
+		
+		return status;
 	}
+	
+	abstract RoutingStatus doHTTPRouting(HTTPContext context);
 }
 
 //Маршрутизатор HTTP-запросов к серверу
-class HTTPRouterRule: ForwardRoutingRuleTpl!(IRoutingRule)
+class HTTPRouterRule: HTTPForwardRoutingRule!(IRoutingRule)
 {	
 public:
 	this()
@@ -68,13 +106,19 @@ public:
 	}
 
 	override {
-		IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment)
-		{	auto ctx = cast(HTTPContext) context;
-			if( ctx is null )
-				return null;
-			else
-			{	return new HTTPRouterSegment(this, ctx, prevSegment);
+		RoutingStatus doHTTPRouting(HTTPContext context)
+		{	writeln("Move along ", routeName, " rule");
+			
+			foreach( childRule; _childRules)
+			{	auto status = childRule.doRouting(context);
+				if( status != RoutingStatus.continued )
+				{	
+// 					writeln( "HTTPRouterRule.doRouting: response.getString(): ", context.response.getString() );
+					return status;
+				}
 			}
+			
+			return RoutingStatus.continued;
 		}
 	
 		void joinToThis(IRoutingRule newRule)
@@ -97,41 +141,24 @@ public:
 protected:
 	IRoutingRule[] _childRules;
 }
-
-
-class URIRouterSegment: BaseRouteSegmentTpl!(URIRouterRule, HTTPContext, HTTPRouterSegment)
-{	
-	this(URIRouterRule routeRule, HTTPContext context, HTTPRouterSegment prevSegment)
-	{	super(routeRule, context, prevSegment);
-	}
-	
-	override void moveAlongRoute()
-	{	writeln("Move along ", _routingRule.routeName, " rule");
-		foreach( rule; _routingRule )
-		{	auto currentSegment = rule.getRouteSegment(_context, _parentSegment);
-			if( currentSegment )
-			{	currentSegment.moveAlongRoute();
-				break;
-			}
-		}
-	}
-}
 	
 //Маршрутизатор URI - запросов к приложению
-class URIRouterRule: ForwardRoutingRuleTpl!(URIHandlingRule)
+class URIRouterRule: HTTPForwardRoutingRule!(URIHandlingRule)
 {	this()
 	{	super(".HTTP.URI");
 	}
-	
+		
 	override {
-		IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment)
-		{	auto ctx = cast(HTTPContext) context;
-			auto parentSeg = cast(HTTPRouterSegment) prevSegment;
-			if( ctx is null )
-				return null;
+		RoutingStatus doHTTPRouting(HTTPContext context)
+		{	writeln("Move along ", routeName, " rule");
+			
+			auto URIHandler = _childRules
+				.get( _normalizePagePath(context.request.path), null );
+			
+			if( URIHandler )
+				return URIHandler.doRouting(context);
 			else
-			{	return new URIRouterSegment(this, ctx, parentSeg);
-			}
+				return RoutingStatus.continued;
 		}
 		
 		void joinToThis(URIHandlingRule newRule)
@@ -155,46 +182,45 @@ protected:
 	URIHandlingRule[string] _childRules;
 }
 
-class URIHandlingSegment: BaseRouteSegmentTpl!(URIHandlingRule, HTTPContext, URIRouterSegment)
-{	this(URIHandlingRule routeRule, HTTPContext context, URIRouterSegment prevSegment)
-	{	super(routeRule, context, prevSegment);
-	}
-	
-	override void moveAlongRoute()
-	{	writeln("Move along ", _routingRule.routeName, " rule");
-		
-	}
-	
-}
-
 alias void function(HTTPContext) URIHandlerFuncType;
 
-class URIHandlingRule: EndPointRoutingRule
+class URIHandlingRule: HTTPEndPointRoutingRule
 {	
-	this()
+	this(string URI, URIHandlerFuncType handler)
 	{	super(".HTTP.URI.");
+		_URI = _normalizePagePath(URI);
+		_handler = handler;
 	}
 	
 	override {
-		IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment)
-		{	auto ctx = cast(HTTPContext) context;
-			auto parentSeg = cast(URIRouterSegment) prevSegment;
-			
-			if( ctx is null )
-				return null;
-			
-			
-			return new URIHandlingSegment(this, ctx, parentSeg);
+		RoutingStatus doHTTPRouting(HTTPContext context)
+		{	writeln("Move along ", routeName, " rule");
+				
+			_handler(context); //Вызов пользовательского обработчика
+			writeln("Handler for URI: \"" ~ URI ~ "\" executed!!!");
+			return RoutingStatus.succeed;
 		}
 	} //override
 	
 	string URI() @property
-	{	return "vasya";
-		
-	}
-	
-	
+	{	return _URI; }
 	
 protected:
-	
+	string _URI;
+	URIHandlerFuncType _handler;
+}
+
+static string _normalizePagePath(string path, bool ignoreEndSlash = true)
+{	import std.string;
+	import std.path;
+	string clearPath = buildNormalizedPath( strip( path ) );
+	version(Windows) {
+		if ( ignoreEndSlash && clearPath[$-1] == '\\' ) 
+			return clearPath[0..$-1];
+	}
+	version(Posix) {
+		if ( ignoreEndSlash && clearPath[$-1] == '/')
+			return clearPath[0..$-1];
+	}
+	return clearPath;
 }

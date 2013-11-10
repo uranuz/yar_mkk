@@ -2,7 +2,7 @@ module webtank.net.web_server;
 
 import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime, std.getopt;
 
-import webtank.net.http.http_routing, webtank.net.routing;
+import webtank.net.http.routing, webtank.net.http.context;
 
 class WebServer
 {	
@@ -120,19 +120,32 @@ public:
 	}
 	
 protected:
+	void socketSend(string msg)
+	{	_socket.sendTo(msg);
+	}
+
 	void _work()
-	{	auto request = receiveHTTPRequest(_socket);
+	{	auto context = new HTTPContext;
+		context.request = receiveHTTPRequest(_socket);
 		
 		//TODO: Исправить на передачу запроса на страницу
 		//с ошибкой маршрутизатору, а не просто падение сервера
-		if( request is null )
+		if( context.request is null )
 			return; 
 		
-		auto response = new ServerResponse(&_socket.writeTo);
-		auto context = new HTTPContext(request, response);
+		
+		
+		context.response = new ServerResponse(&socketSend);
 		
 		//Запуск обработки HTTP-запроса через маршрутизатор
-		router.process( context );
+		processServerRequest( context );
+		
+		writeln("Server response processing finished!!!");
+		writeln( context.response.getString() );
+		context.response.flush();
+		
+		Thread.sleep( dur!("msecs")( 50 ) );
+		
 		scope(exit) 
 		{	_socket.shutdown(SocketShutdown.BOTH);
 			_socket.close();

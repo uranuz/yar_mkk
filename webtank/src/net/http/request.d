@@ -1,5 +1,7 @@
 module webtank.net.http.request;
 
+import std.json;
+
 import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
 // version = cgi_script;
@@ -69,8 +71,7 @@ public:
 	}
 	
 	JSONValue JSON_Body() @property
-	{	import std.json;
-		if( !_isJSONParsed)
+	{	if( !_isJSONParsed)
 		{	try { //Пытаемся распарсить messageBody в JSON
 				_JSON_Body = parseJSON(messageBody);
 			} catch (JSONException e) {

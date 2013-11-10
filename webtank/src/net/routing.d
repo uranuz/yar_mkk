@@ -13,7 +13,7 @@ class RoutingException : Exception {
 	}
 }
 
-enum RoutingStatus {	keepRouting, stopRouting };
+enum RoutingStatus {	continued, succeed, failed };
 
 //Интерфейс набора правил маршрутизации
 interface IRoutingRuleSet
@@ -33,33 +33,29 @@ interface IRoutingRule
 	//Метод получения участка маршрута
 	//routeName - имя маршрута, для которого создаётся участок
 	//context - "полезная нагрузка", передаваемая по маршруту
-	IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment);
+	RoutingStatus doRouting(Object context);
 	
 	//Метод для просмотра дочерних правил данного правила (не рекурсивно)
 	int opApply(int delegate(IRoutingRule) dg);
 	
 	//Набор правил маршрутизации, из которого получено данное правило
 	IRoutingRuleSet ruleSet() @property;
+	
+	//Вывод информации о дереве маршрутизации
+	final string toString()
+	{	string result = routeName ~ "\r\n";
+		foreach( childRule; &this.opApply )
+			result ~= childRule.toString();
+		return result;
+	}
 }
 
-//Интерфейс участка маршрута
-interface IRouteSegment
-{	
-	//Двигаться по маршруту
-	void moveAlongRoute();
-	
-	//Правило маршрутизации, соответствующее участку маршрута
-	IRoutingRule routingRule() @property;
-	
-	//Родительский участок маршрута, от которого пошёл данный
-	//Если родитель is null, то значит данный участок - корневой
-	IRouteSegment parentSegment() @property;
-}
+
 
 //Разделитель в имени маршрута
 immutable routeNamePartsDelim = ".";
 
-class ForwardRoutingRuleTpl(alias ChildRuleT = IRoutingRule): IRoutingRule
+class ForwardRoutingRule(ChildRuleT = IRoutingRule): IRoutingRule
 //  	if( is( ChildRuleT : IRoutingRule ) )
 {	
 protected:
@@ -114,7 +110,7 @@ public:
 				throw new RoutingException("Parent routing rule for new rule is not presented in the system!!!");
 		}
 		
-		abstract IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment);
+		abstract RoutingStatus doRouting(Object context);
 		abstract int opApply(int delegate(IRoutingRule) dg);
 		
 		//По-умолчанию считаем, что набора правил нет
@@ -147,7 +143,7 @@ public:
 		{	throw new RoutingException("Can't join new rule to end-point rule!!!");
 		}
 		
-		abstract IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment);
+		abstract RoutingStatus doRouting(Object context);
 		
 		int opApply(int delegate(IRoutingRule) dg)
 		{	return 0; }
@@ -159,32 +155,3 @@ public:
 	} //override
 }
 
-//Базовый шаблон для построения участков маршрутов
-class BaseRouteSegmentTpl(
-	RoutingRuleT,
-	ContextT,
-	ParentSegmentT
-): IRouteSegment
-{	
-public:
-	this(RoutingRuleT routeRule, ContextT context, ParentSegmentT prevSegment)
-	{	_routingRule = routeRule;
-		_context = context;
-		_parentSegment = prevSegment;
-	}
-	
-	override {
-		abstract void moveAlongRoute();
-		
-		RoutingRuleT routingRule()
-		{	return _routingRule; }
-		
-		ParentSegmentT parentSegment()
-		{	return _parentSegment; }
-	} //override
-	
-protected:
-	RoutingRuleT _routingRule;
-	ParentSegmentT _parentSegment;
-	ContextT _context;
-}

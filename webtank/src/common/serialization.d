@@ -1,6 +1,6 @@
 module webtank.common.serialization;
  
-import std.json;
+import std.json, std.traits, std.conv;
 
 interface IStdJSONSerializeable
 {	JSONValue getStdJSON();
@@ -75,7 +75,7 @@ JSONValue getStdJSON(T)(T dValue)
 	}
 }
 
-T fromStdJSON(T, uint recursionLevel = 1)(JSONValue jValue)
+T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
 	static if( is( T == JSONValue ) )
 	{	return jValue; //Raw JSONValue
@@ -118,11 +118,15 @@ T fromStdJSON(T, uint recursionLevel = 1)(JSONValue jValue)
 	else static if( isSomeString!T )
 	{	if( jValue.type == JSON_TYPE.STRING )
 			return jValue.str.to!T;
+		else if( jValue.type == JSON_TYPE.NULL )
+		{	return null;
+		}
 		else
 			throw new SerializationException("JSON value doesn't match string type!!!");
 	}
 	else static if( isAssociativeArray!T )
-	{	static assert( recursionLevel, "Recursion level limit!!!" );
+	{	
+// 		static assert( recursionLevel, "Recursion level limit!!!" );
 		alias  KeyType!T AAKeyType;
 		static assert( isSomeString!AAKeyType, "JSON object's key must be of string type!!!" );
 		alias ValueType!T AAValueType;
@@ -132,18 +136,21 @@ T fromStdJSON(T, uint recursionLevel = 1)(JSONValue jValue)
 				result[key.to!AAKeyType] = getDLangValue!( AAValueType, recursionLevel-1 )(val);
 			return result;
 		}
+		else if( jValue.type == JSON_TYPE.NULL )
+		{	return null;
+		}
 		else
 			throw new SerializationException("JSON value doesn't match object type!!!");
 	}
 	else static if( isArray!T )
 	{	import std.range;
-		static assert( recursionLevel, "Recursion level limit!!!" );
+// 		static assert( recursionLevel, "Recursion level limit!!!" );
 		alias ElementType!T AElementType;
 		
 		if( jValue.type == JSON_TYPE.ARRAY )
 		{	T array;
 			foreach( i, val; jValue.array )
-				array[i] = getDLangValue!( AElementType, recursionLevel-1 )(val);
+				array ~= getDLangValue!( AElementType, recursionLevel-1 )(val);
 			return array;
 		}
 		else if( jValue.type == JSON_TYPE.NULL )

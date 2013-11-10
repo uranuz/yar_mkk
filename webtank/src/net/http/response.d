@@ -40,6 +40,11 @@ public:
 		_send( _respBody );
 	}
 	
+	string getString()
+	{	return _getHeaderStr() ~ _respBody;
+		
+	}
+	
 	//Пытаемся очистить ответ, возвращает true, если получилось
 	bool tryClear()
 	{	if( !_headersSent )

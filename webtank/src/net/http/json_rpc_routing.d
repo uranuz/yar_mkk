@@ -1,59 +1,84 @@
 module webtank.net.http.json_rpc_routing;
 
-import webtank.net.routing, webtank.net.http.routing, webtank.net.http.context, webtank.net.http.request, webtank.net.http.response;
+import std.stdio, std.json;
 
-class JSON_RPC_RouterRule: ForwardRoutingRuleTpl!(JSON_RPC_HandlingRule)
+import webtank.net.routing, webtank.net.http.routing, webtank.net.http.context, webtank.net.http.request, webtank.net.http.response, webtank.net.json_rpc;
+
+shared static this()
+{	joinRoutingRule(new JSON_RPC_RouterRule);
+	
+}
+
+class JSON_RPC_RouterRule: HTTPForwardRoutingRule!(JSON_RPC_HandlingRuleBase)
 {	
 public:
 	this()
-	{	super(".HTTP");
+	{	super(".HTTP.JSON_RPC");
 	}
 
 	override {
-		IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment)
-		{	auto ctx = cast(HTTPContext) context;
-			if( ctx is null ) //Проверяем, что правильный контекст
-				return null;
-			
+		RoutingStatus doHTTPRouting(HTTPContext context)
+		{	writeln("Move along ", routeName, " rule");
+
 			import std.string;
-			string HTTPMethod = toLower( ctx.request.headers.get("method", null) );
+			string HTTPMethod = toLower( context.request.headers.get("method", null) );
 			
 			if( HTTPMethod != "post" )
-				return null;
+				return RoutingStatus.continued;
 			
-			auto jMessageBody = ctx.request.JSON_Body;
+			auto jMessageBody = context.request.JSON_Body;
+			
+			writeln( "Received JSON_Body: ", toJSON( &jMessageBody ), " of type ", jMessageBody.type );
 			
 			if( jMessageBody.type == JSON_TYPE.OBJECT )
-			{	if( jMessageBody !is null )
-				{	string jsonrpc;
-					if( "jsonrpc" in jMessageBody.object )
-					{	if( jMessageBody.object["jsonrpc"].type == JSON_TYPE.STRING )
-							jsonrpc = jMessageBody.object["jsonrpc"].str;
-					}
+			{	string jsonrpc;
+				if( "jsonrpc" in jMessageBody.object )
+				{	if( jMessageBody.object["jsonrpc"].type == JSON_TYPE.STRING )
+						jsonrpc = jMessageBody.object["jsonrpc"].str;
+				}
+				
+				if( jsonrpc != "2.0" )
+					return RoutingStatus.continued;
 					
-					if( jsonrpc != "2.0" )
-						return null;
-						
-					string methodName;
-					if( "method" in jMessageBody.object )
-					{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
-							methodName = jMessageBody.object["method"].str;
-					}
-					
-					if( methodName.length == 0 )
-						return null;
-						
-					return new JSON_RPC_RouterSegment
+				string methodName;
+				if( "method" in jMessageBody.object )
+				{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
+						methodName = jMessageBody.object["method"].str;
+				}
+				
+				if( methodName.length == 0 )
+					return RoutingStatus.continued;
+				
+				//Запрос должен иметь элемент params, даже если параметров
+				//не передаётся. В последнем случае должно передаваться
+				//либо null в качестве параметра, либо пустой объект {}
+				if( "params" in jMessageBody.object )
+				{	auto paramsType = jMessageBody.object["params"].type;
+				
+					//В текущей реализации принимаем либо объект (список поименованных параметров)
+					//либо null, символизирующий их отсутствие
+					if( paramsType != JSON_TYPE.OBJECT && paramsType != JSON_TYPE.NULL )
+						return RoutingStatus.continued;
 				}
 				else
-					return null;
+					return RoutingStatus.continued;
+					
+				auto hdlRule = _childRules.get(methodName, null);
+				if( hdlRule )
+				{
+					return hdlRule.doRouting(context);
+					writeln( "JSON_RPC_RouterRule.doRouting: response.getString(): ", context.response.getString() );
+				}
+				else
+					return RoutingStatus.continued;
 			}
 			else
-				return null
+				return RoutingStatus.continued;
+			assert(0);
 		}
 	
-		void joinToThis(JSON_RPC_HandlingRule newRule)
-		{	childRules[newRule.methodName] ~= newRule;
+		void joinToThis(JSON_RPC_HandlingRuleBase newRule)
+		{	_childRules[newRule.methodName] = newRule;
 		}
 		
 		int opApply(int delegate(IRoutingRule) dg)
@@ -70,78 +95,52 @@ public:
 	
 	} //override
 protected:
-	JSON_RPC_HandlingRule[string] _childRules;
+	JSON_RPC_HandlingRuleBase[string] _childRules;
 
 }
 
-
-class JSON_RPC_RouterSegment: BaseRouteSegmentTpl!(JSON_RPC_RouterRule, HTTPContext, HTTPRouterSegment)
-{	
-	this(JSON_RPC_RouterRule routeRule, HTTPContext context, HTTPRouterSegment prevSegment)
-	{	super(routeRule, context, prevSegment);
-	}
-	
-	override void moveAlongRoute()
-	{	writeln("Move along ", _routingRule.routeName, " rule");
-		foreach( rule; _routingRule )
-		{	auto currentSegment = rule.getRouteSegment(_context, _parentSegment);
-			if( currentSegment )
-			{	currentSegment.moveAlongRoute();
-				break;
-			}
-		}
-	}
-}
-
-class JSON_RPC_HandlingRule: EndPointRoutingRule
+class JSON_RPC_HandlingRuleBase: HTTPEndPointRoutingRule
 {	
 public:
-	this()
-	{	super(".HTTP");
+	this(string methodName)
+	{	super(".HTTP.JSON_RPC.");
+		_methodName = methodName;
 	}
 
-	override {
-		IRouteSegment getRouteSegment(Object context, IRouteSegment prevSegment)
-		{	auto ctx = cast(HTTPContext) context;
-			if( ctx is null ) //Проверяем, что правильный контекст
-				return null;
-			
-			auto jMessageBody = ctx.request.JSON_Body;
-			string reqMethodName = jMessageBody.object["method"].str;
-			
-			if( methodName == reqMethodName )
-			{	jMessageBody.
-				return new JSON_RPC_HandlingSegment()
-				
-			}
-			else
-				return null;
-		}	
-	} //override
-	
 	string methodName() @property
-	{	
-		
-	}
-protected:
-	IRoutingRule[] _childRules;
+	{	return _methodName; }
 
+protected:
+	string _methodName;
 }
 
-class JSON_RPC_HandlingSegment: BaseRouteSegmentTpl!(JSON_RPC_HandlingRule, HTTPContext, JSON_RPC_RouterSegment)
+class JSON_RPC_HandlingRule(alias JSON_RPC_Method): JSON_RPC_HandlingRuleBase
 {	
-	this(JSON_RPC_RouterRule routeRule, HTTPContext context, HTTPRouterSegment prevSegment)
-	{	super(routeRule, context, prevSegment);
+public:
+	this(string methodName)
+	{	super(methodName);
+	}
+
+	override RoutingStatus doHTTPRouting(HTTPContext context)
+	{	writeln("Move along ", routeName, " rule");
+		
+		auto jMessageBody = context.request.JSON_Body;
+		string reqMethodName = jMessageBody.object["method"].str;
+		
+		if( this.methodName != reqMethodName ) //Доп. проверка не повредит
+			return RoutingStatus.continued;
+		
+		auto jParams = jMessageBody.object["params"];
+		
+// 		writeln("Received jParams: ", toJSON(&jParams));
+		
+		auto jResult = callJSON_RPC_Method!(JSON_RPC_Method)(jParams);
+// 		writeln("JSON-RPC method calling finished!!!");
+// 		writeln("Returned jResult: ", toJSON(&jResult));
+		context.response ~= toJSON(&jResult).idup;
+//  		writeln("response.getString() returned: ", context.response.getString());
+		
+		return RoutingStatus.succeed;
 	}
 	
-	override void moveAlongRoute()
-	{	writeln("Move along ", _routingRule.routeName, " rule");
-		foreach( rule; _routingRule )
-		{	auto currentSegment = rule.getRouteSegment(_context, _parentSegment);
-			if( currentSegment )
-			{	currentSegment.moveAlongRoute();
-				break;
-			}
-		}
-	}
 }
