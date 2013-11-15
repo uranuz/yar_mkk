@@ -24,9 +24,7 @@ void processServerRequest(Object context)
 //Функция построения дерева маршрутизации
 ///Запускать один раз после добавления всех правил
 void buildRoutingTree()
-{	if( _rootRule is null )
-	{	_rootRule = new HTTPRouterRule;
-	
+{	
 		import std.algorithm;
 		sort!(`count(a.routeName, "` ~ routeNamePartsDelim 
 			~ `") < count(b.routeName, "` ~ routeNamePartsDelim ~ `")`)(_routingRules);

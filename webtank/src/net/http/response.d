@@ -4,16 +4,15 @@ import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
 class ServerResponse  //Ответ от нашего приложения
 {
-	ResponseHeaders headers;
+	HTTPHeaders headers;
 protected:
 	string _respBody;
 	ResponseCookie _cookie; //Куки в ответ
 public:
 	
-
 	this( void delegate(string) send )
 	{	_cookie = new ResponseCookie;
-		headers = new ResponseHeaders;
+		headers = new HTTPHeaders;
 		_send = send;
 	}
 	

@@ -5,20 +5,13 @@ import webtank.net.http.routing, webtank.net.http.context, webtank.net.http.json
 import std.stdio;
 
 shared static this()
-{	joinRoutingRule(new JSON_RPC_HandlingRule!(rpcFunc)("rpcFunc"));
+{	joinRoutingRule( new HTTPRouterRule() )
+	joinRoutingRule( new JSON_RPC_HandlingRule!(rpcFunc) );
 }
 
-string rpcFunc(string[string] assocList)
+string rpcFunc(string[string] assocList, int shit)
 {	
 	writeln("Hello, router!!!");
 	return "Your kesha is " ~ assocList.get("kesha", null);
 	
 }
-
-// void main()
-// {	
-// 	buildRoutingTree();
-// 	
-// 	auto ctx = new HTTPContext;
-// 	processServerRequest(ctx);
-// }

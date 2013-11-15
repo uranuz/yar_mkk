@@ -7,7 +7,7 @@ import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 // version = cgi_script;
 
 class ServerRequest  //Запрос к нашему приложению
-{	RequestHeaders headers;
+{	HTTPHeaders headers;
 
 protected:
 	RequestCookie _cookie; //Куки из запроса
@@ -19,7 +19,7 @@ protected:
 	JSONValue _JSON_Body;
 	bool _isJSONParsed = false;
 public:
-	this(RequestHeaders headersParam, string messageBodyParam)
+	this(HTTPHeaders headersParam, string messageBodyParam)
 	{	headers = headersParam;
 		messageBody = messageBodyParam;
 		

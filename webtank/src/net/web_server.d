@@ -10,7 +10,13 @@ protected:
 	ushort _port = 8082;
 	
 public:
-	this(ushort port) { _port = port;}
+	this(ushort port) 
+	{	_port = port;
+		
+		//TODO: Исправить это временное решение
+		//Отстраиваем дерево маршрутизации
+		buildRoutingTree();
+	}
 	
 	void start()
 	{	Socket listener = new TcpSocket;
@@ -26,6 +32,9 @@ public:
 		{	try {
 				listener.bind( new InternetAddress(_port) );
 				isNotBinded = false;
+				
+				//Ждём, чтобы излишне не загружать систему
+				Thread.sleep( dur!("msecs")( 500 ) ); 
 			} catch(std.socket.SocketOSException) {}
 		}
 		listener.listen(1);
@@ -60,14 +69,15 @@ ServerRequest receiveHTTPRequest(Socket sock)
 	sock.receive(startBuf);
 	//TODO: Проверить сколько байт прочитано
 	
-	auto headers = new RequestHeaders(startBuf.idup);
+	auto headersParser = new HTTPHeadersParser(startBuf.idup);
 	
-	if( headers.errorCode != 0 )
-	{	/+sock.sendTo( generateServicePage(headers.errorCode) );+/
-		//TODO: Исправить на генерацию осмысленных исключений,
-		//их обработку и создание запроса маршрутизатору на страницу с ошибкой
-		return null;
-	}
+	auto headers = headersParser.getHeaders();
+	
+	if( headers is null )
+		throw new HTTPException(
+			"Request headers buffer is too large or is empty or malformed!!!",
+			400 //400 Bad Request
+		);
 	
 	//Определяем длину тела запроса
 	size_t contentLength = 0;
@@ -79,33 +89,49 @@ ServerRequest receiveHTTPRequest(Socket sock)
 	
 	//Проверяем размер тела запроса
 	if( contentLength > messageBodyLimit )
-	{	/+sock.sendTo( generateServicePage(413) );+/
-		//TODO: Аналогично предыдущему
-		return null;
-	}
-	
-// 		write("headers.strLength: "); writeln( headers.strLength );
+		throw new HTTPException(
+			"Content length is too large!!!",
+			413 //413 Request Entity Too Large
+		);
 	
 	string messageBody;
 	char[] bodyBuf;
-	size_t extraBytesInHeaderBuf = startBufLength - headers.strLength;
-// 		write("extraBytesInHeaderBuf: "); writeln( extraBytesInHeaderBuf );
+	size_t extraBytesInHeaderBuf = startBufLength - headersParser.headerData.length;
 	//Нужно определить сколько ещё нужно прочитать
 	if( contentLength > extraBytesInHeaderBuf )
 	{	bodyBuf.length = contentLength - extraBytesInHeaderBuf;
 		sock.receive(bodyBuf);
-		messageBody = headers.extraData ~ bodyBuf.idup;
-// 			writeln("contentLength > extraBytesInHeaderBuf");
+		messageBody = headersParser.bodyData ~ bodyBuf.idup;
 	}
 	else
-	{	messageBody = headers.extraData[0..contentLength];
-// 			writeln("contentLength < extraBytesInHeaderBuf");
+	{	messageBody = headersParser.bodyData[0..contentLength];
 	}
-// 		write("messageBody.length: "); writeln( messageBody.length ); 
 	
 	return new ServerRequest( headers, messageBody );
 }
 
+enum string[ushort] HTTPReasonPhrases = 
+[	
+	///1xx: Informational
+	///1xx: Информационные — запрос получен, продолжается процесс
+	100: "Continue", 101: "Switching Protocols", 102: "Processing",
+
+	///2xx: Success
+	///2xx: Успешные коды — действие было успешно получено, принято и обработано
+	200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 226: "IM Used",
+	
+	///3xx: Redirection
+	///3xx: Перенаправление — дальнейшие действия должны быть предприняты для того, чтобы выполнить запрос
+	300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect",
+	
+	///4xx: Client Error 
+	///4xx: Ошибка клиента — запрос имеет плохой синтаксис или не может быть выполнен
+	400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 414: "Request-URL Too Long", 415: "Unsupported Media Type", 416: "Requested Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a teapot", 422: "Unprocessable Entity", 423: "Locked", 424: "Failed Dependency", 425: "Unordered Collection", 426: "Upgrade Required", 456: "Unrecoverable Error", 499: "Retry With", 
+	
+	///5xx: Server Error
+	///5xx: Ошибка сервера — сервер не в состоянии выполнить допустимый запрос
+	500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 509: "Bandwidth Limit Exceeded", 510: "Not Extended"
+];
 
 //Рабочий процесс веб-сервера
 class WorkingThread: Thread
@@ -126,25 +152,36 @@ protected:
 
 	void _work()
 	{	auto context = new HTTPContext;
-		context.request = receiveHTTPRequest(_socket);
-		
+
+		try {
+			context.request = receiveHTTPRequest(_socket);
+		} catch( HTTPException exc ) {
+			context.response.clear();
+			string statusCodeStr = exc.HTTPStatusCode.to!string;
+			string reasonPhrase = HTTPReasonPhrases.get(exc.HTTPStatusCode, "Absolutely unknown status");
+			context.response.headers["status-code"] = statusCodeStr;
+			context.response.headers["reason-phrase"] = reasonPhrase;
+			context.response.write(
+				`<html><head><title>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</title></head><body>`
+				~ `<h3>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</h3>`
+				~ `<h4>` ~ exc.msg ~ `</h4>`
+				~ `<hr><p style="text-align: right;">webtank.net.web_server</p>`
+				~ `</body></html>`
+			);
+		}
 		//TODO: Исправить на передачу запроса на страницу
 		//с ошибкой маршрутизатору, а не просто падение сервера
 		if( context.request is null )
 			return; 
-		
-		
 		
 		context.response = new ServerResponse(&socketSend);
 		
 		//Запуск обработки HTTP-запроса через маршрутизатор
 		processServerRequest( context );
 		
-		writeln("Server response processing finished!!!");
-		writeln( context.response.getString() );
 		context.response.flush();
 		
-		Thread.sleep( dur!("msecs")( 50 ) );
+		Thread.sleep( dur!("msecs")( 300 ) );
 		
 		scope(exit) 
 		{	_socket.shutdown(SocketShutdown.BOTH);
@@ -159,11 +196,7 @@ void main(string[] progAgs) {
 	ushort port = 8082;
 	//Получаем порт из параметров командной строки
 	getopt( progAgs, "port", &port );
-	
-	
-	//TODO: Исправить это временное решение
-	//Отстраиваем дерево маршрутизации
-	buildRoutingTree();
+
 	
 	auto server = new WebServer(port);
 	server.start();

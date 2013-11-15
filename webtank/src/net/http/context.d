@@ -8,7 +8,13 @@ class HTTPContext
 // 	{	request = rq;
 // 		response = rp;
 // 	}
-	
+	///Объект запроса к серверу по протоколу HTTP
 	ServerRequest request;
+	
+	///Ответ объекта сервера
 	ServerResponse response;
+	
+	///Билет контроля доступа
+	IAccessTicket accessTicket; 
+	
 }

@@ -1,6 +1,6 @@
 module webtank.net.http.json_rpc_routing;
 
-import std.stdio, std.json;
+import std.stdio, std.json, std.traits;
 
 import webtank.net.routing, webtank.net.http.routing, webtank.net.http.context, webtank.net.http.request, webtank.net.http.response, webtank.net.json_rpc;
 
@@ -102,24 +102,23 @@ protected:
 class JSON_RPC_HandlingRuleBase: HTTPEndPointRoutingRule
 {	
 public:
-	this(string methodName)
-	{	super(".HTTP.JSON_RPC.");
-		_methodName = methodName;
-	}
+	this()
+	{	super(".HTTP.JSON_RPC."); }
 
-	string methodName() @property
-	{	return _methodName; }
-
-protected:
-	string _methodName;
+	abstract string methodName() @property;
 }
 
 class JSON_RPC_HandlingRule(alias JSON_RPC_Method): JSON_RPC_HandlingRuleBase
 {	
 public:
-	this(string methodName)
-	{	super(methodName);
+
+	this(IAccessControlRule)
+	{
+		
+		
 	}
+	
+
 
 	override RoutingStatus doHTTPRouting(HTTPContext context)
 	{	writeln("Move along ", routeName, " rule");
@@ -141,6 +140,10 @@ public:
 //  		writeln("response.getString() returned: ", context.response.getString());
 		
 		return RoutingStatus.succeed;
+	}
+	
+	override string methodName() @property
+	{	return fullyQualifiedName!(JSON_RPC_Method);
 	}
 	
 }

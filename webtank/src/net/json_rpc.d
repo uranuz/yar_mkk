@@ -24,10 +24,8 @@ template callJSON_RPC_Method(alias Method)
 	{	JSONValue result;
 		result.type = JSON_TYPE.NULL;  //По-умолчанию в качестве результата null
 		
-		writeln("test10");
-		
 		static if( ParamTypes.length == 0 )
-		{	writeln("test20");
+		{	
 			if( jValue.type == JSON_TYPE.NULL   )
 			{	//Don't remove!!!
 			}
@@ -42,19 +40,19 @@ template callJSON_RPC_Method(alias Method)
 				throw new JSON_RPC_Exception( 
 					"Unsupported JSON value type!!!"
 				);
-			writeln("test30");
+			
 			static if( is( ResultType == void ) )
 				Method(); //Вызов метода без параметров и возвращаемого значения
 			else
 				result = getStdJSON( Method() ); //Вызов метода без параметров с возвращаемым значением
 		}
 		else
-		{	writeln("test40");
+		{	
 			if( jValue.type == JSON_TYPE.OBJECT )
-			{	writeln("test50");
+			{	
 				writeln("jValue.object.length: ", jValue.object.length);
 				if( ParamTypes.length == jValue.object.length )
-				{	writeln("test60");
+				{	
 // 					pragma(msg, ParamTypes);
 					Tuple!(ParamTypes) argTuple;
 // 					pragma(msg, typeof(argTuple));
@@ -72,7 +70,7 @@ template callJSON_RPC_Method(alias Method)
 								~ " is not found in param object!!!"
 							);
 					}
-					writeln("test70");
+					
 					static if( is( ResultType == void ) )
 						Method(argTuple.expand);
 					else
@@ -89,7 +87,7 @@ template callJSON_RPC_Method(alias Method)
 					"Unsupported JSON value type!!!"
 				);
 		}
-		writeln("test80");
+		
 		return result;
 	}
 }
