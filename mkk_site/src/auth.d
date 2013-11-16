@@ -4,16 +4,22 @@ import std.process, std.conv;
 
 import webtank.net.http.router, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data, mkk_site.authentication;
+import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 
 static this()
 {	Router.setPathHandler(dynamicPath ~ "auth", &netMain);
 }
 
+immutable thisPagePath = dynamicPath ~ "auth";
+
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
 	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
 	
+	auto tpl = getGeneralTemplate(thisPagePath);
+	
+	string content = `<h2>Аутентификация</h2>`;
+
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
 	{	import webtank.common.conv;
@@ -55,35 +61,30 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			rp.redirect(redirectTo);
 		}
 		else
-		{	rp.write("Вход завершился с ошибкой");
+		{	content = `Вход завершился с ошибкой`;
 		}
 	}
 	else //Если не пришёл логин с паролем, то работаем в обычном режиме
 	{	
 		string login = rq.cookie.get("user_login", "");
-		rp.write(
-//HTML
-`<html><body>
-<h2>Аутентификация</h2>`);
+		
 		if( auth.isIdentified() )
-			rp.write("Вход на сайт уже выполен");
-		rp.write(
-`<hr>
-<form method="post" action="#"><table>
-  <tr>
-    <th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td> 
-    <td rowspan="2"><input value="     Войти     " type="submit"></td>
-  </tr>
-  <tr><th>Пароль</th> <td><input name="user_password" type="password"></td></tr>
-</table>`
-//`<input type="hidden" name="returnTo" value="` ~ rq.postVars ~ `"
-`</form> <br>`
-//HTML
-		);
+			content ~= `Вход на сайт уже выполен`;
+		else
+			content ~= `<hr>
+<form method="post" action="#">
+	<table>
+		<tr>
+			<th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td> 
+			<td rowspan="2"><input value="     Войти     " type="submit"></td>
+		</tr>
+		<tr><th>Пароль</th> <td><input name="user_password" type="password"></td></tr>
+	</table>
+</form>`;
 		
 	}
-	
-	//rp.write( input );
-	rp.write(`</body></html>`);
+	tpl.set( "content", content );
+	rp.write( tpl.getString() );
+
 }
 
