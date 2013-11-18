@@ -17,7 +17,10 @@ shared static this()
 }
 
 string rpcFunc(HTTPContext context, string[string] assocList, int shit)
-{	
+{	writeln( "context is null: ", context is null );
+	writeln( "context.accessTicket is null: ", context.accessTicket is null );
+	writeln( "context.accessTicket.user is null: ", context.accessTicket.user is null );
+	writeln("user.login: ", context.accessTicket.user.login);
 	writeln("Hello, router!!!");
 	return "Your kesha is " ~ assocList.get("kesha", null);
 	

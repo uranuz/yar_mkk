@@ -113,16 +113,35 @@ public:
 		
 		string SIDString = ctx.request.cookie.get( SIDCookieName, null );
 		
+		string login;
+		string group;
+		string name;
+		string email;
+		
+		SessionIdType sessionId;
+		
+		MKK_SiteAccessTicket createTicket()
+		{	auto user = new MKK_SiteUser(
+				login, //login
+				group, //group
+				name,  //name
+				email  //email
+			);
+			
+			return 
+				new MKK_SiteAccessTicket(user, sessionId);
+		}
+		
 		if( SIDString.length >= SIDStrMinSize )
 		{	auto dbase = new DBPostgreSQL(_authDBConnStr);
 		
 			if( (dbase is null) || !dbase.isConnected )
-				return null;
+				return createTicket();
 			
-			auto sessionId = verifySessionId( SIDString, dbase );
+			sessionId = verifySessionId( SIDString, dbase );
 			
 			if( sessionId == SessionIdType.init )
-				return null;
+				return createTicket();
 			//TODO: Добавить проверку, что у нас корректный Ид сессии
 			
 			//Делаем запрос к БД за информацией о пользователе
@@ -136,21 +155,15 @@ public:
 			);
 			
 			if( (query_res.recordCount != 1) && (query_res.fieldCount != 4) )
-				return null;
+				return createTicket();
 			
 			//Получаем информацию о пользователе из результата запроса
-			auto user = new MKK_SiteUser(
-				query_res.get(0, 0, null), //login
-				query_res.get(1, 0, null), //group
-				query_res.get(2, 0, null),  //name
-				query_res.get(3, 0, null)  //email
-			);
-			
-			return 
-				new MKK_SiteAccessTicket(user, sessionId);
+			login = query_res.get(0, 0, null); //login
+			group = query_res.get(1, 0, null); //group
+			name = query_res.get(2, 0, null);  //name
+			email = query_res.get(3, 0, null);  //email
 		}
-		else
-			return null;
+		return createTicket();
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
