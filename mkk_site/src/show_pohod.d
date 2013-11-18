@@ -61,8 +61,8 @@ void netMain(HTTPContext context)
 		bool _filtr;    // котроль необходимости фильтрации
 		bool _sverka = context.accessTicket.isAuthenticated && ( context.accessTicket.user.isInGroup("admin") || context.accessTicket.user.isInGroup("moder") );    // наличие сверки
 		///////////////////////////////
-		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ;// вид туризма		
-		if (vid=="") _vid=false;
+		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "0" ) ;// вид туризма		
+		if (vid=="0") _vid=false;
 		else _vid=true;
 		////////////////////
 		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; // категория сложности похода		
