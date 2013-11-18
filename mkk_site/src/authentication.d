@@ -2,7 +2,7 @@ module mkk_site.authentication;
 
 import std.conv;
 
-import webtank.db.postgresql, webtank.net.utils;
+import webtank.db.postgresql, webtank.net.utils, webtank.net.access_control, webtank.net.connection, webtank.net.http.context, webtank.common.conv;;
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -18,59 +18,144 @@ enum uint loginMinLength = 3;  //Минимальная длина логина
 enum uint passwordMinLength = 6;  //Минимальная длина пароля
 alias ubyte[sessionIdSize] SessionIdType;
 
-//Структура с информацией о пользователе
-struct UserInfo
-{	string login;
-	string group;
-	string name;
+enum SIDCookieName = "__sid__";
+
+class MKK_SiteUser: IUser
+{
+	this( string login, string group, string name, string email )
+	{	_login = login;
+		_group = group;
+		_name = name;
+		_email = email;
+	}
+	
+	override {
+		///Строка для идентификации пользователя
+		string login() @property
+		{	return _login; }
+		
+		///Функция возвращает true, если пользователь входит в группу
+		bool isInGroup(string groupName)
+		{	return ( groupName == _group ); }
+		
+		///Публикуемое имя пользователя
+		string name() @property
+		{	return _name; }
+		
+		///Адрес эл. почты пользователя для рассылки служебной информации от сервера
+		string email() @property
+		{	return _email; }
+	}
+	
+protected:
+	string _login;
+	string _group;
+	string _name;
+	string _email;
 }
 
-///Класс "Аутентификация"
-class Authentication
+class MKK_SiteAccessTicket: IAccessTicket
+{	
+	this( IUser user, SessionIdType sessionId )
+	{	_user = user; 
+		_sessionId = sessionId;
+	}
+	
+	///Пользователь-владелец карты
+	override IUser user() @property
+	{	return _user; }
+	
+	///Возвращает true, если владелец успешно прошёл проверку подлинности. Иначе false
+	override bool isAuthenticated() @property
+	{	return ( ( _sessionId != SessionIdType.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
+	}
+	
+// 	//свойство "Ид сессии"
+// 	SessionIdType sessionId() @property
+// 	{	if( _updateSID )
+// 		{	_sessionId = verifySessionId( _SIDString, new DBPostgreSQL(_authDBConnStr) );
+// 			_userInfo = anonymousUI;
+// 			_updateUserInfo = true; //Раз получили Ид сессии на всякий случай ставим флаг
+// 			_updateSID = false;
+// 		}
+// 		return _sessionId;
+// 	}
+	
+protected:
+	SessionIdType _sessionId;  //Ид сессии
+	IUser _user;
+}
+
+///Класс управляет выдачей билетов для доступа
+class MKK_SiteAccessTicketManager: IAccessTicketManager
 {	
 protected:
-	UserInfo _userInfo = anonymousUI; //Информация о пользователе (не вся, только основная)
-	SessionIdType _sessionId;  //Ид сессии
-	bool _updateSID = true;
-	bool _updateUserInfo = true;
-	string _SIDString;
 	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
 	string _authDBConnStr;
 	string _errorLogFile;
 
 public:
-	enum UserInfo anonymousUI = UserInfo("anonymous", "anonymous", "anonymous");
-
-	this(string SIDString, string dbConnStr, string errorLogFile) //Конструктор
+	this(string dbConnStr, string errorLogFile) //Конструктор
 	{	_authDBConnStr = dbConnStr;
 		_errorLogFile = errorLogFile;
-		_SIDString = SIDString;
-		identify(_SIDString);
 	}
 	
-	this(string SIDString, string dbConnStr) //Конструктор
+	this(string dbConnStr) //Конструктор
 	{	_authDBConnStr = dbConnStr;
-		_SIDString = SIDString;	
-		identify(_SIDString);
 	}
 	
-	void identify(string SIDString)
-	{	if( SIDString.length >= SIDStrMinSize )
-		{	auto db = new DBPostgreSQL(_authDBConnStr);
-			_sessionId = verifySessionId( SIDString, db );
-			if( _sessionId != SessionIdType.init )
-				_userInfo = getUserInfo( _sessionId, db, anonymousUI );
+	override IAccessTicket getTicket(IConnectionContext context)
+	{
+		auto ctx = cast(HTTPContext) context;
+		
+		if( ctx is null || ctx.request is null || ctx.request.cookie is null  )
+			return null;
+		
+		string SIDString = ctx.request.cookie.get( SIDCookieName, null );
+		
+		if( SIDString.length >= SIDStrMinSize )
+		{	auto dbase = new DBPostgreSQL(_authDBConnStr);
+		
+			if( (dbase is null) || !dbase.isConnected )
+				return null;
+			
+			auto sessionId = verifySessionId( SIDString, dbase );
+			
+			if( sessionId == SessionIdType.init )
+				return null;
+			//TODO: Добавить проверку, что у нас корректный Ид сессии
+			
+			//Делаем запрос к БД за информацией о пользователе
+			auto query_res = dbase.query(
+				` select U.login, U.user_group, U.name, U.email `
+				` from session `
+				` join site_user as U `
+				` on U.num = site_user_num `
+				` where session.num = '` 
+				~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
+			);
+			
+			if( (query_res.recordCount != 1) && (query_res.fieldCount != 4) )
+				return null;
+			
+			//Получаем информацию о пользователе из результата запроса
+			auto user = new MKK_SiteUser(
+				query_res.get(0, 0, null), //login
+				query_res.get(1, 0, null), //group
+				query_res.get(2, 0, null),  //name
+				query_res.get(3, 0, null)  //email
+			);
+			
+			return 
+				new MKK_SiteAccessTicket(user, sessionId);
 		}
-	}
-	
-	//Функция возвращает true, если вход пользователя выполнен и false иначе
-	bool isIdentified() @property
-	{	return ( ( _sessionId != SessionIdType.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
+		else
+			return null;
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	void authenticate(string login, string password)
+	IAccessTicket authenticate(string login, string password)
 	{	try { //Логирование запросов к БД для отладки
 			import std.file;
 			std.file.append( _errorLogFile, 
@@ -82,24 +167,27 @@ public:
 	
 		auto dbase = new DBPostgreSQL(_authDBConnStr);
 		if( (dbase is null) || (!dbase.isConnected) )
-			return;
+			return null;
 			
 		if( login.length < loginMinLength ) //Проверяем длину логина
-			return;
+			return null;
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
-			` select num, password `
+			` select num, password, user_group, name, email `
 			` from site_user `
 			` where login='`
 			~ PGEscapeStr( login ) ~ `';`
 		);
 		
-		if( ( query_res.recordCount != 1 ) || ( query_res.fieldCount != 2 ) )
-			return;
+		if( ( query_res.recordCount != 1 ) || ( query_res.fieldCount != 5 ) )
+			return null;
 			
 		string user_id = query_res.get(0, 0, null);
 		string found_password = query_res.get(1, 0, null);
+		string group = query_res.get(2, 0, null);
+		string name = query_res.get(3, 0, null);
+		string email = query_res.get(4, 0, null);
 		
 		try { //Логирование запросов к БД для отладки
 			import std.file;
@@ -107,7 +195,7 @@ public:
 				"--------------------\r\n"
 				"Authentication.enterUser()\r\n"
 				"user_id: " ~ user_id 
-				~ ";  found_password: " ~ found_password ~ "\r\n"
+				~ ";  name: " ~ name ~ "\r\n"
 			);
 		} catch(Exception) {}
 		
@@ -133,37 +221,22 @@ public:
 				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
 				~ ` returning 'authenticated';`;
 			auto newSIDStatusRes = dbase.query(query);
-			if( newSIDStatusRes.recordCount <= 0 )
-				return;
+			if( newSIDStatusRes.recordCount != 1 )
+				return null;
 			string statusStr = newSIDStatusRes.get(0, 0, "");
+			
 			if( statusStr == "authenticated" )
-			{	_sessionId = sid;
-				_updateSID = false;
-				_updateUserInfo = true;
+			{	auto user = new MKK_SiteUser( login, group, name, email );
+				return 
+					new MKK_SiteAccessTicket( user, sid );
 				//Аутентификация завершена успешно
 			}
 		}
+		
+		return null;
 	}
 
-	//Свойство "Информация о пользователе"
-	UserInfo userInfo() @property
-	{	if( _updateUserInfo )
-		{	_userInfo = getUserInfo( _sessionId, new DBPostgreSQL(_authDBConnStr) );
-			_updateUserInfo = false;
-		}
-		return _userInfo;
-	}
 	
-	//свойство "Ид сессии"
-	SessionIdType sessionId() @property
-	{	if( _updateSID )
-		{	_sessionId = verifySessionId( _SIDString, new DBPostgreSQL(_authDBConnStr) );
-			_userInfo = anonymousUI;
-			_updateUserInfo = true; //Раз получили Ид сессии на всякий случай ставим флаг
-			_updateSID = false;
-		}
-		return _sessionId;
-	}
 }
 
 //Служебная функция для генерации Ид сессии
@@ -202,39 +275,4 @@ SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
 		return SID; 
 	else
 		return SessionIdType.init; //Нет записей
-}
-
-//Служебная функция получения информации о пользователе
-UserInfo getUserInfo( 
-	SessionIdType sessionId, 
-	DBPostgreSQL dbase,
-	UserInfo anonymousUI = Authentication.anonymousUI
-)
-{	if( (dbase is null) || !dbase.isConnected )
-		return anonymousUI;
-	
-	if( sessionId == SessionIdType.init )
-		return anonymousUI; //Не доступа к базе
-	//TODO: Добавить проверку, что у нас корректный Ид сессии
-	
-	//Делаем запрос к БД за информацией о пользователе
-	import webtank.common.conv;
-	auto query_res = dbase.query(
-		` select U.login, U.user_group, U.name `
-		` from session `
-		` join site_user as U `
-		` on U.num = site_user_num `
-		` where session.num = '` 
-		~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
-	);
-	
-	if( (query_res.recordCount != 1) && (query_res.fieldCount != 3) )
-		return anonymousUI;
-	
-	//Получаем информацию о пользователе из результата запроса
-	return UserInfo(
-		query_res.get(0, 0, null), //login
-		query_res.get(1, 0, null), //user_group
-		query_res.get(2, 0, null)  //name
-	);
 }

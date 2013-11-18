@@ -1,7 +1,7 @@
 module webtank.net.routing;
 
 import std.stdio;
-import webtank.common.utils;
+import webtank.common.utils, webtank.net.connection;
 
 ///Модуль содержит основные интерфейсы для маршрутизации
 ///запросов веб-приложения на основе библиотеки webtank
@@ -14,6 +14,71 @@ class RoutingException : Exception {
 }
 
 enum RoutingStatus {	continued, succeed, failed };
+
+///Статический класс внутрипрограммного маршрутизатора
+abstract class Router
+{
+	static {
+		///Присоединяет правило маршрутизации к системе
+		Router join(IRoutingRule routingRule)
+		{	_routingRules ~= routingRule;
+			return null;
+		}
+		
+		///Присоединяет массив правил маршрутизации к системе
+		Router join(IRoutingRule[] routingRules)
+		{	_routingRules ~= routingRules.dup;
+			return null;
+		}
+		
+		///Запускает маршрутизацию для заданного контекста подключения
+		void process(IConnectionContext context)
+		{	auto status = _rootRule.doRouting(context);
+		}
+		
+		//Внутренняя функция для построения дерева маршрутизации
+		protected void _buildRoutingTree()
+		{	
+			import std.algorithm;
+			sort!(`count(a.routeName, "` ~ routeNamePartsDelim 
+				~ `") < count(b.routeName, "` ~ routeNamePartsDelim ~ `")`)(_routingRules);
+			
+			if( _routingRules.length == 0 )
+				return;
+				
+			//Определяем корневое правило из списка добавленных правил
+			if( _routingRules.length > 1 )
+			{	auto firstDelimCount = count(_routingRules[0].routeName, routeNamePartsDelim);
+				auto secondDelimCount = count(_routingRules[1].routeName, routeNamePartsDelim);
+			
+				if ( firstDelimCount == secondDelimCount )
+					throw new RoutingException("Can't determine root routing rule!!!");
+				else
+					_rootRule = _routingRules[0];
+			}
+			else if( _routingRules.length == 1 )
+				_rootRule = _routingRules[0];
+			
+			foreach( rule; _routingRules[1..$])
+				_rootRule.joinRule(rule);
+				
+		}
+		
+		///Инициализация маршрутизатора
+		void start()
+		{	if( _rootRule is null )
+				_buildRoutingTree();
+		}
+		
+	} //static
+protected:
+	static {
+		__gshared IRoutingRule _rootRule;
+		__gshared IRoutingRule[] _routingRules;
+	} //static
+}
+
+
 
 //Интерфейс набора правил маршрутизации
 interface IRoutingRuleSet
@@ -33,7 +98,7 @@ interface IRoutingRule
 	//Метод получения участка маршрута
 	//routeName - имя маршрута, для которого создаётся участок
 	//context - "полезная нагрузка", передаваемая по маршруту
-	RoutingStatus doRouting(Object context);
+	RoutingStatus doRouting(IConnectionContext context);
 	
 	//Метод для просмотра дочерних правил данного правила (не рекурсивно)
 	int opApply(int delegate(IRoutingRule) dg);
@@ -110,7 +175,7 @@ public:
 				throw new RoutingException("Parent routing rule for new rule is not presented in the system!!!");
 		}
 		
-		abstract RoutingStatus doRouting(Object context);
+		abstract RoutingStatus doRouting(IConnectionContext context);
 		abstract int opApply(int delegate(IRoutingRule) dg);
 		
 		//По-умолчанию считаем, что набора правил нет
@@ -143,7 +208,7 @@ public:
 		{	throw new RoutingException("Can't join new rule to end-point rule!!!");
 		}
 		
-		abstract RoutingStatus doRouting(Object context);
+		abstract RoutingStatus doRouting(IConnectionContext context);
 		
 		int opApply(int delegate(IRoutingRule) dg)
 		{	return 0; }
@@ -154,4 +219,3 @@ public:
 		{	return null; 	}
 	} //override
 }
-

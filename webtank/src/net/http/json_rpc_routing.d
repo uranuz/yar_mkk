@@ -4,11 +4,6 @@ import std.stdio, std.json, std.traits;
 
 import webtank.net.routing, webtank.net.http.routing, webtank.net.http.context, webtank.net.http.request, webtank.net.http.response, webtank.net.json_rpc;
 
-shared static this()
-{	joinRoutingRule(new JSON_RPC_RouterRule);
-	
-}
-
 class JSON_RPC_RouterRule: HTTPForwardRoutingRule!(JSON_RPC_HandlingRuleBase)
 {	
 public:
@@ -112,14 +107,6 @@ class JSON_RPC_HandlingRule(alias JSON_RPC_Method): JSON_RPC_HandlingRuleBase
 {	
 public:
 
-	this(IAccessControlRule)
-	{
-		
-		
-	}
-	
-
-
 	override RoutingStatus doHTTPRouting(HTTPContext context)
 	{	writeln("Move along ", routeName, " rule");
 		
@@ -133,7 +120,7 @@ public:
 		
 // 		writeln("Received jParams: ", toJSON(&jParams));
 		
-		auto jResult = callJSON_RPC_Method!(JSON_RPC_Method)(jParams);
+		auto jResult = callJSON_RPC_Method!(JSON_RPC_Method)(jParams, context);
 // 		writeln("JSON-RPC method calling finished!!!");
 // 		writeln("Returned jResult: ", toJSON(&jResult));
 		context.response ~= toJSON(&jResult).idup;

@@ -2,7 +2,7 @@ module webtank.net.json_rpc;
 
 // import webtank._version;
 
-import webtank.common.serialization;
+import webtank.common.serialization, webtank.net.connection;
 
 import std.stdio, std.string, std.conv, std.traits, std.typecons, std.json;
 
@@ -20,7 +20,7 @@ template callJSON_RPC_Method(alias Method)
 	alias ReturnType!(Method) ResultType;
 	alias ParameterIdentifierTuple!(Method) ParamNames;
 	
-	JSONValue callJSON_RPC_Method(JSONValue jValue)
+	JSONValue callJSON_RPC_Method(JSONValue jValue, IConnectionContext context)
 	{	JSONValue result;
 		result.type = JSON_TYPE.NULL;  //По-умолчанию в качестве результата null
 		
@@ -51,24 +51,38 @@ template callJSON_RPC_Method(alias Method)
 			if( jValue.type == JSON_TYPE.OBJECT )
 			{	
 				writeln("jValue.object.length: ", jValue.object.length);
-				if( ParamTypes.length == jValue.object.length )
+				size_t jParamsCount = 0;
+				
+				//Считаем количество параметров, которые должны были быть переданы
+				foreach( type; ParamTypes )
+				{	static if( !is( type: IConnectionContext )  )
+						jParamsCount++;
+				}
+				
+				if( jParamsCount == jValue.object.length )
 				{	
 // 					pragma(msg, ParamTypes);
 					Tuple!(ParamTypes) argTuple;
 // 					pragma(msg, typeof(argTuple));
 					foreach( i, type; ParamTypes )
 					{	pragma(msg, "Current type is ", type, " ", i);
-						if( ParamNames[i] in jValue.object )
-						{	
-							auto dValue = getDLangValue!(type)( jValue.object[ ParamNames[i] ] );
-							pragma(msg, "Typeof dValue is ", typeof(dValue));
-							argTuple[i] = dValue;
+						static if( is( type : IConnectionContext )  )
+						{	argTuple[i] = cast(type) context; //Передаём контекст при необходимости
+							continue;
 						}
-						else
-							throw new JSON_RPC_Exception( 
-								"Expected JSON-RPC parameter " ~ ParamNames[i]
-								~ " is not found in param object!!!"
-							);
+						else 
+						{	if( ParamNames[i] in jValue.object )
+							{	
+								auto dValue = getDLangValue!(type)( jValue.object[ ParamNames[i] ] );
+								pragma(msg, "Typeof dValue is ", typeof(dValue));
+								argTuple[i] = dValue;
+							}
+							else
+								throw new JSON_RPC_Exception( 
+									"Expected JSON-RPC parameter " ~ ParamNames[i]
+									~ " is not found in param object!!!"
+								);
+						}
 					}
 					
 					static if( is( ResultType == void ) )
@@ -78,7 +92,7 @@ template callJSON_RPC_Method(alias Method)
 				}
 				else
 					throw new JSON_RPC_Exception( 
-						"Expected JSON-RPC params count is " ~ ParamTypes.length.to!string
+						"Expected JSON-RPC params count is " ~ jParamsCount.to!string
 						~ " but got " ~ jValue.object.length.to!string
 					);
 			}

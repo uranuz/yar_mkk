@@ -2,7 +2,7 @@ module webtank.net.web_server;
 
 import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime, std.getopt;
 
-import webtank.net.http.routing, webtank.net.http.context;
+import webtank.net.routing, webtank.net.http.context;
 
 class WebServer
 {	
@@ -15,7 +15,7 @@ public:
 		
 		//TODO: Исправить это временное решение
 		//Отстраиваем дерево маршрутизации
-		buildRoutingTree();
+		Router.start();
 	}
 	
 	void start()
@@ -151,33 +151,37 @@ protected:
 	}
 
 	void _work()
-	{	auto context = new HTTPContext;
-
+	{	
+		
+		ServerRequest request;
+		
 		try {
-			context.request = receiveHTTPRequest(_socket);
+			request = receiveHTTPRequest(_socket);
 		} catch( HTTPException exc ) {
-			context.response.clear();
-			string statusCodeStr = exc.HTTPStatusCode.to!string;
-			string reasonPhrase = HTTPReasonPhrases.get(exc.HTTPStatusCode, "Absolutely unknown status");
-			context.response.headers["status-code"] = statusCodeStr;
-			context.response.headers["reason-phrase"] = reasonPhrase;
-			context.response.write(
-				`<html><head><title>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</title></head><body>`
-				~ `<h3>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</h3>`
-				~ `<h4>` ~ exc.msg ~ `</h4>`
-				~ `<hr><p style="text-align: right;">webtank.net.web_server</p>`
-				~ `</body></html>`
-			);
+			//TODO: Построить правильный запрос и отправить на обработку ошибок
+// 			response.clear();
+// 			string statusCodeStr = exc.HTTPStatusCode.to!string;
+// 			string reasonPhrase = HTTPReasonPhrases.get(exc.HTTPStatusCode, "Absolutely unknown status");
+// 			response.headers["status-code"] = statusCodeStr;
+// 			response.headers["reason-phrase"] = reasonPhrase;
+// 			response.write(
+// 				`<html><head><title>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</title></head><body>`
+// 				~ `<h3>` ~ statusCodeStr ~ ` ` ~ reasonPhrase ~ `</h3>`
+// 				~ `<h4>` ~ exc.msg ~ `</h4>`
+// 				~ `<hr><p style="text-align: right;">webtank.net.web_server</p>`
+// 				~ `</body></html>`
+// 			);
+			return;
 		}
 		//TODO: Исправить на передачу запроса на страницу
 		//с ошибкой маршрутизатору, а не просто падение сервера
-		if( context.request is null )
+		if( request is null )
 			return; 
 		
-		context.response = new ServerResponse(&socketSend);
+		auto context = new HTTPContext( request, new ServerResponse(&socketSend) );
 		
 		//Запуск обработки HTTP-запроса через маршрутизатор
-		processServerRequest( context );
+		Router.process( context );
 		
 		context.response.flush();
 		

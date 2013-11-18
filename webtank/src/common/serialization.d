@@ -1,6 +1,6 @@
 module webtank.common.serialization;
  
-import std.json, std.traits, std.conv;
+import std.json, std.traits, std.conv, std.typecons;
 
 interface IStdJSONSerializeable
 {	JSONValue getStdJSON();

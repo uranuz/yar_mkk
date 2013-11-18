@@ -1,45 +1,7 @@
 module webtank.net.http.routing;
 
 import std.stdio;
-import webtank.net.routing, webtank.net.http.context;
-
-private {
-	__gshared HTTPRouterRule _rootRule;
-	__gshared IRoutingRule[] _routingRules;
-}
-
-//Метод добавления правила маршрутизации в систему
-///Правила добавлять в shared static this конструкторе модуля!!!
-void joinRoutingRule(IRoutingRule newRule)
-{	_routingRules ~= newRule;
-}
-	
-void processServerRequest(Object context)
-{	if( _rootRule is null )
-		buildRoutingTree();
-		
-	auto status = _rootRule.doRouting(context);
-}
-
-//Функция построения дерева маршрутизации
-///Запускать один раз после добавления всех правил
-void buildRoutingTree()
-{	
-		import std.algorithm;
-		sort!(`count(a.routeName, "` ~ routeNamePartsDelim 
-			~ `") < count(b.routeName, "` ~ routeNamePartsDelim ~ `")`)(_routingRules);
-
-		foreach( rule; _routingRules)
-			_rootRule.joinRule(rule);
-			
-		writeln( _rootRule.toString() );
-	}
-}
-
-shared static this()
-{	joinRoutingRule(new URIRouterRule);
-	
-}
+import webtank.net.routing, webtank.net.http.context, webtank.net.connection, webtank.net.access_control;
 
 class HTTPForwardRoutingRule(ChildRuleT): ForwardRoutingRule!(ChildRuleT)
 {	
@@ -47,7 +9,7 @@ public:
 	this(string thisRouteName) 
 	{	super(thisRouteName); }
 
-	override RoutingStatus doRouting(Object context)
+	override RoutingStatus doRouting(IConnectionContext context)
 	{	auto ctx = cast(HTTPContext) context;
 	
 		if( ctx is null )
@@ -74,7 +36,7 @@ public:
 	this(string thisRouteName) 
 	{	super(thisRouteName); }
 
-	override RoutingStatus doRouting(Object context)
+	override RoutingStatus doRouting(IConnectionContext context)
 	{	auto ctx = cast(HTTPContext) context;
 
 		if( ctx is null )
@@ -99,13 +61,16 @@ public:
 class HTTPRouterRule: HTTPForwardRoutingRule!(IRoutingRule)
 {	
 public:
-	this()
+	this(IAccessTicketManager ticketManager)
 	{	super(".HTTP");
+		_ticketManager = ticketManager;
 	}
 
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
 		{	writeln("Move along ", routeName, " rule");
+			
+			context._setAccessTicket( _ticketManager.getTicket(context) );
 			
 			foreach( childRule; _childRules)
 			{	auto status = childRule.doRouting(context);
@@ -136,8 +101,10 @@ public:
 
 	
 	} //override
+	
 protected:
 	IRoutingRule[] _childRules;
+	IAccessTicketManager _ticketManager;
 }
 	
 //Маршрутизатор URI - запросов к приложению
