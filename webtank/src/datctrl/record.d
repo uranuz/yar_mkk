@@ -4,7 +4,7 @@ import webtank._version;
 
 static if( isDatCtrlEnabled ) {
 
-import std.typetuple, std.typecons, std.conv;
+import std.typetuple, std.typecons, std.conv, std.json;
 
 import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field, webtank.common.serialization;
 
@@ -31,7 +31,7 @@ template Record(alias RecFormat)
 	public:
 		
 		JSONValue getStdJSON()
-		{	JSONValue jValue = _format.getStdJSON();
+		{	JSONValue jValue = _recordSet.format.getStdJSON();
 			
 			jValue.object["d"] = _recordSet.serializeDataAt(_recordKey);
 			jValue.object["t"] = JSONValue();

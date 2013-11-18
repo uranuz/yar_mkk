@@ -4,7 +4,7 @@ import webtank._version;
 
 static if( isDatCtrlEnabled ) {
 
-import std.typetuple, std.typecons, std.conv;
+import std.typetuple, std.typecons, std.conv, std.json;
 
 import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization;
 

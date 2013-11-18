@@ -40,10 +40,11 @@ template RecordSet(alias RecFormat)
 			recJSON.type = JSON_TYPE.ARRAY;
 			recJSON.array.length = RecFormat.fieldSpecs.length; 
 			foreach( j, spec; RecFormat.fieldSpecs )
-			{	if( rec.isNull(spec.name) )
+			{	if( this.isNull(spec.name, _getRecordKey(index) ) )
 					recJSON[j].type = JSON_TYPE.NULL;
 				else
-					recJSON[j] = getStdJSON( this.get!(spec.name)(index) );
+					recJSON[j] = 
+						webtank.common.serialization.getStdJSON( this.get!(spec.name)( _getRecordKey(index) ) );
 			}
 			return recJSON;
 		}
@@ -51,7 +52,7 @@ template RecordSet(alias RecFormat)
 		//Сериализация объекта в std.json
 		JSONValue getStdJSON()
 		{	
-			jValue = _format.getStdJSON();
+			auto jValue = _format.getStdJSON();
 			JSONValue recordsJSON;
 				recordsJSON.type = JSON_TYPE.ARRAY;
 			foreach( i; 0..this.length )
@@ -179,6 +180,9 @@ template RecordSet(alias RecFormat)
 			{	_fields[fieldIndex] = field;
 			}
 		}
+		
+		auto format() @property
+		{	return _format; }
 		
 	protected:
 		size_t _getRecordIndex(size_t key)

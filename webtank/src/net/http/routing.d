@@ -1,7 +1,9 @@
 module webtank.net.http.routing;
 
 import std.stdio;
-import webtank.net.routing, webtank.net.http.context, webtank.net.connection, webtank.net.access_control;
+public import webtank.net.routing; 
+
+import webtank.net.http.context, webtank.net.connection, webtank.net.access_control;
 
 class HTTPForwardRoutingRule(ChildRuleT): ForwardRoutingRule!(ChildRuleT)
 {	

@@ -2,54 +2,36 @@ module mkk_site.auth;
 
 import std.process, std.conv;
 
-import webtank.net.http.router, webtank.net.http.request, webtank.net.http.response;
+import webtank.net.http.routing, webtank.net.http.context/+, webtank.net.access_control+/;
 
 import mkk_site.site_data, mkk_site.authentication;
 
-static this()
-{	Router.setPathHandler(dynamicPath ~ "auth", &netMain);
+immutable thisPagePath = dynamicPath ~ "auth";
+
+shared static this()
+{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+void netMain(HTTPContext context)
 {	
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+	auto rq = context.request;
+	auto rp = context.response;
+
+	auto ticketManager = new MKK_SiteAccessTicketManager( authDBConnStr, eventLogFileName );
 	
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
 	{	import webtank.common.conv;
 		
-		auth.authenticate(rq.postVars["user_login"], rq.postVars["user_password"]);
+		auto newTicket = ticketManager.authenticate(rq.postVars["user_login"], rq.postVars["user_password"]);
 		string sidStr;
-		if( auth.isIdentified() )
-		{	sidStr = webtank.common.conv.toHexString( auth.sessionId ) ;
+		if( newTicket.isAuthenticated )
+		{	sidStr = webtank.common.conv.toHexString( newTicket.sessionId ) ;
 			//TODO: Подумать, что делать с этими багами
-			import std.file;
-			std.file.append( eventLogFileName, 
-				"--------------------\r\n"
-				"mkk_site.auth\r\n"
-				"auth.isIdentified(): sid: " ~ sidStr ~ ";"
-				~ "\r\n"
-			);
 			
-			rp.cookie["sid"] = sidStr;
+			rp.cookie[SIDCookieName] = sidStr;
 			rp.cookie["user_login"] = rq.postVars["user_login"];
-		}
-		
-		try { //Логирование запросов к БД для отладки
-			import std.file;
-			std.file.append( eventLogFileName, 
-				"--------------------\r\n"
-				"mkk_site.auth\r\n"
-				"redirectTo: " ~ rq.queryVars.get("redirectTo", "") 
-				~ " sid: " ~ sidStr ~ ";"
-				~ "\r\n"
-				~ rp.cookie.getString()
-				~ "\r\n"
-			);
-		} catch(Exception) {}
-		
-		if( auth.isIdentified() ) 
-		{	//rp.write("Вход выполнен успешно"); //Создан Ид сессии для пользователя
+
 			//Добавляем перенаправление на другую страницу
 			string redirectTo = rq.queryVars.get("redirectTo", "");
 			rp.redirect(redirectTo);
@@ -65,7 +47,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 //HTML
 `<html><body>
 <h2>Аутентификация</h2>`);
-		if( auth.isIdentified() )
+		if( context.accessTicket.isAuthenticated )
 			rp.write("Вход на сайт уже выполен");
 		rp.write(
 `<hr>

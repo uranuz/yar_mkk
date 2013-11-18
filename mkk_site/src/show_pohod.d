@@ -4,18 +4,21 @@ import std.stdio;
 import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
+import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
 
 import mkk_site.site_data, mkk_site.utils;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
-static this()
-{	Router.setPathHandler(thisPagePath, &netMain);
+shared static this()
+{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+void netMain(HTTPContext context)
 {	
+	auto rq = context.request;
+	auto rp = context.response;
+	
 	//---------------------------
 	string output; //"Выхлоп" программы 
 	scope(exit) rp.write(output);
@@ -49,16 +52,14 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		
 		
 		string[] month =["","январь","февраль","март","апрель","май","июнь",
-		       "июль","август","сентябрь","октябрь","ноябрь","декабрь"];     
-		import mkk_site.authentication;
-		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+		       "июль","август","сентябрь","октябрь","ноябрь","декабрь"];
 		
 		bool _vid;    // наличие фильтрации вид туризма
 		bool _ks;    //  наличие фильтрации категория сложности
 		bool _start_dat; // наличие начального диапазона поиска
 		bool _end_dat;   // наличие конечного  диапазона поиска
 		bool _filtr;    // котроль необходимости фильтрации
-		bool _sverka = auth.isIdentified() && ( auth.userInfo.group == "admin" || auth.userInfo.group == "moder" );    // наличие сверки
+		bool _sverka = context.accessTicket.isAuthenticated && ( context.accessTicket.user.isInGroup("admin") || context.accessTicket.user.isInGroup("moder") );    // наличие сверки
 		///////////////////////////////
 		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "" ) ;// вид туризма		
 		if (vid=="") _vid=false;
@@ -441,11 +442,11 @@ group by num
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 
-	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	if( context.accessTicket.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
 	}
 	else 
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 	}
 	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками

@@ -2,7 +2,7 @@ module mkk_site.authentication;
 
 import std.conv;
 
-import webtank.db.postgresql, webtank.net.utils, webtank.net.access_control, webtank.net.connection, webtank.net.http.context, webtank.common.conv;;
+import webtank.db.postgresql, webtank.net.utils, webtank.net.access_control, webtank.net.connection, webtank.net.http.context, webtank.common.conv;
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -70,16 +70,9 @@ class MKK_SiteAccessTicket: IAccessTicket
 	{	return ( ( _sessionId != SessionIdType.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
 	}
 	
-// 	//свойство "Ид сессии"
-// 	SessionIdType sessionId() @property
-// 	{	if( _updateSID )
-// 		{	_sessionId = verifySessionId( _SIDString, new DBPostgreSQL(_authDBConnStr) );
-// 			_userInfo = anonymousUI;
-// 			_updateUserInfo = true; //Раз получили Ид сессии на всякий случай ставим флаг
-// 			_updateSID = false;
-// 		}
-// 		return _sessionId;
-// 	}
+	//свойство "Ид сессии"
+	SessionIdType sessionId() @property
+	{	return _sessionId; }
 	
 protected:
 	SessionIdType _sessionId;  //Ид сессии
@@ -168,22 +161,27 @@ public:
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	IAccessTicket authenticate(string login, string password)
-	{	try { //Логирование запросов к БД для отладки
-			import std.file;
-			std.file.append( _errorLogFile, 
-				"--------------------\r\n"
-				"Authentication.authenticate: _authDBConnStr = \r\n"
-				~ _authDBConnStr ~ "\r\n"
-			);
-		} catch(Exception) {}
-	
+	MKK_SiteAccessTicket authenticate(string login, string password)
+	{	
 		auto dbase = new DBPostgreSQL(_authDBConnStr);
 		if( (dbase is null) || (!dbase.isConnected) )
 			return null;
 			
+		string group;
+		string name;
+		string email;
+		
+		auto makeInvalidTicket()
+		{	return
+				new MKK_SiteAccessTicket(  
+					new MKK_SiteUser( login, group, name, email ),
+					SessionIdType.init //Задаём некорректный идентификатор
+				);
+		}
+			
 		if( login.length < loginMinLength ) //Проверяем длину логина
-			return null;
+			return 
+				makeInvalidTicket();
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
@@ -194,23 +192,15 @@ public:
 		);
 		
 		if( ( query_res.recordCount != 1 ) || ( query_res.fieldCount != 5 ) )
-			return null;
+			return 
+				makeInvalidTicket();
 			
 		string user_id = query_res.get(0, 0, null);
 		string found_password = query_res.get(1, 0, null);
-		string group = query_res.get(2, 0, null);
-		string name = query_res.get(3, 0, null);
-		string email = query_res.get(4, 0, null);
 		
-		try { //Логирование запросов к БД для отладки
-			import std.file;
-			std.file.append( _errorLogFile, 
-				"--------------------\r\n"
-				"Authentication.enterUser()\r\n"
-				"user_id: " ~ user_id 
-				~ ";  name: " ~ name ~ "\r\n"
-			);
-		} catch(Exception) {}
+		group = query_res.get(2, 0, null);
+		name = query_res.get(3, 0, null);
+		email = query_res.get(4, 0, null);
 		
 		//Проверка пароля
 		if( (found_password.length >= passwordMinLength ) && 
@@ -219,12 +209,6 @@ public:
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
 			import std.digest.digest;
 			SessionIdType sid = generateSessionId(login);
-			try { //Логирование запросов к БД для отладки
-				import std.file;
-				std.file.append( _errorLogFile, 
-					"sid: " ~ toHexString(sid) ~ "\r\n"
-				);
-			} catch(Exception) {}
 			
 			string sidStr = std.digest.digest.toHexString(sid);
 			string query = 
@@ -234,19 +218,22 @@ public:
 				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
 				~ ` returning 'authenticated';`;
 			auto newSIDStatusRes = dbase.query(query);
+			
 			if( newSIDStatusRes.recordCount != 1 )
-				return null;
+				return 
+					makeInvalidTicket();
 			string statusStr = newSIDStatusRes.get(0, 0, "");
 			
 			if( statusStr == "authenticated" )
-			{	auto user = new MKK_SiteUser( login, group, name, email );
-				return 
-					new MKK_SiteAccessTicket( user, sid );
-				//Аутентификация завершена успешно
-			}
+				return //Аутентификация завершена успешно
+					new MKK_SiteAccessTicket(  
+						new MKK_SiteUser( login, group, name, email ),
+						sid
+					);
 		}
 		
-		return null;
+		return
+			makeInvalidTicket();
 	}
 
 	
