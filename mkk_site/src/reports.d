@@ -42,7 +42,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	<p><a href="/pub/reports/2012/Отчёт Лахость 2012.doc"           >Отчёт Лахость.     </a></p>
 	<p><a href="/pub/reports/2012/Отчета  Писта 2012.doc"           >Отчета  Писта.     </a></p>
 	<p><a href="/pub/reports/2012/Сводный 2012.xlsx"           >Сводный чемпионата походов <br> Ярославской области 2012 года.xlsx.     </a></p>
-	<p><a href="/pub/reports/2012//Marshrutka.doc"           >Маршрутная книжка.     </a></p>
+	<p><a href="/pub/reports/2012/Marshrutka.doc"           >Маршрутная книжка.     </a></p>
 	
 	
 	`;

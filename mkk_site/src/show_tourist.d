@@ -47,7 +47,16 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		output ~= "Ошибка соединения с БД";
 	
 	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
-	   
+	 
+	 string raz_sud_kat;
+	 
+	 string [int] raz=[0:"",3:"третий",2:"второй",1:"первый",
+	 30:"КМС",20:"МС",10:"ЗМС"];
+	 
+	 string [int] sud_kat=[0:"",2:"вторая",1:"первая",10:"всероссийская",
+	 20:"всесоюзная",30:"международная"];
+	 
+	 
 	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
 	
 	try { //Логирование запросов к БД для отладки
@@ -108,14 +117,17 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
 	ft.IntKey, "Ключ",   ft.Str, "Имя", ft.Str, "Дата рожд", 
-	ft.Str,  "Опыт",   ft.Str, "Контакты",  ft.Str, "Комментарий")();
+	ft.Str,  "Опыт",   ft.Str, "Контакты",
+	ft.Int,  "Разряд",   ft.Int, "Категория",
+	ft.Str, "Комментарий")();
 	
 	string queryStr;
 	
     
 		queryStr=`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
-		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date , exp, `
+		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date ,`
+		`exp, `
 		`( case `
 			` when( show_phone = true ) then phone||'<br> ' `
 			` else '' `
@@ -123,7 +135,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		` case `
 			` when( show_email = true ) then email `
 			` else '' `
-		   ` end ) as contact, `
+		   ` end ) as contact,razr,sud, `
 		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name ILIKE'` ~ fem ~"%'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
@@ -132,16 +144,21 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	table ~= `<tr>`;
 	if(_sverka) table ~= `<td> Ключ</td>`;
 	
-	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td><td> Комментарий</td>`;
+	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td>
+	<td> Спорт.разр.<br>Суд.кат.</td><td> Комментарий</td>`;
 
 	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
-	{	table ~= `<tr>`;
+	{	
+	raz_sud_kat= raz [rec.get!"Разряд"(0)] ~ `<br>` ~ sud_kat [rec.get!"Категория"(0)] ;
+	
+	table ~= `<tr>`;
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Опыт"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;		
+		table ~= `<td>` ~rec.get!"Опыт"("")  ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`;
+		table ~= `<td>` ~ raz_sud_kat ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
 		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`;
 		

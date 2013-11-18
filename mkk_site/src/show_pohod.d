@@ -1,7 +1,7 @@
 module mkk_site.show_pohod;
 
 import std.stdio;
-import std.conv, std.string;
+import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
@@ -27,12 +27,27 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 		
-		string [10] v=["", "пешеходный","лыжный","горный","водный","велосипедный","автомото","спелео","парусный","конный" ];
+		string vke;
+		
+		string ps;
+		
+	enum string [int] видТуризма=[0:"", 1:"пешеходный",2:"лыжный",3:"горный",
+		4:"водный",5:"велосипедный",6:"автомото",7:"спелео",8:"парусный",
+		9:"конный",10:"комбинированный" ];
 		// виды туризма
 				
-		string [9] k=["любая", "н.к.","первая","вторая","третья","четвёртая","пятая","шестая","путешествие" ];
+	enum	string [int] категорияСложности=[ 0:"н.к.",1:"первая",2:"вторая",3:"третья",4:"четвёртая",5:"пятая",6:"шестая",
+		7:"путешествие",8:"любая",9:"ПВД" ,10:"" ];
 		// категории сложности
-				     
+	enum	string [int] сЭлементами=[0:"",1:"с эл.1",2:"с эл.2",3:"с эл.3",4:"с эл.4",5:"с эл.5",6:"с эл.6"];
+		
+	enum	string [int] готовность=[0:"",1:"планируется",2:"набор группы",3:"набор завершён",4:"идёт подготовка",
+		5:"на маршруте",6:"пройден",7:"пройден частично",8:"не пройден"];
+		
+	enum	string [int] статус=[0:"",1:"не заявлен",2:"подана заявка",3:"отказ в заявке",4:"заявлен",
+		5:"засчитан",6:"засчитан частично",7:"не засчитан"];
+		
+		
 		string[] month =["","январь","февраль","март","апрель","май","июнь",
 		       "июль","август","сентябрь","октябрь","ноябрь","декабрь"];     
 		import mkk_site.authentication;
@@ -52,12 +67,13 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; // категория сложности похода		
 		//  strip()       Убирает начальные и конечные пробелы   
 		auto long_ks= ks.length;// выдаёт число элементов массива         
-		string all_ks;
+		//string all_ks;
 		foreach( kkkk; ks )// перебирает элементы массива
-		    { if (kkkk=="любая") {_ks=false;break; }
-		     all_ks ~= kkkk;}
-		if (all_ks=="") _ks=false;          
-		else _ks=true;	
+		    { 
+		    if (kkkk=="8"||kkkk=="10") {_ks=false;break; }
+		    else _ks=true;
+		     }
+		
 		//////////////////////////////////
 		
 		
@@ -119,19 +135,20 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 		
 		_filtr=_start_dat||_end_dat||_ks||_vid;//переменная отвечающшая за необходимость фильтрации (true есть фильтрация)
 		
-		//if((s_year ~ e_year ~  vid ~ all_ks)=="")_filtr=false;
+		
 		//-----------------------------            
 		immutable(string) LogFile = "/home/test_serv/sites/test/logs/mkk_site.log";            
 		   try { //Логирование запросов к БД для отладки
 	std.file.append( LogFile, 
 		"--------------------\r\n"
-		"год переменная " ~ vid~"год окно  "~  all_ks ~ "\r\n"
+		"вид туризма vid - " ~ vid
+		~ " ks категория - " ~ join(ks, "/")
+		
+		~ "\r\n"
 	);
 	} catch(Exception) {}         
 	 //----------------------------------------------------------	
-	// Запрос на число строк
-	//	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from pohod` ):
-	//cast(PostgreSQLQueryResult) dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
+	
 	
 	
 	
@@ -166,7 +183,7 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
   	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;  	
 	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  begin_date<= '` ~e_dat~`' `;
- 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~s_dat~`' and `~`begin_date <='`~e_dat~`') `;
+ 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~s_dat~`' and `~ e_dat~`') `;
  	select_str2~=`) `;
  	}
  	
@@ -208,9 +225,11 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
 	auto pohodRecFormat = RecordFormat!(
 	ft.IntKey, "Ключ",   ft.Str, "Номер книги", ft.Str, "Сроки", 
-	ft.Str, "Вид, кс",   ft.Str,"Район",  ft.Str,"Руководитель", 
+	ft.Int, "Вид", ft.Int, "кс", ft.Int, "элем",
+	ft.Str,"Район",  ft.Str,"Руководитель", 
 	ft.Str,"Участники",  ft.Str,"Уч",     ft.Str,"Город,<br>организация", 
-	ft.Str, "Нитка маршрута", ft.Str, "Статус<br> похода")();
+	ft.Str, "Нитка маршрута",
+	ft.Int, "Готовность",ft.Int, "Статус")();
 	//WHERE
 	
 	string queryStr = 
@@ -246,16 +265,16 @@ group by num
     date_part('month', finish_date)||'.'||
     date_part('YEAR', finish_date)
  ) as date , ` 
-     `( coalesce( vid::text, '' )||'<br>'|| coalesce( ks::text, '' )||'<br>'||coalesce( element::text, ' ' ) ) as vid,`
+     ` coalesce( vid, '0' ),coalesce( ks, '9' ),coalesce( elem, '0' ) ,`
 
      `region_pohod , `
-     `(tourist.family_name||' '||coalesce(tourist.given_name,'')||' '||coalesce(tourist.patronymic,'')||' '||coalesce(tourist.birth_year::text,'')), `
+     `(tourist.family_name||'<br> '||coalesce(tourist.given_name,'')||'<br> '||coalesce(tourist.patronymic,'')||'<br> '||coalesce(tourist.birth_year::text,'')), `
      `(coalesce(pohod.unit,'')),(coalesce(gr,'')), `
      
      `(coalesce(organization,'')||'<br>'||coalesce(region_group,'')), `
      `(coalesce(marchrut::text,'')||'<br>'||coalesce(chef_coment::text,'')), `
-     `(coalesce(prepare::text,'')||'<br>'||coalesce(status::text,''))  `
-             `from pohod  `
+     `coalesce(prepar,'0'),coalesce(stat,'0')  `
+             `from pohod `
                
         ` JOIN tourist   `
       `on pohod.chef_grupp = tourist.num `
@@ -281,10 +300,10 @@ group by num
 	     <td>
 	     <select name="vid" size="1">`;
 // 	     foreach( i; 0..10 )
-	     for( int i=0; i<10;i++)
-	     tablefiltr ~=`<option value="`~v[i] ~`"`~
-	     ( ( v[i]==vid ) ? " selected": "" )//если условие выполняется возвращается(вклеивается) selected
-	     ~`>`~v[i]~`</option>`;
+	     for( int i=0; i<11;i++)
+	     tablefiltr ~=`<option value=`~i.to!string ~` `~
+	     ( ( i==vid.to!int ) ? " selected": "" )//если условие выполняется возвращается(вклеивается) selected
+	     ~`>`~видТуризма[i]~`</option>`;
 	     
 	  tablefiltr ~= `</select> </td>`;
 	       
@@ -297,14 +316,14 @@ group by num
 	<td>
 	     <select name="ks" size="3" multiple>`;
 	     
-	      for( int i=0; i<9;i++)
+	      for( int i=0; i<11;i++)
 	      
-	      {tablefiltr ~=`<option value="`~k[i] ~`" `;
+	      {tablefiltr ~=`<option value=`~i.to!string  ~`  `;
 	     
-	                for( int j=0;j<long_ks;j++) {if(k[i]==ks[j]) tablefiltr ~=`selected` ; }//если условие выполняется возвращается(вклеивается) selected
+	                for( int j=0;j<long_ks;j++) {if(i==ks[j].to!int) tablefiltr ~=`selected` ; }//если условие выполняется возвращается(вклеивается) selected
 	                                     
 	    
-	    tablefiltr ~=`>`~k[i]~`</option>`; }
+	    tablefiltr ~=`>`~категорияСложности[i]~`</option>`; }
 	 
 	    
 	         
@@ -373,20 +392,27 @@ group by num
 	~"</td></tr></table>";
 	 
 	    // _sverka=true;    // наличие сверки     
-	            
+	    
+	    
+	    
 		string table = `<table class="tab">`;
 		
 		if(_sverka) table~= `<td>Ключ</td>`;
 		
-		table ~=`<td>&nbspНомер&nbsp</td><td>&nbsp&nbspСроки&nbsp похода&nbsp</td><td> Вид, кс</td><td >Район</td><td>Руководитель</td><td>Участники</td><td>Город,<br>организация</td><td>Статус<br> похода</td>`;
+		table ~=`<td>&nbspНомер&nbsp</td><td>&nbsp&nbspСроки<br>похода&nbsp</td><td> Вид<br>кс</td><td >Район</td><td>Руководитель</td><td>Участники</td><td>Город,<br>организация</td><td>Статус<br> похода</td>`;
 		if(_sverka) table ~=`<td>Изменить</td>`;
 	foreach(rec; rs)
-	{	table ~= `<tr>`;
+	  
+	{	
+	   vke = видТуризма [rec.get!"Вид"(0)] ~ `<br>` ~ категорияСложности [rec.get!"кс"(0)] ~ `<br>` ~ сЭлементами[rec.get!"элем"(0)] ;
+	   ps  = готовность [rec.get!"Готовность"(0)] ~ `<br>` ~ статус [rec.get!"Статус"(0)] ;
+	  
+	table ~= `<tr>`;
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
 		table ~= `<td >` ~rec.get!"Номер книги"("нет")  ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Вид, кс"("нет") ~ `</td>`;
+		table ~= `<td>` ~  vke ~ `</td>`;
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;
 		
@@ -395,7 +421,7 @@ group by num
 		
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`;
 
-		table ~= `<td>` ~ rec.get!"Статус<br> похода"("нет")  ~ `</td>`;
+		table ~= `<td>` ~ ps  ~ `</td>`;
 		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`;
 		table ~= `</tr>`;
 		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`;
