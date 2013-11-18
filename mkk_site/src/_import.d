@@ -4,7 +4,7 @@ import webtank.net.web_server, webtank.net.http.routing, webtank.net.http.json_r
 
 public import mkk_site.site_data;
 
-import mkk_site.show_tourist, mkk_site.show_pohod, mkk_site.authentication, mkk_site.auth/+, mkk_site.admin, mkk_site.edit_tourist, mkk_site.edit_pohod+/;
+import mkk_site.show_tourist, mkk_site.show_pohod, mkk_site.index, mkk_site.reports, mkk_site.stati, mkk_site.authentication, mkk_site.auth,mkk_site.show_moder;
 
 //Инициализация сайта МКК
 shared static this()

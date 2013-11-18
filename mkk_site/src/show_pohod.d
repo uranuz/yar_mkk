@@ -437,13 +437,16 @@ group by num
 	
 	string content = `<form id="main_form" method="post">`
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~table; //Тобавляем таблицу с данными к содержимому страницы
-		
+	
+	writeln(content);
+	
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 
 	if( context.accessTicket.isAuthenticated )
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.accessTicket.user.login );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

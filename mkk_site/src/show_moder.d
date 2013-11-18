@@ -3,7 +3,7 @@ module mkk_site.show_moder;
 import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.router, webtank.templating.plain_templater, webtank.net.http.request, webtank.net.http.response;
+import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
 
 import mkk_site.site_data, mkk_site.utils;
 
@@ -11,16 +11,15 @@ import mkk_site.site_data, mkk_site.utils;
 //----------------------
 immutable thisPagePath = dynamicPath ~ "show_moder";
 
-static this()
-{	Router.setPathHandler(thisPagePath, &netMain);
+shared static this()
+{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+void netMain(HTTPContext context)
 {	
-	import mkk_site.authentication;
-		auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
-	    
-	
+	auto rq = context.request;
+	auto rp = context.response;
+
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
@@ -108,14 +107,14 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 	
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	/*
-	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	
+	if( context.accessTicket.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.accessTicket.user.login );
 	}
 	else 
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 	}
-	*/
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

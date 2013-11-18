@@ -1,6 +1,6 @@
 module mkk_site.show_tourist;
 
-import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf/+, std.stdio+/;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
@@ -176,6 +176,7 @@ void netMain(HTTPContext context)
 	
 	if( context.accessTicket.isAuthenticated )
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.accessTicket.user.login );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

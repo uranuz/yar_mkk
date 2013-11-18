@@ -11,25 +11,30 @@ import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 immutable thisPagePath = dynamicPath ~ "reports";
 immutable authPagePath = dynamicPath ~ "auth";
 
-static this()
-{	Router.setPathHandler(thisPagePath, &netMain);
+shared static this()
+{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
-
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+void netMain(HTTPContext context)
 {	
+	auto rq = context.request;
+	auto rp = context.response;
+	
 	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
 	
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
-
 	string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
 	
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);
-
-	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
-	tpl.set("user login", auth.userInfo.login );
+	
+	if( context.accessTicket.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.accessTicket.user.login );
+	}
+	else 
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	}
 
 	string содержимоеГлавнойСтраницы = `
 	<h2>Отчёты о походах</h2>
