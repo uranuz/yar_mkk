@@ -110,10 +110,10 @@ void netMain(HTTPContext context)
 		//----------------------формирование конца диапозона дат
 		string e_dat; // конечная дата диапозона поиска
 		
-		if(e_year)
+		if(_end_dat)
 		{
 		
-		      if((e_month=="декабрь")&&(e_month=="")) // если месяц  декабрь или  пустой ставим дату с начала следующего года
+		      if((e_month=="декабрь")||(e_month=="")) // если месяц  декабрь или  пустой ставим дату с начала следующего года
 		        {e_dat =(e_year.to!int+1).to!string ~`-01-01`;}
 		
 		      else		 
@@ -182,9 +182,9 @@ void netMain(HTTPContext context)
 	// фильтрация по дате
 	
 	
-  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~s_dat~`' `;  	
+  	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~ s_dat~`' `;  	
 	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  begin_date<= '` ~e_dat~`' `;
- 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~s_dat~`' and `~ e_dat~`') `;
+ 	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~ s_dat~`' and `~ `begin_date <='`~e_dat~`') `;
  	select_str2~=`) `;
  	}
  	
