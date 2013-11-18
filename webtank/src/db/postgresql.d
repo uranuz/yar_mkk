@@ -2,7 +2,7 @@ module webtank.db.postgresql;
 
 pragma(lib, "pq");
 
-import std.string, std.exception, std.conv, std.stdio;
+import std.string, std.exception, std.conv;
 
 import webtank.db.database;
 

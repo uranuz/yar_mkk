@@ -1,6 +1,5 @@
 module webtank.net.routing;
 
-import std.stdio;
 import webtank.common.utils, webtank.net.connection;
 
 ///Модуль содержит основные интерфейсы для маршрутизации
@@ -143,13 +142,9 @@ public:
 			import webtank.common.utils;
 			auto thisRouteNameParts = splitArray(_routeName, routeNamePartsDelim);
 			auto newRouteNameParts = splitArray(newRule.routeName, routeNamePartsDelim);
-			writeln("newRule.routeName: ",newRule.routeName);
-			writeln("thisRouteNameParts: ", thisRouteNameParts);
-			writeln("newRouteNameParts: ", newRouteNameParts);
 			
 			if( newRouteNameParts.startsWith(thisRouteNameParts) )
 			{	auto newRelRouteNameParts = newRouteNameParts[thisRouteNameParts.length .. $];
-				writeln("newRelRouteNameParts: ", newRelRouteNameParts, "\r\n");
 				if( newRelRouteNameParts.length == 1 )
 				{	auto newChildRule = cast( ChildRuleT ) newRule;
 					if( newChildRule )
@@ -160,7 +155,6 @@ public:
 				else if( newRelRouteNameParts.length > 1 )
 				{	foreach( childRule; this )
 					{	auto childRouteNameParts = splitArray(childRule.routeName, routeNamePartsDelim);
-						writeln("childRouteNameParts: ", childRouteNameParts, "\r\n");
 						if( newRouteNameParts.startsWith(childRouteNameParts) )
 						{	childRule.joinRule(newRule);
 							return;

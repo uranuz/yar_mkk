@@ -158,8 +158,6 @@ public:
 
 protected:
 }
-import std.stdio;
-
 
 class ThreadedLogger: Logger
 {	import std.concurrency;

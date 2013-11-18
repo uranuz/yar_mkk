@@ -4,7 +4,7 @@ import webtank._version;
 
 static if( isDatCtrlEnabled ) {
 
-import std.typetuple, std.typecons, std.stdio, std.conv, std.json;
+import std.typetuple, std.typecons, std.conv, std.json;
 
 //import std.stdio;
 
@@ -17,9 +17,6 @@ import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.recor
 
 template RecordSet(alias RecFormat)
 {
-// 	alias Tuple!( getTupleTypeOf!(IField, RecFormat.fieldSpecs) ) IFieldTupleType;
-	
-	
 	class RecordSet: /+IBaseRecordSet,+/ IStdJSONSerializeable
 	{	
 	public:

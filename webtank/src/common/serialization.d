@@ -90,8 +90,7 @@ T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 	}
 	else static if( isIntegral!T )
 	{	static if( isUnsigned!T )
-		{	write("Unsigned integer - "); writeln(jValue.type);
-			if( jValue.type == JSON_TYPE.UINTEGER )
+		{	if( jValue.type == JSON_TYPE.UINTEGER )
 				return jValue.uinteger.to!T;
 			else
 				throw new SerializationException("JSON value doesn't match unsigned integer type!!!");

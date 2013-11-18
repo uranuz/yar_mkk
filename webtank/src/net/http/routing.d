@@ -1,6 +1,5 @@
 module webtank.net.http.routing;
 
-import std.stdio;
 public import webtank.net.routing; 
 
 import webtank.net.http.context, webtank.net.connection, webtank.net.access_control;
@@ -23,8 +22,6 @@ public:
 			return RoutingStatus.continued;
 		
 		auto status = doHTTPRouting(ctx); //Заменяем вызов общей функции на частную
-		
-		writeln( "HTTPForwardRoutingRule.doRouting: response.getString(): ", ctx.response.getString() );
 		
 		return status;
 	}
@@ -50,9 +47,7 @@ public:
 			return RoutingStatus.continued;
 		
 		auto status = doHTTPRouting(ctx); //Заменяем вызов общей функции на частную
-		
-		writeln( "HTTPEndPointRoutingRule.doRouting: response.getString(): ", ctx.response.getString() );
-		
+
 		return status;
 	}
 	
@@ -70,16 +65,13 @@ public:
 
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	writeln("Move along ", routeName, " rule");
-			
+		{	
 			context._setAccessTicket( _ticketManager.getTicket(context) );
 			
 			foreach( childRule; _childRules)
 			{	auto status = childRule.doRouting(context);
 				if( status != RoutingStatus.continued )
-				{	
-// 					writeln( "HTTPRouterRule.doRouting: response.getString(): ", context.response.getString() );
-					return status;
+				{	return status;
 				}
 			}
 			
@@ -117,8 +109,7 @@ class URIRouterRule: HTTPForwardRoutingRule!(URIHandlingRule)
 		
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	writeln("Move along ", routeName, " rule");
-			
+		{	
 			auto URIHandler = _childRules
 				.get( _normalizePagePath(context.request.path), null );
 			
@@ -161,10 +152,7 @@ class URIHandlingRule: HTTPEndPointRoutingRule
 	
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	writeln("Move along ", routeName, " rule");
-				
-			_handler(context); //Вызов пользовательского обработчика
-			writeln("Handler for URI: \"" ~ URI ~ "\" executed!!!");
+		{	_handler(context); //Вызов пользовательского обработчика
 			return RoutingStatus.succeed;
 		}
 	} //override

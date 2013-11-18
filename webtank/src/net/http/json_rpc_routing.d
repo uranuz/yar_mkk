@@ -1,6 +1,6 @@
 module webtank.net.http.json_rpc_routing;
 
-import std.stdio, std.json, std.traits;
+import std.json, std.traits, std.string;
 
 import webtank.net.routing, webtank.net.http.routing, webtank.net.http.context, webtank.net.http.request, webtank.net.http.response, webtank.net.json_rpc;
 
@@ -13,17 +13,12 @@ public:
 
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	writeln("Move along ", routeName, " rule");
-
-			import std.string;
-			string HTTPMethod = toLower( context.request.headers.get("method", null) );
+		{	string HTTPMethod = toLower( context.request.headers.get("method", null) );
 			
 			if( HTTPMethod != "post" )
 				return RoutingStatus.continued;
 			
 			auto jMessageBody = context.request.JSON_Body;
-			
-			writeln( "Received JSON_Body: ", toJSON( &jMessageBody ), " of type ", jMessageBody.type );
 			
 			if( jMessageBody.type == JSON_TYPE.OBJECT )
 			{	string jsonrpc;
@@ -60,9 +55,7 @@ public:
 					
 				auto hdlRule = _childRules.get(methodName, null);
 				if( hdlRule )
-				{
-					return hdlRule.doRouting(context);
-					writeln( "JSON_RPC_RouterRule.doRouting: response.getString(): ", context.response.getString() );
+				{	return hdlRule.doRouting(context);
 				}
 				else
 					return RoutingStatus.continued;
@@ -108,8 +101,7 @@ class JSON_RPC_HandlingRule(alias JSON_RPC_Method): JSON_RPC_HandlingRuleBase
 public:
 
 	override RoutingStatus doHTTPRouting(HTTPContext context)
-	{	writeln("Move along ", routeName, " rule");
-		
+	{	
 		auto jMessageBody = context.request.JSON_Body;
 		string reqMethodName = jMessageBody.object["method"].str;
 		
@@ -117,14 +109,8 @@ public:
 			return RoutingStatus.continued;
 		
 		auto jParams = jMessageBody.object["params"];
-		
-// 		writeln("Received jParams: ", toJSON(&jParams));
-		
 		auto jResult = callJSON_RPC_Method!(JSON_RPC_Method)(jParams, context);
-// 		writeln("JSON-RPC method calling finished!!!");
-// 		writeln("Returned jResult: ", toJSON(&jResult));
 		context.response ~= toJSON(&jResult).idup;
-//  		writeln("response.getString() returned: ", context.response.getString());
 		
 		return RoutingStatus.succeed;
 	}

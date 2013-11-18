@@ -4,7 +4,7 @@ module webtank.net.json_rpc;
 
 import webtank.common.serialization, webtank.net.connection;
 
-import std.stdio, std.string, std.conv, std.traits, std.typecons, std.json;
+import std.string, std.conv, std.traits, std.typecons, std.json;
 
 //Класс исключения для удалённого вызова процедур
 class JSON_RPC_Exception : Exception {
@@ -49,9 +49,7 @@ template callJSON_RPC_Method(alias Method)
 		else
 		{	
 			if( jValue.type == JSON_TYPE.OBJECT )
-			{	
-				writeln("jValue.object.length: ", jValue.object.length);
-				size_t jParamsCount = 0;
+			{	size_t jParamsCount = 0;
 				
 				//Считаем количество параметров, которые должны были быть переданы
 				foreach( type; ParamTypes )
