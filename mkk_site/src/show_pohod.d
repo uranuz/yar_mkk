@@ -438,8 +438,6 @@ group by num
 	string content = `<form id="main_form" method="post">`
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	writeln(content);
-	
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне

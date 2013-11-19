@@ -83,7 +83,7 @@ protected:
 class MKK_SiteAccessTicketManager: IAccessTicketManager
 {	
 protected:
-	immutable(size_t) _sessionLifetime = 15; //Время жизни сессии в минутах
+	immutable(size_t) _sessionLifetime = 60; //Время жизни сессии в минутах
 	string _authDBConnStr;
 	string _errorLogFile;
 
