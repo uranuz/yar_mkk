@@ -51,11 +51,11 @@ void netMain(HTTPContext context)
 	 
 	 string raz_sud_kat;
 	 
-	 string [int] raz=[0:"",3:"третий",2:"второй",1:"первый",
-	 30:"КМС",20:"МС",10:"ЗМС"];
+	// string [int] спортивныйРазряд=[0:"",3:"третий",2:"второй",1:"первый",
+	// 30:"КМС",20:"МС",10:"ЗМС",5:"МСМК"];
 	 
-	 string [int] sud_kat=[0:"",2:"вторая",1:"первая",10:"всероссийская",
-	 20:"всесоюзная",30:"международная"];
+	 //string [int] судейскаяКатегория=[0:"",2:"вторая",1:"первая",10:"всероссийская",
+	// 20:"всесоюзная",30:"международная"];
 	 
 	 
 	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
@@ -151,7 +151,7 @@ void netMain(HTTPContext context)
 	if(_sverka) table ~=`<td>"Править"</td>`; 
 	foreach(rec; rs)
 	{	
-	raz_sud_kat= raz [rec.get!"Разряд"(0)] ~ `<br>` ~ sud_kat [rec.get!"Категория"(0)] ;
+	raz_sud_kat= спортивныйРазряд [rec.get!"Разряд"(1000)] ~ `<br>` ~ судейскаяКатегория [rec.get!"Категория"(1000)] ;
 	
 	table ~= `<tr>`;
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
