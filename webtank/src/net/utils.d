@@ -1,6 +1,6 @@
  module webtank.net.utils;
  
- import std.utf;
+ import std.utf, std.conv;
 
 //Функция возвращает переданную строку с заменой экранированными кавычками для БД postgresql
 string PGEscapeStr(string srcStr, string quoteSubst = "''" )
@@ -19,7 +19,9 @@ string PGEscapeStr(string srcStr, string quoteSubst = "''" )
 	return toUTF8(result);
 }
 
-string HTMLEscapeStr(string srcStr)
+
+///Функция "очистки" текста от HTML-тэгов
+string HTMLEscapeText(string srcStr)
 {	dstring result;
 	auto str = toUTF32(srcStr);
 	size_t i = 0;
@@ -32,6 +34,16 @@ string HTMLEscapeStr(string srcStr)
 	}
 	result ~= str[ (lastBracketPos + 1) .. $ ];
 	return toUTF8(result);
+}
+
+string printHTMLAttr(V)(string attr, V value)
+{	//TODO: Сделать защиту от HTML-инъекций для имени аттрибута
+	string strValue = value.to!string;
+	return ( 
+		( attr.length > 0 && strValue.length > 0 ) 
+		? ( ` ` ~ attr ~ `="` ~ HTMLEscapeValue( strValue )  ~ `"` ) 
+		: ``
+	);
 }
 
 //Функция замены определённых строк на другие строки
@@ -66,6 +78,7 @@ string replace(string src, in string[string] mapping)
 	return toUTF8( replace( toUTF32(src), UTF32Mapping ) );
 }
 
+///Функция "очистки" значений HTML-аттрибутов
 string HTMLEscapeValue(string src)
 {	return replace( src, [ "<": "&lt;", ">": "&gt;", "\"": "&#34;", "\'": "&#39;", "&": "&amp;" ] );
 }

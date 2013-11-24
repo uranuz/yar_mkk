@@ -15,6 +15,7 @@ import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.recor
 // 	
 // }
 
+///Класс реализует работу с набором записей
 template RecordSet(alias RecFormat)
 {
 	class RecordSet: /+IBaseRecordSet,+/ IStdJSONSerializeable
@@ -31,7 +32,7 @@ template RecordSet(alias RecFormat)
 		size_t _currRecIndex;
 	public:
 
-		//Сериализация данных записи с индексом index в std.json
+		///Сериализация данных записи с индексом index в std.json
 		JSONValue serializeDataAt(size_t index)
 		{	JSONValue recJSON;
 			recJSON.type = JSON_TYPE.ARRAY;
@@ -46,7 +47,7 @@ template RecordSet(alias RecFormat)
 			return recJSON;
 		}
 		
-		//Сериализация объекта в std.json
+		///Сериализация объекта в std.json
 		JSONValue getStdJSON()
 		{	
 			auto jValue = _format.getStdJSON();
@@ -70,33 +71,42 @@ template RecordSet(alias RecFormat)
 		}
 	
 		//Оператор получения записи по индексу
-		Rec opIndex(size_t index) 
-		{	return new Rec(this, _getRecordKey(index));
-		}
+		Rec opIndex(size_t recordIndex) 
+		{	return getRecordAt(recordIndex); }
 		
-		//Получить запись на позиции с номером index
-		Rec getRecordAt(size_t index)
-		{	return new Rec(this, _getRecordKey(index));
-		}
+		///Метод получения записи по её индексу в наборе
+		Rec getRecordAt(size_t recordIndex)
+		{	return getRecord( _getRecordKey(recordIndex) ); }
 		
-		//Получить запись с заданным ключом key
-		Rec getRecord(size_t key)
-		{	return new Rec(this, key);
-		}
-	
+		///Метод получения записи по её значению первичного ключа
+		Rec getRecord(size_t recordKey)
+		{	return new Rec(this, recordKey); }
+		
+		///Методы получения значения ячейки данных по имени поля и значению первичного ключа записи
 		template get(string fieldName)
+		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			
+			ValueType get(size_t recordKey)
+			{	return getAt!(fieldName)( _getRecordIndex(recordKey) ); }
+
+			ValueType get(size_t recordKey, ValueType defaultValue)
+			{	return getAt!(fieldName)( _getRecordIndex(recordKey), defaultValue ); }
+		}
+		
+		///Методы получения значения ячейки данных по имени поля и индексу записи в наборе
+		template getAt(string fieldName)
 		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
 			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
 			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
 			
-			ValueType get(size_t recordKey)
+			ValueType getAt(size_t recordIndex)
 			{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
-				return currField.get( _getRecordIndex(recordKey) );
+				return currField.get( recordIndex );
 			}
 
-			ValueType get(size_t recordKey, ValueType defaultValue)
+			ValueType getAt(size_t recordIndex, ValueType defaultValue)
 			{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
-				return currField.get( _getRecordIndex(recordKey), defaultValue );
+				return currField.get( recordIndex, defaultValue );
 			}
 		}
 		
@@ -116,9 +126,16 @@ template RecordSet(alias RecFormat)
 				static assert( 0, "Getting enum data is only available for enum field types!!!" );
 		}
 
+		///Метод получения "сырого" строкового представления значения ячейки данных
+		///по имени поля и значению первичного ключа записи
 		string getStr(string fieldName, size_t recordKey, string defaultValue = null)
+		{	return this.getStrAt( fieldName, _getRecordIndex(recordKey), defaultValue ); }
+		
+		///Метод получения "сырого" строкового представления значения ячейки данных
+		///по имени поля и индексу записи в наборе
+		string getStrAt(string fieldName, size_t recordIndex, string defaultValue = null)
 		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
-			return currField.getStr( _getRecordIndex(recordKey), defaultValue );
+			return currField.getStr( recordIndex, defaultValue );
 		}
 		
 		Rec front() @property
@@ -137,10 +154,13 @@ template RecordSet(alias RecFormat)
 			}
 		}
 		
+		///Метод возвращает порядковый номер первичного ключа в наборе записей
 		size_t keyFieldIndex() @property
 		{	return _format.keyFieldIndex;
 		}
 		
+		///Метод задаёт какое поле является первичным ключом набора записей
+		///через задание порядкового номера поля
 		void setKeyField(size_t index)
 		{	auto keyFieldIndexes = getKeyFieldIndexes!(RecFormat.fieldSpecs)();
 			foreach( i; keyFieldIndexes )
@@ -152,16 +172,26 @@ template RecordSet(alias RecFormat)
 			assert( 0, "Field with index \"" ~ index.to!string ~ "\" isn't found or can't be used as primary key!" );
 		}
 		
+		///Метод возвращает true, если значение ячейки поля с именем fieldName
+		///и значением первичного ключа recordKey записи является пустым (null). Иначе false.
 		bool isNull(string fieldName, size_t recordKey)
+		{	return this.isNullAt( fieldName, _getRecordIndex(recordKey) ); }
+		
+		///Метод возвращает true, если значение ячейки поля с именем fieldName
+		///и индексом записи в наборе recordIndex является пустым (null). Иначе false.
+		bool isNullAt(string fieldName, size_t recordIndex)
 		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
-			return currField.isNull( _getRecordIndex(recordKey) );
+			return currField.isNull( recordIndex );
 		}
 		
+		///Возвращает true, если поле с именем fieldName может иметь пустое значение (null)
+		///В противном случае возвращается false
 		bool isNullable(string fieldName)
 		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
 			return currField.isNullable();
 		}
 		
+		///Возвращает количество записей в наборе
 		size_t length() @property
 		{	assert( _fields[_format.keyFieldIndex].type == FieldType.IntKey, "Field with index " 
 				~ _format.keyFieldIndex.to!string ~ " is not a key field!!!" ); 

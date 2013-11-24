@@ -12,8 +12,9 @@ immutable thisPagePath = dynamicPath ~ "edit_pohod";
 immutable authPagePath = dynamicPath ~ "auth";
 
 static this()
-{	Router.setPathHandler(thisPagePath, &netMain);
-	Router.setRPCMethod("турист.список_по_фильтру", &getTouristList);
+{	
+	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
+	Router.join( new JSON_RPC_HandlingRule() );
 // 	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
 // 	Router.setRPCMethod("поход.создать_поход", &createPohod);
 // 	Router.setRPCMethod("поход.обновить_поход", &updatePohod);
@@ -96,161 +97,178 @@ enum string[] months = [ "январь", "февраль", "март", "апре
 enum strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
 
 
-string 
-
-
-
 //Функция формирует форму редактирования похода
-void createPohodEditForm()
-{	if( action == ActionType.showUpdateForm )
-	{	
-		
-		//Выводим в браузер значения строковых полей (<input type="text">)
+void создатьФормуИзмененияПохода(
+	//Шаблон формы редактирования/ добавления похода
+	PlainTemplater pohodForm, 
+	
+	//Запись с данными о существующем походе (если null - вставка нового похода)
+	Record!( typeof(pohodRecFormat) ) pohodRec = null,
+	
+	//Набор записей о туристах, участвующих в походе
+	RecordSet!( typeof(shortTouristRecFormat) ) touristRS = null
+)
+{	
+
+	if( pohodRec )
+	{	//Выводим в браузер значения строковых полей (<input type="text">)
 		foreach( fieldName; strFieldNames )
-			pohodForm.set( fieldName, ` value="` ~ HTMLEscapeValue( pohodRec.getStr(fieldName, "") ) ~ `"` );
+			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr(fieldName, "") ) );
+	}
 
+	//Создаём компонент выбора даты начала похода
+	auto beginDatePicker = new PlainDatePicker;
+	beginDatePicker.name = "begin"; //Задаём часть имени (компонент допишет _day, _year или _month)
+	beginDatePicker.id = "begin"; //аналогично для id
+	
+	//Создаём компонент выбора даты завершения похода
+	auto finishDatePicker = new PlainDatePicker;
+	finishDatePicker.name = "finish";
+	finishDatePicker.id = "finish";
+	
+	//Получаем данные о датах (если режим редактирования)
+	if( pohodRec )
+	{	//Извлекаем данные из БД
+		if( !pohodRec.isNull("begin_date") )
+			beginDatePicker.date = pohodRec.get!("begin_date");
+		//Если данные не получены, то компонент выбора даты будет пустым
 		
-		/+pohodForm.set( "num.value", pohodRec.get!"ключ"(0).to!string );+/
-		//Выводим дату начала похода
-		pohodForm.set( "begin_day", ` value="` ~ pohodRec.get!("begin_date").day.to!string ~ `"` );
-		///!!! Месяц выводится далее
-		pohodForm.set( "begin_year", ` value="` ~ pohodRec.get!("begin_date").year.to!string ~ `"` );
-		
-		//Выводим дату конца похода
-		pohodForm.set( "finish_day", ` value="` ~ pohodRec.get!("finish_date").day.to!string ~ `"` );
-		///!!! Месяц выводится далее
-		pohodForm.set( "finish_year", ` value="` ~ pohodRec.get!("finish_date").year.to!string ~ `"` );
-
-		string touristListStr;
+		if( !pohodRec.isNull("finish_date") )
+			beginDatePicker.date = pohodRec.get!("finish_date");
+	}
+	
+	pohodForm.set( "begin_date", beginDatePicker.print() );
+	pohodForm.set( "finish_date", finishDatePicker.print() );
+	
+	/+pohodForm.set( "num.value", pohodRec.get!"ключ"(0).to!string );+/
+	
+	if( touristRS )
+	{	string touristListStr;
 		foreach( rec; touristRS )
 		{	touristListStr ~= HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
 				~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " " ~ HTMLEscapeValue( rec.get!"patronymic"("") )
 				~ ( rec.isNull("birth_year") ? "" : (", " ~ rec.get!"birth_year"(0).to!string ~ " г.р") ) ~ "<br>\r\n";
 		}
-		
-		
 		pohodForm.set( "unit", touristListStr );
-		pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
+	}
+	
+	if( pohodRec )
+	{	pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 	
-	if( action == ActionType.showUpdateForm || action == ActionType.showInsertForm )
-	{	import std.string;
-		if( action == ActionType.showInsertForm )
-		{	//TODO: Проверка наличия похода в базе
-		}
+	//Вывод перечислимых полей
+	foreach( fieldName, values; enumValueBlocks )
+	{	//Создаём экземпляр генератора выпадающего списка
+		auto dropdown =  new PlainDropDownList;
 		
-		//Выводим месяц начала похода в форму
-		ubyte beginMonth;
-		if( action == ActionType.showUpdateForm )
-			beginMonth = ( pohodRec.isNull("begin_date") ? 0 : pohodRec.get!("begin_date").month );
-		auto beginMonthInp = `<option value=""` ~ ( ( beginMonth == 0 || beginMonth > 31 ) ? ` selected` : `` ) ~ `></option>`;
-		foreach( i; 1..12 )
-		{	beginMonthInp ~= `<option value="` ~ i.to!string ~ `"`
-			~ ( beginMonth == i ? ` selected` : ``) 
-			~ `>` ~ i.to!string ~ `</option>`;
-		}
-		pohodForm.set( "begin_month", beginMonthInp );
+		dropdown.values = values;
+		dropdown.name = fieldName;
+		dropdown.id = fieldName;
 		
-		//Выводим месяц окончания похода
-		ubyte finishMonth;
-		if( action == ActionType.showUpdateForm )
-			finishMonth = ( pohodRec.isNull("finish_date") ? 0 : pohodRec.get!("finish_date").month );
-		auto finishMonthInp = `<option value=""` ~ ( ( finishMonth == 0 || finishMonth > 31 ) ? ` selected` : `` ) ~ `></option>`;
-		foreach( i; 1..12 )
-		{	finishMonthInp ~= `<option value="` ~ i.to!string ~ `"`
-			~ ( finishMonth == i ? ` selected` : ``) 
-			~ `>` ~ i.to!string ~ `</option>`;
-		}
-		pohodForm.set( "finish_month", finishMonthInp );
-	
-		foreach( fieldName, valueBlock; enumValueBlocks )
-		{	string inputField;
-			foreach( value; valueBlock )
-			{	inputField ~= `<option value="` ~ value ~ `"`;
-				if( action == ActionType.showUpdateForm )
-					inputField ~= ( (pohodRec.getStr(fieldName, "") == value) ? " selected" : "" );
-				inputField ~= `>` ~ value ~ `</option>`;
-			}
-			pohodForm.set( fieldName, inputField );
-		}
-		
-		pohodForm.set( "action", ` value="write"` );
-		
-		content = pohodForm.getString();
-	}
-	
-	
-}
-
-
-void showPohod()
-{	string fieldNamesStr;
-	string fieldValuesStr;
-	
-	//Формируем набор строковых полей и значений
-	foreach( i, fieldName; strFieldNames )
-	{	string value = pVars.get(fieldName, null);
-		if( value.length > 0  )
-		{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
-			fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
-		}
-	}
-	
-	//Формируем часть запроса для вывода перечислимых полей
-	foreach( fieldName, valueBlock;  pohodEnumValues )
-	{	int enumKey = 0;
-		try {
-			enumKey = pVars.get(fieldName, "").to!int;
-		} catch (std.conv.ConvException e) {
+		//Задаём текущее значение
+		if( pohodRec.isNull(fieldName) )
+			dropdown.currValue = pohodRec.get!(fieldName)();
 			
-		}
-		
-		if( enumKey in valueBlock )
-		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
-		}
-		else
-			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("vid", "") ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+		pohodForm.set( fieldName, dropdown.print() );
 	}
 	
-	//Формируем часть запроса для вбивания начальной и конечной даты
-	foreach( i; 0..1 )
-	{	auto pre = ( i == 0 ? "begin_" : "end_" );
-		if( pVars.get( pre ~ "year", "" ).length > 0  &&
-			pVars.get( pre ~ "month", "").length > 0  &&
-			pVars.get( pre ~ "day", "").length > 0
-		)
-		{	import std.datetime;
-			auto date = Date( 
-				pVars.get( pre ~ "year", "").to!int,
-				pVars.get( pre ~ "month", "").to!int,
-				pVars.get( pre ~ "day", "").to!int
-			);
-			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ date.toISOExtString() ~ `'`;
-		}
-	}
+	//Задаём действие, чтобы при след. обращении к обработчику
+	//перейти на этап записи в БД
+	pohodForm.set( "action", ` value="write"` );
 	
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+
+// void изменитьДанныеПохода(HTTPContext context)
+// {	
+// 	auto rq = context.request;
+// 	auto rp = context.response;
+// 	
+// 	auto pVars = rq.postVars;
+// 	auto qVars = rq.queryVars;
+// 	
+// 	string fieldNamesStr;
+// 	string fieldValuesStr;
+// 	
+// 	//Формируем набор строковых полей и значений
+// 	foreach( i, fieldName; strFieldNames )
+// 	{	string value = pVars.get(fieldName, null);
+// 		if( value.length > 0  )
+// 		{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
+// 			fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
+// 		}
+// 	}
+// 	
+// 	//Формируем часть запроса для вывода перечислимых полей
+// 	foreach( fieldName, valueBlock;  pohodEnumValues )
+// 	{	int enumKey = 0;
+// 		try {
+// 			enumKey = pVars.get(fieldName, "").to!int;
+// 		} catch (std.conv.ConvException e) {
+// 			
+// 		}
+// 		
+// 		if( enumKey in valueBlock )
+// 		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
+// 			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
+// 		}
+// 		else
+// 			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("vid", "") ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+// 	}
+// 	
+// 	//Формируем часть запроса для вбивания начальной и конечной даты
+// 	foreach( i; 0..1 )
+// 	{	auto pre = ( i == 0 ? "begin_" : "end_" );
+// 		import std.datetime;
+// 		Date date;
+// 		try {
+// 			date = Date( 
+// 				pVars.get( pre ~ "year", "").to!int,
+// 				pVars.get( pre ~ "month", "").to!int,
+// 				pVars.get( pre ~ "day", "").to!int
+// 			);
+// 		} 
+// 		catch (std.conv.ConvException exc) 
+// 		{	throw exc;
+// 			//TODO: Добавить обработку исключения
+// 		} 
+// 		catch (std.datetime.DateTimeException exc) 
+// 		{	throw exc;
+// 			//TODO: Добавить обработку исключения
+// 		}
+// 		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
+// 		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ date.toISOExtString() ~ `'`;
+// 	}
+// 	
+// }
+
+
+void netMain(HTTPContext context)
 {	
+	auto rq = context.request;
+	auto rp = context.response;
+	
 	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
-	
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
-	
-	bool isAuthorized = auth.isIdentified() && ( (auth.userInfo.group == "moder") || (auth.userInfo.group == "admin") );
+		
+	bool isAuthorized = 
+		context.accessTicket.isAuthenticated && 
+		( context.accessTicket.isInGroup("moder") || context.accessTicket.isInGroup("admin") );
 	
 	if( isAuthorized )
-	{	//Пользователь авторизован делать бесчинства	
+	{	//Пользователь авторизован делать бесчинства
 				
 		//Создаем шаблон по файлу
 		auto tpl = getGeneralTemplate(thisPagePath);
 
-		tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ auth.userInfo.name ~ "</b>!!!</i>");
-		tpl.set("user login", auth.userInfo.login );
+		if( context.accessTicket.isAuthenticated )
+		{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
+			tpl.set("user login", context.accessTicket.user.login );
+		}
+		else 
+		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+		}
 	
 		auto dbase = getCommmonDB;
 		if ( !dbase.isConnected )
@@ -295,28 +313,20 @@ void netMain(ServerRequest rq, ServerResponse rp)  //Определение гл
 			else
 				isPohodKeyAccepted = false;
 		}
-
-		//Перечислимый тип, который определяет выполняемое действие
-		enum ActionType { showInsertForm, showUpdateForm, insertData, updateData };
-		
-		ActionType action;
-		//Определяем выполняемое страницей действие
-		if( pVars.get("action", "") == "write" )
-			action = ( isPohodKeyAccepted ? ActionType.updateData : ActionType.insertData );
-		else
-			action = ( isPohodKeyAccepted ? ActionType.showUpdateForm : ActionType.showInsertForm );
 		
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
+		
+		
+		//Определяем выполняемое страницей действие
+		if( pVars.get("action", "") == "write" )
+		{	
+			
+		}
+		else
+		{	создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
+			
+		}
 
-		
-		
-		
-		string content;
-		
-		
-		
-		
-		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();
 

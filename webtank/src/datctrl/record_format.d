@@ -12,6 +12,7 @@ struct RecordFormat(Args...)
 {	alias TypeTuple!Args templateArgs;
 	alias parseFieldSpecs!Args fieldSpecs;
 	
+	///Метод получения типов полей (FieldType)
 	static pure FieldType[] types() @property
 	{	FieldType[] result;
 		foreach( spec; fieldSpecs )
@@ -19,6 +20,7 @@ struct RecordFormat(Args...)
 		return result;
 	}
 	
+	///Метод получения имён полей
 	static pure string[] names() @property
 	{	string[] result;
 		foreach( spec; fieldSpecs )
@@ -26,6 +28,8 @@ struct RecordFormat(Args...)
 		return result;
 	}
 	
+	///Метод возыращает ассоциативный массив порядковых номеров
+	///полей в формате, индексируемых по именам полей
 	static pure size_t[string] indexes() @property
 	{	size_t[string] result;
 		foreach( i, spec; fieldSpecs )
@@ -33,6 +37,7 @@ struct RecordFormat(Args...)
 		return result;
 	}
 	
+	///Метод сериализует формат в std.json
 	JSONValue getStdJSON()
 	{	JSONValue jValue = void;
 		jValue.type = JSON_TYPE.OBJECT;

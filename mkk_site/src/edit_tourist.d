@@ -22,7 +22,11 @@ void netMain(HTTPContext context)
 	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
 	
-	if( ticket.isAuthenticated && ( ticket.user.isInGroup("moder") || ticket.user.isInGroup("admin") )  )
+	bool isAuthorized = 
+		ticket.isAuthenticated && 
+		( ticket.user.isInGroup("moder") || ticket.user.isInGroup("admin") );
+	
+	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаём подключение к БД		
 		string generalTplStr = cast(string) std.file.read( generalTemplateFileName );

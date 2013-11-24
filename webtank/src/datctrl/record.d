@@ -15,6 +15,7 @@ interface IBaseRecord
 	size_t length() @property;
 }
 
+///Класс реализует работу с записью
 template Record(alias RecFormat)
 {	
 	
@@ -30,6 +31,7 @@ template Record(alias RecFormat)
 	
 	public:
 		
+		///Сериализаци записи в std.json
 		JSONValue getStdJSON()
 		{	JSONValue jValue = _recordSet.format.getStdJSON();
 			
@@ -46,6 +48,7 @@ template Record(alias RecFormat)
 			_recordKey = recordKey;
 		}
 		
+		///Методы получения значения ячейки данных по имени поля
 		template get(string fieldName)
 		{	
 			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
@@ -56,7 +59,6 @@ template Record(alias RecFormat)
 			ValueType get(ValueType defaultValue)
 			{	return _recordSet.get!(fieldName)(_recordKey, defaultValue);
 			}
-			
 		}
 		
 		//Функция получения формата для перечислимого типа
@@ -66,10 +68,13 @@ template Record(alias RecFormat)
 		}
 		
 		override {
+			///Получение "сырого" строкового представления ячейки данных по имени поля
 			string getStr(string fieldName, string defaultValue = null)
 			{	return _recordSet.getStr( fieldName, _recordKey, defaultValue );
 			}
 			
+			///Возвращает true, если значение ячейки данных с именем fieldName пустое.
+			///В противном случае возвращает false.
 			bool isNull(string fieldName)
 			{	return _recordSet.isNull(fieldName, _recordKey);
 			}
@@ -78,6 +83,7 @@ template Record(alias RecFormat)
 			{	return _recordSet.isNullable(fieldName);
 			}
 			
+			///Возвращает количество ячеек данных в записи
 			size_t length() @property
 			{	return RecFormat.fieldSpecs.length;
 			}
