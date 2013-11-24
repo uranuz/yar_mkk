@@ -14,7 +14,7 @@ immutable authPagePath = dynamicPath ~ "auth";
 static this()
 {	
 	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
-	Router.join( new JSON_RPC_HandlingRule() );
+// 	Router.join( new JSON_RPC_HandlingRule() );
 // 	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
 // 	Router.setRPCMethod("поход.создать_поход", &createPohod);
 // 	Router.setRPCMethod("поход.обновить_поход", &updatePohod);
@@ -29,50 +29,50 @@ auto shortTouristRecFormat = RecordFormat!(
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 
-//RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto getTouristList(string filterStr)
-{	string result;
-	auto dbase = getCommmonDB();
-	
-	if ( !dbase.isConnected )
-		return null; //Завершаем
-
-	auto queryRes = dbase.query(  
-		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
-		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`
-	);
-	if( queryRes is null || queryRes.recordCount == 0 )
-		return null;
-	
-	return queryRes.getRecordSet(shortTouristRecFormat);
-}
-
-
-
-auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
-{	auto dbase = getCommmonDB();
-	if ( !dbase.isConnected )
-		return null; //Завершаем
-	
-	uint maxLimit = 25;
-	uint limit = ( requestedLimit < maxLimit ? requestedLimit : maxLimit );
-	
-	auto queryRes = dbase.query(
-		shortTouristFormatQueryBase ~ `where num=`
-		~ pohodNum.to!string ~ ` limit ` ~ limit.to!string ~ `;`
-	);
-	if( queryRes is null || queryRes.recordCount == 0 )
-		return null;
-	
-	return queryRes.getRecordSet(shortTouristRecFormat);
-}
+// //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
+// auto getTouristList(string filterStr)
+// {	string result;
+// 	auto dbase = getCommmonDB();
+// 	
+// 	if ( !dbase.isConnected )
+// 		return null; //Завершаем
+// 
+// 	auto queryRes = dbase.query(  
+// 		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
+// 		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`
+// 	);
+// 	if( queryRes is null || queryRes.recordCount == 0 )
+// 		return null;
+// 	
+// 	return queryRes.getRecordSet(shortTouristRecFormat);
+// }
+// 
+// 
+// 
+// auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
+// {	auto dbase = getCommmonDB();
+// 	if ( !dbase.isConnected )
+// 		return null; //Завершаем
+// 	
+// 	uint maxLimit = 25;
+// 	uint limit = ( requestedLimit < maxLimit ? requestedLimit : maxLimit );
+// 	
+// 	auto queryRes = dbase.query(
+// 		shortTouristFormatQueryBase ~ `where num=`
+// 		~ pohodNum.to!string ~ ` limit ` ~ limit.to!string ~ `;`
+// 	);
+// 	if( queryRes is null || queryRes.recordCount == 0 )
+// 		return null;
+// 	
+// 	return queryRes.getRecordSet(shortTouristRecFormat);
+// }
 
 // import std.typecons, std.typetuple;
 // alias TypeTuple!(
 // 	string, "kod_mkk", string, "nomer_knigi", string, "region_pohod", string, "organization", string, "organization", string, "vid", string, "element", string, "ks", string, "marchrut", string, "begin_date", string, "finish_date", string, "chef_grupp", string, "alt_chef", string, "unit", string, "prepare", string, "status", string, "emitter", string, "chef_coment", string, "MKK_coment", size_t[], "unit_neim"
 // ) PohodTupleType;
 
-enum pohodEnumValues = [
+enum string[int][string] pohodEnumValues = [
 	"vid": [ 1:"пешеходный", 2:"лыжный", 3:"горный", 4:"водный", 5:"велосипедный", 6:"автомото", 7:"спелео", 8:"парусрый", 9:"конный", 10:"комбинированный" ],
 	"element": [ 1:"с эл.1", 2:"с эл.2", 3:"с эл.3", 4:"с эл.4", 5:"с эл.5", 6:"с эл.6" ],
 	"ks": [ 10:"п.в.д.", 1:"н.к.", 1:"первая", 2:"вторая", 3:"третья", 4:"четвёртая", 5:"пятая", 6:"шестая", 11:"путешествие" ],
