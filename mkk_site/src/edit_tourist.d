@@ -59,15 +59,15 @@ void netMain(HTTPContext context)
 			ft.IntKey, "ключ", ft.Str, "фамилия", ft.Str, "имя", ft.Str, "отчество",
 			ft.Str, "дата рожд", ft.Int, "год рожд", ft.Str, "адрес", ft.Str, "телефон",
 			ft.Bool, "показать телефон", ft.Str, "эл почта", ft.Bool, "показать эл почту",
-			ft.Str, "тур опыт", ft.Str, "комент", ft.Str, "спорт разряд",
-			ft.Str, "суд категория"
+			ft.Str, "тур опыт", ft.Str, "комент", ft.Int, "спорт разряд",
+			ft.Int, "суд категория"
 		)();
 		
 		Record!( typeof(touristRecFormat) ) touristRec;
 		
 		//Если в принципе ключ является числом, то получаем данные из БД
 		if( isTouristKeyAccepted )
-		{	auto touristRS = dbase.query( "select num, family_name, given_name, patronymic, birth_date, birth_year, address, phone, show_phone, email, show_email, exp, comment, sports_grade, judge_category from tourist where num=" ~ touristKey.to!string ~ ";" ).getRecordSet(touristRecFormat);
+		{	auto touristRS = dbase.query( "select num, family_name, given_name, patronymic, birth_date, birth_year, address, phone, show_phone, email, show_email, exp, comment, razr, sud from tourist where num=" ~ touristKey.to!string ~ ";" ).getRecordSet(touristRecFormat);
 			if( ( touristRS !is null ) && ( touristRS.length == 1 ) ) //Если получили одну запись -> ключ верный
 			{	touristRec = touristRS.front;
 				isTouristKeyAccepted = true;
@@ -77,7 +77,12 @@ void netMain(HTTPContext context)
 		}
 		
 		//Перечислимый тип, который определяет выполняемое действие
-		enum ActionType { showInsertForm, showUpdateForm, insertData, updateData };
+		enum ActionType { 
+			showInsertForm, //Показать форму вставки нового туриста
+			showUpdateForm, //Показать форму изменения туриста
+			insertData, //Приём данных и вставка нового туриста в БД
+			updateData //Приём данных и обновление информации о существующем туристе в БД
+		};
 		
 		ActionType action;
 		//Определяем выполняемое страницей действие
@@ -90,14 +95,22 @@ void netMain(HTTPContext context)
 		
 		auto edTourFormTpl = new PlainTemplater( editTouristFormTplStr );
 		
-		string[] sportsGrades = [ "", "третий", "второй", "первый", "КМС", "МС", "ЗМС" ];
-		string[] judgeCategories = [ "", "вторая", "первая", "всероссийская" ];
+		
+		
+		
+		
+		
+		//string[] sportsGrades = ["", "третий","второй", "первый", "КМС","МС","ЗМС","МСМК"];
+		
+		//string[] judgeCategories = [ "", "вторая", "первая", "всероссийская" ];
 		
 
 		string[] strFieldNames = [ "family_name", "given_name", "patronymic", "address", "phone", "email", "exp", "comment" ];
 		
+		
 		string content;
 		
+		//Вывод данных о туристе в форму редакирования
 		if( action == ActionType.showUpdateForm )
 		{	/+edTourFormTpl.set( "num.value", touristRec.get!"ключ"(0).to!string );+/
 			edTourFormTpl.set( "family_name", ` value="` ~ HTMLEscapeValue( touristRec.get!"фамилия"("") ) ~ `"` );
@@ -112,7 +125,9 @@ void netMain(HTTPContext context)
  			edTourFormTpl.set( "exp", ` value="` ~ HTMLEscapeValue( touristRec.get!"тур опыт"("") ) ~ `"` );
  			edTourFormTpl.set( "comment", HTMLEscapeValue( touristRec.get!"комент"("") ) ); //textarea
  		}
+ 		//-----------------------------------------------------------------------------------
  		
+ 		// показ формы для обновления или вставки
  		if( action == ActionType.showUpdateForm || action == ActionType.showInsertForm )
  		{	import std.string;
 			if( action == ActionType.showInsertForm )
@@ -122,14 +137,17 @@ void netMain(HTTPContext context)
 				uint birthYear;
 				try {	birthYear = pVars.get("given_name", "").to!uint; }
 				catch( std.conv.ConvException e ) {  }
+				
+				//TODO: Проверить что правильно проверяется наличие туриста в базе
 				auto touristExistsQRes = 
 				dbase.query( `select num, family_name, given_name, patronymic, birth_year from tourist where ` 
 				~ PGYotCaseInsensTrimCompare( "family_name", familyName ) 
 				~ ` and ` ~ PGYotCaseInsensTrimCompare( "given_name", givenName ) 
 				~ ` and ` ~ PGYotCaseInsensTrimCompare( "patronymic", patronymic ) 
 				~ ` and birth_year=` ~ birthYear.to!string ~ `;` );
-				if( touristExistsQRes.recordCount == 1 )
-				{	content = "Турист " ~ touristExistsQRes.get(0, 0) ~ " " ~ touristExistsQRes.get(1, 0) ~ " "
+				if( touristExistsQRes.recordCount != 0 )
+				{	
+					content = "Турист " ~ touristExistsQRes.get(0, 0) ~ " " ~ touristExistsQRes.get(1, 0) ~ " "
 					~ " " ~ touristExistsQRes.get(2, 0) ~ " " ~ touristExistsQRes.get(3, 0) 
 					~ " г.р. уже наличествует в базе данных!!!";
 					tpl.set( "content", content );
@@ -138,6 +156,7 @@ void netMain(HTTPContext context)
 			}
 			ubyte birthDay;
 			ubyte birthMonth;
+			//Вывод даты рождения туриста из базы данных
 			if( action == ActionType.showUpdateForm )
 			{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
 				if( birthDateParts.length != 2 )
@@ -156,7 +175,7 @@ void netMain(HTTPContext context)
 					
 				}
 			}
-			
+			//Формируем окошечки вывода даты
 			auto birthDayInp = `<select name="birth_day">`;
 			birthDayInp ~= `<option value=""` ~ ( ( birthDay == 0 || birthDay > 31 ) ? ` selected` : `` ) ~ `></option>`;
 			for( ubyte i = 1; i <= 31; i++ )
@@ -177,23 +196,36 @@ void netMain(HTTPContext context)
 			}
 			birthMonthInp ~= `</select>`;
 			edTourFormTpl.set( "birth_month", birthMonthInp );
- 		
-			string sportsGradeInp = `<select name="sports_grade">`;
- 			foreach( grade; sportsGrades )
- 			{	sportsGradeInp ~= `<option value="` ~ grade ~ `"`;
+			
+			//Окошечко вывода разряда туриста
+		
+ 			
+ 			string sportsGradeInp = 
+			`<select name="sports_grade">`;
+			import std.algorithm;
+			int[] ключиСпортРазрядов = спортивныйРазряд.keys;
+			sort!("a > b")(ключиСпортРазрядов);
+			
+ 			foreach( i; ключиСпортРазрядов ) 			
+ 			{	sportsGradeInp ~= `<option value="` ~ i.to!string ~ `"`;
 				if( action == ActionType.showUpdateForm )
-					sportsGradeInp ~= ( (touristRec.get!"спорт разряд"("") == grade) ? " selected" : "" );
-				sportsGradeInp ~= `>` ~ grade ~ `</option>`;
+					sportsGradeInp ~= ( (touristRec.get!"спорт разряд"(1000) == i) ? " selected" : "" );
+				sportsGradeInp ~= `>` ~ спортивныйРазряд[i] ~ `</option>`;
  			}
  			sportsGradeInp ~= `</select>`;
  			edTourFormTpl.set( "sports_grade", sportsGradeInp );
  			
+ 			
+ 			//Окошечко вывода судейской категории туриста
  			string judgeCategoryInp = `<select name="judge_category">`;
- 			foreach( category; judgeCategories )
- 			{	judgeCategoryInp ~= `<option value="` ~ category ~ `"`;
+ 			int[] ключиСудеКатегорий = судейскаяКатегория.keys;
+ 			sort!("a > b")(ключиСудеКатегорий);
+ 			
+ 			foreach( i; ключиСудеКатегорий )
+ 			{	judgeCategoryInp ~= `<option value="` ~ i.to!string ~ `"`;
 				if( action == ActionType.showUpdateForm )
-					judgeCategoryInp ~= ( (touristRec.get!"суд категория"("") == category) ? " selected" : "" );
-				judgeCategoryInp ~= `>` ~ category ~ `</option>`;
+					judgeCategoryInp ~= ( (touristRec.get!"суд категория"(1000) == i) ? " selected" : "" );
+				judgeCategoryInp ~= `>` ~ судейскаяКатегория[i] ~ `</option>`;
 			}
  			judgeCategoryInp ~= `</select>`;
  			edTourFormTpl.set( "judge_category", judgeCategoryInp );
@@ -202,13 +234,19 @@ void netMain(HTTPContext context)
  			content = edTourFormTpl.getString();
 		}
 		
+		
+		// конец показ формы для обновления или вставки
+		//-------------------------------------------------------------------
+		
+		//Собственно проверка и запись данных в БД
 		if( action == ActionType.insertData || action == ActionType.updateData )
 		{	import std.conv, std.algorithm;
 			string queryStr;
 			try
-			{	string fieldNamesStr;
-				string fieldValuesStr;
+			{	string fieldNamesStr;  //имена полей для записи
+				string fieldValuesStr; //значения полей для записи
 				
+				//Формирование запроса для записи строковых полей в БД
 				foreach( i, fieldName; strFieldNames )
 				{	string value = pVars.get(fieldName, null);
 					if( value.length > 0  )
@@ -217,6 +255,7 @@ void netMain(HTTPContext context)
 					}
 				}
 				
+				//Формирование запроса на запись даты рождения туриста
 				auto birthDayStr = pVars.get("birth_day", null);
 				auto birthMonthStr = pVars.get("birth_month", null);
 				if( (birthDayStr.length > 0) && (birthMonthStr.length >0) )
@@ -228,6 +267,7 @@ void netMain(HTTPContext context)
 					}
 				}
 				
+				//Формирование запроса на запись года рождения туриста
 				auto birthYearStr = pVars.get("birth_year", null);
 				if( birthYearStr.length > 0 )
 				{	auto birthYear = birthYearStr.to!uint;
@@ -235,23 +275,35 @@ void netMain(HTTPContext context)
 					fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ birthYear.to!string ~ "'";
 				}
 				
+				//Логические значения
+				//Показать телефон
 				bool showPhone = toBool( pVars.get("show_phone", "no") );
 				fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"show_phone\"";
 				fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showPhone ? "true" : "false" ) ~ "'";
-
+				
+				//Показать емэйл
 				bool showEmail = toBool( pVars.get("show_email", "no") );
 				fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"show_email\"";
 				fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
 
-				if( find( sportsGrades, pVars.get("sports_grade", "") ).length > 0  )
-				{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"sports_grade\"";
+				
+				int sports_grade;
+			try	{  sports_grade =  pVars.get("sports_grade", "1000").to!int; }
+			catch(std.conv.ConvException e) {  sports_grade=1000;	};
+							
+				if (sports_grade  in спортивныйРазряд)
+				{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"razr\"";
 					fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ pVars.get("sports_grade", "") ~ "'";
 				}
 				else
 					throw new std.conv.ConvException("Выражение \"" ~ pVars.get("sports_grade", "") ~ "\" не является значением типа \"спортивный разряд\"!!!");
 					
-				if( find( judgeCategories, pVars.get("judge_category", "") ).length > 0  )
-				{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"judge_category\"";
+				int	judge_category;					
+				try	{  judge_category =  pVars.get("judge_category", "1000").to!int; }
+			catch(std.conv.ConvException e) {  judge_category=1000;	};
+							
+				if (judge_category  in судейскаяКатегория)
+				{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"sud\"";
 					fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ pVars.get("judge_category", "") ~ "'";
 				}
 				else
