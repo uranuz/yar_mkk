@@ -16,17 +16,17 @@ import webtank.datctrl.data_field, webtank.datctrl.record, webtank.datctrl.recor
 // }
 
 ///Класс реализует работу с набором записей
-template RecordSet(alias RecFormat)
+template RecordSet(alias RecordFormatType)
 {
 	class RecordSet: /+IBaseRecordSet,+/ IStdJSONSerializeable
 	{	
 	public:
-		alias Record!RecFormat Rec;
-		alias RecFormat RecordFormatType;
+		alias Record!FormatType RecordType;
+		alias RecordFormatType FormatType;
 		
 	protected:
 		IBaseField[] _fields;
-		RecFormat _format;
+		FormatType _format;
 		
 		
 		size_t _currRecIndex;
@@ -36,8 +36,8 @@ template RecordSet(alias RecFormat)
 		JSONValue serializeDataAt(size_t index)
 		{	JSONValue recJSON;
 			recJSON.type = JSON_TYPE.ARRAY;
-			recJSON.array.length = RecFormat.fieldSpecs.length; 
-			foreach( j, spec; RecFormat.fieldSpecs )
+			recJSON.array.length = FormatType._fieldSpecs.length; 
+			foreach( j, spec; FormatType._fieldSpecs )
 			{	if( this.isNull(spec.name, _getRecordKey(index) ) )
 					recJSON[j].type = JSON_TYPE.NULL;
 				else
@@ -64,27 +64,27 @@ template RecordSet(alias RecFormat)
 			return jValue;
 		}
 		
-		this(RecFormat fieldFormat)
+		this(FormatType fieldFormat)
 		{	_format = fieldFormat;
 			//Устанавливаем размер массива полей
-			_fields.length = RecFormat.fieldSpecs.length; 
+			_fields.length = FormatType._fieldSpecs.length; 
 		}
 	
 		//Оператор получения записи по индексу
-		Rec opIndex(size_t recordIndex) 
+		RecordType opIndex(size_t recordIndex) 
 		{	return getRecordAt(recordIndex); }
 		
 		///Метод получения записи по её индексу в наборе
-		Rec getRecordAt(size_t recordIndex)
+		RecordType getRecordAt(size_t recordIndex)
 		{	return getRecord( _getRecordKey(recordIndex) ); }
 		
 		///Метод получения записи по её значению первичного ключа
-		Rec getRecord(size_t recordKey)
-		{	return new Rec(this, recordKey); }
+		RecordType getRecord(size_t recordKey)
+		{	return new RecordType(this, recordKey); }
 		
 		///Методы получения значения ячейки данных по имени поля и значению первичного ключа записи
 		template get(string fieldName)
-		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+		{	alias FormatType.getValueType!(fieldName) ValueType;
 			
 			ValueType get(size_t recordKey)
 			{	return getAt!(fieldName)( _getRecordIndex(recordKey) ); }
@@ -95,9 +95,9 @@ template RecordSet(alias RecFormat)
 		
 		///Методы получения значения ячейки данных по имени поля и индексу записи в наборе
 		template getAt(string fieldName)
-		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
-			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
-			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+		{	alias FormatType.getValueType!(fieldName) ValueType;
+			alias FormatType.getFieldType!(fieldName) fieldType;
+			alias FormatType.getFieldIndex!(fieldName) fieldIndex;
 			
 			ValueType getAt(size_t recordIndex)
 			{	auto currField = cast(IField!(fieldType)) _fields[fieldIndex];
@@ -113,8 +113,9 @@ template RecordSet(alias RecFormat)
 		//Функция получения формата для перечислимого типа
 		//Определена только для полей, имеющих перечислимый тип, что логично
 		template getEnum(string fieldName)
-		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
-			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+		{	alias FormatType.getValueType!(fieldName) ValueType;
+			alias FormatType.getFieldType!(fieldName) fieldType;
+			alias FormatType.getFieldIndex!(fieldName) fieldIndex;
 			
 			static if( fieldType == FieldType.Enum )
 			{	auto getEnum()
@@ -134,12 +135,12 @@ template RecordSet(alias RecFormat)
 		///Метод получения "сырого" строкового представления значения ячейки данных
 		///по имени поля и индексу записи в наборе
 		string getStrAt(string fieldName, size_t recordIndex, string defaultValue = null)
-		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
+		{	auto currField = _fields[ FormatType.indexes[fieldName] ];
 			return currField.getStr( recordIndex, defaultValue );
 		}
 		
-		Rec front() @property
-		{	return new Rec( this, _getRecordKey(_currRecIndex) );
+		RecordType front() @property
+		{	return new RecordType( this, _getRecordKey(_currRecIndex) );
 		}
 		
 		void popFront()
@@ -162,7 +163,7 @@ template RecordSet(alias RecFormat)
 		///Метод задаёт какое поле является первичным ключом набора записей
 		///через задание порядкового номера поля
 		void setKeyField(size_t index)
-		{	auto keyFieldIndexes = getKeyFieldIndexes!(RecFormat.fieldSpecs)();
+		{	auto keyFieldIndexes = getKeyFieldIndexes!(FormatType._fieldSpecs)();
 			foreach( i; keyFieldIndexes )
 			{	if( i == index )
 				{	_format.keyFieldIndex = index;
@@ -180,14 +181,14 @@ template RecordSet(alias RecFormat)
 		///Метод возвращает true, если значение ячейки поля с именем fieldName
 		///и индексом записи в наборе recordIndex является пустым (null). Иначе false.
 		bool isNullAt(string fieldName, size_t recordIndex)
-		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
+		{	auto currField = _fields[ FormatType.indexes[fieldName] ];
 			return currField.isNull( recordIndex );
 		}
 		
 		///Возвращает true, если поле с именем fieldName может иметь пустое значение (null)
 		///В противном случае возвращается false
 		bool isNullable(string fieldName)
-		{	auto currField = _fields[ RecFormat.indexes[fieldName] ];
+		{	auto currField = _fields[ FormatType.indexes[fieldName] ];
 			return currField.isNullable();
 		}
 		
@@ -200,14 +201,16 @@ template RecordSet(alias RecFormat)
 		}
 		
 		template _setField(string fieldName)
-		{	alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).fieldType fieldType;
-			alias getFieldIndex!(fieldName, RecFormat.fieldSpecs) fieldIndex;
+		{	alias FormatType.getValueType!(fieldName) ValueType;
+			alias FormatType.getFieldType!(fieldName) fieldType;
+			alias FormatType.getFieldIndex!(fieldName) fieldIndex;
 			
 			void _setField( IField!(fieldType) field )
 			{	_fields[fieldIndex] = field;
 			}
 		}
 		
+		///Свойство возвращает формат поля
 		auto format() @property
 		{	return _format; }
 		

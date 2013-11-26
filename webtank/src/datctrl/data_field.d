@@ -6,7 +6,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.array, std.conv;
 
-import webtank.datctrl.field_type;
+import webtank.datctrl.field_type, webtank.datctrl.record_format;
 public import webtank.datctrl.field_type : FieldType;
 
 ///Базовый и нешаблонный интерфейс поля данных

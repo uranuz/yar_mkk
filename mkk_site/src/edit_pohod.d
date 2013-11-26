@@ -2,7 +2,7 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.stdio, std.array;
 
-import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls;
 
 // import webtank.net.javascript;
 
@@ -14,7 +14,7 @@ immutable authPagePath = dynamicPath ~ "auth";
 static this()
 {	
 	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
-// 	Router.join( new JSON_RPC_HandlingRule() );
+// 	Router.join( new JSON_RPC_HandlingRule!() );
 // 	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
 // 	Router.setRPCMethod("поход.создать_поход", &createPohod);
 // 	Router.setRPCMethod("поход.обновить_поход", &updatePohod);
@@ -72,14 +72,20 @@ immutable shortTouristFormatQueryBase =
 // 	string, "kod_mkk", string, "nomer_knigi", string, "region_pohod", string, "organization", string, "organization", string, "vid", string, "element", string, "ks", string, "marchrut", string, "begin_date", string, "finish_date", string, "chef_grupp", string, "alt_chef", string, "unit", string, "prepare", string, "status", string, "emitter", string, "chef_coment", string, "MKK_coment", size_t[], "unit_neim"
 // ) PohodTupleType;
 
-enum string[int][string] pohodEnumValues = [
-	"vid": [ 1:"пешеходный", 2:"лыжный", 3:"горный", 4:"водный", 5:"велосипедный", 6:"автомото", 7:"спелео", 8:"парусрый", 9:"конный", 10:"комбинированный" ],
-	"element": [ 1:"с эл.1", 2:"с эл.2", 3:"с эл.3", 4:"с эл.4", 5:"с эл.5", 6:"с эл.6" ],
-	"ks": [ 10:"п.в.д.", 1:"н.к.", 1:"первая", 2:"вторая", 3:"третья", 4:"четвёртая", 5:"пятая", 6:"шестая", 11:"путешествие" ],
-	"prepare": [ 1:"планируется", 2:"готовится", 3:"набор группы", 4:"набор завершон", 5:"на маршруте", 6:"пройден" ],
-	"status": [ 1:"рассматривается", 2:"заявлен", 3:"на контроле", 4:"пройден", 5:"засчитан" ]
-];
+string[int][string] initializePohodEnumValues()
+{	string[int][string] result;
+	result["vid"] = видТуризма;
+	result["element"] = элементыКС;
+	result["ks"] = категорияСложности;
+	result["prepare"] = готовностьПохода;
+	result["status"] = статусЗаявки;
 
+	return result;
+}
+
+alias enum string[int] PohodEnumType;
+
+enum PohodEnumType[string] pohodEnumValues = initializePohodEnumValues();
 
 RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
@@ -89,7 +95,13 @@ RecordFormat!(
 	ft.Int, "unit", ft.Enum, "prepare", ft.Enum, "status",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
 ) pohodRecFormat = 
-{	enumValues: pohodEnumValues
+{	enumValues: [
+		"vid": видТуризма,
+		"ks": категорияСложности,
+		"element": элементыКС,
+		"prepare": готовностьПохода,
+		 "status": статусЗаявки
+	]
 };
 
 enum string[] months = [ "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь" ];
@@ -157,9 +169,13 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 	
+	alias pohodRec.FormatType.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	
 	//Вывод перечислимых полей
-	foreach( fieldName, values; enumValueBlocks )
-	{	//Создаём экземпляр генератора выпадающего списка
+	foreach( fieldName; pohodEnumFieldNames )
+	{	auto enumFormat = pohodRec.getEnum!(fieldName);
+		
+		//Создаём экземпляр генератора выпадающего списка
 		auto dropdown =  new PlainDropDownList;
 		
 		dropdown.values = values;
@@ -254,7 +270,7 @@ void netMain(HTTPContext context)
 		
 	bool isAuthorized = 
 		context.accessTicket.isAuthenticated && 
-		( context.accessTicket.isInGroup("moder") || context.accessTicket.isInGroup("admin") );
+		( context.accessTicket.user.isInGroup("moder") || context.accessTicket.user.isInGroup("admin") );
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
@@ -290,7 +306,7 @@ void netMain(HTTPContext context)
 		
 
 		Record!( typeof(pohodRecFormat) ) pohodRec;
-		RecordSet!( typeof(touristRecFormat) ) touristRS;
+		RecordSet!( typeof(shortTouristRecFormat) ) touristRS;
 		
 		//Если в принципе ключ является числом, то получаем данные из БД
 		if( isPohodKeyAccepted )
@@ -308,7 +324,7 @@ void netMain(HTTPContext context)
 						~ PGEscapeStr( (pohodRec.get!"unit_neim"(""))[1..$-1] ) ~ `', ',') ) as id ) ` //вырезали скобочки
 						~ ` select num, family_name, given_name, patronymic, birth_year from tourist, nums ` 
 						~ ` where num=nums.id::bigint;`
-					).getRecordSet(touristRecFormat);
+					).getRecordSet(shortTouristRecFormat);
 			}
 			else
 				isPohodKeyAccepted = false;

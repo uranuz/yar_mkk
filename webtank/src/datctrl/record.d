@@ -16,17 +16,17 @@ interface IBaseRecord
 }
 
 ///Класс реализует работу с записью
-template Record(alias RecFormat)
+template Record(alias RecordFormatType)
 {	
 	
 	class Record: IBaseRecord
 	{
 	public:
-		alias RecordSet!RecFormat RecSet;
-		alias RecFormat RecordFormatType;
+		alias RecordFormatType FormatType;
+		alias RecordSet!FormatType RecordSetType;
 		
 	protected:
-		RecSet _recordSet;
+		RecordSetType _recordSet;
 		size_t _recordKey;
 	
 	public:
@@ -43,7 +43,7 @@ template Record(alias RecFormat)
 			return jValue;
 		}
 		
-		this(RecSet recordSet, size_t recordKey)
+		this(RecordSetType recordSet, size_t recordKey)
 		{	_recordSet = recordSet;
 			_recordKey = recordKey;
 		}
@@ -51,7 +51,7 @@ template Record(alias RecFormat)
 		///Методы получения значения ячейки данных по имени поля
 		template get(string fieldName)
 		{	
-			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias FormatType.getValueType!(fieldName) ValueType;
 			ValueType get()
 			{	return _recordSet.get!(fieldName)(_recordKey);
 			}
@@ -85,7 +85,7 @@ template Record(alias RecFormat)
 			
 			///Возвращает количество ячеек данных в записи
 			size_t length() @property
-			{	return RecFormat.fieldSpecs.length;
+			{	return RecordFormatType._fieldSpecs.length;
 			}
 		
 		} //override

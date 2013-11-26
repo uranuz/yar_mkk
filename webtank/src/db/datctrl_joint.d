@@ -14,7 +14,7 @@ import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.datctr
 auto getRecordSet(RecFormat)(IDBQueryResult queryResult, RecFormat format)
 {	alias RecordSet!RecFormat RecSet;
 	auto recordSet = new RecSet(format);
-	foreach( i, fldSpec; RecFormat.fieldSpecs )
+	foreach( i, fldSpec; RecFormat._fieldSpecs )
 	{	auto field = new DatabaseField!(fldSpec.fieldType)(queryResult, i);
 		recordSet._setField!(fldSpec.name)( field );
 		static if( fldSpec.fieldType == FieldType.Enum )
