@@ -1,6 +1,8 @@
 module webtank.net.http.routing;
 
-public import webtank.net.routing; 
+public import webtank.net.routing;
+
+import std.stdio;
 
 import webtank.net.http.context, webtank.net.connection, webtank.net.access_control;
 
@@ -12,7 +14,7 @@ public:
 
 	override RoutingStatus doRouting(IConnectionContext context)
 	{	auto ctx = cast(HTTPContext) context;
-	
+		
 		if( ctx is null )
 			return RoutingStatus.continued;
 		
@@ -37,7 +39,7 @@ public:
 
 	override RoutingStatus doRouting(IConnectionContext context)
 	{	auto ctx = cast(HTTPContext) context;
-
+		
 		if( ctx is null )
 			return RoutingStatus.continued;
 		
@@ -109,7 +111,7 @@ class URIRouterRule: HTTPForwardRoutingRule!(URIHandlingRule)
 		
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	
+		{
 			auto URIHandler = _childRules
 				.get( _normalizePagePath(context.request.path), null );
 			
@@ -152,7 +154,8 @@ class URIHandlingRule: HTTPEndPointRoutingRule
 	
 	override {
 		RoutingStatus doHTTPRouting(HTTPContext context)
-		{	_handler(context); //Вызов пользовательского обработчика
+		{	
+			_handler(context); //Вызов пользовательского обработчика
 			return RoutingStatus.succeed;
 		}
 	} //override

@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.stdio;
 
 import webtank.net.http.context, webtank.net.http.json_rpc_routing, webtank.net.http.routing, mkk_site.site_data, mkk_site.utils;
 
-immutable thisPagePath = dynamicPath ~ "edit_tourist";
+immutable thisPagePath = dynamicPath ~ "xhr_test";
 immutable authPagePath = dynamicPath ~ "auth";
 
 shared static this()

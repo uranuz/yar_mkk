@@ -178,6 +178,7 @@ protected:
 		if( request is null )
 			return; 
 		
+		
 		auto context = new HTTPContext( request, new ServerResponse(&socketSend) );
 		
 		//Запуск обработки HTTP-запроса через маршрутизатор
