@@ -26,6 +26,8 @@ auto shortTouristRecFormat = RecordFormat!(
 	ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" 
 )();
 
+
+
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 
@@ -72,42 +74,43 @@ immutable shortTouristFormatQueryBase =
 // 	string, "kod_mkk", string, "nomer_knigi", string, "region_pohod", string, "organization", string, "organization", string, "vid", string, "element", string, "ks", string, "marchrut", string, "begin_date", string, "finish_date", string, "chef_grupp", string, "alt_chef", string, "unit", string, "prepare", string, "status", string, "emitter", string, "chef_coment", string, "MKK_coment", size_t[], "unit_neim"
 // ) PohodTupleType;
 
-string[int][string] initializePohodEnumValues()
-{	string[int][string] result;
-	result["vid"] = видТуризма;
-	result["element"] = элементыКС;
-	result["ks"] = категорияСложности;
-	result["prepare"] = готовностьПохода;
-	result["status"] = статусЗаявки;
+// string[int][string] initializePohodEnumValues()
+// {	string[int][string] result;
+// 	result["vid"] = видТуризма;
+// 	result["element"] = элементыКС;
+// 	result["ks"] = категорияСложности;
+// 	result["prepare"] = готовностьПохода;
+// 	result["status"] = статусЗаявки;
+// 
+// 	return result;
+// }
+// 
+// alias enum string[int] PohodEnumType;
+// 
+// enum PohodEnumType[string] pohodEnumValues = initializePohodEnumValues();
 
-	return result;
-}
-
-alias enum string[int] PohodEnumType;
-
-enum PohodEnumType[string] pohodEnumValues = initializePohodEnumValues();
-
-RecordFormat!(
+immutable(RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
 	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "element",
 	ft.Enum, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
 	ft.Date, "finish_date", ft.Str, "chef_group", ft.Str, "alt_chef",
 	ft.Int, "unit", ft.Enum, "prepare", ft.Enum, "status",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
-) pohodRecFormat = 
-{	enumValues: [
-		"vid": видТуризма,
+)) pohodRecFormat;
+
+
+shared static this()
+{	import webtank.common.utils;
+	pohodRecFormat.enumFormats = 
+	[	"vid": видТуризма,
 		"ks": категорияСложности,
 		"element": элементыКС,
 		"prepare": готовностьПохода,
-		 "status": статусЗаявки
-	]
-};
+		"status": статусЗаявки
+	];
+}
 
-enum string[] months = [ "январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь" ];
-
-enum strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
-
+immutable strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ].idup;
 
 //Функция формирует форму редактирования похода
 void создатьФормуИзмененияПохода(
@@ -121,23 +124,26 @@ void создатьФормуИзмененияПохода(
 	RecordSet!( typeof(shortTouristRecFormat) ) touristRS = null
 )
 {	
-
+	writeln("ФормаИзмПохода10");
 	if( pohodRec )
 	{	//Выводим в браузер значения строковых полей (<input type="text">)
 		foreach( fieldName; strFieldNames )
 			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr(fieldName, "") ) );
 	}
 
+	writeln("ФормаИзмПохода20");
 	//Создаём компонент выбора даты начала похода
 	auto beginDatePicker = new PlainDatePicker;
 	beginDatePicker.name = "begin"; //Задаём часть имени (компонент допишет _day, _year или _month)
 	beginDatePicker.id = "begin"; //аналогично для id
 	
+	writeln("ФормаИзмПохода30");
 	//Создаём компонент выбора даты завершения похода
 	auto finishDatePicker = new PlainDatePicker;
 	finishDatePicker.name = "finish";
 	finishDatePicker.id = "finish";
 	
+	writeln("ФормаИзмПохода40");
 	//Получаем данные о датах (если режим редактирования)
 	if( pohodRec )
 	{	//Извлекаем данные из БД
@@ -149,6 +155,7 @@ void создатьФормуИзмененияПохода(
 			beginDatePicker.date = pohodRec.get!("finish_date");
 	}
 	
+	writeln("ФормаИзмПохода50");
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
 	
@@ -165,34 +172,56 @@ void создатьФормуИзмененияПохода(
 	}
 	
 	if( pohodRec )
-	{	pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
+	{	writeln("pohodRec is not null!!");
+		pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
-	
+	writeln("ФормаИзмПохода60");
 	alias pohodRec.FormatType.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	
+	pragma(msg, "pohodEnumFieldNames: ", pohodEnumFieldNames);
+	
+	
 	
 	//Вывод перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
-	{	auto enumFormat = pohodRec.getEnum!(fieldName);
+	{	pragma(msg, "Current field name is: ");
+		pragma(msg, fieldName);
+		
+		writeln("ФормаИзмПохода65");
 		
 		//Создаём экземпляр генератора выпадающего списка
 		auto dropdown =  new PlainDropDownList;
 		
-		dropdown.values = values;
+		writeln("ФормаИзмПохода66");
+		import webtank.common.utils;
+		const(EnumFormat) enumFormatC = pohodRec.getEnumFormat!(fieldName)();
+		writeln("ФормаИзмПохода66а");
+		EnumFormat enumFormat = enumFormatC.mutCopy();
+		writeln("enumForamt", enumFormat);
+		dropdown.values = enumFormat;
+		writeln("ФормаИзмПохода67");
 		dropdown.name = fieldName;
 		dropdown.id = fieldName;
 		
+		writeln("ФормаИзмПохода68");
 		//Задаём текущее значение
-		if( pohodRec.isNull(fieldName) )
-			dropdown.currValue = pohodRec.get!(fieldName)();
-			
+		if( !pohodRec.isNull(fieldName) )
+		{	writeln("ФормаИзмПохода69");
+			dropdown.currKey = pohodRec.get!(fieldName)();
+			writeln("ФормаИзмПохода69а");
+		}
+		
+		writeln("ФормаИзмПохода69б");
 		pohodForm.set( fieldName, dropdown.print() );
+		writeln("ФормаИзмПохода69в");
 	}
+	writeln("ФормаИзмПохода70");
 	
 	//Задаём действие, чтобы при след. обращении к обработчику
 	//перейти на этап записи в БД
 	pohodForm.set( "action", ` value="write"` );
-	
+	writeln("pohodForm.getStr()", pohodForm.getString());
 }
 
 
@@ -271,10 +300,12 @@ void netMain(HTTPContext context)
 	bool isAuthorized = 
 		context.accessTicket.isAuthenticated && 
 		( context.accessTicket.user.isInGroup("moder") || context.accessTicket.user.isInGroup("admin") );
+		
+	writeln("test10");
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
-				
+		writeln("test20");
 		//Создаем шаблон по файлу
 		auto tpl = getGeneralTemplate(thisPagePath);
 
@@ -285,6 +316,7 @@ void netMain(HTTPContext context)
 		else 
 		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 		}
+		writeln("test30");
 	
 		auto dbase = getCommmonDB;
 		if ( !dbase.isConnected )
@@ -292,6 +324,7 @@ void netMain(HTTPContext context)
 			rp ~= tpl.getString();
 			return; //Завершаем
 		}
+		writeln("test40");
 		
 		//Пытаемся получить ключ
 		bool isPohodKeyAccepted = false;
@@ -304,6 +337,7 @@ void netMain(HTTPContext context)
 		catch(std.conv.ConvException e)
 		{	isPohodKeyAccepted = false; }
 		
+		writeln("test50");
 
 		Record!( typeof(pohodRecFormat) ) pohodRec;
 		RecordSet!( typeof(shortTouristRecFormat) ) touristRS;
@@ -330,6 +364,7 @@ void netMain(HTTPContext context)
 				isPohodKeyAccepted = false;
 		}
 		
+		writeln("test60");
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
 		
 		
@@ -339,10 +374,14 @@ void netMain(HTTPContext context)
 			
 		}
 		else
-		{	создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
+		{	writeln("test70");
+			создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
 			
 		}
 
+		string content = pohodForm.getString();
+		writeln("content.length", content.length);
+		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();
 

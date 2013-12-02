@@ -23,14 +23,14 @@ struct FieldViewFormat
 class FieldView
 {	
 public:
-	IField field;
-	IField titleField;
+	IDataField field;
+	IDataField titleField;
 
 	FieldViewFormat format;
-	this(IField field, IField titleField)
+	this(IDataField field, IDataField titleField)
 	{	_field = field; _titleField = titleField; }
 	
-	this(IField field)
+	this(IDataField field)
 	{	_field = field; }
 	
 	string _printHeaderCell()
@@ -167,7 +167,7 @@ public:
 	
 	void setFormats(Field)
 	
-	void setTitleField(IField field, size_t position)
+	void setTitleField(IDataField field, size_t position)
 	{	return _fieldViews[position].titleField = field;
 	}
 	
