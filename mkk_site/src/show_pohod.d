@@ -14,6 +14,8 @@ shared static this()
 {	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
+
+
 void netMain(HTTPContext context)
 {	
 	auto rq = context.request;

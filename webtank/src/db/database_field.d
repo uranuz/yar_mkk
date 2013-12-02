@@ -31,7 +31,7 @@ protected: ///ВНУТРЕННИЕ ПОЛЯ КЛАССА
 	}
 	
 	static if( FieldT == FieldType.Enum )
-	{	EnumFormat _enumFormat;
+	{	string[int] _enumFormat;
 	}
 
 public:

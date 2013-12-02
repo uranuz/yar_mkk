@@ -15,21 +15,23 @@ interface IBaseRecord
 	size_t length() @property;
 }
 
-template Record(alias RecFormat)
+///Класс реализует работу с записью
+template Record(alias RecordFormatType)
 {	
 	
 	class Record: IBaseRecord
 	{
 	public:
-		alias RecordSet!RecFormat RecSet;
-		alias RecFormat RecordFormatType;
+		alias RecordFormatType FormatType;
+		alias RecordSet!FormatType RecordSetType;
 		
 	protected:
-		RecSet _recordSet;
+		RecordSetType _recordSet;
 		size_t _recordKey;
 	
 	public:
 		
+		///Сериализаци записи в std.json
 		JSONValue getStdJSON()
 		{	JSONValue jValue = _recordSet.format.getStdJSON();
 			
@@ -41,14 +43,15 @@ template Record(alias RecFormat)
 			return jValue;
 		}
 		
-		this(RecSet recordSet, size_t recordKey)
+		this(RecordSetType recordSet, size_t recordKey)
 		{	_recordSet = recordSet;
 			_recordKey = recordKey;
 		}
 		
+		///Методы получения значения ячейки данных по имени поля
 		template get(string fieldName)
 		{	
-			alias getFieldSpec!(fieldName, RecFormat.fieldSpecs).valueType ValueType;
+			alias FormatType.getValueType!(fieldName) ValueType;
 			ValueType get()
 			{	return _recordSet.get!(fieldName)(_recordKey);
 			}
@@ -56,7 +59,6 @@ template Record(alias RecFormat)
 			ValueType get(ValueType defaultValue)
 			{	return _recordSet.get!(fieldName)(_recordKey, defaultValue);
 			}
-			
 		}
 		
 		//Функция получения формата для перечислимого типа
@@ -66,10 +68,13 @@ template Record(alias RecFormat)
 		}
 		
 		override {
+			///Получение "сырого" строкового представления ячейки данных по имени поля
 			string getStr(string fieldName, string defaultValue = null)
 			{	return _recordSet.getStr( fieldName, _recordKey, defaultValue );
 			}
 			
+			///Возвращает true, если значение ячейки данных с именем fieldName пустое.
+			///В противном случае возвращает false.
 			bool isNull(string fieldName)
 			{	return _recordSet.isNull(fieldName, _recordKey);
 			}
@@ -78,8 +83,9 @@ template Record(alias RecFormat)
 			{	return _recordSet.isNullable(fieldName);
 			}
 			
+			///Возвращает количество ячеек данных в записи
 			size_t length() @property
-			{	return RecFormat.fieldSpecs.length;
+			{	return RecordFormatType._fieldSpecs.length;
 			}
 		
 		} //override

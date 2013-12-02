@@ -6,13 +6,13 @@ import webtank.templating.plain_templater, webtank.db.database;
 
 import mkk_site.site_data;
 
-auto getGeneralTemplate(string pagePath)
+PlainTemplater getGeneralTemplate(string pagePath)
 {	auto tpl = getPageTemplate(generalTemplateFileName);
 	tpl.set("this page path", pagePath);
 	return tpl;
 }
 
-auto getPageTemplate(string tplFileName, bool shouldInit = true)
+PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 {	
 	import std.file;
 	string templateStr;
@@ -35,7 +35,6 @@ auto getPageTemplate(string tplFileName, bool shouldInit = true)
 		tpl.set("webtank js folder", webtankJsPath);
 		
 		tpl.set("dynamic path", dynamicPath);
-		tpl.set("useful links", "Куча хороших ссылок");
 	}
 	
 	return tpl;

@@ -69,6 +69,10 @@ JSONValue getStdJSON(T)(T dValue)
 			else
 				jValue = dValue.getStdJSON();
 		}
+		else static if( is( T: std.datetime.Date ) )
+		{	jValue.type = JSON_TYPE.STRING;
+			jValue.str = dValue.toISOExtString();
+		}
 		else
 			static assert( 0, "This value's type is not of one implemented JSON type!!!" );
 		return jValue;
