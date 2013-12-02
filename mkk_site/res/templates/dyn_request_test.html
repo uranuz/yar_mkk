@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <style></style>
+    <script src="http://yandex.st/jquery/1.9.1/jquery.js"></script>
+	<script>
+		function doSomething()
+		{	var 
+				nameInput = document.getElementById("name"),
+				name = nameInput.value;
+			
+			var invokeArgs = 
+			{	uri: "/dyn/dgbdfgb",  //Адрес для отправки
+				method: "mkk_site.xhr_test.приветствие", //Название удалённого метода для вызова в виде строки
+				params: 
+				{	"имя": name
+				}, //Параметры вызова удалённого метода
+				success: function (resp)
+				{	var a = "b";
+					alert(resp);
+				} //Обработчик успешного вызова удалённого метода
+			};
+			
+			webtank.json_rpc.invoke(invokeArgs);
+			
+		}
+	</script>
+  </head>
+  <body>
+	<input type="text" id="name" placeholder="Введите имя">
+	<input type="button" value="Послать!" onclick="doSomething();">
+  </body>
+  <script type="text/javascript" src="{{webtank js folder}}components.js"></script>
+</html>

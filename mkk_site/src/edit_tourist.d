@@ -1,10 +1,11 @@
 module mkk_site.edit_tourist;
 
-import std.conv, std.string, std.file, std.stdio;
+import std.conv, std.string, std.file, std.stdio, std.utf;
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context;
 
 import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
+import std.conv, std.algorithm;
 
 immutable thisPagePath = dynamicPath ~ "edit_tourist";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -15,17 +16,18 @@ shared static this()
 
 void netMain(HTTPContext context)
 {	
+   int числоСовпадений;
+   string table;
 	auto rq = context.request;
 	auto rp = context.response;
 	auto ticket = context.accessTicket;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = context.request.postVars;
+	auto qVars = context.request.queryVars;
 	
 	if( ticket.isAuthenticated && ( ticket.user.isInGroup("moder") || ticket.user.isInGroup("admin") )  )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаём подключение к БД		
-		string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
 		
 		//Создаем шаблон по файлу
 		auto tpl = getGeneralTemplate(thisPagePath);
@@ -44,7 +46,7 @@ void netMain(HTTPContext context)
 		
 		size_t touristKey;
 		try {
-			touristKey = qVars.get("key", null).to!size_t;
+			touristKey = qVars.get("key", null).to!size_t;//принимается ключ (и преобразуется в номер туриста)
 			isTouristKeyAccepted = true;
 		}
 		catch(std.conv.ConvException e)
@@ -126,30 +128,7 @@ void netMain(HTTPContext context)
  		// показ формы для обновления или вставки
  		if( action == ActionType.showUpdateForm || action == ActionType.showInsertForm )
  		{	import std.string;
-			if( action == ActionType.showInsertForm )
-			{	string familyName = "'" ~ PGEscapeStr( pVars.get("family_name", "") ) ~ "'";
-				string givenName = "'" ~ PGEscapeStr( pVars.get("given_name", "") ) ~ "'";
-				string patronymic = "'" ~ PGEscapeStr( pVars.get("given_name", "") ) ~ "'";
-				uint birthYear;
-				try {	birthYear = pVars.get("given_name", "").to!uint; }
-				catch( std.conv.ConvException e ) {  }
-				
-				//TODO: Проверить что правильно проверяется наличие туриста в базе
-				auto touristExistsQRes = 
-				dbase.query( `select num, family_name, given_name, patronymic, birth_year from tourist where ` 
-				~ PGYotCaseInsensTrimCompare( "family_name", familyName ) 
-				~ ` and ` ~ PGYotCaseInsensTrimCompare( "given_name", givenName ) 
-				~ ` and ` ~ PGYotCaseInsensTrimCompare( "patronymic", patronymic ) 
-				~ ` and birth_year=` ~ birthYear.to!string ~ `;` );
-				if( touristExistsQRes.recordCount != 0 )
-				{	
-					content = "Турист " ~ touristExistsQRes.get(0, 0) ~ " " ~ touristExistsQRes.get(1, 0) ~ " "
-					~ " " ~ touristExistsQRes.get(2, 0) ~ " " ~ touristExistsQRes.get(3, 0) 
-					~ " г.р. уже наличествует в базе данных!!!";
-					tpl.set( "content", content );
-					rp ~= tpl.getString();
-				}
-			}
+						
 			ubyte birthDay;
 			ubyte birthMonth;
 			//Вывод даты рождения туриста из базы данных
@@ -192,6 +171,8 @@ void netMain(HTTPContext context)
 			}
 			birthMonthInp ~= `</select>`;
 			edTourFormTpl.set( "birth_month", birthMonthInp );
+			
+			
 			
 			//Окошечко вывода разряда туриста
 		
@@ -236,12 +217,125 @@ void netMain(HTTPContext context)
 		
 		//Собственно проверка и запись данных в БД
 		if( action == ActionType.insertData || action == ActionType.updateData )
-		{	import std.conv, std.algorithm;
+		{	
+			import std.string;
+			if( action == ActionType.insertData )
+			{	string familyName =  PGEscapeStr( pVars.get("family_name", "") );
+				string givenName  =  PGEscapeStr( pVars.get("given_name", "") );
+				string patronymic =  PGEscapeStr( pVars.get("given_name", "") );
+				
+			
+				uint birthYear;
+				try {	birthYear = pVars.get("given_name", "").to!uint; }
+				catch( std.conv.ConvException e ) {  }
+				
+				
+		auto короткийФорматТурист = RecordFormat!(
+			ft.IntKey, "ключ", ft.Str, "фамилия", ft.Str, "имя", ft.Str, "отчество",
+			 ft.Int, "год рожд"
+		)();
+		
+		
+		
+				
+				//: Проверить количество совпадений  в базе
+			//	string select_str1 =`select count(1) from tourist`;
+				
+				
+				
+				string  fff;//запрос на наличие туриста в базе
+				try {
+				
+				fff=`select num, family_name, given_name, patronymic, birth_year from tourist where ` 
+				~ `family_name=         '`~ familyName ~`' ` 
+				~ ` and (`;
+				
+				if(givenName.length!=0)
+				{fff~= ` given_name ILIKE   '`~givenName[0..givenName.toUTFindex(1)]~`%' 
+				                OR  coalesce(given_name, '') = ''	) `;}
+				  else   { fff~=  ` given_name ILIKE  '%%' OR  coalesce(given_name, '') = ''	 )` ;  }           
+				fff~=  ` and (`;
+				 
+				if(patronymic.length!=0) 
+				{fff~= ` patronymic  ILIKE  '`~patronymic[0..patronymic.toUTFindex(1)]~`%' 
+				                       OR     coalesce(patronymic, '') = '') `;}
+				      else   { fff~=  ` patronymic ILIKE  '%%'  OR     coalesce(patronymic, '') = '' )` ;  }                                    
+				 
+				 if(birthYear.to!string =0) 
+				 { fff~=  ` birth_year IS NULL` ;  }  
+				
+				   else   {fff~= ` and (birth_year=    '`~ birthYear.to!string 
+				                                       ~ `' OR  birth_year IS NULL);` ;}                                      
+				}
+				catch(Throwable e)
+				{	writeln(e.msg);
+				
+				}
+				                                     
+			                                    
+				writeln(fff);
+				auto response = dbase.query(fff); //запрос к БД
+					auto похожиеФИО = response.getRecordSet(короткийФорматТурист); 
+					//трансформирует ответ БД в RecordSet (набор записей)
+			 числоСовпадений=похожиеФИО.length;
+		  //table;//таблицаСовпадений;
+		  if(числоСовпадений!=0)
+			{
+			table = `<table class="tab">`;
+	table ~= `<tr>`;
+   table ~= `<td> Ключ</td>`;
+	
+	table ~=`<td>Фамилия</td><td> Имя</td><td> Отчество</td><td> год рожд.</td><td>Править</td>`;
+
+	
+	foreach(rec; похожиеФИО)
+	{	
+	//raz_sud_kat= спортивныйРазряд [rec.get!"Разряд"(1000)] ~ `<br>`~ судейскаяКатегория[rec.get!"Категория"(1000)] ;
+	
+	   table ~= `<tr>`;
+		table ~= `<td>` ~ rec.get!"ключ"(0).to!string ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"фамилия"("") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"имя"("") ~ `</td>`;
+		table ~= `<td>` ~ rec.get!"отчество"("")  ~ `</td>`;
+		table ~= `<td>` ~ ( rec.isNull("год рожд") ? ``: rec.get!"год рожд"().to!string ) ~ `</td>`;
+	   table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"ключ"(0).to!string~`">Изменить</a>  </td>`;
+		
+		table ~= `</tr>`;
+	}
+	
+	table ~= `</table>`;
+
+			
+			}
+			/*
+				foreach(rec;похожиеФИО )
+				{	writeln("СУПЕР_ПУПЕР_ПРОВЕРКА: ",
+				     rec.get!"ключ"(),
+				` `, rec.get!"фамилия"("") ,
+				` `, rec.get!"имя"("") ,
+				` `, rec.get!"отчество"(""),
+				` `,( rec.isNull("год рожд") ? ``: rec.get!"год рожд"().to!string ),
+				"\r\n");                                 
+				}
+				*/
+					/*
+					if( touristExistsQRes.recordCount != 0 )
+					{	
+						content = "Турист " ~ touristExistsQRes.get(0, 0) ~ " " ~ touristExistsQRes.get(1, 0) ~ " "
+						~ " " ~ touristExistsQRes.get(2, 0) ~ " " ~ touristExistsQRes.get(3, 0) 
+						~ " г.р. уже наличествует в базе данных!!!";
+						tpl.set( "content", content );
+						rp ~= tpl.getString();
+					}
+					*/
+			}
+			
 			string queryStr;
 			try
 			{	string fieldNamesStr;  //имена полей для записи
 				string fieldValuesStr; //значения полей для записи
 				
+			
 				//Формирование запроса для записи строковых полей в БД
 				foreach( i, fieldName; strFieldNames )
 				{	string value = pVars.get(fieldName, null);
@@ -323,8 +417,12 @@ void netMain(HTTPContext context)
 				rp ~= tpl.getString();
 				return;
 			}
-			dbase.query(queryStr);
-			if( action == ActionType.insertData )
+			
+			 if(числоСовпадений==0)	 {	dbase.query(queryStr);		 };
+			
+			//dbase.query(queryStr);//исполнение запроса//////////////////////////////////
+			
+			if( action == ActionType.insertData && числоСовпадений==0   )
 			{	if( dbase.lastErrorMessage is null )
 					content = "<h3>Данные о туристе успешно добавлены в базу данных!!!</h3>"
 					~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
@@ -334,7 +432,7 @@ void netMain(HTTPContext context)
 					~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>";
 			}
 			else
-			{	if( dbase.lastErrorMessage is null )
+			{	if( dbase.lastErrorMessage is null && числоСовпадений==0  )
 					content = "<h3>Данные о туристе успешно обновлены!!!</h3>"
 					~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
 					~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
@@ -344,6 +442,18 @@ void netMain(HTTPContext context)
 					~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
 					~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
 			}
+			
+			if( числоСовпадений!=0 )
+			{
+			content ="<h3>В базе имеются похожие туристы</h3>"
+					~ "Вы можете <a href=\"" ~ thisPagePath ~ "\">Добавить запись...</a><br>\r\nпродолжить редактирование</a> этой же записи<br>\r\n"
+					~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a><br>\r\n"
+			      ~ " отредактировать одну из сушествующих записей в представленной таблице<br>\r\n"
+			       ~table;
+			       
+			}
+			
+			
 		}
 		
 		tpl.set( "content", content );

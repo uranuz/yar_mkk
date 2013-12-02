@@ -109,8 +109,19 @@ public:
 			return RoutingStatus.continued;
 		
 		auto jParams = jMessageBody.object["params"];
-		auto jResult = callJSON_RPC_Method!(JSON_RPC_Method)(jParams, context);
-		context.response ~= toJSON(&jResult).idup;
+		
+		JSONValue jResponse = JSONValue();
+		jResponse.type = JSON_TYPE.OBJECT;
+		
+		jResponse.object["result"] = callJSON_RPC_Method!(JSON_RPC_Method)(jParams, context);
+		
+		jResponse.object["jsonrpc"] = JSONValue();
+		jResponse.object["jsonrpc"].type = JSON_TYPE.STRING;
+		jResponse.object["jsonrpc"].str = "2.0";
+		
+		jResponse.object["id"] = jMessageBody.object["id"];
+		
+		context.response ~= toJSON(&jResponse).idup;
 		
 		return RoutingStatus.succeed;
 	}
