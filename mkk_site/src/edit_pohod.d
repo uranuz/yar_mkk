@@ -124,26 +124,22 @@ void создатьФормуИзмененияПохода(
 	RecordSet!( typeof(shortTouristRecFormat) ) touristRS = null
 )
 {	
-	writeln("ФормаИзмПохода10");
 	if( pohodRec )
 	{	//Выводим в браузер значения строковых полей (<input type="text">)
 		foreach( fieldName; strFieldNames )
 			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr(fieldName, "") ) );
 	}
 
-	writeln("ФормаИзмПохода20");
 	//Создаём компонент выбора даты начала похода
 	auto beginDatePicker = new PlainDatePicker;
 	beginDatePicker.name = "begin"; //Задаём часть имени (компонент допишет _day, _year или _month)
 	beginDatePicker.id = "begin"; //аналогично для id
 	
-	writeln("ФормаИзмПохода30");
 	//Создаём компонент выбора даты завершения похода
 	auto finishDatePicker = new PlainDatePicker;
 	finishDatePicker.name = "finish";
 	finishDatePicker.id = "finish";
 	
-	writeln("ФормаИзмПохода40");
 	//Получаем данные о датах (если режим редактирования)
 	if( pohodRec )
 	{	//Извлекаем данные из БД
@@ -155,7 +151,6 @@ void создатьФормуИзмененияПохода(
 			beginDatePicker.date = pohodRec.get!("finish_date");
 	}
 	
-	writeln("ФормаИзмПохода50");
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
 	
@@ -172,56 +167,31 @@ void создатьФормуИзмененияПохода(
 	}
 	
 	if( pohodRec )
-	{	writeln("pohodRec is not null!!");
-		pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
+	{	pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
-	writeln("ФормаИзмПохода60");
+
 	alias pohodRec.FormatType.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
-	
-	pragma(msg, "pohodEnumFieldNames: ", pohodEnumFieldNames);
-	
-	
-	
 	//Вывод перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
-	{	pragma(msg, "Current field name is: ");
-		pragma(msg, fieldName);
-		
-		writeln("ФормаИзмПохода65");
-		
-		//Создаём экземпляр генератора выпадающего списка
+	{	//Создаём экземпляр генератора выпадающего списка
 		auto dropdown =  new PlainDropDownList;
 		
-		writeln("ФормаИзмПохода66");
 		import webtank.common.utils;
-		const(EnumFormat) enumFormatC = pohodRec.getEnumFormat!(fieldName)();
-		writeln("ФормаИзмПохода66а");
-		EnumFormat enumFormat = enumFormatC.mutCopy();
-		writeln("enumForamt", enumFormat);
-		dropdown.values = enumFormat;
-		writeln("ФормаИзмПохода67");
+		dropdown.values = pohodRecFormat.enumFormats[fieldName].mutCopy();
 		dropdown.name = fieldName;
 		dropdown.id = fieldName;
-		
-		writeln("ФормаИзмПохода68");
+
 		//Задаём текущее значение
-		if( !pohodRec.isNull(fieldName) )
-		{	writeln("ФормаИзмПохода69");
+		if( pohodRec && !pohodRec.isNull(fieldName) )
 			dropdown.currKey = pohodRec.get!(fieldName)();
-			writeln("ФормаИзмПохода69а");
-		}
 		
-		writeln("ФормаИзмПохода69б");
 		pohodForm.set( fieldName, dropdown.print() );
-		writeln("ФормаИзмПохода69в");
 	}
-	writeln("ФормаИзмПохода70");
 	
 	//Задаём действие, чтобы при след. обращении к обработчику
 	//перейти на этап записи в БД
 	pohodForm.set( "action", ` value="write"` );
-	writeln("pohodForm.getStr()", pohodForm.getString());
 }
 
 
@@ -300,12 +270,9 @@ void netMain(HTTPContext context)
 	bool isAuthorized = 
 		context.accessTicket.isAuthenticated && 
 		( context.accessTicket.user.isInGroup("moder") || context.accessTicket.user.isInGroup("admin") );
-		
-	writeln("test10");
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
-		writeln("test20");
 		//Создаем шаблон по файлу
 		auto tpl = getGeneralTemplate(thisPagePath);
 
@@ -316,7 +283,6 @@ void netMain(HTTPContext context)
 		else 
 		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 		}
-		writeln("test30");
 	
 		auto dbase = getCommmonDB;
 		if ( !dbase.isConnected )
@@ -324,7 +290,6 @@ void netMain(HTTPContext context)
 			rp ~= tpl.getString();
 			return; //Завершаем
 		}
-		writeln("test40");
 		
 		//Пытаемся получить ключ
 		bool isPohodKeyAccepted = false;
@@ -336,8 +301,6 @@ void netMain(HTTPContext context)
 		}
 		catch(std.conv.ConvException e)
 		{	isPohodKeyAccepted = false; }
-		
-		writeln("test50");
 
 		Record!( typeof(pohodRecFormat) ) pohodRec;
 		RecordSet!( typeof(shortTouristRecFormat) ) touristRS;
@@ -364,7 +327,6 @@ void netMain(HTTPContext context)
 				isPohodKeyAccepted = false;
 		}
 		
-		writeln("test60");
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
 		
 		
@@ -374,13 +336,11 @@ void netMain(HTTPContext context)
 			
 		}
 		else
-		{	writeln("test70");
-			создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
+		{	создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
 			
 		}
 
 		string content = pohodForm.getString();
-		writeln("content.length", content.length);
 		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();

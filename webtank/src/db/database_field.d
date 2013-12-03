@@ -43,13 +43,11 @@ public:
 			_fieldIndex = fieldIndex;
 			_name = fieldName;
 			_enumFormat = enumFormat.mutCopy();
-			writeln("ctor _enumFormat: ", _enumFormat);
 		}
 		
 		///Возвращает формат значения перечислимого типа
 		EnumFormat enumFormat()
-		{	writeln("_enumFormat", _enumFormat);
-			return _enumFormat;
+		{	return _enumFormat;
 		}
 	}
 

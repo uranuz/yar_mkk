@@ -94,6 +94,10 @@ class PlainDatePicker: HTMLControl
 		attrBlocks[`year`]["type"] = `text`;
 		attrBlocks[`day`]["type"] = `text`;
 		
+		//Размеры окошечек для дня и года
+		attrBlocks[`year`]["size"] = `4`;
+		attrBlocks[`day`]["size"] = `2`;
+		
 		if( !_isEmpty )
 		{	attrBlocks[`year`]["value"] = date.year.to!string;
 			attrBlocks[`day`]["value"] = date.day.to!string;
