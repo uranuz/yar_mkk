@@ -14,6 +14,20 @@ shared static this()
 {	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
 }
 
+
+
+auto тестНаличияПохожегоТуриста(
+	string фамилия,
+	string имя,
+	string отчество,
+	int годРожд
+) {
+	
+	
+	
+}
+
+
 void netMain(HTTPContext context)
 {	
    int числоСовпадений;
