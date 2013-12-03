@@ -1,5 +1,7 @@
 module webtank.datctrl.record_format;
 
+import std.stdio;
+
 import webtank._version;
 
 static if( isDatCtrlEnabled ) {
@@ -14,7 +16,7 @@ struct RecordFormat(Args...)
 	//Флаги для полей, показывающие может ли значение поля быть пустым (null)
 	//(если значение = true) или нет (false)
 	bool[string] nullableFlags; ///Флаги "обнулябельности"
-	string[int][string] enumValues; ///Возможные значения для перечислимых полей
+	EnumFormat[string] enumFormats; ///Возможные значения для перечислимых полей
 	
 	///Метод получения типов полей (FieldType)
 	static pure FieldType[] types() @property
@@ -39,32 +41,6 @@ struct RecordFormat(Args...)
 		foreach( i, spec; _fieldSpecs )
 			result[spec.name] = i;
 		return result;
-	}
-	
-	///Метод сериализует формат в std.json
-	JSONValue getStdJSON()
-	{	JSONValue jValue = void;
-		jValue.type = JSON_TYPE.OBJECT;
-		jValue.object["kfi"] = JSONValue();
-		jValue.object["kfi"].type = JSON_TYPE.UINTEGER;
-		jValue.object["kfi"].uinteger = keyFieldIndex;
-		
-		//Образуем JSON-массив описаний полей
-		JSONValue fieldsJSON = void;
-		fieldsJSON.type = JSON_TYPE.ARRAY;
-		foreach( spec; _fieldSpecs )
-		{	JSONValue fldJSON;
-			fldJSON.type = JSON_TYPE.OBJECT;
-			
-			fldJSON.object["n"] = JSONValue(); 
-			fldJSON.object["t"] = JSONValue();
-			fldJSON["n"].str = spec.name;
-			fldJSON["t"].str = spec.fieldType.to!string;
-			fieldsJSON.array ~= fldJSON; //Добавляем описание поля
-		}
-		//Добавляем массив описаний полей к результату
-		jValue.object["f"] = fieldsJSON;
-		return jValue;
 	}
 	
 	//Внутреннее "хранилище" разобранной информации о полях записи
@@ -141,6 +117,45 @@ public:
 		_keys = assumeUnique(keys);
 	}
 	
+	this( const(EnumFormat) format )
+	{	foreach( key, name; format._names )
+			_names[key] = name;
+		
+		_keys = format._keys.dup;
+	}
+	
+	EnumFormat mutCopy() @property const
+	{	return EnumFormat(this);
+	}
+	
+	///Сериализует формат перечислимого типа в std.json
+	JSONValue getStdJSON()
+	{	JSONValue jValue;
+		jValue.type = JSON_TYPE.OBJECT;
+		
+		//Словарь перечислимых значений (числовой ключ --> строковое имя)
+		jValue["enum_n"] = JSONValue();
+		jValue["enum_n"].type = JSON_TYPE.OBJECT;
+		foreach( key, name; _names )
+		{	string strKey = key.to!string;
+			jValue["enum_n"].object[strKey].type = JSON_TYPE.STRING;
+			jValue["enum_n"].object[strKey].str = name;
+		}
+		
+		//Массив, определяющий порядок перечислимых значений
+		jValue["enum_k"] = JSONValue();
+		jValue["enum_k"].type = JSON_TYPE.ARRAY;
+		foreach( key; _keys )
+		{	jValue["enum_k"].array[key].type = JSON_TYPE.UINTEGER;
+			jValue["enum_k"].array[key].uinteger = key;
+		}
+		return jValue;
+	}
+	
+// 	EnumFormat dup() @property immutable
+// 	{	return EnumFormat(this);
+// 	}
+
 	///Конструктор формата получает на входе карту соответсвия
 	///ключей названиям элементов и массив ключей, определяющий
 	///их порядок следования
@@ -229,7 +244,7 @@ template _getFieldNameTuple(FieldSpecs...)
 {	static if( FieldSpecs.length == 0 )
 		alias TypeTuple!() _getFieldNameTuple;
 	else
-		alias TypeTuple!(FieldSpecs[0].name, FieldSpecs[1..$]) _getFieldNameTuple;
+		alias TypeTuple!( FieldSpecs[0].name, _getFieldNameTuple!(FieldSpecs[1..$]) ) _getFieldNameTuple;
 }
 
 //Получить из кортежа элементов типа FieldSpec нужный элемент по имени

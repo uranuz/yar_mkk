@@ -11,17 +11,24 @@ import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.datctr
 
 
 
-auto getRecordSet(RecFormat)(IDBQueryResult queryResult, RecFormat format)
-{	alias RecordSet!RecFormat RecSet;
-	auto recordSet = new RecSet(format);
-	foreach( i, fldSpec; RecFormat._fieldSpecs )
-	{	auto field = new DatabaseField!(fldSpec.fieldType)(queryResult, i);
-		recordSet._setField!(fldSpec.name)( field );
-		static if( fldSpec.fieldType == FieldType.Enum )
-		{	recordSet._initEnum( format.enumValues.get( fieldSpec.name, null ) );
+auto getRecordSet(RecordFormatT)(IDBQueryResult queryResult, const(RecordFormatT) format)
+{	alias RecordSet!RecordFormatT RecordSetT;
+	
+	IBaseDataField[] dataFields;
+	foreach( i, fieldName; RecordFormatT.tupleOfNames!() )
+	{	alias RecordFormatT.getFieldType!(fieldName) fieldType;
+		alias DatabaseField!(fieldType) CurrFieldT;
+		
+		static if( fieldType == FieldType.Enum )
+		{	if( fieldName in format.enumFormats )
+				dataFields ~= new CurrFieldT( queryResult, i, fieldName, format.enumFormats[fieldName] );
+			else
+				dataFields ~= new CurrFieldT( queryResult, i, fieldName );
 		}
+		else
+			dataFields ~= new CurrFieldT( queryResult, i, fieldName );
 	}
+	auto recordSet = new RecordSetT(dataFields);
 	recordSet.setKeyField(0);
 	return recordSet;
 }
-

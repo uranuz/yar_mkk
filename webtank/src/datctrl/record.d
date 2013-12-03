@@ -1,5 +1,7 @@
 module webtank.datctrl.record;
 
+import std.stdio;
+
 import webtank._version;
 
 static if( isDatCtrlEnabled ) {
@@ -16,14 +18,15 @@ interface IBaseRecord
 }
 
 ///Класс реализует работу с записью
-template Record(alias RecordFormatType)
+template Record(alias RecordFormatT)
 {	
 	
 	class Record: IBaseRecord
 	{
-	public:
-		alias RecordFormatType FormatType;
-		alias RecordSet!FormatType RecordSetType;
+		///Тип формата для записи
+		alias RecordFormatT FormatType;
+		
+		private alias RecordSet!FormatType RecordSetType;
 		
 	protected:
 		RecordSetType _recordSet;
@@ -33,9 +36,11 @@ template Record(alias RecordFormatType)
 		
 		///Сериализаци записи в std.json
 		JSONValue getStdJSON()
-		{	JSONValue jValue = _recordSet.format.getStdJSON();
+		{	JSONValue jValue = _recordSet.getStdJSONFormat();
 			
-			jValue.object["d"] = _recordSet.serializeDataAt(_recordKey);
+			jValue.object["d"] = 
+				_recordSet.getStdJSONDataAt( _recordSet.getRecordIndex(_recordKey) );
+			
 			jValue.object["t"] = JSONValue();
 			jValue.object["t"].type = JSON_TYPE.STRING;
 			jValue.object["t"].str = "record";
@@ -61,10 +66,11 @@ template Record(alias RecordFormatType)
 			}
 		}
 		
-		//Функция получения формата для перечислимого типа
-		//Значения отсортированы по возрастанию
-		auto getEnum(string fieldName)()
-		{	return _recordSet.getEnum!(fieldName)();
+		///Метод получения формата для перечислимого типа
+		///Значения отсортированы по возрастанию
+		auto getEnumFormat(string fieldName)()
+		{	writeln("_recordSet.getEnumFormat!(fieldName)()", _recordSet.getEnumFormat!(fieldName)());
+			return _recordSet.getEnumFormat!(fieldName)();
 		}
 		
 		override {
@@ -85,11 +91,12 @@ template Record(alias RecordFormatType)
 			
 			///Возвращает количество ячеек данных в записи
 			size_t length() @property
-			{	return RecordFormatType._fieldSpecs.length;
+			{	return FormatType.tupleOfNames!().length;
 			}
 		
 		} //override
 		
+		///Порядковый номер ключевого поля данных
 		size_t keyFieldIndex() @property
 		{	return _recordSet.keyFieldIndex();
 		}

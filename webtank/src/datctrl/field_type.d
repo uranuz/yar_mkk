@@ -54,7 +54,7 @@ auto fldConv(FieldType FieldT, S)( S value )
 	else static if( isSomeString!(S) )
 	{	with( FieldType ) {
 		//Стандартное преобразование
-		static if( FieldT == Int || FieldT == Str || FieldT == IntKey )
+		static if( FieldT == Int || FieldT == Str || FieldT == IntKey || FieldT == Enum )
 		{	return value.to!( GetFieldValueType!FieldT ); }
 		else static if( FieldT == Bool )
 		{	import std.string;
@@ -86,7 +86,6 @@ auto fldConv(FieldType FieldT, S)( S value )
 	}
 
 }
-
 
 //Возвращает true если данный тип поля является типом ключевого поля
 template isKeyFieldType(FieldType fieldType)

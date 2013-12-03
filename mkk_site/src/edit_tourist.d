@@ -30,7 +30,7 @@ auto тестНаличияПохожегоТуриста(
 
 void netMain(HTTPContext context)
 {	
-   int числоСовпадений;
+   size_t числоСовпадений;
    string table;
 	auto rq = context.request;
 	auto rp = context.response;
@@ -279,7 +279,7 @@ void netMain(HTTPContext context)
 				                       OR     coalesce(patronymic, '') = '') `;}
 				      else   { fff~=  ` patronymic ILIKE  '%%'  OR     coalesce(patronymic, '') = '' )` ;  }                                    
 				 
-				 if(birthYear.to!string =0) 
+				 if(birthYear.to!string =="0") 
 				 { fff~=  ` birth_year IS NULL` ;  }  
 				
 				   else   {fff~= ` and (birth_year=    '`~ birthYear.to!string 

@@ -14,7 +14,7 @@ class SerializationException : Exception {
 	}
 }
 
-
+///Шаблонная функция для сериализации данных в std.json
 JSONValue getStdJSON(T)(T dValue)
 {	/+pragma(msg, T);+/
 	static if( is( T == JSONValue ) )
@@ -79,6 +79,7 @@ JSONValue getStdJSON(T)(T dValue)
 	}
 }
 
+///Шаблонная функция десериализации данных из std.json
 T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
 	static if( is( T == JSONValue ) )

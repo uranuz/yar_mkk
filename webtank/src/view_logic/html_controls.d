@@ -2,7 +2,7 @@ module webtank.view_logic.html_controls;
 
 import std.conv, std.datetime, std.array, std.stdio;
 
-import webtank.net.utils;
+import webtank.net.utils, webtank.datctrl.record_format;
 
 class HTMLControl
 {
@@ -28,13 +28,12 @@ class PlainDropDownList: HTMLControl
 		if( classes.length > 0 )
 			attrs["class"] = HTMLEscapeValue( join(classes, ` `) );
 		
-			
 		string output = `<select` ~ printHTMLAttributes(attrs) ~ `>`;
 		
-		foreach( key, val; values )
+		foreach( name, key; values )
 		{	output ~= `<option value="` ~ key.to!string ~ `"`
-			~ ( ( key == _currValue && !_isEmpty ) ? ` selected` : `` )
-			~ `>` ~ HTMLEscapeText(val) ~ `</option>`;
+			~ ( ( key == _currKey && !_isEmpty ) ? ` selected` : `` )
+			~ `>` ~ HTMLEscapeText(name) ~ `</option>`;
 		}
 		
 		output ~= `</select>`;
@@ -42,13 +41,13 @@ class PlainDropDownList: HTMLControl
 		return output;
 	}
 	
-	string[int] values; ///Значения выпадающего списка (перечислимый тип)
+	EnumFormat values; ///Значения выпадающего списка (перечислимый тип)
 	
-	int currValue() @property  ///Текущее значение списка
-	{	return _currValue; }
+	int currKey() @property  ///Текущее значение списка
+	{	return _currKey; }
 	
-	void currValue(int value) @property
-	{	_currValue = value;
+	void currKey(int value) @property
+	{	_currKey = value;
 		_isEmpty = false;
 	}
 	
@@ -60,7 +59,7 @@ class PlainDropDownList: HTMLControl
 
 protected:
 	bool _isEmpty = true;
-	int _currValue;
+	int _currKey;
 }
 
 enum string[] months = 
@@ -94,6 +93,10 @@ class PlainDatePicker: HTMLControl
 		//Задаём доп. аттрибуты и значения для дня и месяца
 		attrBlocks[`year`]["type"] = `text`;
 		attrBlocks[`day`]["type"] = `text`;
+		
+		//Размеры окошечек для дня и года
+		attrBlocks[`year`]["size"] = `4`;
+		attrBlocks[`day`]["size"] = `2`;
 		
 		if( !_isEmpty )
 		{	attrBlocks[`year`]["value"] = date.year.to!string;

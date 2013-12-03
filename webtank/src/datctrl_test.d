@@ -18,7 +18,7 @@ void main()
 	writeln( format.nullableFlags );
 	
 	
-	writeln( typeid( getTupleTypeOf!(IField, format.fieldSpecs) ).to!string  );
+	writeln( typeid( getTupleTypeOf!(IDataField, format.fieldSpecs) ).to!string  );
 	alias  getTupleTypeOf!(DatabaseField, format.fieldSpecs)[2] DBFieldType;
 	
 	alias RecordSet!( typeof(format) ) RSType;

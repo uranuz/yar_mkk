@@ -1,75 +1,98 @@
 module webtank.db.database_field;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database;
+import std.stdio;
+
+import std.json, std.conv;
+
+import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
 
 
 
 ///Класс ключевого поля
-class DatabaseField(FieldType FieldT) : IField!( FieldT )
+class DatabaseField(FieldType FieldT) : IDataField!( FieldT )
 {
 protected: ///ВНУТРЕННИЕ ПОЛЯ КЛАССА
 	alias GetFieldValueType!(FieldT) T;
 
 	IDBQueryResult _queryResult;
 	immutable(size_t) _fieldIndex;
-	immutable string _name = "";
-	
-	
+	immutable(string) _name;
 
 	//Поля от формата поля
 	static if( isKeyFieldType!(FieldT))
 	{	size_t[size_t] _indexes;
-	// 	size_t _iter = 0; //Итератор, который проходит по всем ключам массива индексов
 		size_t[] _keys;   //Массив ключей
-
 	}
 	else
 	{	bool _isNullable = true;
-// 		bool[] _nullFlags;
-// 		T[] _values;
-		bool _isWriteable = false;
 	}
 	
 	static if( FieldT == FieldType.Enum )
-	{	string[int] _enumFormat;
+	{	EnumFormat _enumFormat;
 	}
 
 public:
-	this( IDBQueryResult queryResult, size_t fieldIndex = 0 )
+		
+	static if( FieldT == FieldType.Enum )
+	{	this( IDBQueryResult queryResult, 
+			size_t fieldIndex, 
+			string fieldName, 
+			const(EnumFormat) enumFormat
+		)
+		{	_queryResult = queryResult;
+			_fieldIndex = fieldIndex;
+			_name = fieldName;
+			_enumFormat = enumFormat.mutCopy();
+		}
+		
+		///Возвращает формат значения перечислимого типа
+		EnumFormat enumFormat()
+		{	return _enumFormat;
+		}
+	}
+
+	this( IDBQueryResult queryResult, 
+		size_t fieldIndex, 
+		string fieldName 
+	)
 	{	_queryResult = queryResult;
 		_fieldIndex = fieldIndex;
+		_name = fieldName;
+		
 		static if( isKeyFieldType!(FieldT) )
 			_readKeys();
 	}
 
-	
 	override { //Переопределяем интерфейсные методы
+		///Возвращает тип поля
 		FieldType type()
 		{	return FieldT; }
+		
+		///Возвращает количество записей для поля
 		size_t length()
 		{	static if( isKeyFieldType!(FieldT) )
 				return _indexes.length;
 			else
 				return _queryResult.recordCount;
 		}
+		
 		string name() @property
 		{	return _name; }
 		
+		///Возвращает true, если поле может быть пустым и false - иначе
 		bool isNullable() @property
 		{	static if( isKeyFieldType!(FieldT) )
 				return false;
 			else
-				return _isNullable;
-		
+				return _isNullable; 
 		}
+		
+		///Возвращает false, поскольку поле не записываемое
 		bool isWriteable() @property
-		{	static if( isKeyFieldType!(FieldT) )
-				return false;
-			else
-				return _isWriteable;
+		{	return false; //Поле только для чтения из БД
 		}
 		
-		//Ключевое поле всегда не пустое
+		///Возвращает true, если поле пустое или false - иначе
 		bool isNull(size_t index)
 		{	static if( isKeyFieldType!(FieldT) )
 				return false;
@@ -80,6 +103,29 @@ public:
 			}
 		}
 		
+		///Метод сериализации формата поля в std.json
+		JSONValue getStdJSONFormat()
+		{	JSONValue jValue;
+			//Вывод имени поля
+			jValue["n"] = JSONValue();
+			jValue["n"].type = JSON_TYPE.STRING;
+			jValue["n"].str = _name;
+			
+			//Вывод типа поля
+			jValue["t"] = JSONValue();
+			jValue["t"].type = JSON_TYPE.STRING;
+			jValue["t"].str = FieldT.to!string;
+			
+			static if( FieldT == FieldType.Enum )
+			{	//Сериализуем формат для перечислимого типа
+				auto enumJValue = _enumFormat.getStdJSON();
+				foreach( key, val; enumJValue.object )
+					jValue[key] = val;
+			}
+			return jValue;
+		}
+		
+		///Получение данных из поля по порядковому номеру index
 		T get(size_t index)
 		{	static if( isKeyFieldType!(FieldT) )
 			{	assert( index <= _indexes.length, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because _indexes.length is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
@@ -89,6 +135,9 @@ public:
 				assert( index <=  _queryResult.recordCount, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because record count is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
 			return fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) );
 		}
+		
+		///Получение данных из поля по порядковому номеру index
+		///Возвращает defaultValue, если значение поля пустое
 		T get(size_t index, T defaultValue)
 		{	static if( isKeyFieldType!(FieldT) )
 				assert( index <= _indexes.length, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because _indexes.length is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
@@ -97,6 +146,7 @@ public:
 			return ( isNull(index) ? defaultValue : fldConv!( FieldT )( _queryResult.get(_fieldIndex, index) ) );
 		}
 		
+		///Получает "сырое" строковое представление данных
 		string getStr(size_t index, string defaultValue = null)
 		{	static if( isKeyFieldType!(FieldT) )
 			{	assert( index <= _indexes.length, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because _indexes.length is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
@@ -105,78 +155,31 @@ public:
 			else
 				assert( index <= _queryResult.recordCount, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because record count is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
 			
-			
 			return ( isNull(index) ? defaultValue : _queryResult.get(_fieldIndex, index) );
 		}
-		
-		static if( FieldT == FieldType.Enum )
-		{	EnumFormat getEnum()
-			{	return _enumFormat;
-			}
-			
-			void _initEnum( const string[int] enumMap )
-			{	_enumFormat = new EnumFormat(enumMap);
-			}
-		}
-
-// 		//Методы и свойства по работе с диапазоном
-// 		ICell front() @property
-// 		{	if( _iter < _keys.length )
-// 				return new Cell( this, _keys[_iter]  );
-// 			assert(0, "Выход за границы дипазона") ;
-// 		}
-// 		bool empty() @property
-// 		{	if ( _iter >= _indexes.length )
-// 			{	_iter = 0;
-// 				return true; 
-// 			}
-// 			else return false;
-// 		}
-// 		void popFront()
-// 		{	_iter++; 
-// 		}
-		
-// 		void setNull(size_t index) //Установить значение ячейки в null
-// 		{	assert(0, _readOnyMessage); }
-// 		void isNullable(bool nullable) @property //Установка возможности быть пустым
-// 		{	assert(0, _readOnyMessage); }
-
-
-// 				size_t _frontKey() @property
-// 				{	if( _iter < _keys.length )
-// 						return _keys[_iter];
-// 					assert(0, "Выход за границы дипазона") ;
-// 				}
 
 		static if( isKeyFieldType!(FieldT) )
-		{	size_t getIndex(size_t key)
+		{	///Возвращает порядковый номер ячейки со значением ключа key
+			size_t getIndex(size_t key)
 			{	if( key in _indexes )
 					return _indexes[key];
-				assert(0, "Ключ не найден!!!");
+				else
+					throw new Exception(`Ключ ` ~ key.to!string ~ ` не найден в поле данных!!!`);
 				//else
 					//TODO: Выдавать ошибку
 			}
 			
+			///Возвращает значение ключа по порядковому номеру ячейки index
 			size_t getKey(size_t index)
 			{	if( index < _keys.length )
 					return _keys[index];
-				assert(0, "Ключ не найден!!!");
-				//else
-					//TODO: Выдавать ошибку
+				else
+					throw new Exception(`Индекс ` ~ index.to!string ~ ` не найден в поле данных!!!`);
 			}
 		}
 		
 			
 	} //override
-	
-	
-	static if( ! isKeyFieldType!(FieldT) )
-	{
-			
-		void _setNullable(bool nullable)
-		{	_isNullable = nullable;
-		}
-	}
 	
 // 	bool keyExists(size_t key)
 // 	{	if( key in _indexes ) return true;
