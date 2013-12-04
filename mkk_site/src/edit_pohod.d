@@ -284,7 +284,7 @@ void netMain(HTTPContext context)
 		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 		}
 	
-		auto dbase = getCommmonDB;
+		auto dbase = getCommonDB;
 		if ( !dbase.isConnected )
 		{	tpl.set( "content", "<h3>База данных МКК не доступна!</h3>" );
 			rp ~= tpl.getString();

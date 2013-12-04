@@ -2,18 +2,18 @@
 	<input type="hidden" name="num"{{num}}>
 	<table>
 		<tr><td>Фамилия</td>
-			<td><input type="text" name="family_name"{{family_name}}></td>
+			<td><input type="text" name="family_name" id="family_name"{{family_name}}></td>
 		</tr>
 		<tr><td>Имя</td>
-			<td><input type="text" name="given_name"{{given_name}}></td>
+			<td><input type="text" name="given_name" id="given_name"{{given_name}}></td>
 		</tr>
 		<tr><td>Отчество</td>
-			<td><input type="text" name="patronymic"{{patronymic}}></td>
+			<td><input type="text" name="patronymic" id="patronymic"{{patronymic}}></td>
 		</tr>
 		<tr><td>Дата рождения</td>
 			<td>{{birth_day}}
 				{{birth_month}}
-				<input type="text" name="birth_year"{{birth_year}} size=6>
+				<input type="text" name="birth_year" id="birth_year"{{birth_year}} size=6>
 			</td>
 		</tr>
 		<tr><td>Адрес проживания</td>
@@ -44,8 +44,10 @@
 			<td>{{judge_category}}</td>
 		</tr>
 		<tr><td> &nbsp; </td>
-			<td><input type="submit"{{submit_btn}}"></td>
+			<td><input type="submit"{{submit_btn}}></td>
+			<td><input type="button" onclick="mkk_site.edit_tourist.sendButtonClick();" value="Послать!"></td>
 		</tr>
 	<table>
 	<input type="hidden" name="action"{{action}}>
 </form>
+<script src="{{js folder}}edit_tourist.js"></script>

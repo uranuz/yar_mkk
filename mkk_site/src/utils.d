@@ -40,7 +40,7 @@ PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 	return tpl;
 }
 
-IDatabase getCommmonDB()
+IDatabase getCommonDB()
 {	import webtank.db.postgresql;
 	return new DBPostgreSQL(commonDBConnStr);
 }
