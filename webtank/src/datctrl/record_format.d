@@ -195,7 +195,7 @@ public:
 	///Первый параметр - имя (строка), второй - ключ (число)
 	int opApply(int delegate(string name, int i) dg) const
 	{	foreach( key; _keys )
-		{	auto result = dg(names[key], key);
+		{	auto result = dg(_names[key], key);
 			if(result)
 				return result;
 		}
