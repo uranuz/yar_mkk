@@ -37,21 +37,26 @@ auto тестНаличияПохожегоТуриста(
 	
 	string  запросНаличияТуриста;//запрос на наличие туриста в базе
 	try {
-	
-	запросНаличияТуриста=`select num, family_name, given_name, patronymic, birth_year from tourist where ` 
-	~ `family_name=         '`~ фамилия ~`' ` 
-	~ ` and (`;
-	
-	if(имя.length!=0)
-	{запросНаличияТуриста~= ` given_name ILIKE   '`~имя[0..имя.toUTFindex(1)]~`%' 
-							OR  coalesce(given_name, '') = ''	) `;}
-		else   { запросНаличияТуриста~=  ` given_name ILIKE  '%%' OR  coalesce(given_name, '') = ''	 )` ;  }           
-	запросНаличияТуриста~=  ` and (`;
+		запросНаличияТуриста=
+			`select num, family_name, given_name, patronymic, birth_year from tourist where ` 
+			~ `family_name = '`~ фамилия ~`' and (`;
 		
-	if(отчество.length!=0) 
-	{запросНаличияТуриста~= ` patronymic  ILIKE  '`~отчество[0..отчество.toUTFindex(1)]~`%' 
-									OR     coalesce(patronymic, '') = '') `;}
-			else   { запросНаличияТуриста~=  ` patronymic ILIKE  '%%'  OR     coalesce(patronymic, '') = '' )` ;  }                                    
+		if( имя.length != 0 )
+		{	запросНаличияТуриста ~= ` given_name ILIKE   '` ~ имя[0..имя.toUTFindex(1)] 
+			~`%' OR  coalesce(given_name, '') = ''	) `;
+		}
+		else
+		{	запросНаличияТуриста~=  ` given_name ILIKE  '%%' OR  coalesce(given_name, '') = ''	 )` ;  
+		}
+		запросНаличияТуриста~=  ` and (`;
+			
+		if( отчество.length != 0 ) 
+		{	запросНаличияТуриста ~= ` patronymic  ILIKE  '` ~ отчество[0..отчество.toUTFindex(1)]
+			~ `%' OR coalesce(patronymic, '') = '') `;
+		}
+		else
+		{	запросНаличияТуриста~=  ` patronymic ILIKE  '%%'  OR  coalesce(patronymic, '') = '' )` ;
+		}
 		
 		if( годРожд.length > 0 )
 		{	try {
@@ -60,7 +65,8 @@ auto тестНаличияПохожегоТуриста(
 			} catch(std.conv.ConvException e) {}
 		}
 		else 
-		{ запросНаличияТуриста~=  ` and birth_year IS NULL;` ;  }                                   
+		{	запросНаличияТуриста~=  ` and birth_year IS NULL;` ;
+		}
 	}
 	catch(Throwable e)
 	{	writeln(e.msg);
@@ -155,6 +161,24 @@ string показатьФормуРедактТуриста(
 		}
 	}
 	
+	//Генератор выпадающего списка месяцев
+	auto monthDropdown = new PlainDropDownList;
+	monthDropdown.values = месяцы.mutCopy();
+	monthDropdown.name = "birth_month";
+	monthDropdown.id = "birth_month";
+
+	//Генератор выпадющего списка спорт. разрядов
+	auto sportsGradeDropdown = new PlainDropDownList;
+	sportsGradeDropdown.values = спортивныйРазряд.mutCopy();
+	sportsGradeDropdown.name = "sports_grade";
+	sportsGradeDropdown.id = "sports_grade";
+	
+	//Генератор выпадающего списка судейских категорий
+	auto judgeCatDropdown = new PlainDropDownList;
+	judgeCatDropdown.values = судейскаяКатегория.mutCopy();
+	judgeCatDropdown.name = "judge_category";
+	judgeCatDropdown.id = "judge_category";
+	
 	//Вывод данных о туристе в форму редакирования
 	if( isUpdateAction )
 	{	/+editTouristForm.set( "num.value", touristRec.get!"ключ"(0).to!string );+/
@@ -170,29 +194,17 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "show_email", ( touristRec.get!"показать эл почту"(false) ? " checked" : "" )  );
 		editTouristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
 		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
+		
+		if( !touristRec.isNull("спорт разряд") )
+			sportsGradeDropdown.currKey = touristRec.get!"спорт разряд"();
+			
+		if( !touristRec.isNull("суд категория") )
+			judgeCatDropdown.currKey = touristRec.get!"суд категория"();
 	}
 	//-----------------------------------------------------------------------------------
 
-	auto monthDropdown = new PlainDropDownList;
-	monthDropdown.values = месяцы.mutCopy();
-	monthDropdown.name = "birth_month";
-	monthDropdown.id = "birth_month";
-
 	editTouristForm.set( "birth_month", monthDropdown.print() );
-	
-	//Окошечко вывода разряда туриста
-	auto sportsGradeDropdown = new PlainDropDownList;
-	sportsGradeDropdown.values = спортивныйРазряд.mutCopy();
-	sportsGradeDropdown.name = "sports_grade";
-	sportsGradeDropdown.id = "sports_grade";
-	
 	editTouristForm.set( "sports_grade", sportsGradeDropdown.print() );
-	
-	auto judgeCatDropdown = new PlainDropDownList;
-	judgeCatDropdown.values = судейскаяКатегория.mutCopy();
-	judgeCatDropdown.name = "judge_category";
-	judgeCatDropdown.id = "judge_category";
-	
 	editTouristForm.set( "judge_category", judgeCatDropdown.print() );
 	
 	editTouristForm.set( "action", ` value="write"` );
@@ -291,7 +303,7 @@ string записатьТуриста(
 				queryStr = "insert into tourist ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
 		}
 		
-		//dbase.query(queryStr);
+		dbase.query(queryStr);
 	}
 	catch(std.conv.ConvException e)
 	{	//TODO: Выдавать ошибку
