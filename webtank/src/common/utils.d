@@ -146,3 +146,27 @@ unittest
  	//static assert( is( typeof(a1) == int[string] ) );
 	//static assert( is( typeof(a2) == int[string] ) );
 }
+
+import std.typecons;
+
+///Шаблон, возвращает true, если N является Nullable или NullableRef
+template isStdNullable(N)
+{
+	static if( is( N == NullableRef!(TL1), TL1... ) )
+		enum bool isStdNullable = true;
+	else static if( is( N == Nullable!(TL2), TL2... ) )
+		enum bool isStdNullable = true;
+	else
+		enum bool isStdNullable = false;
+}
+
+///Шаблон возвращает базовый тип для Nullable или NullableRef
+template getStdNullableType(N)
+{
+	static if( is( N == NullableRef!(TL2), TL2... ) )
+		alias TL2[0] getStdNullableType;
+	else static if( is( N == Nullable!(TL2), TL2... ) )
+		alias TL2[0] getStdNullableType;
+	else
+		static assert (0, `Type ` ~ fullyQualifiedName!(N) ~ ` can't be used as Nullable type!!!` );
+}

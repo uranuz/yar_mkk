@@ -2,6 +2,8 @@ module webtank.common.serialization;
  
 import std.json, std.traits, std.conv, std.typecons;
 
+import webtank.common.utils;
+
 interface IStdJSONSerializeable
 {	JSONValue getStdJSON();
 // 	IStdJSONSerializeable fromStdJSON(JSONValue jValue);
@@ -62,6 +64,13 @@ JSONValue getStdJSON(T)(T dValue)
 		{	jValue.type = JSON_TYPE.ARRAY;
 			foreach( elem; dValue )
 				jValue.array ~= getStdJSON( elem );
+		}
+		else static if( isStdNullable!T )
+		{	alias getStdNullableType!T BaseT;
+			if( dValue.isNull() )
+				jValue.type = JSON_TYPE.NULL;
+			else
+				jValue = getStdJSON( dValue.get() );
 		}
 		else static if( is( T: IStdJSONSerializeable ) )
 		{	if( dValue is null ) 
@@ -178,6 +187,15 @@ T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 		else
 			throw new SerializationException("JSON value doesn't match tuple type!!!");
 	}
+	else static if( isStdNullable!T )
+	{	alias getStdNullableType!T BaseT;
+		pragma(msg, "getStdNullableType!T ", BaseT)
+		T result;
+		if( jValue.type != JSON_TYPE.NULL )
+			result = getDLangValue!(BaseT)(jValue);
+		return result;
+	}
+	
 // 	else static if( is( T: IStdJSONSerializeable ) )
 // 	{	return ( cast(T) dValue.fromStdJSON(jValue) );
 // 	}

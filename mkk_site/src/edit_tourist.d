@@ -22,11 +22,14 @@ auto короткийФорматТурист = immutable( RecordFormat!(
 		ft.Int, "годРожд"
 ) )();
 
+struct AAA { int aaa; }
+
 auto тестНаличияПохожегоТуриста(
 	string фамилия,
 	string имя,
 	string отчество,
-	string годРожд  //TODO: Переделать на число
+	string годРожд,  //TODO: Переделать на число
+	Nullable!(string) число
 ) {
 	writeln("тестНаличияПохожегоТуриста");
 	
