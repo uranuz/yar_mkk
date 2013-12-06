@@ -41,25 +41,27 @@ auto тестНаличияПохожегоТуриста(
 	string  запросНаличияТуриста;//запрос на наличие туриста в базе
 	try {
 		запросНаличияТуриста=
-			`select num, family_name, given_name, patronymic, birth_year from tourist where ` 
-			~ `family_name = '`~ фамилия ~`' and (`;
-		
-		if( имя.length != 0 )
-		{	запросНаличияТуриста ~= ` given_name ILIKE   '` ~ имя[0..имя.toUTFindex(1)] 
-			~`%' OR  coalesce(given_name, '') = ''	) `;
-		}
-		else
-		{	запросНаличияТуриста~=  ` given_name ILIKE  '%%' OR  coalesce(given_name, '') = ''	 )` ;  
-		}
-		запросНаличияТуриста~=  ` and (`;
+			`select num, family_name, given_name, patronymic, birth_year from tourist where `;
 			
-		if( отчество.length != 0 ) 
-		{	запросНаличияТуриста ~= ` patronymic  ILIKE  '` ~ отчество[0..отчество.toUTFindex(1)]
+		запросНаличияТуриста ~= `family_name = '`~ фамилия~`' ` ;// фамилия туриста
+		
+		if( имя.length != 0 )// если набираются имя или первая буква имени туриста
+		{	запросНаличияТуриста ~= ` and (`;
+			запросНаличияТуриста ~= ` given_name ILIKE   '`
+			~ имя[0..имя.toUTFindex(1)] //выводим имена с совпадающей первой буквой
+			~`%' OR  coalesce(given_name, '') = ''	) `;// или тех у кго имя не известно
+		}
+			
+			
+		if( отчество.length != 0 ) // если набираются отчествоили первая буква отчества туриста
+		{	// далее аналогично именам
+		
+			запросНаличияТуриста~=  ` and (`;
+			запросНаличияТуриста ~= ` patronymic  ILIKE  '` ~ отчество[0..отчество.toUTFindex(1)]
 			~ `%' OR coalesce(patronymic, '') = '') `;
 		}
-		else
-		{	запросНаличияТуриста~=  ` patronymic ILIKE  '%%'  OR  coalesce(patronymic, '') = '' )` ;
-		}
+	
+		
 		
 		if( годРожд.length > 0 )
 		{	try {
@@ -67,14 +69,13 @@ auto тестНаличияПохожегоТуриста(
 														~ ` OR  birth_year IS NULL);`;
 			} catch(std.conv.ConvException e) {}
 		}
-		else 
-		{	запросНаличияТуриста~=  ` and birth_year IS NULL;` ;
-		}
+		
 	}
 	catch(Throwable e)
 	{	writeln(e.msg);
 	}
 
+	
 	writeln(запросНаличияТуриста);
 	auto response = dbase.query(запросНаличияТуриста); //запрос к БД
 		auto похожиеФИО = response.getRecordSet(короткийФорматТурист);
