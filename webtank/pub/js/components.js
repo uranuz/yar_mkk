@@ -41,7 +41,7 @@ var webtank = {
 		}
 		return xmlhttp;
 	},
-	parseGetParams: function () { 
+	parseGetParams: function() { 
 		var $_GET = {}; 
 		var __GET = window.location.search.substring(1).split("&"); 
 		for(var i=0; i<__GET.length; i++) { 
@@ -49,7 +49,19 @@ var webtank = {
 			$_GET[getVar[0]] = typeof(getVar[1])=="undefined" ? "" : getVar[1]; 
 		} 
 		return $_GET; 
-	} 
+	},
+	getScrollTop: function() {
+		return (  
+			(window.pageYOffset !== undefined) ? window.pageYOffset : 
+			(document.documentElement || document.body.parentNode || document.body).scrollTop
+		);
+	},
+	getScrollLeft: function() {
+		return (
+			(window.pageXOffset !== undefined) ? window.pageXOffset : 
+			(document.documentElement || document.body.parentNode || document.body).scrollLeft
+		);
+	}
 };
 
 
@@ -136,7 +148,7 @@ webtank.json_rpc =
 };
 
 webtank.wui = {
-	createModalWindow: function()
+	createModalWindow: function(headerText, topPos, leftPos)
 	{	var 
 			doc = window.document,
 			blackout_div = doc.createElement("div"),
@@ -155,7 +167,8 @@ webtank.wui = {
 		close_btn.className = "modal_window_close_btn";
 		
 		close_btn.innerText = "Закрыть";
-		title.innerText = "Текст заголовка";
+		if( headerText )
+			title.innerText = headerText;
 
 		close_btn.onclick = function() {
 			body.removeChild(window_div);
@@ -170,6 +183,11 @@ webtank.wui = {
 		
 		body.appendChild(blackout_div);
 		body.appendChild(window_div);
+		
+		if( topPos )
+			window_div.style.top = topPos + "px";
+		if( leftPos )
+			window_div.style.left = leftPos + "px";
 		
 		return window_div;
 	}

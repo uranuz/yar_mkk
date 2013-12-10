@@ -2,7 +2,7 @@ module mkk_site.edit_tourist;
 
 import std.conv, std.string, std.file, std.stdio, std.utf, std.typecons;
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_routing, webtank.view_logic.html_controls;
+import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_routing, webtank.view_logic.html_controls;
 
 import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
 import std.conv, std.algorithm;
@@ -22,65 +22,44 @@ auto короткийФорматТурист = immutable( RecordFormat!(
 		ft.Int, "годРожд"
 ) )();
 
-struct AAA { int aaa; }
-
 auto тестНаличияПохожегоТуриста(
 	string фамилия,
 	string имя,
 	string отчество,
-	string годРожд,  //TODO: Переделать на число
-	Nullable!(string) число
+	Nullable!(int) годРожд
 ) {
-	writeln("тестНаличияПохожегоТуриста");
-	
 	IDatabase dbase = getCommonDB();
 	
 	//if( !dbase || !dbase.isConnected )
 		//TODO: Добавить ошибку
 	
-	string  запросНаличияТуриста;//запрос на наличие туриста в базе
-	try {
-		запросНаличияТуриста=
-			`select num, family_name, given_name, patronymic, birth_year from tourist where `;
+	//запрос на наличие туриста в базе
+	string запросНаличияТуриста = `select num, family_name, given_name, patronymic, birth_year from tourist where `;
 			
-		запросНаличияТуриста ~= `family_name = '`~ фамилия~`' ` ;// фамилия туриста
-		
-		if( имя.length != 0 )// если набираются имя или первая буква имени туриста
-		{	запросНаличияТуриста ~= ` and (`;
-			запросНаличияТуриста ~= ` given_name ILIKE   '`
-			~ имя[0..имя.toUTFindex(1)] //выводим имена с совпадающей первой буквой
-			~`%' OR  coalesce(given_name, '') = ''	) `;// или тех у кго имя не известно
-		}
-			
-			
-		if( отчество.length != 0 ) // если набираются отчествоили первая буква отчества туриста
-		{	// далее аналогично именам
-		
-			запросНаличияТуриста~=  ` and (`;
-			запросНаличияТуриста ~= ` patronymic  ILIKE  '` ~ отчество[0..отчество.toUTFindex(1)]
-			~ `%' OR coalesce(patronymic, '') = '') `;
-		}
+	запросНаличияТуриста ~= `family_name = '`~ фамилия ~`' ` ;// фамилия туриста
 	
-		
-		
-		if( годРожд.length > 0 )
-		{	try {
-				запросНаличияТуриста~= ` and (birth_year = `~ годРожд.to!string 
-														~ ` OR  birth_year IS NULL);`;
-			} catch(std.conv.ConvException e) {}
-		}
-		
+	if( имя.length != 0 )// если набираются имя или первая буква имени туриста
+	{	запросНаличияТуриста ~= ` and (`;
+		запросНаличияТуриста ~= ` given_name ILIKE   '`
+		~ имя[0..имя.toUTFindex(1)] //выводим имена с совпадающей первой буквой
+		~`%' OR  coalesce(given_name, '') = ''	) `;// или тех у кго имя не известно
 	}
-	catch(Throwable e)
-	{	writeln(e.msg);
+		
+		
+	if( отчество.length > 0 ) // если набираются отчествоили первая буква отчества туриста
+	{	// далее аналогично именам
+	
+		запросНаличияТуриста~=  ` and (`;
+		запросНаличияТуриста ~= ` patronymic  ILIKE  '` ~ отчество[0..отчество.toUTFindex(1)]
+		~ `%' OR coalesce(patronymic, '') = '') `;
 	}
 
-	
-	writeln(запросНаличияТуриста);
+	if( !годРожд.isNull )
+	{	запросНаличияТуриста~= ` and (birth_year = `~ годРожд.to!string ~ ` OR  birth_year IS NULL);`;
+	}
+
 	auto response = dbase.query(запросНаличияТуриста); //запрос к БД
 		auto похожиеФИО = response.getRecordSet(короткийФорматТурист);
-	
-	writeln("похожиеФИО.length", похожиеФИО.length);
 		
 	if( похожиеФИО && похожиеФИО.length > 0  )
 		return создатьТаблицуПохожихТуристов(похожиеФИО);
@@ -91,15 +70,15 @@ auto тестНаличияПохожегоТуриста(
 string создатьТаблицуПохожихТуристов(
 	RecordSet!( typeof(короткийФорматТурист) ) похожиеФИО
 ) {
-	string table = `<table class="tab">`;
+	string table = `<table>`;
 	table ~= `<tr>`;
    table ~= `<td>Ключ</td>`;
 	
-	table ~=`<td>Фамилия</td><td> Имя</td><td> Отчество</td><td> год рожд.</td><td>Править</td>`;
+	table ~=`<td>Фамилия</td><td>Имя</td><td>Отчество</td><td>Год рожд.</td><td>Правка</td>`;
 
 	foreach(rec; похожиеФИО)
 	{	
-	   table ~= `<tr>`;
+		table ~= `<tr>`;
 		table ~= `<td>` ~ rec.get!"ключ"(0).to!string ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"фамилия"("") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"имя"("") ~ `</td>`;
@@ -147,8 +126,8 @@ string показатьФормуРедактТуриста(
 	
 	import std.string;
 				
-	ubyte birthDay;
-	ubyte birthMonth;
+	Nullable!(ubyte) birthDay;
+	Nullable!(ubyte) birthMonth;
 	//Вывод даты рождения туриста из базы данных
 	if( isUpdateAction )
 	{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
@@ -156,12 +135,10 @@ string показатьФормуРедактТуриста(
 			birthDateParts = split( touristRec.get!"дата рожд"(""), "," );
 		if( birthDateParts.length == 2 ) 
 		{	import std.conv;
-			try
-			{	birthDay = birthDateParts[0].to!ubyte;
+			try {
+				birthDay = birthDateParts[0].to!ubyte;
 				birthMonth = birthDateParts[1].to!ubyte;
-			}
-			catch(std.conv.Exception e)
-			{ }
+			} catch(std.conv.ConvException e) { }
 		}
 	}
 	
@@ -190,7 +167,7 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "given_name", printHTMLAttr( `value`, touristRec.get!"имя"("") )  );
 		editTouristForm.set(  "patronymic", printHTMLAttr( `value`, touristRec.get!"отчество"("") )  );
 		editTouristForm.set(  "birth_year", printHTMLAttr( `value`, touristRec.getStr("год рожд", null) )  );
-		editTouristForm.set(  "birth_day", printHTMLAttr( `value`, birthDay == 0 ? null : birthDay.to!string  )  );
+		editTouristForm.set(  "birth_day", printHTMLAttr( `value`, birthDay.isNull() ? null : birthDay.to!string  )  );
 		editTouristForm.set(  "address", printHTMLAttr( `value`, touristRec.get!"адрес"("") )  );
 		editTouristForm.set(  "phone", printHTMLAttr( `value`, touristRec.get!"телефон"("") )  );
 		editTouristForm.set(  "show_phone", ( touristRec.get!"показать телефон"(false) ? " checked" : "" )  );
@@ -198,6 +175,9 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "show_email", ( touristRec.get!"показать эл почту"(false) ? " checked" : "" )  );
 		editTouristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
 		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
+		
+		if( !birthMonth.isNull() )
+			sportsGradeDropdown.currKey = birthMonth.get();
 		
 		if( !touristRec.isNull("спорт разряд") )
 			sportsGradeDropdown.currKey = touristRec.get!"спорт разряд"();
@@ -275,24 +255,26 @@ string записатьТуриста(
 		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
 
 		
-		int sports_grade;
-		try { sports_grade =  pVars.get("sports_grade", "1000").to!int; }
-		catch(std.conv.ConvException e) {  sports_grade=1000;	};
-					
-		if (sports_grade  in спортивныйРазряд)
+		Nullable!(int) sports_grade;
+		try { sports_grade =  pVars.get("sports_grade", null).to!int; }
+		catch(std.conv.ConvException e) {  sports_grade.nullify(); };
+		
+		if( sports_grade in спортивныйРазряд )
 		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"razr\"";
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ pVars.get("sports_grade", "") ~ "'";
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
+				~ ( sports_grade.isNull() ? "NULL" : "'" ~ sports_grade.get().to!string ~ "'" );
 		}
 		else
 			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("sports_grade", "") ~ "\" не является значением типа \"спортивный разряд\"!!!");
 			
-		int judge_category;					
-		try { judge_category =  pVars.get("judge_category", "1000").to!int; }
-		catch(std.conv.ConvException e) {  judge_category=1000;	};
+		Nullable!(int) judge_category;
+		try { judge_category =  pVars.get("judge_category", null).to!int; }
+		catch(std.conv.ConvException e) {  judge_category.nullify(); };
 					
-		if (judge_category  in судейскаяКатегория)
+		if (judge_category in судейскаяКатегория)
 		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"sud\"";
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ pVars.get("judge_category", "") ~ "'";
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
+				~ ( judge_category.isNull() ? "NULL" : "'" ~ judge_category.get().to!string ~ "'" );
 		}
 		else
 			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("judge_category", "") ~ "\" не является значением типа \"судейская категория\"!!!");
@@ -309,10 +291,13 @@ string записатьТуриста(
 		
 		dbase.query(queryStr);
 	}
-	catch(std.conv.ConvException e)
+	catch(Throwable
+	//std.conv.ConvException 
+	e)
 	{	//TODO: Выдавать ошибку
 		content = "<h3>Ошибка при разборе данных формы!!!</h3><br>\r\n";
-		content ~= e.msg;
+		//content ~= e.msg;
+		content ~= e.to!string;
 		return content;
 	}
 	

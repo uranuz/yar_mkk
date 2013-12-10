@@ -1,6 +1,6 @@
 module webtank.view_logic.html_controls;
 
-import std.conv, std.datetime, std.array, std.stdio;
+import std.conv, std.datetime, std.array, std.stdio, std.typecons;
 
 import webtank.net.utils, webtank.datctrl.record_format;
 
@@ -28,12 +28,14 @@ class PlainDropDownList: HTMLControl
 		if( classes.length > 0 )
 			attrs["class"] = HTMLEscapeValue( join(classes, ` `) );
 		
-		string output = `<select` ~ printHTMLAttributes(attrs) ~ `>`;
+		string output = `<select` ~ printHTMLAttributes(attrs) ~ `>`
+			~ `<option value="null"` ~ ( _isNull ? ` selected` : `` ) ~ `>`
+			~ HTMLEscapeText(values.nullName) ~ `</option>`;
 		
 		foreach( name, key; values )
 		{	output ~= `<option value="` ~ key.to!string ~ `"`
-			~ ( ( key == _currKey && !_isEmpty ) ? ` selected` : `` )
-			~ `>` ~ HTMLEscapeText(name) ~ `</option>`;
+			~ ( ( !_isNull && key == _currKey  ) ? ` selected` : `` ) ~ `>`
+			~ HTMLEscapeText(name) ~ `</option>`;
 		}
 		
 		output ~= `</select>`;
@@ -46,19 +48,28 @@ class PlainDropDownList: HTMLControl
 	int currKey() @property  ///Текущее значение списка
 	{	return _currKey; }
 	
+	///Свойство: текущее значение списка
 	void currKey(int value) @property
 	{	_currKey = value;
-		_isEmpty = false;
+		_isNull = false;
 	}
 	
-	bool isEmpty() @property
-	{	return _isEmpty; }
+	///Свойство для задания значения через std.typecons.Nullable
+	void currKey(Nullable!(int) value) @property
+	{	if( value.isNull() )
+			_isNull = true;
+		else
+			_currKey = value.get();
+	}
 	
-	void reset()
-	{	_isEmpty = true; }
+	bool isNull() @property
+	{	return _isNull; }
+	
+	void nullify()
+	{	_isNull = true; }
 
 protected:
-	bool _isEmpty = true;
+	bool _isNull = true;
 	int _currKey;
 }
 
@@ -98,7 +109,7 @@ class PlainDatePicker: HTMLControl
 		attrBlocks[`year`]["size"] = `4`;
 		attrBlocks[`day`]["size"] = `2`;
 		
-		if( !_isEmpty )
+		if( !_isNull )
 		{	attrBlocks[`year`]["value"] = date.year.to!string;
 			attrBlocks[`day`]["value"] = date.day.to!string;
 		}
@@ -107,10 +118,13 @@ class PlainDatePicker: HTMLControl
 		string yearInp = `<input` ~ printHTMLAttributes(attrBlocks[`year`]) ~ `>`;
 		string dayInp = `<input` ~ printHTMLAttributes(attrBlocks[`day`]) ~ `>`;
 		
-		string monthInp = `<select` ~ printHTMLAttributes(attrBlocks[`month`]) ~ `>`;
+		string monthInp = `<select` ~ printHTMLAttributes(attrBlocks[`month`]) ~ `>`
+			~ `<option value="null"` ~ ( _isNull ? ` selected` : `` ) ~ `>`
+			~ `Месяц не выбран</option>`;
+		
 		foreach( i, month; months )
 		{	monthInp ~= `<option value="` ~ (i+1).to!string ~ `"`
-			~ ( ( i+1 == date.month && !_isEmpty ) ? ` selected` : `` )
+			~ ( ( i+1 == date.month && !_isNull ) ? ` selected` : `` )
 			~ `>` ~ month ~ `</option>`;
 		}
 		monthInp ~= `</select>`;
@@ -124,14 +138,17 @@ class PlainDatePicker: HTMLControl
 	
 	void date(Date value) @property
 	{	_date = value;
-		_isEmpty = false;
+		_isNull = false;
 	}
 	
-	void reset()
-	{	_isEmpty = true; }
+	bool isNull() @property
+	{	return _isNull; }
+	
+	void nullify()
+	{	_isNull = true; }
 
 protected:
-	bool _isEmpty = true;
+	bool _isNull = true;
 	Date _date;
 }
 

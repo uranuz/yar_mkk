@@ -2,7 +2,6 @@ module webtank.view_logic.record_set_view;
 
 import std.conv;
 
-import webtank.datctrl.field_type;
 import webtank.datctrl.record_set;
 
 enum FieldViewManner 

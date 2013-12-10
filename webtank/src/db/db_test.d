@@ -3,7 +3,6 @@ module webtank.db.db_test;
 import std.stdio;
 
 //import webtank.db.database;
-import webtank.datctrl.field_type;
 import webtank.db.postgresql;
 import webtank.db.db_record_set;
 

@@ -2,7 +2,7 @@ module webtank.datctrl_test;
 
 import std.typetuple, std.typecons, std.stdio, std.conv;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.datctrl.record, webtank.datctrl.record_set;
+import   webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.datctrl.record, webtank.datctrl.record_set;
 import webtank.db.database_field, webtank.db.datctrl_joint, webtank.db.postgresql;
 
 void main()

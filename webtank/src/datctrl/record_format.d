@@ -8,7 +8,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.typetuple, std.typecons, std.conv, std.json;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization;
+import   webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization, webtank.common.utils;
 
 struct RecordFormat(Args...)
 {	
@@ -99,6 +99,7 @@ struct EnumFormat
 protected:
 	string[int] _names;
 	int[] _keys;
+	string _nullName;
 
 public:
 	///Конструктор формата получает на входе карту соответсвия
@@ -117,11 +118,17 @@ public:
 		_keys = assumeUnique(keys);
 	}
 	
+	this(immutable(string[int]) names, string nullName, bool isAscendingOrder = true) immutable
+	{	this(names, isAscendingOrder);
+		_nullName = nullName;
+	}
+	
 	this( const(EnumFormat) format )
 	{	foreach( key, name; format._names )
 			_names[key] = name;
 		
 		_keys = format._keys.dup;
+		_nullName = format._nullName;
 	}
 	
 	EnumFormat mutCopy() @property const
@@ -129,7 +136,7 @@ public:
 	}
 	
 	///Сериализует формат перечислимого типа в std.json
-	JSONValue getStdJSON()
+	JSONValue getStdJSON() const
 	{	JSONValue jValue;
 		jValue.type = JSON_TYPE.OBJECT;
 		
@@ -151,10 +158,6 @@ public:
 		}
 		return jValue;
 	}
-	
-// 	EnumFormat dup() @property immutable
-// 	{	return EnumFormat(this);
-// 	}
 
 	///Конструктор формата получает на входе карту соответсвия
 	///ключей названиям элементов и массив ключей, определяющий
@@ -165,18 +168,45 @@ public:
 // 	}
 	
 	///Оператор индексации по ключам для получения имени значения
-	string opIndex(int key) const
-	{	if( key in _names )
-			return _names[key];
-		else
-			throw new Exception("Value " ~ key.to!string ~ " is not valid enum key!!!");
-	}
+	///Возвращает null, если значения нет в контейнере
+	string opIndex(K)(K key) const
+		if( is( K == int ) )
+	{	return _names.get(key, null); }
+	
+	///Шаблонный оператор индексации по ключам для получения имени значения
+	///Возвращает null, если значения нет в контейнере
+	///Принимает в качестве параметра "занулябельные" ключи, определённые
+	///через std.typecons.Nullable или NullableRef. Однако базовый тип
+	///значения должен быть int
+	string opIndex(K)(K key) const
+		if( isStdNullable!(K) && is( getStdNullableType!(K) == int )  )
+	{	return ( key.isNull() ? _nullName : _names.get( key.get(), null) ); }
+	
+	///Метод получения имени для перечислимого типа по ключю
+	///с указанием значения по-умолчанию (на случай если имя для ключа не определено)
+	string get(K)(K key, string defaultValue = null) const
+		if( is( K == int ) )
+	{	return _names.get(key, defaultValue); }
+	
+	///Шаблонный метод получения имени перечислимого типа по ключу типа
+	///std.typecons.Nullable или NullableRef. Однако тип значения
+	///в "занулябельных" переменных должен быть int
+	string get(K)(K key, string defaultValue = null) const
+		if( isStdNullable!(K) && is( getStdNullableType!(K) == int )  )
+	{	return ( key.isNull() ? _nullName : _names.get( key.get(), defaultValue) ); }
+	
+	
+	//TODO: Разобраться что применять string* или bool
+	///Оператор in для проверки наличия ключа в наборе значений перечислимого типа
+	inout(string)* opBinaryRight(string op, K)(K key) inout 
+		if( op == "in" && is( K == int ) )
+	{	return ( key in _names ); }
 	
 	///Оператор in для проверки наличия ключа в наборе значений перечислимого типа
-	//TODO: Разобраться как работает inout
-	inout(string)* opBinaryRight(string op)(int key) inout if(op == "in")
-	{	return ( key in _names );
-	}
+	///Работает со ключами типа std.typecons.Nullable, NullableRef (с базовым типом int)
+	inout(bool) opBinaryRight(string op, K)(K key) inout 
+		if( op == "in" && isStdNullable!(K) && is( getStdNullableType!(K) == int ) )
+	{	return ( key.isNull() ? true : ( ( key.get() in _names ) ? true : false ) );  }
 	
 	///Возвращает набор названий значений перечислимого типа
 	string[] names() @property const
@@ -190,6 +220,10 @@ public:
 	int[] keys() @property const
 	{	return _keys.dup;
 	}
+	
+	///Возвращает имя для пустого значения (null) для перечислимого типа
+	string nullName() @property const
+	{	return _nullName; }
 	
 	///Оператор для обхода значений перечислимого типа через foreach
 	///Первый параметр - имя (строка), второй - ключ (число)
@@ -218,7 +252,7 @@ public:
 ///В шаблоне хранится соответсвие между именем и типом поля
 template FieldSpec( FieldType ft, string s = null )
 {	alias ft fieldType;
-	alias GetFieldValueType!(ft) ValueType;
+	alias DataFieldValueType!(ft) ValueType;
 	alias s name;
 }
 

@@ -5,7 +5,7 @@ import std.conv, std.stdio;
 
 import webtank.db.database, webtank.db.database_field;
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.datctrl.record_set, webtank.datctrl.data_field;
+import   webtank.datctrl.record_format, webtank.datctrl.record_set, webtank.datctrl.data_field;
 
 //junction, joint, link, coop
 

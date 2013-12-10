@@ -89,30 +89,8 @@ public:
 		//Запрос к БД, строка запроса в качестве параметра
 		//Возвращает объект унаследованный от интерфейса результата запроса
 		IDBQueryResult query(string sql)
-		{	try { //Логирование запросов к БД для отладки
-				import std.file;
-				std.file.append( _queryLogFileName, 
-					"--------------------\r\n"
-					~ sql ~ "\r\n"
-				);
-			} catch(Exception)
-			{}
-			
-			//Выполняем запрос
+		{	//Выполняем запрос
 			PGresult* Res=PQexec(_conn, toStringz(sql));
-			
-			auto errorMessage = lastErrorMessage;
-			import std.string;
-			if( std.string.strip(errorMessage).length > 0 )
-			{	try { //Логирование запросов к БД для отладки
-					import std.file;
-					std.file.append( _errorLogFileName,
-						"--------------------\r\n"
-						~ errorMessage ~ "\r\n"
-					);
-				} catch(Exception)
-				{}
-			}
 			//TODO: Возможно возвращать null, если запрос завершился с ошибкой
 			
 			return new PostgreSQLQueryResult(this, Res);

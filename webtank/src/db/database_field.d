@@ -4,7 +4,7 @@ import std.stdio;
 
 import std.json, std.conv;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
+import   webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
 
 
 
@@ -12,7 +12,7 @@ import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.db.databa
 class DatabaseField(FieldType FieldT) : IDataField!( FieldT )
 {
 protected: ///ВНУТРЕННИЕ ПОЛЯ КЛАССА
-	alias GetFieldValueType!(FieldT) T;
+	alias DataFieldValueType!(FieldT) T;
 
 	IDBQueryResult _queryResult;
 	immutable(size_t) _fieldIndex;

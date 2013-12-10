@@ -8,7 +8,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.typetuple, std.typecons, std.conv, std.json;
 
-import webtank.datctrl.field_type, webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field, webtank.common.serialization;
+import   webtank.datctrl.data_field, webtank.datctrl.record_set, webtank.datctrl.record_format, webtank.db.database_field, webtank.common.serialization;
 
 interface IBaseRecord
 {	string getStr(string fieldName, string defaultValue);
