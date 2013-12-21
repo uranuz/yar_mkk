@@ -36,7 +36,7 @@ class Element
 enum LexemeType 
 {	markPre, markSuf, varPre, matchOp, varSuf };
 
-dstring[LexemeType] defaultLexems;
+immutable(dstring[LexemeType]) defaultLexems;
 
 static this()
 {	with( LexemeType )
@@ -57,7 +57,7 @@ protected:
 	dstring[LexemeType] _lexValues;
 	
 public:
-	this( string templateStr, dstring[LexemeType] lexems = defaultLexems )
+	this( string templateStr, const(dstring[LexemeType]) lexems = defaultLexems )
 	{	import std.utf;
 		_lexValues = lexems;
 		_sourceStr = std.utf.toUTF32(templateStr);

@@ -244,8 +244,7 @@ class HTTPHeaders
 		return _headers.get( toLower( strip( name ) ), defaultValue );
 	}
 	
-	//Определяем оператор in для класса
-	//TODO: Разобраться как работает inout
+	///Оператор in для класса
 	inout(string)* opBinaryRight(string op)(string name) inout if(op == "in")
 	{	return ( name in _headers );
 	}

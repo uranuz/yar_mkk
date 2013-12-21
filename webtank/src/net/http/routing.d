@@ -116,7 +116,15 @@ class URIRouterRule: HTTPForwardRoutingRule!(URIHandlingRule)
 				.get( _normalizePagePath(context.request.path), null );
 			
 			if( URIHandler )
-				return URIHandler.doRouting(context);
+			{	try {
+					return URIHandler.doRouting(context);
+				}
+				catch( Exception exc )
+				{	
+					
+				}
+				
+			}
 			else
 				return RoutingStatus.continued;
 		}
@@ -167,6 +175,31 @@ protected:
 	string _URI;
 	URIHandlerFuncType _handler;
 }
+
+class URIErrorHandlingRule: HTTPEndPointRoutingRule
+{	
+	this(string URI, URIHandlerFuncType handler)
+	{	super(".HTTP.URI.");
+		_URI = _normalizePagePath(URI);
+		_handler = handler;
+	}
+	
+	override {
+		RoutingStatus doHTTPRouting(HTTPContext context)
+		{	
+			_handler(context); //Вызов пользовательского обработчика
+			return RoutingStatus.succeed;
+		}
+	} //override
+	
+	string URI() @property
+	{	return _URI; }
+	
+protected:
+	string _URI;
+	URIHandlerFuncType _handler;
+}
+
 
 static string _normalizePagePath(string path, bool ignoreEndSlash = true)
 {	import std.string;

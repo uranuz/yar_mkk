@@ -15,4 +15,4 @@ shared static this()
 		.join( new HTTPRouterRule(ticketManager) ) //Добавляем базовый HTTP - роутер
 		.join( new URIRouterRule )  //Добавляем URI - роутер (маршрутизация по адресам)
 		.join( new JSON_RPC_RouterRule );  //Добавляем JSON-RPC - роутер (удалённый вызов процедур)
-}
+} 

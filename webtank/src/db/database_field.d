@@ -155,6 +155,23 @@ public:
 			else
 				assert( index <= _queryResult.recordCount, "Field index '" ~ std.conv.to!string(index) ~ "' is out of bounds, because record count is '" ~ std.conv.to!string(_queryResult.recordCount) ~ "'!!!" );
 			
+			static if( FieldT == FieldType.Enum )
+			{	if( isNull(index) )
+				{	return _enumFormat.nullName;
+					
+				}
+				else
+				{	_enumFormat.
+					
+				}
+				
+				
+			}
+			else
+			{	
+				
+			}
+			
 			return ( isNull(index) ? defaultValue : _queryResult.get(_fieldIndex, index) );
 		}
 
