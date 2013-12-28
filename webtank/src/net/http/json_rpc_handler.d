@@ -11,6 +11,111 @@ class JSON_RPC_Exception : Exception {
 	}
 }
 
+class JSON_RPC_Router: EventBasedHTTPHandler
+{	
+	this( string URIPatternStr, string[string] regExprs, string[string] defaults )
+	{	_URIPattern = new PlainURIPattern(URIPatternStr, regExprs, defaults);
+	}
+	
+	this( string URIPatternStr, string[string] defaults = null )
+	{	this(URIPatternStr, null, defaults);
+	}
+	
+	alias JSONValue delegate( ref const(JSONValue), HTTPContext ) JSON_RPC_WrapperMethod;
+	
+	override bool customProcessRequest(HTTPContext context)
+	{	
+		//-----Опрос обработчика запроса-----
+		auto uriData = _URIPattern.getURIData(context.request.path);
+			
+		if( !uriData.isMatched )
+			return false; //Запрос не прошёл через фильтр
+			
+		string HTTPMethod = toLower( context.request.headers.get("method", null) );
+			
+		if( HTTPMethod != "post" )
+			return false; //Запрос не прошёл через фильтр
+		
+		//-----Конец опроса обработчика события-----
+		onPreProcess.fire(context);
+		
+		auto jMessageBody = context.request.JSON_Body;
+		
+		if( jMessageBody.type != JSON_TYPE.OBJECT )
+			throw new JSON_RPC_Exception(`JSON-RPC message body must be of object type!!!`);
+		
+		string jsonrpc;
+		if( "jsonrpc" in jMessageBody.object )
+		{	if( jMessageBody.object["jsonrpc"].type == JSON_TYPE.STRING )
+				jsonrpc = jMessageBody.object["jsonrpc"].str;
+		}
+		
+		if( jsonrpc != "2.0" )
+			throw new JSON_RPC_Exception(`Only version 2.0 of JSON-RPC protocol is supported!!!`);
+			
+		string methodName;
+		if( "method" in jMessageBody.object )
+		{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
+				methodName = jMessageBody.object["method"].str;
+		}
+		
+		if( methodName.length == 0 )
+			throw new JSON_RPC_Exception(`JSON-RPC method name must not be empty!!!`);
+			
+		auto method = _methods.get(methodName, null);
+		
+		if( method is null )
+			throw new JSON_RPC_Exception(`JSON-RPC method "` ~ methodName ~ `" is not found by server!!!`);
+		
+		//Запрос должен иметь элемент params, даже если параметров
+		//не передаётся. В последнем случае должно передаваться
+		//либо null в качестве параметра, либо пустой объект {}
+		if( "params" in jMessageBody.object )
+		{	auto paramsType = jMessageBody.object["params"].type;
+		
+			//В текущей реализации принимаем либо объект (список поименованных параметров)
+			//либо null, символизирующий их отсутствие
+			if( paramsType != JSON_TYPE.OBJECT && paramsType != JSON_TYPE.NULL )
+				throw new JSON_RPC_Exception(`JSON-RPC "params" property should be of null or object type!!!`);
+		}
+		else
+			throw new JSON_RPC_Exception(`JSON-RPC "params" property should be in JSON request object!!!`);
+		
+		JSONValue jResponse = JSONValue();
+		jResponse.type = JSON_TYPE.OBJECT;
+		
+		//Вызов метода
+		jResponse.object["result"] = method( jMessageBody.object["params"], context );
+		
+		jResponse.object["jsonrpc"] = JSONValue();
+		jResponse.object["jsonrpc"].type = JSON_TYPE.STRING;
+		jResponse.object["jsonrpc"].str = "2.0";
+		
+		jResponse.object["id"] = jMessageBody.object["id"];
+		
+		context.response ~= toJSON(&jResponse).idup;
+		
+		return true;
+	}
+	
+	JSON_RPC_Router join(alias Method)(string methodName = null)
+		if( isSomeFunction!(Method) )
+	{	auto nameOfMethod = ( methodName.length == 0 ? fullyQualifiedName!(Method) : methodName );
+	
+		if( nameOfMethod in _methods )
+			throw new JSON_RPC_Exception(`JSON-RPC method` ~ nameOfMethod ~ ` is already registered in system!!!`);
+		
+		_methods[nameOfMethod] = toDelegate(  &callJSON_RPC_Method!(Method) );
+		return this;
+	}
+	
+protected:
+	
+	JSON_RPC_WrapperMethod[string] _methods;
+	
+	PlainURIPattern _URIPattern;
+}
+
 template callJSON_RPC_Method(alias Method)
 {	
 	import std.traits, std.json, std.conv, std.typecons;
@@ -102,103 +207,4 @@ template callJSON_RPC_Method(alias Method)
 	}
 }
 
-class JSON_RPC_Router: EventBasedHTTPHandler
-{	
-	this( PlainURIPattern pattern )
-	{	_URIPattern = pattern;
-	}
-	
-	alias JSONValue delegate( ref const(JSONValue), HTTPContext ) JSON_RPC_WrapperMethod;
-	
-	override bool customProcessRequest(HTTPContext context)
-	{	
-		//-----Опрос обработчика запроса-----
-		auto uriData = _URIPattern.getURIData(context.request.path);
-			
-		if( !uriData.isMatched )
-			return false; //Запрос не прошёл через фильтр
-			
-		string HTTPMethod = toLower( context.request.headers.get("method", null) );
-			
-		if( HTTPMethod != "post" )
-			return false; //Запрос не прошёл через фильтр
-		
-		//-----Конец опроса обработчика события-----
-		onPreProcess.fire(context);
-		
-		auto jMessageBody = context.request.JSON_Body;
-		
-		if( jMessageBody.type != JSON_TYPE.OBJECT )
-			throw new JSON_RPC_Exception(`JSON-RPC message body must be of object type!!!`);
-		
-		string jsonrpc;
-		if( "jsonrpc" in jMessageBody.object )
-		{	if( jMessageBody.object["jsonrpc"].type == JSON_TYPE.STRING )
-				jsonrpc = jMessageBody.object["jsonrpc"].str;
-		}
-		
-		if( jsonrpc != "2.0" )
-			throw new JSON_RPC_Exception(`Only version 2.0 of JSON-RPC protocol is supported!!!`);
-			
-		string methodName;
-		if( "method" in jMessageBody.object )
-		{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
-				methodName = jMessageBody.object["method"].str;
-		}
-		
-		if( methodName.length == 0 )
-			throw new JSON_RPC_Exception(`JSON-RPC method name must not be empty!!!`);
-			
-		auto method = _methods.get(methodName, null);
-		
-		if( method is null )
-			throw new JSON_RPC_Exception(`JSON-RPC method "` ~ methodName ~ `" is not found by server!!!`);
-		
-		//Запрос должен иметь элемент params, даже если параметров
-		//не передаётся. В последнем случае должно передаваться
-		//либо null в качестве параметра, либо пустой объект {}
-		if( "params" in jMessageBody.object )
-		{	auto paramsType = jMessageBody.object["params"].type;
-		
-			//В текущей реализации принимаем либо объект (список поименованных параметров)
-			//либо null, символизирующий их отсутствие
-			if( paramsType != JSON_TYPE.OBJECT && paramsType != JSON_TYPE.NULL )
-				throw new JSON_RPC_Exception(`JSON-RPC "params" property should be of null or object type!!!`);
-		}
-		else
-			throw new JSON_RPC_Exception(`JSON-RPC "params" property should be in JSON request object!!!`);
-		
-		JSONValue jResponse = JSONValue();
-		jResponse.type = JSON_TYPE.OBJECT;
-		
-		//Вызов метода
-		jResponse.object["result"] = method( jMessageBody.object["params"], context );
-		
-		jResponse.object["jsonrpc"] = JSONValue();
-		jResponse.object["jsonrpc"].type = JSON_TYPE.STRING;
-		jResponse.object["jsonrpc"].str = "2.0";
-		
-		jResponse.object["id"] = jMessageBody.object["id"];
-		
-		context.response ~= toJSON(&jResponse).idup;
-		
-		return true;
-	}
-	
-	JSON_RPC_Router join(alias Method)()
-		if( isSomeFunction!(Method) )
-	{	auto methodName = fullyQualifiedName!(Method);
-	
-		if( methodName in _methods )
-			throw new JSON_RPC_Exception(`JSON-RPC method` ~ methodName ~ ` is already registered in system!!!`);
-		
-		_methods[methodName] = toDelegate(  &callJSON_RPC_Method!(Method) );
-		return this;
-	}
-	
-protected:
-	
-	JSON_RPC_WrapperMethod[string] _methods;
-	
-	PlainURIPattern _URIPattern;
-}
+

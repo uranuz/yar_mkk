@@ -11,13 +11,24 @@ struct PlainURIData
 
 class PlainURIPattern
 {	
-	this( dstring URIPatternStr, dstring[dstring] conditions, dstring[dstring] defaults )
+	this( dstring URIPatternStr, dstring[dstring] regExprs, dstring[dstring] defaults )
 	{	_patternStr = toUTF32(URIPatternStr);
 		_parseURIPatternStr(URIPatternStr);
-		_conditions = conditions;
+		_regExprs = regExprs;
 		_defaults = defaults;
 	}
 	
+	this( string URIPatternStr, string[string] regExprs, string[string] defaults )
+	{	_patternStr = toUTF32(URIPatternStr);
+	
+		_parseURIPatternStr(_patternStr);
+		
+		foreach( paramName, expr; regExprs )
+			_regExprs[ toUTF32(paramName) ] = toUTF32(expr);
+		
+		foreach( paramName, value; defaults )
+			_defaults[ toUTF32(paramName) ] = toUTF32(value);
+	}
 	
 	PlainURIData getURIData(string URIStr)
 	{	import std.utf;
@@ -40,7 +51,7 @@ class PlainURIPattern
 		
 		size_t matchedConditionsCount = 0;
 		//Проверка условий
-		foreach( paramName, cond; _conditions )
+		foreach( paramName, cond; _regExprs )
 		{	auto r = regex("^" ~ cond ~ "$", "g");
 			if( paramName in params )
 			{
@@ -56,12 +67,12 @@ class PlainURIPattern
 				
 			}
 			else
-			{	//Параметр с заданным именем вовсе не найден
+			{	//Параметр с заданным именем не найден
 				return PlainURIData(null, false); 
 			}
 		}
 		
-		if( matchedConditionsCount == _conditions.length )
+		if( matchedConditionsCount == _regExprs.length )
 			return PlainURIData(params, true);
 		else
 			return PlainURIData(null, false);
@@ -69,7 +80,7 @@ class PlainURIPattern
 	
 protected:
 	dstring _patternStr;
-	dstring[dstring] _conditions;
+	dstring[dstring] _regExprs;
 	dstring[dstring] _defaults;
 	
 	dstring[] _literals;
@@ -175,27 +186,31 @@ protected:
 		
 		//Метод добавления значения параметра в результат
 		bool appendParam(size_t i) nothrow
-		{	auto paramName = _paramNames[paramIndex];
-			auto paramValue = URIStr[paramValuePos..i];
-			
-			if( paramName in params )
-			{	if( paramValue != params[paramName] )
-					return false;
+		{	if( paramIndex < _paramNames.length  )
+			{
+				auto paramName = _paramNames[paramIndex];
+				auto paramValue = URIStr[paramValuePos..i];
+				
+				if( paramName in params )
+				{	if( paramValue != params[paramName] )
+						return false;
+				}
+				else
+				{	params[ paramName ] = paramValue;
+					paramIndex++;
+				}
 			}
 			else
-			{	params[ paramName ] = paramValue;
-				paramIndex++;
-			}
+				return true; //TODO: Выглядит как костыль
 			
 			return true;
 		}
 		
 		//Цикл просмотра строки и поиска литералов
 		for( ; i < URIStr.length; i++ )
-		{	if( literalIndex < _literals.length && paramIndex < _paramNames.length )
+		{	if( literalIndex < _literals.length)
 			{	if( URIStr[i..$].startsWith(_literals[literalIndex]) )
 				{	//Нашли литерал 
-				
 					if( !appendParam(i) ) //Добавляем параметр, идущий до него
 						return PlainURIData(null, false);
 					
@@ -243,20 +258,23 @@ protected:
 
 
 
-// void main()
-// {	
-// 	
-// 	dstring URIPatternStr = `/dyn/pohod/by_date/(  {start_year}( |/{start_month} )(|/to/{end_year}(|/{end_month})))`;
-// 	
-// 	
-// 	dstring plainURIPatternStr1 = `{fig}/dyn/pohod/by_date/{start_year}/{start_month}/to/{end_year}/{end_month}`;
-// 	dstring URIExampleStr1 = `/dyn/pohod/by_date/2013r/08/to/2014/06`;
-// 	
-// 	dstring plainURIPatternStr2 = `/dyn/pohod/by_date/{goblin}/ololo_{name}`;
-// 	dstring URIExampleStr2 = `/dyn/pohod/by_date/{goblin}/ololo_{name}/`;
-// 	
-// 	auto pattern = new PlainURIPattern(plainURIPatternStr1, ["start_year": `\d*`], ["fig": "ooo"]);
-// 	
-// 	writeln( pattern.getURIData(URIExampleStr1) );
-// 
-// }
+void main()
+{	
+	
+	dstring URIPatternStr = `/dyn/pohod/by_date/(  {start_year}( |/{start_month} )(|/to/{end_year}(|/{end_month})))`;
+	
+	
+	dstring plainURIPatternStr1 = `{fig}/dyn/pohod/by_date/{start_year}/{start_month}/to/{end_year}/{end_month}`;
+	dstring URIExampleStr1 = `/dyn/pohod/by_date/2013/08/to/2014/06`;
+	
+	dstring plainURIPatternStr2 = `/dyn/pohod/by_date/{goblin}/ololo_{name}`;
+	dstring URIExampleStr2 = `/dyn/pohod/by_date/{goblin}/ololo_{name}/`;
+	
+	dstring plainURIPatternStr3 = `/dyn/pohod`;
+	dstring URIExampleStr3 = `/dyn/pohod`;
+	
+	auto pattern = new PlainURIPattern(plainURIPatternStr3, null, null);
+	
+	writeln( pattern.getURIData(URIExampleStr3) );
+
+}

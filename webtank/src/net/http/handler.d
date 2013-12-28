@@ -1,5 +1,7 @@
 module webtank.net.http.handler;
 
+import std.stdio, std.conv;
+
 import webtank.net.http.context, webtank.common.utils;
 
 ///Интерфейс обработчика HTTP-запросов приложения
@@ -123,8 +125,12 @@ import webtank.net.http.uri_pattern;
 ///Маршрутизатор запросов к страницам сайта по URI
 class URIPageRouter: EventBasedHTTPHandler
 {	
-	this( PlainURIPattern pattern )
-	{	_URIPattern = pattern;
+	this( string URIPatternStr, string[string] regExprs, string[string] defaults )
+	{	_URIPattern = new PlainURIPattern(URIPatternStr, regExprs, defaults);
+	}
+	
+	this( string URIPatternStr, string[string] defaults = null )
+	{	this(URIPatternStr, null, defaults);
 	}
 	
 	alias void delegate(HTTPContext) PageHandler;
@@ -134,18 +140,22 @@ class URIPageRouter: EventBasedHTTPHandler
 		
 		if( !uriData.isMatched )
 			return false;
-			
+
 		onPreProcess.fire(context);
 		
-		auto method = _pageHandlers.get(context.request.path, null);
-		if( method )
-		{	method(context);
-			return true;
+		//Перебор маршрутов к страницам
+		foreach( ref route; _pageRoutes )
+		{	auto pageURIData = route.pattern.getURIData(context.request.path);
+			
+			if( pageURIData.isMatched )
+			{	route.handler(context);
+				return true; //Запрос обработан
+			}
 		}
 		
 		//Перебор различных обработчиков для запроса
-		foreach( requestHdl; _handlers )
-		{	if( requestHdl.processRequest(context) )
+		foreach( handler; _handlers )
+		{	if( handler.processRequest(context) )
 				return true; //Запрос обработан
 		}
 		
@@ -157,20 +167,53 @@ class URIPageRouter: EventBasedHTTPHandler
 		return this;
 	}
 	
-	URIPageRouter join(IHTTPHandler[] handlers)
-	{	_handlers ~= handlers;
-		return this;
+	struct PageRoute
+	{	PlainURIPattern pattern;
+		PageHandler handler;
 	}
 	
-	URIPageRouter join(alias Method)(string pageURI)
-	{	import std.functional;
-		_pageHandlers[pageURI] = toDelegate( &Method );
-		return this;
+	template join(alias Method)
+		
+	{	
+		import std.functional;
+		URIPageRouter join(string URIPatternStr, string[string] regExprs, string[string] defaults)
+		{	auto uriPattern = new PlainURIPattern(URIPatternStr, regExprs, defaults);
+			_pageRoutes ~= PageRoute( uriPattern, toDelegate( &Method ) );
+			return this;
+		}
+		
+		URIPageRouter join(string URIPatternStr, string[string] defaults = null)
+		{	return this.join!(Method)( URIPatternStr, null, defaults );
+		}
 	}
+	
+	
 	
 protected:
-	IHTTPHandler[] _handlers;
-	PageHandler[string] _pageHandlers;
+	PageRoute[] _pageRoutes;
 	
+	IHTTPHandler[] _handlers;
+	
+	PlainURIPattern _URIPattern;
+}
+
+
+class PlainPageHandler(alias Method): IHTTPHandler
+	
+{	this(string URIPatternStr, string[string] regExprs, string[string] defaults)
+	{	_URIPattern = new PlainURIPattern(URIPatternStr, regExprs, defaults);
+	}
+	
+	override bool processRequest( HTTPContext context )
+	{	auto uriData = PlainURIPattern.getURIData(context.request.path);
+		
+		if( uriData.isMatched )
+		{	Method(context);
+			return true;
+		}
+		else
+			return false;
+	}
+protected:
 	PlainURIPattern _URIPattern;
 }
