@@ -1,0 +1,176 @@
+module webtank.net.http.handler;
+
+import webtank.net.http.context, webtank.common.utils;
+
+///Интерфейс обработчика HTTP-запросов приложения
+interface IHTTPHandler
+{	///Метод обработки запроса. Возвращает true, если запрос обработан.
+	///Возвращает false, если запрос не соответствует обработчику
+	///В случае ошибки кидает исключение
+	bool processRequest(HTTPContext context);
+}
+
+///Типы обработчиков, используемых при обработке HTTP-запросов
+
+///Тип обработчика: ошибка при обработке HTTP-запроса
+alias bool delegate(HTTPContext, Throwable) ErrorHandler;
+
+///Тип обработчика: начало опроса обработчика HTTP-запроса
+alias void delegate(HTTPContext)  PrePollHandler;
+
+///Тип обработчика: начало обработки HTTP-запроса
+alias void delegate(HTTPContext) PreProcessHandler;
+
+///Тип обработчика: завершение обработки HTTP-запроса
+alias void delegate(HTTPContext) PostProcessHandler;
+
+///Базовый класс набора обработчиков HTTP-запросов
+class EventBasedHTTPHandler: IHTTPHandler
+{	this()
+	{	_errorEvent = new Event!(ErrorHandler);
+		_prePollEvent = new Event!(PrePollHandler);
+		_preProcessEvent = new Event!(PreProcessHandler);
+		_postProcessEvent = new Event!(PostProcessHandler);
+	}
+	
+	///События, возникающие при обработке запроса
+	@property {
+		///Событие: ошибка при обработке HTTP-запроса
+		Event!(ErrorHandler) onError()
+		{	return _errorEvent; }
+		
+		///Событие: начало опроса обработчика HTTP-запроса
+		Event!(PrePollHandler) onPrePoll()
+		{	return _prePollEvent; }
+		
+		///Событие: начало обработки HTTP-запроса
+		Event!(PreProcessHandler) onPreProcess()
+		{	return _preProcessEvent; }
+		
+		///Событие: завершение обработки HTTP-запроса
+		Event!(PostProcessHandler) onPostProcess()
+		{	return _postProcessEvent; }
+	}
+	
+	///Реализация обработчика HTTP-запроса по-умолчанию.
+	///Без отсутствия явной необходимости не переопределять,
+	///а использовать переопределение customProcessRequest
+	bool processRequest( HTTPContext context )
+	{	//Перебор различных обработчиков для запроса
+		try {
+			onPrePoll.fire(context);
+			if( customProcessRequest(context) )
+			{	onPostProcess.fire(context);
+				return true; //Запрос обработан
+			}
+		}
+		catch( Throwable error )
+		{	if( onError.fire(context, error) )
+				return true; //Ошибка обработана -> запрос обработан
+			else
+				throw error; //Ни один обработчик не смог обработать ошибку
+		}
+		
+		return false; //Запрос не обработан
+	}
+	
+	///Переопределяемый пользователем метод для обработки запроса
+	abstract bool customProcessRequest( HTTPContext context );
+	
+protected:
+	Event!(ErrorHandler) _errorEvent;
+	Event!(PrePollHandler) _prePollEvent;
+	Event!(PreProcessHandler) _preProcessEvent;
+	Event!(PostProcessHandler) _postProcessEvent;
+}
+
+class HTTPRouter: EventBasedHTTPHandler
+{	
+	override bool customProcessRequest( HTTPContext context )
+	{	onPrePoll.fire(context);
+		//TODO: Проверить, что имеем достаточно корректный HTTP-запрос
+		onPreProcess.fire(context);
+		
+		foreach( hdl; _handlers )
+		{	if( hdl.processRequest(context) )
+				return true;;
+		}
+		
+		onPostProcess.fire(context);
+		
+		return false;
+	}
+	
+	///Метод присоединения обработчика HTTP-запроса
+	HTTPRouter join(IHTTPHandler handler)
+	{	_handlers ~= handler;
+		return this;
+	}
+	
+	///Метод присоединения массива обработчиков HTTP-запросов к набору
+	HTTPRouter join(IHTTPHandler[] handlers)
+	{	_handlers ~= handlers;
+		return this;
+	}
+	
+protected:
+	IHTTPHandler[] _handlers;
+}
+
+
+import webtank.net.http.uri_pattern;
+
+///Маршрутизатор запросов к страницам сайта по URI
+class URIPageRouter: EventBasedHTTPHandler
+{	
+	this( PlainURIPattern pattern )
+	{	_URIPattern = pattern;
+	}
+	
+	alias void delegate(HTTPContext) PageHandler;
+	
+	override bool customProcessRequest( HTTPContext context )
+	{	auto uriData = _URIPattern.getURIData(context.request.path);
+		
+		if( !uriData.isMatched )
+			return false;
+			
+		onPreProcess.fire(context);
+		
+		auto method = _pageHandlers.get(context.request.path, null);
+		if( method )
+		{	method(context);
+			return true;
+		}
+		
+		//Перебор различных обработчиков для запроса
+		foreach( requestHdl; _handlers )
+		{	if( requestHdl.processRequest(context) )
+				return true; //Запрос обработан
+		}
+		
+		return false; //Запрос не обработан этим узлом
+	}
+	
+	URIPageRouter join(IHTTPHandler handler)
+	{	_handlers ~= handler;
+		return this;
+	}
+	
+	URIPageRouter join(IHTTPHandler[] handlers)
+	{	_handlers ~= handlers;
+		return this;
+	}
+	
+	URIPageRouter join(alias Method)(string pageURI)
+	{	import std.functional;
+		_pageHandlers[pageURI] = toDelegate( &Method );
+		return this;
+	}
+	
+protected:
+	IHTTPHandler[] _handlers;
+	PageHandler[string] _pageHandlers;
+	
+	PlainURIPattern _URIPattern;
+}

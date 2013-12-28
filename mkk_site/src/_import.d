@@ -1,6 +1,6 @@
 module mkk_site._import;
 
-import webtank.net.web_server, webtank.net.http.routing, webtank.net.http.json_rpc_routing; //Подключаем сервер
+import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler; //Подключаем сервер
 
 public import mkk_site.site_data;
 

@@ -1,21 +1,19 @@
 module webtank.net.web_server;
 
-import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime, std.getopt;
+import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime;
 
-import webtank.net.routing, webtank.net.http.context;
+import webtank.net.http.handler, webtank.net.http.context;
 
 class WebServer
 {	
 protected:
 	ushort _port = 8082;
+	IHTTPHandler _handler;
 	
 public:
-	this(ushort port) 
+	this(ushort port, IHTTPHandler handler) 
 	{	_port = port;
-		
-		//TODO: Исправить это временное решение
-		//Отстраиваем дерево маршрутизации
-		Router.start();
+		_handler = handler;
 	}
 	
 	void start()
@@ -42,7 +40,7 @@ public:
 		
 		while(true) //Цикл приёма соединений через серверный сокет
 		{	Socket currSock = listener.accept(); //Принимаем соединение
-			auto workingThread = new WorkingThread(currSock);
+			auto workingThread = new WorkingThread(currSock, _handler);
 			workingThread.start();
 		}
 		
@@ -138,10 +136,12 @@ class WorkingThread: Thread
 {	
 protected:
 	Socket _socket;
+	IHTTPHandler _handler;
 	
 public:
-	this(Socket sock)
+	this(Socket sock, IHTTPHandler handler)
 	{	_socket = sock;
+		_handler = handler;
 		super(&_work);
 	}
 	
@@ -181,8 +181,8 @@ protected:
 		
 		auto context = new HTTPContext( request, new ServerResponse(&socketSend) );
 		
-		//Запуск обработки HTTP-запроса через маршрутизатор
-		Router.process( context );
+		//Запуск обработки HTTP-запроса
+		_handler.processRequest( context );
 		
 		context.response.flush();
 		
@@ -195,15 +195,15 @@ protected:
 	}
 }
 
-void main(string[] progAgs) {
-	//Основной поток - поток управления потоками
-
-	ushort port = 8082;
-	//Получаем порт из параметров командной строки
-	getopt( progAgs, "port", &port );
-
-	
-	auto server = new WebServer(port);
-	server.start();
-}
+// void main(string[] progAgs) {
+// 	//Основной поток - поток управления потоками
+// 
+// 	ushort port = 8082;
+// 	//Получаем порт из параметров командной строки
+// 	getopt( progAgs, "port", &port );
+// 
+// 	
+// 	auto server = new WebServer(port);
+// 	server.start();
+// }
 

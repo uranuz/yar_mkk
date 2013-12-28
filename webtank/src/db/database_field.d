@@ -4,7 +4,7 @@ import std.stdio;
 
 import std.json, std.conv;
 
-import   webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
+import webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
 
 
 
@@ -160,10 +160,10 @@ public:
 				{	return _enumFormat.nullName;
 					
 				}
-				else
-				{	_enumFormat.
-					
-				}
+// 				else
+// 				{	_enumFormat.
+// 					
+// 				}
 				
 				
 			}

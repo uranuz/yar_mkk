@@ -2,7 +2,7 @@ module webtank.test.json_rpc_test;
 
 import std.conv, std.string, std.file, std.stdio, std.json;
 
-import webtank.net.json_rpc, webtank.datctrl._import, webtank.db._import;
+import webtank.datctrl._import, webtank.db._import;
 
 immutable asyncHandlersPath = "/dyn/handlers/";
 immutable thisPagePath = asyncHandlersPath ~ "xhr_test";

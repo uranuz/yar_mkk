@@ -170,3 +170,46 @@ template getStdNullableType(N)
 	else
 		static assert (0, `Type ` ~ fullyQualifiedName!(N) ~ ` can't be used as Nullable type!!!` );
 }
+
+import std.traits;
+
+///Попытка реализации событий
+///В текущей реализации обработчик должен возвращать bool или ничего (void)
+///Возврат обработчиком значения true или возникновение исключения вызывает
+///прерывание цепочки обработчиков
+class Event(T)
+	if( isCallable!(T) && ( is( ReturnType!(T) == void ) || is( ReturnType!(T) == bool ) ) )
+{
+	this() const {}
+	
+	private T[] _handlers;
+	
+	///Добавление обработчика события
+	void opOpAssign(string op)( T handler ) if( op == "~" )
+	{	_handlers ~= handler; }
+	
+	///Запуск всех обработчиков
+	bool fire(TL...)(TL params) const
+	{	foreach( hdl; _handlers)
+		{	static if( is( ReturnType!(T) == void ) )
+			{	hdl(params);
+			}
+			else static if( is( ReturnType!(T) == bool ) )
+			{	if( hdl(params) )
+					return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	import std.algorithm;
+	
+	void remove( T handler )
+	{	auto index = countUntil(_handlers, handler);
+		if( index != -1 )
+		{	_handlers = ( index ==_handlers.length-1 ? _handlers[0..$-1] : _handlers[0..index] ~ _handlers[index+1..$] );
+		}
+	}
+	
+}
