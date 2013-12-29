@@ -28,7 +28,7 @@
 	
 		function testXHR() {
 			var xmlhttp = getXmlHttp()
-			xmlhttp.open('POST', '/dyn/xhr_test', true);
+			xmlhttp.open('POST', '/dyn/jsonrpc/', true);
 			xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState == 4) {
 				if(xmlhttp.status == 200) {

@@ -14,7 +14,7 @@ class JSON_RPC_Exception : Exception {
 class JSON_RPC_Router: EventBasedHTTPHandler
 {	
 	this( string URIPatternStr, string[string] regExprs, string[string] defaults )
-	{	_URIPattern = new PlainURIPattern(URIPatternStr, regExprs, defaults);
+	{	_uriPattern = new URIPattern(URIPatternStr, regExprs, defaults);
 	}
 	
 	this( string URIPatternStr, string[string] defaults = null )
@@ -26,7 +26,7 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 	override bool customProcessRequest(HTTPContext context)
 	{	
 		//-----Опрос обработчика запроса-----
-		auto uriData = _URIPattern.getURIData(context.request.path);
+		auto uriData = _uriPattern.match(context.request.path);
 			
 		if( !uriData.isMatched )
 			return false; //Запрос не прошёл через фильтр
@@ -113,7 +113,7 @@ protected:
 	
 	JSON_RPC_WrapperMethod[string] _methods;
 	
-	PlainURIPattern _URIPattern;
+	URIPattern _uriPattern;
 }
 
 template callJSON_RPC_Method(alias Method)

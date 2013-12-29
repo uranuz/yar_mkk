@@ -13,7 +13,7 @@ __gshared JSON_RPC_Router jsonRPCRouter;
 shared static this()
 {	router = new HTTPRouter;
 	pageRouter = new URIPageRouter( "/dyn/{remainder}" );
-	jsonRPCRouter = new JSON_RPC_Router( "/jsonrpc/{remainder}" );
+	jsonRPCRouter = new JSON_RPC_Router( "/dyn/jsonrpc/{remainder}" );
 	
 	router
 		.join(pageRouter)
@@ -33,6 +33,12 @@ shared static this()
 	
 	jsonRPCRouter.join!(rpcFunc);
 	pageRouter.join!(netMain)("/dyn/vasya");
+	
+	jsonRPCRouter.onError ~= (HTTPContext context, Throwable error) {
+		context.response ~= `{"jsonrpc":"2.0","error":{"msg":"` 
+		~ error.msg ~ `"}}`;
+		return true;
+	};
 }
 
 string rpcFunc(HTTPContext context, string[string] assocList, int shit)
