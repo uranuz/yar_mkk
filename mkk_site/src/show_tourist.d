@@ -1,6 +1,6 @@
 module mkk_site.show_tourist;
 
-import std.conv, std.string, std.utf/+, std.stdio+/;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
@@ -58,8 +58,8 @@ void netMain(HTTPContext context)
 	// 20:"всесоюзная",30:"международная"];
 	 
 	 
-	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); 
-	
+	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); // пропускаем фамилию через функцию отсечки
+
 	try { //Логирование запросов к БД для отладки
 	std.file.append( eventLogFileName, 
 		"--------------------\r\n"
@@ -69,18 +69,19 @@ void netMain(HTTPContext context)
 	uint limit = 10;// максимальное  чмсло строк на странице
 	int page;
 	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
-	dbase.query(`select count(1) from tourist where family_name = '` ~ fem ~ "'");
-
+	dbase.query(`select count(1) from tourist where family_name ILIKE '`~ fem ~ `%'`);
+  
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
+	 //writeln(col_str);
 	
-	uint pageCount = (col_str)/limit; //Количество страниц
+	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
  			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
-	} catch (Exception) { curPageNum = 1; }
+	} catch (Exception) { ceNumurPag = 1; }
 
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
@@ -102,8 +103,8 @@ void netMain(HTTPContext context)
 	{	if( curPageNum != 1 )
 			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
 		
-		content ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `"> из ` 
-			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `;
+		content ~= ` Страница <input name="cur_page_num" type="text" value="` ~ curPageNum.to!string ~ `" size="3"  maxlength="3" > из ` 
+			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `~ "\r\n";
 		
 		if( curPageNum != pageCount )
 			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
@@ -157,7 +158,9 @@ void netMain(HTTPContext context)
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
-		table ~= `<td>` ~rec.get!"Опыт"("")  ~ `</td>`;
+		table ~= `<td>`
+		~`<a href="`~dynamicPath~`show_pohod_for_tourist?key=`~rec.get!"Ключ"(0).to!string ~`">`
+		~rec.get!"Опыт"("")  ~ ` </a>  </td>`;
 		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`;
 		table ~= `<td>` ~ raz_sud_kat ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
