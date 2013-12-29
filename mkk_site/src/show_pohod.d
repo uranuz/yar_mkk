@@ -229,8 +229,10 @@ void netMain(HTTPContext context)
 	auto pohodRecFormat = RecordFormat!(
 	ft.IntKey, "Ключ",   ft.Str, "Номер книги", ft.Str, "Сроки", 
 	ft.Int, "Вид", ft.Int, "кс", ft.Int, "элем",
-	ft.Str,"Район",  ft.Str,"Руководитель", 
-	ft.Str,"Участники",  ft.Str,"Уч",     ft.Str,"Город,<br>организация", 
+	//ft.Str,"Руководитель", 
+	//ft.Str,"Участники", 
+	ft.Str,"Город,<br>организация",
+	ft.Str,"Район",
 	ft.Str, "Нитка маршрута",
 	ft.Int, "Готовность",ft.Int, "Статус")();
 	//WHERE
@@ -276,7 +278,8 @@ group by num
      
      `(coalesce(organization,'')||'<br>'||coalesce(region_group,'')), `
      `(coalesce(marchrut::text,'')||'<br>'||coalesce(chef_coment::text,'')), `
-     `coalesce(prepar,'0'),coalesce(stat,'0')  `
+     `coalesce(prepar,'0'),
+        coalesce(stat,'0')  `
              `from pohod `
                
         ` JOIN tourist   `
