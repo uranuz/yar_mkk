@@ -81,7 +81,7 @@ void netMain(HTTPContext context)
 	try {
 		if( "cur_page_num" in rq.postVars )
  			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
-	} catch (Exception) { ceNumurPag = 1; }
+	} catch (Exception) { curPageNum = 1; }
 
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	

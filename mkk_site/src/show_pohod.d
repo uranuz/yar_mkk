@@ -79,32 +79,42 @@ void netMain(HTTPContext context)
 		
 		//////////////////////////////////
 		
-		
-		
+	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" );
+	   // конечный год диапазона поиска
+		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
+		// конечный месяц диапазона поиска		
 		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );// начальный год диапазона поиска		
-		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");// начальный месяц диапазона поиска                                      
+		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");// начальный месяц диапазона поиска   
+		writeln(e_year,e_month,s_year,s_month);
+		
 		if ( s_year=="") _start_dat=false;                  // наличие начального диапазона поиска если начального года нет "запрещено"
 		else _start_dat=true;
 		//----------------------формирование начала диапозона дат
 		string s_dat;   // начальная дата диапозона поиска
-		if(_start_dat)
+		if(_start_dat)  // если сушествует год начала поиска 
+		                //формируем значение по маске 2013-05-01
+{	
+	       s_dat =s_year.to!string ~`-`; // добавляем 2013- (взятое из окна - запроса s_year)
 		
-		s_dat =s_year.to!string ~`-`;   // если месяц указан сформировать значение маска 2013-05-01
-		if(s_month!="")
-		{foreach( i, word; month)
-		{	if( s_month == word ) 
-			{	 if(i<9)s_dat ~=`0`; // если месяц меньше 10-го добавить 0 перед номером (сдвиг по значению на 1)
+		if(s_month!="")// если месяц указан сформировать значение маска 2013-05-01
+
+	{
+		  foreach( i, word; month)
+			if( s_month == word ) 
+			{	 if(i<10)s_dat ~=`0`; // если месяц меньше 10-го добавить 0 перед номером (сдвиг по значению на 1)
 			
 			s_dat ~= i.to!string ~`-01`; //-01 первое число месяца
 				break;
+			}	
 			}
-		}
-		}
-		 else {s_dat ~=`01-01`;} // если месяца нет искать с первого января текущего года
-	
+		else {s_dat ~=`01-01`;} // если месяца нет искать с первого января текущего года
+		
+		 
+
+}	
+	writeln(s_dat);
 	  ///////////////////////////////////// 
-	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" ); // конечный год диапазона поиска
-		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : ""); // конечный месяц диапазона поиска
+	  
 		
 				
 		if ( e_year=="") _end_dat=false;  // наличие конечного диапазона поиска если конечного года нет "запрещено"
@@ -120,15 +130,17 @@ void netMain(HTTPContext context)
 		
 		      else		 
 		   {
-		      e_dat =e_year.to!string ~`-`;		
+		      e_dat =e_year.to!string ~`-`;	// записываем год поиска например 2013-	
 		     foreach( i, word; month)
+		     // ищем индекс месяца начиная с 1 и до 12 из массива month
 		     {	if( e_month == word ) 
-			      {  if(i<9) e_dat ~=`0`; 
+			      {  if(i<10) e_dat ~=`0`; // если номер однозначный добавляем перед значением 0
 					      	e_dat ~= (i+1).to!string ~`-01`;// добавляем единицу к номеру месяца для включение этого месяца в диапазон
 			    	break;}
 	      	}
 		   }
 	    }
+	    writeln(e_dat);
 		////////////////////////////////////////////////////////////
 		
 		
@@ -169,15 +181,15 @@ void netMain(HTTPContext context)
 	if (_vid)
 	
 	        {select_str2~= ` vid='`~vid~`' `;// добавлние запроса по виду туризма
-				if (_ks)	select_str2 ~=" and ";}
+				if (_ks)	select_str2 ~=` and `;}
 				
 	if (_ks)
-	{	select_str2 ~= " ( ";
+	{	select_str2 ~= ` ( `;
 		foreach( n, kkkk; ks ) 
-		{	select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? " OR ": "" );// перебирает элементы массива ks
+		{	select_str2 ~= ` ks='` ~kkkk~`'`~ ( (  n+1 < long_ks ) ? ` OR `: ` ` );// перебирает элементы массива ks
 		 }
-		select_str2 ~= " ) ";
-		select_str2~=((_start_dat) || (_end_dat))?" and ": "";
+		select_str2 ~= ` ) `;
+		select_str2~=((_start_dat) || (_end_dat))?` and `: ` `;
 		
 	}	
 		
@@ -187,10 +199,10 @@ void netMain(HTTPContext context)
   	if ((s_year !="")&&(e_year =="")) select_str2 ~= `  begin_date>='` ~ s_dat~`' `;  	
 	if ((s_year =="")&&(e_year !="")) select_str2 ~= `  begin_date<= '` ~e_dat~`' `;
  	if ((s_year !="")&&(e_year !="")) select_str2 ~= `  (begin_date>='`~ s_dat~`' and `~ `begin_date <='`~e_dat~`') `;
- 	select_str2~=`) `;
- 	}
+ 	select_str2~=` ) `;
  	
-		//----------- конец формировки расширеенного  запроса--------------------------
+ 	}
+ 			//----------- конец формировки расширеенного  запроса--------------------------
 	
 	string select_str= select_str1 ~ select_str2; // полный запрос
 	
@@ -212,7 +224,7 @@ void netMain(HTTPContext context)
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str)/limit+1; //Количество страниц
+	uint pageCount = (col_str-1)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
 		if( "cur_page_num" in rq.postVars )
@@ -229,12 +241,14 @@ void netMain(HTTPContext context)
 	auto pohodRecFormat = RecordFormat!(
 	ft.IntKey, "Ключ",   ft.Str, "Номер книги", ft.Str, "Сроки", 
 	ft.Int, "Вид", ft.Int, "кс", ft.Int, "элем",
-	//ft.Str,"Руководитель", 
-	//ft.Str,"Участники", 
-	ft.Str,"Город,<br>организация",
 	ft.Str,"Район",
+	ft.Str,"Руководитель", 
+	ft.Str, "Число участников",
+	ft.Str,"Участники",	
+	ft.Str,"Город,<br>организация",	
 	ft.Str, "Нитка маршрута",
-	ft.Int, "Готовность",ft.Int, "Статус")();
+	ft.Int, "Готовность",
+	ft.Int, "Статус")();
 	//WHERE
 	
 	string queryStr = 
@@ -422,7 +436,10 @@ group by num
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`;
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`;
 		
-		table ~= `<td style="text-align: center;" title="`~ rec.get!"Уч"("нет")~`">` ~`<font color="red">`~  (  rec.get!"Участники"("Не задано") ) ~ `</font ></td>`;
+		table ~= `<td style="text-align: center;" title="`
+		~ rec.get!"Участники"("нет")~`">` ~`<font color="red">`
+		~ (  rec.get!"Число участников"("Не задано") )
+		~ `</font ></td>`;
 		
 		
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`;
@@ -441,7 +458,9 @@ group by num
 	table ~= `</table>`;
 	
 	string content = `<form id="main_form" method="post">`
-	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~table; //Тобавляем таблицу с данными к содержимому страницы
+	~ tablefiltr ~ pageSelector ~ `</form><br><br>`
+	~`<h1> Число походов `~col_str.to!string ~` </h1>`
+	~table; //Тобавляем таблицу с данными к содержимому страницы
 	
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);
