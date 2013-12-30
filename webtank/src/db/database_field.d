@@ -105,22 +105,36 @@ public:
 		
 		///Метод сериализации формата поля в std.json
 		JSONValue getStdJSONFormat()
-		{	JSONValue jValue;
+		{	writeln("DatabaseField getStdJSONFormat test 10");
+			JSONValue jValue;
+			
+			jValue.type = JSON_TYPE.OBJECT;
+			
 			//Вывод имени поля
-			jValue["n"] = JSONValue();
-			jValue["n"].type = JSON_TYPE.STRING;
-			jValue["n"].str = _name;
+			jValue.object["n"] = JSONValue();
+			jValue.object["n"].type = JSON_TYPE.STRING;
+			jValue.object["n"].str = _name;
+			
+			writeln("DatabaseField getStdJSONFormat test 20");
 			
 			//Вывод типа поля
-			jValue["t"] = JSONValue();
-			jValue["t"].type = JSON_TYPE.STRING;
-			jValue["t"].str = FieldT.to!string;
+			jValue.object["t"] = JSONValue();
+			jValue.object["t"].type = JSON_TYPE.STRING;
+			jValue.object["t"].str = FieldT.to!string;
+			
+			writeln("DatabaseField getStdJSONFormat test 40");
 			
 			static if( FieldT == FieldType.Enum )
-			{	//Сериализуем формат для перечислимого типа
+			{	writeln("DatabaseField getStdJSONFormat test 50");
+				//Сериализуем формат для перечислимого типа
 				auto enumJValue = _enumFormat.getStdJSON();
+				
+				writeln("DatabaseField getStdJSONFormat test 60");
+				
 				foreach( key, val; enumJValue.object )
 					jValue[key] = val;
+					
+				writeln("DatabaseField getStdJSONFormat test 70");
 			}
 			return jValue;
 		}

@@ -57,34 +57,55 @@ template RecordSet(alias RecordFormatT)
 		{	JSONValue jValue = JSONValue();
 			jValue.type = JSON_TYPE.OBJECT;
 			
+			writeln("RecordSet getStdJSONFormat test 10");
+			
 			//Выводим номер ключевого поля
 			jValue.object["kfi"] = JSONValue();
 			jValue.object["kfi"].type = JSON_TYPE.UINTEGER;
 			jValue.object["kfi"].uinteger = _keyFieldIndex;
+			
+			writeln("RecordSet getStdJSONFormat test 20");
 			
 			//Выводим тип данных
 			jValue.object["t"] = JSONValue();
 			jValue.object["t"].type = JSON_TYPE.STRING;
 			jValue.object["t"].str = "recordset";
 			
+			writeln("RecordSet getStdJSONFormat test 30");
+			
 			//Образуем JSON-массив форматов полей
-			jValue["f"] = JSONValue();
-			jValue["f"].type = JSON_TYPE.ARRAY;
+			jValue.object["f"] = JSONValue();
+			jValue.object["f"].type = JSON_TYPE.ARRAY;
+			
+			writeln("RecordSet getStdJSONFormat test 31");
+			
+			writeln("_dataFields.length: ", _dataFields.length);
 			
 			foreach( field; _dataFields )
 				jValue["f"].array ~= field.getStdJSONFormat();
+			
+			writeln("RecordSet getStdJSONFormat test 40");
 
 			return jValue;
 		}
 		
 		///Сериализация объекта в std.json
 		JSONValue getStdJSON()
-		{	auto jValue = this.getStdJSONFormat();
+		{	writeln("RecordSet getStdJSON test 00");
+			auto jValue = this.getStdJSONFormat();
+		
+			writeln("RecordSet getStdJSON test 10");
 			
-			jValue["d"].type = JSON_TYPE.ARRAY;
-			jValue["d"].array.length = this.length;
+			jValue.object["d"] = JSONValue();
+			jValue.object["d"].type = JSON_TYPE.ARRAY;
+			jValue.object["d"].array.length = this.length;
+			
+			writeln("RecordSet getStdJSON test 20");
+			
 			foreach( i; 0..this.length )
 				jValue["d"].array[i] = this.getStdJSONDataAt(i);
+				
+			writeln("RecordSet getStdJSON test 30");
 
 			return jValue;
 		}

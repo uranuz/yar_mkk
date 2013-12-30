@@ -19,9 +19,9 @@ mkk_site.edit_pohod = {
 		selTouristKeys = [];
 			
 		webtank.json_rpc.invoke({
-			uri: "/dyn/rpc",
-			method: "турист.список_по_фильтру",
-			params: $("#tourist_search_inp").val(),
+			uri: "/jsonrpc/",
+			method: "mkk_site.edit_pohod.getTouristList",
+			params: { "фамилия": $("#tourist_search_inp").val() },
 			success: function(responseJSON) {
 				var
 					rs = webtank.datctrl.fromJSON(responseJSON),

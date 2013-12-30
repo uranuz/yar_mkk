@@ -2,14 +2,14 @@ module mkk_site.auth;
 
 import std.process, std.conv;
 
-import webtank.net.http.routing, webtank.net.http.context/+, webtank.net.access_control+/;
+import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
+import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "auth";
 
 shared static this()
-{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
+{	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

@@ -1,6 +1,6 @@
 module webtank.net.http.json_rpc_handler;
 
-import std.string, std.conv, std.traits, std.typecons, std.json, std.functional;
+import std.string, std.conv, std.traits, std.typecons, std.json, std.functional, std.stdio;
 
 import webtank.net.http.handler, webtank.common.serialization, webtank.net.connection, webtank.net.http.context, webtank.net.http.uri_pattern;
 
@@ -24,10 +24,12 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 	alias JSONValue delegate( ref const(JSONValue), HTTPContext ) JSON_RPC_WrapperMethod;
 	
 	override bool customProcessRequest(HTTPContext context)
-	{	
+	{	writeln("JSON_RPC_Router test 10");
 		//-----Опрос обработчика запроса-----
 		auto uriData = _uriPattern.match(context.request.path);
-			
+		
+		writeln("JSON_RPC_Router uriData: ", uriData);
+		
 		if( !uriData.isMatched )
 			return false; //Запрос не прошёл через фильтр
 			
@@ -38,6 +40,8 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		
 		//-----Конец опроса обработчика события-----
 		onPreProcess.fire(context);
+		
+		writeln("JSON_RPC_Router test 20");
 		
 		auto jMessageBody = context.request.JSON_Body;
 		

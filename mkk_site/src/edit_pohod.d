@@ -1,20 +1,21 @@
 module mkk_site.edit_pohod;
 
-import std.conv, std.string, std.file, std.stdio, std.array;
+import std.conv, std.string, std.file, std.stdio, std.array, std.json;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls;
 
 // import webtank.net.javascript;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils;
+import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "edit_pohod";
 immutable authPagePath = dynamicPath ~ "auth";
 
-static this()
+shared static this()
 {	
-	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
-// 	Router.join( new JSON_RPC_HandlingRule!() );
+	PageRouter.join!(netMain)(thisPagePath);
+	JSONRPCRouter.join!(getTouristList);
+
 // 	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
 // 	Router.setRPCMethod("поход.создать_поход", &createPohod);
 // 	Router.setRPCMethod("поход.обновить_поход", &updatePohod);
@@ -31,23 +32,31 @@ auto shortTouristRecFormat = RecordFormat!(
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 
-// //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-// auto getTouristList(string filterStr)
-// {	string result;
-// 	auto dbase = getCommmonDB();
-// 	
-// 	if ( !dbase.isConnected )
-// 		return null; //Завершаем
-// 
-// 	auto queryRes = dbase.query(  
-// 		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
-// 		~ PGEscapeStr( filterStr ) ~ `%' limit 25;`
-// 	);
-// 	if( queryRes is null || queryRes.recordCount == 0 )
-// 		return null;
-// 	
-// 	return queryRes.getRecordSet(shortTouristRecFormat);
-// }
+//RPC метод для вывода списка туристов (с краткой информацией) по фильтру
+auto getTouristList(string фамилия)
+{	string result;
+	auto dbase = getCommonDB();
+	
+	if ( !dbase.isConnected )
+		return null; //Завершаем
+
+	auto queryRes = dbase.query(  
+		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
+		~ PGEscapeStr( фамилия ) ~ `%' limit 25;`
+	);
+	
+	writeln("getTouristList test 10");
+	
+	if( queryRes is null || queryRes.recordCount == 0 )
+		return null;
+	
+	writeln("getTouristList test 20");
+	
+	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
+	writeln("getTouristList test 30");
+	
+	return rs;
+}
 // 
 // 
 // 

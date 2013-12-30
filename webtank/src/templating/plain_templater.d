@@ -54,10 +54,10 @@ protected:
 	Element[][dstring] _namedEls;
 	Element[] _indexedEls;
 	dstring _sourceStr;
-	dstring[LexemeType] _lexValues;
+	immutable(dstring[LexemeType]) _lexValues;
 	
 public:
-	this( string templateStr, const(dstring[LexemeType]) lexems = defaultLexems )
+	this( string templateStr, immutable(dstring[LexemeType]) lexems = defaultLexems )
 	{	import std.utf;
 		_lexValues = lexems;
 		_sourceStr = std.utf.toUTF32(templateStr);

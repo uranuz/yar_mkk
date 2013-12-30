@@ -3,9 +3,9 @@ module mkk_site.show_pohod_for_tourist;
 import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
 import std.file; //Стандартная библиотека по работе с файлами
 
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
+import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils;
+import mkk_site.site_data, mkk_site.utils, mkk_site._import;
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 
@@ -13,7 +13,7 @@ import mkk_site.site_data, mkk_site.utils;
 immutable thisPagePath = dynamicPath ~ "show_pohod_for_tourist";
 
 shared static this()
-{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
+{	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

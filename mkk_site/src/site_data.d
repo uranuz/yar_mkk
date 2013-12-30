@@ -21,6 +21,7 @@ immutable webtankImgPath = webtankPublicPath ~ "img/";  //Путь к дирек
 
 immutable dynamicPath = "/dyn/";    //Путь к директории динамического содержимого
 immutable restrictedPath = "/restricted/"; //Путь к директории содержимого с ограниченным доступом
+immutable JSON_RPC_Path = "/jsonrpc/"; //Путь для вызова удалённых процедур
 
 
 ///Пути в файловой системе

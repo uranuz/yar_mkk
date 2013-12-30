@@ -89,13 +89,15 @@ protected:
 class HTTPRouter: EventBasedHTTPHandler
 {	
 	override bool customProcessRequest( HTTPContext context )
-	{	onPrePoll.fire(context);
+	{	writeln("HTTPRouter test 10");
+		onPrePoll.fire(context);
 		//TODO: Проверить, что имеем достаточно корректный HTTP-запрос
 		onPreProcess.fire(context);
 		
 		foreach( hdl; _handlers )
-		{	if( hdl.processRequest(context) )
-				return true;;
+		{	writeln("HTTPRouter test 20");
+			if( hdl.processRequest(context) )
+				return true;
 		}
 		
 		onPostProcess.fire(context);
@@ -137,6 +139,8 @@ class URIPageRouter: EventBasedHTTPHandler
 	
 	override bool customProcessRequest( HTTPContext context )
 	{	auto uriData = _uriPattern.match(context.request.path);
+		
+		writeln("JSON_RPC_Router uriData: ", uriData);
 		
 		if( !uriData.isMatched )
 			return false;

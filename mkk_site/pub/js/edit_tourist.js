@@ -72,7 +72,7 @@ mkk_site.edit_tourist = {
 		{	//Добавление нового
 			
 			webtank.json_rpc.invoke({
-				uri: "/dyn/jsonrpc",
+				uri: "/jsonrpc/",
 				method: "mkk_site.edit_tourist.тестНаличияПохожегоТуриста",
 				params: {
 					"имя": doc.getElementById("given_name").value,

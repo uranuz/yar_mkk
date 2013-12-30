@@ -268,14 +268,14 @@ URIMatchingData matchURI(
 // 	dstring plainURIPatternStr2 = `/dyn/pohod/by_date/{animal}/ololo_{name}/`;
 // 	dstring URIExampleStr2 = `/dyn/pohod/by_date//ololo_vasya/`;
 // 	
-// 	dstring plainURIPatternStr3 = `/dyn/pohod`;
-// 	dstring URIExampleStr3 = `/dyn/pohod`;
+// 	dstring plainURIPatternStr3 = `/jsonrpc/{remainder}`;
+// 	dstring URIExampleStr3 = `/dyn/edit_tourist`;
 // 	
 // 	dstring plainURIPatternStr4 = `{param}`;
 // 	dstring URIExampleStr4 = `trololo`;
 // 	
-// 	auto pattern = parseURIPattern(plainURIPatternStr2);
+// 	auto pattern = parseURIPattern(plainURIPatternStr3);
 // 	
-// 	writeln( matchURI(URIExampleStr2, pattern, ["animal": "elephant"], ["animal": "elephants" ]) );
+// 	writeln( matchURI(URIExampleStr3, pattern, null, null) );
 // 
 // }

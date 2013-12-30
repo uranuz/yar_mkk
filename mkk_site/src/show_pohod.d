@@ -4,17 +4,15 @@ import std.stdio;
 import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
+import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils;
+import mkk_site.site_data, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
 shared static this()
-{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
+{	PageRouter.join!(netMain)(thisPagePath);
 }
-
-
 
 void netMain(HTTPContext context)
 {	
