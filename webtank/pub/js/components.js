@@ -257,7 +257,7 @@ webtank.datctrl = {
 			},
 			//Сброс итератора на начало
 			rewind: function() {
-				_recIndex = 0;
+				rs._recIndex = 0;
 			},
 			getFormat: function()
 			{	return webtank.deepCopy(rs._fmt);

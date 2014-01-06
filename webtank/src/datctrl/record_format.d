@@ -141,20 +141,20 @@ public:
 		jValue.type = JSON_TYPE.OBJECT;
 		
 		//Словарь перечислимых значений (числовой ключ --> строковое имя)
-		jValue["enum_n"] = JSONValue();
-		jValue["enum_n"].type = JSON_TYPE.OBJECT;
+		jValue.object["enum_n"] = JSONValue();
+		jValue.object["enum_n"].type = JSON_TYPE.OBJECT;
 		foreach( key, name; _names )
 		{	string strKey = key.to!string;
-			jValue["enum_n"].object[strKey].type = JSON_TYPE.STRING;
-			jValue["enum_n"].object[strKey].str = name;
+			jValue.object["enum_n"].object[strKey].type = JSON_TYPE.STRING;
+			jValue.object["enum_n"].object[strKey].str = name;
 		}
 		
 		//Массив, определяющий порядок перечислимых значений
-		jValue["enum_k"] = JSONValue();
-		jValue["enum_k"].type = JSON_TYPE.ARRAY;
+		jValue.object["enum_k"] = JSONValue();
+		jValue.object["enum_k"].type = JSON_TYPE.ARRAY;
 		foreach( key; _keys )
-		{	jValue["enum_k"].array[key].type = JSON_TYPE.UINTEGER;
-			jValue["enum_k"].array[key].uinteger = key;
+		{	jValue.object["enum_k"].array[key].type = JSON_TYPE.UINTEGER;
+			jValue.object["enum_k"].array[key].uinteger = key;
 		}
 		return jValue;
 	}

@@ -1,6 +1,6 @@
 module mkk_site.edit_pohod;
 
-import std.conv, std.string, std.file, std.stdio, std.array, std.json;
+import std.conv, std.string, std.file, std.stdio, std.array, std.json, std.typecons;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls;
 
@@ -180,7 +180,7 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 
-	alias pohodRec.FormatType.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
 	//Вывод перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
 	{	//Создаём экземпляр генератора выпадающего списка
@@ -200,72 +200,82 @@ void создатьФормуИзмененияПохода(
 	
 	//Задаём действие, чтобы при след. обращении к обработчику
 	//перейти на этап записи в БД
-	pohodForm.set( "action", ` value="write"` );
+	pohodForm.set( "form_input_action", ` value="write"` );
 }
 
 
-// void изменитьДанныеПохода(HTTPContext context)
-// {	
-// 	auto rq = context.request;
-// 	auto rp = context.response;
-// 	
-// 	auto pVars = rq.postVars;
-// 	auto qVars = rq.queryVars;
-// 	
-// 	string fieldNamesStr;
-// 	string fieldValuesStr;
-// 	
-// 	//Формируем набор строковых полей и значений
-// 	foreach( i, fieldName; strFieldNames )
-// 	{	string value = pVars.get(fieldName, null);
-// 		if( value.length > 0  )
-// 		{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
-// 			fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
-// 		}
-// 	}
-// 	
-// 	//Формируем часть запроса для вывода перечислимых полей
-// 	foreach( fieldName, valueBlock;  pohodEnumValues )
-// 	{	int enumKey = 0;
-// 		try {
-// 			enumKey = pVars.get(fieldName, "").to!int;
-// 		} catch (std.conv.ConvException e) {
-// 			
-// 		}
-// 		
-// 		if( enumKey in valueBlock )
-// 		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
-// 			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
-// 		}
-// 		else
-// 			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("vid", "") ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
-// 	}
-// 	
-// 	//Формируем часть запроса для вбивания начальной и конечной даты
-// 	foreach( i; 0..1 )
-// 	{	auto pre = ( i == 0 ? "begin_" : "end_" );
-// 		import std.datetime;
-// 		Date date;
-// 		try {
-// 			date = Date( 
-// 				pVars.get( pre ~ "year", "").to!int,
-// 				pVars.get( pre ~ "month", "").to!int,
-// 				pVars.get( pre ~ "day", "").to!int
-// 			);
-// 		} 
-// 		catch (std.conv.ConvException exc) 
-// 		{	throw exc;
-// 			//TODO: Добавить обработку исключения
-// 		} 
-// 		catch (std.datetime.DateTimeException exc) 
-// 		{	throw exc;
-// 			//TODO: Добавить обработку исключения
-// 		}
-// 		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
-// 		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ date.toISOExtString() ~ `'`;
-// 	}
-// 	
-// }
+void изменитьДанныеПохода(HTTPContext context)
+{	
+	auto rq = context.request;
+	auto rp = context.response;
+	
+	auto pVars = rq.postVars;
+	auto qVars = rq.queryVars;
+	
+	string fieldNamesStr;
+	string fieldValuesStr;
+	
+	writeln("изменитьДанныеПохода test 20");
+	
+	//Формируем набор строковых полей и значений
+	foreach( i, fieldName; strFieldNames )
+	{	string value = pVars.get(fieldName, null);
+		if( value.length > 0  )
+		{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
+			fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
+		}
+	}
+	
+	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	
+	//Формируем часть запроса для вывода перечислимых полей
+	foreach( fieldName; pohodEnumFieldNames )
+	{	int enumKey;
+		try {
+			enumKey = pVars.get(fieldName, "").to!int;
+		} catch (std.conv.ConvException e) {
+// 			enumKey.nullify();
+		}
+		
+		writeln(enumKey);
+		
+// 		if(  )
+		
+		if( enumKey in pohodRecFormat.enumFormats[fieldName] )
+		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
+		}
+		else
+			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("vid", "") ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+	}
+	
+	//Формируем часть запроса для вбивания начальной и конечной даты
+	foreach( i; 0..1 )
+	{	auto pre = ( i == 0 ? "begin_" : "end_" );
+		import std.datetime;
+		Date date;
+		try {
+			date = Date( 
+				pVars.get( pre ~ "year", "").to!int,
+				pVars.get( pre ~ "month", "").to!int,
+				pVars.get( pre ~ "day", "").to!int
+			);
+		} 
+		catch (std.conv.ConvException exc) 
+		{	throw exc;
+			//TODO: Добавить обработку исключения
+		} 
+		catch (std.datetime.DateTimeException exc) 
+		{	throw exc;
+			//TODO: Добавить обработку исключения
+		}
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
+		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ date.toISOExtString() ~ `'`;
+	}
+	
+	writeln("fieldNamesStr: ", fieldNamesStr);
+	writeln("fieldValuesStr: ", fieldValuesStr);
+}
 
 
 void netMain(HTTPContext context)
@@ -337,11 +347,13 @@ void netMain(HTTPContext context)
 		}
 		
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
+		pohodForm.set( "form_action", thisPagePath );
 		
 		
 		//Определяем выполняемое страницей действие
 		if( pVars.get("action", "") == "write" )
-		{	
+		{	writeln("mkk_site.edit_pohod.netMain write test 20");
+			изменитьДанныеПохода(context);
 			
 		}
 		else
