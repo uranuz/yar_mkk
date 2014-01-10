@@ -4,34 +4,115 @@ mkk_site = {
 
 //Инициализация страницы
 $(window.document).ready( function() {
-	
+	mkk_site.edit_pohod.loadPohodParticipantsList();
 	
 } );
 
 mkk_site.edit_pohod = {
+	participantsRS: null, //RecordSet с участниками похода
+	
 	selTouristsRS: null, //RecordSet с выбранными в поиске туристами
-
-	//Вывод списка туристов из набора записей (rs) в контейнер (container)
-	renderTouristList: function(rs, container) {
-		var 
-			rec,
-			pohod = mkk_site.edit_pohod,
-			touristListDiv = ( container ? container : $("<div>") );
+	
+	renderTouristRecord: function(rec, onAppend, onRemove)
+	{	var
+			appendBtn,
+			removeBtn,
+			recordDiv = $("<div>", {
+				text: rec.get("family_name") + " " + rec.get("given_name") + " " 
+					+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р"
+			});
 		
-		rs.rewind();
-			
-		while( rec = rs.next() )
-		{	( function(_rec) {
-				return $( "<div>", {
-					text: _rec.get("family_name") + " " + _rec.get("given_name") + " " 
-						+ _rec.get("patronymic") + ", " + _rec.get("birth_year") + " г.р"
-				} )
-				.on( "click", _rec, pohod.onTouristDivClick )
-				.appendTo(touristListDiv);
-			} )(rec);
+		if( onAppend )
+		{	appendBtn = $("<img>", {
+				src: "/pub/img/icons/append_icon.png",
+			})
+			.on( "click", rec, onAppend )
+			.appendTo(recordDiv);
 		}
 		
-		return touristListDiv;
+		if( onRemove )
+		{	removeBtn = $("<img>", {
+				src: "/pub/img/icons/remove_icon.png",
+			})
+			.on( "click", rec, onRemove )
+			.appendTo(recordDiv);
+		}
+		
+		return recordDiv;
+	},
+	
+	//Загрузка списка участников похода
+	loadPohodParticipantsList: function()
+	{	var 
+			doc = window.document,
+			pohod = mkk_site.edit_pohod,
+			getParams = webtank.parseGetParams(),
+			pohodKey = parseInt(getParams["key"], 10);
+		
+		if( isNaN(pohodKey) )
+			return;
+			
+		webtank.json_rpc.invoke({
+			uri: "/jsonrpc/",
+			method: "mkk_site.edit_pohod.списокУчастниковПохода",
+			params: { "pohodKey": pohodKey },
+			success: function(responseJSON) {
+				var 
+					unitNeimInput = $("#unit_neim")[0];
+				
+				unitNeimInput.value = "";
+				
+				pohod.participantsRS = webtank.datctrl.fromJSON(responseJSON);
+				
+				$("#unit_div").empty();
+				
+				pohod.participantsRS.rewind();
+				while( rec = pohod.participantsRS.next() )
+				{	pohod.renderTouristRecord(rec)
+					.appendTo("#unit_div");
+				}
+			}
+		});
+	},
+	
+	//Обработчик добавления найденной записи о туристе
+	selectTourist: function(event) {
+		
+		var 
+			rec = event.data, //Добавляемая запись
+			pohod = mkk_site.edit_pohod;
+		
+		if( !pohod.selTouristsRS )
+		{	pohod.selTouristsRS = new webtank.datctrl.RecordSet();
+			pohod.selTouristsRS._fmt = rec._fmt;
+		}
+		
+		if( pohod.selTouristsRS.hasKey( rec.getKey() ) )
+		{	$("#tourist_select_msg_div").html(
+				"Турист <b>" + rec.get("family_name") + " " 
+				+ rec.get("given_name") + " " + rec.get("patronymic")
+				+ "</b> уже находится в списке выбранных туристов"
+			);
+		}
+		else
+		{	pohod.selTouristsRS.append(rec);
+			pohod.renderTouristRecord(rec, null, pohod.deselectTourist)
+			.appendTo("#tourist_select_div");
+		}
+	},
+	
+	//Обработчик отмены выбора записи
+	deselectTourist: function(event) {
+		var 
+			rec = event.data,
+			pohod = mkk_site.edit_pohod,
+			removeBtn = $(this),
+			recordDiv = removeBtn.parent(),
+			touristSelectDiv = $("#tourist_select_div");
+		
+		pohod.selTouristsRS.remove( rec.getKey() );
+		recordDiv.remove();
+		//pohod.renderTouristRecord(rec, null, deselectTourist);
 	},
 	
 	//Получение списка туристов для
@@ -47,37 +128,18 @@ mkk_site.edit_pohod = {
 			params: { "фамилия": $("#tourist_search_inp").val() },
 			success: function(responseJSON) {
 				var
-					rs = webtank.datctrl.fromJSON(responseJSON);
-					
-				mkk_site.edit_pohod.renderTouristList(rs, $("#tourist_search_div"));
+					rs = webtank.datctrl.fromJSON(responseJSON),
+					rec,
+					pohod = mkk_site.edit_pohod,
+					touristSelectDiv = $("#tourist_select_div");
+				
+				rs.rewind();
+				while( rec = rs.next() )
+				{	pohod.renderTouristRecord(rec, pohod.selectTourist)
+					.appendTo("#tourist_search_div");
+				}
 			}
 		});
-	},
-	onTouristDivClick: function(event) {
-		var 
-			rec = event.data,
-			$touristDiv = $(this),
-			pohod = mkk_site.edit_pohod;
-		
-		//Перемещение DOM узла между окнами
-		$touristDiv.appendTo(  (
-				$touristDiv.parent().attr("id") === "tourist_search_div" ?
-				"#tourist_select_div" : "#tourist_search_div"
-			)
-		);
-		
-		//TODO: Убрать потом, наверное
-		if( !pohod.selTouristsRS )
-		{	pohod.selTouristsRS = new webtank.datctrl.RecordSet();
-			pohod.selTouristsRS._fmt = rec._fmt;
-		}
-		
-		if( pohod.selTouristsRS.hasKey( rec.getKey() ) ) {
-			pohod.selTouristsRS.remove( rec.getKey() );
-		} else {
-			pohod.selTouristsRS.append( rec );
-		}
-		
 	},
 	onTouristSelWinOkBtnCLick: function() {
 		var 
@@ -89,26 +151,19 @@ mkk_site.edit_pohod = {
 		$("#unit_div").empty();
 		unitNeimInput.value = "";
 		
-		if( !pohod.selTouristsRS )
+		if( !pohod.participantsRS )
 		{	$(searchWindow).remove();
 			$(".modal_window_blackout").remove();
 			return;
 		}
 		
-		pohod.selTouristsRS.rewind();
-		while( rec = pohod.selTouristsRS.next() )
-		{	( function(_rec) {
-				unitNeimInput.value += ( unitNeimInput.value.length ? "," : "" ) + _rec.getKey();
-				$( "<div>", {
-						text: rec.get("family_name") + " " + rec.get("given_name") + " " 
-					+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р"
-					}
-				)
-// 					.on( "click", function() {
-// 						pohod.onTouristDivClick.call(touristDiv, _rec);
-// 					})
-				.appendTo("#unit_div");
-			} )(rec);
+		pohod.participantsRS = webtank.deepCopy(pohod.selTouristsRS);
+		
+		pohod.participantsRS.rewind();
+		while( rec = pohod.participantsRS.next() )
+		{	unitNeimInput.value += ( unitNeimInput.value.length ? "," : "" ) + rec.getKey();
+			pohod.renderTouristRecord(rec)
+			.appendTo("#unit_div");
 		}
 		
 		$(searchWindow).remove();
@@ -117,8 +172,13 @@ mkk_site.edit_pohod = {
 	openParticipantsEditWindow: function() {
 		var 
 			pohod = mkk_site.edit_pohod,
+			rec,
 			searchWindow = webtank.wui.createModalWindow(),
 			windowContent = $(searchWindow).children(".modal_window_content"),
+			splitViewTable = $('<table><tr style="vertical-align: top;"><td></td><td></td></tr></table>'),
+			splitViewTableRow = splitViewTable.children("tbody").children("tr")
+			splitViewLeft = splitViewTableRow.children("td")[0],
+			splitViewRight = splitViewTableRow.children("td")[1],
 			touristSearchDiv = $("<div>", {
 				id: "tourist_search_div"
 			}),
@@ -136,10 +196,21 @@ mkk_site.edit_pohod = {
 			}),
 			touristSelectDiv = $("<div>", {
 				id: "tourist_select_div"
+			}),
+			messageDiv = $("<div>", {
+				id: "tourist_select_msg_div"
 			});
-		
-		if( pohod.selTouristsRS )
-			pohod.renderTouristList(pohod.selTouristsRS, touristSelectDiv);
+			
+		if( pohod.participantsRS )
+		{	//Создаем копию набора записей
+			pohod.selTouristsRS = webtank.deepCopy(pohod.participantsRS);
+			
+			pohod.selTouristsRS.rewind();
+			while( rec = pohod.selTouristsRS.next() )
+			{	pohod.renderTouristRecord(rec, null, pohod.deselectTourist)
+				.appendTo(touristSelectDiv);
+			}
+		}
 		
 		$(touristSearchButton)
 		.on( "click", mkk_site.edit_pohod.searchForTourist ); 
@@ -152,7 +223,10 @@ mkk_site.edit_pohod = {
 		.append(touristSearchInp)
 		.append(touristSearchButton)
 		.append(okButton)
-		.append(touristSearchDiv)
-		.append(touristSelectDiv);
+		.append(messageDiv);
+		
+		$(splitViewLeft).append("<b>Участники похода</b>").append(touristSelectDiv);
+		$(splitViewRight).append("<b>Поиск туристов</b>").append(touristSearchDiv);
+		$(splitViewTable).appendTo(windowContent);
 	}
 };

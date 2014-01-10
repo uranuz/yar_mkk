@@ -8,7 +8,7 @@ static if( isDatCtrlEnabled ) {
 
 import std.typetuple, std.typecons, std.conv, std.json;
 
-import   webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization, webtank.common.utils;
+import webtank.common.optional, webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization, webtank.common.utils;
 
 struct RecordFormat(Args...)
 {	
@@ -89,8 +89,6 @@ struct RecordFormat(Args...)
 	template getFieldIndex(string fieldName)
 	{	alias _getFieldIndex!(fieldName, 0, _fieldSpecs) getFieldIndex;
 	}
-	
-	
 }
 
 ///Формат для перечислимого поля
@@ -99,7 +97,7 @@ struct EnumFormat
 protected:
 	string[int] _names;
 	int[] _keys;
-	string _nullName;
+	string _defaultName;
 
 public:
 	///Конструктор формата получает на входе карту соответсвия
@@ -120,7 +118,7 @@ public:
 	
 	this(immutable(string[int]) names, string nullName, bool isAscendingOrder = true) immutable
 	{	this(names, isAscendingOrder);
-		_nullName = nullName;
+		_defaultName = nullName;
 	}
 	
 	this( const(EnumFormat) format )
@@ -128,7 +126,7 @@ public:
 			_names[key] = name;
 		
 		_keys = format._keys.dup;
-		_nullName = format._nullName;
+		_defaultName = format._defaultName;
 	}
 	
 	EnumFormat mutCopy() @property const
@@ -171,7 +169,7 @@ public:
 	///Возвращает null, если значения нет в контейнере
 	string opIndex(K)(K key) const
 		if( is( K == int ) )
-	{	return _names.get(key, null); }
+	{	return _names.get( key, _defaultName ); }
 	
 	///Шаблонный оператор индексации по ключам для получения имени значения
 	///Возвращает null, если значения нет в контейнере
@@ -179,34 +177,28 @@ public:
 	///через std.typecons.Nullable или NullableRef. Однако базовый тип
 	///значения должен быть int
 	string opIndex(K)(K key) const
-		if( isStdNullable!(K) && is( getStdNullableType!(K) == int )  )
-	{	return ( key.isNull() ? _nullName : _names.get( key.get(), null) ); }
+		if( isOptional!(K) && is( OptionalValueType!(K) == int )  )
+	{	return ( key.isNull ? _defaultName : _names.get( key.value, _defaultName ) ); }
 	
 	///Метод получения имени для перечислимого типа по ключю
 	///с указанием значения по-умолчанию (на случай если имя для ключа не определено)
-	string get(K)(K key, string defaultValue = null) const
+	string get(K)(K key, string defaultValue) const
 		if( is( K == int ) )
 	{	return _names.get(key, defaultValue); }
 	
 	///Шаблонный метод получения имени перечислимого типа по ключу типа
 	///std.typecons.Nullable или NullableRef. Однако тип значения
 	///в "занулябельных" переменных должен быть int
-	string get(K)(K key, string defaultValue = null) const
-		if( isStdNullable!(K) && is( getStdNullableType!(K) == int )  )
-	{	return ( key.isNull() ? _nullName : _names.get( key.get(), defaultValue) ); }
+	string get(K)(K key, string defaultValue) const
+		if( isOptional!(K) && is( OptionalValueType!(K) == int )  )
+	{	return ( key.isNull ? defaultValue : _names.get( key.value, defaultValue) ); }
 	
 	
 	//TODO: Разобраться что применять string* или bool
 	///Оператор in для проверки наличия ключа в наборе значений перечислимого типа
-	inout(string)* opBinaryRight(string op, K)(K key) inout 
-		if( op == "in" && is( K == int ) )
-	{	return ( key in _names ); }
-	
-	///Оператор in для проверки наличия ключа в наборе значений перечислимого типа
-	///Работает со ключами типа std.typecons.Nullable, NullableRef (с базовым типом int)
-	inout(bool) opBinaryRight(string op, K)(K key) inout 
-		if( op == "in" && isStdNullable!(K) && is( getStdNullableType!(K) == int ) )
-	{	return ( key.isNull() ? true : ( ( key.get() in _names ) ? true : false ) );  }
+	inout(string)* opBinaryRight(string op)(int key) inout 
+		if( op == "in" )
+	{	return key in _names; }
 	
 	///Возвращает набор названий значений перечислимого типа
 	string[] names() @property const
@@ -222,8 +214,8 @@ public:
 	}
 	
 	///Возвращает имя для пустого значения (null) для перечислимого типа
-	string nullName() @property const
-	{	return _nullName; }
+	string defaultName() @property const
+	{	return _defaultName; }
 	
 	///Оператор для обхода значений перечислимого типа через foreach
 	///Первый параметр - имя (строка), второй - ключ (число)

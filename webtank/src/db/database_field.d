@@ -171,7 +171,7 @@ public:
 			
 			static if( FieldT == FieldType.Enum )
 			{	if( isNull(index) )
-				{	return _enumFormat.nullName;
+				{	return _enumFormat.defaultName;
 					
 				}
 // 				else

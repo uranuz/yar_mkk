@@ -30,7 +30,7 @@ class PlainDropDownList: HTMLControl
 		
 		string output = `<select` ~ printHTMLAttributes(attrs) ~ `>`
 			~ `<option value="null"` ~ ( _isNull ? ` selected` : `` ) ~ `>`
-			~ HTMLEscapeText(values.nullName) ~ `</option>`;
+			~ HTMLEscapeText(values.defaultName) ~ `</option>`;
 		
 		foreach( name, key; values )
 		{	output ~= `<option value="` ~ key.to!string ~ `"`

@@ -1,8 +1,8 @@
 module webtank.common.serialization;
  
-import std.json, std.traits, std.conv, std.typecons;
+import std.json, std.traits, std.conv, std.typecons, std.stdio;
 
-import webtank.common.utils;
+import webtank.common.optional;
 
 interface IStdJSONSerializeable
 {	JSONValue getStdJSON();
@@ -65,12 +65,12 @@ JSONValue getStdJSON(T)(T dValue)
 			foreach( elem; dValue )
 				jValue.array ~= getStdJSON( elem );
 		}
-		else static if( isStdNullable!T )
-		{	alias getStdNullableType!T BaseT;
-			if( dValue.isNull() )
+		else static if( isOptional!T )
+		{	alias OptionalValueType!T BaseT;
+			if( dValue.isNull )
 				jValue.type = JSON_TYPE.NULL;
 			else
-				jValue = getStdJSON( dValue.get() );
+				jValue = getStdJSON( dValue.value );
 		}
 		else static if( is( T: IStdJSONSerializeable ) )
 		{	if( dValue is null ) 
@@ -91,6 +91,7 @@ JSONValue getStdJSON(T)(T dValue)
 ///Шаблонная функция десериализации данных из std.json
 T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
+	writeln("getDLangValue jValue.type: ", jValue.type);
 	static if( is( T == JSONValue ) )
 	{	return jValue; //Raw JSONValue
 	}
@@ -103,20 +104,12 @@ T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 			throw new SerializationException("JSON value doesn't match boolean type!!!");
 	}
 	else static if( isIntegral!T )
-	{	static if( isUnsigned!T )
-		{	if( jValue.type == JSON_TYPE.UINTEGER )
-				return jValue.uinteger.to!T;
-			else
-				throw new SerializationException("JSON value doesn't match unsigned integer type!!!");
-		}
+	{	if( jValue.type == JSON_TYPE.UINTEGER )
+			return jValue.uinteger.to!T;
+		else if( jValue.type == JSON_TYPE.INTEGER )
+			return jValue.integer.to!T;
 		else
-		{	if( jValue.type == JSON_TYPE.INTEGER )
-				return jValue.integer.to!T;
-			else if( jValue.type == JSON_TYPE.UINTEGER  )
-				return jValue.uinteger.to!T;
-			else
-				throw new SerializationException("JSON value doesn't match integer type!!!");
-		}
+			throw new SerializationException("JSON value doesn't match unsigned integer type!!!");
 	}
 	else static if( isFloatingPoint!T )
 	{	if( jValue.type == JSON_TYPE.FLOAT )
@@ -187,9 +180,9 @@ T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 		else
 			throw new SerializationException("JSON value doesn't match tuple type!!!");
 	}
-	else static if( isStdNullable!T )
-	{	alias getStdNullableType!T BaseT;
-		pragma(msg, "getStdNullableType!T ", BaseT)
+	else static if( isOptional!T )
+	{	alias OptionalValueType!T BaseT;
+		pragma(msg, "OptionalValueType!T ", BaseT)
 		T result;
 		if( jValue.type != JSON_TYPE.NULL )
 			result = getDLangValue!(BaseT)(jValue);

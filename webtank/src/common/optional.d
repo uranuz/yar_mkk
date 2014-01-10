@@ -1,6 +1,6 @@
-module webtank.common.nullable;
+module webtank.common.optional;
 
-import std.stdio;
+import std.stdio, std.conv;
 
 ///Returns true if T is nullable type
 template isNullable(T)
@@ -29,8 +29,18 @@ template getStdNullableType(N)
 		static assert (0, `Type ` ~ fullyQualifiedName!(N) ~ ` can't be used as Nullable type!!!` );
 }
 
-template isWebtankNullable(N)
-{	enum bool isWebtankNullable = is( N == Nullable!(T), T ) ;
+
+///Возвращает true, если тип N произведён от шаблона Optional
+template isOptional(O)
+{	enum bool isOptional = is( O == Optional!(T), T ) ;
+}
+
+template OptionalValueType(O)
+{	import std.traits;
+	static if( is( O == Optional!(T), T ) )
+		alias T OptionalValueType;
+	else
+		static assert (0, `Type ` ~ fullyQualifiedName!(O) ~ ` is not an instance of Optional!!!` );
 }
 
 unittest
@@ -61,82 +71,6 @@ unittest
 	assert( !isNullable!(double) );
 }
 
-// private struct NullableTag { }
-// 
-// 
-// template Nullable(T)
-// {
-// 	static if (isNullable!(T)) { alias T Nullable; }
-// 	else
-// 	{
-// 		struct Nullable
-// 		{
-// 			// To tell if something is Nullable
-// 			private alias .NullableTag NullableTag;
-// 			private T _value;
-// 			private bool _hasValue;
-// 
-// 			public this(A)(auto ref A value)
-// 				inout /+pure @safe nothrow+/
-// 			{
-// 				this._value = value;
-// 				this._hasValue = true;
-// 			}
-// 
-// 			public this(A : typeof(null))(A)
-// 				inout /+pure @safe nothrow+/ { }
-// 
-// 			public @property ref const(bool) hasValue()
-// 				const /+pure @safe nothrow+/
-// 			{ return this._hasValue; }
-// 
-// 			public @property ref inout(T) value()
-// 				inout /+pure @safe+/
-// 			{ return *(this._hasValue ? &this._value : null); }
-// 
-// 			
-// 
-// 			public bool opEquals(RHS)(scope RHS rhs)
-// 				const /+pure @safe nothrow+/
-// 				if (!is(RHS.NullableTag == NullableTag))
-// 			{ return this.hasValue && this._value == rhs; }
-// 
-// 			public bool opEquals(RHS)(scope RHS rhs)
-// 				const /+pure @safe nothrow+/
-// 				if (is(RHS.NullableTag == NullableTag))
-// 			{
-// 				return this.hasValue == rhs.hasValue &&
-// 					this._value == rhs._value;
-// 			}
-// 
-// 			public bool opEquals(RHS : typeof(null))(scope RHS)
-// 				const /+pure @safe nothrow+/
-// 			{ return !this.hasValue; }
-// 
-// 			static if (!is(T == const(T)))
-// 			{
-// 				public auto ref opAssign(RHS)(auto ref RHS rhs)
-// 					/+pure @safe nothrow+/
-// 				{
-// 					this._value = rhs;
-// 					this._hasValue = true;
-// 					return rhs;
-// 				}
-// 
-// 				public auto ref opAssign(RHS : typeof(null))(auto ref RHS rhs)
-// 					/+pure @safe nothrow+/
-// 				{
-// 					this._value = T.init;
-// 					this._hasValue = false;
-// 					return rhs;
-// 				}
-// 			}
-// 
-// 			//public alias value this;
-// 		}
-// 	}
-// }
-// 
 // unittest
 // {
 // 	Nullable!int a = null;
@@ -149,9 +83,9 @@ unittest
 // 	assert(b + 1 == 6);
 // 	struct S
 // 	{
-// 		public bool opEquals(S) const pure @safe nothrow
+// 		public bool opEquals(S) const /+pure @safe nothrow+/
 // 		{ return true; }
-// 		public bool opEquals(int) const pure @safe nothrow
+// 		public bool opEquals(int) const /+pure @safe nothrow+/
 // 		{ return true; }
 // 	}
 // 	Nullable!S s;
@@ -162,16 +96,19 @@ unittest
 // 	assert(b.opCmp(6) < 0);
 // 	assert(b.opCmp(5) == 0);
 // }
-// 
-// @property Nullable!(T) nullable(T)(auto ref T value) /+pure @safe 
-// nothrow+/
-// {
-// 	Nullable!(T) result = value;
-// 	return result;
-// }
 
 
-struct Nullable(T)
+
+
+Optional!(T) optional(T)(auto ref inout(T) value) 
+	/+pure @safe nothrow+/
+{	Optional!(T) result = value;
+	return result;
+}
+
+///Шаблон для представления типов, имеющих выделенное пустое,
+///или неинициализированное состояние
+struct Optional(T)
 	if( isNullable!T )
 {
 	private T _value;
@@ -180,14 +117,14 @@ struct Nullable(T)
 Constructor binding $(D this) with $(D value).
  */
 	this(A)( auto ref T value) 
-		inout pure @safe nothrow
+		inout /+pure @safe nothrow+/
 	{	_value = value; }
 
 /**
 Returns $(D true) if and only if $(D this) is in the null state.
  */
 	@property bool isNull() 
-		const pure @safe nothrow
+		const /+pure @safe nothrow+/
 	{	return _value is null;
 	}
 	
@@ -195,25 +132,25 @@ Returns $(D true) if and only if $(D this) is in the null state.
 Forces $(D this) to the null state.
  */
 	void nullify()
-		pure @safe nothrow
+		/+pure @safe nothrow+/
 	{	_value = null;
 	}
     
 	bool opEquals(RHS)(auto ref RHS rhs)
-		const pure @safe nothrow
-		if ( !isWebtankNullable!(RHS) )
+		const /+pure @safe nothrow+/
+		if ( !isOptional!(RHS) )
 	{	return _value == rhs; }
 
 	bool opEquals(RHS)(auto ref RHS rhs)
-		const pure @safe nothrow
-		if( isWebtankNullable!(RHS) )
+		const /+pure @safe nothrow+/
+		if( isOptional!(RHS) )
 	{	return _value == rhs._value; }
 
 /**
 Assigns $(D value) to the internally-held state.
  */
 	auto ref opAssign(ref T rhs) 
-		pure @safe nothrow
+		/+pure @safe nothrow+/
 	{	return _value = rhs; }
 
 /**
@@ -221,14 +158,18 @@ Gets the value. $(D this) must not be in the null state.
 This function is also called for the implicit conversion to $(D T).
  */
 	@property ref inout(T) value() 
-		inout pure nothrow @safe
+		inout /+pure @safe nothrow+/
 	{	return _value;
 	}
 
 	auto ref inout(T) get()(auto ref inout(T) defaultValue) 
-		inout pure nothrow @safe
+		inout /+pure @safe nothrow+/
 	{	return isNull ? defaultValue : _value ;
 	}
+	
+// 	string toString() 
+// 		inout /+pure @safe nothrow+/
+// 	{	return _value; }
 
 /**
 Implicitly converts to $(D T).
@@ -237,7 +178,7 @@ $(D this) must not be in the null state.
 	alias value this;
 }
 
-struct Nullable(T)
+struct Optional(T)
 	if( !isNullable!T )
 {
 	private T _value;
@@ -247,13 +188,13 @@ struct Nullable(T)
 Constructor initializing $(D this) with $(D value).
  */
 	this( A )( auto ref inout(A) value )
-		inout pure nothrow @safe
+		inout /+pure @safe nothrow+/
 	{	_value = value;
 		_isNull = false;
 	}
 	
 	this( A : typeof(null) )( A value ) 
-		inout pure @safe nothrow
+		inout /+pure @safe nothrow+/
 	{	_isNull = true;
 	}
 
@@ -261,7 +202,7 @@ Constructor initializing $(D this) with $(D value).
 Returns $(D true) if and only if $(D this) is in the null state.
  */
 	@property bool isNull() 
-		const pure @safe nothrow
+		const /+pure @safe nothrow+/
 	{	return _isNull;
 	}
 
@@ -269,61 +210,59 @@ Returns $(D true) if and only if $(D this) is in the null state.
 Forces $(D this) to the null state.
  */
 	void nullify()()
-		pure @safe nothrow
+		/+pure @safe nothrow+/
 	{
 		.destroy(_value);
 		_isNull = true;
 	}
 	
-// 	int opCmp(RHS)(scope RHS rhs)
-// 		const /+pure @safe nothrow+/
-// 		if (!is(RHS.NullableTag == NullableTag))
-// 	{
-// 		int r;
-// 		if (this.hasValue)
-// 		{
-// 			static if (__traits(compiles, this._value.opCmp(rhs)))
-// 			{ r = this._value.opCmp(rhs._value); }
-// 			else
-// 			{ r = this._value < rhs ? -1 : (this._value > rhs ? 1 : 0); }
-// 		}
-// 		else { r = -1; }
-// 		return r;
-// 	}
-// 
-// 	int opCmp(RHS)(scope RHS rhs)
-// 		const /+pure @safe nothrow+/
-// 		if( isWebtankNullable(RHS) )
-// 	{
-// 		int r;
-// 		if ( !isNull && !rhs.isNull)
-// 		{ r = 0; }
-// 		else if( !isNull && rhs.isNull )
-// 		{ r = 1; }
-// 		else if ( isNull && !rhs.isNull )
-// 		{ r = -1; }
-// 		else { r = this == rhs._value; }
-// 		return r;
-// 	}
-// 
-// 	int opCmp(RHS : typeof(null))(scope RHS)
-// 		const /+pure @safe nothrow+/
-// 	{ return this.hasValue ? 1 : 0; }
+	int opCmp(RHS)(auto ref inout(RHS) rhs)
+		const /+pure @safe nothrow+/
+		if( !isOptional!(RHS) )
+	{	int r;
+		if( !isNull )
+		{
+			static if( __traits(compiles, _value.opCmp(rhs)) )
+			{ r = _value.opCmp(rhs._value); }
+			else
+			{ r = _value < rhs ? -1 : (_value > rhs ? 1 : 0); }
+		}
+		else { r = -1; }
+		return r;
+	}
+
+	int opCmp(RHS)(auto ref inout(RHS) rhs)
+		const /+pure @safe nothrow+/
+		if( isOptional!(RHS) )
+	{	int r;
+		if ( !isNull && !rhs.isNull)
+		{ r = 0; }
+		else if( !isNull && rhs.isNull )
+		{ r = 1; }
+		else if ( isNull && !rhs.isNull )
+		{ r = -1; }
+		else { r = this == rhs._value; }
+		return r;
+	}
+
+	int opCmp( RHS : typeof(null) )( RHS rhs )
+		const /+pure @safe nothrow+/
+	{ return !isNull ? 1 : 0; }
 	
 	bool opEquals( RHS )( auto ref RHS rhs )
-		const pure @safe nothrow
-		if( !isWebtankNullable!(RHS) )
+		const /+pure @safe nothrow+/
+		if( !isOptional!(RHS) )
 	{	return !isNull && _value == rhs; }
 
 	bool opEquals( RHS )( auto ref RHS rhs )
-		const pure @safe nothrow
-		if( isWebtankNullable!(RHS) )
+		const /+pure @safe nothrow+/
+		if( isOptional!(RHS) )
 	{	return _isNull == rhs._isNull &&
 			_value == rhs._value;
 	}
 
 	bool opEquals( RHS : typeof(null) )( RHS value )
-		const pure @safe nothrow
+		const /+pure @safe nothrow+/
 	{ return isNull; }
 
 /**
@@ -331,14 +270,14 @@ Gets the value. $(D this) must not be in the null state.
 This function is also called for the implicit conversion to $(D T).
  */
 	@property ref inout(T) value() 
-		inout pure nothrow @safe
+		inout /+pure @safe nothrow+/
 	{	enum message = "Attemt to get value of null " ~ typeof(this).stringof ~ "!!!";
 		assert(!isNull, message);
 		return _value;
 	}
     
 	auto ref inout(T) get()(auto ref inout(T) defaultValue) 
-		inout pure nothrow @safe
+		inout /+pure @safe nothrow+/
 	{	return ( isNull ? defaultValue : _value );
 	}
 
@@ -347,18 +286,22 @@ Assigns $(D value) to the internally-held state. If the assignment
 succeeds, $(D this) becomes non-null.
  */
 	auto ref opAssign( RHS )( auto ref RHS value )
-		pure @safe nothrow
+		/+pure @safe nothrow+/
 	{	this._value = value;
 		this._isNull = false;
 		return value;
 	}
 
 	auto ref opAssign( RHS : typeof(null) )( RHS value )
-		pure @safe nothrow
+		/+pure @safe nothrow+/
 	{	this._value = T.init;
 		this._isNull = true;
 		return value;
 	}
+	
+// 	string toString() 
+// 		inout /+pure @safe nothrow+/
+// 	{	return ( isNull ? "null" : _value.to!string ); }
 
 /**
 Implicitly converts to $(D T).
@@ -367,11 +310,12 @@ $(D this) must not be in the null state.
     alias value this;
 }
 
-// void main() {
-// 	
-// 	import std.stdio;
-// 	
-// 	Nullable!int a;
+import std.stdio, std.datetime;
+
+// void main() 
+// {
+// 
+// 	Optional!Date a;
 // 	
 // 	writeln("test");
 // 	
@@ -379,9 +323,5 @@ $(D this) must not be in the null state.
 // 	
 // 	writeln(a.isNull);
 // 	
-// 	a = 888;
-// 	auto b = a.get(666);
-// 	writeln(b);
 // 	
-// 	writeln(a == null);
 // }

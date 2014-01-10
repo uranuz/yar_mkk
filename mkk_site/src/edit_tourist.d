@@ -2,7 +2,7 @@ module mkk_site.edit_tourist;
 
 import std.conv, std.string, std.file, std.stdio, std.utf, std.typecons;
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls;
+import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls, webtank.common.optional;
 
 import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
 import std.conv, std.algorithm;
@@ -26,7 +26,7 @@ auto тестНаличияПохожегоТуриста(
 	string фамилия,
 	string имя,
 	string отчество,
-	Nullable!(int) годРожд
+	Optional!(int) годРожд
 ) {
 	IDatabase dbase = getCommonDB();
 	

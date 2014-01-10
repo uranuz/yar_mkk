@@ -2,7 +2,7 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.stdio, std.array, std.json, std.typecons;
 
-import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls;
+import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
 
@@ -15,10 +15,7 @@ shared static this()
 {	
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(getTouristList);
-
-// 	Router.setRPCMethod("поход.список_участников", &getParticipantsEditWindow);
-// 	Router.setRPCMethod("поход.создать_поход", &createPohod);
-// 	Router.setRPCMethod("поход.обновить_поход", &updatePohod);
+	JSONRPCRouter.join!(списокУчастниковПохода);
 }
 
 alias FieldType ft;
@@ -36,6 +33,8 @@ immutable shortTouristFormatQueryBase =
 auto getTouristList(string фамилия)
 {	string result;
 	auto dbase = getCommonDB();
+	
+	writeln("edit_pohod.getTouristList test 0");
 	
 	if ( !dbase.isConnected )
 		return null; //Завершаем
@@ -57,53 +56,33 @@ auto getTouristList(string фамилия)
 	
 	return rs;
 }
-// 
-// 
-// 
-// auto getPohodParticipants( size_t pohodNum, uint requestedLimit )
-// {	auto dbase = getCommmonDB();
-// 	if ( !dbase.isConnected )
-// 		return null; //Завершаем
-// 	
-// 	uint maxLimit = 25;
-// 	uint limit = ( requestedLimit < maxLimit ? requestedLimit : maxLimit );
-// 	
-// 	auto queryRes = dbase.query(
-// 		shortTouristFormatQueryBase ~ `where num=`
-// 		~ pohodNum.to!string ~ ` limit ` ~ limit.to!string ~ `;`
-// 	);
-// 	if( queryRes is null || queryRes.recordCount == 0 )
-// 		return null;
-// 	
-// 	return queryRes.getRecordSet(shortTouristRecFormat);
-// }
 
-// import std.typecons, std.typetuple;
-// alias TypeTuple!(
-// 	string, "kod_mkk", string, "nomer_knigi", string, "region_pohod", string, "organization", string, "organization", string, "vid", string, "element", string, "ks", string, "marchrut", string, "begin_date", string, "finish_date", string, "chef_grupp", string, "alt_chef", string, "unit", string, "prepare", string, "status", string, "emitter", string, "chef_coment", string, "MKK_coment", size_t[], "unit_neim"
-// ) PohodTupleType;
+auto списокУчастниковПохода( size_t pohodKey )
+{	auto dbase = getCommonDB();
+	if ( !dbase.isConnected )
+		throw new Exception("База данных не доступна!!!"); //Завершаем
+	
+	auto queryRes = dbase.query(
+`		with nums as (
+			select unnest(unit_neim) as id from pohod where num=` ~ pohodKey.to!string ~ `
+		)
+		select num, family_name, given_name, patronymic, birth_year from tourist, nums
+		where num=nums.id::bigint;
+`	);
 
-// string[int][string] initializePohodEnumValues()
-// {	string[int][string] result;
-// 	result["vid"] = видТуризма;
-// 	result["element"] = элементыКС;
-// 	result["ks"] = категорияСложности;
-// 	result["prepare"] = готовностьПохода;
-// 	result["status"] = статусЗаявки;
-// 
-// 	return result;
-// }
-// 
-// alias enum string[int] PohodEnumType;
-// 
-// enum PohodEnumType[string] pohodEnumValues = initializePohodEnumValues();
+	if( queryRes is null || queryRes.recordCount == 0 )
+		return null;
+	
+	return queryRes.getRecordSet(shortTouristRecFormat);
+}
+
 
 immutable(RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
-	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "element",
+	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "elem",
 	ft.Enum, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
 	ft.Date, "finish_date", ft.Str, "chef_group", ft.Str, "alt_chef",
-	ft.Int, "unit", ft.Enum, "prepare", ft.Enum, "status",
+	ft.Int, "unit", ft.Enum, "prepar", ft.Enum, "stat",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
 )) pohodRecFormat;
 
@@ -113,9 +92,9 @@ shared static this()
 	pohodRecFormat.enumFormats = 
 	[	"vid": видТуризма,
 		"ks": категорияСложности,
-		"element": элементыКС,
-		"prepare": готовностьПохода,
-		"status": статусЗаявки
+		"elem": элементыКС,
+		"stat": статусЗаявки,
+		"prepar": готовностьПохода
 	];
 }
 
@@ -163,18 +142,6 @@ void создатьФормуИзмененияПохода(
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
 	
-	/+pohodForm.set( "num.value", pohodRec.get!"ключ"(0).to!string );+/
-	
-	if( touristRS )
-	{	string touristListStr;
-		foreach( rec; touristRS )
-		{	touristListStr ~= HTMLEscapeValue( rec.get!"family_name"("") ) ~ " "
-				~ HTMLEscapeValue( rec.get!"given_name"("") ) ~ " " ~ HTMLEscapeValue( rec.get!"patronymic"("") )
-				~ ( rec.isNull("birth_year") ? "" : (", " ~ rec.get!"birth_year"(0).to!string ~ " г.р") ) ~ "<br>\r\n";
-		}
-		pohodForm.set( "unit", touristListStr );
-	}
-	
 	if( pohodRec )
 	{	pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
@@ -204,13 +171,17 @@ void создатьФормуИзмененияПохода(
 }
 
 
-void изменитьДанныеПохода(HTTPContext context)
+string изменитьДанныеПохода(HTTPContext context, Optional!size_t pohodKey)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 	
 	auto pVars = rq.postVars;
 	auto qVars = rq.queryVars;
+	
+	auto dbase = getCommonDB();
+	
+	if( !dbase.isConnected )
+		throw new Exception("База данных МКК не доступна!!!");
 	
 	string fieldNamesStr;
 	string fieldValuesStr;
@@ -219,62 +190,134 @@ void изменитьДанныеПохода(HTTPContext context)
 	
 	//Формируем набор строковых полей и значений
 	foreach( i, fieldName; strFieldNames )
-	{	string value = pVars.get(fieldName, null);
-		if( value.length > 0  )
-		{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
-			fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
-		}
+	{	if( fieldName !in pVars )
+			continue;
+			
+		string value = pVars[fieldName];
+		
+		fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
+		fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) 
+			~ ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" ); 
 	}
 	
+	writeln("изменитьДанныеПохода test 30");
 	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
 	
 	//Формируем часть запроса для вывода перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
-	{	int enumKey;
-		try {
-			enumKey = pVars.get(fieldName, "").to!int;
-		} catch (std.conv.ConvException e) {
-// 			enumKey.nullify();
+	{	if( fieldName !in pVars )
+			continue;
+			
+		Optional!(int) enumKey;
+		
+		auto strKey = pVars[fieldName];
+		if( strKey.length != 0 && toLower(strKey) != "null" )
+		{	try {
+				enumKey = strKey.to!int;
+			} catch (std.conv.ConvException e) {
+				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+			}
 		}
 		
-		writeln(enumKey);
+		if( !enumKey.isNull && enumKey !in pohodRecFormat.enumFormats[fieldName] )
+			throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+	
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
+			
+		if( fieldValuesStr.length > 0 )
+			fieldValuesStr ~= ", ";
 		
-// 		if(  )
-		
-		if( enumKey in pohodRecFormat.enumFormats[fieldName] )
-		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ pVars.get(fieldName, "") ~ `'`;
-		}
-		else
-			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("vid", "") ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
+		fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 	}
 	
+	writeln("изменитьДанныеПохода test 40");
 	//Формируем часть запроса для вбивания начальной и конечной даты
-	foreach( i; 0..1 )
-	{	auto pre = ( i == 0 ? "begin_" : "end_" );
-		import std.datetime;
-		Date date;
-		try {
-			date = Date( 
-				pVars.get( pre ~ "year", "").to!int,
-				pVars.get( pre ~ "month", "").to!int,
-				pVars.get( pre ~ "day", "").to!int
-			);
-		} 
-		catch (std.conv.ConvException exc) 
-		{	throw exc;
-			//TODO: Добавить обработку исключения
-		} 
-		catch (std.datetime.DateTimeException exc) 
-		{	throw exc;
-			//TODO: Добавить обработку исключения
+	import std.datetime;
+	
+	Optional!(Date)[2] pohodDates;
+	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
+	
+	foreach( i; 0..2 )
+	{	string pre = dateParamNamePrefixes[i];
+		
+		if( 
+			(pre ~ "year") !in pVars ||  
+			(pre ~ "month") !in pVars ||
+			(pre ~ "day") !in pVars
+		) continue;
+
+		string yearStr = pVars[ pre ~ "year" ];
+		string monthStr = pVars[ pre ~ "month" ];
+		string dayStr = pVars[ pre ~ "day" ];
+		
+		if( 
+			yearStr.length != 0 && toLower(yearStr) != "null" ||
+			monthStr.length != 0 && toLower(monthStr) != "null" ||
+			dayStr.length != 0 && toLower(dayStr) != "null"
+		)
+		{	try {
+				pohodDates[i] = Date(yearStr.to!int, monthStr.to!int, dayStr.to!int);
+			}
+			catch (std.conv.ConvException exc) 
+			{	throw new Exception("Введенные компоненты дат не являются числовыми значениями");
+				//TODO: Добавить обработку исключения
+			} 
+			catch (std.datetime.DateTimeException exc) 
+			{	throw new Exception("Некорректный формат даты");
+				//TODO: Добавить обработку исключения
+				
+			}
 		}
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `'` ~ date.toISOExtString() ~ `'`;
+	}
+
+	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
+	{	if( pohodDates[1].value < pohodDates[0].value )
+			throw new Exception("Дата начала похода должна быть раньше даты окончания");
+	}
+	
+	foreach( i, pre; dateParamNamePrefixes )
+	{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
+		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
+			~ ( pohodDates[i].isNull ? "NULL" : `'` ~ pohodDates[i].value.toISOExtString() ~ `'` );
+	}
+	
+	string queryStr;
+	
+	if( pohodKey.isNull )
+		queryStr = "insert into pohod ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
+	else
+		queryStr = "update pohod set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ pohodKey.value.to!string ~ "';";
+		
+	auto writeDBQueryRes = dbase.query(queryStr);
+	
+	string message;
+	
+	if( pohodKey.isNull  )
+	{	if( dbase.lastErrorMessage is null )
+			message = "<h3>Данные о походе успешно добавлены в базу данных!!!</h3>"
+			~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
+		else
+			message = "<h3>Произошла ошибка при добавлении данных в базу данных!!!</h3>"
+			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>\r\n";
+	}
+	else
+	{	if( dbase.lastErrorMessage is null )
+			message = "<h3>Данные о походе успешно обновлены!!!</h3>"
+			~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
+		else
+			message = "<h3>Произошла ошибка при обновлении данных!!!</h3>"
+			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>\r\n";
 	}
 	
 	writeln("fieldNamesStr: ", fieldNamesStr);
 	writeln("fieldValuesStr: ", fieldValuesStr);
+	writeln("queryStr", queryStr);
+	
+	return message;
 }
 
 
@@ -310,58 +353,38 @@ void netMain(HTTPContext context)
 			return; //Завершаем
 		}
 		
-		//Пытаемся получить ключ
-		bool isPohodKeyAccepted = false;
-		
-		size_t pohodKey;
+		Optional!size_t pohodKey;
 		try {
 			pohodKey = qVars.get("key", null).to!size_t;
-			isPohodKeyAccepted = true;
 		}
 		catch(std.conv.ConvException e)
-		{	isPohodKeyAccepted = false; }
+		{	pohodKey = null; }
 
 		Record!( typeof(pohodRecFormat) ) pohodRec;
 		RecordSet!( typeof(shortTouristRecFormat) ) touristRS;
 		
 		//Если в принципе ключ является числом, то получаем данные из БД
-		if( isPohodKeyAccepted )
+		if( !pohodKey.isNull )
 		{	auto pohodRS = dbase.query( 
-				`select num, kod_mkk, nomer_knigi, region_pohod, organization, region_group, vid, element, ks, marchrut, begin_date, finish_date, chef_grupp, alt_chef, unit, prepare, status, chef_coment, "MKK_coment", unit_neim from pohod where num=` ~ pohodKey.to!string ~ `;`
+				`select num, kod_mkk, nomer_knigi, region_pohod, organization, region_group, vid, elem, ks, marchrut, begin_date, finish_date, chef_grupp, alt_chef, unit, prepar, stat, chef_coment, "MKK_coment", unit_neim from pohod where num=` ~ pohodKey.value.to!string ~ `;`
 			).getRecordSet(pohodRecFormat);
 			if( ( pohodRS !is null ) && ( pohodRS.length == 1 ) ) //Если получили одну запись -> ключ верный
-			{	pohodRec = pohodRS.front;
-				isPohodKeyAccepted = true;
-				//Получаем информацию об участниках похода
-				//Скобочки {} в начале и в конце строкового представления массива
-				if( pohodRec.get!"unit_neim"("").length >= 2 ) 
-					touristRS = dbase.query(
-						` with nums as ( select unnest( string_to_array('` 
-						~ PGEscapeStr( (pohodRec.get!"unit_neim"(""))[1..$-1] ) ~ `', ',') ) as id ) ` //вырезали скобочки
-						~ ` select num, family_name, given_name, patronymic, birth_year from tourist, nums ` 
-						~ ` where num=nums.id::bigint;`
-					).getRecordSet(shortTouristRecFormat);
-			}
+				pohodRec = pohodRS.front;
 			else
-				isPohodKeyAccepted = false;
+				pohodKey = null;
 		}
 		
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
 		pohodForm.set( "form_action", thisPagePath );
 		
-		
+		string editResultMessage;
 		//Определяем выполняемое страницей действие
 		if( pVars.get("action", "") == "write" )
-		{	writeln("mkk_site.edit_pohod.netMain write test 20");
-			изменитьДанныеПохода(context);
-			
-		}
-		else
-		{	создатьФормуИзмененияПохода(pohodForm, pohodRec, touristRS);
-			
-		}
+			editResultMessage = изменитьДанныеПохода(context, pohodKey);
 
-		string content = pohodForm.getString();
+		создатьФормуИзмененияПохода(pohodForm, pohodRec);
+
+		string content = editResultMessage ~ pohodForm.getString();
 		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();
