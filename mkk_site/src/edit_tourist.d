@@ -151,14 +151,14 @@ string показатьФормуРедактТуриста(
 	//Генератор выпадющего списка спорт. разрядов
 	auto sportsGradeDropdown = new PlainDropDownList;
 	sportsGradeDropdown.values = спортивныйРазряд.mutCopy();
-	sportsGradeDropdown.name = "sports_grade";
-	sportsGradeDropdown.id = "sports_grade";
+	sportsGradeDropdown.name = "razr";
+	sportsGradeDropdown.id = "razr";
 	
 	//Генератор выпадающего списка судейских категорий
 	auto judgeCatDropdown = new PlainDropDownList;
 	judgeCatDropdown.values = судейскаяКатегория.mutCopy();
-	judgeCatDropdown.name = "judge_category";
-	judgeCatDropdown.id = "judge_category";
+	judgeCatDropdown.name = "sud";
+	judgeCatDropdown.id = "sud";
 	
 	//Вывод данных о туристе в форму редакирования
 	if( isUpdateAction )
@@ -177,7 +177,7 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
 		
 		if( !birthMonth.isNull() )
-			sportsGradeDropdown.currKey = birthMonth.get();
+			monthDropdown.currKey = birthMonth.get();
 		
 		if( !touristRec.isNull("спорт разряд") )
 			sportsGradeDropdown.currKey = touristRec.get!"спорт разряд"();
@@ -188,8 +188,8 @@ string показатьФормуРедактТуриста(
 	//-----------------------------------------------------------------------------------
 
 	editTouristForm.set( "birth_month", monthDropdown.print() );
-	editTouristForm.set( "sports_grade", sportsGradeDropdown.print() );
-	editTouristForm.set( "judge_category", judgeCatDropdown.print() );
+	editTouristForm.set( "razr", sportsGradeDropdown.print() );
+	editTouristForm.set( "sud", judgeCatDropdown.print() );
 	
 	editTouristForm.set( "action", ` value="write"` );
 	
@@ -254,30 +254,51 @@ string записатьТуриста(
 		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"show_email\"";
 		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
 
+		if( "razr" in pVars )
+		{	Optional!(int) enumKey;
 		
-		Nullable!(int) sports_grade;
-		try { sports_grade =  pVars.get("sports_grade", null).to!int; }
-		catch(std.conv.ConvException e) {  sports_grade.nullify(); };
-		
-		if( sports_grade in спортивныйРазряд )
-		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"razr\"";
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
-				~ ( sports_grade.isNull() ? "NULL" : "'" ~ sports_grade.get().to!string ~ "'" );
-		}
-		else
-			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("sports_grade", "") ~ "\" не является значением типа \"спортивный разряд\"!!!");
+			string strKey = pVars["razr"];
+			if( strKey.length != 0 && toLower(strKey) != "null" )
+			{	try {
+					enumKey = strKey.to!int;
+				} catch (std.conv.ConvException e) {
+					throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"спортивный разряд\"!!!");
+				}
+			}
 			
-		Nullable!(int) judge_category;
-		try { judge_category =  pVars.get("judge_category", null).to!int; }
-		catch(std.conv.ConvException e) {  judge_category.nullify(); };
-					
-		if (judge_category in судейскаяКатегория)
-		{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"sud\"";
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
-				~ ( judge_category.isNull() ? "NULL" : "'" ~ judge_category.get().to!string ~ "'" );
+			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
+				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"спортивный разряд\"!!!");
+		
+			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"razr"`;
+				
+			if( fieldValuesStr.length > 0 )
+				fieldValuesStr ~= ", ";
+			
+			fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 		}
-		else
-			throw new std.conv.ConvException("Выражение \"" ~ pVars.get("judge_category", "") ~ "\" не является значением типа \"судейская категория\"!!!");
+			
+		if( "sud" in pVars )
+		{	Optional!(int) enumKey;
+		
+			string strKey = pVars["sud"];
+			if( strKey.length != 0 && toLower(strKey) != "null" )
+			{	try {
+					enumKey = strKey.to!int;
+				} catch (std.conv.ConvException e) {
+					throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
+				}
+			}
+			
+			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
+				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
+		
+			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"sud"`;
+				
+			if( fieldValuesStr.length > 0 )
+				fieldValuesStr ~= ", ";
+			
+			fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
+		}
 		
 
 		string queryStr;
