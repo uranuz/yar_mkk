@@ -24,10 +24,11 @@ auto shortTouristRecFormat = RecordFormat!(
 	ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" 
 )();
 
-
-
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
+
+immutable touristInfoStringQueryBase = 
+	` select coalesce(family_name, '') || coalesce(' ' || given_name, '') || coalesce(' ' || patronymic, '') || ', ' || coalesce(birth_year::text, 'null') || ' г.р' from tourist `;
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
 auto getTouristList(string фамилия)
@@ -81,7 +82,7 @@ immutable(RecordFormat!(
 	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
 	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "elem",
 	ft.Enum, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
-	ft.Date, "finish_date", ft.Str, "chef_group", ft.Str, "alt_chef",
+	ft.Date, "finish_date", ft.Int, "chef_grupp", ft.Int, "alt_chef",
 	ft.Int, "unit", ft.Enum, "prepar", ft.Enum, "stat",
 	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
 )) pohodRecFormat;
@@ -106,10 +107,7 @@ void создатьФормуИзмененияПохода(
 	PlainTemplater pohodForm, 
 	
 	//Запись с данными о существующем походе (если null - вставка нового похода)
-	Record!( typeof(pohodRecFormat) ) pohodRec = null,
-	
-	//Набор записей о туристах, участвующих в походе
-	RecordSet!( typeof(shortTouristRecFormat) ) touristRS = null
+	Record!( typeof(pohodRecFormat) ) pohodRec = null
 )
 {	
 	if( pohodRec )
@@ -163,6 +161,44 @@ void создатьФормуИзмененияПохода(
 			dropdown.currKey = pohodRec.get!(fieldName)();
 		
 		pohodForm.set( fieldName, dropdown.print() );
+	}
+	
+	//Выводим руководителя похода и его зама
+	
+	
+	if( pohodRec )
+	{	auto dbase = getCommonDB();
+	
+		if( !dbase.isConnected )
+			throw new Exception("База данных МКК не доступна!!!");
+			
+		if( pohodRec.isNull("chef_grupp") )
+			pohodForm.set( "chef_grupp_text", "Редактировать");
+		else {
+			auto chefString_QRes = dbase.query( 
+				touristInfoStringQueryBase ~ ` where num=` ~ pohodRec.get!("chef_grupp").to!string ~ `;` 
+			);
+			if( chefString_QRes.recordCount == 1 )
+				pohodForm.set( "chef_grupp_text", chefString_QRes.get(0, 0) );
+			else
+				pohodForm.set( "chef_grupp_text", "Отсутствует в БД");
+		}
+		
+		if( pohodRec.isNull("alt_chef") )
+			pohodForm.set( "alt_chef_text", "Редактировать");
+		else {
+			auto chefString_QRes = dbase.query( 
+				touristInfoStringQueryBase ~ ` where num=` ~ pohodRec.get!("alt_chef").to!string ~ `;`
+			);
+			if( chefString_QRes.recordCount == 1 )
+				pohodForm.set( "alt_chef_text", chefString_QRes.get(0, 0) );
+			else
+				pohodForm.set( "alt_chef_text", "Отсутствует в БД");
+		}
+	}
+	else
+	{	pohodForm.set( "chef_grupp_text", "Редактировать");
+		pohodForm.set( "alt_chef_text", "Редактировать");
 	}
 	
 	//Задаём действие, чтобы при след. обращении к обработчику
@@ -281,6 +317,67 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			~ ( pohodDates[i].isNull ? "NULL" : `'` ~ pohodDates[i].value.toISOExtString() ~ `'` );
 	}
 	
+	//Разбор списка туристов
+	if( "unit_neim" in pVars )
+	{	import std.array;
+		
+		if( pVars["unit_neim"] != "null" && pVars["unit_neim"].length != 0 )
+		{	auto touristKeyStrings = std.array.split(pVars["unit_neim"], ",");
+			size_t[] touristKeys;
+			
+			foreach( keyStr; touristKeyStrings )
+				touristKeys ~= keyStr.to!size_t; //Проверка на число
+			
+			writeln(touristKeys);
+			
+			auto existTouristCount_QRes = dbase.query(
+				` with nums as ( select unnest( ARRAY[` ~ pVars["unit_neim"] ~ `] ) as n ) `
+				~ ` select count(1) from tourist join nums on nums.n = tourist.num; `
+			);
+			
+			if( existTouristCount_QRes.recordCount != 1 || existTouristCount_QRes.fieldCount != 1 )
+				throw new Exception("Ошибка при запросе количества найденных записей о туристах!!!");
+			
+			size_t existTouristCount = existTouristCount_QRes.get(0, 0).to!size_t;
+			if( existTouristCount != touristKeys.length )
+				throw new Exception("Часть переданных в запросе ключей не соответствуют существующим в БД туристам!!!");
+			
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `ARRAY[` ~ pVars["unit_neim"] ~ `]`;
+		}
+		else
+		{	fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+		}
+		
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `unit_neim`;
+	}
+	
+	//Бадяжим часть запроса для записи руководителя и его заместителя
+	
+	if( "chef_grupp" in pVars )
+	{	if( pVars["chef_grupp"] != "null" && pVars["chef_grupp"].length != 0 )
+		{	size_t chefGruppKey = pVars["chef_grupp"].to!size_t;
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ chefGruppKey.to!string;
+		}
+		else
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+			
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `chef_grupp`;
+	}
+	
+	if( "alt_chef" in pVars )
+	{	if( pVars["alt_chef"] != "null" && pVars["alt_chef"].length != 0 )
+		{	size_t chefGruppKey = pVars["alt_chef"].to!size_t;
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ chefGruppKey.to!string;
+		}
+		else
+			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+			
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `alt_chef`;
+	}
+	
+	//TODO: Сделать запись автора последних изменений и даты этих изменений
+	
+	//Формирование и выполнение запроса к БД
 	string queryStr;
 	
 	if( pohodKey.isNull )

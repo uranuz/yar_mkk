@@ -45,9 +45,9 @@
 </tr>
 <tr>
 	<td><label for="begin_day">Сроки проведения</label></td>
-	<td colspan="999">с &nbsp;
+	<td colspan="999">с &nbsp;&nbsp;
 		{{begin_date}}
-		
+		<br>
 		<label for="finish_day">по</label>
 		{{finish_date}}
 	</td>
@@ -79,21 +79,21 @@
 	</tr>
 	<tr>
 		<td>Руководитель похода</td>
-		<td colspan="999"><input type="hidden" name="chef_grupp">
-			<a href="#" onclick="">{{chef_grupp_text}}</a>
+		<td colspan="999"><input type="hidden" name="chef_grupp" id="chef_grupp">
+			<a href="#" id="pohod_chef_edit_btn">{{chef_grupp_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Заместитель руководителя</td>
-		<td colspan="999"><input type="hidden" name="alt_chef">
-			<a href="#" onclick="">{{alt_chef_text}}</a>
+		<td colspan="999"><input type="hidden" name="alt_chef" id="alt_chef">
+			<a href="#" id="pohod_alt_chef_edit_btn">{{alt_chef_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Участники</td>
 		<td>
 			<input type="hidden" name="unit_neim" id="unit_neim">
-			<a href="#" onclick="mkk_site.edit_pohod.openParticipantsEditWindow()">Редактировать</a>
+			<a href="#" id="pohod_participants_edit_btn">Редактировать</a>
 		</td>
 	</tr>
 	<tr>
@@ -111,14 +111,23 @@
 </form>
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
 
-<!--<style type="text/css">
-	#tourist_group_div {
-		width: 50%;
-		float: left;
-	}
-	#tourist_select_div {
-		float: right;
-		width: 50%;
+<style type="text/css">
+	.pohod_chef_select_btn, .tourist_select_btn, .tourist_deselect_btn {
+		background-repeat: no-repeat;
+		background-size: 18px 18px;
+		display: inline-block;
+		width: 18px;
+		height: 18px;
+		margin: 0;
+		padding: 0;
 	}
 	
-</style>-->
+	.pohod_chef_select_btn, .tourist_select_btn {
+		background-image: url("/pub/img/icons/append_icon.png");
+	}
+
+	.tourist_deselect_btn {
+		background-image: url("/pub/img/icons/remove_icon.png");
+	}
+	
+</style>
