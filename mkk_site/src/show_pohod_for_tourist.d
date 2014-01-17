@@ -27,7 +27,7 @@ void netMain(HTTPContext context)
 	enum string [int] видТуризма=[0:"", 1:"пешеходный",2:"лыжный",3:"горный",
 		4:"водный",5:"велосипедный",6:"автомото",7:"спелео",8:"парусный",
 		9:"конный",10:"комбинированный" ];
-	string vke;// вид туризма и категория сложности
+	string vke;// вид туризма и категория сложности с элементыКС
 	string  ps;//готовность и статус похода 
 	auto rq = context.request;
 	auto rp = context.response;
@@ -55,28 +55,25 @@ void netMain(HTTPContext context)
 	catch(std.conv.ConvException e)
 	{	isTouristKeyAccepted = false; }
 		
-		string content ; 
+		string content ;//  содержимое страницы 
 	
-	//content=`<h1>`~touristKey.to!string~`</h1>`~ "\r\n";
+	
 	content=`<h1> --------------------------------------------------------------</h1>`~ "\r\n";
 	
-	string qeri_ФИО =`SELECT num,
+	string qeri_ФИО = //по номеру в базе формируем строку ФИО г.р.
+	`SELECT num,
 (family_name||' '||coalesce(given_name,'')
-||' '||coalesce(patronymic,'')||' '|| 
+||' '||coalesce(patronymic,'')||
  coalesce(birth_date,'')||','||birth_year ) as birth_date
 FROM tourist 
 WHERE num=`~touristKey.to!string;
  
-  string qeri_число_походов=
+  string qeri_число_походов= //получаем число походов
   `select count(1) from (
  select unnest(pohod.unit_neim ) as u      
  FROM pohod ) as uu where uu.u =`~touristKey.to!string;
   
- 
-  
 
-  
-     
   
 	alias FieldType ft;
 
@@ -157,7 +154,7 @@ WHERE num=`~touristKey.to!string;
 	)();
 	
 	
-	 string qeri_походы=
+	 string qeri_походы=//основной запрос
   `select * from (
  select
      pohod.num,
@@ -212,7 +209,7 @@ WHERE num=`~touristKey.to!string;
 	   vke = видТуризма [rec.get!"Вид"(0)] ~ `<br>` ~ категорияСложности [rec.get!"кс"(0)] ~ `<br>` ~ элементыКС[rec.get!"элем"(0)] ;
 	   ps  = готовностьПохода [rec.get!"Готовность"(0)] ~ `<br>` ~ статусЗаявки [rec.get!"Статус"(0)] ;
 	  
-	table ~= `<tr>`;
+	table ~= `<tr>`;  //Начинаем оформлять таблицу с данными
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";
 		table ~= `<td >` ~rec.get!"Номер книги"("нет")  ~ `</td>`~ "\r\n";
@@ -226,36 +223,24 @@ WHERE num=`~touristKey.to!string;
 		//руководство - участие
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";		
 		table ~= `<td>` ~ ps  ~ `</td>`;
-		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`;
-		table ~= `</tr>`;
-		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`;
+		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`~ "\r\n";
+		table ~= `</tr>`~ "\r\n";
+		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`~ "\r\n";
 		if(_sverka)
 		     table ~=`10`;
 		  else
 		     table ~=`8`;
 		
-		table ~= `"  >Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`;
+		table ~= `"  >Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`~ "\r\n";
 	}
-	table ~= `</table>`;
+	table ~= `</table>`~ "\r\n";
 	
 	 
 	content ~= table;
 
-	
-	
 
-   //Начинаем оформлять таблицу с данными
-  
-	
-	
-
-		  
-	
-	
-	
-	
-	
-	
+ 
+ 
 	
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
