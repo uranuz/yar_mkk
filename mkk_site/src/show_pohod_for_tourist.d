@@ -64,7 +64,7 @@ void netMain(HTTPContext context)
 	`SELECT num,
 (family_name||' '||coalesce(given_name,'')
 ||' '||coalesce(patronymic,'')||
- coalesce(birth_date,'')||','||birth_year ) as birth_date
+ coalesce(birth_date,'')||', '||birth_year ) as birth_date
 FROM tourist 
 WHERE num=`~touristKey.to!string;
  
