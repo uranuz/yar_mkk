@@ -105,7 +105,7 @@ ServerRequest receiveHTTPRequest(Socket sock)
 	{	messageBody = headersParser.bodyData[0..contentLength];
 	}
 	
-	return new ServerRequest( headers, messageBody );
+	return new ServerRequest( headers, messageBody, sock.remoteAddress, sock.localAddress );
 }
 
 enum string[ushort] HTTPReasonPhrases = 
@@ -151,12 +151,13 @@ protected:
 	}
 
 	void _work()
-	{	
+	{	writeln("_socket.remoteAddress.toAddrString(): ", _socket.remoteAddress.toAddrString());
 		
 		ServerRequest request;
 		
 		try {
 			request = receiveHTTPRequest(_socket);
+			writeln("request.headers._headers", request.headers._headers);
 		} catch( HTTPException exc ) {
 			//TODO: Построить правильный запрос и отправить на обработку ошибок
 // 			response.clear();

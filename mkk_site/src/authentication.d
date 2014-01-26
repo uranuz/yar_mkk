@@ -1,8 +1,14 @@
 module mkk_site.authentication;
 
-import std.conv;
+import std.conv, std.digest.digest, std.datetime, std.base64 : Base64URL;
 
-import webtank.db.postgresql, webtank.net.utils, webtank.net.access_control, webtank.net.connection, webtank.net.http.context, webtank.common.conv;
+import webtank.db.postgresql, webtank.net.utils, webtank.net.access_control, webtank.net.connection, webtank.net.http.context, webtank.common.conv, webtank.common.crypto_scrypt;
+
+import deimos.openssl.sha;
+
+pragma(lib, "crypto");
+pragma(lib, "ssl");
+pragma(lib, "/usr/local/lib/libtarsnap.a");
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -12,13 +18,20 @@ class AuthException : Exception {
 	}
 }
 
-enum uint sessionIdSize = 16;
-enum uint SIDStrMinSize = 2 * sessionIdSize; //Минимальная длина строкового представления Ид сессии
-enum uint loginMinLength = 3;  //Минимальная длина логина
-enum uint passwordMinLength = 6;  //Минимальная длина пароля
-alias ubyte[sessionIdSize] SessionIdType;
+enum uint sessionIdByteLength = 48; //Количество байт в ИД - сессии
+enum uint sessionIdStrLength = sessionIdByteLength * 8 / 6;  //Длина в символах в виде base64 - строки
+alias ubyte[sessionIdByteLength] SessionId; //Тип: ИД сессии
 
-enum SIDCookieName = "__sid__";
+enum uint minLoginLength = 3;  //Минимальная длина логина
+enum uint minPasswordLength = 8;  //Минимальная длина пароля
+
+enum uint pwHashByteLength = 72; //Количество байт в хэше пароля
+enum uint pwHashStrLength = pwHashByteLength * 8 / 6; //Длина в символах в виде base64 - строки
+//alias ubyte[pwHashByteLength] PasswordHash;
+
+enum scryptN = 1024;
+enum scryptR = 8;
+enum scryptP = 1;
 
 class MKK_SiteUser: IUser
 {
@@ -56,7 +69,7 @@ protected:
 
 class MKK_SiteAccessTicket: IAccessTicket
 {	
-	this( IUser user, SessionIdType sessionId )
+	this( IUser user, SessionId sessionId )
 	{	_user = user; 
 		_sessionId = sessionId;
 	}
@@ -67,15 +80,15 @@ class MKK_SiteAccessTicket: IAccessTicket
 	
 	///Возвращает true, если владелец успешно прошёл проверку подлинности. Иначе false
 	override bool isAuthenticated() @property
-	{	return ( ( _sessionId != SessionIdType.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
+	{	return ( ( _sessionId != SessionId.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
 	}
 	
 	//свойство "Ид сессии"
-	SessionIdType sessionId() @property
+	SessionId sessionId() @property
 	{	return _sessionId; }
 	
 protected:
-	SessionIdType _sessionId;  //Ид сессии
+	SessionId _sessionId;  //Ид сессии
 	IUser _user;
 }
 
@@ -101,17 +114,21 @@ public:
 	{
 		auto ctx = cast(HTTPContext) context;
 		
+		writeln("getTicket test 10");
+		
 		if( ctx is null || ctx.request is null || ctx.request.cookie is null  )
 			return null;
 		
-		string SIDString = ctx.request.cookie.get( SIDCookieName, null );
+		string SIDString = ctx.request.cookie.get( "__sid__", null );
 		
 		string login;
 		string group;
 		string name;
 		string email;
 		
-		SessionIdType sessionId;
+		writeln("getTicket test 20");
+		
+		SessionId sessionId;
 		
 		MKK_SiteAccessTicket createTicket()
 		{	auto user = new MKK_SiteUser(
@@ -125,15 +142,21 @@ public:
 				new MKK_SiteAccessTicket(user, sessionId);
 		}
 		
-		if( SIDString.length >= SIDStrMinSize )
+		writeln("getTicket test 30");
+		
+		if( SIDString.length == sessionIdStrLength )
 		{	auto dbase = new DBPostgreSQL(_authDBConnStr);
 		
 			if( (dbase is null) || !dbase.isConnected )
 				return createTicket();
+				
+			writeln("getTicket test 40");
 			
 			sessionId = verifySessionId( SIDString, dbase );
 			
-			if( sessionId == SessionIdType.init )
+			writeln("getTicket test 50");
+			
+			if( sessionId == SessionId.init )
 				return createTicket();
 			//TODO: Добавить проверку, что у нас корректный Ид сессии
 			
@@ -143,9 +166,11 @@ public:
 				` from session `
 				` join site_user as U `
 				` on U.num = site_user_num `
-				` where session.num = '` 
-				~ webtank.common.conv.toHexString( sessionId ) ~ `'::uuid;`
+				` where session.sid = '` 
+				~ Base64URL.encode( sessionId ) ~ `';`
 			);
+			
+			writeln("getTicket test 60");
 			
 			if( (query_res.recordCount != 1) && (query_res.fieldCount != 4) )
 				return createTicket();
@@ -155,16 +180,23 @@ public:
 			group = query_res.get(1, 0, null); //group
 			name = query_res.get(2, 0, null);  //name
 			email = query_res.get(3, 0, null);  //email
+			
+			writeln("getTicket test 70");
 		}
 		return createTicket();
 	}
 	
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
-	MKK_SiteAccessTicket authenticate(string login, string password)
+	MKK_SiteAccessTicket authenticate(
+		string login, 
+		string password,
+		string clientAddress,
+		string userAgent
+	)
 	{	
 		auto dbase = new DBPostgreSQL(_authDBConnStr);
-		if( (dbase is null) || (!dbase.isConnected) )
+		if( dbase is null || !dbase.isConnected )
 			return null;
 			
 		string group;
@@ -175,49 +207,59 @@ public:
 		{	return
 				new MKK_SiteAccessTicket(  
 					new MKK_SiteUser( login, group, name, email ),
-					SessionIdType.init //Задаём некорректный идентификатор
+					SessionId.init //Задаём некорректный идентификатор
 				);
 		}
+		
+		if( login.length < minLoginLength || password.length < minPasswordLength )
+			return 
+				makeInvalidTicket();
+		//	throw new AuthException("Длина логина или пароля меньше минимально разрешённой!!!");
 			
-		if( login.length < loginMinLength ) //Проверяем длину логина
+		if( login.length < minLoginLength ) //Проверяем длину логина
 			return 
 				makeInvalidTicket();
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
-			` select num, password, user_group, name, email `
+			` select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email `
 			` from site_user `
 			` where login='`
 			~ PGEscapeStr( login ) ~ `';`
 		);
 		
-		if( ( query_res.recordCount != 1 ) || ( query_res.fieldCount != 5 ) )
+		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
 			return 
 				makeInvalidTicket();
 			
-		string user_id = query_res.get(0, 0, null);
-		string found_password = query_res.get(1, 0, null);
+		string userId = query_res.get(0, 0, null);
+		string validEncodedPwHash = query_res.get(1, 0, null);
+		string pwSalt = query_res.get(2, 0, null);
+		string regTimestampStr = query_res.get(3, 0, null)[0..19];
 		
-		group = query_res.get(2, 0, null);
-		name = query_res.get(3, 0, null);
-		email = query_res.get(4, 0, null);
+		DateTime regDateTime = DateTimeFromPGTimestamp( regTimestampStr );
 		
+		group = query_res.get(4, 0, null);
+		name = query_res.get(5, 0, null);
+		email = query_res.get(6, 0, null);
+		
+		bool isValidPassword = checkPassword( validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString() );
+
 		//Проверка пароля
-		if( (found_password.length >= passwordMinLength ) && 
-			(password.length >= passwordMinLength ) && 
-			(password == found_password) ) 
+		if( isValidPassword ) 
 		{	//TODO: Генерировать уникальный идентификатор сессии и возвращать
-			import std.digest.digest;
-			SessionIdType sid = generateSessionId(login);
 			
-			string sidStr = std.digest.digest.toHexString(sid);
-			string query = 
-				` insert into "session" ("num", "site_user_num", "expires") values ( ( '`
-				~ sidStr ~ `' )::uuid, ` ~ PGEscapeStr( user_id  )
+			SessionId sid = generateSessionId( login, group, Clock.currTime().toISOString() );
+			
+			auto newSIDStatusRes = dbase.query(
+				` insert into "session" ` 
+				~ ` ( "sid", "site_user_num", "expires", "client_address", "user_agent" ) ` 
+				~ ` values( '` ~ Base64URL.encode(sid) ~ `', ` ~ PGEscapeStr( userId )
 				~ `, ( current_timestamp + interval '` 
-				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' )  )`
-				~ ` returning 'authenticated';`;
-			auto newSIDStatusRes = dbase.query(query);
+				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' ), ` 
+				~ `'` ~ PGEscapeStr(clientAddress) ~ `', '` ~ PGEscapeStr(userAgent) ~ `' ) `
+				~ ` returning 'authenticated';`
+			);
 			
 			if( newSIDStatusRes.recordCount != 1 )
 				return 
@@ -235,44 +277,115 @@ public:
 		return
 			makeInvalidTicket();
 	}
-
-	
 }
 
 //Служебная функция для генерации Ид сессии
-SessionIdType generateSessionId(string baseStr)
-{	import std.digest.md;
-	import std.datetime;
-	string idSource = baseStr ~ Clock.currTime().toISOString(); //Создаём исходную строку 
-	return md5Of(idSource); //Возвращаем идентификатор сессии
+SessionId generateSessionId( const(char)[] login, const(char)[] group, const(char)[] dateString )
+{	auto idSource = login ~ "::" ~ dateString ~ "::" ~ group; //Создаём исходную строку
+	SessionId pwHash;
+	SHA384( cast(const(ubyte)*) idSource.ptr, idSource.length, pwHash.ptr);
+	return pwHash; //Возвращаем идентификатор сессии
 }
 
 //Служебная проверки и получения идентификатора сессии
-SessionIdType verifySessionId(string SIDString, DBPostgreSQL dbase)
+SessionId verifySessionId(string SIDString, DBPostgreSQL dbase)
 {	
-	if( (dbase is null) || !dbase.isConnected )
-		return SessionIdType.init; //Не доступа к базе
+	if( dbase is null || !dbase.isConnected )
+		return SessionId.init; //Не доступа к базе
+		
+	writeln("verifySessionId test 10");
 		
 	//Прерываем, если нет Ид сессии нет в браузере
-	if( SIDString.length < SIDStrMinSize ) 
-		return SessionIdType.init;
+	if( SIDString.length < sessionIdStrLength ) 
+		return SessionId.init;
+		
+	writeln("verifySessionId test 20");
 	
 	import webtank.common.conv;
-	auto SID = hexStringToStaticByteArray!(sessionIdSize)(SIDString);
-	if( SID == SessionIdType.init )
-		return SessionIdType.init;
-	SIDString = webtank.common.conv.toHexString( SID );  //Важно
+	SessionId SID; 
+	Base64URL.decode(SIDString, SID[]);
+	
+	writeln("verifySessionId test 30");
+	
+	if( SID == SessionId.init )
+		return SessionId.init;
+	SIDString = Base64URL.encode( SID );  //Важно
+	
+	writeln("verifySessionId test 40");
 	
 	//Делаем запрос к БД за информацией о сессии
 	auto query_res = dbase.query(
 		//Получим 1, если срок действия не истек или ничего
 		`select 1 from session 
-		where num = '` ~ SIDString ~ `'::uuid and current_timestamp < "expires";`
+		where sid = '` ~ SIDString ~ `' and current_timestamp < "expires";`
 	);
+	
+	writeln("verifySessionId test 50");
 	
 	//К БД подключились
 	if( ( query_res.recordCount == 1 ) && ( query_res.fieldCount == 1 ) )
 		return SID; 
 	else
-		return SessionIdType.init; //Нет записей
+		return SessionId.init; //Нет записей
 }
+
+import std.stdio, std.datetime, std.random, core.thread;
+
+///Генерирует хэш для пароля с "солью" и "перцем"
+ubyte[] makePasswordHash( 
+	const(char)[] password, const(char)[] salt, const(char)[] pepper, 
+	size_t hashByteLength = pwHashByteLength,
+	ulong N = scryptN, uint r = scryptR, uint p = scryptP  )
+{	ubyte[] pwHash = new ubyte[hashByteLength];
+	
+	auto secret = password ~ pepper;
+	auto spice = pepper ~ salt;
+
+	int result = crypto_scrypt(
+		cast(const(ubyte)*) secret.ptr, secret.length,
+		cast(const(ubyte)*) spice.ptr, spice.length,
+		N, r, p, pwHash.ptr, hashByteLength
+	);
+	
+	if( result != 0 )
+		throw new AuthException("Cannot make password hash!!!");
+	
+	return pwHash;
+}
+
+///Кодирует хэш пароля для хранения в виде строки
+string encodePasswordHash( const(ubyte[]) pwHash, ulong N = scryptN, uint r = scryptR, uint p = scryptP )
+{	return ( "scr$" ~ Base64URL.encode(pwHash) ~ "$" ~ pwHash.length.to!string
+		~ "$" ~ N.to!string ~ "$" ~ r.to!string ~ "$" ~ p.to!string ).idup;
+}
+
+import std.array;
+
+///Проверяет пароль на соответствие закодированному хэшу с заданной солью и перцем
+bool checkPassword( const(char)[] encodedPwHash, const(char)[] password, const(char)[] salt, const(char)[] pepper )
+{	auto params = encodedPwHash.split("$");
+
+	if( params.length != 6 || params[0] != "scr" )
+		return false;
+	
+	ubyte[] pwHash = Base64URL.decode( params[1] );
+	if( pwHash.length != params[2].to!size_t )
+		return false;
+	
+	return makePasswordHash( password, salt, pepper, params[2].to!size_t, params[3].to!ulong, params[4].to!uint, params[5].to!uint ) == pwHash;
+}
+
+// void main()
+// {	string password = "rtghrthggrth";
+// 	string salt = "1jyuj11";
+// 	string pepper = "pp11ppp6";
+// 
+// 	auto time = Clock.currTime();
+// 	auto hash1 = makePasswordHash(password, salt, pepper);
+// 	string encodedHash = encodePasswordHash( hash1 );
+// 	writeln( "Hashing time: ", Clock.currTime() - time, ". Encoded hash string:" );
+// 	writeln( encodedHash );
+// 	writeln( "Password checking returned: ", checkPassword(encodedHash, password, salt, pepper) );
+// 	
+// 	
+// }

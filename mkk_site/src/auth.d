@@ -1,6 +1,6 @@
 module mkk_site.auth;
 
-import std.process, std.conv;
+import std.process, std.conv, std.stdio, std.base64;
 
 import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
 
@@ -16,6 +16,8 @@ void netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
+	
+	writeln( "remoteAddress: ", rq.remoteAddress.toAddrString() );
 
 	auto ticketManager = new MKK_SiteAccessTicketManager( authDBConnStr, eventLogFileName );
 
@@ -23,13 +25,18 @@ void netMain(HTTPContext context)
 	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
 	{	import webtank.common.conv;
 		
-		auto newTicket = ticketManager.authenticate(rq.postVars["user_login"], rq.postVars["user_password"]);
+		auto newTicket = ticketManager.authenticate(
+			rq.postVars["user_login"], 
+			rq.postVars["user_password"],
+			rq.remoteAddress.toAddrString(),
+			rq.headers["user-agent"]
+		);
 		string sidStr;
 		if( newTicket.isAuthenticated )
-		{	sidStr = webtank.common.conv.toHexString( newTicket.sessionId ) ;
+		{	sidStr = Base64URL.encode( newTicket.sessionId ) ;
 			//TODO: Подумать, что делать с этими багами
 			
-			rp.cookie[SIDCookieName] = sidStr;
+			rp.cookie["__sid__"] = sidStr;
 			rp.cookie["user_login"] = rq.postVars["user_login"];
 
 			//Добавляем перенаправление на другую страницу

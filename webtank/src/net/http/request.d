@@ -1,6 +1,6 @@
 module webtank.net.http.request;
 
-import std.json;
+import std.json, std.socket;
 
 import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
@@ -18,11 +18,20 @@ protected:
 	string[][string] _GETArray;
 	JSONValue _JSON_Body;
 	bool _isJSONParsed = false;
+	
+	Address _remoteAddress;
+	Address _localAddress;
 public:
-	this(HTTPHeaders headersParam, string messageBodyParam)
+	this(
+		HTTPHeaders headersParam, 
+		string messageBodyParam,
+		Address remoteAddressParam,
+		Address localAddressParam
+	)
 	{	headers = headersParam;
 		messageBody = messageBodyParam;
-		
+		_remoteAddress = remoteAddressParam;
+		_localAddress = localAddressParam;
 		
 		queryString = separateQuery( headers["request-uri"] );
 		path = separatePath( headers["request-uri"] );
@@ -32,7 +41,7 @@ public:
 		userAgent = headers["user-agent"];
 	}
 	
-	//Получение кукев из запроса (сюда записывать нельзя)
+	///Возвращает набор HTTP Cookie для текущего запроса
 	RequestCookie cookie() @property
 	{	return _cookie; }
 		
@@ -68,6 +77,16 @@ public:
 	{	if( _GETArray.length <= 0 )
 			_GETArray = extractURIDataArray( queryString );
 		return _GETArray;
+	}
+	
+	///Возвращает адрес удалённого узла, с которого пришёл запрос
+	Address remoteAddress() @property
+	{	return _remoteAddress;
+	}
+	
+	///Возвращает адрес *этого* узла, который обрабатывает запрос
+	Address localAddress() @property
+	{	return _localAddress;
 	}
 	
 	JSONValue JSON_Body() @property

@@ -8,7 +8,7 @@ enum DBMSType {postgreSQL, mySQL}; //Вроде как на будущее
 interface IDatabase ///Интерфейс БД
 {	bool connect(string connStr);  //Подключение к БД, используя строку подключения
 	bool isConnected() @property;  //Вернёт true, если мы подключены к БД
-	IDBQueryResult query(string queryStr);  //Подача запроса к БД, возвращает результат
+	IDBQueryResult query(const(char)[] queryStr);  //Подача запроса к БД, возвращает результат
 	//DBStatus getStatus() @property; //Подробнее узнать как дела у базы
 	string lastErrorMessage() @property; //Прочитать последнюю ошибку
 	//string getVersionInfo();

@@ -88,7 +88,7 @@ public:
 		
 		//Запрос к БД, строка запроса в качестве параметра
 		//Возвращает объект унаследованный от интерфейса результата запроса
-		IDBQueryResult query(string sql)
+		IDBQueryResult query(const(char)[] sql)
 		{	//Выполняем запрос
 			PGresult* Res=PQexec(_conn, toStringz(sql));
 			//TODO: Возможно возвращать null, если запрос завершился с ошибкой
