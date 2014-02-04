@@ -106,6 +106,13 @@ bool toBool(string src)
 	throw new std.conv.ConvException("Can't convert string \"" ~ src ~ "\" to boolean type!!!");
 }
 
+import std.datetime;
+
+DateTime DateTimeFromPGTimestamp( const(char)[] dateString )
+{	auto temp = dateString[0..10] ~ "T" ~ dateString[11..19];
+	return DateTime.fromISOExtString(temp);
+}
+
 // void main()
 // {	import std.stdio;
 // 	import std.digest.digest;

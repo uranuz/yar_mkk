@@ -59,7 +59,7 @@ void netMain(HTTPContext context)
 		bool _start_dat; // наличие начального диапазона поиска
 		bool _end_dat;   // наличие конечного  диапазона поиска
 		bool _filtr;    // котроль необходимости фильтрации
-		bool _sverka = context.accessTicket.isAuthenticated && ( context.accessTicket.user.isInGroup("admin") || context.accessTicket.user.isInGroup("moder") );    // наличие сверки
+		bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
 		///////////////////////////////
 		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "0" ) ;// вид туризма		
 		if (vid=="0") _vid=false;
@@ -445,9 +445,9 @@ group by num
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 
-	if( context.accessTicket.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.accessTicket.user.login );
+	if( context.user.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.user.id );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

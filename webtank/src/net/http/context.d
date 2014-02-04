@@ -1,8 +1,8 @@
 module webtank.net.http.context;
 
-import webtank.net.connection, webtank.net.http.request, webtank.net.http.response, webtank.net.access_control;
+import webtank.net.http.request, webtank.net.http.response, webtank.security.access_control;
 
-class HTTPContext: IConnectionContext
+class HTTPContext
 {	
 	this(ServerRequest rq, ServerResponse rp)
 	{	_request = rq;
@@ -16,13 +16,13 @@ class HTTPContext: IConnectionContext
 	ServerResponse response() @property
 	{	return _response; }
 	
-	///Билет доступа
-	override IAccessTicket accessTicket() @property
-	{	return _accessTicket; }
+	///Удостоверение пользователя
+	IUserIdentity user() @property
+	{	return _userIdentity; }
 	
-	void _setAccessTicket(IAccessTicket ticket) 
-	{	if( _accessTicket is null )
-			_accessTicket = ticket;
+	void _setuser(IUserIdentity newIdentity) 
+	{	if( _userIdentity is null )
+			_userIdentity = newIdentity;
 		else
 			throw new Exception("Access ticket for connection is already set!!!");
 	}
@@ -30,5 +30,5 @@ class HTTPContext: IConnectionContext
 protected:
 	ServerRequest _request;
 	ServerResponse _response;
-	IAccessTicket _accessTicket;
+	IUserIdentity _userIdentity;
 }

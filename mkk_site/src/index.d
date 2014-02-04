@@ -6,7 +6,7 @@ import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, we
 
 // import webtank.net.javascript;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "index";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -28,9 +28,9 @@ void netMain(HTTPContext context)
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);
 
-	if( context.accessTicket.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.accessTicket.user.login );
+	if( context.user.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.user.id );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

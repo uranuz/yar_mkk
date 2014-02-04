@@ -2,7 +2,7 @@ module webtank.net.http.json_rpc_handler;
 
 import std.string, std.conv, std.traits, std.typecons, std.json, std.functional, std.stdio;
 
-import webtank.net.http.handler, webtank.common.serialization, webtank.net.connection, webtank.net.http.context, webtank.net.http.uri_pattern;
+import webtank.net.http.handler, webtank.common.serialization, webtank.net.http.context, webtank.net.http.uri_pattern;
 
 ///Класс исключения для удалённого вызова процедур
 class JSON_RPC_Exception : Exception {
@@ -160,7 +160,7 @@ template callJSON_RPC_Method(alias Method)
 				
 				//Считаем количество параметров, которые должны были быть переданы
 				foreach( type; ParamTypes )
-				{	static if( !is( type: IConnectionContext )  )
+				{	static if( !is( type: HTTPContext )  )
 						jParamsCount++;
 				}
 				
@@ -171,7 +171,7 @@ template callJSON_RPC_Method(alias Method)
 // 					pragma(msg, typeof(argTuple));
 					foreach( i, type; ParamTypes )
 					{	pragma(msg, "Current type is ", type, " ", i);
-						static if( is( type : IConnectionContext )  )
+						static if( is( type : HTTPContext )  )
 						{	argTuple[i] = cast(type) context; //Передаём контекст при необходимости
 							continue;
 						}

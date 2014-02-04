@@ -108,9 +108,9 @@ void netMain(HTTPContext context)
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	
-	if( context.accessTicket.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.accessTicket.user.login );
+	if( context.user.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.user.id );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

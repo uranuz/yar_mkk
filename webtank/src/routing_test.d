@@ -2,7 +2,7 @@ module webtank.routing_test;
 
 import webtank.net.http.handler, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.net.web_server, webtank.net.access_control, webtank.net.http.uri_pattern;
 
-import mkk_site.authentication, mkk_site.site_data;
+import mkk_site.access_control, mkk_site.site_data;
 
 import std.stdio, std.getopt, std.conv;
 
@@ -25,10 +25,10 @@ shared static this()
 		return true;
 	};
 	
-	auto ticketManager = new MKK_SiteAccessTicketManager(authDBConnStr);
+	auto ticketManager = new MKK_SiteuserManager(authDBConnStr);
 	
 	router.onPreProcess ~= (HTTPContext context) {
-		context._setAccessTicket( ticketManager.getTicket(context) );
+		context._setuser( ticketManager.getTicket(context) );
 	};
 	
 	jsonRPCRouter.join!(rpcFunc);
@@ -43,9 +43,9 @@ shared static this()
 
 string rpcFunc(HTTPContext context, string[string] assocList, int shit)
 {	writeln( "context is null: ", context is null );
-	writeln( "context.accessTicket is null: ", context.accessTicket is null );
-	writeln( "context.accessTicket.user is null: ", context.accessTicket.user is null );
-	writeln("user.login: ", context.accessTicket.user.login);
+	writeln( "context.user is null: ", context.user is null );
+	writeln( "context.user is null: ", context.user is null );
+	writeln("user.login: ", context.user.id);
 	writeln("Hello, router!!!");
 	return "Your kesha is " ~ assocList.get("kesha", null);
 	
@@ -53,7 +53,7 @@ string rpcFunc(HTTPContext context, string[string] assocList, int shit)
 
 void netMain(HTTPContext context)
 {	context.response ~= "Hello, World, again!!!";
-	//writeln("Hello, ", context.accessTicket.isAuthenticated);
+	//writeln("Hello, ", context.user.isAuthenticated);
 	
 }
 

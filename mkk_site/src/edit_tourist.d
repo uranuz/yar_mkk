@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.stdio, std.utf, std.typecons;
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls, webtank.common.optional;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
 import std.conv, std.algorithm;
 
 immutable thisPagePath = dynamicPath ~ "edit_tourist";
@@ -300,6 +300,9 @@ string записатьТуриста(
 			fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 		}
 		
+		//Запись автора последних изменений и даты этих изменений
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `last_editor_num, last_edit_timestamp` ;
+		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
 
 		string queryStr;
 		
@@ -307,7 +310,10 @@ string записатьТуриста(
 		{	if( isUpdateAction )
 				queryStr = "update tourist set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ touristKey.to!string ~ "';";
 			else
+			{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `registrator_num, reg_timestamp` ;
+				fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
 				queryStr = "insert into tourist ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
+			}
 		}
 		
 		dbase.query(queryStr);
@@ -350,21 +356,21 @@ void netMain(HTTPContext context)
 {
 	auto rq = context.request;
 	auto rp = context.response;
-	auto ticket = context.accessTicket;
+	auto user = context.user;
 	
 	auto pVars = context.request.postVars;
 	auto qVars = context.request.queryVars;
 	
 	bool isAuthorized = 
-		ticket.isAuthenticated && 
-		( ticket.user.isInGroup("moder") || ticket.user.isInGroup("admin") );
+		user.isAuthenticated && 
+		( user.isInRole("moder") || user.isInRole("admin") );
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем общий шаблон страницы
 		auto tpl = getGeneralTemplate(thisPagePath);
-		tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ ticket.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", ticket.user.login );
+		tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ user.name ~ "</b>!!!</i>");
+		tpl.set("user login", user.id );
 	
 		//Создаём подключение к БД
 		auto dbase = getCommonDB();

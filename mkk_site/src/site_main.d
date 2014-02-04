@@ -4,7 +4,7 @@ import std.conv, std.getopt;
 
 import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.authentication;
+import mkk_site.site_data, mkk_site.access_control;
 
 __gshared HTTPRouter Router;
 __gshared URIPageRouter PageRouter;
@@ -26,10 +26,10 @@ shared static this()
 		return true;
 	};
 	
-	auto ticketManager = new MKK_SiteAccessTicketManager(authDBConnStr);
+	auto accessController = new MKK_SiteAccessController;
 	
 	Router.onPreProcess ~= (HTTPContext context) {
-		context._setAccessTicket( ticketManager.getTicket(context) );
+		context._setuser( accessController.authenticate(context) );
 	};
 	
 	JSONRPCRouter.onError ~= (HTTPContext context, Throwable error) {

@@ -32,7 +32,7 @@ void netMain(HTTPContext context)
 	auto rq = context.request;
 	auto rp = context.response;
 
-	bool _sverka = context.accessTicket.isAuthenticated && ( context.accessTicket.user.isInGroup("admin") || context.accessTicket.user.isInGroup("moder") );    // наличие сверки
+	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
 	//writeln(1);
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
@@ -260,9 +260,9 @@ WHERE num=`~touristKey.to!string;
 	auto tpl = getGeneralTemplate(thisPagePath);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	//writeln(8);
-	if( context.accessTicket.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.accessTicket.user.login );
+	if( context.user.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.user.id );
 	}
 	else 
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");

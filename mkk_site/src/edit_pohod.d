@@ -1,12 +1,12 @@
 module mkk_site.edit_pohod;
 
-import std.conv, std.string, std.file, std.stdio, std.array, std.json, std.typecons;
+import std.conv, std.string, std.file, std.stdio, std.array, std.json, std.typecons, core.thread;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "edit_pohod";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -134,8 +134,11 @@ void создатьФормуИзмененияПохода(
 		//Если данные не получены, то компонент выбора даты будет пустым
 		
 		if( !pohodRec.isNull("finish_date") )
-			beginDatePicker.date = pohodRec.get!("finish_date");
+			finishDatePicker.date = pohodRec.get!("finish_date");
 	}
+	
+	writeln( "beginDatePicker.print(): ", beginDatePicker.print() );
+	writeln( "finishDatePicker.print()", finishDatePicker.print() );
 	
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
@@ -164,8 +167,6 @@ void создатьФормуИзмененияПохода(
 	}
 	
 	//Выводим руководителя похода и его зама
-	
-	
 	if( pohodRec )
 	{	auto dbase = getCommonDB();
 	
@@ -224,8 +225,10 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	writeln("изменитьДанныеПохода test 20");
 	
+	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
+	
 	//Формируем набор строковых полей и значений
-	foreach( i, fieldName; strFieldNames )
+	foreach( i, fieldName; allStringFields )
 	{	if( fieldName !in pVars )
 			continue;
 			
@@ -375,16 +378,23 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `alt_chef`;
 	}
 	
-	//TODO: Сделать запись автора последних изменений и даты этих изменений
+	//Запись автора последних изменений и даты этих изменений
+	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `last_editor_num, last_edit_timestamp` ;
+	fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;
 	
 	if( pohodKey.isNull )
+	{	//Запись пользователя, добавившего поход и даты добавления
+		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `registrator_num, reg_timestamp` ;
+		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
 		queryStr = "insert into pohod ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
+	}
 	else
+	{
 		queryStr = "update pohod set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ pohodKey.value.to!string ~ "';";
-		
+	}
 	auto writeDBQueryRes = dbase.query(queryStr);
 	
 	string message;
@@ -427,17 +437,17 @@ void netMain(HTTPContext context)
 	auto qVars = rq.queryVars;
 		
 	bool isAuthorized = 
-		context.accessTicket.isAuthenticated && 
-		( context.accessTicket.user.isInGroup("moder") || context.accessTicket.user.isInGroup("admin") );
+		context.user.isAuthenticated && 
+		( context.user.isInRole("moder") || context.user.isInRole("admin") );
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем шаблон по файлу
 		auto tpl = getGeneralTemplate(thisPagePath);
 
-		if( context.accessTicket.isAuthenticated )
-		{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.accessTicket.user.name ~ "</b>!!!</i>");
-			tpl.set("user login", context.accessTicket.user.login );
+		if( context.user.isAuthenticated )
+		{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+			tpl.set("user login", context.user.id );
 		}
 		else 
 		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
@@ -471,14 +481,16 @@ void netMain(HTTPContext context)
 				pohodKey = null;
 		}
 		
+		writeln("pohodKey.isNull: ", pohodKey.isNull);
+		
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
-		pohodForm.set( "form_action", thisPagePath );
+		//pohodForm.set( "form_action", thisPagePath );
 		
 		string editResultMessage;
 		//Определяем выполняемое страницей действие
 		if( pVars.get("action", "") == "write" )
 			editResultMessage = изменитьДанныеПохода(context, pohodKey);
-
+		
 		создатьФормуИзмененияПохода(pohodForm, pohodRec);
 
 		string content = editResultMessage ~ pohodForm.getString();

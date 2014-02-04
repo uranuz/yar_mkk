@@ -19,7 +19,7 @@ string приветствие(string имя)
 void netMain(HTTPContext context)
 {	auto rq = context.request;
 	auto rp = context.response;
-	auto ticket = context.accessTicket;
+	auto ticket = context.user;
 	
 	auto pVars = context.request.postVars;
 	auto qVars = context.request.queryVars;

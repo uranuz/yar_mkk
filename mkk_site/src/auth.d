@@ -4,7 +4,7 @@ import std.process, std.conv, std.stdio, std.base64;
 
 import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
 
-import mkk_site.site_data, mkk_site.authentication, mkk_site.utils, mkk_site._import;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
 
 immutable thisPagePath = dynamicPath ~ "auth";
 
@@ -19,21 +19,19 @@ void netMain(HTTPContext context)
 	
 	writeln( "remoteAddress: ", rq.remoteAddress.toAddrString() );
 
-	auto ticketManager = new MKK_SiteAccessTicketManager( authDBConnStr, eventLogFileName );
+	auto accessController = new MKK_SiteAccessController;
 
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
-	{	import webtank.common.conv;
-		
-		auto newTicket = ticketManager.authenticate(
+	{	auto newIdentity = cast(MKK_SiteUser) accessController.authenticateByPassword(
 			rq.postVars["user_login"], 
 			rq.postVars["user_password"],
 			rq.remoteAddress.toAddrString(),
 			rq.headers["user-agent"]
 		);
 		string sidStr;
-		if( newTicket.isAuthenticated )
-		{	sidStr = Base64URL.encode( newTicket.sessionId ) ;
+		if( newIdentity !is null && newIdentity.isAuthenticated )
+		{	sidStr = Base64URL.encode( newIdentity.sessionId ) ;
 			//TODO: Подумать, что делать с этими багами
 			
 			rp.cookie["__sid__"] = sidStr;
@@ -63,7 +61,7 @@ void netMain(HTTPContext context)
 		
 		string content = `<h2>Аутентификация</h2>`;
 		
-		if( context.accessTicket.isAuthenticated )
+		if( context.user.isAuthenticated )
 			content ~= "Вход на сайт уже выполен";
 		
 		content ~=
