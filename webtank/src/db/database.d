@@ -3,7 +3,7 @@ module webtank.db.database;
 //Большой пользы пока не приносят, но как бы украшают...
 
 ///Тип СУБД, или по-буржуйски Database Management System (DBMS)
-enum DBMSType {postgreSQL, mySQL}; //Вроде как на будущее
+enum DBMSType {PostgreSQL, MySQL, Firebird}; //Вроде как на будущее
 
 interface IDatabase ///Интерфейс БД
 {	bool connect(string connStr);  //Подключение к БД, используя строку подключения

@@ -8,12 +8,23 @@ import webtank.db.database;
 
 extern (C)
 {
+	alias uint Oid;
+	
 	struct PGconn;
 	struct PGresult;
 	
 	PGconn *PQconnectdb(const char *conninfo);  //New connection to the database server.
 	PGresult *PQexec(PGconn *conn, //Submits a command to the server 
 	                 const char *command); //and waits for the result.
+	
+	PGresult *PQexecParams(PGconn *conn,
+                       const char *command,
+                       int nParams,
+                       const Oid *paramTypes,
+                       const char** paramValues,
+                       const int *paramLengths,
+                       const int *paramFormats,
+                       int resultFormat);
 	                 
 	void PQfinish(PGconn *conn); //Closes the connection to the server. Also frees 
 	       //memory used by the PGconn object.
@@ -58,7 +69,7 @@ enum string dbQueryLogFile = `/home/test_serv/sites/test/logs/db_query.log`;
 class DBPostgreSQL : IDatabase
 {
 protected:
-	PGconn *_conn;
+	PGconn* _conn;
 	string _queryLogFileName;
 	string _errorLogFileName;
 	
@@ -88,9 +99,9 @@ public:
 		
 		//Запрос к БД, строка запроса в качестве параметра
 		//Возвращает объект унаследованный от интерфейса результата запроса
-		IDBQueryResult query(const(char)[] sql)
+		IDBQueryResult query( const(char)[] queryStr )
 		{	//Выполняем запрос
-			PGresult* Res=PQexec(_conn, toStringz(sql));
+			PGresult* Res=PQexec(_conn, toStringz(queryStr));
 			//TODO: Возможно возвращать null, если запрос завершился с ошибкой
 			
 			return new PostgreSQLQueryResult(this, Res);
@@ -102,7 +113,7 @@ public:
 		
 		//Тип СУБД
 		DBMSType type() @property
-		{	return DBMSType.postgreSQL; }
+		{	return DBMSType.PostgreSQL; }
 		
 		//Отключиться от БД
 		void disconnect()
@@ -112,6 +123,9 @@ public:
 			}
 		}
 	}
+	
+	package PGconn* rawPGConn() @property
+	{	return _conn; }
 	
 	~this() //Деструктор объекта
 	{	if (_conn !is null) 
@@ -212,3 +226,124 @@ public:
 		}
 	}
 }
+
+//PGconn* conn, const(char*) command, int nParams  , const(uint*) paramTypes, const(char**) paramValues, const(int*) paramLengths, const(int*) paramFormats , int resultFormat
+//PGconn* conn, char* command       , ulong nParams, typeof(null) paramTypes, const(char)* paramValues , int* paramLengths       , typeof(null) paramFormats, int resultFormat
+
+string toPGString(T)(T value)
+{	static if( isSomeString!(T) )
+	{	return value.to!string;
+	}
+	static if( is( T == SysTime ) || is( T == DateTime ) )
+	{	return value.toISOExtString();
+	}
+	else static if( isArray!(T) )
+	{	alias ElementType!T ElemType;
+		string arrayData = "ARRAY[";
+		foreach( i, elem; value )
+		{	arrayData ~= 
+				"'" ~ toPGString(elem) ~ "'" 
+				~ ( i == value.length-1 ? "" : "," );
+		}
+		arrayData ~= "]";
+		return arrayData;
+	}
+	else
+	{	return value.to!string;
+	}
+}
+
+// import std.stdio, std.traits, std.datetime, std.conv;
+// import std.range: ElementType;
+// 
+// PostgreSQLQuery createQuery( DBPostgreSQL database, string expression = null )
+// {	return new PostgreSQLQuery( database, expression );
+// }
+// 
+// alias IDBQueryResult delegate() QueryMethod;
+// 
+// class PostgreSQLQuery
+// {	
+// 	this( DBPostgreSQL database, string expression = null )
+// 	{	_dbase = database;
+// 		_expr = expression;
+// 	}
+// 	
+// 	PostgreSQLQuery setParams(TL...)(TL params)
+// 	{	_params.length = params.length;
+// 		foreach( i, param; params )
+// 		{	_params[i] = param.toPGString();
+// 		}
+// 		return this;
+// 	}
+// 	
+// 	PostgreSQLQuery setExpr(string expression) @property
+// 	{	_expr = expression;
+// 		return this;
+// 	}
+// 	
+// 	IDBQueryResult exec()
+// 	{	return _dbase.execParamQuery( _expr, _params );
+// 	}
+// 
+// protected:
+// 	QueryMethod _method;
+// 	DBPostgreSQL _dbase;
+// 	string _expr;
+// }
+// 
+// 
+// IDBQueryResult execParamQuery( 
+// 	DBPostgreSQL dbase, const(char)[] queryStr,
+// 	string[] params
+// )
+// {	const(char*) query = toStringz(queryStr);
+// 	const(char*)[] cParams;
+// 	
+// 	int[] paramLengths;
+// 	
+// 	foreach( param; params )
+// 	{	cParams ~= toStringz(param);
+// 		paramLengths ~= param.length.to!int;
+// 	}
+// 	
+// 	PGresult* pgResult = PQexecParams( 
+// 		dbase.rawPGConn,
+// 		query,
+// 		cParams.length.to!int,
+// 		null, //paramTypes: auto
+// 		cParams.ptr,
+// 		paramLengths.ptr,
+// 		null, //paramFormats: text
+// 		0 //resultFormat: text
+// 	);
+// 	
+// 	return new PostgreSQLQueryResult(dbase, pgResult);
+// }
+
+// IDBQueryResult queryTuple(TL...)( 
+// 	DBPostgreSQL dbase, const(char)[][] queryStr,
+// 	TL params
+// )
+// {	
+// 	int[] paramLengths;
+// 	const(char)[] strParams;
+// 	
+// 	foreach( param; params )
+// 	{	strParams ~= param.to!string;
+// 		paramLengths ~= params.length;
+// 	}
+// 	
+// 	PGresult* pgResult = PQexecParams( 
+// 		dbase.rawPGConn,
+// 		toStringz(queryStr),
+// 		strParams.length,
+// 		null, //paramTypes: auto
+// 		strParams.ptr,
+// 		paramLengths.ptr,
+// 		null, //paramFormats: text
+// 		0 //resultFormat: text
+// 	);
+// 	
+// 	return new PostgreSQLQueryResult(dbase, pgResult);
+// }
