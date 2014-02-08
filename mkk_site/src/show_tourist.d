@@ -67,28 +67,40 @@ void netMain(HTTPContext context)
 	);
 	} catch(Exception) {}
 	uint limit = 10;// максимальное  чмсло строк на странице
-	int page;
-	auto col_str_qres = ( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` ):
-	dbase.query(`select count(1) from tourist where family_name ILIKE '`~ fem ~ `%'`);
+	// int page;
+	auto col_str_qres = // запрос на число строк
+	( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` )://без фильтра
+	dbase.query(`select count(1) from tourist where family_name ILIKE '%`~ fem ~ `%'`);
+	//с фильтром фамилией
   
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
-	 //writeln(col_str);
+	//writeln(col_str_qres);
+	
+	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;// количество строк 
+	// writeln(col_str);
 	
 	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
+	
+	//-----------------------
 	try {
-		if( "cur_page_num" in rq.postVars )
- 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
-	} catch (Exception) { curPageNum = 1; }
-
+		if( "cur_page_num" in rq.postVars )// если в окне задан номер страницы
+ 			curPageNum = rq.postVars["cur_page_num"].to!uint;
+ 			
+	} catch (Exception) {}
+	
+	//-------------
+	if(curPageNum>pageCount) curPageNum=pageCount; 
+	//если номер страницы больше числа страниц переходим на последнюю 
+	//?? может лучше на первую
+	
 	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
 	string content = 
 	`<form id="main_form" method="post">
 		Фамилия: <input name="family_name" type="text" value="` ~ fem ~ `">
-		<input type="submit" name="act" value="Найти"><br>`;
+		<input type="submit" name="act" value="Найти"><br>`~ "\r\n";
 	
 	try { //Логирование запросов к БД для отладки
 		std.file.append( eventLogFileName, 
@@ -107,12 +119,12 @@ void netMain(HTTPContext context)
 			~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `~ "\r\n";
 		
 		if( curPageNum != pageCount )
-			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `;
+			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `~ "\r\n";
 	}
 	
 	content ~= 
 `	</form>
-	<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
+	<script type="text/javascript" src="` ~ js_file ~ `"></script>`~ "\r\n";
 	
 	alias FieldType ft;
 
@@ -126,7 +138,8 @@ void netMain(HTTPContext context)
 	string queryStr;
 	
     
-		queryStr=`select num, 
+		queryStr=//основной запрос
+		`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
 		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date ,`
 		`exp, `
@@ -138,39 +151,48 @@ void netMain(HTTPContext context)
 			` when( show_email = true ) then email `
 			` else '' `
 		   ` end ) as contact,razr,sud, `
-		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name ILIKE'` ~ fem ~"%'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `;   
+		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name ILIKE '%` ~ fem ~"%'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `; 
 		   
+		//writeln(queryStr);   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	string table = `<table class="tab">`;
-	table ~= `<tr>`;
-	if(_sverka) table ~= `<td> Ключ</td>`;
+	
+	//writeln("rs.length: ", rs.length);
+	string table = `<table class="tab">`~ "\r\n";
+	table ~= `<tr>`~ "\r\n";
+	if(_sverka) table ~= `<td> Ключ</td>`~ "\r\n";
 	
 	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td>
-	<td> Спорт.разр.<br>Суд.кат.</td><td> Комментарий</td>`;
+	<td> Спорт.разр.<br>Суд.кат.</td><td> Комментарий</td>`~ "\r\n";
 
-	if(_sverka) table ~=`<td>"Править"</td>`; 
+	if(_sverka) table ~=`<td>"Править"</td>`~ "\r\n"; 
+	try {
 	foreach(rec; rs)
 	{	
-	raz_sud_kat= спортивныйРазряд [rec.get!"Разряд"(1000)] ~ `<br>` ~ судейскаяКатегория [rec.get!"Категория"(1000)] ;
-	
-	table ~= `<tr>`;
-		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`;
+		raz_sud_kat= спортивныйРазряд [rec.get!"Разряд"(1000)] ~ `<br>` ~ судейскаяКатегория [rec.get!"Категория"(1000)] ~ "\r\n";
+		
+		table ~= `<tr>`;
+		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";
+		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`~ "\r\n";
+		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`~ "\r\n";
 		table ~= `<td>`
 		~`<a href="`~dynamicPath~`show_pohod_for_tourist?key=`~rec.get!"Ключ"(0).to!string ~`">`
-		~rec.get!"Опыт"("")  ~ ` </a>  </td>`;
-		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`;
-		table ~= `<td>` ~ raz_sud_kat ~ `</td>`;
-		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`;
-		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`;
+		~rec.get!"Опыт"("")  ~ ` </a>  </td>`~ "\r\n";
+		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`~ "\r\n";
+		table ~= `<td>` ~ raz_sud_kat ~ `</td>`~ "\r\n";
+		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`~ "\r\n";
+		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`~ "\r\n";
 		
-		table ~= `</tr>`;
+		table ~= `</tr>`~ "\r\n";
 	}
-	table ~= `</table>`;
+	} catch(Throwable exc)
+	{	writeln(exc.to!string);
+	
+	}
+	
+	table ~= `</table>`~ "\r\n";
 
-	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`;
+	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`~ "\r\n";
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
