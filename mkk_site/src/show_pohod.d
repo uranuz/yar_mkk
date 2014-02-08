@@ -4,7 +4,7 @@ import std.stdio;
 import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context;
+import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context, webtank.net.http.json_rpc_routing;
 
 import mkk_site.site_data, mkk_site.utils;
 
@@ -12,9 +12,29 @@ immutable thisPagePath = dynamicPath ~ "show_pohod";
 
 shared static this()
 {	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
+	Router.join( new JSON_RPC_HandlingRule!(participantsList)() );
 }
 
-
+string participantsList( size_t pohodNum )
+{	writeln("participantsList ", "номерПохода: ", pohodNum);
+	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	if ( !dbase.isConnected )
+		return null;
+	
+	auto рез_запроса = dbase.query(`with tourist_nums as (
+select unnest(unit_neim) as num from pohod where pohod.num = ` ~ pohodNum.to!string ~ `
+)
+select coalesce(family_name, '')||coalesce(' '||given_name,'')
+||coalesce(' '||patronymic, '')||coalesce(', '||birth_year::text,'') from tourist_nums 
+left join tourist
+on tourist.num = tourist_nums.num
+	`);
+	string result;
+	for( size_t i = 0; i < рез_запроса.recordCount; i++ )
+	{	result ~= рез_запроса.get(0, i, "") ~ `<br>`; 
+	}
+	return result;
+}
 
 void netMain(HTTPContext context)
 {	
@@ -474,10 +494,12 @@ from pohod
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
 		
-		table ~= `<td style="text-align: center;" title="`
+		table ~= `<td  class="show_participants_btn"  style="text-align: center;" title="`
 		~ rec.get!"Участники"("нет")~`">`~ "\r\n" ~`<font color="red">`
 		~ (  rec.get!"Число участников"("Не задано") )
-		~ `</font ></td>`~ "\r\n";
+		~ `</font >
+		<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
+		</td>`~ "\r\n";
 		
 		
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";
@@ -500,6 +522,8 @@ from pohod
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~ "\r\n"
 	~`<h1> Число походов `~col_str.to!string ~` </h1>`~ "\r\n"
 	~table; //Тобавляем таблицу с данными к содержимому страницы
+	
+	content ~= `<script src="`~ jsPath ~ "show_pohod.js" ~ `"></script>`;
 	
 	//Создаем шаблон по файлу
 	auto tpl = getGeneralTemplate(thisPagePath);

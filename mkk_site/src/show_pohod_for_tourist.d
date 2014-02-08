@@ -236,7 +236,9 @@ WHERE num=`~touristKey.to!string;
 	table ~= `</table>`~ "\r\n";
 	
 	 
-	content ~= table;
+	content ~= table ~ "\r\n";
+	content ~= `<script  type="text/JavaScript" src="pohod_filtr.js">  </script>` ~ "\r\n";
+	
 
 
  
