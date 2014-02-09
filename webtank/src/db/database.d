@@ -37,3 +37,31 @@ class DBException : Exception {
 	}
 }
 
+
+// struct DBQuery
+// {
+// 	ref DBQuery setParams(TL...)(TL params)
+// 	{	
+// 	}
+// 	
+// 	IDBQueryResult exec()
+// 	{
+// 		
+// 		
+// 	}
+// 	ref DBQuery setExpr( string expression )
+// 	{
+// 		
+// 		
+// 	}
+// 	
+// 	ref DBQuery clearParams()
+// 	{
+// 		
+// 		
+// 	}
+// protected:
+// 	union {
+// 		PostgreSQLQuery _pgQuery;
+// 	}
+// }

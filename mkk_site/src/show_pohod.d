@@ -4,7 +4,7 @@ import std.stdio;
 import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
-import webtank.datctrl.field_type, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.routing, webtank.templating.plain_templater, webtank.net.http.context, webtank.net.http.json_rpc_routing;
+import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.templating.plain_templater, webtank.net.http.context;
 
 import mkk_site.site_data, mkk_site.utils, mkk_site._import;
 import mkk_site.site_data, mkk_site.utils;
@@ -13,8 +13,7 @@ immutable thisPagePath = dynamicPath ~ "show_pohod";
 
 shared static this()
 {	PageRouter.join!(netMain)(thisPagePath);
-{	Router.join( new URIHandlingRule(thisPagePath, &netMain) );
-	Router.join( new JSON_RPC_HandlingRule!(participantsList)() );
+	JSONRPCRouter.join!(participantsList);
 }
 
 string participantsList( size_t pohodNum )

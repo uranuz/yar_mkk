@@ -260,16 +260,15 @@ string toPGString(T)(T value)
 // {	return new PostgreSQLQuery( database, expression );
 // }
 // 
-// alias IDBQueryResult delegate() QueryMethod;
 // 
-// class PostgreSQLQuery
+// struct PostgreSQLQuery
 // {	
 // 	this( DBPostgreSQL database, string expression = null )
 // 	{	_dbase = database;
 // 		_expr = expression;
 // 	}
 // 	
-// 	PostgreSQLQuery setParams(TL...)(TL params)
+// 	ref PostgreSQLQuery setParams(TL...)(TL params)
 // 	{	_params.length = params.length;
 // 		foreach( i, param; params )
 // 		{	_params[i] = param.toPGString();
@@ -277,7 +276,13 @@ string toPGString(T)(T value)
 // 		return this;
 // 	}
 // 	
-// 	PostgreSQLQuery setExpr(string expression) @property
+// 	ref PostgreSQLQuery setParams(TL...)(TL params)
+// 	{
+// 	
+// 	
+// 	}
+// 	
+// 	ref PostgreSQLQuery setExpr(string expression) @property
 // 	{	_expr = expression;
 // 		return this;
 // 	}
@@ -285,11 +290,15 @@ string toPGString(T)(T value)
 // 	IDBQueryResult exec()
 // 	{	return _dbase.execParamQuery( _expr, _params );
 // 	}
+// 	
+// 	ref PostgreSQLQuery clearParams()
+// 	{	_params = null;
+// 	}
 // 
 // protected:
-// 	QueryMethod _method;
 // 	DBPostgreSQL _dbase;
 // 	string _expr;
+// 	string[] _params;
 // }
 // 
 // 
