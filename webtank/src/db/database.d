@@ -2,6 +2,8 @@ module webtank.db.database;
 ///Какие-то там базовые интерфейсы по работе с базой данных
 //Большой пользы пока не приносят, но как бы украшают...
 
+import std.conv;
+
 ///Тип СУБД, или по-буржуйски Database Management System (DBMS)
 enum DBMSType {PostgreSQL, MySQL, Firebird}; //Вроде как на будущее
 
@@ -37,31 +39,105 @@ class DBException : Exception {
 	}
 }
 
+///Функция создания параметризованного запроса к БД
+DBQuery createQuery( IDatabase database, string expression = null )
+{	return DBQuery( database, expression );
+}
 
-// struct DBQuery
-// {
-// 	ref DBQuery setParams(TL...)(TL params)
-// 	{	
-// 	}
-// 	
-// 	IDBQueryResult exec()
-// 	{
-// 		
-// 		
-// 	}
-// 	ref DBQuery setExpr( string expression )
-// 	{
-// 		
-// 		
-// 	}
-// 	
-// 	ref DBQuery clearParams()
-// 	{
-// 		
-// 		
-// 	}
-// protected:
-// 	union {
-// 		PostgreSQLQuery _pgQuery;
-// 	}
-// }
+///Функция создания параметризованого запроса по кортежу параметров
+DBQuery createQueryTuple(TL...)( IDatabase database, string expression, TL params )
+	//if( is( DB : IDatabase ) )
+{	return DBQuery( database, expression, params );
+}
+
+///Функция выполнения параметризованного запроса по кортежу параметров
+IDBQueryResult execQueryTuple(TL...)( IDatabase database, string expression, TL params )
+	//if( is( DB : IDatabase ) )
+{	import webtank.db.postgresql;
+	if( database.type == DBMSType.PostgreSQL )
+	{	auto dbase = cast(DBPostgreSQL) database;
+		if( dbase is null )
+			throw new DBException("Database connection object is null!!!");
+			
+		return execQueryTupleImpl( dbase, expression, params );
+	}
+	else
+		throw new DBException("execQueryTuple function for database driver " ~ database.type.to!string ~ " is not implemented!!!");
+	assert(0);
+}
+
+///Параметризованный запрос к базе данных
+struct DBQuery
+{	import webtank.db.postgresql;
+	this( IDatabase database, string expression )
+	{	_dbType = database.type;
+		if( _dbType == DBMSType.PostgreSQL )
+		{	auto dbase = cast(DBPostgreSQL) database;
+			_pgQuery = PostgreSQLQuery(dbase, expression);
+		}
+		else
+			_notImplementedError();
+	}
+	
+	this(TL...)( IDatabase database, string expression, TL params )
+	{	this( database, expression );
+		setParamTuple(params);
+	}
+	
+	///Метод устанавливает параметры запросов по кортежу значений
+	///Существующие параметры полностью перезаписываются
+	ref DBQuery setParamTuple(TL...)(TL params)
+	{	clearParams();
+		if( _dbType == DBMSType.PostgreSQL )
+			_pgQuery.setParamTuple(params);
+		else
+			_notImplementedError();
+		return this;
+	}
+	
+	///Устанавливает param в качестве значения параметра с номером index
+	ref DBQuery setParam(T)( uint index, T param )
+	{	if( _dbType == DBMSType.PostgreSQL )
+			_pgQuery.setParam(index, param);
+		else
+			_notImplementedError();
+		return this;
+	}
+	
+	///Выполняет сформированный запрос
+	IDBQueryResult exec()
+	{	if( _dbType == DBMSType.PostgreSQL )
+			return _pgQuery.exec();
+		else
+			_notImplementedError();
+		assert(0);
+	}
+	
+	///Функция задаёт выражение запроса (с местозаполнителями для параметров)
+	ref DBQuery setExpr( string expression )
+	{	if( _dbType == DBMSType.PostgreSQL )
+			_pgQuery.setExpr(expression);
+		else
+			_notImplementedError();
+		return this;
+	}
+	
+	///Стирает внутренний набор параметров
+	ref DBQuery clearParams()
+	{	if( _dbType == DBMSType.PostgreSQL )
+			_pgQuery.clearParams();
+		else
+			_notImplementedError();
+		return this;
+	}
+	
+	private void _notImplementedError(string file = __FILE__, size_t line = __LINE__)
+	{	throw new DBException("DBQuery for database driver " ~ _dbType.to!string ~ " is not implemented!!!", file, line);
+	}
+	
+protected:
+	union {
+		PostgreSQLQuery _pgQuery;
+	}
+	DBMSType _dbType;
+}

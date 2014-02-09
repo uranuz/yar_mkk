@@ -230,6 +230,10 @@ public:
 //PGconn* conn, const(char*) command, int nParams  , const(uint*) paramTypes, const(char**) paramValues, const(int*) paramLengths, const(int*) paramFormats , int resultFormat
 //PGconn* conn, char* command       , ulong nParams, typeof(null) paramTypes, const(char)* paramValues , int* paramLengths       , typeof(null) paramFormats, int resultFormat
 
+import std.traits, std.datetime, std.conv;
+import std.range: ElementType;
+
+///Функция преобразования параметров в строковое представление для PostgreSQL
 string toPGString(T)(T value)
 {	static if( isSomeString!(T) )
 	{	return value.to!string;
@@ -253,106 +257,101 @@ string toPGString(T)(T value)
 	}
 }
 
-// import std.stdio, std.traits, std.datetime, std.conv;
-// import std.range: ElementType;
-// 
-// PostgreSQLQuery createQuery( DBPostgreSQL database, string expression = null )
-// {	return new PostgreSQLQuery( database, expression );
-// }
-// 
-// 
-// struct PostgreSQLQuery
-// {	
-// 	this( DBPostgreSQL database, string expression = null )
-// 	{	_dbase = database;
-// 		_expr = expression;
-// 	}
-// 	
-// 	ref PostgreSQLQuery setParams(TL...)(TL params)
-// 	{	_params.length = params.length;
-// 		foreach( i, param; params )
-// 		{	_params[i] = param.toPGString();
-// 		}
-// 		return this;
-// 	}
-// 	
-// 	ref PostgreSQLQuery setParams(TL...)(TL params)
-// 	{
-// 	
-// 	
-// 	}
-// 	
-// 	ref PostgreSQLQuery setExpr(string expression) @property
-// 	{	_expr = expression;
-// 		return this;
-// 	}
-// 	
-// 	IDBQueryResult exec()
-// 	{	return _dbase.execParamQuery( _expr, _params );
-// 	}
-// 	
-// 	ref PostgreSQLQuery clearParams()
-// 	{	_params = null;
-// 	}
-// 
-// protected:
-// 	DBPostgreSQL _dbase;
-// 	string _expr;
-// 	string[] _params;
-// }
-// 
-// 
-// IDBQueryResult execParamQuery( 
-// 	DBPostgreSQL dbase, const(char)[] queryStr,
-// 	string[] params
-// )
-// {	const(char*) query = toStringz(queryStr);
-// 	const(char*)[] cParams;
-// 	
-// 	int[] paramLengths;
-// 	
-// 	foreach( param; params )
-// 	{	cParams ~= toStringz(param);
-// 		paramLengths ~= param.length.to!int;
-// 	}
-// 	
-// 	PGresult* pgResult = PQexecParams( 
-// 		dbase.rawPGConn,
-// 		query,
-// 		cParams.length.to!int,
-// 		null, //paramTypes: auto
-// 		cParams.ptr,
-// 		paramLengths.ptr,
-// 		null, //paramFormats: text
-// 		0 //resultFormat: text
-// 	);
-// 	
-// 	return new PostgreSQLQueryResult(dbase, pgResult);
-// }
+///Реализация запроса параметризованного кортежем для PostgreSQL
+PostgreSQLQueryResult execQueryTupleImpl(TL...)( DBPostgreSQL database, string expression, TL params )
+	//if( is( DB == DBPostgreSQL ) )
+{	int[] paramLengths;
+	const(char*)[] cParams;
+	
+	foreach( param; params )
+	{	cParams ~= param.toPGString().toStringz();
+		paramLengths ~= params.length;
+	}
+	
+	PGresult* pgResult = PQexecParams( 
+		database.rawPGConn,
+		toStringz(expression),
+		cParams.length.to!int,
+		null, //paramTypes: auto
+		cParams.ptr,
+		paramLengths.ptr,
+		null, //paramFormats: text
+		0 //resultFormat: text
+	);
+	
+	return new PostgreSQLQueryResult(database, pgResult);
+}
 
-// IDBQueryResult queryTuple(TL...)( 
-// 	DBPostgreSQL dbase, const(char)[][] queryStr,
-// 	TL params
-// )
-// {	
-// 	int[] paramLengths;
-// 	const(char)[] strParams;
-// 	
-// 	foreach( param; params )
-// 	{	strParams ~= param.to!string;
-// 		paramLengths ~= params.length;
-// 	}
-// 	
-// 	PGresult* pgResult = PQexecParams( 
-// 		dbase.rawPGConn,
-// 		toStringz(queryStr),
-// 		strParams.length,
-// 		null, //paramTypes: auto
-// 		strParams.ptr,
-// 		paramLengths.ptr,
-// 		null, //paramFormats: text
-// 		0 //resultFormat: text
-// 	);
-// 	
-// 	return new PostgreSQLQueryResult(dbase, pgResult);
-// }
+///Реализация параметризованного запроса к БД PostgreSQL
+struct PostgreSQLQuery
+{	
+	this( DBPostgreSQL database, string expression = null )
+	{	_dbase = database;
+		_expr = expression;
+	}
+	
+	ref PostgreSQLQuery setParamTuple(TL...)(TL params)
+	{	_params.length = params.length;
+		foreach( i, param; params )
+		{	_params[i] = param.toPGString();
+		}
+		return this;
+	}
+	
+	ref PostgreSQLQuery setParam(T)( uint index, TL param )
+	{	if( index >= _params.length  )
+			_params.length = index;
+		
+		assert(index > 0, "Index of parameter must be greather than 0!!!" );
+		_params[index-1] = param.toPGString();
+	}
+	
+	ref PostgreSQLQuery setExpr(string expression) @property
+	{	_expr = expression;
+		return this;
+	}
+	
+	IDBQueryResult exec()
+	{	return _dbase.execParamQueryImpl( _expr, _params );
+	}
+	
+	ref PostgreSQLQuery clearParams()
+	{	_params = null;
+		return this;
+	}
+
+protected:
+	DBPostgreSQL _dbase;
+	string _expr;
+	string[] _params;
+}
+
+///Реализация выполнения запроса, параметризованного массивом, для Постгреса
+IDBQueryResult execParamQueryImpl( 
+	DBPostgreSQL dbase, const(char)[] queryStr,
+	string[] params
+)
+{	const(char*) query = toStringz(queryStr);
+	const(char*)[] cParams;
+	
+	int[] paramLengths;
+	
+	foreach( param; params )
+	{	cParams ~= toStringz(param);
+		paramLengths ~= param.length.to!int;
+	}
+	
+	PGresult* pgResult = PQexecParams( 
+		dbase.rawPGConn,
+		query,
+		cParams.length.to!int,
+		null, //paramTypes: auto
+		cParams.ptr,
+		paramLengths.ptr,
+		null, //paramFormats: text
+		0 //resultFormat: text
+	);
+	
+	return new PostgreSQLQueryResult(dbase, pgResult);
+}
+
