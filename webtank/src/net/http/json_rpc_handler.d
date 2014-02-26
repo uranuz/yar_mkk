@@ -23,23 +23,21 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 	
 	alias JSONValue delegate( ref const(JSONValue), HTTPContext ) JSON_RPC_WrapperMethod;
 	
-	override bool customProcessRequest(HTTPContext context)
+	override HTTPHandlingResult customProcessRequest(HTTPContext context)
 	{	writeln("JSON_RPC_Router test 10");
 		//-----Опрос обработчика запроса-----
 		auto uriData = _uriPattern.match(context.request.path);
 		
 		writeln("JSON_RPC_Router uriData: ", uriData);
-		
-		if( !uriData.isMatched )
-			return false; //Запрос не прошёл через фильтр
-			
-		string HTTPMethod = toLower( context.request.headers.get("method", null) );
-			
-		if( HTTPMethod != "post" )
-			return false; //Запрос не прошёл через фильтр
+		writeln("JSON_RPC_Router context.request.path: ", context.request.path);
+		bool isRequestMatched =
+			uriData.isMatched &&
+			toLower( context.request.headers.get("method", null) ) == "post";
 		
 		//-----Конец опроса обработчика события-----
-		onPreProcess.fire(context);
+		onPostPoll.fire(context, isRequestMatched);
+		if( !isRequestMatched )
+			return HTTPHandlingResult.mismatched;
 		
 		writeln("JSON_RPC_Router test 20");
 		
@@ -99,7 +97,7 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		
 		context.response ~= toJSON(&jResponse).idup;
 		
-		return true;
+		return HTTPHandlingResult.handled;
 	}
 	
 	JSON_RPC_Router join(alias Method)(string methodName = null)

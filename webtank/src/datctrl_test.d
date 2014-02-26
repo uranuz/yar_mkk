@@ -16,8 +16,10 @@ void main()
 	auto bookRecFormat = RecordFormat!(ft.IntKey, "Ключ", ft.Str, "Название", ft.Str, "Автор", ft.Str, "Жанр", ft.Int, "Цена", ft.Bool, "Скидка", ft.Bool, "Переплет")();
 	
 	auto book_rs = dbase
-	.createQuery(`select * from book where hardcover = $1 and discount = $2;`)
-	.setParams(false, true).exec()
+	/+.execQueryTuple(+/ .createQueryTuple(
+		`select * from book where hardcover = $1 and discount = $2;`, 
+		false, true
+	).exec()
 	.getRecordSet(bookRecFormat);
 
 // 	auto queryStr = `select * from book where hardcover = $1 and discount = $3`;

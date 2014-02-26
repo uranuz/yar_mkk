@@ -1,43 +1,96 @@
-module std.event;
+module webtank.common.event;
+
+enum EventOption
+{	synchronized_,
+	allowDuplicateHandlers,
+	stopOnValue,
+	stopHandlingValue,
+};
+
+template OptionPair(alias first, alias second)
+{	enum type = first;
+	enum value = second;
+}
+
+///Option that signals whether to sunchronize access to ErrorEvent object
+template Synchronized(bool value)
+{	alias OptionPair!(EventOption.synchronized_, value) Synchronized;
+}
+
+///Option that signals whether duplicate handlers are allowed
+template AllowDuplicateHandlers(bool value)
+{	alias OptionPair!(EventOption.allowDuplicateHandlers, value) AllowDuplicateHandlers;
+}
+
+///Option defines return value that signals handling interrupt
+///Interrupting doesn't affect priorite handers
+template StopHandlingValue(alias value)
+{	alias OptionPair!(EventOption.stopHandlingValue, value) StopHandlingValue;
+}
+
+template GetEventOption(EventOption optType, Opts...)
+{	static if( Opts.length > 0 )
+	{	static if( is( typeof(Opts[0].type) == EventOption ) )
+		{	static if( Opts[0].type == EventOption.stopHandlingValue && optType == EventOption.stopOnValue )
+				enum bool GetEventOption = true;
+			else static if( Opts[0].type == optType )
+				enum GetEventOption = Opts[0].value;
+			else
+				enum GetEventOption = GetEventOption!(optType, Opts[1..$]);
+		}
+	 	else
+			enum GetEventOption = GetEventOption!(optType, Opts[1..$]);
+	}
+ 	else
+	{	static if( optType == EventOption.synchronized_ )
+			enum bool GetEventOption = false;
+	 	else static if( optType == EventOption.allowDuplicateHandlers )
+			enum bool GetEventOption = true;
+		else static if( optType == EventOption.stopOnValue )
+			enum bool GetEventOption = false;
+	 	else
+			static assert( 0, "Can't get default value for ErrorEvent option");
+	}
+}
 
 import std.traits : isCallable, isDelegate;
 
-struct Event(OPTS...)
-	if (OPTS.length >= 1 && OPTS.length <= 3 && isCallable!(OPTS[0]))
+struct Event(Opts...)
+	if (Opts.length >= 1 && Opts.length <= 3 && isCallable!(Opts[0]))
 {
 	import std.functional : toDelegate;
 	import std.traits : ParameterTypeTuple;
 
-	static if (OPTS.length >= 2)
+	static if (Opts.length >= 2)
 	{
-		static if (!is(typeof(OPTS[1]) == bool))
+		static if (!is(typeof(Opts[1]) == bool))
 			static assert(0, "Expected a bool representing whether to allow duplicates!");
-		public enum allowDuplicates = OPTS[1];
+		public enum allowDuplicates = Opts[1];
 	}
 	else
 		public enum allowDuplicates = false;
 
-	static if (OPTS.length >= 3)
+	static if (Opts.length >= 3)
 	{
-		static if (!is(typeof(OPTS[2]) == bool))
+		static if( !is(typeof(Opts[2]) == bool))
 			static assert(0, "Expected a bool representing whether to synchronize access!");
-		public enum synchronizedAccess = OPTS[2];
+		public enum isSynchronized = Opts[2];
 	}
 	else
-		public enum synchronizedAccess = false;
+		public enum isSynchronized = false;
 
-	static if (isDelegate!(OPTS[0]) || isFunction!(OPTS[0]))
-		public alias DelegateType = OPTS[0];
+	static if (isDelegate!(Opts[0]) || isFunction!(Opts[0]))
+		public alias DelegateType = Opts[0];
 	else
-		public alias DelegateType = typeof(&OPTS[0]);
+		public alias DelegateType = typeof(&Opts[0]);
 
 	private DelegateType[] subscribedCallbacks;
 	
-	static if (synchronizedAccess)
+	static if (isSynchronized)
 		private Object lock = new Object();
 	private R MaybeSynchronous(R)(R delegate() d)
 	{
-		static if (synchronizedAccess)
+		static if (isSynchronized)
 		{
 			synchronized (lock)
 			{
@@ -46,17 +99,6 @@ struct Event(OPTS...)
 		}
 		else
 			return d();
-	}
-	
-	// This is only here because this event system is
-	// designed on the C# event model, which utilizes
-	// += to append a handler to an event, and the D 
-	// operator for append operations is ~=, so this
-	// directs them to use that instead. This may very
-	// well be removed soon.
-	deprecated("You should be using ~= rather than += to subscribe a callback!") void opOpAssign(string op : "+")(D value)
-	{
-		this ~= value;
 	}
 	
 	void opOpAssign(string op : "~", C)(C value)
@@ -94,7 +136,7 @@ struct Event(OPTS...)
 	}
 	
 	private static void rethrowExceptionHandler(DelegateType invokedCallback, Exception exceptionThrown) { throw exceptionThrown; }
-	auto opCall(ParameterTypeTuple!DelegateType args, void delegate(DelegateType, Exception) exceptionHandler = toDelegate(&rethrowExceptionHandler))
+	auto fire(ParameterTypeTuple!DelegateType args, void delegate(DelegateType, Exception) exceptionHandler = toDelegate(&rethrowExceptionHandler))
 	{
 		return MaybeSynchronous({
 			import std.traits : ReturnType;
@@ -114,8 +156,7 @@ struct Event(OPTS...)
 				}
 			}
 			else
-			{
-				ReturnType!DelegateType[] retVals;
+			{	ReturnType!DelegateType[] retVals;
 				
 				foreach (callback; subscribedCallbacks)
 				{
@@ -135,63 +176,129 @@ struct Event(OPTS...)
 	}
 }
 
-unittest
+import std.stdio, std.algorithm, std.range, std.conv, std.container, std.typecons, std.typetuple, std.traits;
+
+bool isInheritsOf( TypeInfo_Class objTypeinfo, TypeInfo_Class baseTypeinfo  )
+{	while( objTypeinfo )
+	{	if( objTypeinfo is baseTypeinfo )
+			return true;
+
+		objTypeinfo = objTypeinfo.base;
+	}
+	return false;
+}
+
+///Error handling event-like mechanics
+struct ErrorEvent( ErrorHandler, Opts... )
+	if( isCallable!(ErrorHandler) )
 {
-	import std.algorithm : equal;
-	
-	{
-		Event!(int delegate(int i)) intReturnTest;
-		int IntReturn1(int i) { return i; }
-		int IntReturn2(int i) { return i; }
-		static int IntReturn3(int i) { return i; }
-		
-		intReturnTest ~= &IntReturn1;
-		intReturnTest ~= &IntReturn2;
-		intReturnTest ~= &IntReturn3;
-		assert(intReturnTest(3).equal([3, 3, 3]));
-		intReturnTest -= &IntReturn1;
-		assert(intReturnTest(4).equal([4, 4]));
-		intReturnTest -= &IntReturn2;
-		assert(intReturnTest(5).equal([5]));
-		
-		void FailIntReturn1(int i) { }
-		int FailIntReturn2() { return 42; }
-		static assert(!__traits(compiles, { intReturnTest ~= &FailIntReturn1; }));
-		static assert(!__traits(compiles, { intReturnTest ~= &FailIntReturn2; }));
+	enum bool isSynchronized = GetEventOption!(EventOption.synchronized_, Opts);
+	enum bool allowDuplicateHandlers = GetEventOption!(EventOption.allowDuplicateHandlers, Opts);
+	enum bool stopHandlingOnValue = GetEventOption!(EventOption.stopOnValue, Opts);
+
+	static if( stopHandlingOnValue )
+		enum ReturnType!(ErrorHandler) stopHandlingValue = GetEventOption!(EventOption.stopHandlingValue, Opts);
+
+	alias ParameterTypeTuple!(ErrorHandler) ParamTypes;
+
+	struct ErrorHandlerPair
+	{	ErrorHandler method;
+		TypeInfo_Class typeInfo;
 	}
-	
-	{
-		Event!(void delegate(int i)) voidReturnTest;
-		int voidTest1I = 0;
-		void VoidTest1(int i) { voidTest1I = i; }
-		int voidTest2I = 0;
-		void VoidTest2(int i) { voidTest2I = i; }
-		static int voidTest3I = 0;
-		static void VoidTest3(int i) { voidTest3I = i; }
-		voidReturnTest ~= &VoidTest1;
-		voidReturnTest ~= &VoidTest2;
-		voidReturnTest ~= &VoidTest3;
-		voidReturnTest(3);
-		assert(voidTest1I == 3);
-		assert(voidTest2I == 3);
-		assert(voidTest3I == 3);
-		voidReturnTest -= &VoidTest1;
-		voidReturnTest(4);
-		assert(voidTest1I == 3);
-		assert(voidTest2I == 4);
-		assert(voidTest3I == 4);
-		voidReturnTest -= &VoidTest2;
-		voidReturnTest(5);
-		assert(voidTest1I == 3);
-		assert(voidTest2I == 4);
-		assert(voidTest3I == 5);
-		
-		int FailVoidTest1(int i) { return i; }
-		void FailVoidTest2(long i) { }
-		static assert(!__traits(compiles, { voidReturnTest ~= &FailVoidTest1; }));
-		static assert(!__traits(compiles, { voidReturnTest ~= &FailVoidTest2; }));
+
+	static if (isSynchronized)
+		private Object lock = new Object();
+	private R MaybeSynchronous(R)(R delegate() d)
+	{	static if (isSynchronized)
+		{	synchronized (lock)
+			{
+				return d();
+			}
+		}
+		else
+			return d();
 	}
-	
-	// TODO: test function pointers, types with static opCall's, and objects with opCall's.
-	// TODO: Also test ref, inout, out, etc. param modifiers.
+
+	bool fire(ParamTypes params)
+	{	return MaybeSynchronous({
+			_sortHandlers();
+
+			static if( stopHandlingOnValue )
+				bool stopFlag = false;
+
+			foreach( pair; prioriteErrorPairs )
+			{	if( typeid(params[0]).isInheritsOf(pair.typeInfo) )
+				{	if( pair.method(params) )
+					{	static if( stopHandlingOnValue )
+							stopFlag = true;
+					}
+				}
+			}
+
+			static if( stopHandlingOnValue )
+			{	if( stopFlag )
+					return true;
+			}
+
+			foreach( pair; errorPairs )
+			{	if( typeid(params[0]).isInheritsOf(pair.typeInfo) )
+				{	static if( stopHandlingOnValue )
+					{	if( pair.method(params) == stopHandlingValue  )
+							return true;
+					}
+					else
+					{	pair.method(params);
+					}
+				}
+			}
+			return false;
+		});
+	}
+
+	private void _sortHandlers()
+	{	MaybeSynchronous({
+			sort!( (a, b) { return countDerivations(a.typeInfo) > countDerivations(b.typeInfo); } )( prioriteErrorPairs );
+			sort!( (a, b) { return countDerivations(a.typeInfo) > countDerivations(b.typeInfo); } )( errorPairs );
+		});
+	}
+
+	void join()(TypeInfo_Class errorTypeinfo, ErrorHandler handler, bool isPriorite = false)
+	{	MaybeSynchronous({
+			if( isPriorite )
+			{	prioriteErrorPairs ~= ErrorHandlerPair( handler, errorTypeinfo );
+			}
+			else
+			{	errorPairs ~= ErrorHandlerPair( handler, errorTypeinfo );
+			}
+		});
+	}
+
+	void join(SomeErrorHandler)(SomeErrorHandler handler, bool isPriorite = false)
+		if( isCallable!(SomeErrorHandler) && is( ParameterTypeTuple!(SomeErrorHandler)[0] : ParamTypes[0] ) )
+	{	alias ParameterTypeTuple!(SomeErrorHandler)[0] SomeError;
+		this.join(
+			typeid(SomeError),
+			(ParamTypes params)
+			{	static if( !is ( ReturnType!(ErrorHandler) == void )  )
+					return handler( cast(SomeError) params[0], params[1..$] );
+				else
+					handler( cast(SomeError) params[0], params[1..$] );
+			},
+			isPriorite
+		);
+	}
+
+protected:
+	ErrorHandlerPair[] prioriteErrorPairs;
+	ErrorHandlerPair[] errorPairs;
+}
+
+size_t countDerivations(TypeInfo_Class typeInfo)
+{	size_t result;
+	while(typeInfo !is null)
+	{	//writeln(typeInfo.name);
+		result ++;
+		typeInfo = typeInfo.base;
+	}
+	return result;
 }

@@ -2,7 +2,7 @@ module webtank.net.web_server;
 
 import std.socket, std.string, std.conv, core.thread, std.stdio, std.datetime;
 
-import webtank.net.http.handler, webtank.net.http.context;
+import webtank.net.http.handler, webtank.net.http.context, webtank.net.http.http;
 
 class WebServer
 {	
@@ -108,29 +108,6 @@ ServerRequest receiveHTTPRequest(Socket sock)
 	return new ServerRequest( headers, messageBody, sock.remoteAddress, sock.localAddress );
 }
 
-enum string[ushort] HTTPReasonPhrases = 
-[	
-	///1xx: Informational
-	///1xx: Информационные — запрос получен, продолжается процесс
-	100: "Continue", 101: "Switching Protocols", 102: "Processing",
-
-	///2xx: Success
-	///2xx: Успешные коды — действие было успешно получено, принято и обработано
-	200: "OK", 201: "Created", 202: "Accepted", 203: "Non-Authoritative Information", 204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status", 226: "IM Used",
-	
-	///3xx: Redirection
-	///3xx: Перенаправление — дальнейшие действия должны быть предприняты для того, чтобы выполнить запрос
-	300: "Multiple Choices", 301: "Moved Permanently", 302: "Found", 303: "See Other", 304: "Not Modified", 305: "Use Proxy", 307: "Temporary Redirect",
-	
-	///4xx: Client Error 
-	///4xx: Ошибка клиента — запрос имеет плохой синтаксис или не может быть выполнен
-	400: "Bad Request", 401: "Unauthorized", 402: "Payment Required", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed", 406: "Not Acceptable", 407: "Proxy Authentication Required", 408: "Request Timeout", 409: "Conflict", 410: "Gone", 411: "Length Required", 412: "Precondition Failed", 414: "Request-URL Too Long", 415: "Unsupported Media Type", 416: "Requested Range Not Satisfiable", 417: "Expectation Failed", 418: "I'm a teapot", 422: "Unprocessable Entity", 423: "Locked", 424: "Failed Dependency", 425: "Unordered Collection", 426: "Upgrade Required", 456: "Unrecoverable Error", 499: "Retry With", 
-	
-	///5xx: Server Error
-	///5xx: Ошибка сервера — сервер не в состоянии выполнить допустимый запрос
-	500: "Internal Server Error", 501: "Not Implemented", 502: "Bad Gateway", 503: "Service Unavailable", 504: "Gateway Timeout", 505: "HTTP Version Not Supported", 506: "Variant Also Negotiates", 507: "Insufficient Storage", 509: "Bandwidth Limit Exceeded", 510: "Not Extended"
-];
-
 //Рабочий процесс веб-сервера
 class WorkingThread: Thread
 {	
@@ -146,19 +123,12 @@ public:
 	}
 	
 protected:
-	void socketSend(string msg)
-	{	_socket.sendTo(msg);
-	}
-
 	void _work()
-	{	writeln("_socket.remoteAddress.toAddrString(): ", _socket.remoteAddress.toAddrString());
+	{	ServerRequest request;
 		
-		ServerRequest request;
-		
-		try {
+// 		try {
 			request = receiveHTTPRequest(_socket);
-			writeln("request.headers._headers", request.headers._headers);
-		} catch( HTTPException exc ) {
+// 		} catch( HTTPException exc ) {
 			//TODO: Построить правильный запрос и отправить на обработку ошибок
 // 			response.clear();
 // 			string statusCodeStr = exc.HTTPStatusCode.to!string;
@@ -172,39 +142,29 @@ protected:
 // 				~ `<hr><p style="text-align: right;">webtank.net.web_server</p>`
 // 				~ `</body></html>`
 // 			);
-			return;
-		}
+// 			return;
+// 		}
 		//TODO: Исправить на передачу запроса на страницу
 		//с ошибкой маршрутизатору, а не просто падение сервера
 		if( request is null )
 			return; 
 		
-		
-		auto context = new HTTPContext( request, new ServerResponse(&socketSend) );
-		
+		auto context = new HTTPContext( request, new ServerResponse(/+&socketSend+/) );
+
+		try {
 		//Запуск обработки HTTP-запроса
 		_handler.processRequest( context );
+		}
+		catch (Throwable exc) {
+		}
 		
-		context.response.flush();
+		_socket.send( context.response.getString() ); //Главное - отправка результата клиенту
+
 		
-		Thread.sleep( dur!("msecs")( 300 ) );
-		
-		scope(exit) 
-		{	_socket.shutdown(SocketShutdown.BOTH);
+		scope(exit)
+		{	Thread.sleep( dur!("msecs")( 30 ) );
+			_socket.shutdown(SocketShutdown.BOTH);
 			_socket.close();
 		}
 	}
 }
-
-// void main(string[] progAgs) {
-// 	//Основной поток - поток управления потоками
-// 
-// 	ushort port = 8082;
-// 	//Получаем порт из параметров командной строки
-// 	getopt( progAgs, "port", &port );
-// 
-// 	
-// 	auto server = new WebServer(port);
-// 	server.start();
-// }
-
