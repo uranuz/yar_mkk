@@ -123,18 +123,11 @@ public:
 	}
 	
 protected:
-// 	void socketSend(string msg)
-// 	{	_socket.sendTo(msg);
-// 	}
-
 	void _work()
-	{	writeln("_socket.remoteAddress.toAddrString(): ", _socket.remoteAddress.toAddrString());
-		
-		ServerRequest request;
+	{	ServerRequest request;
 		
 // 		try {
 			request = receiveHTTPRequest(_socket);
-			writeln("request.headers._headers", request.headers._headers);
 // 		} catch( HTTPException exc ) {
 			//TODO: Построить правильный запрос и отправить на обработку ошибок
 // 			response.clear();
@@ -156,29 +149,22 @@ protected:
 		if( request is null )
 			return; 
 		
-		
 		auto context = new HTTPContext( request, new ServerResponse(/+&socketSend+/) );
 
 		try {
 		//Запуск обработки HTTP-запроса
 		_handler.processRequest( context );
-
 		}
 		catch (Throwable exc) {
-			writeln("BIG ERRROR HAPPPENED!!!");
 		}
-		string responseStr = context.response.getString();
-		writeln(responseStr);
 		
-		_socket.send( responseStr ); //Главное - отправка результата клиенту
+		_socket.send( context.response.getString() ); //Главное - отправка результата клиенту
 
-		Thread.sleep( dur!("msecs")( 50 ) );
 		
 		scope(exit)
 		{	Thread.sleep( dur!("msecs")( 30 ) );
 			_socket.shutdown(SocketShutdown.BOTH);
 			_socket.close();
-			Thread.sleep( dur!("msecs")( 30 ) );
 		}
 	}
 }

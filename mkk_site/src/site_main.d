@@ -2,9 +2,10 @@ module mkk_site.site_main;
 
 import std.conv, std.getopt;
 
-import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler, webtank.net.http.context, webtank.net.http.http;
+import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler,
+webtank.net.http.context, webtank.net.http.http;
 
-import mkk_site.site_data, mkk_site.access_control;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils;
 
 __gshared HTTPRouter Router;
 __gshared URIPageRouter PageRouter;
@@ -21,21 +22,26 @@ shared static this()
 		.join(PageRouter);
 		
 	Router.onError.join( (Throwable error, HTTPContext context) {
-		context.response ~= "<http><body><h2>500 Внутренняя ошибка сервера!!!</h2>\r\n"
-		~ error.to!string ~ "</body></http>";
+		auto tpl = getGeneralTemplate(context.request.path);
+		tpl.set( "content", "<h2>500 Внутренняя ошибка сервера!!!</h2>\r\n" ~ error.to!string );
+		context.response ~= tpl.getString();
 		return true;
 	} );
 
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
-		context.response ~= "<http><body><h2>" ~ error.HTTPStatusCode.to!string ~ " Какое-то HTTP ошибко!!!</h2>\r\n"
-		~ error.to!string ~ "</body></http>";
+		auto tpl = getGeneralTemplate(context.request.path);
+		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
+			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.to!string );
+		context.response ~= tpl.getString();
 		return true;
 	} );
 	
 	auto accessController = new MKK_SiteAccessController;
 	
 	Router.onPostPoll ~= (HTTPContext context, bool isMatched) {
-		context._setuser( accessController.authenticate(context) );
+		if( isMatched )
+		{	context._setuser( accessController.authenticate(context) );
+		}
 	};
 	
 	JSONRPCRouter.onError.join( (Throwable error, HTTPContext context) {
