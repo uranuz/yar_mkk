@@ -27,7 +27,7 @@ void main(string[] progAgs) {
 		writeln(
 			"Опции:\r\n",
 			"  --msg=ДАТА_ВРЕМЯ\r\n",
-			"  --secret=ПАРОЛЬ\r\n",
+			"  --pw=ПАРОЛЬ\r\n",
 			"  --salt=СОЛЬ\r\n",
 			"  --help - эта справка"
 		);

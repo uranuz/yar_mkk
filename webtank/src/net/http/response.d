@@ -10,10 +10,10 @@ protected:
 	ResponseCookie _cookie; //Куки в ответ
 public:
 	
-	this( void delegate(string) send )
+	this(/+ void delegate(string) send +/)
 	{	_cookie = new ResponseCookie;
 		headers = new HTTPHeaders;
-		_send = send;
+// 		_send = send;
 	}
 	
 	//Записывает данные в буфер для отдачи
@@ -30,42 +30,43 @@ public:
 		headers["reason-phrase"] = "Found";
 		headers["location"] = location;
 	}
-	
-	void flush()
-	{	if( !_headersSent ) 
-		{	_headersSent = true;
-			_send( _getHeaderStr() );
-		}
-		_send( _respBody );
-	}
+
+	//TODO: Разобраться с отправкой ответа клиенту
+// 	void flush()
+// 	{	if( !_headersSent ) 
+// 		{	_headersSent = true;
+// 			_send( _getHeaderStr() );
+// 		}
+// 		_send( _respBody );
+// 	}
 	
 	string getString()
 	{	return _getHeaderStr() ~ _respBody;
-		
 	}
 	
 	//Пытаемся очистить ответ, возвращает true, если получилось
-	bool tryClear()
-	{	if( !_headersSent )
-		{	_respBody = null;
-			headers.clear();
-			_cookie.clear();
-			return true;
-		}
-		return false;
-	}
+// 	bool tryClear()
+// 	{	if( !_headersSent )
+// 		{	_respBody = null;
+// 			headers.clear();
+// 			_cookie.clear();
+// 			return true;
+// 		}
+// 		return false;
+// 	}
 	
 	//Куки ответа приложения (в них только пишем)
 	ResponseCookie cookie() @property
 	{	return _cookie; }
 
 protected:
-	void delegate(string) _send;
-	bool _headersSent = false;
+// 	void delegate(string) _send;
+// 	bool _headersSent = false;
 	
 	string _getHeaderStr()
-	{	import std.conv;
-		headers["content-length"] = std.conv.to!string(_respBody.length);
+	{	import std.conv, std.stdio;
+		headers["content-length"] = _respBody.length.to!string;
+		writeln( headers["content-length"] );
 // 		if( _cookie.length > 0 )
 // 			headers["set-cookie"] = _cookie.getString();
 		headers["content-type"] = "text/html; charset=\"utf-8\"";

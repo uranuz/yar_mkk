@@ -1,19 +1,7 @@
 module webtank.net.http.headers;
 
+import webtank.net.http.http;
 //TODO: Подумать, нужно ли делать URI декодировку заголовков
-
-class HTTPException : Exception {
-	this(string msg, ushort statusCode, string file = __FILE__, size_t line = __LINE__) {
-		super(msg, file, line);
-		_HTTPStatusCode = statusCode;
-	}
-	
-	ushort HTTPStatusCode() @property
-	{	return _HTTPStatusCode; }
-	
-protected:
-	ushort _HTTPStatusCode;
-}
 
 ///HTTP headers parser
 ///Парсер HTTP заголовков
