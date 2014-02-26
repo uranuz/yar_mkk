@@ -1,0 +1,22 @@
+#gruppa{
+	position:fixed; /* Фиксированное положение */
+	left:30%;
+	top:40%;
+	max-height:20%; 
+	padding: 10px;
+	border: 3px solid #008800; /* Параметры рамки */
+	padding: 5px; /* Поля вокруг текста */
+   overflow-y: scroll;
+	background: #8dc0de; /* Цвет фона */
+	z-index: 101;
+		
+}
+
+.tourist_list_blackout {
+	position: fixed; /* Фиксированное положение */
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	top: 0;
+	left: 0;
+}

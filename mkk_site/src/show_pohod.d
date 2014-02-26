@@ -30,12 +30,30 @@ select coalesce(family_name, '')||coalesce(' '||given_name,'')
 left join tourist
 on tourist.num = tourist_nums.num
 	`);
-	string result;
-	for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-	{	result ~= рез_запроса.get(0, i, "") ~ `<br>`; 
-	}
+	
+	auto поход = dbase.query( `select (coalesce(kod_mkk , '')
+	||' Маршрутка № '||coalesce( nomer_knigi, 'нет сведений') 
+	||'.<br> Район проведения '||coalesce(region_pohod, '')) as poh from pohod where pohod.num = ` ~ pohodNum.to!string ~ ` `);
+	
+	string result;//список туристов
+	result ~= поход.get(0, 0, null) ~ `<br>---------------------------------------<br>`;
+	
+	
+	if( рез_запроса.recordCount<1) result ~=`Сведения об участниках <br> отсутствуют`;
+	else
+	   {
+	      for( size_t i = 0; i < рез_запроса.recordCount; i++ )
+	           {	result ~= рез_запроса.get(0, i, "") ~ `<br>`;	}
+	   }        
+	           
 	return result;
+	
+	
 }
+
+
+
+
 void netMain(HTTPContext context)
 {	
 	auto rq = context.request;
@@ -271,7 +289,6 @@ void netMain(HTTPContext context)
 	ft.Str,"Район",
 	ft.Str,"Руководитель", 
 	ft.Str, "Число участников",
-	ft.Str,"Участники",	
 	ft.Str,"Город,<br>организация",	
 	ft.Str, "Нитка маршрута",
 	ft.Int, "Готовность",
@@ -280,38 +297,7 @@ void netMain(HTTPContext context)
 	
 	string queryStr = // основное тело запроса
 	`with 
-tourist_nums as (
-  select num,/*номер похода*/
-   unnest(unit_neim) as tourist_num from pohod 
-),  /* функция unnest() превращает массив в таблицу 
-происходит развёртываниетаблицы поход
-  обьём по числу строк номер похода*на номера его участников   */
-
-     tourist_info as (
-select     tourist_nums.num,/*номер похода*/
-          /* tourist_num,?????*/
-          (family_name||' '
-  ||coalesce(given_name,'')||' '
-  ||coalesce(patronymic,'')||' '
-  ||coalesce(birth_year::text,'')) as fio from tourist_nums
-  join tourist 
-   on tourist_num = tourist.num
-), /* создаётся табли номера участников похода - их ФИО г.р.
- обьём ???????
-*/
-
- U as (
-
-select tourist_info.num,/*номер похода*/
- string_agg /* собирает значения в строку разделенную разделителем*/
-(
-  fio,
-   chr(13)/* символ переноса строки*/
-  ) as gr
-from tourist_info
-group by num), /*всочетании с string_agg удалят лишние строчки num */
-
-  t_chef as (
+t_chef as (
  select pohod.num,/*номер похода*/
          
         (
@@ -326,6 +312,7 @@ from pohod
  LEFT join tourist T
    on pohod.chef_grupp = T.num
 )
+
 
 	  select pohod.num,
    (coalesce(kod_mkk,'')||'<br>'||coalesce(nomer_knigi,'')) as nomer_knigi,   
@@ -346,7 +333,7 @@ from pohod
      region_pohod , 
      t_chef.fio , 
      (coalesce(pohod.unit,'')) as kol_tur,
-     (coalesce(gr,'')) as gr, 
+     /*(coalesce(gr,'')) as gr, */
      
      (coalesce(organization,'')||'<br>'||coalesce(region_group,'')) as organiz, 
      (coalesce(marchrut::text,'')||'<br>'||coalesce(chef_coment::text,'')) as marchrut, 
@@ -354,15 +341,10 @@ from pohod
         coalesce(stat,'0') as stat 
              from pohod 
                
-       LEFT OUTER  JOIN tourist   
-         
-      on( pohod.chef_grupp = tourist.num )
+       
 
        LEFT OUTER JOIN t_chef
-      on t_chef.num = pohod.num 
-      
-       LEFT OUTER JOIN  U 
-      on U.num = pohod.num   `;     
+      on t_chef.num = pohod.num  `;     
       
 		if( _filtr ){	queryStr~=select_str2;}	// добавляем фильтрации
 		
@@ -494,8 +476,7 @@ from pohod
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
 		
-		table ~= `<td  class="show_participants_btn"  style="text-align: center;" title="`
-		~ rec.get!"Участники"("нет")~`">`~ "\r\n" ~`<font color="red">`
+		table ~= `<td  class="show_participants_btn"  style="text-align: center;" >`~ "\r\n" ~`<font color="red">`
 		~ (  rec.get!"Число участников"("Не задано") )
 		~ `</font >
 		<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
@@ -518,7 +499,11 @@ from pohod
 	table ~= `</table>`~ "\r\n";
 	// конец формирования основной таблицы
 	
-	string content = `<form id="main_form" method="post">`// содержимое страницы
+	string content;
+	
+	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`;
+	
+	content ~= `<form id="main_form" method="post">`// содержимое страницы
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~ "\r\n"
 	~`<h1> Число походов `~col_str.to!string ~` </h1>`~ "\r\n"
 	~table; //Тобавляем таблицу с данными к содержимому страницы
