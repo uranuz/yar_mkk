@@ -215,7 +215,7 @@ void netMain(HTTPContext context)
 	if (_vid)
 	
 	        {select_str2~= ` vid='`~vid~`' `;// добавлние запроса по виду туризма
-				if (_ks)	select_str2 ~=` and `;}
+				if (_ks ||(_start_dat) || (_end_dat))	select_str2 ~=` and `;}
 				
 	if (_ks)
 	{	select_str2 ~= ` ( `;
@@ -260,7 +260,7 @@ void netMain(HTTPContext context)
 	//Количество строк в таблице
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;
 	
-	uint pageCount = (col_str-1)/limit+1; //Количество страниц
+	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	
 	////////////////
