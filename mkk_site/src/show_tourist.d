@@ -142,7 +142,7 @@ void netMain(HTTPContext context)
 		`select num, 
 		(family_name||'<br>'||coalesce(given_name,'')||'<br>'||coalesce(patronymic,'')) as name, `
 		`( coalesce(birth_date,'')||'<br>'||birth_year ) as birth_date ,`
-		`exp, `
+		`coalesce(exp,'???'), `
 		`( case `
 			` when( show_phone = true ) then phone||'<br> ' `
 			` else '' `
