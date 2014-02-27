@@ -140,6 +140,12 @@ public:
 		_logFileName = logFileName;
 		_logLevel = logLevel;
 	}
+
+	this( string logFileName, LogLevel logLevel ) shared
+	{	/+_logFile = File( logFileName, "a" );+/
+		_logFileName = logFileName;
+		_logLevel = logLevel;
+	}
 	
 	///Добавление записи в лог
 	override void writeEvent(LogEvent event)
@@ -216,7 +222,7 @@ protected:
 // private {
 // 	__gshared shared(Logger)[] _loggers;
 // }
-
+// 
 // __gshared Logger log;
 // 
 // import core.thread, std.datetime;
@@ -226,7 +232,7 @@ protected:
 // 	{	Thread.sleep( dur!("seconds")( 1 ) );
 // 		log.write( LogEventType.warn, "Сообщение" );
 // 	}
-// 	
+// 
 // }
 // 
 // 
@@ -235,10 +241,10 @@ protected:
 // {
 // 	log = new ThreadedLogger( new FileLogger("test.log", LogLevel.warn) );
 // 	pragma(msg, typeof(log));
-// 	
+// 
 // 	auto th = new Thread(&func);
 // 	th.start();
-// 	
+// 
 // 	log.crit( "Произошла страшно непонятная ошибка!!!", "Абсолютно неизвестная ошибка" );
 // 
 // }

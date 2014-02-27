@@ -5,30 +5,34 @@ import std.conv, std.getopt;
 import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler,
 webtank.net.http.context, webtank.net.http.http;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, webtank.common.logger;
 
 __gshared HTTPRouter Router;
 __gshared URIPageRouter PageRouter;
 __gshared JSON_RPC_Router JSONRPCRouter;
+__gshared Logger SiteLogger;
 
 //Инициализация сайта МКК
 shared static this()
 {	Router = new HTTPRouter;
 	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
+	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.warn) );
 	
 	Router
 		.join(JSONRPCRouter)
 		.join(PageRouter);
 		
 	Router.onError.join( (Throwable error, HTTPContext context) {
+		SiteLogger.error(error.to!string);
 		auto tpl = getGeneralTemplate(context.request.path);
-		tpl.set( "content", "<h2>500 Внутренняя ошибка сервера!!!</h2>\r\n" ~ error.to!string );
+		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ error.to!string );
 		context.response ~= tpl.getString();
 		return true;
 	} );
 
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
+		SiteLogger.warn(error.to!string);
 		auto tpl = getGeneralTemplate(context.request.path);
 		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
 			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.to!string );

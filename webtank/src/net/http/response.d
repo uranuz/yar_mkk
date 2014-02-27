@@ -1,12 +1,14 @@
 module webtank.net.http.response;
 
+import std.array;
+
 import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
 class ServerResponse  //Ответ от нашего приложения
 {
 	HTTPHeaders headers;
 protected:
-	string _respBody;
+	Appender!(string) _respBody;
 	ResponseCookie _cookie; //Куки в ответ
 public:
 	
@@ -41,7 +43,7 @@ public:
 // 	}
 	
 	string getString()
-	{	return _getHeaderStr() ~ _respBody;
+	{	return _getHeaderStr() ~ _respBody.data();
 	}
 	
 	//Пытаемся очистить ответ, возвращает true, если получилось
@@ -65,7 +67,7 @@ protected:
 	
 	string _getHeaderStr()
 	{	import std.conv, std.stdio;
-		headers["content-length"] = _respBody.length.to!string;
+		headers["content-length"] = _respBody.data().length.to!string;
 		writeln( headers["content-length"] );
 // 		if( _cookie.length > 0 )
 // 			headers["set-cookie"] = _cookie.getString();
