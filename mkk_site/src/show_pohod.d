@@ -476,10 +476,9 @@ from pohod
 		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
 		
-		table ~= `<td  class="show_participants_btn"  style="text-align: center;" >`~ "\r\n" ~`<font color="red">`
-		~ (  rec.get!"Число участников"("Не задано") )
-		~ `</font >
-		<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
+		table ~= `<td  class="show_participants_btn"  style="text-align: center;" >`~ "\r\n" 
+		~ (  rec.get!"Число участников"("Не задано") ) ~ `<img src="` ~imgPath~`icons/list_icon.png">`
+		~ `	<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
 		</td>`~ "\r\n";
 		
 		
