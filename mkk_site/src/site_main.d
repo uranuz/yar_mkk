@@ -11,13 +11,15 @@ __gshared HTTPRouter Router;
 __gshared URIPageRouter PageRouter;
 __gshared JSON_RPC_Router JSONRPCRouter;
 __gshared Logger SiteLogger;
+__gshared Logger PrioriteLogger;
 
 //Инициализация сайта МКК
 shared static this()
 {	Router = new HTTPRouter;
 	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
-	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.warn) );
+	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.error) );
+	PrioriteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.info) );
 	
 	Router
 		.join(JSONRPCRouter)
@@ -31,6 +33,10 @@ shared static this()
 		return true;
 	} );
 
+	PageRouter.onPrePoll ~= (HTTPContext context) {
+		PrioriteLogger.info( "context.request.headers: \r\n" ~ context.request.headers.getString() );
+	};
+	
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
 		SiteLogger.warn("request.path: " ~ context.request.path ~ "\r\n" ~ error.to!string);
 		auto tpl = getGeneralTemplate(context);

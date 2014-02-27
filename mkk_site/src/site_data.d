@@ -63,6 +63,7 @@ shared static this()
 	webtankErrorLogFileName = siteLogsDir ~ "webtank_error.log";
 	webtankEventLogFileName = siteLogsDir ~ "webtank_event.log";
 	dbQueryLogFileName = siteLogsDir ~ "db_query.log";
+	eventLogFileName = siteLogsDir ~ "priorite.log";
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)
