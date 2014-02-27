@@ -1,6 +1,6 @@
 module webtank.net.http.handler;
 
-import std.stdio, std.conv;
+import std.conv;
 
 import webtank.net.http.context, webtank.common.event, webtank.net.http.http;
 
@@ -156,9 +156,6 @@ class URIPageRouter: EventBasedHTTPHandler
 	
 	override HTTPHandlingResult customProcessRequest( HTTPContext context )
 	{	auto uriData = _uriPattern.match(context.request.path);
-		
-		writeln("URIPageRouter uriData: ", uriData);
-		writeln("URIPageRouter context.request.path: ", context.request.path);
 
 		onPostPoll.fire(context, uriData.isMatched);
 		

@@ -25,17 +25,17 @@ shared static this()
 		
 	Router.onError.join( (Throwable error, HTTPContext context) {
 		SiteLogger.error(error.to!string);
-		auto tpl = getGeneralTemplate(context.request.path);
-		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ error.to!string );
+		auto tpl = getGeneralTemplate(context);
+		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ error.msg );
 		context.response ~= tpl.getString();
 		return true;
 	} );
 
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
-		SiteLogger.warn(error.to!string);
-		auto tpl = getGeneralTemplate(context.request.path);
+		SiteLogger.warn("request.path: " ~ context.request.path ~ "\r\n" ~ error.to!string);
+		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
-			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.to!string );
+			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.msg );
 		context.response ~= tpl.getString();
 		return true;
 	} );

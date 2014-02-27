@@ -1,6 +1,6 @@
 module mkk_site.edit_pohod;
 
-import std.conv, std.string, std.file, std.stdio, std.array, std.json, std.typecons, core.thread;
+import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.thread;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
@@ -35,8 +35,6 @@ auto getTouristList(string фамилия)
 {	string result;
 	auto dbase = getCommonDB();
 	
-	writeln("edit_pohod.getTouristList test 0");
-	
 	if ( !dbase.isConnected )
 		return null; //Завершаем
 
@@ -44,16 +42,11 @@ auto getTouristList(string фамилия)
 		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
 		~ PGEscapeStr( фамилия ) ~ `%' limit 25;`
 	);
-	
-	writeln("getTouristList test 10");
-	
+
 	if( queryRes is null || queryRes.recordCount == 0 )
 		return null;
 	
-	writeln("getTouristList test 20");
-	
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
-	writeln("getTouristList test 30");
 	
 	return rs;
 }
@@ -136,9 +129,6 @@ void создатьФормуИзмененияПохода(
 		if( !pohodRec.isNull("finish_date") )
 			finishDatePicker.date = pohodRec.get!("finish_date");
 	}
-	
-	writeln( "beginDatePicker.print(): ", beginDatePicker.print() );
-	writeln( "finishDatePicker.print()", finishDatePicker.print() );
 	
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
@@ -223,8 +213,6 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	string fieldNamesStr;
 	string fieldValuesStr;
 	
-	writeln("изменитьДанныеПохода test 20");
-	
 	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
 	
 	//Формируем набор строковых полей и значений
@@ -238,8 +226,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) 
 			~ ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" ); 
 	}
-	
-	writeln("изменитьДанныеПохода test 30");
+
 	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
 	
 	//Формируем часть запроса для вывода перечислимых полей
@@ -269,7 +256,6 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 	}
 	
-	writeln("изменитьДанныеПохода test 40");
 	//Формируем часть запроса для вбивания начальной и конечной даты
 	import std.datetime;
 	
@@ -330,8 +316,6 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			
 			foreach( keyStr; touristKeyStrings )
 				touristKeys ~= keyStr.to!size_t; //Проверка на число
-			
-			writeln(touristKeys);
 			
 			auto existTouristCount_QRes = dbase.query(
 				` with nums as ( select unnest( ARRAY[` ~ pVars["unit_neim"] ~ `] ) as n ) `
@@ -420,10 +404,6 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>\r\n";
 	}
 	
-	writeln("fieldNamesStr: ", fieldNamesStr);
-	writeln("fieldValuesStr: ", fieldValuesStr);
-	writeln("queryStr", queryStr);
-	
 	return message;
 }
 
@@ -443,15 +423,7 @@ void netMain(HTTPContext context)
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем шаблон по файлу
-		auto tpl = getGeneralTemplate(thisPagePath);
-
-		if( context.user.isAuthenticated )
-		{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-			tpl.set("user login", context.user.id );
-		}
-		else 
-		{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-		}
+		auto tpl = getGeneralTemplate(context);
 	
 		auto dbase = getCommonDB;
 		if ( !dbase.isConnected )
@@ -481,8 +453,6 @@ void netMain(HTTPContext context)
 				pohodKey = null;
 		}
 		
-		writeln("pohodKey.isNull: ", pohodKey.isNull);
-		
 		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
 		//pohodForm.set( "form_action", thisPagePath );
 		
@@ -497,7 +467,6 @@ void netMain(HTTPContext context)
 		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();
-
 	}
 	
 	

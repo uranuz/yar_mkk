@@ -1,6 +1,5 @@
 module mkk_site.show_pohod;
 
-import std.stdio;
 import std.conv, std.string, std.array;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
@@ -17,7 +16,7 @@ shared static this()
 }
 
 string participantsList( size_t pohodNum )
-{	writeln("participantsList ", "номерПохода: ", pohodNum);
+{
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
 		return null;
@@ -115,7 +114,6 @@ void netMain(HTTPContext context)
 		// конечный месяц диапазона поиска		
 		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );// начальный год диапазона поиска		
 		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");// начальный месяц диапазона поиска   
-		//writeln(e_year,e_month,s_year,s_month);
 		
 		if ( s_year=="") _start_dat=false;                  // наличие начального диапазона поиска если начального года нет "запрещено"
 		else _start_dat=true;
@@ -142,8 +140,6 @@ void netMain(HTTPContext context)
 		 
 
 }	
-	//writeln(s_dat);
-	  ///////////////////////////////////// 
 	  
 		
 				
@@ -170,12 +166,6 @@ void netMain(HTTPContext context)
 	      	}
 		   }
 	    }
-	   // writeln(e_dat);
-		////////////////////////////////////////////////////////////
-		
-		
-	
-		
 		
 		
 		_filtr=_start_dat||_end_dat||_ks||_vid;//переменная отвечающшая за необходимость фильтрации (true есть фильтрация)
@@ -200,7 +190,6 @@ void netMain(HTTPContext context)
 	//параметры_поиска~=ks.to!string;
 	
 	foreach (r;ks){ параметры_поиска~=`-`~r.to!string;     }
-	//writeln(параметры_поиска);
 	
 	uint limit = 5;// максимальное  число строк на странице
 	int page;
@@ -510,17 +499,9 @@ from pohod
 	content ~= `<script src="`~ jsPath ~ "show_pohod.js" ~ `"></script>`;
 	
 	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(thisPagePath);
+	auto tpl = getGeneralTemplate(context);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 
-	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
-	}
-	else 
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-	}
-	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

@@ -1,7 +1,7 @@
 module webtank.db.datctrl_joint;
 ///Функционал, объединяющий работу с БД и с набором записей
 
-import std.conv, std.stdio;
+import std.conv;
 
 import webtank.db.database, webtank.db.database_field;
 

@@ -68,7 +68,6 @@ protected:
 	string _getHeaderStr()
 	{	import std.conv, std.stdio;
 		headers["content-length"] = _respBody.data().length.to!string;
-		writeln( headers["content-length"] );
 // 		if( _cookie.length > 0 )
 // 			headers["set-cookie"] = _cookie.getString();
 		headers["content-type"] = "text/html; charset=\"utf-8\"";

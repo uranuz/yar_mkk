@@ -57,7 +57,7 @@ abstract class Logger
 	
 	
 public:
-	void writeEvent(LogEvent event);
+	abstract void writeEvent(LogEvent event);
 	
 	void write(	LogEventType eventType, string text, string title = null,
 		string file = __FILE__, int line = __LINE__, 
