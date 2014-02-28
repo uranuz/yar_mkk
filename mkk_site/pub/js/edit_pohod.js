@@ -281,6 +281,11 @@ mkk_site.edit_pohod = {
 			chefEditBtn = isAltChef ? $("#pohod_alt_chef_edit_btn") : $("#pohod_chef_edit_btn");
 		
 		chefInput.val( rec.get("num") );
+		
+		if( !pohod.participantsRS )
+		{	pohod.participantsRS = new webtank.datctrl.RecordSet();
+			pohod.participantsRS._fmt = rec._fmt;
+		}
 
 		if( !pohod.participantsRS.hasKey( rec.getKey() ) )
 			pohod.participantsRS.append( rec );
