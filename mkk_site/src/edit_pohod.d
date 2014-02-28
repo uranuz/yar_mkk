@@ -27,8 +27,6 @@ auto shortTouristRecFormat = RecordFormat!(
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 
-immutable touristInfoStringQueryBase = 
-	` select coalesce(family_name, '') || coalesce(' ' || given_name, '') || coalesce(' ' || patronymic, '') || ', ' || coalesce(birth_year::text, 'null') || ' г.р' from tourist `;
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
 auto getTouristList(string фамилия)
@@ -83,7 +81,7 @@ immutable(RecordFormat!(
 
 shared static this()
 {	import webtank.common.utils;
-	pohodRecFormat.enumFormats = 
+	pohodRecFormat.enumFormats =
 	[	"vid": видТуризма,
 		"ks": категорияСложности,
 		"elem": элементыКС,
@@ -132,7 +130,7 @@ void создатьФормуИзмененияПохода(
 	
 	pohodForm.set( "begin_date", beginDatePicker.print() );
 	pohodForm.set( "finish_date", finishDatePicker.print() );
-	
+
 	if( pohodRec )
 	{	pohodForm.set( "chef_coment", HTMLEscapeValue( pohodRec.get!"chef_coment"("") ) );
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
@@ -166,11 +164,22 @@ void создатьФормуИзмененияПохода(
 		if( pohodRec.isNull("chef_grupp") )
 			pohodForm.set( "chef_grupp_text", "Редактировать");
 		else {
-			auto chefString_QRes = dbase.query( 
-				touristInfoStringQueryBase ~ ` where num=` ~ pohodRec.get!("chef_grupp").to!string ~ `;` 
+			auto chefInfo_QRes = dbase.query( 
+				shortTouristFormatQueryBase ~ ` where num=` ~ pohodRec.get!("chef_grupp").to!string ~ `;` 
 			);
-			if( chefString_QRes.recordCount == 1 )
-				pohodForm.set( "chef_grupp_text", chefString_QRes.get(0, 0) );
+			if( chefInfo_QRes.recordCount == 1 && chefInfo_QRes.fieldCount == 5 )
+			{	string chefInfoStr;
+				
+				foreach( i; 1..4 )
+				{	if( !chefInfo_QRes.isNull( i, 0 ) )
+						chefInfoStr ~= ( chefInfoStr.length == 0 ? "" : " " ) ~ chefInfo_QRes.get( i, 0 ) ;
+				}
+				
+				chefInfoStr ~= chefInfo_QRes.isNull(4, 0) ? "" : ", " ~ chefInfo_QRes.get( 4, 0) ~ " г.р.";
+				
+				pohodForm.set( "chef_grupp_text", chefInfoStr );
+				pohodForm.set( "chef_grupp", printHTMLAttr( "value", chefInfo_QRes.get( 0,0, "" ) ) );
+			}
 			else
 				pohodForm.set( "chef_grupp_text", "Отсутствует в БД");
 		}
@@ -178,11 +187,22 @@ void создатьФормуИзмененияПохода(
 		if( pohodRec.isNull("alt_chef") )
 			pohodForm.set( "alt_chef_text", "Редактировать");
 		else {
-			auto chefString_QRes = dbase.query( 
-				touristInfoStringQueryBase ~ ` where num=` ~ pohodRec.get!("alt_chef").to!string ~ `;`
+			auto chefInfo_QRes = dbase.query( 
+				shortTouristFormatQueryBase ~ ` where num=` ~ pohodRec.get!("alt_chef").to!string ~ `;`
 			);
-			if( chefString_QRes.recordCount == 1 )
-				pohodForm.set( "alt_chef_text", chefString_QRes.get(0, 0) );
+			if( chefInfo_QRes.recordCount == 1 && chefInfo_QRes.fieldCount == 5 )
+			{	string chefInfoStr;
+				
+				foreach( i; 1..4 )
+				{	if( !chefInfo_QRes.isNull( i, 0 ) )
+						chefInfoStr ~= ( chefInfoStr.length == 0 ? "" : " " ) ~ chefInfo_QRes.get( i, 0 );
+				}
+				
+				chefInfoStr ~= chefInfo_QRes.isNull(4, 0) ? "" : ", " ~ chefInfo_QRes.get( 4, 0) ~ " г.р.";
+				
+				pohodForm.set( "alt_chef_text", chefInfoStr );
+				pohodForm.set( "alt_chef", printHTMLAttr( "value", chefInfo_QRes.get( 0,0, "" ) ) );
+			}
 			else
 				pohodForm.set( "alt_chef_text", "Отсутствует в БД");
 		}
