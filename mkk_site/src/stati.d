@@ -1,6 +1,6 @@
 module mkk_site.stati;
 
-import std.conv, std.string, std.file, std.stdio, std.array;
+import std.conv, std.string, std.file, std.array;
 
 import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
 
@@ -26,7 +26,7 @@ void netMain(HTTPContext context)
 	string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
 	
 	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(thisPagePath);
+	auto tpl = getGeneralTemplate(context);
 
 	if( context.user.isAuthenticated )
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");

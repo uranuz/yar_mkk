@@ -1,7 +1,5 @@
 module webtank.datctrl.record;
 
-import std.stdio;
-
 import webtank._version;
 
 static if( isDatCtrlEnabled ) {
@@ -69,8 +67,7 @@ template Record(alias RecordFormatT)
 		///Метод получения формата для перечислимого типа
 		///Значения отсортированы по возрастанию
 		auto getEnumFormat(string fieldName)()
-		{	writeln("_recordSet.getEnumFormat!(fieldName)()", _recordSet.getEnumFormat!(fieldName)());
-			return _recordSet.getEnumFormat!(fieldName)();
+		{	return _recordSet.getEnumFormat!(fieldName)();
 		}
 		
 		override {

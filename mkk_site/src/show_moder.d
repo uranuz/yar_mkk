@@ -1,6 +1,6 @@
 module mkk_site.show_moder;
 
-import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
@@ -105,16 +105,9 @@ void netMain(HTTPContext context)
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	auto tpl = getGeneralTemplate(thisPagePath);
+	auto tpl = getGeneralTemplate(context);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
 	
-	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
-	}
-	else 
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-	}
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

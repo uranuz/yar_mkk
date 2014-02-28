@@ -1,6 +1,6 @@
 module webtank.common.optional;
 
-import std.stdio, std.conv;
+import std.conv;
 
 ///Returns true if T is nullable type
 template isNullable(T)

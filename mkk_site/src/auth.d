@@ -1,6 +1,6 @@
 module mkk_site.auth;
 
-import std.process, std.conv, std.stdio, std.base64;
+import std.process, std.conv, std.base64;
 
 import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
 
@@ -16,8 +16,6 @@ void netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
-	
-	writeln( "remoteAddress: ", rq.remoteAddress.toAddrString() );
 
 	auto accessController = new MKK_SiteAccessController;
 
@@ -42,7 +40,7 @@ void netMain(HTTPContext context)
 			rp.redirect(redirectTo);
 		}
 		else
-		{	auto tpl = getGeneralTemplate(thisPagePath);
+		{	auto tpl = getGeneralTemplate(context);
 			string content =
 `<h2>Аутентификация</h2>
 <hr>
@@ -57,7 +55,7 @@ void netMain(HTTPContext context)
 	else //Если не пришёл логин с паролем, то работаем в обычном режиме
 	{	
 		string login = rq.cookie.get("user_login", "");
-		auto tpl = getGeneralTemplate(thisPagePath);
+		auto tpl = getGeneralTemplate(context);
 		
 		string content = `<h2>Аутентификация</h2>`;
 		

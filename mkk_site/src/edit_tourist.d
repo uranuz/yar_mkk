@@ -1,6 +1,6 @@
 module mkk_site.edit_tourist;
 
-import std.conv, std.string, std.file, std.stdio, std.utf, std.typecons;
+import std.conv, std.string, std.file, std.utf, std.typecons;
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls, webtank.common.optional;
 
@@ -368,9 +368,7 @@ void netMain(HTTPContext context)
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем общий шаблон страницы
-		auto tpl = getGeneralTemplate(thisPagePath);
-		tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ user.name ~ "</b>!!!</i>");
-		tpl.set("user login", user.id );
+		auto tpl = getGeneralTemplate(context);
 	
 		//Создаём подключение к БД
 		auto dbase = getCommonDB();

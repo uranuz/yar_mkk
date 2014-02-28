@@ -1,6 +1,6 @@
 module webtank.common.serialization;
  
-import std.json, std.traits, std.conv, std.typecons, std.stdio;
+import std.json, std.traits, std.conv, std.typecons;
 
 import webtank.common.optional;
 
@@ -91,7 +91,6 @@ JSONValue getStdJSON(T)(T dValue)
 ///Шаблонная функция десериализации данных из std.json
 T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
-	writeln("getDLangValue jValue.type: ", jValue.type);
 	static if( is( T == JSONValue ) )
 	{	return jValue; //Raw JSONValue
 	}

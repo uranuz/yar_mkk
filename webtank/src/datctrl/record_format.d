@@ -1,7 +1,5 @@
 module webtank.datctrl.record_format;
 
-import std.stdio;
-
 import webtank._version;
 
 static if( isDatCtrlEnabled ) {

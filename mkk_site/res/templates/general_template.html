@@ -46,7 +46,7 @@
 			<a href="{{dynamic path}}stati">Статьи и документы</a>
 		</div> <!-- #main_menu -->
 		<div id="auth_bar">
-			<form action="{{dynamic path}}auth?redirectTo={{this page path}}" id="auth_form" method="post" style="display: inline;">
+			<form action="{{dynamic path}}auth?redirectTo={{this page path}}&protection={{secure}}" id="auth_form" method="post" style="display: inline;">
 				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
 				Пароль: <input name="user_password" type="password" size="15">
 				<input type="submit" value="Войти">

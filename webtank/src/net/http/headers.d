@@ -244,7 +244,7 @@ class HTTPHeaders
 			_headers = null;
 	}
 	
-//protected:
+protected:
 	string[string] _headers;
 	bool _isRequest;
 }

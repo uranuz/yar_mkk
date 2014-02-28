@@ -1,6 +1,6 @@
 module mkk_site.show_tourist;
 
-import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
@@ -75,10 +75,8 @@ void netMain(HTTPContext context)
   
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
 	//Количество строк в таблице
-	//writeln(col_str_qres);
 	
 	uint col_str = ( col_str_qres.get(0, 0, "0") ).to!uint;// количество строк 
-	// writeln(col_str);
 	
 	uint pageCount = (col_str)/limit+1; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
@@ -153,11 +151,9 @@ void netMain(HTTPContext context)
 		   ` end ) as contact,razr,sud, `
 		   ` comment from tourist `~ ( ( fem.length == 0 )?"": (` WHERE family_name ILIKE '%` ~ fem ~"%'") ) ~` order by num LIMIT `~ limit.to!string ~` OFFSET `~ offset.to!string ~` `; 
 		   
-		//writeln(queryStr);   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
-	//writeln("rs.length: ", rs.length);
 	string table = `<table class="tab">`~ "\r\n";
 	table ~= `<tr>`~ "\r\n";
 	if(_sverka) table ~= `<td> Ключ</td>`~ "\r\n";
@@ -186,9 +182,7 @@ void netMain(HTTPContext context)
 		table ~= `</tr>`~ "\r\n";
 	}
 	} catch(Throwable exc)
-	{	writeln(exc.to!string);
-	
-	}
+	{}
 	
 	table ~= `</table>`~ "\r\n";
 
@@ -196,16 +190,8 @@ void netMain(HTTPContext context)
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	auto tpl = getGeneralTemplate(thisPagePath);
+	auto tpl = getGeneralTemplate(context);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	
-	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
-	}
-	else 
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-	}
 	
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }

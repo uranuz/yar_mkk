@@ -2,13 +2,21 @@ module mkk_site.utils;
 
 import std.file;
 
-import webtank.templating.plain_templater, webtank.db.database;
+import webtank.templating.plain_templater, webtank.db.database, webtank.net.http.context;
 
 import mkk_site.site_data;
 
-PlainTemplater getGeneralTemplate(string pagePath)
+PlainTemplater getGeneralTemplate(HTTPContext context)
 {	auto tpl = getPageTemplate(generalTemplateFileName);
-	tpl.set("this page path", pagePath);
+	tpl.set("this page path", context.request.path);
+	
+	if( context.user.isAuthenticated )
+	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
+		tpl.set("user login", context.user.id );
+	}
+	else
+	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	}
 	return tpl;
 }
 

@@ -109,8 +109,6 @@ public:
 		
 		SessionId sessionId;
 		
-		writeln("getTicket test 30");
-		
 		if( SIDString.length != sessionIdStrLength )
 			return new AnonymousUser;
 			
@@ -118,8 +116,6 @@ public:
 		
 		if( !dbase.isConnected )
 			return new AnonymousUser;
-			
-		writeln("getTicket test 40");
 		
 		Base64URL.decode(SIDString, sessionId[]);
 		
@@ -141,8 +137,6 @@ public:
 			context.request.headers.get("user-agent", "") != session_QRes.get(1, 0, "")
 		) return new AnonymousUser;
 		
-		writeln("getTicket test 50");
-		
 		//Делаем запрос к БД за информацией о пользователе
 		auto user_QRes = dbase.query(
 			` select U.num, U.email, U.login, U.name, U.user_group `
@@ -152,8 +146,6 @@ public:
 			` where session.sid = '` 
 			~ Base64URL.encode( sessionId ) ~ `';`
 		);
-		
-		writeln("getTicket test 60");
 		
 		if( (user_QRes.recordCount != 1) && (user_QRes.fieldCount != 5) )
 			return new AnonymousUser;
@@ -253,7 +245,7 @@ SessionId generateSessionId( const(char)[] login, const(char)[] group, const(cha
 	return sessionId; //Возвращаем идентификатор сессии
 }
 
-import std.stdio, std.datetime, std.random, core.thread;
+import std.datetime, std.random, core.thread;
 
 ///Генерирует хэш для пароля с "солью" и "перцем"
 ubyte[] makePasswordHash( 

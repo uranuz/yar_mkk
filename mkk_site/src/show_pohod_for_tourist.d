@@ -1,6 +1,6 @@
 module mkk_site.show_pohod_for_tourist;
 
-import std.conv, std.string, std.utf, std.stdio;//  strip()       Уибират начальные и конечные пробелы   
+import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
@@ -33,7 +33,6 @@ void netMain(HTTPContext context)
 	auto rp = context.response;
 
 	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
-	//writeln(1);
 	string output; //"Выхлоп" программы
 	scope(exit) rp.write(output);
 	string js_file = "../../js/page_view.js";
@@ -239,22 +238,9 @@ WHERE num=`~touristKey.to!string;
 	content ~= table ~ "\r\n";
 	content ~= `<script  type="text/JavaScript" src="pohod_filtr.js">  </script>` ~ "\r\n";
 	
-
-
- 
- 
-	
-	auto tpl = getGeneralTemplate(thisPagePath);
+	auto tpl = getGeneralTemplate(context);
 	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	//writeln(8);
-	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
-	}
-	else 
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-	}
-	//writeln(9);
+
 	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
 }
 

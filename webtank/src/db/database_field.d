@@ -1,7 +1,5 @@
 module webtank.db.database_field;
 
-import std.stdio;
-
 import std.json, std.conv;
 
 import webtank.datctrl.data_field, webtank.db.database, webtank.datctrl.record_format;
@@ -105,8 +103,7 @@ public:
 		
 		///Метод сериализации формата поля в std.json
 		JSONValue getStdJSONFormat()
-		{	writeln("DatabaseField getStdJSONFormat test 10");
-			JSONValue jValue;
+		{	JSONValue jValue;
 			
 			jValue.type = JSON_TYPE.OBJECT;
 			
@@ -115,26 +112,17 @@ public:
 			jValue.object["n"].type = JSON_TYPE.STRING;
 			jValue.object["n"].str = _name;
 			
-			writeln("DatabaseField getStdJSONFormat test 20");
-			
 			//Вывод типа поля
 			jValue.object["t"] = JSONValue();
 			jValue.object["t"].type = JSON_TYPE.STRING;
 			jValue.object["t"].str = FieldT.to!string;
 			
-			writeln("DatabaseField getStdJSONFormat test 40");
-			
 			static if( FieldT == FieldType.Enum )
-			{	writeln("DatabaseField getStdJSONFormat test 50");
-				//Сериализуем формат для перечислимого типа
+			{	//Сериализуем формат для перечислимого типа
 				auto enumJValue = _enumFormat.getStdJSON();
-				
-				writeln("DatabaseField getStdJSONFormat test 60");
 				
 				foreach( key, val; enumJValue.object )
 					jValue[key] = val;
-					
-				writeln("DatabaseField getStdJSONFormat test 70");
 			}
 			return jValue;
 		}

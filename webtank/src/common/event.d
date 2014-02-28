@@ -176,7 +176,7 @@ struct Event(Opts...)
 	}
 }
 
-import std.stdio, std.algorithm, std.range, std.conv, std.container, std.typecons, std.typetuple, std.traits;
+import std.algorithm, std.range, std.conv, std.container, std.typecons, std.typetuple, std.traits;
 
 bool isInheritsOf( TypeInfo_Class objTypeinfo, TypeInfo_Class baseTypeinfo  )
 {	while( objTypeinfo )
@@ -247,8 +247,7 @@ struct ErrorEvent( ErrorHandler, Opts... )
 							return true;
 					}
 					else
-					{	pair.method(params);
-					}
+						pair.method(params);
 				}
 			}
 			return false;
@@ -296,8 +295,7 @@ protected:
 size_t countDerivations(TypeInfo_Class typeInfo)
 {	size_t result;
 	while(typeInfo !is null)
-	{	//writeln(typeInfo.name);
-		result ++;
+	{	result ++;
 		typeInfo = typeInfo.base;
 	}
 	return result;
