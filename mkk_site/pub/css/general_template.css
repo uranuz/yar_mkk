@@ -16,6 +16,8 @@ body {
 	/*---------------*/
 	background: url("../img/design/body_bg.png");
 	z-index: -5;
+	overflow: -moz-scrollbars-vertical; /*Прокрутка всегда*/
+	overflow-y: scroll;
 }
 
 #page, #footer_framing {

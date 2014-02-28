@@ -18,7 +18,7 @@ interface IUserIdentity
 	string name() @property;
 	
 	///Словарь с доп. информацией связаной с пользователями
-	const(char[])[string] data() @property;
+	string[string] data() @property;
 	
 	///Возвращает true, если пользователь успешно прошёл аутентификацию. Иначе - false
 	bool isAuthenticated() @property;
@@ -46,7 +46,7 @@ public:
 		string name()
 		{	return null; }
 		
-		const(char[])[string] data()
+		string[string] data()
 		{	return null; }
 		
 		bool isAuthenticated()

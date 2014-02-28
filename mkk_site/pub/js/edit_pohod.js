@@ -249,9 +249,10 @@ mkk_site.edit_pohod = {
 		.on( "click", pohod.onSearchTourists_BtnClick ); 
 		
 		$(okButton).on( "click", pohod.onSaveSelectedParticipants_BtnCLick );
+
+		$(searchWindow).addClass("tourist_selection_window");
 		
 		$(windowContent)
-		.addClass("tourist_selection_window")
 		.append(touristSearchInp)
 		.append(touristSearchButton)
 		.append(okButton)
@@ -280,8 +281,13 @@ mkk_site.edit_pohod = {
 			chefEditBtn = isAltChef ? $("#pohod_alt_chef_edit_btn") : $("#pohod_chef_edit_btn");
 		
 		chefInput.val( rec.get("num") );
-		chefEditBtn.text( pohod.getTouristInfoString(rec) );
+
+		if( !pohod.participantsRS.hasKey( rec.getKey() ) )
+			pohod.participantsRS.append( rec );
 		
+		chefEditBtn.text( pohod.getTouristInfoString(rec) );
+
+		pohod.renderParticipantsList();
 		
 		$(".chef_selection_window").remove();
 		$(".modal_window_blackout").remove();

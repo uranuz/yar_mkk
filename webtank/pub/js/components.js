@@ -185,8 +185,8 @@ webtank.wui = {
 			title.innerText = headerText;
 
 		close_btn.onclick = function() {
-			body.removeChild(window_div);
-			body.removeChild(blackout_div);
+			window_div.parentNode.removeChild(window_div);
+			blackout_div.parentNode.removeChild(blackout_div);
 		}
 		
 		//Создаём структуру модального окна

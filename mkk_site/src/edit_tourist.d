@@ -135,10 +135,16 @@ string показатьФормуРедактТуриста(
 			birthDateParts = split( touristRec.get!"дата рожд"(""), "," );
 		if( birthDateParts.length == 2 ) 
 		{	import std.conv;
+			
 			try {
-				birthDay = birthDateParts[0].to!ubyte;
-				birthMonth = birthDateParts[1].to!ubyte;
-			} catch(std.conv.ConvException e) { }
+				if( birthDateParts[0].length != 0 )
+					birthDay = birthDateParts[0].to!ubyte;
+				if( birthDateParts[1].length != 0 )
+					birthMonth = birthDateParts[1].to!ubyte;
+			} catch(std.conv.ConvException e) {
+				birthDay.nullify();
+				birthMonth.nullify();
+			}
 		}
 	}
 	
@@ -211,48 +217,69 @@ string записатьТуриста(
 	string content;
 	
 	try
-	{	string fieldNamesStr;  //имена полей для записи
-		string fieldValuesStr; //значения полей для записи
+	{	string[] fieldNames;  //имена полей для записи
+		string[] fieldValues; //значения полей для записи
 		
 		//Формирование запроса для записи строковых полей в БД
 		foreach( i, fieldName; strFieldNames )
 		{	string value = pVars.get(fieldName, null);
-			if( value.length > 0  )
-			{	fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
-				fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) ~ "'" ~ PGEscapeStr(value) ~ "'"; 
+			if( value.length > 0 )
+			{	fieldNames ~= "\"" ~ fieldName ~ "\"";
+				fieldValues ~=  "'" ~ PGEscapeStr(value) ~ "'";
 			}
 		}
-		
+
 		//Формирование запроса на запись даты рождения туриста
-		auto birthDayStr = pVars.get("birth_day", null);
-		auto birthMonthStr = pVars.get("birth_month", null);
-		if( (birthDayStr.length > 0) && (birthMonthStr.length >0) )
-		{	auto birthDay = birthDayStr.to!ubyte;
-			auto birthMonth = birthMonthStr.to!ubyte;
-			if( birthDay > 0 && birthDay <= 31 && birthMonth > 0 && birthMonth <= 12 )
-			{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"birth_date\"";
-				fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ birthDay.to!string ~ "." ~ birthMonth.to!string ~ "'";
+		if( "birth_day" in pVars || "birth_month" in pVars )
+		{	string birthDateStr;
+			if( "birth_day" in pVars )
+			{	if( pVars["birth_day"].length != 0 && pVars["birth_day"] != "null" )
+				{	auto birthDay = pVars["birth_day"].to!ubyte;
+					if( birthDay > 0u && birthDay <= 31 )
+						birthDateStr ~= birthDay.to!string;
+					else
+						throw new Exception("Номер дня в месяце должен быть в диапазоне от 1 до 31!!!");
+				}
 			}
+
+			birthDateStr ~= ".";
+
+			if( "birth_month" in pVars )
+			{	if( pVars["birth_month"].length != 0 && pVars["birth_month"] != "null" )
+				{	auto birthMonth = pVars["birth_month"].to!ubyte;
+					if( birthMonth > 0u && birthMonth <= 12 )
+						birthDateStr ~= birthMonth.to!string;
+					else
+						throw new Exception("Номер месяца должен лежать в диапазоне от 1 до 12!!!");
+				}
+			}
+
+			fieldNames ~= "\"birth_date\"";
+			fieldValues ~= "'" ~ birthDateStr ~ "'";
 		}
-		
+
 		//Формирование запроса на запись года рождения туриста
-		auto birthYearStr = pVars.get("birth_year", null);
-		if( birthYearStr.length > 0 )
-		{	auto birthYear = birthYearStr.to!uint;
-			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"birth_year\"";
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ birthYear.to!string ~ "'";
+		if( "birth_year" in pVars )
+		{	if( pVars["birth_year"].length != 0 && pVars["birth_year"] != "null" )
+			{	auto birthYear = pVars["birth_year"].to!uint;
+				fieldValues ~= "'" ~ birthYear.to!string ~ "'";
+			}
+			else
+				fieldValues ~= "NULL";
+
+			fieldNames ~= "\"birth_year\"";
 		}
 		
 		//Логические значения
 		//Показать телефон
 		bool showPhone = toBool( pVars.get("show_phone", "no") );
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"show_phone\"";
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showPhone ? "true" : "false" ) ~ "'";
+		fieldNames ~= "\"show_phone\"";
+		fieldValues ~= "'" ~ ( showPhone ? "true" : "false" ) ~ "'";
 		
 		//Показать емэйл
 		bool showEmail = toBool( pVars.get("show_email", "no") );
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ "\"show_email\"";
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
+		fieldNames ~= "\"show_email\"";
+		fieldValues ~= "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
 
 		if( "razr" in pVars )
 		{	Optional!(int) enumKey;
@@ -269,12 +296,9 @@ string записатьТуриста(
 			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
 				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"спортивный разряд\"!!!");
 		
-			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"razr"`;
-				
-			if( fieldValuesStr.length > 0 )
-				fieldValuesStr ~= ", ";
+			fieldNames ~= `"razr"`;
 			
-			fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
+			fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 		}
 			
 		if( "sud" in pVars )
@@ -292,35 +316,32 @@ string записатьТуриста(
 			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
 				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
 		
-			fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"sud"`;
-				
-			if( fieldValuesStr.length > 0 )
-				fieldValuesStr ~= ", ";
+			fieldNames ~= `"sud"`;
 			
-			fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
+			fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 		}
+
+		import std.array : join;
 		
 		//Запись автора последних изменений и даты этих изменений
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `last_editor_num, last_edit_timestamp` ;
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
+		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 
 		string queryStr;
 		
-		if( fieldNamesStr.length > 0 && fieldValuesStr.length > 0 )
+		if( fieldNames.length > 0 && fieldValues.length > 0 )
 		{	if( isUpdateAction )
-				queryStr = "update tourist set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ touristKey.to!string ~ "';";
+				queryStr = "update tourist set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num='" ~ touristKey.to!string ~ "';";
 			else
-			{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `registrator_num, reg_timestamp` ;
-				fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
-				queryStr = "insert into tourist ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
+			{	fieldNames ~= ["registrator_num", "reg_timestamp"] ;
+				fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+				queryStr = "insert into tourist ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 			}
 		}
 		
 		dbase.query(queryStr);
 	}
-	catch(Throwable
-	//std.conv.ConvException 
-	e)
+	catch(Throwable e)
 	{	//TODO: Выдавать ошибку
 		content = "<h3>Ошибка при разборе данных формы!!!</h3><br>\r\n";
 		//content ~= e.msg;
