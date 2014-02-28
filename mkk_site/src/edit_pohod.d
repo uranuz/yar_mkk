@@ -191,7 +191,9 @@ void создатьФормуИзмененияПохода(
 	{	pohodForm.set( "chef_grupp_text", "Редактировать");
 		pohodForm.set( "alt_chef_text", "Редактировать");
 	}
-	
+
+	if( pohodRec )
+		pohodForm.set( "unit_count", ( pohodRec.isNull("unit") ? "" : printHTMLAttr( "value", pohodRec.get!("unit") ) ) );
 	//Задаём действие, чтобы при след. обращении к обработчику
 	//перейти на этап записи в БД
 	pohodForm.set( "form_input_action", ` value="write"` );
@@ -210,8 +212,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	if( !dbase.isConnected )
 		throw new Exception("База данных МКК не доступна!!!");
 	
-	string fieldNamesStr;
-	string fieldValuesStr;
+	string[] fieldNames;
+	string[] fieldValues;
 	
 	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
 	
@@ -222,9 +224,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			
 		string value = pVars[fieldName];
 		
-		fieldNamesStr ~= ( ( fieldNamesStr.length > 0  ) ? ", " : "" ) ~ "\"" ~ fieldName ~ "\""; 
-		fieldValuesStr ~=  ( ( fieldValuesStr.length > 0 ) ? ", " : "" ) 
-			~ ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" ); 
+		fieldNames ~= `"` ~ fieldName ~ `"` ;
+		fieldValues ~= ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" );
 	}
 
 	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
@@ -248,12 +249,9 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		if( !enumKey.isNull && enumKey !in pohodRecFormat.enumFormats[fieldName] )
 			throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
 	
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ fieldName ~ `"`;
-			
-		if( fieldValuesStr.length > 0 )
-			fieldValuesStr ~= ", ";
+		fieldNames ~= fieldName;
 		
-		fieldValuesStr ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
+		fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 	}
 	
 	//Формируем часть запроса для вбивания начальной и конечной даты
@@ -301,10 +299,18 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	}
 	
 	foreach( i, pre; dateParamNamePrefixes )
-	{	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `"` ~ pre ~ `date"`;
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) 
-			~ ( pohodDates[i].isNull ? "NULL" : `'` ~ pohodDates[i].value.toISOExtString() ~ `'` );
+	{	fieldNames ~= pre ~ "date";
+		fieldValues ~= pohodDates[i].isNull ? "NULL" : `'` ~ pohodDates[i].value.toISOExtString() ~ `'` ;
 	}
+
+	Optional!size_t overalTouristCount;
+	if( "unit" in pVars )
+	{	if( pVars["unit"].length != 0 )
+		{	overalTouristCount = pVars["unit"].to!size_t;
+		}
+	}
+
+	size_t[] touristKeys;
 	
 	//Разбор списка туристов
 	if( "unit_neim" in pVars )
@@ -312,10 +318,14 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		
 		if( pVars["unit_neim"] != "null" && pVars["unit_neim"].length != 0 )
 		{	auto touristKeyStrings = std.array.split(pVars["unit_neim"], ",");
-			size_t[] touristKeys;
 			
 			foreach( keyStr; touristKeyStrings )
 				touristKeys ~= keyStr.to!size_t; //Проверка на число
+
+			if( !overalTouristCount.isNull )
+			{	if( overalTouristCount.value < touristKeys.length )
+					throw new Exception("Указанное количество участников похода меньше количества добавленных в список!!!");
+			}
 			
 			auto existTouristCount_QRes = dbase.query(
 				` with nums as ( select unnest( ARRAY[` ~ pVars["unit_neim"] ~ `] ) as n ) `
@@ -329,55 +339,68 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			if( existTouristCount != touristKeys.length )
 				throw new Exception("Часть переданных в запросе ключей не соответствуют существующим в БД туристам!!!");
 			
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ `ARRAY[` ~ pVars["unit_neim"] ~ `]`;
+			fieldValues ~= "ARRAY[" ~ pVars["unit_neim"] ~ "]";
 		}
 		else
-		{	fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+		{	fieldValues ~= "NULL";
 		}
 		
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `unit_neim`;
+		fieldNames ~= "unit_neim";
 	}
+
+	if( "unit" in pVars )
+	{	fieldValues ~= overalTouristCount.isNull ? "NULL" : overalTouristCount.value.to!string;
+		fieldNames ~= "unit";
+	}
+
+	import std.algorithm : canFind;
 	
 	//Бадяжим часть запроса для записи руководителя и его заместителя
-	
 	if( "chef_grupp" in pVars )
 	{	if( pVars["chef_grupp"] != "null" && pVars["chef_grupp"].length != 0 )
 		{	size_t chefGruppKey = pVars["chef_grupp"].to!size_t;
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ chefGruppKey.to!string;
+			if( !touristKeys.canFind(chefGruppKey) )
+				throw new Exception("Руководитель похода должен быть в списке участников!!!");
+		
+			fieldValues ~= chefGruppKey.to!string;
 		}
 		else
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+			fieldValues ~= "NULL";
 			
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `chef_grupp`;
+		fieldNames ~= "chef_grupp";
 	}
 	
 	if( "alt_chef" in pVars )
 	{	if( pVars["alt_chef"] != "null" && pVars["alt_chef"].length != 0 )
 		{	size_t chefGruppKey = pVars["alt_chef"].to!size_t;
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ chefGruppKey.to!string;
+			if( !touristKeys.canFind(chefGruppKey) )
+				throw new Exception("Заместитель руководителя должен быть в списке участников!!!");
+				
+			fieldValues ~= chefGruppKey.to!string;
 		}
 		else
-			fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ "NULL";
+			fieldValues ~= "NULL";
 			
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `alt_chef`;
+		fieldNames ~= "alt_chef";
 	}
 	
 	//Запись автора последних изменений и даты этих изменений
-	fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `last_editor_num, last_edit_timestamp` ;
-	fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
+	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;
-	
+
+	import std.array : join;
 	if( pohodKey.isNull )
 	{	//Запись пользователя, добавившего поход и даты добавления
-		fieldNamesStr ~= ( fieldNamesStr.length > 0 ? ", " : "" ) ~ `registrator_num, reg_timestamp` ;
-		fieldValuesStr ~= ( fieldValuesStr.length > 0 ? ", " : "" ) ~ context.user.data["user_num"] ~ `, current_timestamp`;
-		queryStr = "insert into pohod ( " ~ fieldNamesStr ~ " ) values( " ~ fieldValuesStr ~ " );";
+		fieldNames ~= ["registrator_num", "reg_timestamp"];
+		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+		queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 	}
 	else
 	{
-		queryStr = "update pohod set( " ~ fieldNamesStr ~ " ) = ( " ~ fieldValuesStr ~ " ) where num='" ~ pohodKey.value.to!string ~ "';";
+		queryStr = "update pohod set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num='" ~ pohodKey.value.to!string ~ "';";
 	}
 	auto writeDBQueryRes = dbase.query(queryStr);
 	
@@ -452,18 +475,18 @@ void netMain(HTTPContext context)
 			else
 				pohodKey = null;
 		}
+
+		string content;
 		
-		auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
-		//pohodForm.set( "form_action", thisPagePath );
-		
-		string editResultMessage;
 		//Определяем выполняемое страницей действие
 		if( pVars.get("action", "") == "write" )
-			editResultMessage = изменитьДанныеПохода(context, pohodKey);
-		
-		создатьФормуИзмененияПохода(pohodForm, pohodRec);
-
-		string content = editResultMessage ~ pohodForm.getString();
+		{	content = изменитьДанныеПохода(context, pohodKey);
+		}
+		else
+		{	auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
+			создатьФормуИзмененияПохода(pohodForm, pohodRec);
+			content = pohodForm.getString();
+		}
 		
 		tpl.set( "content", content );
 		rp ~= tpl.getString();

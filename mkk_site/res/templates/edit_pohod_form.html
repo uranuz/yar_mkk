@@ -18,7 +18,7 @@
 </tr>
 </table>
 <label for="MKK_coment">Коментарий МКК</label><br>
-<textarea id="MKK_coment" name="MKK_coment">{{MKK_coment}}</textarea>
+<textarea id="MKK_coment" name="MKK_coment" cols="40">{{MKK_coment}}</textarea>
 
 
 <hr>
@@ -60,7 +60,7 @@
 </tr>
 </table>
 <label for="chef_coment">Коментарий руководителя</label><br>
-<textarea id="chef_coment" name="chef_coment">{{chef_coment}}</textarea>
+<textarea id="chef_coment" name="chef_coment"  cols="40">{{chef_coment}}</textarea>
 
 <hr>
 <b>Группа</b>
@@ -95,6 +95,9 @@
 			<input type="hidden" name="unit_neim" id="unit_neim">
 			<a href="#" id="pohod_participants_edit_btn">Редактировать</a>
 		</td>
+	</tr>
+	<tr>
+		<td>Количество участников</td><td><input type="text" size="4" name="unit"{{unit_count}}></td>
 	</tr>
 	<tr>
 		<td colspan="999"><div id="unit_div">{{unit}}</div></td>

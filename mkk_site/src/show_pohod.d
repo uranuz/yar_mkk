@@ -474,7 +474,9 @@ from pohod
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";
 
 		table ~= `<td>` ~ ps  ~ `</td>`~ "\r\n";
-		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`~ "\r\n";// появляется при наличии допуска
+		if(_sverka)
+			table ~= `<td> <a href="` ~ dynamicPath ~ `edit_pohod?key=`
+			~ rec.get!"Ключ"(0).to!string ~ `">Изменить</a>  </td>`~ "\r\n";// появляется при наличии допуска
 		table ~= `</tr>`~ "\r\n";
 		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`;
 		if(_sverka)
@@ -493,6 +495,7 @@ from pohod
 	
 	content ~= `<form id="main_form" method="post">`// содержимое страницы
 	~ tablefiltr ~ pageSelector ~ `</form><br><br>`~ "\r\n"
+	~ ( _sverka ? `<a href="` ~ dynamicPath ~ `edit_pohod">Добавить новый поход</a><br>` ~ "\r\n" : "" )
 	~`<h1> Число походов `~col_str.to!string ~` </h1>`~ "\r\n"
 	~table; //Тобавляем таблицу с данными к содержимому страницы
 	

@@ -59,7 +59,7 @@ class MKK_SiteUser: AnonymousUser
 		{	return _name; }
 		
 		///Дополнительные данные пользователя
-		const(char[])[string] data()
+		string[string] data()
 		{	return _data; }
 		
 		///Возвращает true, если владелец успешно прошёл проверку подлинности. Иначе false
@@ -88,7 +88,7 @@ protected:
 class MKK_SiteAccessController: IAccessController
 {
 protected:
-	immutable(size_t) _sessionLifetime = 60; //Время жизни сессии в минутах
+	immutable(size_t) _sessionLifetime = 180; //Время жизни сессии в минутах
 
 public:
 	///Реализация метода аутентификации контролёра доступа
