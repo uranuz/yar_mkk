@@ -38,7 +38,7 @@
 		<div id="menu_bg_left"></div>
 		<div id="menu_bg_right"></div>
 		<div id="main_menu">
-			<a href="{{dynamic path}}index"><span>Главная</span></a>
+			<a href="/"><span>Главная</span></a>
 			<a href="{{dynamic path}}show_pohod"><span>Походы</span></a>
 			<a href="{{dynamic path}}show_tourist"><span>Туристы</span></a>
 			<a href="{{dynamic path}}show_moder"><span>Модераторы</span></a>
@@ -46,7 +46,7 @@
 			<a href="{{dynamic path}}stati">Статьи и документы</a>
 		</div> <!-- #main_menu -->
 		<div id="auth_bar">
-			<form action="{{dynamic path}}auth?redirectTo={{this page path}}&protection={{secure}}" id="auth_form" method="post" style="display: inline;">
+			<form action="{{authentication uri}}" id="auth_form" method="post" style="display: inline;">
 				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
 				Пароль: <input name="user_password" type="password" size="15">
 				<input type="submit" value="Войти">

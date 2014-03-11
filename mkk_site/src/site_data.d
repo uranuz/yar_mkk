@@ -1,5 +1,20 @@
 module mkk_site.site_data;
 
+///Перечисление целей сборки сайта
+enum BuildTarget {devel, test, release};
+
+//Определение текущей цели сборки сайта
+version(devel)
+	enum siteBuildTarget = BuildTarget.devel;
+else version(test)
+	enum siteBuildTarget = BuildTarget.test;
+else
+	enum siteBuildTarget = BuildTarget.release;
+
+
+version(release)
+	enum isReleaseVersion
+
 ///Общие данные для сайта
 
 ///Строки подключения к базам данных
@@ -46,6 +61,7 @@ immutable(string) eventLogFileName; //Путь к журналу событий 
 immutable(string) webtankErrorLogFileName; //Логи ошибок библиотеки
 immutable(string) webtankEventLogFileName; //Логи событий библиотеки
 immutable(string) dbQueryLogFileName; //Логи событий библиотеки
+immutable(string) prioriteLogFileName; //Путь к журналу приоритетных сообщений
 
 shared static this()
 {	import std.path;
@@ -63,7 +79,7 @@ shared static this()
 	webtankErrorLogFileName = siteLogsDir ~ "webtank_error.log";
 	webtankEventLogFileName = siteLogsDir ~ "webtank_event.log";
 	dbQueryLogFileName = siteLogsDir ~ "db_query.log";
-	eventLogFileName = siteLogsDir ~ "priorite.log";
+	prioriteLogFileName = siteLogsDir ~ "priorite.log";
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)

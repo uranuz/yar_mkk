@@ -1,4 +1,4 @@
-module mkk_site._import;
+module mkk_site.package;
 
 public import mkk_site.site_main, mkk_site.site_data;
 

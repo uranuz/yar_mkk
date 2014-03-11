@@ -1,1 +1,1 @@
-rdmd --force "-I../../import" -ofmkk_site _import.d
+rdmd --force "-I../../import" -ofmkk_site package.d

@@ -19,7 +19,7 @@ shared static this()
 	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
 	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.error) );
-	PrioriteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.info) );
+	PrioriteLogger = new ThreadedLogger( new FileLogger(prioriteLogFileName, LogLevel.info) );
 	
 	Router
 		.join(JSONRPCRouter)
@@ -68,7 +68,6 @@ void main(string[] progAgs) {
 	//Получаем порт из параметров командной строки
 	getopt( progAgs, "port", &port );
 
-	
 	auto server = new WebServer(port, Router);
 	server.start();
 } 

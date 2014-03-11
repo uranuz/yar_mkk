@@ -24,13 +24,12 @@ void netMain(HTTPContext context)
 	{	auto newIdentity = cast(MKK_SiteUser) accessController.authenticateByPassword(
 			rq.postVars["user_login"], 
 			rq.postVars["user_password"],
-			rq.remoteAddress.toAddrString(),
-			rq.headers["user-agent"]
+			rq.headers.get("x-real-ip", ""),
+			rq.headers.get("user-agent", "")
 		);
 		string sidStr;
 		if( newIdentity !is null && newIdentity.isAuthenticated )
 		{	sidStr = Base64URL.encode( newIdentity.sessionId ) ;
-			//TODO: Подумать, что делать с этими багами
 			
 			rp.cookie["__sid__"] = sidStr;
 			rp.cookie["user_login"] = rq.postVars["user_login"];

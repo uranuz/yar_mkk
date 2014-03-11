@@ -133,7 +133,7 @@ public:
 			return new AnonymousUser;
 		
 		//Проверяем адрес и клиентскую программу с имеющимися при создании сессии
-		if( context.request.remoteAddress.toAddrString() != session_QRes.get(0, 0, "") ||
+		if( context.request.headers.get("x-real-ip", "") != session_QRes.get(0, 0, "") ||
 			context.request.headers.get("user-agent", "") != session_QRes.get(1, 0, "")
 		) return new AnonymousUser;
 		

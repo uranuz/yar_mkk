@@ -1,6 +1,6 @@
 module mkk_site.utils;
 
-import std.file;
+import std.file, std.algorithm : endsWIth;
 
 import webtank.templating.plain_templater, webtank.db.database, webtank.net.http.context;
 
@@ -9,6 +9,11 @@ import mkk_site.site_data;
 PlainTemplater getGeneralTemplate(HTTPContext context)
 {	auto tpl = getPageTemplate(generalTemplateFileName);
 	tpl.set("this page path", context.request.path);
+
+	if( context.request.path.endsWIth("/dyn/auth")  ) //Записываем исходный транспорт
+		tpl.set( "transport_proto", context.request.headers.get("x-forwarded-proto", "http") );
+
+	
 	
 	if( context.user.isAuthenticated )
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
@@ -18,6 +23,22 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
 	}
 	return tpl;
+}
+
+
+
+string getAuthRedirectURI(HTTPContext context)
+{	//Задаем ссылку на аутентификацию
+	static if( buildTarget == BuildTarget.devel )
+		tpl.set("authentication uri", dynamicPath ~ "auth?redirectTo=" ~ context.request. )
+	else
+		tpl.set("authentication uri",
+			"https://" ~ dynamicPath ~ "auth?redirectTo="
+			~ context.request.headers.get("x-forwarded-proto", "http")
+			~ context.request.headers.get("x-forwarded-host", "")
+			~ context.request.path
+		);
+	
 }
 
 PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
@@ -32,6 +53,7 @@ PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 	
 	if( shouldInit )
 	{	//Задаём местоположения всяких файлов
+
 		tpl.set("public folder", publicPath);
 		tpl.set("img folder", imgPath);
 		tpl.set("css folder", cssPath);
