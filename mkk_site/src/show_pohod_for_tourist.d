@@ -222,7 +222,11 @@ WHERE num=`~touristKey.to!string;
 		//руководство - участие
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";		
 		table ~= `<td>` ~ ps  ~ `</td>`;
-		if(_sverka) table ~= `<td> <a href="#">Изменить</a>  </td>`~ "\r\n";
+		
+		if(_sverka)
+			table ~= `<td> <a href="` ~ dynamicPath ~ `edit_pohod?key=`
+			~ rec.get!"Ключ"(0).to!string ~ `">Изменить</a>  </td>`~ "\r\n";// появляется при наличии допуска
+		
 		table ~= `</tr>`~ "\r\n";
 		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`~ "\r\n";
 		if(_sverka)

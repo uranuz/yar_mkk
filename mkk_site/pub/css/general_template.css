@@ -188,8 +188,8 @@ body {
 
 .tab
 {
-		width: 90%;
-	border: ridge 2px ;
+		width: 800px;
+	border: ridge 3px;
 	border-collapse: collapse;
 	font-size:85%;
 	}

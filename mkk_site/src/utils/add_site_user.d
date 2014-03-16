@@ -1,4 +1,4 @@
-module mkk_site.utils.gen_pw_hash;
+module mkk_site.utils.add_site_user;
 
 ///Утилита для добавления пользователя сайта МКК
 
@@ -31,7 +31,7 @@ void main(string[] progAgs) {
 	);
 
 	if( isHelp )
-	{	writeln("Утилита для генерации идентификатора сессии сайта МКК.");
+	{	writeln("Утилита для добавления пользователя сайта МКК.");
 		writeln("Возвращает ИД сессии в виде числа в кодировке Base64");
 		writeln(
 			"Опции:\r\n",

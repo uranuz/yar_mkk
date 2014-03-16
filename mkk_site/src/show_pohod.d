@@ -42,7 +42,7 @@ on tourist.num = tourist_nums.num
 	else
 	   {
 	      for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-	           {	result ~= рез_запроса.get(0, i, "") ~ `<br>`;	}
+	           {	result ~= `<p><a href="`~рез_запроса.get(0, i, "")~`" >Ссылка`~(i+1).to!string~` </a></p> <br>`;	}
 	   }        
 	           
 	return result;
@@ -444,12 +444,12 @@ from pohod
 	    
 	    
 	  // Начало формирования основной отображающей таблицы  
-		string table = `<table class="tab">`;
+		string table = `<table class="tab"   >`;
 		
-		if(_sverka) table~= `<td>Ключ</td>`~ "\r\n";// появляется при наличии допуска
+		if(_sverka) table~= `<td>Кл.</td>`~ "\r\n";// появляется при наличии допуска
 		
-		table ~=`<td>&nbspНомер&nbsp</td><td>&nbsp&nbspСроки<br>похода&nbsp</td><td> Вид<br>кс</td><td >Район</td><td>Руководитель</td><td>Участники</td><td>Город,<br>организация</td><td>Статус<br> похода</td>`~ "\r\n";
-		if(_sverka) table ~=`<td>Изменить</td>`~ "\r\n";// появляется при наличии допуска
+		table ~=`<td>&nbspНомер&nbsp</td><td>&nbsp&nbspСроки<br>похода&nbsp</td><td> Вид<br>кс</td><td >Район</td><td>Руководитель</td><td>Участн.</td><td>Город,<br>организация</td><td>Статус<br>похода</td>`~ "\r\n";
+		if(_sverka) table ~=`<td>Изм.</td>`~ "\r\n";// появляется при наличии допуска
 	foreach(rec; rs)
 	  
 	{	
@@ -459,10 +459,13 @@ from pohod
 	table ~= `<tr>`;
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
-		table ~= `<td >` ~rec.get!"Номер книги"("нет")  ~ `</td>`~ "\r\n";
+		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
+			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";
+	
+		 
 		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~  vke ~ `</td>`~ "\r\n";
-		table ~= `<td >` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
+		table ~= `<td width ="8%">` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
 		
 		table ~= `<td  class="show_participants_btn"  style="text-align: center;" >`~ "\r\n" 
@@ -474,9 +477,11 @@ from pohod
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";
 
 		table ~= `<td>` ~ ps  ~ `</td>`~ "\r\n";
+		
 		if(_sverka)
 			table ~= `<td> <a href="` ~ dynamicPath ~ `edit_pohod?key=`
-			~ rec.get!"Ключ"(0).to!string ~ `">Изменить</a>  </td>`~ "\r\n";// появляется при наличии допуска
+			~ rec.get!"Ключ"(0).to!string ~ `">Изм.</a>  </td>`~ "\r\n";// появляется при наличии допуска
+			
 		table ~= `</tr>`~ "\r\n";
 		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`;
 		if(_sverka)
