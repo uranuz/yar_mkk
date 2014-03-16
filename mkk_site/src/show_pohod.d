@@ -191,7 +191,7 @@ void netMain(HTTPContext context)
 	
 	foreach (r;ks){ параметры_поиска~=`-`~r.to!string;     }
 	
-	uint limit = 5;// максимальное  число строк на странице
+	uint limit = 10;// максимальное  число строк на странице
 	int page;
 	//-----------------формируем варианты запросов на число строк-------------------------
 	string select_str1 =`select count(1) from pohod`; 	// при отсутствии фильтрации 
