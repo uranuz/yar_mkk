@@ -42,7 +42,7 @@ on tourist.num = tourist_nums.num
 	else
 	   {
 	      for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-	           {	result ~= `<p><a href="`~рез_запроса.get(0, i, "")~`" >Ссылка`~(i+1).to!string~` </a></p> <br>`;	}
+	           {	result ~= рез_запроса.get(0, i, "")~` <br>`;	}
 	   }        
 	           
 	return result;
@@ -304,7 +304,7 @@ from pohod
 
 
 	  select pohod.num,
-   (coalesce(kod_mkk,'')||'<br>'||coalesce(nomer_knigi,'')) as nomer_knigi,   
+   (coalesce(kod_mkk,'000-00')||'<br>'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
      (
     date_part('day', begin_date)||'.'||
     date_part('month', begin_date)||'.'||
