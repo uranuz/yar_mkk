@@ -48,17 +48,18 @@ struct URI
 		/// Creactes an URI from an input range, throws if invalid.
 		/// Input should be an ENCODED url range.
 		/// Throws: $(D URIException) if the URI is invalid.
-		this(T)(T input) if (isForwardRange!T)
+		this(T)(T input, bool isRawURI = true) if (isForwardRange!T)
 		{
 				_scheme = null;
 				_hostType = HostType.NONE;
-				_hostName = null;
+				_rawHost = null;
 				_port = 0;
-				_userInfo = null;
-				_path = null;
-				_query = null;
-				_fragment = null;
-				parseURI(input);
+				_rawUserInfo = null;
+				_rawPath = null;
+				_rawQuery = null;
+				_rawFragment = null;
+				auto inp = isRawURI ? input : encodeURI(input);
+				parseURI( inp );
 		}
 
 		/// Checks URI validity.
@@ -95,12 +96,21 @@ struct URI
 		}
 
 		/// Returns: Host name, or null if not available.
-		string hostName() @property pure const nothrow
-		{	return _hostName;
+		string host() @property pure const /+nothrow+/
+		{	return decodeURIHost(_rawHost);
 		}
 
-		void hostName(string value) @property pure nothrow
-		{	_hostName = value;
+		void host(string value) @property pure /+nothrow+/
+		{	_rawHost = encodeURIHost(value);
+		}
+
+		/// Returns: Host name, or null if not available.
+		string rawHost() @property pure const nothrow
+		{	return _rawHost;
+		}
+
+		void rawHost(string value) @property pure nothrow
+		{	_rawHost = value;
 		}
 
 		/// Returns: Host type (HostType.NONE if not available).
@@ -131,87 +141,125 @@ struct URI
 		}
 
 		/// Returns: User-info part of the URI, or null if not available.
-		string userInfo() @property pure const nothrow
-		{	return _userInfo;
-		}
+		string userInfo() @property pure const /+nothrow+/
+		{	return decodeURIUserInfo(_rawUserInfo); }
+
+		/// Returns: User-info part of the URI, or null if not available.
+		void userInfo(string value) @property pure /+nothrow+/
+		{	_rawUserInfo = encodeURIUserInfo(value); }
+
+		/// Returns: User-info part of the URI, or null if not available.
+		string rawUserInfo() @property pure const nothrow
+		{	return _rawUserInfo; }
+
+		/// Returns: User-info part of the URI, or null if not available.
+		void rawUserInfo(string value) @property pure nothrow
+		{	_rawUserInfo = value; }
 
 		/// Returns: Path part of the URI, never null, can be the empty string.
 		string rawPath() @property pure const nothrow
-		{	return _path;
+		{	return _rawPath;
 		}
 
 		void rawPath(string value) @property pure nothrow
-		{	_path = value;
+		{	_rawPath = value;
 		}
 
 		/// Returns: Path part of the URI, never null, can be the empty string.
-		string path() @property pure const nothrow
-		{	return _path;
+		string path() @property pure const /+nothrow+/
+		{	return  decodeURIPath(_rawPath);
 		}
 
-		void path(string value) @property pure nothrow
-		{	_path = value;
+		void path(string value) @property pure /+nothrow+/
+		{	_rawPath = encodeURIPath(value);
 		}
 
 		string rawQuery() @property pure const nothrow
-		{	return _query;
+		{	return _rawQuery;
 		}
 
 		void rawQuery(string value) @property pure nothrow
-		{	_query = value;
+		{	_rawQuery = value;
 		}
 
 		/// Returns: Query part of the URI, or null if not available.
-		string query() @property pure const nothrow
-		{	
+		string query() @property pure const /+nothrow+/
+		{	return decodeURIQueryOrFragment(_rawQuery);
 		}
 
-		void query(string value) @property pure nothrow
-		{	_query = value;
+		void query(string value) @property pure /+nothrow+/
+		{	_rawQuery = encodeURIQueryOrFragment(value);
 		}
 
 		/// Returns: Fragment part of the URI, or null if not available.
 		string rawFragment() @property pure const nothrow
-		{	return _fragment;
+		{	return _rawFragment;
 		}
 
 		void rawFragment(string value) @property pure nothrow
-		{	_fragment = value;
+		{	_rawFragment = value;
 		}
 
 		/// Returns: Fragment part of the URI, or null if not available.
-		string fragment() @property pure const nothrow
-		{	return _fragment;
+		string fragment() @property pure const /+nothrow+/
+		{	return decodeURIQueryOrFragment(_rawFragment);
 		}
 
-		void fragment(string value) @property pure nothrow
-		{	_fragment = value;
+		void fragment(string value) @property pure /+nothrow+/
+		{	_rawFragment = encodeURIQueryOrFragment(value);
 		}
 
 		/// Returns: Authority part of the URI.
-		string authority() @property pure const nothrow
+		string rawAuthority() @property pure const nothrow
 		{
-			if ( _hostName.length == 0 )
+			if( rawHost.length == 0 )
 				return "";
 
 			string res = "";
-			if( _userInfo.length > 0 )
-				res ~= _userInfo ~ "@";
+			if( rawUserInfo.length > 0 )
+				res ~= rawUserInfo ~ "@";
 
-			res ~= _hostName;
+			res ~= rawHost;
 
-			if (_port != 0)
-				res ~= ":" ~ itos(_port);
+			if( port != 0 )
+				res ~= ":" ~ itos(port);
+
+			return res;
+		}
+
+		/// Returns: Authority part of the URI.
+		string authority() @property pure const /+nothrow+/
+		{
+			if( host.length == 0 )
+				return "";
+
+			string res = "";
+			if( userInfo.length > 0 )
+				res ~= userInfo ~ "@";
+
+			res ~= host;
+
+			if( port != 0 )
+				res ~= ":" ~ itos(port);
 
 			return res;
 		}
 
 		void authority(string value) @property /+pure+/
 		{	//Clearing authority data
-			_userInfo = null;
-			_hostName = null;
+			_rawUserInfo = null;
+			_rawHost = null;
 			_port = 0;
-			parseAuthority(value);
+			string encodedValue = encodeURIHost(value);
+			parseAuthority( encodedValue );
+		}
+
+		void rawAuthority(string value) @property /+pure+/
+		{	//Clearing authority data
+			_rawUserInfo = null;
+			_rawHost = null;
+			_port = 0;
+			parseAuthority( value );
 		}
 
 		/// Resolves URI host name.
@@ -222,10 +270,10 @@ struct URI
 			{
 				case HostType.REG_NAME:
 				case HostType.IPV4:
-					return new InternetAddress(_hostName, cast(ushort)port());
+					return new InternetAddress(_rawHost, cast(ushort)port());
 
 				case HostType.IPV6:
-					return new Internet6Address(_hostName, cast(ushort)port());
+					return new Internet6Address(_rawHost, cast(ushort)port());
 
 				case HostType.IPVFUTURE:
 				case HostType.NONE:
@@ -234,22 +282,40 @@ struct URI
 		}
 
 		/// Returns: Pretty string representation.
-		override string toString() const
+		string toString() const
 		{
 			string res;
 
-			if( !_scheme.empty )
-				res ~= _scheme ~ ":";
+			if( !scheme.empty )
+				res ~= scheme ~ ":";
 
-			if ( !_hostName.empty )
+			if ( !host.empty )
 				res = res ~ "//" ~ authority;
 
-			res ~= _path;
+			res ~= path;
 
-			if( !_query.empty )
-				res = res ~ "?" ~ _query;
-			if( _fragment.length != 0 )
-				res = res ~ "#" ~ _fragment;
+			if( !query.empty )
+				res = res ~ "?" ~ query;
+			if( !fragment.length != 0 )
+				res = res ~ "#" ~ fragment;
+			return res;
+		}
+
+		string toRawString() const
+		{	string res;
+
+			if( !scheme.empty )
+				res ~= scheme ~ ":";
+
+			if ( !rawHost.empty )
+				res = res ~ "//" ~ rawAuthority;
+
+			res ~= rawPath;
+
+			if( !rawQuery.empty )
+				res = res ~ "?" ~ rawQuery;
+			if( !rawFragment.length != 0 )
+				res = res ~ "#" ~ rawFragment;
 			return res;
 		}
 
@@ -264,13 +330,13 @@ struct URI
 	{
 		// normalized URI components
 		string _scheme;     // never null, never empty
-		string _userInfo;   // can be null
+		string _rawUserInfo;   // can be null
 		HostType _hostType; // what the hostname string is (NONE if no host in URI)
-		string _hostName;   // null if no authority in URI
+		string _rawHost;   // null if no authority in URI
 		ushort _port;          // 0 if no port in URI
-		string _path;       // never null, bu could be empty
-		string _query;      // can be null
-		string _fragment;   // can be null
+		string _rawPath;       // never null, bu could be empty
+		string _rawQuery;      // can be null
+		string _rawFragment;   // can be null
 
 		// URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 		void parseURI(T)(ref T input)
@@ -289,7 +355,7 @@ struct URI
 
 			if (c == '?')
 			{
-				_query = parseQuery(input);
+				_rawQuery = parseQuery(input);
 
 				if (input.empty)
 					return;
@@ -299,7 +365,7 @@ struct URI
 
 			if (c == '#')
 			{
-				_fragment = parseFragment(input);
+				_rawFragment = parseFragment(input);
 			}
 
 			if (!input.empty)
@@ -361,17 +427,17 @@ struct URI
 				{
 					consume(input, '/');
 					parseAuthority(input);
-					_path = parseAbEmpty(input);
+					_rawPath = parseAbEmpty(input);
 				}
 				else
 				{
 					input = sinput.save;
-					_path = parsePathAbsolute(input);
+					_rawPath = parsePathAbsolute(input);
 				}
 			}
 			else
 			{
-				_path = parsePathRootless(input);
+				_rawPath = parsePathRootless(input);
 			}
 		}
 
@@ -382,17 +448,17 @@ struct URI
 			T uinput = input.save;
 			try
 			{
-				_userInfo = parseUserinfo(input);
+				_rawUserInfo = parseUserinfo(input);
 				consume(input, '@');
 			}
 			catch(URIException e)
 			{
 				// no user name in URI
-				_userInfo = null;
+				_rawUserInfo = null;
 				input = uinput.save;
 			}
 
-			parseHost(input, _hostName, _hostType);
+			parseHost(input, _rawHost, _hostType);
 
 			if (!empty(input) && peekChar(input) == ':')
 			{
@@ -400,8 +466,8 @@ struct URI
 				_port = parsePort(input);
 			}
 		}
-
-		string parsePcharString(T)(ref T input, bool allowColon, bool allowAt, bool allowSlashQuestionMark)
+		
+		string parsePcharString(T)(ref T input, string allowedSpecChars = null)
 		{
 			string res = "";
 
@@ -409,15 +475,7 @@ struct URI
 			{
 				char c = peekChar(input);
 
-				if (isUnreserved(c) || isSubDelim(c))
-					res ~= popChar(input);
-				else if (c == '%')
-					res ~= parsePercentEncodedChar(input);
-				else if (c == ':' && allowColon)
-					res ~= popChar(input);
-				else if (c == '@' && allowAt)
-					res ~= popChar(input);
-				else if ((c == '?' || c == '/') && allowSlashQuestionMark)
+				if( isUnreserved(c) || isSubDelim(c) || c == '%' || allowedSpecChars.contains(c) )
 					res ~= popChar(input);
 				else
 					break;
@@ -528,35 +586,35 @@ struct URI
 		// query         = *( pchar / "/" / "?" )
 		string parseQuery(T)(ref T input)
 		{
-			return parsePcharString(input, true, true, true);
+			return parsePcharString(input, ":@/?");
 		}
 
 		// fragment      = *( pchar / "/" / "?" )
 		string parseFragment(T)(ref T input)
 		{
-			return parsePcharString(input, true, true, true);
+			return parsePcharString(input, ":@/?");
 		}
 
-		// pct-encoded   = "%" HEXDIG HEXDIG
-		char parsePercentEncodedChar(T)(ref T input)
-		{
-			consume(input, '%');
-
-			int char1Val = hexValue(popChar(input));
-			int char2Val = hexValue(popChar(input));
-			return cast(char)(char1Val * 16 + char2Val);
-		}
+// 		// pct-encoded   = "%" HEXDIG HEXDIG
+// 		char parsePercentEncodedChar(T)(ref T input)
+// 		{
+// 			consume(input, '%');
+// 
+// 			ushort char1Val = hexValue(popChar(input));
+// 			ushort char2Val = hexValue(popChar(input));
+// 			return cast(char)(char1Val * 16 + char2Val);
+// 		}
 
 		// userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
 		string parseUserinfo(T)(ref T input)
 		{	/+writeln("parseUserinfo input: ", input);+/
-			return parsePcharString(input, true, false, false);
+			return parsePcharString(input, ":");
 		}
 
 		// reg-name      = *( unreserved / pct-encoded / sub-delims )
 		string parseRegName(T)(ref T input)
 		{
-			return parsePcharString(input, false, false, false);
+			return parsePcharString(input);
 		}
 
 		// port          = *DIGIT
@@ -579,7 +637,7 @@ struct URI
 		// segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
 		string parseSegment(T)(ref T input, bool allowZero, bool allowColon)
 		{
-			string res = parsePcharString(input, allowColon, true, false);
+			string res = parsePcharString( input, ( allowColon ? ":@" : "@" ) );
 			if (!allowZero && res == "")
 				throw new URIException("expected a non-zero segment in URI");
 			return res;
@@ -689,9 +747,9 @@ private pure
 		if( isDigit(c) )
 				return c - '0';
 		else if (c >= 'a' && c <= 'f')
-				return c - 'a';
+				return c - 'a' + 10;
 		else if (c >= 'A' && c <= 'F')
-				return c - 'A';
+				return c - 'A' + 10;
 		else
 				return ushort.max;
 	}
@@ -965,32 +1023,109 @@ string[][string] extractURIDataArray(string queryStr)
 	return result;
 }
 
-//Декодировать URI. Прослойка на случай, если захотим написать свою версию, отличную
-//от стандартной. TODO: Может переписать через alias? (однако неудобно смотреть аргументы)
-string decodeURI(string src)
-{	char[] result = src.dup;
-	for ( int i = 0; i < src.length; ++i )
-	{	if ( src[i] == '+' ) result[i] = ' '; //Заменяем плюсики на пробелы
+immutable(char[]) hexChars = "0123456789ABCDEF";
+
+// sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+enum string URI_SubDelims = "!$&'()*+,;=";
+
+string encodeURICustom(string allowedSpecChars = null, bool formEncoding = false)(string source) pure
+{
+	static assert( !allowedSpecChars.contains('%'), "% sign must have the meaning of percent code prefix!!!" );
+	
+	import std.array;
+	auto result = appender!string();
+	result.reserve(source.length);
+
+	foreach( i, c; source )
+	{	//writeln( source[i..$] );
+		if( isUnreserved(c) || allowedSpecChars.contains(c) )
+		{	result ~= c; }
+		else
+		{	result ~= [ '%', hexChars[ c >> 4 ], hexChars[ c & 0x0F ] ]; }
 	}
-	return std.uri.decodeComponent(result.idup);
+	return result.data;
 }
 
-//Декодировать URI. Прослойка на случай, если захотим написать свою версию, отличную
-//от стандартной. TODO: Может переписать через alias? (однако неудобно смотреть аргументы)
-string encodeURI(string src)
-{	char[] result = src.dup;
-	for ( int i = 0; i < src.length; ++i )
-	{	if ( src[i] == '+' ) result[i] = ' '; //Заменяем плюсики на пробелы
+string decodeURICustom(string allowedSpecChars = null, bool formEncoding = false)(string source) pure
+{
+	static assert( !allowedSpecChars.contains('%'), "% sign must have the meaning of percent code prefix!!!" );
+
+	import std.array;
+ 	auto result = appender!string();
+ 	result.reserve(source.length);
+
+	for( size_t i = 0; i < source.length; i++ )
+	{
+		auto c = source[i];
+		if( isUnreserved(c) || allowedSpecChars.contains(c) )
+		{	result ~= c; }
+		else if( c == '%' )
+		{
+			if( i + 2 < source.length )
+			{	if( isHexDigit(source[i+1]) && isHexDigit(source[i+2]) )
+				{	result ~= cast(char)( ( hexValue(source[i+1]) << 4 ) + ( hexValue(source[i+2])  ) );
+
+					i += 2;
+				}
+				else
+					throw new Exception( "Invalid percent encoded sequence!!!" );
+			}
+		 	else
+				throw new Exception( "Invalid percent encoded sequence!!!" );
+		}
+		else
+			throw new Exception( "Not allowed character found in URI encoded string!!!" );
 	}
-	return std.uri.encodeComponent(result.idup);
+	return result.data;
 }
 
 
-string decodeComponent(string str)
-{	
+// reg-name    = *( unreserved / pct-encoded / sub-delims )
+// host        = IP-literal / IPv4address / reg-name
+alias decodeURICustom!("!$&'()*+,;=") decodeURIHost;
+alias encodeURICustom!("!$&'()*+,;=") encodeURIHost;
 
+
+alias decodeURICustom!("!$&'()*+,;=:@/") decodeURIPath;
+alias encodeURICustom!("!$&'()*+,;=:@/") encodeURIPath;
+
+// userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
+alias decodeURICustom!("!$&'()*+,;=:") decodeURIUserInfo;
+alias encodeURICustom!("!$&'()*+,;=:") encodeURIUserInfo;
+
+// query       = *( pchar / "/" / "?" )
+// fragment    = *( pchar / "/" / "?" )
+alias decodeURICustom!("!$&'()*+,;=:@/?") decodeURIQueryOrFragment;
+alias encodeURICustom!("!$&'()*+,;=:@/?") encodeURIQueryOrFragment;
+
+alias decodeURICustom!("") decodeURIComponent;
+alias encodeURICustom!("") encodeURIComponent;
+
+// unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
+// sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+// gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+// pct-encoded = "%" HEXDIG HEXDIG
+alias decodeURICustom!("!$&'()*+,;=:/?#[]@") decodeURI;
+alias encodeURICustom!("!$&'()*+,;=:/?#[]@") encodeURI;
+
+void main()
+{
+	string str = "Привет, Вася!!!";
+
+	string strEnc = encodeURICustom(str);
+
+	writeln(strEnc);
+
+	import std.uri;
+
+	writeln( decodeComponent(strEnc) );
+
+	writeln(decodeURICustom(strEnc));
+
+	auto uri = URI("http://www.yandex.ru/ya%20sobaka%20ru/shit%21%21%21");
+
+	writeln(uri.toString());
 }
-
 
 // import std.stdio;
 
