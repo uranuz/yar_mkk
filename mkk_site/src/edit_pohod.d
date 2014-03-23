@@ -2,11 +2,11 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.thread;
 
-import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
+import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 immutable thisPagePath = dynamicPath ~ "edit_pohod";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -224,8 +224,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 {	
 	auto rq = context.request;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = rq.bodyForm;
+	auto qVars = rq.queryForm;
 	
 	auto dbase = getCommonDB();
 	
@@ -456,8 +456,8 @@ void netMain(HTTPContext context)
 	auto rq = context.request;
 	auto rp = context.response;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = rq.bodyForm;
+	auto qVars = rq.queryForm;
 		
 	bool isAuthorized = 
 		context.user.isAuthenticated && 

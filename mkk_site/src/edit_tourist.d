@@ -4,7 +4,7 @@ import std.conv, std.string, std.file, std.utf, std.typecons;
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls, webtank.common.optional;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
+import mkk_site;
 import std.conv, std.algorithm;
 
 immutable thisPagePath = dynamicPath ~ "edit_tourist";
@@ -209,7 +209,7 @@ string записатьТуриста(
 	size_t touristKey = size_t.max
 )
 {
-	auto pVars = context.request.postVars;
+	auto pVars = context.request.bodyForm;
 	
 	immutable(string[]) strFieldNames = 
 		[ "family_name", "given_name", "patronymic", "address", "phone", "email", "exp", "comment" ];
@@ -379,8 +379,8 @@ void netMain(HTTPContext context)
 	auto rp = context.response;
 	auto user = context.user;
 	
-	auto pVars = context.request.postVars;
-	auto qVars = context.request.queryVars;
+	auto pVars = context.request.bodyForm;
+	auto qVars = context.request.queryForm;
 	
 	bool isAuthorized = 
 		user.isAuthenticated && 

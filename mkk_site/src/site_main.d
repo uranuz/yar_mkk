@@ -38,7 +38,7 @@ shared static this()
 	};
 	
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
-		SiteLogger.warn("request.path: " ~ context.request.path ~ "\r\n" ~ error.to!string);
+		SiteLogger.warn("request.path: " ~ context.request.uri.path ~ "\r\n" ~ error.to!string);
 		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
 			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.msg );

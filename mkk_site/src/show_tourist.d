@@ -5,7 +5,7 @@ import std.file; //Стандартная библиотека по работе
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 string nou_SQL_injekt(string str)
@@ -46,8 +46,6 @@ void netMain(HTTPContext context)
 	auto dbase = new DBPostgreSQL(commonDBConnStr);
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
-	
-	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
 	 
 	 string raz_sud_kat;
 	 
@@ -58,7 +56,7 @@ void netMain(HTTPContext context)
 	// 20:"всесоюзная",30:"международная"];
 	 
 	 
-	string fem = nou_SQL_injekt( ( ( "family_name" in rq.postVars ) ? rq.postVars["family_name"] : "" ) ); // пропускаем фамилию через функцию отсечки
+	string fem = nou_SQL_injekt( ( ( "family_name" in rq.bodyForm ) ? rq.bodyForm["family_name"] : "" ) ); // пропускаем фамилию через функцию отсечки
 
 	try { //Логирование запросов к БД для отладки
 	std.file.append( eventLogFileName, 
@@ -83,8 +81,8 @@ void netMain(HTTPContext context)
 	
 	//-----------------------
 	try {
-		if( "cur_page_num" in rq.postVars )// если в окне задан номер страницы
- 			curPageNum = rq.postVars["cur_page_num"].to!uint;
+		if( "cur_page_num" in rq.bodyForm )// если в окне задан номер страницы
+ 			curPageNum = rq.bodyForm["cur_page_num"].to!uint;
  			
 	} catch (Exception) {}
 	

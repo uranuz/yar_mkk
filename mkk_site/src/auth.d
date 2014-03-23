@@ -4,7 +4,7 @@ import std.process, std.conv, std.base64;
 
 import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
+import mkk_site, mkk_site.access_control;
 
 immutable thisPagePath = dynamicPath ~ "auth";
 
@@ -20,10 +20,10 @@ void netMain(HTTPContext context)
 	auto accessController = new MKK_SiteAccessController;
 
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
-	if( ("user_login" in rq.postVars) && ("user_password" in rq.postVars) )
+	if( ("user_login" in rq.bodyForm) && ("user_password" in rq.bodyForm) )
 	{	auto newIdentity = cast(MKK_SiteUser) accessController.authenticateByPassword(
-			rq.postVars["user_login"], 
-			rq.postVars["user_password"],
+			rq.bodyForm["user_login"],
+			rq.bodyForm["user_password"],
 			rq.headers.get("x-real-ip", ""),
 			rq.headers.get("user-agent", "")
 		);
@@ -32,10 +32,10 @@ void netMain(HTTPContext context)
 		{	sidStr = Base64URL.encode( newIdentity.sessionId ) ;
 			
 			rp.cookie["__sid__"] = sidStr;
-			rp.cookie["user_login"] = rq.postVars["user_login"];
+			rp.cookie["user_login"] = rq.bodyForm["user_login"];
 
 			//Добавляем перенаправление на другую страницу
-			string redirectTo = rq.queryVars.get("redirectTo", "");
+			string redirectTo = rq.queryForm.get("redirectTo", "");
 			rp.redirect(redirectTo);
 		}
 		else
@@ -70,7 +70,7 @@ void netMain(HTTPContext context)
   </tr>
   <tr><th>Пароль</th> <td><input name="user_password" type="password"></td></tr>
 </table>`
-//`<input type="hidden" name="returnTo" value="` ~ rq.postVars ~ `"
+//`<input type="hidden" name="returnTo" value="` ~ rq.bodyForm ~ `"
 `</form> <br>`;
 		
 		tpl.set( "content", content );

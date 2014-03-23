@@ -4,12 +4,14 @@ import std.array;
 
 import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
 
-class ServerResponse  //Ответ от нашего приложения
+///Класс представляющий ответ сервера
+class ServerResponse
 {
+	///HTTP заголовки ответа сервера
 	HTTPHeaders headers;
 protected:
 	Appender!(string) _respBody;
-	ResponseCookie _cookie; //Куки в ответ
+	ResponseCookie _cookie; 
 public:
 	
 	this(/+ void delegate(string) send +/)
@@ -18,15 +20,15 @@ public:
 // 		_send = send;
 	}
 	
-	//Записывает данные в буфер для отдачи
+	///Добавляет строку str к ответу сервера
 	void write(string str)
 	{	_respBody ~= str; }
 	
-	//То же самое, но в виде оператора приклеивания ~=
+	///Добавляет строку str к ответу сервера
 	void opOpAssign(string op: "~")(string str)
 	{	_respBody ~= str; }
 	
-	//Перенаправление пользователя по указанному адресу
+	///Устанавливает заголовки для перенаправления
 	void redirect(string location)
 	{	headers["status-code"] = "302";
 		headers["reason-phrase"] = "Found";
@@ -57,7 +59,7 @@ public:
 // 		return false;
 // 	}
 	
-	//Куки ответа приложения (в них только пишем)
+	///Куки ответа которыми ответит сервер
 	ResponseCookie cookie() @property
 	{	return _cookie; }
 

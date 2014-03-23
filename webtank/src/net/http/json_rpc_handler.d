@@ -25,7 +25,7 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 	
 	override HTTPHandlingResult customProcessRequest(HTTPContext context)
 	{	//-----Опрос обработчика запроса-----
-		auto uriData = _uriPattern.match(context.request.path);
+		auto uriData = _uriPattern.match(context.request.uri.path);
 		
 		bool isRequestMatched =
 			uriData.isMatched &&
@@ -36,7 +36,7 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		if( !isRequestMatched )
 			return HTTPHandlingResult.mismatched;
 		
-		auto jMessageBody = context.request.JSON_Body;
+		auto jMessageBody = context.request.bodyJSON;
 		
 		if( jMessageBody.type != JSON_TYPE.OBJECT )
 			throw new JSON_RPC_Exception(`JSON-RPC message body must be of object type!!!`);

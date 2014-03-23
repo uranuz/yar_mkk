@@ -12,8 +12,12 @@ else
 	enum siteBuildTarget = BuildTarget.release;
 
 
-version(release)
-	enum isReleaseVersion
+// version(release)
+// 	enum isReleaseVersion = true;
+// else
+// 	enum isReleaseVersion = false;
+// 
+// version()
 
 ///Общие данные для сайта
 

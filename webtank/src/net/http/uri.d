@@ -7,9 +7,6 @@ import std.range,
 		std.ascii,
 		std.socket;
 
-import std.stdio;
-
-
 /// Exception thrown when an URI doesn't parse.
 class URIException : Exception
 {	this(string msg, string file = __FILE__, size_t line = __LINE__)  pure nothrow{
@@ -595,16 +592,6 @@ struct URI
 			return parsePcharString(input, ":@/?");
 		}
 
-// 		// pct-encoded   = "%" HEXDIG HEXDIG
-// 		char parsePercentEncodedChar(T)(ref T input)
-// 		{
-// 			consume(input, '%');
-// 
-// 			ushort char1Val = hexValue(popChar(input));
-// 			ushort char2Val = hexValue(popChar(input));
-// 			return cast(char)(char1Val * 16 + char2Val);
-// 		}
-
 		// userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
 		string parseUserinfo(T)(ref T input)
 		{	/+writeln("parseUserinfo input: ", input);+/
@@ -867,21 +854,6 @@ unittest
 	}
 }
 
-string separateQuery(const string URIString)
-{	for( size_t i = 0; i < URIString.length; i++ )
-		if( URIString[i] == '?' )
-			return URIString[i+1..$].idup;
-	return null;
-}
-
-string separatePath(const string URIString)
-{	for( size_t i = 0; i < URIString.length; i++ )
-		if( URIString[i] == '?' )
-			return URIString[0..i].idup;
-	return URIString;
-}
-
-
 //Эта функция принимает строку похожую на URI-запрос и анализирует. Результат
 //возращается в ассоциативный массив типа  значение[ключ]. Осторожно, функция
 //кидается исключениями, если что-то не так. Если запрос пуст, то возвращается
@@ -1028,55 +1000,78 @@ immutable(char[]) hexChars = "0123456789ABCDEF";
 // sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
 enum string URI_SubDelims = "!$&'()*+,;=";
 
-string encodeURICustom(string allowedSpecChars = null, bool formEncoding = false)(string source) pure
+template encodeURICustom(string allowedSpecChars = null, bool isFormEncoding = false)
 {
 	static assert( !allowedSpecChars.contains('%'), "% sign must have the meaning of percent code prefix!!!" );
 	
-	import std.array;
-	auto result = appender!string();
-	result.reserve(source.length);
+	string encodeURICustom(T : string)(T source) pure
+	{	
+		//import std.utf : toUTF8;
+		import std.array : appender;
 
-	foreach( i, c; source )
-	{	//writeln( source[i..$] );
-		if( isUnreserved(c) || allowedSpecChars.contains(c) )
-		{	result ~= c; }
-		else
-		{	result ~= [ '%', hexChars[ c >> 4 ], hexChars[ c & 0x0F ] ]; }
+		//auto source = toUTF8(src);
+		
+		auto result = appender!string();
+		result.reserve(source.length);
+
+		foreach( i, c; source )
+		{	//writeln( source[i..$] );
+			if( c == ' ' )
+			{	static if( isFormEncoding )
+					result ~= '+';
+			}
+			else if( isUnreserved(c) || allowedSpecChars.contains(c) )
+			{	result ~= c; }
+			else
+			{	result ~= [ '%', hexChars[ c >> 4 ], hexChars[ c & 0x0F ] ]; }
+		}
+		return result.data;
 	}
-	return result.data;
 }
 
-string decodeURICustom(string allowedSpecChars = null, bool formEncoding = false)(string source) pure
+template decodeURICustom(string allowedSpecChars = null, bool isFormEncoding = false)
 {
 	static assert( !allowedSpecChars.contains('%'), "% sign must have the meaning of percent code prefix!!!" );
-
-	import std.array;
- 	auto result = appender!string();
- 	result.reserve(source.length);
-
-	for( size_t i = 0; i < source.length; i++ )
+	
+	string decodeURICustom(T : string)(T source) pure
 	{
-		auto c = source[i];
-		if( isUnreserved(c) || allowedSpecChars.contains(c) )
-		{	result ~= c; }
-		else if( c == '%' )
-		{
-			if( i + 2 < source.length )
-			{	if( isHexDigit(source[i+1]) && isHexDigit(source[i+2]) )
-				{	result ~= cast(char)( ( hexValue(source[i+1]) << 4 ) + ( hexValue(source[i+2])  ) );
+		//import std.utf : toUTF8;
+		import std.array : appender;
 
-					i += 2;
+		//auto source = toUTF8(src);
+		
+		auto result = appender!string();
+		result.reserve(source.length);
+
+		for( size_t i = 0; i < source.length; i++ )
+		{
+			auto c = source[i];
+			if( c == '+' )
+			{
+				static if( isFormEncoding )
+					result ~= ' ';
+			}
+			if( isUnreserved(c) || allowedSpecChars.contains(c) )
+			{	result ~= c; }
+			else if( c == '%' )
+			{
+				if( i + 2 < source.length )
+				{	if( isHexDigit(source[i+1]) && isHexDigit(source[i+2]) )
+					{	result ~= cast(char)( ( hexValue(source[i+1]) << 4 ) + ( hexValue(source[i+2])  ) );
+
+						i += 2;
+					}
+					else
+						throw new Exception( "Invalid percent encoded sequence!!!" );
 				}
 				else
 					throw new Exception( "Invalid percent encoded sequence!!!" );
 			}
-		 	else
-				throw new Exception( "Invalid percent encoded sequence!!!" );
+			else
+				throw new Exception( "Not allowed character found in URI encoded string!!!" );
 		}
-		else
-			throw new Exception( "Not allowed character found in URI encoded string!!!" );
+		return result.data;
 	}
-	return result.data;
 }
 
 
@@ -1107,43 +1102,3 @@ alias encodeURICustom!("") encodeURIComponent;
 // pct-encoded = "%" HEXDIG HEXDIG
 alias decodeURICustom!("!$&'()*+,;=:/?#[]@") decodeURI;
 alias encodeURICustom!("!$&'()*+,;=:/?#[]@") encodeURI;
-
-void main()
-{
-	string str = "Привет, Вася!!!";
-
-	string strEnc = encodeURICustom(str);
-
-	writeln(strEnc);
-
-	import std.uri;
-
-	writeln( decodeComponent(strEnc) );
-
-	writeln(decodeURICustom(strEnc));
-
-	auto uri = URI("http://www.yandex.ru/ya%20sobaka%20ru/shit%21%21%21");
-
-	writeln(uri.toString());
-}
-
-// import std.stdio;
-
-// void main()
-// {
-// // 	string uri_string = "http://vasya@www.yandex.ru:8080/products/cars/mercedes?hello#goodbye";
-// 	//string uri_string = "products/cars/mercedes?hello#goodbye";
-// 	string uri_string = "http:products/cars/mercedes";
-// 	URI uri = new URI(uri_string);
-// 
-// 	writeln("uri.scheme: ", uri.scheme);
-// 	writeln("uri.authority: ", uri.authority);
-// 	writeln("uri.userInfo: ", uri.userInfo);
-// 	writeln("uri.host: ", uri.hostName);
-// 	writeln("uri.port: ", uri.port);
-// 	writeln("uri.path: ", uri.path);
-// 	writeln("uri.query: ", uri.query);
-// 	writeln("uri.fragment: ", uri.fragment);
-// 	writeln("uri: ", uri);
-// 
-// }

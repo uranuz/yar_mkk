@@ -21,8 +21,8 @@ void netMain(HTTPContext context)
 	auto rp = context.response;
 	auto ticket = context.user;
 	
-	auto pVars = context.request.postVars;
-	auto qVars = context.request.queryVars;
+	auto pVars = context.request.bodyForm;
+	auto qVars = context.request.queryForm;
 	
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "dyn_request_test.html" );
 	

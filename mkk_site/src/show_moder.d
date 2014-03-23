@@ -5,7 +5,7 @@ import std.file; //Стандартная библиотека по работе
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 
 //----------------------
@@ -29,9 +29,9 @@ void netMain(HTTPContext context)
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 	
-	//rq.postVarsArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
+	//rq.bodyFormArray[] формирует ассоциативный массив массивов из строки возвращаемой по пост запросу
 	   
-	string fem = ( ( "name" in rq.postVars ) ? rq.postVars["name"] : "" ) ; 
+	string fem = ( ( "name" in rq.bodyForm ) ? rq.bodyForm["name"] : "" ) ;
 	
 	/*try { //Логирование запросов к БД для отладки
 	std.file.append( eventLogFileName, 
@@ -51,8 +51,8 @@ void netMain(HTTPContext context)
 	//uint pageCount = (col_str)/limit; //Количество страниц
 	//uint curPageNum = 1; //Номер текущей страницы
 	//try {
-	//	if( "cur_page_num" in rq.postVars )
- 	//		curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+	//	if( "cur_page_num" in rq.bodyForm )
+ 	//		curPageNum = rq.bodyForm.get("cur_page_num", "1").to!uint;
 	//} catch (Exception) { curPageNum = 1; }
 
 	//uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
