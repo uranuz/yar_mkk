@@ -165,8 +165,9 @@ string linkList( size_t pohodNum ) //функция получения спис�
      coalesce(alt_chef,'0') as a_ch,
      
      coalesce(prepar,'0') as prepar,
-        coalesce(stat,'0') as stat 
-     
+        coalesce(stat,'0') as stat ,
+         coalesce(chef_coment,'') as chef_coment ,
+         coalesce("MKK_coment",'') as mkk_coment
              from pohod 
                
        left outer join
@@ -218,7 +219,10 @@ string linkList( size_t pohodNum ) //функция получения спис�
 	content ~=`<p>Статус заявки: <font color=" 	#006400" ><b> `~статусЗаявки[response.get(15,0).to!int] ~`</b></font></p>`~ "\r\n";
 	content ~=`<p>&nbsp&nbsp&nbsp<br> </p>`~ "\r\n";
 	content ~=`<p>Список ссылок:<br>  `~linkList( pohodKey ) ~`</p>`~ "\r\n";
-	
+	content ~=`<p>Коментарий руководителя: <font color="#006400"><b>  `~HTMLEscapeText(response.get(16,0)) ~`.</b></font><br></p>`~ "\r\n";
+	content ~=`<p>Список ссылок:<br>  `~linkList( pohodKey ) ~`</p>`~ "\r\n";
+	content ~=`<p>Коментарий MKK: <font color="#006400"><b>  `~HTMLEscapeText(response.get(17,0)) ~`.</b></font><br></p>`~ "\r\n";
+	//content ~=`<p>Коментарий МКК: <font color="#006400"><b>  `~HTMLEscapeText(response.get(17,0)) ~`.</b></font><br></p>`~ "\r\n";
 	content ~= "\r\n";
 	
 	
