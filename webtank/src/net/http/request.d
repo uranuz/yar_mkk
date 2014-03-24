@@ -2,7 +2,7 @@ module webtank.net.http.request;
 
 import std.json, std.socket;
 
-import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
+import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.form, webtank.net.http.headers;
 
 // version = cgi_script;
 
@@ -56,7 +56,7 @@ public:
 	///Данные HTTP формы переданные через адресную строку
 	string[string] queryForm() @property
 	{	if( _GET.length <= 0 )
-			_GET = extractURIData( uri.query );
+			_GET = extractFormData( uri.query );
 		return _GET;
 	}
 
@@ -64,14 +64,14 @@ public:
 	///Используется, когда одному имени соответсвует несколько значений
 	string[][string] queryFormMulti() @property
 	{	if( _GETArray.length <= 0 )
-			_GETArray = extractURIDataArray( uri.query );
+			_GETArray = extractFormDataMulti( uri.query );
 		return _GETArray;
 	}
 
 	///Данные HTTP формы переданные в теле сообщения через POST, PUT
 	string[string] bodyForm() @property
 	{	if( _POST.length <= 0 )
-			_POST = extractURIData( messageBody );
+			_POST = extractFormData( messageBody );
 		return _POST;
 	}
 
@@ -79,7 +79,7 @@ public:
 	///Используется, когда одному имени соответсвует несколько значений
 	string[][string] bodyFormMulti() @property
 	{	if( _POSTArray.length <= 0 )
-			_POSTArray = extractURIDataArray( messageBody );
+			_POSTArray = extractFormDataMulti( messageBody );
 		return _POSTArray;
 	}
 
