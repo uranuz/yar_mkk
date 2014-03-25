@@ -1,8 +1,8 @@
-module webtank.net.http.form;
+module webtank.net.web_form;
 
 import std.range;
 
-import webtank.net.http.uri;
+import webtank.net.uri;
 
 template parseFormData(bool isMulti = false)
 {

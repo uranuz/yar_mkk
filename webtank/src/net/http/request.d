@@ -2,7 +2,7 @@ module webtank.net.http.request;
 
 import std.json, std.socket;
 
-import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.form, webtank.net.http.headers;
+import webtank.net.http.cookie, webtank.net.uri, webtank.net.web_form, webtank.net.http.headers;
 
 // version = cgi_script;
 
@@ -10,11 +10,11 @@ class ServerRequest  //Запрос к нашему приложению
 {	
 protected:
 	RequestCookie _cookie; //Куки из запроса
-	string[string] _POST;
-	string[string] _GET;
+	string[string] _bodyForm;
+	string[string] _queryForm;
 	
-	string[][string] _POSTArray;
-	string[][string] _GETArray;
+	string[][string] _bodyFormMulti;
+	string[][string] _queryFormMulti;
 	JSONValue _bodyJSON;
 	bool _isJSONParsed = false;
 	
@@ -55,32 +55,32 @@ public:
 
 	///Данные HTTP формы переданные через адресную строку
 	string[string] queryForm() @property
-	{	if( _GET.length <= 0 )
-			_GET = extractFormData( uri.query );
-		return _GET;
+	{	if( _queryForm.length <= 0 )
+			_queryForm = extractFormData( uri.query );
+		return _queryForm;
 	}
 
 	///Множественные данные HTTP формы переданные через адресную строку
 	///Используется, когда одному имени соответсвует несколько значений
 	string[][string] queryFormMulti() @property
-	{	if( _GETArray.length <= 0 )
-			_GETArray = extractFormDataMulti( uri.query );
-		return _GETArray;
+	{	if( _queryFormMulti.length <= 0 )
+			_queryFormMulti = extractFormDataMulti( uri.query );
+		return _queryFormMulti;
 	}
 
 	///Данные HTTP формы переданные в теле сообщения через POST, PUT
 	string[string] bodyForm() @property
-	{	if( _POST.length <= 0 )
-			_POST = extractFormData( messageBody );
-		return _POST;
+	{	if( _bodyForm.length <= 0 )
+			_bodyForm = extractFormData( messageBody );
+		return _bodyForm;
 	}
 
 	///Множественные данные HTTP формы в теле сообщения через POST, PUT
 	///Используется, когда одному имени соответсвует несколько значений
 	string[][string] bodyFormMulti() @property
-	{	if( _POSTArray.length <= 0 )
-			_POSTArray = extractFormDataMulti( messageBody );
-		return _POSTArray;
+	{	if( _bodyFormMulti.length <= 0 )
+			_bodyFormMulti = extractFormDataMulti( messageBody );
+		return _bodyFormMulti;
 	}
 
 	//TODO: Реализовать HTTPRequest.form

@@ -1,6 +1,6 @@
 module webtank.net.http.cookie;
 
-import webtank.net.http.uri;
+import webtank.net.uri;
 
 class ResponseCookie
 {	

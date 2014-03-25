@@ -2,7 +2,7 @@ module webtank.net.http.response;
 
 import std.array;
 
-import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
+import webtank.net.http.cookie, webtank.net.uri, webtank.net.http.headers;
 
 ///Класс представляющий ответ сервера
 class ServerResponse
