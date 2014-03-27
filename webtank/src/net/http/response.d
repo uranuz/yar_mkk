@@ -11,11 +11,11 @@ class ServerResponse
 	HTTPHeaders headers;
 protected:
 	Appender!(string) _respBody;
-	ResponseCookie _cookie; 
+	ResponseCookies _cookies; 
 public:
 	
 	this(/+ void delegate(string) send +/)
-	{	_cookie = new ResponseCookie;
+	{	_cookies = new ResponseCookies;
 		headers = new HTTPHeaders;
 // 		_send = send;
 	}
@@ -60,8 +60,8 @@ public:
 // 	}
 	
 	///Куки ответа которыми ответит сервер
-	ResponseCookie cookie() @property
-	{	return _cookie; }
+	ResponseCookies cookies() @property
+	{	return _cookies; }
 
 protected:
 // 	void delegate(string) _send;
@@ -70,12 +70,11 @@ protected:
 	string _getHeaderStr()
 	{	import std.conv, std.stdio;
 		headers["content-length"] = _respBody.data().length.to!string;
-// 		if( _cookie.length > 0 )
-// 			headers["set-cookie"] = _cookie.getString();
 		headers["content-type"] = "text/html; charset=\"utf-8\"";
+
 		return 
-		headers.getStatusLine() 
-		~ _cookie.getString() 
-		~ headers.getString() ~ "\r\n" ;
+			headers.getStatusLine()
+			~ ( _cookies.length > 0 ? _cookies.toString() ~ "\r\n" : "" )
+			~ headers.getString() ~ "\r\n" ;
 	}
 }

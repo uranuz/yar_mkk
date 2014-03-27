@@ -31,8 +31,10 @@ void netMain(HTTPContext context)
 		if( newIdentity !is null && newIdentity.isAuthenticated )
 		{	sidStr = Base64URL.encode( newIdentity.sessionId ) ;
 			
-			rp.cookie["__sid__"] = sidStr;
-			rp.cookie["user_login"] = rq.bodyForm["user_login"];
+			rp.cookies["__sid__"] = sidStr;
+			rp.cookies["user_login"] = rq.bodyForm["user_login"];
+			rp.cookies["__sid__"].path = "/";
+			rp.cookies["user_login"].path = "/";
 
 			//Добавляем перенаправление на другую страницу
 			string redirectTo = rq.queryForm.get("redirectTo", "");
@@ -53,7 +55,7 @@ void netMain(HTTPContext context)
 	}
 	else //Если не пришёл логин с паролем, то работаем в обычном режиме
 	{	
-		string login = rq.cookie.get("user_login", "");
+		string login = rq.cookies.get("user_login", "");
 		auto tpl = getGeneralTemplate(context);
 		
 		string content = `<h2>Аутентификация</h2>`;

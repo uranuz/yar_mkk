@@ -1,6 +1,6 @@
 module mkk_site.access_control;
 
-import std.conv, std.digest.digest, std.datetime, std.base64 : Base64URL;
+import std.conv, std.digest.digest, std.datetime, std.utf, std.base64 : Base64URL;
 
 import webtank.db.postgresql, webtank.net.utils, webtank.security.access_control, webtank.net.http.context, webtank.common.conv, webtank.common.crypto_scrypt;
 
@@ -105,7 +105,7 @@ public:
 	///Возвращает удостоверение пользователя
 	IUserIdentity authenticateSession(HTTPContext context)
 	{
-		string SIDString = context.request.cookie.get( "__sid__", null );
+		string SIDString = context.request.cookies.get( "__sid__", null );
 		
 		SessionId sessionId;
 		
@@ -173,7 +173,11 @@ public:
 		string clientAddress,
 		string userAgent
 	)
-	{	auto dbase = new DBPostgreSQL(authDBConnStr);
+	{	import std.stdio;
+		writeln(login);
+		writeln(password);
+		
+		auto dbase = new DBPostgreSQL(authDBConnStr);
 		if( !dbase.isConnected )
 			return new AnonymousUser;
 			
@@ -181,8 +185,10 @@ public:
 		string name;
 		string email;
 		
-		if( login.length < minLoginLength || password.length < minPasswordLength )
+		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
+
+		writeln("authenticateByPassword test1");
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
@@ -194,6 +200,8 @@ public:
 		
 		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
 			return new AnonymousUser;
+
+		writeln("authenticateByPassword test2");
 			
 		string userNum = query_res.get(0, 0, null);
 		string validEncodedPwHash = query_res.get(1, 0, null);
@@ -208,8 +216,12 @@ public:
 		
 		bool isValidPassword = checkPassword( validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString() );
 
+		writeln("authenticateByPassword test3");
+
 		if( isValidPassword ) 
 		{	SessionId sid = generateSessionId( login, group, Clock.currTime().toISOString() );
+
+			writeln("authenticateByPassword test4");
 			
 			auto newSIDStatusRes = dbase.query(
 				` insert into "session" ` 
@@ -223,6 +235,8 @@ public:
 			
 			if( newSIDStatusRes.recordCount != 1 )
 				return new AnonymousUser;
+
+			writeln("authenticateByPassword test5");
 			
 			if( newSIDStatusRes.get(0, 0, "") == "authenticated" )
 			{	string[string] userData = [ "user_num": userNum, "email": email ];

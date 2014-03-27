@@ -12,7 +12,7 @@ static this()
 
 void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
-	auto auth = new Authentication( rq.cookie.get("sid", null), authDBConnStr, eventLogFileName );
+	auto auth = new Authentication( rq.cookies.get("sid", null), authDBConnStr, eventLogFileName );
 	
 	if( !auth.isIdentified() || ( auth.userInfo.group != "admin" ) )
 	{	rp.headers["status-code"] = "403";

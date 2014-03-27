@@ -9,7 +9,7 @@ import webtank.net.http.cookie, webtank.net.uri, webtank.net.web_form, webtank.n
 class ServerRequest  //Запрос к нашему приложению
 {	
 protected:
-	RequestCookie _cookie; //Куки из запроса
+	string[string] _cookies; //Куки из запроса
 	string[string] _bodyForm;
 	string[string] _queryForm;
 	
@@ -32,7 +32,7 @@ public:
 		_remoteAddress = remoteAddressParam;
 		_localAddress = localAddressParam;
 
-		_cookie = new RequestCookie( headers["cookie"] );
+		_cookies = parseRequestCookies( headers["cookie"] );
 		uri = URI( headers["request-uri"] );
 		rawURI = headers["request-uri"];
 		referer = headers["referer"];
@@ -95,8 +95,8 @@ public:
 //	string[][string] formMulti() @property {}
 
 	///Возвращает набор HTTP Cookie для текущего запроса
-	RequestCookie cookie() @property
-	{	return _cookie; }
+	const(string[string]) cookies() @property
+	{	return _cookies; }
 
 	///Возвращает адрес удалённого узла, с которого пришёл запрос
 	Address remoteAddress() @property
