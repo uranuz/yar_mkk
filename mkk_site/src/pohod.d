@@ -217,11 +217,10 @@ string linkList( size_t pohodNum ) //функция получения спис�
 	content ~=`<p>Готовность похода: <font color=" 	#006400" ><b> `~готовностьПохода[response.get(14,0).to!int] ~`</b></font></p>`~ "\r\n";
 	content ~=`<p>&nbsp&nbsp&nbsp<br> </p>`~ "\r\n";
 	content ~=`<p>Статус заявки: <font color=" 	#006400" ><b> `~статусЗаявки[response.get(15,0).to!int] ~`</b></font></p>`~ "\r\n";
-	content ~=`<p>&nbsp&nbsp&nbsp<br> </p>`~ "\r\n";
-	content ~=`<p>Список ссылок:<br>  `~linkList( pohodKey ) ~`</p>`~ "\r\n";
+	content ~=`<p>&nbsp&nbsp&nbsp<br> </p>`~ "\r\n";	
 	content ~=`<p>Коментарий руководителя: <font color="#006400"><b>  `~HTMLEscapeText(response.get(16,0)) ~`.</b></font><br></p>`~ "\r\n";
-	content ~=`<p>Список ссылок:<br>  `~linkList( pohodKey ) ~`</p>`~ "\r\n";
 	content ~=`<p>Коментарий MKK: <font color="#006400"><b>  `~HTMLEscapeText(response.get(17,0)) ~`.</b></font><br></p>`~ "\r\n";
+		content ~=`<p>Список ссылок:<br>  `~linkList( pohodKey ) ~`</p>`~ "\r\n";
 	//content ~=`<p>Коментарий МКК: <font color="#006400"><b>  `~HTMLEscapeText(response.get(17,0)) ~`.</b></font><br></p>`~ "\r\n";
 	content ~= "\r\n";
 	
