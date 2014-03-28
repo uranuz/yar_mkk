@@ -219,7 +219,6 @@ void создатьФормуИзмененияПохода(
 	pohodForm.set( "form_input_action", ` value="write"` );
 }
 
-
 string изменитьДанныеПохода(HTTPContext context, Optional!size_t pohodKey)
 {	
 	auto rq = context.request;
@@ -408,8 +407,20 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 
+	import std.array, webtank.net.utils : PGEscapeStr;
+
+	string[] rawLinks = split( pVars.get("link_list", ""), "\r\n" );
+	
+	foreach( ref link; rawLinks )
+	{	if( !URI.isValid(link) )
+			throw new Exception("Некорректная ссылка");
+		link = PGEscapeStr(link);
+	}
+	fieldNames ~= "links";
+	fieldValues ~= "ARRAY['" ~ rawLinks.join("','") ~ "']";
+
 	import std.stdio;
-	writeln( `pVars.get("link_list", "")`, pVars.get("link_list", "")  );
+	writeln(fieldValues[$-1]);
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;

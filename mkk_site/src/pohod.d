@@ -5,7 +5,7 @@ import std.file; //Стандартная библиотека по работе
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context,webtank.net.utils;
 
-import mkk_site.site_data, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
@@ -29,7 +29,7 @@ void netMain(HTTPContext context)
 	auto rp = context.response;
 	
 	//auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto qVars = rq.queryForm;
 	string content ;//  содержимое страницы 	
 	//---------------------------
 	string output; //"Выхлоп" программы 

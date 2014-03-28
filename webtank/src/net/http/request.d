@@ -53,9 +53,9 @@ public:
 
 	///Данные HTTP формы переданные через адресную строку
 	FormData queryForm() @property
-	{	if( _bodyForm is null )
-			_bodyForm = new FormData( uri.query );
-		return _bodyForm;
+	{	if( _queryForm is null )
+			_queryForm = new FormData( uri.query );
+		return _queryForm;
 	}
 
 	///Данные HTTP формы переданные в теле сообщения через HTTP методы POST, PUT и др.

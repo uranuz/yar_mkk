@@ -2,7 +2,7 @@ module webtank.net.http.json_rpc_handler;
 
 import std.string, std.conv, std.traits, std.typecons, std.json, std.functional;
 
-import webtank.net.http.handler, webtank.common.serialization, webtank.net.http.context, webtank.net.http.uri_pattern;
+import webtank.net.http.handler, webtank.common.serialization, webtank.net.http.context, webtank.net.uri_pattern;
 
 ///Класс исключения для удалённого вызова процедур
 class JSON_RPC_Exception : Exception {

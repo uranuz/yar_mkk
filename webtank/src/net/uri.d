@@ -67,7 +67,7 @@ struct URI
 			{
 				try
 				{
-					URI uri = new URI(input);
+					URI uri = URI(input);
 					return true;
 				}
 				catch (URIException e)

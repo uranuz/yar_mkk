@@ -139,7 +139,7 @@ protected:
 }
 
 
-import webtank.net.http.uri_pattern;
+import webtank.net.uri_pattern;
 
 ///Маршрутизатор запросов к страницам сайта по URI
 class URIPageRouter: EventBasedHTTPHandler

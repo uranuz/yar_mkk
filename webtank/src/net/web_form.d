@@ -99,6 +99,11 @@ public:
 		else
 			return null;
 	}
+
+	override string toString()
+	{	import std.conv;
+		return _data.to!string;
+	}
 	
 }
 
