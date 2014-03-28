@@ -10,11 +10,9 @@ class ServerRequest  //Запрос к нашему приложению
 {	
 protected:
 	string[string] _cookies; //Куки из запроса
-	string[string] _bodyForm;
-	string[string] _queryForm;
-	
-	string[][string] _bodyFormMulti;
-	string[][string] _queryFormMulti;
+	FormData _bodyForm;
+	FormData _queryForm;
+
 	JSONValue _bodyJSON;
 	bool _isJSONParsed = false;
 	
@@ -54,33 +52,17 @@ public:
 	immutable(string) userAgent;
 
 	///Данные HTTP формы переданные через адресную строку
-	string[string] queryForm() @property
-	{	if( _queryForm.length <= 0 )
-			_queryForm = extractFormData( uri.query );
-		return _queryForm;
-	}
-
-	///Множественные данные HTTP формы переданные через адресную строку
-	///Используется, когда одному имени соответсвует несколько значений
-	string[][string] queryFormMulti() @property
-	{	if( _queryFormMulti.length <= 0 )
-			_queryFormMulti = extractFormDataMulti( uri.query );
-		return _queryFormMulti;
-	}
-
-	///Данные HTTP формы переданные в теле сообщения через POST, PUT
-	string[string] bodyForm() @property
-	{	if( _bodyForm.length <= 0 )
-			_bodyForm = extractFormData( messageBody );
+	FormData queryForm() @property
+	{	if( _bodyForm is null )
+			_bodyForm = new FormData( uri.query );
 		return _bodyForm;
 	}
 
-	///Множественные данные HTTP формы в теле сообщения через POST, PUT
-	///Используется, когда одному имени соответсвует несколько значений
-	string[][string] bodyFormMulti() @property
-	{	if( _bodyFormMulti.length <= 0 )
-			_bodyFormMulti = extractFormDataMulti( messageBody );
-		return _bodyFormMulti;
+	///Данные HTTP формы переданные в теле сообщения через HTTP методы POST, PUT и др.
+	FormData bodyForm() @property
+	{	if( _bodyForm is null )
+			_bodyForm = new FormData(messageBody);
+		return _bodyForm;
 	}
 
 	//TODO: Реализовать HTTPRequest.form
@@ -95,7 +77,7 @@ public:
 //	string[][string] formMulti() @property {}
 
 	///Возвращает набор HTTP Cookie для текущего запроса
-	const(string[string]) cookies() @property
+	ref const(string[string]) cookies() @property const
 	{	return _cookies; }
 
 	///Возвращает адрес удалённого узла, с которого пришёл запрос

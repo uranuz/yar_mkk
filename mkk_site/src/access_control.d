@@ -173,11 +173,7 @@ public:
 		string clientAddress,
 		string userAgent
 	)
-	{	import std.stdio;
-		writeln(login);
-		writeln(password);
-		
-		auto dbase = new DBPostgreSQL(authDBConnStr);
+	{	auto dbase = new DBPostgreSQL(authDBConnStr);
 		if( !dbase.isConnected )
 			return new AnonymousUser;
 			
@@ -187,8 +183,6 @@ public:
 		
 		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
-
-		writeln("authenticateByPassword test1");
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
@@ -200,8 +194,6 @@ public:
 		
 		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
 			return new AnonymousUser;
-
-		writeln("authenticateByPassword test2");
 			
 		string userNum = query_res.get(0, 0, null);
 		string validEncodedPwHash = query_res.get(1, 0, null);
@@ -216,12 +208,8 @@ public:
 		
 		bool isValidPassword = checkPassword( validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString() );
 
-		writeln("authenticateByPassword test3");
-
 		if( isValidPassword ) 
 		{	SessionId sid = generateSessionId( login, group, Clock.currTime().toISOString() );
-
-			writeln("authenticateByPassword test4");
 			
 			auto newSIDStatusRes = dbase.query(
 				` insert into "session" ` 
@@ -236,8 +224,6 @@ public:
 			if( newSIDStatusRes.recordCount != 1 )
 				return new AnonymousUser;
 
-			writeln("authenticateByPassword test5");
-			
 			if( newSIDStatusRes.get(0, 0, "") == "authenticated" )
 			{	string[string] userData = [ "user_num": userNum, "email": email ];
 				//Аутентификация завершена успешно

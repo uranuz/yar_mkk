@@ -407,6 +407,9 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	//Запись автора последних изменений и даты этих изменений
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+
+	import std.stdio;
+	writeln( `pVars.get("link_list", "")`, pVars.get("link_list", "")  );
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;

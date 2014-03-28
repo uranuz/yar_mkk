@@ -95,7 +95,7 @@ void netMain(HTTPContext context)
 		if (vid=="0") _vid=false;
 		else _vid=true;
 		////////////////////
-		string[] ks = ( ( "ks" in rq.bodyFormMulti ) ? rq.bodyFormMulti["ks"] : null ) ; // категория сложности похода
+		string[] ks = ( ( "ks" in rq.bodyForm ) ? rq.bodyForm.array("ks") : null ) ; // категория сложности похода
 		  
 		auto long_ks= ks.length;// выдаёт число элементов массива - выбранные категории Сложности походов       
 		

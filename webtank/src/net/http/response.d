@@ -71,7 +71,7 @@ protected:
 	{	import std.conv, std.stdio;
 		headers["content-length"] = _respBody.data().length.to!string;
 		headers["content-type"] = "text/html; charset=\"utf-8\"";
-
+		
 		return 
 			headers.getStatusLine()
 			~ ( _cookies.length > 0 ? _cookies.toString() ~ "\r\n" : "" )

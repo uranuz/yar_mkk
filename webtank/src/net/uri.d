@@ -856,9 +856,6 @@ unittest
 
 immutable(char[]) hexChars = "0123456789ABCDEF";
 
-// sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
-enum string URI_SubDelims = "!$&'()*+,;=";
-
 template encodeURICustom(string allowedSpecChars = null, bool isFormEncoding = false)
 {
 	static assert( !allowedSpecChars.contains('%'), "% sign must have the meaning of percent code prefix!!!" );
@@ -910,7 +907,7 @@ template decodeURICustom(string allowedSpecChars = null, bool isFormEncoding = f
 				static if( isFormEncoding )
 					result ~= ' ';
 			}
-			if( isUnreserved(c) || allowedSpecChars.contains(c) )
+			else if( isUnreserved(c) || allowedSpecChars.contains(c) )
 			{	result ~= c; }
 			else if( c == '%' )
 			{

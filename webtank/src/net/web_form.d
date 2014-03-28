@@ -1,96 +1,111 @@
 module webtank.net.web_form;
 
-import std.range;
+import std.range, std.ascii, std.conv;
 
 import webtank.net.uri;
 
-template parseFormData(bool isMulti = false)
-{
-	auto parseFormData(T)(T input)
-	{
-		import std.algorithm: canFind;
-
-		if( input.empty )
-			return null;
-
-		static if( isMulti )
-			T[][T] result;
-		else
-			T[T] result;
-
-		T curKey = input.save();
-		T curValue = input.save();
-		size_t count = 0;
-
-
-		for( input = input[]; !input.empty; input.popFront(), count++ )
-		{
-			auto c = input.front;
-			if( !(
-				'a' <= c && c <= 'z' ||
-				'A' <= c && c <= 'Z' ||
-				'0' <= c && c <= '9' ||
-				"-._~!$&'()*+,;=/?".canFind(c)
-				)
-			)	throw new Exception("Invalid urlencoded form data!!!");
-
-			if( c == '=' )
-			{
-				curKey = curKey[0..count];
-				count = 0;
-
-				input.popFront();
-				curValue = input.save();
-			}
-			else if( c == '&' )
-			{
-				static if( isMulti )
-					result[curKey] ~= curValue[0..count];
-				else
-					result[curKey] = curValue[0..count];
-				
-				count = 0;
-				curKey = null;
-				curValue = null;
-
-				input.popFront();
-				curKey = input.save();
-			}
-		}
-
-		if( !curValue.empty )
-		{
-			static if( isMulti )
-				result[curKey] ~= curValue[0..count];
-			else
-				result[curKey] = curValue[0..count];
-		}
-
-		return result;
-	}
-}
-
-alias parseFormData!(true) parseFormDataMulti;
-
-unittest
-{	string Query="ff=adfggg&text_inp1=kirpich&text_inp2=another_text&opinion=kupi_konya";
-	string[string] Res=parseFormData(Query);
-	assert(Res.length==4);
-	assert (  Res["ff"]=="adfggg" && Res["text_inp1"]=="kirpich" &&
-	          Res["text_inp2"]=="another_text" && Res["opinion"]=="kupi_konya"  );
-
-}
-
-string[string] extractFormData(string queryStr)
-{	string[string] result;
-	foreach( key, value; parseFormData( queryStr ) )
-		result[ decodeURIFormQuery(key) ] = decodeURIFormQuery(value);
+// pop char from input range, or throw
+private dchar popChar(T)(ref T input)
+{	dchar result = input.front;
+	input.popFront();
 	return result;
 }
 
-string[][string] extractFormDataMulti(string queryStr)
+///Функция выполняет разбор данных HTML формы
+T[][T] parseFormData(T)(T input)
+{	T[][T] result;
+	T[] params = split(input, "&");
+
+	foreach( param; params )
+	{	size_t count = 0;
+		auto temp = param.save();
+		for( ; !temp.empty; count++ )
+		{	if( popChar(temp) == '=' )
+				break;
+		}
+		auto name = param.take(count).to!T;
+		result[name] ~= temp;
+	}
+
+	return result;
+}
+
+///Объект с интерфейсом, подобным ассоциативному массиву для хранения
+///данных HTML формы
+class FormData
+{
+private:
+	string[][string] _data;
+
+public:
+	this( ref string[][string] data )
+	{	_data = data;
+	}
+
+	this( string formDataStr )
+	{	_data = extractFormData( formDataStr );
+	}
+
+	string opIndex(string name) const
+	{	return _data[name][0];
+	}
+
+	string[] keys() @property const
+	{	string[] result;
+		foreach( ref array; _data )
+			result ~= array[0];
+		return result;
+	}
+
+	string[] values() @property const
+	{	string[] result;
+		foreach( name, ref array; _data )
+			result ~= name;
+		return result;
+	}
+
+	string[] array(string name) @property const
+	{	return _data[name].dup;
+	}
+
+	string get(string name, string defValue) const
+	{	if( name in _data )
+			return _data[name][0];
+		else
+			return defValue;
+	}
+
+	int opApply(int delegate(ref string value) del) //const
+	{
+		foreach( ref array; _data )
+			if( auto ret = del( array[0] ) )
+				return ret;
+		return 0;
+	}
+
+	int opApply(int delegate(ref string name, ref string value) del) //const
+	{
+		foreach( name, ref array; _data )
+			if( auto ret = del( name, array[0] ) )
+				return ret;
+		return 0;
+	}
+
+	auto opBinaryRight(string op)(string name) const
+		if( op == "in" )
+	{	auto array = name in _data;
+		if( array )
+			return &(*array)[0];
+		else
+			return null;
+	}
+	
+}
+
+///Функция выполняет разбор и декодирование данных HTML формы
+string[][string] extractFormData(string queryStr)
 {	string[][string] result;
-	foreach( key, values; parseFormDataMulti( queryStr ) )
+	foreach( key, values; parseFormData(queryStr) )
 	{	string decodedKey = decodeURIFormQuery(key);
 		foreach( val; values )
 			result[ decodedKey ] ~= decodeURIFormQuery(val);
