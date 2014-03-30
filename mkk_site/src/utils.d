@@ -72,3 +72,19 @@ IDatabase getCommonDB()
 {	import webtank.db.postgresql;
 	return new DBPostgreSQL(commonDBConnStr);
 }
+
+string[] parseExtraFileLink(string linkPair)
+{	import webtank.common.utils;
+	import std.algorithm : startsWith;
+	string link = linkPair.splitFirst("><");
+	string comment;
+
+	if( link.length > 0 && link.length+2 < linkPair.length )
+		comment = linkPair[ link.length+2..$ ];
+	else
+	{	if( !linkPair.startsWith("><") )
+			link = linkPair;
+	}
+
+	return [ link, comment ];
+}

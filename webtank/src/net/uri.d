@@ -45,7 +45,7 @@ struct URI
 		/// Creactes an URI from an input range, throws if invalid.
 		/// Input should be an ENCODED url range.
 		/// Throws: $(D URIException) if the URI is invalid.
-		this(T)(T input, bool isRawURI = true) if (isForwardRange!T)
+		this(T)(T input, bool isStrictParser = false, bool isRawURI = true) if (isForwardRange!T)
 		{
 				_scheme = null;
 				_hostType = HostType.NONE;
@@ -55,6 +55,7 @@ struct URI
 				_rawPath = null;
 				_rawQuery = null;
 				_rawFragment = null;
+				_isStrictParser = isStrictParser;
 				auto inp = isRawURI ? input : encodeURI(input);
 				parseURI( inp );
 		}
@@ -171,6 +172,9 @@ struct URI
 		{	_rawPath = encodeURIPath(value);
 		}
 
+// 		string[] segments() @property pure
+// 		{}
+
 		string rawQuery() @property pure const nothrow
 		{	return _rawQuery;
 		}
@@ -237,7 +241,17 @@ struct URI
 			res ~= host;
 
 			if( port != 0 )
-				res ~= ":" ~ itos(port);
+			{	bool isDefaultPort = false;
+				foreach( e; knownSchemes )
+				{	if( e.defaultPort == port && scheme == e.scheme )
+					{	isDefaultPort = true;
+						break;
+					}
+				}
+				if( !isDefaultPort )
+					res ~= ":" ~ itos(port);
+			}
+				
 
 			return res;
 		}
@@ -293,7 +307,7 @@ struct URI
 
 			if( !query.empty )
 				res = res ~ "?" ~ query;
-			if( !fragment.length != 0 )
+			if( !fragment.empty )
 				res = res ~ "#" ~ fragment;
 			return res;
 		}
@@ -311,7 +325,7 @@ struct URI
 
 			if( !rawQuery.empty )
 				res = res ~ "?" ~ rawQuery;
-			if( !rawFragment.length != 0 )
+			if( !rawFragment.empty )
 				res = res ~ "#" ~ rawFragment;
 			return res;
 		}
@@ -334,6 +348,8 @@ struct URI
 		string _rawPath;       // never null, bu could be empty
 		string _rawQuery;      // can be null
 		string _rawFragment;   // can be null
+
+		bool _isStrictParser;
 
 		// URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 		void parseURI(T)(ref T input)
@@ -423,7 +439,7 @@ struct URI
 				if (!input.empty() && peekChar(input) == '/')
 				{
 					consume(input, '/');
-					parseAuthority(input);
+					parseAuthority(input); //Look at non-struct parsing after change
 					_rawPath = parseAbEmpty(input);
 				}
 				else
@@ -433,8 +449,37 @@ struct URI
 				}
 			}
 			else
-			{
-				_rawPath = parsePathRootless(input);
+			{	if( !_isStrictParser && _scheme.empty )
+				{	//Non-strict parsing of "Suffix Reference""
+					bool isValidAuthority = true;
+					auto temp = input.save();
+					try {
+						parseAuthority(input);
+						_rawPath = parseAbEmpty(input);
+					}
+					catch( URIException e )
+					{	isValidAuthority = false; }
+
+					if( isValidAuthority && _hostType == HostType.REG_NAME )
+					{	import std.algorithm : count;
+						auto pointCount = _rawHost.count(".");
+						//Consider that correct names are of 2nd level or higher
+						if( _rawHost.back == '.' )
+							isValidAuthority = ( pointCount >= 2 );
+						else
+							isValidAuthority = ( pointCount >= 1 );
+					}
+					
+					if( !isValidAuthority ) //Not correct authority
+					{	_rawUserInfo = null;
+						_rawHost = null;
+						_port = 0;
+						_hostType = HostType.NONE;
+						parsePathRootless(temp); 
+					}
+				}
+				else
+					_rawPath = parsePathRootless(input);
 			}
 		}
 
@@ -686,6 +731,12 @@ struct URI
 
 private pure
 {
+	bool isMaybeHostname(T)(T input)
+	{
+		
+
+	}
+
 	bool contains(string s, char c) nothrow
 	{
 		foreach(char sc; s)

@@ -16,9 +16,18 @@ $(window.document).ready( function() {
 	
 	$("#pohod_participants_edit_btn")
 	.on( "click", pohod.onOpenParticipantsEditWindow_BtnClick );
-	
+
+	$("#add_more_extra_file_links_btn")
+	.on( "click", pohod.onAddMoreExtraFileLinks_BtnClick );
+
+	$("#pohod_submit_btn")
+	.on( "click", function(){
+		pohod.saveListOfExtraFileLinks();
+		$("#edit_pohod_form").submit();
+	});
 	//Загрузка списка участников похода с сервера
 	pohod.loadPohodParticipantsList();
+	pohod.loadListOfExtraFileLinks();
 } );
 
 mkk_site.edit_pohod = {
@@ -388,6 +397,107 @@ mkk_site.edit_pohod = {
 		.append(searchBtn)
 		.append(messageDiv)
 		.append(searchResultsDiv);
+	},
+
+///Работа со списком ссылок на дополнительные ресурсы
+	//Размер одной "порции" полей ввода ссылок на доп. материалы
+	extraFileLinksInputPortion: 5,
+	//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
+	onAddMoreExtraFileLinks_BtnClick: function()
+	{	var
+			pohod = mkk_site.edit_pohod,
+			linkListDiv = $("#link_list_div"),
+			inputPortion = pohod.extraFileLinksInputPortion,
+			i = 0;
+
+		for( ; i < inputPortion; i++ )
+			pohod.renderInputsForExtraFileLink([]).appendTo( linkListDiv.children("table") );
+	},
+
+	//Создает элементы для ввода ссылки с описанием на доп. материалы
+	renderInputsForExtraFileLink: function(data)
+	{	var
+			newTr = $("<tr>"),
+			leftTd = $("<td>").appendTo(newTr),
+			rightTd = $("<td>").appendTo(newTr),
+			linkInput = $( "<input>", { type: "text" } ).appendTo(leftTd),
+			commentInput = $( "<input>", { type: "text" } ).appendTo(rightTd);
+
+		if( data )
+		{	linkInput.val( data[0] || "" );
+			commentInput.val( data[1] || "" );
+		}
+
+		return newTr;
+	},
+
+	//Отображает список ссылок на доп. материалы
+	renderListOfExtraFileLinks: function(linkList)
+	{	var
+			pohod = mkk_site.edit_pohod,
+			linkListDiv = $("#link_list_div"),
+			newTable = $("<table>").append(
+				$("<thead>").append(
+					$("<tr>").append( $("<th>Ссылка</th>") ).append( $("<th>Название (комментарий)</th>") )
+				)
+			),
+			inputPortion = pohod.extraFileLinksInputPortion,
+			linkList = linkList ? linkList : [],
+			inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion,
+			i = 0;
+		
+		for( ; i < inputCount; i++ )
+			pohod.renderInputsForExtraFileLink( linkList[i] ).appendTo(newTable);
+		
+		linkListDiv.children("table").replaceWith(newTable);
+	},
+
+	//Загрузка списка ссылок на доп. материалы с сервера
+	loadListOfExtraFileLinks: function()
+	{	var
+			getParams = webtank.parseGetParams(),
+			pohodKey = parseInt(getParams["key"], 10);
+		webtank.json_rpc.invoke({
+			uri: "/jsonrpc/",
+			method: "mkk_site.edit_pohod.списокСсылокНаДопМатериалы",
+			params: { "pohodKey": pohodKey },
+			success: mkk_site.edit_pohod.renderListOfExtraFileLinks
+		});
+	},
+
+	//Сохранение списка ссылок на доп. материалы
+	saveListOfExtraFileLinks: function()
+	{	var
+			pohod = mkk_site.edit_pohod,
+			linkListDiv = $("#link_list_div"),
+			tableRows = linkListDiv.children("table").children("tbody").children("tr"),
+			extraFileLinksInput = $("#extra_file_links"),
+			currInputs,
+			link,
+			comment,
+			data = [],
+			i = 0;
+
+		for( ; i < tableRows.length; i++ )
+		{
+			currInputs = $(tableRows[i]).children("td").children("input");
+			
+			link = $(currInputs[0]).val();
+			comment = $(currInputs[1]).val();
+
+			if( $.trim(link).length && $.trim(link).length )
+				data.push( [ link, comment ] );
+		}
+
+		extraFileLinksInput.val( JSON.stringify(data) );
+	},
+
+	jQueryUITest: function()
+	{	var
+			testDiv = $("<div>Здравствуй, Вася!!!</div>").appendTo("body");
+		
+		testDiv.dialog();
+		testDiv.addClass("testClass");
 	}
 
 };

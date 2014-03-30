@@ -108,11 +108,15 @@ string linkList( size_t pohodNum ) //функция получения спис�
 	
 	if( рез_запроса.recordCount<1) result ~=`Ссылки отсутствуют`;
 	else
-	   {  //result ~=`Cписок ссылок	 `;
-	      for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-	      
-	           {	result ~=`<p><a href="`~HTMLEscapeText(рез_запроса.get(0, i, ""))~`">Сcылка  `~(i+1).to!string~`</a></p><br>`;	}
-	   }        
+	{  //result ~=`Cписок ссылок	 `;
+		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
+		{	string[] linkPair = parseExtraFileLink( рез_запроса.get(0, i, "") );
+			string link = HTMLEscapeText(linkPair[0]);
+			string linkComment = ( linkPair[1].length ? HTMLEscapeText(linkPair[1]) : link );
+			result ~=`<p><a href="` ~ link ~ `">` ~ linkComment ~ `</a></p>`;
+			
+		}
+	}        
 	           
 	return result;
 	

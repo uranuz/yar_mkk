@@ -16,6 +16,7 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(getTouristList);
 	JSONRPCRouter.join!(списокУчастниковПохода);
+	JSONRPCRouter.join!(списокСсылокНаДопМатериалы);
 }
 
 alias FieldType ft;
@@ -408,19 +409,23 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 
 	import std.array, webtank.net.utils : PGEscapeStr;
+	import std.json, std.string;
+	import webtank.common.serialization;
 
-	string[] rawLinks = split( pVars.get("link_list", ""), "\r\n" );
+	//Запись списка ссылок на доп. материалы по походу
+	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.getDLangValue!(string[][]);
+	string[] processedLinks;
+	URI uri;
 	
-	foreach( ref link; rawLinks )
-	{	if( !URI.isValid(link) )
-			throw new Exception("Некорректная ссылка");
-		link = PGEscapeStr(link);
+	foreach( ref linkPair; rawLinks )
+	{	uri = URI( strip(linkPair[0]) );
+		if( uri.scheme.length == 0 )
+			uri.scheme = "http";
+		processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
 	}
 	fieldNames ~= "links";
-	fieldValues ~= "ARRAY['" ~ rawLinks.join("','") ~ "']";
+	fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
 
-	import std.stdio;
-	writeln(fieldValues[$-1]);
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;
@@ -532,4 +537,23 @@ void netMain(HTTPContext context)
 		rp.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
 		return;
 	}
+}
+
+
+string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
+{	auto dbase = getCommonDB;
+
+	if( !dbase.isConnected )
+		return null;
+	
+	auto links_QRes = dbase.query(
+		`select unnest( links ) from pohod where num=` ~ pohodKey.to!string ~ `;`
+	);
+
+	string[][] result;
+	
+	foreach( i; 0..links_QRes.recordCount )
+		result ~= parseExtraFileLink( links_QRes.get(0, i, "") );
+
+	return result;
 }
