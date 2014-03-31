@@ -1,23 +1,22 @@
 module mkk_site.site_data;
 
 ///Перечисление целей сборки сайта
-enum BuildTarget {devel, test, release};
+enum BuildTarget {	release, test, devel};
 
-//Определение текущей цели сборки сайта
+///Определение текущей цели сборки сайта
+///Разрешена только одна из версий (по умолчанию версия release)
 version(devel)
-	enum siteBuildTarget = BuildTarget.devel;
+	enum MKKSiteBuildTarget = BuildTarget.devel;
 else version(test)
-	enum siteBuildTarget = BuildTarget.test;
+	enum MKKSiteBuildTarget = BuildTarget.test;
 else
-	enum siteBuildTarget = BuildTarget.release;
+	enum MKKSiteBuildTarget = BuildTarget.release;
 
 
-// version(release)
-// 	enum isReleaseVersion = true;
-// else
-// 	enum isReleaseVersion = false;
-// 
-// version()
+///Константы для определения типа сборки сайта ИКК
+enum bool isMKKSiteReleaseTarget = MKKSiteBuildTarget == BuildTarget.release;
+enum bool isMKKSiteTestTarget = MKKSiteBuildTarget == BuildTarget.test;
+enum bool isMKKSiteDevelTarget = MKKSiteBuildTarget == BuildTarget.devel;
 
 ///Общие данные для сайта
 

@@ -12,6 +12,7 @@ protected:
 	string[string] _cookies; //Куки из запроса
 	FormData _bodyForm;
 	FormData _queryForm;
+	URI _uri;
 
 	JSONValue _bodyJSON;
 	bool _isJSONParsed = false;
@@ -31,14 +32,20 @@ public:
 		_localAddress = localAddressParam;
 
 		_cookies = parseRequestCookies( headers["cookie"] );
-		uri = URI( headers["request-uri"] );
+
+		_uri = URI( headers["request-uri"] );
+		if( "host" in headers )
+			_uri.authority = headers["host"];
+
+		_uri.scheme = "http";
+		
 		rawURI = headers["request-uri"];
 		referer = headers["referer"];
 		userAgent = headers["user-agent"];
 	}
 
 	///Структура с информацией об идентификаторе запрашиваемого ресурса
-	immutable(URI) uri;
+	
 	///HTTP заголовки запроса
 	HTTPHeaders headers;
 
@@ -51,6 +58,10 @@ public:
 	///Описание клиентской программы и среды
 	immutable(string) userAgent;
 
+	ref const(URI) uri() @property
+	{	return _uri;
+	}
+	
 	///Данные HTTP формы переданные через адресную строку
 	FormData queryForm() @property
 	{	if( _queryForm is null )

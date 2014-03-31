@@ -13,6 +13,8 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 	if( context.request.uri.path.endsWith("/dyn/auth")  ) //Записываем исходный транспорт
 		tpl.set( "transport_proto", context.request.headers.get("x-forwarded-proto", "http") );
 
+	tpl.set( "authentication uri", getAuthRedirectURI(context) );
+	
 	if( context.user.isAuthenticated )
 	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
 		tpl.set("user login", context.user.id );
@@ -25,19 +27,21 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 
 
 
-// string getAuthRedirectURI(HTTPContext context)
-// {	//Задаем ссылку на аутентификацию
-// 	static if( buildTarget == BuildTarget.devel )
-// 		tpl.set("authentication uri", dynamicPath ~ "auth?redirectTo=" ~ context.request.uri.path );
-// 	else
-// 		tpl.set("authentication uri",
-// 			"https://" ~ dynamicPath ~ "auth?redirectTo="
-// 			~ context.request.headers.get("x-forwarded-proto", "http")
-// 			~ context.request.headers.get("x-forwarded-host", "")
-// 			~ context.request.uri.path
-// 		);
-// 	
-// }
+string getAuthRedirectURI(HTTPContext context)
+{	string query = context.request.uri.query;
+	//Задаем ссылку на аутентификацию
+	static if( isMKKSiteDevelTarget )
+		return
+			dynamicPath ~ "auth?redirectTo=" ~ context.request.uri.path
+			~ "?" ~ context.request.uri.query;
+	else
+		return 
+			"https://" ~ context.request.headers.get("x-forwarded-host", "")
+			~ dynamicPath ~ "auth?redirectTo="
+			~ context.request.headers.get("x-forwarded-proto", "http") ~ "://"
+			~ context.request.headers.get("x-forwarded-host", "")
+			~ context.request.uri.path ~ ( query.length ? "?" ~ query : "" );
+}
 
 PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 {	
