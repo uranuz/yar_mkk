@@ -195,3 +195,6 @@ table.tab1
      /* padding: 1px; /* Поля вокруг содержимого таблицы */
        border: 1px solid ; /* Параметры рамки */
        border-right-style:ridge;}
+       
+   p.font-2{font-size: 70%;}   
+       

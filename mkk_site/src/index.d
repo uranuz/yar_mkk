@@ -122,20 +122,21 @@ from pohod
 	
 	
 	// Начало сведний о последних десяти записях
-	string last_dekada=` <h2>Недавно добавленные походы </h2>`~ "\r\n";
+	string last_dekada=` <h2>Недавно добавленные походы. </h2></br>`~ "\r\n";
 	
 	foreach(rec; rs)
 	{
-	last_dekada~=` <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
+	last_dekada~=`<p> <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
 			~ rec.get!"Ключ"(0).to!string ~ `">` ~ видТуризма [rec.get!"Вид"(0)] ~
 			`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ категорияСложности [rec.get!"кс"(0)]~`&nbsp;`~элементыКС[rec.get!"элем"(0)]
 			~`&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
-			~ rec.get!"Район"("нет")~	` </a> </br>`~ "\r\n";
+			~ rec.get!"Район"("нет")~	` </a> </p>`~ "\r\n";
 			
 	
-	last_dekada~=`По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
-	last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~
-	`<hr style="color:green;">`~ "\r\n";
+	last_dekada~=`<p class="font-2"> По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
+	last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~ "\r\n";
+	last_dekada~=`<hr style="color:green;">`~ "\r\n";
+	last_dekada~=`</p></br>`~ "\r\n";
 	}
 	// Конец сведний о последних десяти записях
 	
@@ -144,7 +145,7 @@ from pohod
 	
  string о_ресурсе_один = `
 	
-	<p><br> <h2>Сведения о базе МКК</h2>
+	<p> <h2>Сведения о базе МКК</h2>
   Ресурс хранит сведения о планируемых, заявленных, пройденных и защищённых походах <br>
   и их участниках.</p>
 <p> <h2>Задачей ресурса ставится: </h2></p>
@@ -158,7 +159,10 @@ from pohod
  <li> &nbsp;&nbsp;создание интернет площадки для формирования туристских групп;</li> 
  <li> &nbsp;&nbsp;создания системы дистанционной заявки на туристские маршруты.</li> 
 </ul><br>
-<a href="` ~ dynamicPath ~ `inform" > <h3>Подробнее</h3></a><br><br> 
+
+<p style="text-align:right;"> <a href="` ~ dynamicPath ~ `inform" > 
+Подробнее</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
   </div>
         </p>
        

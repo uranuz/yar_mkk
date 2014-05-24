@@ -57,7 +57,7 @@ void netMain(HTTPContext context)
 		string content ;//  содержимое страницы 
 	
 	
-	content=`<h1> --------------------------------------------------------------</h1>`~ "\r\n";
+	content=`<hr>`~ "\r\n";
 	
 	string qeri_ФИО = //по номеру в базе формируем строку ФИО г.р.
 	`SELECT num,
@@ -190,7 +190,7 @@ WHERE num=`~touristKey.to!string;
 	 auto rs2 = dbase.query(qeri_походы).getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
 	
-	string table = `<table class="tab">`;
+	string table = `<table class="tab1">`;
 		
 		if(_sverka) table~= `<td>Ключ</td>`;		
 		table ~=`<td>&nbspНомер&nbsp</td>
@@ -207,8 +207,11 @@ WHERE num=`~touristKey.to!string;
 	{	
 	   vke = видТуризма [rec.get!"Вид"(0)] ~ `<br>` ~ категорияСложности [rec.get!"кс"(0)] ~ `<br>` ~ элементыКС[rec.get!"элем"(0)] ;
 	   ps  = готовностьПохода [rec.get!"Готовность"(0)] ~ `<br>` ~ статусЗаявки [rec.get!"Статус"(0)] ;
+	   
 	  
 	table ~= `<tr>`;  //Начинаем оформлять таблицу с данными
+	
+	if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
 	  
 		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
 			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";

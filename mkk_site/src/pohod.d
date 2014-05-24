@@ -56,7 +56,7 @@ void netMain(HTTPContext context)
 		
 	
 	
-	content=`<h1> `~pohodKey.to!string ~`</br>--------------------------------------------------------------</h1>`~ "\r\n";
+	content=`<h1> `~pohodKey.to!string ~`<hr></br></h1>`~ "\r\n";
 //////////////////////////////////*
 	//Функция "очистки" текста от HTML-тэгов  module webtank.net.utils;
 //string HTMLEscapeText(string srcStr)
