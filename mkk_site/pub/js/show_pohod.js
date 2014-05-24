@@ -27,17 +27,23 @@ mkk_site.show_pohod = {
 	okno: function(result)
 	{
 		var 
+			//Создает слой со списком участников
 			touristList = $("<div id='gruppa' ></div>"),
+			//Создает фоновый прозрачный слой для перехвата щелчка мыши
 			blackoutDiv = document.createElement("div");
 		
 		blackoutDiv.setAttribute("class", "tourist_list_blackout");
+		
+		//Добавление обработчика события щелчка по фоновому слою
 		$(blackoutDiv).on( "click", function() {
 			touristList.remove(); //Уничтожение div'а со списком туристов
 			$(blackoutDiv).remove();  //Уничтожение div'a для затемнения
 		} );
 		
+		//Вставка текста в слой списка участников
 		touristList.html(result);
 		
+		//Добавление слоев к телу документа
 		touristList.appendTo("body");
 		$(blackoutDiv).appendTo("body");
 	}

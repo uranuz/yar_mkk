@@ -180,17 +180,18 @@ body {
 
 
 
-.tab td {
-	word-break: break-all;
-   padding: 3px; /* Поля вокруг содержимого таблицы */
-    border: 2px solid ; /* Параметры рамки */
-}
 
-.tab
+
+table.tab1 
 {
-		width: 800px;
-	border: ridge 3px;
-	border-collapse: collapse;
-	font-size:85%;
+	    width: 80%; /* Ширина таблицы */
+    border: 3px ridge #666; /* Рамка вокруг таблицы */
+   border-spacing:	0px;
+	
 	}
-   
+   .tab1 td {
+	font-size: 80%; /* Размер шрифта в процентах */ 	
+	word-break: break-all;
+     /* padding: 1px; /* Поля вокруг содержимого таблицы */
+       border: 1px solid ; /* Параметры рамки */
+       border-right-style:ridge;}

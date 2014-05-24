@@ -15,9 +15,11 @@ table {
 	border: ridge 7pt;
 	border-color:#069;
 	border-spacing:0pt;
+	
 	color: #006;
 	background-color: #9FC;
 	border-collapse: collapse;
+	width:80%;
 }
 
 td {

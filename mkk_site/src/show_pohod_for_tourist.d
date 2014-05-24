@@ -158,7 +158,7 @@ WHERE num=`~touristKey.to!string;
  select
      pohod.num,
      unnest(pohod.unit_neim ) as u, 
-     (coalesce(kod_mkk,'')||'<br>'||coalesce(nomer_knigi,'')) as nomer_knigi,   
+     (coalesce(kod_mkk,'000-00')||'<br>'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
 (
     date_part('day', begin_date)||'.'||
     date_part('month', begin_date)||'.'||
@@ -210,9 +210,12 @@ WHERE num=`~touristKey.to!string;
 	  
 	table ~= `<tr>`;  //Начинаем оформлять таблицу с данными
 	  
-		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";
-		table ~= `<td >` ~rec.get!"Номер книги"("нет")  ~ `</td>`~ "\r\n";
-		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";
+		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
+			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";
+		
+		
+		
+		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";		
 		table ~= `<td>` ~  vke ~ `</td>`~ "\r\n";//вид категорияСложности
 		table ~= `<td>` ~  rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td> `;

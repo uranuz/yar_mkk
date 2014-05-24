@@ -154,14 +154,14 @@ void netMain(HTTPContext context)
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
-	string table = `<table class="tab">`~ "\r\n";
+	string table = `<table class="tab1">`~ "\r\n";
 	table ~= `<tr>`~ "\r\n";
-	if(_sverka) table ~= `<td> Ключ</td>`~ "\r\n";
+	if(_sverka) table ~= `<td> Кл.</td>`~ "\r\n";
 	
 	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td>
-	<td> Спорт.разр.<br>Суд.кат.</td><td> Комментарий</td>`~ "\r\n";
+	<td> Разр.<br>Суд.кат.</td><td> Комментарий</td>`~ "\r\n";
 
-	if(_sverka) table ~=`<td>"Править"</td>`~ "\r\n"; 
+	if(_sverka) table ~=`<td>"Изм."</td>`~ "\r\n"; 
 	try {
 	foreach(rec; rs)
 	{	
@@ -177,7 +177,7 @@ void netMain(HTTPContext context)
 		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ raz_sud_kat ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`~ "\r\n";
-		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изменить</a>  </td>`~ "\r\n";
+		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изм.</a>  </td>`~ "\r\n";
 		
 		table ~= `</tr>`~ "\r\n";
 	}

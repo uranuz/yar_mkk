@@ -74,16 +74,23 @@ void netMain(HTTPContext context)
 
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "ФИО", ft.Str, "Статус",  ft.Str, "Контакты")();
+	ft.IntKey, "Ключ",
+	ft.Str, "ФИО", 
+	ft.Str, "Статус", 
+	ft.Str, "Контакты")();
 	
 	string queryStr;
 	
-    
-		queryStr=`select num,name,region,(status||'<br>'||region) as stat,(email||'<br>'||contact_info) as contact from site_user order by num `;   
+   
+		queryStr=`select num,name,(coalesce(status,'')||'<br>'||coalesce(region,'')) as stat,(coalesce(email,'')||'<br>'||coalesce(contact_info,'')) as contact from site_user order by num `;   
 		   
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	string table = `<table class="tab">`;
+	
+	
+	
+	
+	string table = `<div   ><table class="tab1">`;
 	table ~= `<tr>`;
 		
 	table ~=`<td>ФИО</td><td> Статус</td><td> Контакты</td>`;
@@ -99,7 +106,7 @@ void netMain(HTTPContext context)
 				
 		table ~= `</tr>`;
 	}
-	table ~= `</table>`;
+	table ~= `</table>   </div>`;
 
 	
 	

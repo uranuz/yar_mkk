@@ -35,7 +35,7 @@ on tourist.num = tourist_nums.num
 	||'.<br> Район проведения '||coalesce(region_pohod, '')) as poh from pohod where pohod.num = ` ~ pohodNum.to!string ~ ` `);
 	
 	string result;//список туристов
-	result ~= поход.get(0, 0, null) ~ `<br>---------------------------------------<br>`;
+	result ~= поход.get(0, 0, null) ~ `<hr>`;
 	
 	
 	if( рез_запроса.recordCount<1) result ~=`Сведения об участниках <br> отсутствуют`;
@@ -444,7 +444,7 @@ from pohod
 	    
 	    
 	  // Начало формирования основной отображающей таблицы  
-		string table = `<table class="tab"   >`;
+		string table = `<table class="tab1" >`;
 		
 		if(_sverka) table~= `<td>Кл.</td>`~ "\r\n";// появляется при наличии допуска
 		
@@ -459,6 +459,7 @@ from pohod
 	table ~= `<tr>`;
 	  
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
+		
 		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
 			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";
 	
@@ -504,6 +505,7 @@ from pohod
 	~`<h1> Число походов `~col_str.to!string ~` </h1>`~ "\r\n"
 	~table; //Тобавляем таблицу с данными к содержимому страницы
 	
+	//Подключение JavaScript файла с именем, указанным в атрибуте src
 	content ~= `<script src="`~ jsPath ~ "show_pohod.js" ~ `"></script>`;
 	
 	//Создаем шаблон по файлу
