@@ -1,1 +1,1 @@
-rdmd --force "-I../../import" -ofmkk_site _import.d
+rdmd --force -version=devel "-I../../import" -ofmkk_site_devel package.d

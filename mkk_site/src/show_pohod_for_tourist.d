@@ -5,7 +5,7 @@ import std.file; //Стандартная библиотека по работе
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 
@@ -48,7 +48,7 @@ void netMain(HTTPContext context)
 	size_t touristKey;
 	try {
 		//Получаем ключ туриста из адресной строки
-		touristKey = context.request.queryVars.get("key", null).to!size_t;
+		touristKey = context.request.queryForm.get("key", null).to!size_t;
 		isTouristKeyAccepted = true;
 	}
 	catch(std.conv.ConvException e)
@@ -103,8 +103,8 @@ WHERE num=`~touristKey.to!string;
 	curPageNum = 1; //Номер текущей страницы
 	
 	try {
-		if( "cur_page_num" in rq.postVars )
- 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+		if( "cur_page_num" in rq.bodyForm )
+ 			curPageNum = rq.bodyForm.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
 	
 

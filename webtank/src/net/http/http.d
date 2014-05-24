@@ -11,7 +11,30 @@ class HTTPException : Exception {
 
 protected:
 	ushort _HTTPStatusCode;
-} 
+}
+
+// CTL            = <any US-ASCII control character
+//                        (octets 0 - 31) and DEL (127)>
+// std.ascii.isControl
+
+
+// separators     = "(" | ")" | "<" | ">" | "@"
+//                | "," | ";" | ":" | "\" | <">
+//                | "/" | "[" | "]" | "?" | "="
+//                | "{" | "}" | SP | HT
+bool isHTTPSeparator( dchar c )
+{	import std.algorithm : canFind;
+	return `()<>@,;:\"/[]?={}`d.canFind(c) || c == 32 || c == 9;
+}
+
+// CHAR           = <any US-ASCII character (octets 0 - 127)>
+// std.ascii.isASCII
+
+//token          = 1*<any CHAR except CTLs or separators>
+bool isHTTPTokenChar(dchar c )
+{	import std.ascii;
+	return ( isASCII(c) && !isControl(c) && !isHTTPSeparator(c) );
+}
 
 immutable(string[ushort]) HTTPReasonPhrases;
 

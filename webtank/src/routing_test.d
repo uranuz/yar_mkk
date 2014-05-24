@@ -1,6 +1,6 @@
 module webtank.routing_test;
 
-import webtank.net.http.handler, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.net.web_server, webtank.net.access_control, webtank.net.http.uri_pattern;
+import webtank.net.http.handler, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.net.web_server, webtank.net.access_control, webtank.net.uri_pattern;
 
 import mkk_site.access_control, mkk_site.site_data;
 

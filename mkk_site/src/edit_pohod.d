@@ -2,11 +2,11 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.thread;
 
-import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
+import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 immutable thisPagePath = dynamicPath ~ "edit_pohod";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -16,6 +16,7 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(getTouristList);
 	JSONRPCRouter.join!(списокУчастниковПохода);
+	JSONRPCRouter.join!(списокСсылокНаДопМатериалы);
 }
 
 alias FieldType ft;
@@ -219,13 +220,12 @@ void создатьФормуИзмененияПохода(
 	pohodForm.set( "form_input_action", ` value="write"` );
 }
 
-
 string изменитьДанныеПохода(HTTPContext context, Optional!size_t pohodKey)
 {	
 	auto rq = context.request;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = rq.bodyForm;
+	auto qVars = rq.queryForm;
 	
 	auto dbase = getCommonDB();
 	
@@ -407,6 +407,25 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	//Запись автора последних изменений и даты этих изменений
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+
+	import std.array, webtank.net.utils : PGEscapeStr;
+	import std.json, std.string;
+	import webtank.common.serialization;
+
+	//Запись списка ссылок на доп. материалы по походу
+	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.getDLangValue!(string[][]);
+	string[] processedLinks;
+	URI uri;
+	
+	foreach( ref linkPair; rawLinks )
+	{	uri = URI( strip(linkPair[0]) );
+		if( uri.scheme.length == 0 )
+			uri.scheme = "http";
+		processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
+	}
+	fieldNames ~= "links";
+	fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
+
 	
 	//Формирование и выполнение запроса к БД
 	string queryStr;
@@ -456,8 +475,8 @@ void netMain(HTTPContext context)
 	auto rq = context.request;
 	auto rp = context.response;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = rq.bodyForm;
+	auto qVars = rq.queryForm;
 		
 	bool isAuthorized = 
 		context.user.isAuthenticated && 
@@ -518,4 +537,23 @@ void netMain(HTTPContext context)
 		rp.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
 		return;
 	}
+}
+
+
+string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
+{	auto dbase = getCommonDB;
+
+	if( !dbase.isConnected )
+		return null;
+	
+	auto links_QRes = dbase.query(
+		`select unnest( links ) from pohod where num=` ~ pohodKey.to!string ~ `;`
+	);
+
+	string[][] result;
+	
+	foreach( i; 0..links_QRes.recordCount )
+		result ~= parseExtraFileLink( links_QRes.get(0, i, "") );
+
+	return result;
 }

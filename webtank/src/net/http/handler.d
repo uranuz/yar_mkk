@@ -139,7 +139,7 @@ protected:
 }
 
 
-import webtank.net.http.uri_pattern;
+import webtank.net.uri_pattern;
 
 ///Маршрутизатор запросов к страницам сайта по URI
 class URIPageRouter: EventBasedHTTPHandler
@@ -155,7 +155,7 @@ class URIPageRouter: EventBasedHTTPHandler
 	alias void delegate(HTTPContext) PageHandler;
 	
 	override HTTPHandlingResult customProcessRequest( HTTPContext context )
-	{	auto uriData = _uriPattern.match(context.request.path);
+	{	auto uriData = _uriPattern.match(context.request.uri.path);
 
 		onPostPoll.fire(context, uriData.isMatched);
 		
@@ -164,7 +164,7 @@ class URIPageRouter: EventBasedHTTPHandler
 		
 		//Перебор маршрутов к страницам
 		foreach( ref route; _pageRoutes )
-		{	auto pageURIData = route.pattern.match(context.request.path);
+		{	auto pageURIData = route.pattern.match(context.request.uri.path);
 
 			if( pageURIData.isMatched )
 			{	route.handler(context);

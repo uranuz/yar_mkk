@@ -1,6 +1,6 @@
 module mkk_site.access_control;
 
-import std.conv, std.digest.digest, std.datetime, std.base64 : Base64URL;
+import std.conv, std.digest.digest, std.datetime, std.utf, std.base64 : Base64URL;
 
 import webtank.db.postgresql, webtank.net.utils, webtank.security.access_control, webtank.net.http.context, webtank.common.conv, webtank.common.crypto_scrypt;
 
@@ -105,7 +105,7 @@ public:
 	///Возвращает удостоверение пользователя
 	IUserIdentity authenticateSession(HTTPContext context)
 	{
-		string SIDString = context.request.cookie.get( "__sid__", null );
+		string SIDString = context.request.cookies.get( "__sid__", null );
 		
 		SessionId sessionId;
 		
@@ -133,7 +133,7 @@ public:
 			return new AnonymousUser;
 		
 		//Проверяем адрес и клиентскую программу с имеющимися при создании сессии
-		if( context.request.remoteAddress.toAddrString() != session_QRes.get(0, 0, "") ||
+		if( context.request.headers.get("x-real-ip", "") != session_QRes.get(0, 0, "") ||
 			context.request.headers.get("user-agent", "") != session_QRes.get(1, 0, "")
 		) return new AnonymousUser;
 		
@@ -181,7 +181,7 @@ public:
 		string name;
 		string email;
 		
-		if( login.length < minLoginLength || password.length < minPasswordLength )
+		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
 		
 		//Делаем запрос к БД за информацией о пользователе
@@ -223,7 +223,7 @@ public:
 			
 			if( newSIDStatusRes.recordCount != 1 )
 				return new AnonymousUser;
-			
+
 			if( newSIDStatusRes.get(0, 0, "") == "authenticated" )
 			{	string[string] userData = [ "user_num": userNum, "email": email ];
 				//Аутентификация завершена успешно

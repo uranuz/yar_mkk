@@ -1,4 +1,4 @@
-module webtank.net.http.uri_pattern;
+module webtank.net.uri_pattern;
 
 import std.stdio, std.conv;
 

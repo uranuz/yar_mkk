@@ -19,7 +19,7 @@ shared static this()
 	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
 	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.error) );
-	PrioriteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.info) );
+	PrioriteLogger = new ThreadedLogger( new FileLogger(prioriteLogFileName, LogLevel.info) );
 	
 	Router
 		.join(JSONRPCRouter)
@@ -38,7 +38,7 @@ shared static this()
 	};
 	
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
-		SiteLogger.warn("request.path: " ~ context.request.path ~ "\r\n" ~ error.to!string);
+		SiteLogger.warn("request.path: " ~ context.request.uri.path ~ "\r\n" ~ error.to!string);
 		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
 			~ " " ~ HTTPReasonPhrases[error.HTTPStatusCode] ~ "</h2>\r\n" ~ error.msg );
@@ -68,7 +68,6 @@ void main(string[] progAgs) {
 	//Получаем порт из параметров командной строки
 	getopt( progAgs, "port", &port );
 
-	
 	auto server = new WebServer(port, Router);
 	server.start();
 } 

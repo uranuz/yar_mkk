@@ -2,13 +2,13 @@ module mkk_site.index;
 
 import std.conv, std.string, std.file, std.array;
 
-import webtank.datctrl._import, webtank.db._import, webtank.net.http._import, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
 
 // import webtank.net.javascript;
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.context;
 
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site._import;
+import mkk_site;
 
 immutable thisPagePath = dynamicPath ~ "index";
 immutable authPagePath = dynamicPath ~ "auth";
@@ -22,8 +22,8 @@ void netMain(HTTPContext context)
 	auto rq = context.request;
 	auto rp = context.response;
 	
-	auto pVars = rq.postVars;
-	auto qVars = rq.queryVars;
+	auto pVars = rq.bodyForm;
+	auto qVars = rq.queryForm;
 	
 	
 

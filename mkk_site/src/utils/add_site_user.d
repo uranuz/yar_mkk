@@ -2,7 +2,7 @@ module mkk_site.utils.add_site_user;
 
 ///Утилита для добавления пользователя сайта МКК
 
-import std.stdio, std.getopt, std.digest.digest, std.base64, std.datetime;
+import std.stdio, std.getopt, std.digest.digest, std.base64, std.datetime, std.utf, std.conv, std.algorithm : endsWith;
 
 import std.uuid : randomUUID;
 
@@ -14,7 +14,6 @@ void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
 
 	string login;
-	string password;
 	string name;
 	string group;
 	string email;
@@ -23,7 +22,6 @@ void main(string[] progAgs) {
 	//Получаем порт из параметров командной строки
 	getopt( progAgs,
 		"login", &login,
-		"pw", &password,
 		"name", &name,
 		"group", &group,
 		"email", &email,
@@ -35,8 +33,7 @@ void main(string[] progAgs) {
 		writeln("Возвращает ИД сессии в виде числа в кодировке Base64");
 		writeln(
 			"Опции:\r\n",
-			"  --login=ЛОГИН\r\n",
-			"  --pw=ПАРОЛЬ\r\n",
+			"  --login=ЛОГИН         Минимум " ~ minLoginLength.to!string ~ " символов\r\n",
 			"  --name=ИМЯ_ПОЛЬЗ\r\n",
 			"  --group=ГРУППА_ПОЛЬЗ\r\n",
 			"  --email=EMAIL\r\n",
@@ -45,8 +42,13 @@ void main(string[] progAgs) {
 		return;
 	}
 	
-	if( !login.length || !password.length || !name.length || !group.length || !email.length )
+	if( !login.length || !name.length || !group.length || !email.length )
 	{	writeln("Ошибка: один или несколько обязательных параметров профиля пользователя пусты!!!");
+		return;
+	}
+
+	if( login.count < minLoginLength )
+	{	writeln("Ошибка: длина логина меньше минимально допустимой (", minLoginLength, " символов)!!!");
 		return;
 	}
 	
@@ -54,6 +56,28 @@ void main(string[] progAgs) {
 	
 	if( dbase is null || !dbase.isConnected )
 	{	writeln("Не удалось подключиться к базе данных МКК");
+		return;
+	}
+
+	if(
+		dbase.query(
+			`select 1 from site_user where login='` ~ login ~ `';`
+		).recordCount != 0
+	)
+	{	writeln("Ошибка: пользователь с заданным логином уже зарегистрирован!!!");
+		return;
+	}
+
+	writeln("Введите пароль нового пользователя сайта. Выбирайте сложный пароль (минимум ", minPasswordLength, " символов)");
+	write("password=");
+	
+	string password = readln();
+
+	//Обрезаем символы переноса строки в конце пароля
+	password = password.endsWith("\r\n") ? password[0..$-2] : password[0..$-1];
+
+	if( password.count < minPasswordLength )
+	{	writeln("Ошибка: длина пароля меньше минимально допустимой (", minPasswordLength, " символов)!!!");
 		return;
 	}
 	

@@ -2,31 +2,33 @@ module webtank.net.http.response;
 
 import std.array;
 
-import webtank.net.http.cookie, webtank.net.http.uri, webtank.net.http.headers;
+import webtank.net.http.cookie, webtank.net.uri, webtank.net.http.headers;
 
-class ServerResponse  //Ответ от нашего приложения
+///Класс представляющий ответ сервера
+class ServerResponse
 {
+	///HTTP заголовки ответа сервера
 	HTTPHeaders headers;
 protected:
 	Appender!(string) _respBody;
-	ResponseCookie _cookie; //Куки в ответ
+	ResponseCookies _cookies; 
 public:
 	
 	this(/+ void delegate(string) send +/)
-	{	_cookie = new ResponseCookie;
+	{	_cookies = new ResponseCookies;
 		headers = new HTTPHeaders;
 // 		_send = send;
 	}
 	
-	//Записывает данные в буфер для отдачи
+	///Добавляет строку str к ответу сервера
 	void write(string str)
 	{	_respBody ~= str; }
 	
-	//То же самое, но в виде оператора приклеивания ~=
+	///Добавляет строку str к ответу сервера
 	void opOpAssign(string op: "~")(string str)
 	{	_respBody ~= str; }
 	
-	//Перенаправление пользователя по указанному адресу
+	///Устанавливает заголовки для перенаправления
 	void redirect(string location)
 	{	headers["status-code"] = "302";
 		headers["reason-phrase"] = "Found";
@@ -57,9 +59,9 @@ public:
 // 		return false;
 // 	}
 	
-	//Куки ответа приложения (в них только пишем)
-	ResponseCookie cookie() @property
-	{	return _cookie; }
+	///Куки ответа которыми ответит сервер
+	ResponseCookies cookies() @property
+	{	return _cookies; }
 
 protected:
 // 	void delegate(string) _send;
@@ -68,12 +70,11 @@ protected:
 	string _getHeaderStr()
 	{	import std.conv, std.stdio;
 		headers["content-length"] = _respBody.data().length.to!string;
-// 		if( _cookie.length > 0 )
-// 			headers["set-cookie"] = _cookie.getString();
 		headers["content-type"] = "text/html; charset=\"utf-8\"";
+		
 		return 
-		headers.getStatusLine() 
-		~ _cookie.getString() 
-		~ headers.getString() ~ "\r\n" ;
+			headers.getStatusLine()
+			~ ( _cookies.length > 0 ? _cookies.toString() ~ "\r\n" : "" )
+			~ headers.getString() ~ "\r\n" ;
 	}
 }

@@ -15,12 +15,12 @@ void netMain(Application netApp)  //Определение главной фун
 	uint pageCount = 10; //Количество страниц
 	uint curPageNum = 1; //Номер текущей страницы
 	try {
-		if( "cur_page_num" in rq.postVars )
- 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+		if( "cur_page_num" in rq.bodyForm )
+ 			curPageNum = rq.bodyForm.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
 	string filter = "";  //Фильтр поиска
-	if( "filter" in rq.postVars ) 
-		filter = rq.postVars.get("filter", "");
+	if( "filter" in rq.bodyForm )
+		filter = rq.bodyForm.get("filter", "");
 
 	
 	/*string templFileName = "/ramdisk/general_template.html";*/

@@ -34,12 +34,7 @@
 </tr>
 <tr>
 	<td><label for="marchrut">Нитка маршрута</label></td>
-	<td colspan="999"></td>
-</tr>
-<tr>
-	<td colspan="999">
-		<input type="text" id="marchrut" name="marchrut"{{marchrut}} size="50">
-	</td>
+	<td colspan="999"><input type="text" id="marchrut" name="marchrut" size="60"{{marchrut}}></td>
 </tr>
 <tr>
 	<td><label for="ks">Категория сложности</label></td>
@@ -110,12 +105,20 @@
 	</table>
 </div>
 
+<hr>
+<b>Ссылки на доп. материалы</b>
+<div id="link_list_div">
+	<table></table>
+</div>
+<input type="hidden" id="extra_file_links" name="extra_file_links">
+<input type="button" id="add_more_extra_file_links_btn" value="  Добавить ещё  ">
+
 <div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 <hr>
 
 <input type="hidden" name="action"{{form_input_action}}>
 
-<input type="submit" value="Отправить">
+<input type="submit" id="pohod_submit_btn" value="Отправить">
 </form>
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
 
@@ -136,6 +139,10 @@
 
 	.tourist_deselect_btn {
 		background-image: url("/pub/img/icons/remove_icon.png");
+	}
+
+	.testClass {
+		position: relative; width: 100px; height: 100px; background: #ccc;
 	}
 	
 </style>

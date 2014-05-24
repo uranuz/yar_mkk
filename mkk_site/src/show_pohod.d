@@ -5,8 +5,7 @@ import std.file; //Стандартная библиотека по работе
 //import webtank.db.database;
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.templating.plain_templater, webtank.net.http.context;
 
-import mkk_site.site_data, mkk_site.utils, mkk_site._import;
-import mkk_site.site_data, mkk_site.utils;
+import mkk_site;
 
 immutable thisPagePath = dynamicPath ~ "show_pohod";
 
@@ -70,7 +69,7 @@ void netMain(HTTPContext context)
 		output ~= "Ошибка соединения с БД";
 		
 		string параметры_поиска;//контроль изменения парамнтров фильтрации
-		string параметры_поиска_старое= rq.postVars.get("параметры_поиска", "");
+		string параметры_поиска_старое= rq.bodyForm.get("параметры_поиска", "");
 		
 		string vke;//сводная строка видТуризма категорияСложности сэлементами кс
 		
@@ -92,11 +91,11 @@ void netMain(HTTPContext context)
 		bool _filtr;    // котроль необходимости фильтрации
 		bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
 		///////////////////////////////
-		string vid = ( ( "vid" in rq.postVars ) ? rq.postVars["vid"] : "0" ) ;// вид туризма		
+		string vid = ( ( "vid" in rq.bodyForm ) ? rq.bodyForm["vid"] : "0" ) ;// вид туризма
 		if (vid=="0") _vid=false;
 		else _vid=true;
 		////////////////////
-		string[] ks = ( ( "ks" in rq.postVarsArray ) ? rq.postVarsArray["ks"] : null ) ; // категория сложности похода		
+		string[] ks = ( ( "ks" in rq.bodyForm ) ? rq.bodyForm.array("ks") : null ) ; // категория сложности похода
 		  
 		auto long_ks= ks.length;// выдаёт число элементов массива - выбранные категории Сложности походов       
 		
@@ -108,12 +107,12 @@ void netMain(HTTPContext context)
 		
 		//////////////////////////////////
 		
-	   string e_year  = ( ( "end_year"  in rq.postVars ) ? rq.postVars["end_year"] : "" );
+	   string e_year  = ( ( "end_year"  in rq.bodyForm ) ? rq.bodyForm["end_year"] : "" );
 	   // конечный год диапазона поиска
-		string e_month = ( ( "end_month" in rq.postVars ) ? rq.postVars["end_month"] : "");
+		string e_month = ( ( "end_month" in rq.bodyForm ) ? rq.bodyForm["end_month"] : "");
 		// конечный месяц диапазона поиска		
-		string s_year  = ( ( "start_year"  in rq.postVars ) ? rq.postVars["start_year"] : "" );// начальный год диапазона поиска		
-		string s_month = ( ( "start_month" in rq.postVars ) ? rq.postVars["start_month"] : "");// начальный месяц диапазона поиска   
+		string s_year  = ( ( "start_year"  in rq.bodyForm ) ? rq.bodyForm["start_year"] : "" );// начальный год диапазона поиска
+		string s_month = ( ( "start_month" in rq.bodyForm ) ? rq.bodyForm["start_month"] : "");// начальный месяц диапазона поиска
 		
 		if ( s_year=="") _start_dat=false;                  // наличие начального диапазона поиска если начального года нет "запрещено"
 		else _start_dat=true;
@@ -254,8 +253,8 @@ void netMain(HTTPContext context)
 	
 	////////////////
 	try {
-		if( "cur_page_num" in rq.postVars )// если в окне задан номер страницы
- 			curPageNum = rq.postVars.get("cur_page_num", "1").to!uint;
+		if( "cur_page_num" in rq.bodyForm )// если в окне задан номер страницы
+ 			curPageNum = rq.bodyForm.get("cur_page_num", "1").to!uint;
 	} catch (Exception) { curPageNum = 1; }
 	/////////
 	if(curPageNum>pageCount) curPageNum=pageCount; 
