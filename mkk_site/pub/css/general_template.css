@@ -184,7 +184,7 @@ body {
 
 table.tab1 
 {
-	    width: 80%; /* Ширина таблицы */
+	    width: 100%; /* Ширина таблицы */
     border: 3px ridge #666; /* Рамка вокруг таблицы */
    border-spacing:	0px;
 	

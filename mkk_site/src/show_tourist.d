@@ -152,7 +152,7 @@ void netMain(HTTPContext context)
 	auto response = dbase.query(queryStr); //запрос к БД
 	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
-	string table = `<table class="tab1">`~ "\r\n";
+	string table = `<div style="max-width: 98%;"><table class="tab1">`~ "\r\n";
 	table ~= `<tr>`~ "\r\n";
 	if(_sverka) table ~= `<td> Кл.</td>`~ "\r\n";
 	
@@ -182,7 +182,7 @@ void netMain(HTTPContext context)
 	} catch(Throwable exc)
 	{}
 	
-	table ~= `</table>`~ "\r\n";
+	table ~= `</table></div>`~ "\r\n";
 
 	if(_sverka) content ~= `<a href="edit_tourist" >Добавить нового туриста</a>`~ "\r\n";
 	
