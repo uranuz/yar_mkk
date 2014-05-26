@@ -197,4 +197,14 @@ table.tab1
        border-right-style:ridge;}
        
    p.font-2{font-size: 70%;}   
+   
+   a {
+	   text-decoration: none; /* Убирает подчеркивание для ссылок */
+   } 
+   A:visited { text-decoration: none;color:teal; } 
+   A:active { text-decoration: underline;color:green; }
+   A:hover {
+    text-decoration: underline; /* Делает ссылку подчеркнутой при наведении на нее курсора */
+    color: red; /* Цвет ссылки */
+	}
        

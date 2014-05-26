@@ -34,7 +34,7 @@
 </tr>
 <tr>
 	<td><label for="marchrut">Нитка маршрута</label></td>
-	<td colspan="999"><input type="text" id="marchrut" name="marchrut" size="60"{{marchrut}}></td>
+	<td colspan="999"><input type="text" id="marchrut" name="marchrut" size="55"{{marchrut}}></td>
 </tr>
 <tr>
 	<td><label for="ks">Категория сложности</label></td>
@@ -118,8 +118,21 @@
 
 <input type="hidden" name="action"{{form_input_action}}>
 
-<input type="submit" id="pohod_submit_btn" value="Отправить">
+<span><input type="submit" id="pohod_submit_btn" value="Сохранить"></span>
+<span style="float: right;"><input type="button" id="pohod_delete_btn" value="Удалить поход"></span>
+<div style="clear: both"></div>
+
+
 </form>
+
+<div id="dialog" title="Удаление похода" style="display: none;">
+	<p>Для удаления похода наберите в окне слово "удалить" и нажмите на кнопку.</p>
+
+	<input type="text" id="delete_confirm_inp">
+	<input type="button" id="delete_confirm_btn" value="OK">
+</div>
+
+
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
 
 <style type="text/css">
