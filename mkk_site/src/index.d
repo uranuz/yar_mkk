@@ -133,7 +133,7 @@ from pohod
 			~ rec.get!"Район"("нет")~	` </a> </p>`~ "\r\n";
 			
 	
-	last_dekada~=`<p class="font-2"> По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
+	last_dekada~=`<p > По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
 	last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~ "\r\n";
 	last_dekada~=`<hr style="color:green;">`~ "\r\n";
 	last_dekada~=`</p></br>`~ "\r\n";

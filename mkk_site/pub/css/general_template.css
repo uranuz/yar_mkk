@@ -199,12 +199,13 @@ table.tab1
    p.font-2{font-size: 70%;}   
    
    a {
-	   text-decoration: none; /* Убирает подчеркивание для ссылок */
+	   text-decoration: underline; color:#0000FF;/* Убирает подчеркивание для ссылок */
    } 
-   A:visited { text-decoration: none;color:teal; } 
-   A:active { text-decoration: underline;color:green; }
+   A:visited { text-decoration: underline;color:#20B2AA;} 
+   
+   A:active { text-decoration: underline;color:#104E8B; }
    A:hover {
     text-decoration: underline; /* Делает ссылку подчеркнутой при наведении на нее курсора */
-    color: red; /* Цвет ссылки */
+    color: #EE7600; /* Цвет ссылки */
 	}
        
