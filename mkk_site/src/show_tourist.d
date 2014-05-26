@@ -156,7 +156,7 @@ void netMain(HTTPContext context)
 	table ~= `<tr>`~ "\r\n";
 	if(_sverka) table ~= `<td> Кл.</td>`~ "\r\n";
 	
-	table ~=`<td>Имя</td><td> Дата рожд</td><td> Опыт</td><td> Контакты</td>
+	table ~=`<td width="20%" >Имя</td><td> Дата рожд</td><td> Опыт</td>
 	<td> Разр.<br>Суд.кат.</td><td> Комментарий</td>`~ "\r\n";
 
 	if(_sverka) table ~=`<td>"Изм."</td>`~ "\r\n"; 
@@ -167,12 +167,12 @@ void netMain(HTTPContext context)
 		
 		table ~= `<tr>`;
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";
-		table ~= `<td>` ~ rec.get!"Имя"("") ~ `</td>`~ "\r\n";
+		table ~= `<td width="20%" >` ~ rec.get!"Имя"("") ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Дата рожд"("") ~ `</td>`~ "\r\n";
 		table ~= `<td>`
 		~`<a href="`~dynamicPath~`show_pohod_for_tourist?key=`~rec.get!"Ключ"(0).to!string ~`">`
 		~rec.get!"Опыт"("")  ~ ` </a>  </td>`~ "\r\n";
-		table ~= `<td>` ~ rec.get!"Контакты"("") ~ `</td>`~ "\r\n";
+		
 		table ~= `<td>` ~ raz_sud_kat ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~ rec.get!"Комментарий"("нет") ~ `</td>`~ "\r\n";
 		if(_sverka) table ~= `<td> <a href="`~dynamicPath~`edit_tourist?key=`~rec.get!"Ключ"(0).to!string~`">Изм.</a>  </td>`~ "\r\n";

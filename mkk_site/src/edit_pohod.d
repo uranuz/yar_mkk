@@ -17,6 +17,7 @@ shared static this()
 	JSONRPCRouter.join!(getTouristList);
 	JSONRPCRouter.join!(списокУчастниковПохода);
 	JSONRPCRouter.join!(списокСсылокНаДопМатериалы);
+	JSONRPCRouter.join!(удалитьПоход);
 }
 
 alias FieldType ft;
@@ -28,9 +29,30 @@ auto shortTouristRecFormat = RecordFormat!(
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 
+//import std.stdio;
+	
+void удалитьПоход(HTTPContext context, size_t pohodKey)
+{
+	//writeln("имя: ", context.user.name);
+	
+	if( !context.user.isAuthenticated )
+		return;
+		
+	if( !context.user.isInRole("admin") )
+		return;
+	
+	auto dbase = getCommonDB();
+	
+	if ( !dbase.isConnected )
+		return; //Завершаем\
+		
+	string ЗапросУдалить= `DELETE from pohod where num=` ~ pohodKey.to!string ~ `;`;
+	auto queryRes = dbase.query(ЗапросУдалить);
+}
+
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto getTouristList(string фамилия)
+auto getTouristList(HTTPContext context, string фамилия)
 {	string result;
 	auto dbase = getCommonDB();
 	

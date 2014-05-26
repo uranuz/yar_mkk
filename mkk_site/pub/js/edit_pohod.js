@@ -25,6 +25,16 @@ $(window.document).ready( function() {
 		pohod.saveListOfExtraFileLinks();
 		$("#edit_pohod_form").submit();
 	});
+	
+	$("#pohod_delete_btn")
+	.on( "click", function(){
+	   $( "#dialog" ).dialog();	
+	});
+	
+	$("#delete_confirm_btn")
+	.on( "click", pohod.onDeleteConfirm_BtnClick );
+	
+	
 	//Загрузка списка участников похода с сервера
 	pohod.loadPohodParticipantsList();
 	pohod.loadListOfExtraFileLinks();
@@ -365,10 +375,20 @@ mkk_site.edit_pohod = {
 			}),
 			messageDiv = $("<div>", {
 				class: "pohod_chef_search_message"
-			})
+			}),
 			isAltChef =  this.id == "pohod_alt_chef_edit_btn";
 		
 		$(modalWindow).addClass("chef_selection_window");
+		webtank.json_rpc.invoke({
+			uri: "/jsonrpc/",
+			method: "mkk_site.edit_pohod.списокУчастниковПохода",
+			params: { "pohodKey": pohodKey },
+			success: function(json) {
+				pohod.participantsRS = webtank.datctrl.fromJSON(json);
+				
+				pohod.renderParticipantsList();
+			}
+		});
 		
 		searchBtn.on( "click", 
 			{ "isAltChef": isAltChef }, 
@@ -481,6 +501,26 @@ mkk_site.edit_pohod = {
 		
 		testDiv.dialog();
 		testDiv.addClass("testClass");
+	},
+	
+	//Обработчик тыка по кнопке подтверждения удаления похода
+	onDeleteConfirm_BtnClick: function() {
+		var
+			getParams = webtank.parseGetParams(),
+			pohodKey = parseInt(getParams["key"], 10);
+		
+		if( $("#delete_confirm_inp").val() === "удалить" )
+		{
+			webtank.json_rpc.invoke({
+				uri: "/jsonrpc/",
+				method: "mkk_site.edit_pohod.удалитьПоход",
+				params: { "pohodKey": pohodKey }
+			});
+			document.location.replace("/dyn/show_pohod");
+		}
+		else
+		{	$("#delete_confirm_inp").val("Не подтверждено!!!")
+		}
 	}
 
 };

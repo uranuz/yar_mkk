@@ -63,7 +63,19 @@ void netMain(HTTPContext context)
 	`SELECT num,
 (family_name||' '||coalesce(given_name,'')
 ||' '||coalesce(patronymic,'')||
- coalesce(birth_date,'')||', '||birth_year ) as birth_date
+ coalesce(birth_date,'')||', '||birth_year ) as birth_date,
+ coalesce(exp,'не определён') as opt,
+		razr,sud,
+( case 
+			 when( show_phone = true ) then phone||'<br> ' 
+			else '' 
+		end || 
+		case 
+			 when( show_email = true ) then email 
+			 else '' 
+		   end ) as contact, comment
+ 
+ 
 FROM tourist 
 WHERE num=`~touristKey.to!string;
  
@@ -78,11 +90,25 @@ WHERE num=`~touristKey.to!string;
 
    //получаем данные о ФИО и г.р. туриста
    auto touristRecFormat = RecordFormat!(
-	 ft.IntKey, "Ключ",ft.Str, "Имя"	)();
+	 ft.IntKey, "Ключ",   ft.Str, "Имя", 
+	ft.Str,  "Опыт", 
+	ft.Int,  "Разряд", 
+	ft.Int, "Категория",
+	ft.Str, "Контакты",	
+	ft.Str, "Комментарий"
+	 
+	 
+	 )();
 	 
 	 auto rs1 = dbase.query(qeri_ФИО).getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	 foreach(rec; rs1)
 	 { content~=`<h1>` ~ rec.get!"Имя"("") ~ `</h1>`~ "\r\n";
+	   content~=`<p>Туристский опыт: `~rec.get!"Опыт"("не определён")  ~ `.</p>`~ "\r\n";
+	   content~=`<p>Спортивный разряд: `~спортивныйРазряд [rec.get!"Разряд"(900)]~`.</p>`~ "\r\n";
+      content~=`<p>Судейская категория: `~судейскаяКатегория  [rec.get!"Категория"(900)]~`.</p>`~ "\r\n";
+       content~=`<p>Контакты: `~rec.get!"Контакты"("неопределёны")  ~ `.</p>`~ "\r\n";
+      
+      content~=`<p>Коментарий. `~rec.get!"Комментарий"("Отсутствует")  ~ `.</p><br>`~ "\r\n";
 	 }
 	//-------------------------------------------------------------------
 	//получаем данные о количестве походов
@@ -95,7 +121,7 @@ WHERE num=`~touristKey.to!string;
 	 
     if( кол_воПоходовРез_т.recordCount )
     {
-		content~=`<h2>` ~ кол_воПоходовРез_т.get(0, 0, "0")~` походов ` ~ `</h2>`~ "\r\n";
+		content~=`<h2> Походов ` ~ кол_воПоходовРез_т.get(0, 0, "0")~` </h2>`~ "\r\n";
 		число_походов=кол_воПоходовРез_т.get(0, 0, "0").to!int;
 	 }
 	 
