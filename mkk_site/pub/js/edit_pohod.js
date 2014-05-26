@@ -138,8 +138,7 @@ mkk_site.edit_pohod = {
 	//Обработчик тыка по кнопке сохранения списка выбранных участников
 	onSaveSelectedParticipants_BtnCLick: function() {
 		var 
-			searchWindow = $(".tourist_selection_window"),
-			windowContent = $(searchWindow).children(".modal_window_content"),
+			partySelectDlg = $(".party_select_dlg"),
 			pohod = mkk_site.edit_pohod;
 		
 		pohod.participantsRS = webtank.deepCopy(pohod.selTouristsRS);
@@ -152,8 +151,8 @@ mkk_site.edit_pohod = {
 		
 		pohod.renderParticipantsList();
 		
-		$(searchWindow).remove();
-		$(".modal_window_blackout").remove();
+		partySelectDlg.css("display", "block)
+		//$(".modal_window_blackout").remove();
 	},
 	
 	//Тык по кнопке поиска туристов
@@ -215,33 +214,17 @@ mkk_site.edit_pohod = {
 		var 
 			pohod = mkk_site.edit_pohod,
 			rec,
-			searchWindow = webtank.wui.createModalWindow(),
-			windowContent = $(searchWindow).children(".modal_window_content"),
-			splitViewTable = $('<table><tr style="vertical-align: top;"><td></td><td></td></tr></table>'),
+			partySelectDlg = (".party_select_dlg"),
+			splitViewTable = partySelectDlg.children("table"),
 			splitViewTableRow = splitViewTable.children("tbody").children("tr")
 			splitViewLeft = splitViewTableRow.children("td")[0],
 			splitViewRight = splitViewTableRow.children("td")[1],
-			foundTouristsDiv = $("<div>", {
-				class: "found_tourists"
-			}),
-			touristSearchInp = $("<input>", {
-				type: "text",
-				class: "tourist_search_filter"
-			}),
-			touristSearchButton = $("<input>", {
-				type: "button",
-				value: "Искать!"
-			}),
-			okButton = $("<input>", {
-				type: "button",
-				value: "     OK     "
-			}),
-			touristSelectDiv = $("<div>", {
-				class: "selected_tourists"
-			}),
-			messageDiv = $("<div>", {
-				class: "tourist_select_message"
-			});
+			foundTouristsDiv = $(".found_tourists"),
+			touristSearchInp = $(".tourist_search_filter"),
+			touristSearchButton = $(".tourist_search_btn"),
+			okButton = $(".party_accept_btn"),
+			touristSelectDiv = $(".selected_tourists"),
+			messageDiv = $(".tourist_select_message");
 			
 		if( pohod.participantsRS )
 		{	//Создаем копию набора записей
@@ -261,7 +244,7 @@ mkk_site.edit_pohod = {
 
 		$(searchWindow).addClass("tourist_selection_window");
 		
-		$(windowContent)
+		$(partySelectDlg)
 		.append(touristSearchInp)
 		.append(touristSearchButton)
 		.append(okButton)
@@ -269,7 +252,7 @@ mkk_site.edit_pohod = {
 		
 		$(splitViewLeft).append("<b>Участники похода</b>").append(touristSelectDiv);
 		$(splitViewRight).append("<b>Поиск туристов</b>").append(foundTouristsDiv);
-		$(splitViewTable).appendTo(windowContent);
+		$(splitViewTable).appendTo(partySelectDlg);
 	},
 	
 	//Возвращает строку описания туриста по записи
@@ -368,7 +351,7 @@ mkk_site.edit_pohod = {
 			pohod = mkk_site.edit_pohod,
 			rec,
 			modalWindow = webtank.wui.createModalWindow(),
-			windowContent = $(modalWindow).children(".modal_window_content"),
+			partySelectDlg = $(modalWindow).children(".modal_window_content"),
 			filterInput = $('<input>', {
 				type: 'text',
 				class: "pohod_chef_search_filter"
@@ -392,7 +375,7 @@ mkk_site.edit_pohod = {
 			pohod.onSearchChefCandidates_BtnClick 
 		);
 		
-		$(windowContent)
+		$(partySelectDlg)
 		.append(filterInput)
 		.append(searchBtn)
 		.append(messageDiv)

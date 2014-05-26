@@ -1,13 +1,38 @@
 * {
- margin: 0;
- padding: 0;
- /*border: 0;*/
- font-size: 100.01%;
+	margin: 0;
+	padding: 0;
+	/*border: 0;*/
+	font-size: 16px;
 }
 
 html {
 	height: 100%;
 }
+
+h1 {
+	font-size: 1.5em;
+}
+
+h2 {
+	font-size: 1.4em;
+}
+
+h3 {
+	font-size: 1.3em;
+}
+
+h4 {
+	font-size: 1.2em;
+}
+
+h5 {
+	font-size: 1.1em;
+}
+
+h6 {
+	font-size: 1.0em;
+}
+
 
 body {
 	/*--------------- 100% высота контейнера div.page далее */
@@ -72,7 +97,6 @@ body {
 
 #site_title h1 {
 	color: orange;
-	font-size: 18pt;
 }
 
 #header_pics {
@@ -128,12 +152,15 @@ body {
 #main_menu {
 	background: url("../img/design/menu_bg.png") repeat-x;
 	height: 36px;
-	font-size: 16pt;
 }
 
 #main_menu a {
 	position: relative;
 	top: 6px;
+}
+
+#main_menu > a > span {
+	font-size: 1.2em;
 }
 
 #menu_shadow_bottom {
@@ -184,17 +211,19 @@ body {
 
 table.tab1 
 {
-	    width: 100%; /* Ширина таблицы */
-    border: 3px ridge #666; /* Рамка вокруг таблицы */
-   border-spacing:	0px;
+	width: 100%; /* Ширина таблицы */
+	border: 3px ridge #666; /* Рамка вокруг таблицы */
+	border-spacing:	0px;
 	
-	}
-   .tab1 td {
+}
+
+.tab1 td {
 	font-size: 80%; /* Размер шрифта в процентах */ 	
 	word-break: break-all;
-     /* padding: 1px; /* Поля вокруг содержимого таблицы */
-       border: 1px solid ; /* Параметры рамки */
-       border-right-style:ridge;}
+	/* padding: 1px; /* Поля вокруг содержимого таблицы */
+	border: 1px solid ; /* Параметры рамки */
+	border-right-style:ridge;
+}
        
-   p.font-2{font-size: 70%;}   
+.last_pohod_comment {font-size: 80%;}
        

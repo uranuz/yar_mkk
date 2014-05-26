@@ -122,55 +122,49 @@ from pohod
 	
 	
 	// Начало сведний о последних десяти записях
-	string last_dekada=` <h2>Недавно добавленные походы. </h2></br>`~ "\r\n";
+	string last_dekada=` <h4>Недавно добавленные походы</h4>`~ "\r\n";
 	
 	foreach(rec; rs)
 	{
-	last_dekada~=`<p> <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
-			~ rec.get!"Ключ"(0).to!string ~ `">` ~ видТуризма [rec.get!"Вид"(0)] ~
-			`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ категорияСложности [rec.get!"кс"(0)]~`&nbsp;`~элементыКС[rec.get!"элем"(0)]
-			~`&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
-			~ rec.get!"Район"("нет")~	` </a> </p>`~ "\r\n";
+		last_dekada~=`<hr style="color:green;"><p> <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
+		~ rec.get!"Ключ"(0).to!string ~ `">` ~ видТуризма [rec.get!"Вид"(0)] ~
+		`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ категорияСложности [rec.get!"кс"(0)]~`&nbsp;`~элементыКС[rec.get!"элем"(0)]
+		~`&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
+		~ rec.get!"Район"("нет")~	` </a> </p>`~ "\r\n";
 			
 	
-	last_dekada~=`<p class="font-2"> По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
-	last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~ "\r\n";
-	last_dekada~=`<hr style="color:green;">`~ "\r\n";
-	last_dekada~=`</p></br>`~ "\r\n";
+		last_dekada~=`<p class="last_pohod_comment"> По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
+		last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~ "\r\n";
+		last_dekada~=`</p></br>`~ "\r\n";
 	}
 	// Конец сведний о последних десяти записях
-	
 
-	
-	
  string о_ресурсе_один = `
-	
-	<p> <h2>Сведения о базе МКК</h2>
+	 <h5>Добро пожаловать на сайт!</h5></br>
+
+	<p><h4>Сведения о базе МКК</h4>
   Ресурс хранит сведения о планируемых, заявленных, пройденных и защищённых походах <br>
   и их участниках.</p>
-<p> <h2>Задачей ресурса ставится: </h2></p>
+<p> <h5>Задачей ресурса ставится: </h5></p>
 
 <p>
 <div>
 <ul style="margin-left: 20px;">
 <li>  &nbsp;&nbsp;создание достоверной информационной базы <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;по пройденным и планируемым туристским походам;<br> </li> 
- <li> &nbsp;&nbsp;облегчения поиска информации о планируемых походах;</li> 
- <li> &nbsp;&nbsp;создание интернет площадки для формирования туристских групп;</li> 
- <li> &nbsp;&nbsp;создания системы дистанционной заявки на туристские маршруты.</li> 
-</ul><br>
-
-<p style="text-align:right;"> <a href="` ~ dynamicPath ~ `inform" > 
-Подробнее</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</p>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;по пройденным и планируемым туристским походам;<br> </li>
+ <li> &nbsp;&nbsp;облегчения поиска информации о планируемых походах;</li>
+ <li> &nbsp;&nbsp;создание интернет площадки для формирования туристских групп;</li>
+ <li> &nbsp;&nbsp;создания системы дистанционной заявки на туристские маршруты.</li>
+</ul>
   </div>
         </p>
-       
-       <p>&nbsp;&nbsp;</p>`;
+
+       <p>&nbsp;&nbsp;</p>
+       `;
        
   
 	
-	string содержимоеГлавнойСтраницы=`<h1>Добро пожаловать на сайт!</h1></br>`;
+	string содержимоеГлавнойСтраницы;
 	
 	содержимоеГлавнойСтраницы ~= о_ресурсе_один;
 	
