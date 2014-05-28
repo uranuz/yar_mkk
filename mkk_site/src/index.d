@@ -151,16 +151,19 @@ from pohod
 <div>
 <ul style="margin-left: 20px;">
 <li>  &nbsp;&nbsp;создание достоверной информационной базы <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;по пройденным и планируемым туристским походам;<br> </li>
- <li> &nbsp;&nbsp;облегчения поиска информации о планируемых походах;</li>
- <li> &nbsp;&nbsp;создание интернет площадки для формирования туристских групп;</li>
- <li> &nbsp;&nbsp;создания системы дистанционной заявки на туристские маршруты.</li>
-</ul>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;по пройденным и планируемым туристским походам;<br> </li> 
+ <li> &nbsp;&nbsp;облегчения поиска информации о планируемых походах;</li> 
+ <li> &nbsp;&nbsp;создание интернет площадки для формирования туристских групп;</li> 
+ <li> &nbsp;&nbsp;создания системы дистанционной заявки на туристские маршруты.</li> 
+</ul><br>
+
+<p style="text-align:right;"> <a href="` ~ dynamicPath ~ `inform" > 
+Подробнее</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
   </div>
         </p>
-
-       <p>&nbsp;&nbsp;</p>
-       `;
+       
+       <p>&nbsp;&nbsp;</p>`;
        
   
 	
