@@ -1,0 +1,31 @@
+
+.b-pohod_party_edit.e-found_tourists_panel {
+	display: none;
+	float: right;
+	width: 50%;
+}
+
+.b-pohod_party_edit.e-selected_tourists_panel {
+	float: left;
+	/*width: 50%;*/
+}
+
+.b-pohod_alt_chef_edit.e-select_icon, .b-pohod_chef_edit.e-select_icon,
+.b-pohod_party_edit.e-tourist_select_icon, .b-pohod_party_edit.e-tourist_deselect_icon {
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	padding: 0;
+}
+
+.b-pohod_alt_chef_edit.e-select_icon, .b-pohod_chef_edit.e-select_icon,
+.b-pohod_party_edit.e-tourist_select_icon {
+	background-image: url("/pub/img/icons/append_icon.png");
+}
+
+.b-pohod_party_edit.e-tourist_deselect_icon {
+	background-image: url("/pub/img/icons/remove_icon.png");
+}

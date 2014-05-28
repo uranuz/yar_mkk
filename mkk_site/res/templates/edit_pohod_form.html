@@ -1,7 +1,9 @@
+<link rel="stylesheet" type="text/css" href="{{css folder}}edit_pohod.css">
+
 <form id="edit_pohod_form" method="post"{{edit_pohod_form}}>
 
 <hr>
-<b>Маршрутная книжка</b>
+<h4>Маршрутная книжка</h4>
 <table>
 <tr>
 	<td><label for="kod_mkk">Код МКК</label><br>
@@ -22,7 +24,7 @@
 
 
 <hr>
-<b>Поход</b>
+<h4>Поход</h4>
 <table>
 <tr>
 	<td><label for="region_pohod">Район похода</label></td>
@@ -45,10 +47,10 @@
 </tr>
 <tr>
 	<td><label for="begin_day">Сроки проведения</label></td>
-	<td colspan="999">с &nbsp;&nbsp;
+	<td colspan="999">с &nbsp; &nbsp;
 		{{begin_date}}
 		<br>
-		<label for="finish_day">по</label>
+		<label for="finish_day">по&nbsp;</label>
 		{{finish_date}}
 	</td>
 </tr>
@@ -60,10 +62,10 @@
 </tr>
 </table>
 <label for="chef_coment">Коментарий руководителя</label><br>
-<textarea id="chef_coment" name="chef_coment"  cols="40">{{chef_coment}}</textarea>
+<textarea id="chef_coment" name="chef_coment" cols="40">{{chef_coment}}</textarea>
 
 <hr>
-<b>Группа</b>
+<h4>Группа</h4>
 <div style="clear: both;"></div><!--Чтобы предыдущее содержимое не обтекалось-->
 <!--Блок для вывода списка туристов при поиске-->
 <!-- <div id="tourist_select_div"></div> -->
@@ -79,34 +81,36 @@
 	</tr>
 	<tr>
 		<td>Руководитель похода</td>
-		<td colspan="999"><input type="hidden" name="chef_grupp" id="chef_grupp"{{chef_grupp}}>
-			<a href="#" id="pohod_chef_edit_btn">{{chef_grupp_text}}</a>
+		<td colspan="999">
+			<input type="hidden" name="chef_grupp" class="b-pohod_chef_edit e-tourist_key_inp"{{chef_grupp}}>
+			<a href="#_NOLink" class="b-pohod_chef_edit e-open_dlg_btn">{{chef_grupp_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Заместитель руководителя</td>
-		<td colspan="999"><input type="hidden" name="alt_chef" id="alt_chef"{{alt_chef}}>
-			<a href="#" id="pohod_alt_chef_edit_btn">{{alt_chef_text}}</a>
+		<td colspan="999">
+			<input type="hidden" name="b-pohod_alt_chef_edit e-tourist_key_inp" class="alt_chef"{{alt_chef}}>
+			<a href="#_NOLink" class="b-pohod_alt_chef_edit e-open_dlg_btn">{{alt_chef_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Участники</td>
 		<td>
-			<input type="hidden" name="unit_neim" id="unit_neim">
-			<a href="#" id="pohod_participants_edit_btn">Редактировать</a>
+			<input type="hidden" name="unit_neim" class="b-pohod_party_edit e-tourist_keys_inp">
+			<a href="#_NOLink" class="b-pohod_party_edit e-open_dlg_btn">Редактировать</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Количество участников</td><td><input type="text" size="4" name="unit"{{unit_count}}></td>
 	</tr>
 	<tr>
-		<td colspan="999"><div id="unit_div">{{unit}}</div></td>
+		<td colspan="999"><div class="b-pohod_party_edit e-tourists_list">{{unit}}</div></td>
 	</tr>
 	</table>
 </div>
 
 <hr>
-<b>Ссылки на доп. материалы</b>
+<h4>Ссылки на доп. материалы</h4>
 <div id="link_list_div">
 	<table></table>
 </div>
@@ -135,39 +139,44 @@
 
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
 
-<style type="text/css">
-	.pohod_chef_select_btn, .tourist_select_btn, .tourist_deselect_btn {
-		background-repeat: no-repeat;
-		background-size: 18px 18px;
-		display: inline-block;
-		width: 18px;
-		height: 18px;
-		margin: 0;
-		padding: 0;
-	}
-	
-	.pohod_chef_select_btn, .tourist_select_btn {
-		background-image: url("/pub/img/icons/append_icon.png");
-	}
-
-	.tourist_deselect_btn {
-		background-image: url("/pub/img/icons/remove_icon.png");
-	}
-
-	.testClass {
-		position: relative; width: 100px; height: 100px; background: #ccc;
-	}
-	
-</style>
-
 <!-- Диалог редактирования участников похода -->
-<div id="party_select_dlg" style="display: none;">
-	<input type="text" class="tourist_search_filter">
-	<input type="button" value="Искать!" class="tourist_search_btn">
-	<table><tbody><tr style="vertical-align: top;">
-		<td><div class="found_tourists"></div></td>
-		<td><div class="selected_tourists"></div></td>
-	</tr></tbody></table>
-	<div class="tourist_select_message"></div>
-	<input type="button" value="     OK     " class="party_accept_btn">
+<div class="b-pohod_party_edit e-dlg" style="display: none;" title="Список участников">
+	<div class="b-pohod_party_edit e-select_message"></div>
+	<span>
+		<input type="text" placeholder="Введите фамилию туриста" class="b-pohod_party_edit e-search_filter">
+		<input type="button" value="Искать!" class="b-pohod_party_edit e-search_btn">
+	</span>
+	<span style="float: right;">
+		<input type="button" value="Сохранить" class="b-pohod_party_edit e-accept_btn">
+	</span>
+	<div style="clear: both"></div>
+	
+	<div class="b-pohod_party_edit e-found_tourists_panel">
+		<h5>Найденные туристы</h5>
+		<div class="b-pohod_party_edit e-found_tourists"></div>
+	</div>
+	<div class="b-pohod_party_edit e-selected_tourists_panel">
+		<h5>Участники похода</h5>
+		<div class="b-pohod_party_edit e-selected_tourists"></div>
+	</div>
+</div>
+
+<!--Диалог редактирования руководителя похода-->
+<div class="b-pohod_chef_edit e-dlg" style="display: none;" title="Выбор руководителя">
+	<div class="b-pohod_chef_edit e-search_message"></div>
+	<input type="text" placeholder="Введите фамилию туриста" class="b-pohod_chef_edit e-search_filter">
+	<input type="button" value="Искать!" class="b-pohod_chef_edit e-search_btn">
+	<div class="b-pohod_chef_edit e-search_results"></div>
+</div>
+
+<!--Диалог редактирования зам. руководителя похода-->
+<div class="b-pohod_alt_chef_edit e-dlg" style="display: none;" title="Выбор зам. руководителя">
+	<div class="b-pohod_alt_chef_edit e-search_message"></div>
+	<input type="text" placeholder="Введите фамилию туриста" class="b-pohod_alt_chef_edit e-search_filter">
+	<input type="button" value="Искать!" class="b-pohod_alt_chef_edit e-search_btn">
+	<div class="b-pohod_alt_chef_edit e-delete_btn">
+		<div class="b-pohod_alt_chef_edit e-select_icon"></div>
+		<a href="#_NOLink">Нет заместителя</a>
+	</div>
+	<div class="b-pohod_alt_chef_edit e-search_results"></div>
 </div>
