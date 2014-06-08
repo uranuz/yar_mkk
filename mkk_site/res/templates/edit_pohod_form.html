@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="{{css folder}}edit_pohod.css">
 
-<form id="edit_pohod_form" method="post"{{edit_pohod_form}}>
+<form id="b-edit_pohod e-edit_pohod_form" method="post"{{edit_pohod_form}}>
 
 <hr>
 <h4>Маршрутная книжка</h4>
@@ -89,7 +89,7 @@
 	<tr>
 		<td>Заместитель руководителя</td>
 		<td colspan="999">
-			<input type="hidden" name="b-pohod_alt_chef_edit e-tourist_key_inp" class="alt_chef"{{alt_chef}}>
+			<input type="hidden" name="b-pohod_alt_chef_edit e-tourist_key_inp" class="b-pohod_alt_chef_edit e-tourist_key_inp"{{alt_chef}}>
 			<a href="#_NOLink" class="b-pohod_alt_chef_edit e-open_dlg_btn">{{alt_chef_text}}</a>
 		</td>
 	</tr>
@@ -111,29 +111,30 @@
 
 <hr>
 <h4>Ссылки на доп. материалы</h4>
-<div id="link_list_div">
-	<table></table>
+<div class="b-edit_pohod e-link_list">
+	<table class="b-edit_pohod e-link_list_table"></table>
 </div>
-<input type="hidden" id="extra_file_links" name="extra_file_links">
-<input type="button" id="add_more_extra_file_links_btn" value="  Добавить ещё  ">
+<input type="hidden" class="b-edit_pohod e-extra_file_links_inp" name="extra_file_links">
+<input type="button" class="b-edit_pohod e-add_more_extra_file_links_btn" value="  Добавить ещё  ">
 
 <div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 <hr>
 
 <input type="hidden" name="action"{{form_input_action}}>
 
-<span><input type="submit" id="pohod_submit_btn" value="Сохранить"></span>
-<span style="float: right;"><input type="button" id="pohod_delete_btn" value="Удалить поход"></span>
+<span><input type="submit" class="b-edit_pohod e-submit_btn" value="Сохранить"></span>
+<span style="float: right;"><input type="button" class="b-edit_pohod e-open_delete_dlg_btn" value="Удалить поход"></span>
 <div style="clear: both"></div>
 
 
 </form>
 
-<div id="dialog" title="Удаление похода" style="display: none;">
-	<p>Для удаления похода наберите в окне слово "удалить" и нажмите на кнопку.</p>
+<!-- Диалог удаления похода -->
+<div class="b-edit_pohod e-delete_dlg" title="Удаление похода" style="display: none;">
+	<p>Для подтверждения удаления похода введите слово "удалить" (без кавычек) и нажмите на кнопку</p>
 
-	<input type="text" id="delete_confirm_inp">
-	<input type="button" id="delete_confirm_btn" value="OK">
+	<input type="text" class="b-edit_pohod e-delete_confirm_inp">
+	<input type="button" class="b-edit_pohod e-delete_confirm_btn" value="OK">
 </div>
 
 
@@ -175,7 +176,7 @@
 	<input type="text" placeholder="Введите фамилию туриста" class="b-pohod_alt_chef_edit e-search_filter">
 	<input type="button" value="Искать!" class="b-pohod_alt_chef_edit e-search_btn">
 	<div class="b-pohod_alt_chef_edit e-delete_btn">
-		<div class="b-pohod_alt_chef_edit e-select_icon"></div>
+		<div class="b-pohod_alt_chef_edit e-delete_icon"></div>
 		<a href="#_NOLink">Нет заместителя</a>
 	</div>
 	<div class="b-pohod_alt_chef_edit e-search_results"></div>

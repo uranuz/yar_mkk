@@ -4,30 +4,10 @@ mkk_site = {
 
 //Инициализация страницы
 $(window.document).ready( function() {
-	var
-		pohod = mkk_site.edit_pohod;
-	
+	//Инициализаци блоков на странице
+	mkk_site.edit_pohod.blockInit();
 	mkk_site.pohod_chef_edit.blockInit();
 	mkk_site.pohod_party_edit.blockInit();
-
-	$("#add_more_extra_file_links_btn")
-	.on( "click", pohod.onAddMoreExtraFileLinks_BtnClick );
-
-	$("#pohod_submit_btn")
-	.on( "click", function(){
-		pohod.saveListOfExtraFileLinks();
-		$("#edit_pohod_form").submit();
-	});
-	
-	$("#pohod_delete_btn")
-	.on( "click", function(){
-	   $( "#dialog" ).dialog();	
-	});
-	
-	$("#delete_confirm_btn")
-	.on( "click", pohod.onDeleteConfirm_BtnClick );
-	
-	pohod.loadListOfExtraFileLinks();
 } );
 
 //Редактирование руководителя и зам. руководителя похода
@@ -50,7 +30,7 @@ mkk_site.pohod_chef_edit = {
 		blockAltChef.filter(".e-delete_btn")
 		.on( "click", function() {
 			blockAltChef.filter(".e-tourist_key_inp").val("null");
-			blockAltChef.filter(".e-open_dlg_btn").val("Редактировать");
+			blockAltChef.filter(".e-open_dlg_btn").text("Редактировать");
 			blockAltChef.filter(".e-dlg").dialog("destroy");
 		});
 
@@ -401,6 +381,30 @@ mkk_site.pohod_party_edit = {
 };
 
 mkk_site.edit_pohod = {
+	//Инициализация блока редактирования похода
+	blockInit: function()
+	{	var
+			block = $(".b-edit_pohod");
+
+		block.filter(".e-open_delete_dlg_btn")
+		.on( "click", function(){
+			block.filter(".e-delete_dlg").dialog();
+		});
+
+		block.filter(".e-delete_confirm_btn")
+		.on( "click", mkk_site.edit_pohod.onDeleteConfirm_BtnClick );
+
+		block.filter(".e-add_more_extra_file_links_btn")
+		.on( "click", mkk_site.edit_pohod.onAddMoreExtraFileLinks_BtnClick );
+
+		block.filter(".e-submit_btn")
+		.on( "click", function(){
+			mkk_site.edit_pohod.saveListOfExtraFileLinks();
+			block.filter(".e-edit_pohod_form").submit();
+		});
+
+		mkk_site.edit_pohod.loadListOfExtraFileLinks();
+	},
 	
 	//Возвращает строку описания туриста по записи
 	getTouristInfoString: function(rec) {
@@ -414,13 +418,13 @@ mkk_site.edit_pohod = {
 	//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
 	onAddMoreExtraFileLinks_BtnClick: function()
 	{	var
+			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
-			linkListDiv = $("#link_list_div"),
 			inputPortion = pohod.extraFileLinksInputPortion,
 			i = 0;
 
 		for( ; i < inputPortion; i++ )
-			pohod.renderInputsForExtraFileLink([]).appendTo( linkListDiv.children("table") );
+			pohod.renderInputsForExtraFileLink([]).appendTo( block.filter(".e-link_list_table") );
 	},
 
 	//Создает элементы для ввода ссылки с описанием на доп. материалы
@@ -443,9 +447,10 @@ mkk_site.edit_pohod = {
 	//Отображает список ссылок на доп. материалы
 	renderListOfExtraFileLinks: function(linkList)
 	{	var
+			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
-			linkListDiv = $("#link_list_div"),
-			newTable = $("<table>").append(
+			newTable = $( "<table>", {class: "b-edit_pohod e-link_list_table"} )
+			.append(
 				$("<thead>").append(
 					$("<tr>").append( $("<th>Ссылка</th>") ).append( $("<th>Название (комментарий)</th>") )
 				)
@@ -458,7 +463,7 @@ mkk_site.edit_pohod = {
 		for( ; i < inputCount; i++ )
 			pohod.renderInputsForExtraFileLink( linkList[i] ).appendTo(newTable);
 		
-		linkListDiv.children("table").replaceWith(newTable);
+		block.filter(".e-link_list_table").replaceWith(newTable);
 	},
 
 	//Загрузка списка ссылок на доп. материалы с сервера
@@ -477,10 +482,9 @@ mkk_site.edit_pohod = {
 	//Сохранение списка ссылок на доп. материалы
 	saveListOfExtraFileLinks: function()
 	{	var
+			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
-			linkListDiv = $("#link_list_div"),
-			tableRows = linkListDiv.children("table").children("tbody").children("tr"),
-			extraFileLinksInput = $("#extra_file_links"),
+			tableRows = block.filter(".e-link_list_table").children("tbody").children("tr"),
 			currInputs,
 			link,
 			comment,
@@ -498,24 +502,17 @@ mkk_site.edit_pohod = {
 				data.push( [ link, comment ] );
 		}
 
-		extraFileLinksInput.val( JSON.stringify(data) );
+		block.filter(".e-extra_file_links_inp").val( JSON.stringify(data) );
 	},
 
-	jQueryUITest: function()
-	{	var
-			testDiv = $("<div>Здравствуй, Вася!!!</div>").appendTo("body");
-		
-		testDiv.dialog();
-		testDiv.addClass("testClass");
-	},
-	
 	//Обработчик тыка по кнопке подтверждения удаления похода
 	onDeleteConfirm_BtnClick: function() {
 		var
+			block = $(".b-edit_pohod"),
 			getParams = webtank.parseGetParams(),
 			pohodKey = parseInt(getParams["key"], 10);
 		
-		if( $("#delete_confirm_inp").val() === "удалить" )
+		if( block.filter(".e-delete_confirm_inp").val() === "удалить" )
 		{
 			webtank.json_rpc.invoke({
 				uri: "/jsonrpc/",
@@ -525,7 +522,7 @@ mkk_site.edit_pohod = {
 			document.location.replace("/dyn/show_pohod");
 		}
 		else
-		{	$("#delete_confirm_inp").val("Не подтверждено!!!")
+		{	block.filter(".e-delete_confirm_inp").val("Не подтверждено!!!")
 		}
 	}
 

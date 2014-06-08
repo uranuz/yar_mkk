@@ -33,6 +33,18 @@ h6 {
 	font-size: 1.0em;
 }
 
+a {
+	text-decoration: underline;
+	color:#205F25;
+}
+
+a:visited { color:#408056;}
+
+a:active { color:#205F25; }
+
+a:hover {
+	color: #30CF80;
+}
 
 body {
 	/*--------------- 100% высота контейнера div.page далее */
@@ -226,15 +238,4 @@ table.tab1
 }
        
 .last_pohod_comment {font-size: 80%;}
-   
-   a {
-	   text-decoration: underline; color:#0000FF;/* Убирает подчеркивание для ссылок */
-   } 
-   A:visited { text-decoration: underline;color:#20B2AA;} 
-   
-   A:active { text-decoration: underline;color:#104E8B; }
-   A:hover {
-    text-decoration: underline; /* Делает ссылку подчеркнутой при наведении на нее курсора */
-    color: #EE7600; /* Цвет ссылки */
-	}
        
