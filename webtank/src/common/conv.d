@@ -1,6 +1,14 @@
 module webtank.common.conv;
 
-//Преобразование символа соотв. шестнадцатеричной цифре в байт
+/++
+$(LOCALE_EN_US
+	Function converts character of hex number to byte
+)
+
+$(LOCALE_RU_RU
+	Преобразование символа соотв. шестнадцатеричной цифре в байт
+)
++/
 ubyte hexSymbolToByte(char symbol)
 {	if( symbol >= '0' && symbol <= '9' )
 		return cast(ubyte) ( symbol - '0' ) ;
@@ -11,12 +19,29 @@ ubyte hexSymbolToByte(char symbol)
 	return 0; //TODO: Подумать, что делать
 }
 
+/++
+$(LOCALE_EN_US
+	Function checks if character corresponds to hex number
+)
+
+$(LOCALE_RU_RU
+	Функция определяет соответствует ли переданный символ цифре шестнадцатеричного числа
+)
++/
 bool isHexSymbol(char symbol)
 {	return 
 		( symbol >= '0' && symbol <= '9' ) || ( symbol >= 'a' && symbol <= 'f' ) || ( symbol >= 'A' && symbol <= 'F' );
 }
 
-//Функция преобразования числа из шестнадцатеричной строки в массив байтов
+/++
+$(LOCALE_EN_US
+	Function converts string corresponding to hex number into byte array representing this number
+)
+
+$(LOCALE_RU_RU
+	Функция преобразует строку соответствующую шестнадцатеричному числу в массив байтов пердставляющих число
+)
++/
 ubyte[] hexStringToByteArray(string hexString)
 {	auto result = new ubyte[hexString.length/2]; //Выделяем с запасом (в строке могут быть "лишние" символы)
 	size_t i = 0; //Индексация результирующего массива
@@ -39,6 +64,9 @@ ubyte[] hexStringToByteArray(string hexString)
 	return result;
 }
 
+/++
+	ditto
++/
 ubyte[arrayLen] hexStringToStaticByteArray(size_t arrayLen)(string hexString)
 {	ubyte[arrayLen] result;
 	size_t i = 0; //Индексация результирующего массива
@@ -61,12 +89,20 @@ ubyte[arrayLen] hexStringToStaticByteArray(size_t arrayLen)(string hexString)
 	return result;
 }
 
+/++
+$(LOCALE_EN_US
+	Function converts very long number into it's hex string representation
+)
+
+$(LOCALE_RU_RU
+	Функция преобразует очень длинное число в строку, сотоящую из шестнадцатеричных цифр числа
+)
++/
 string toHexString(uint arrayLen)(ubyte[arrayLen] srcArray)
 {	import std.digest.digest;
 	return std.digest.digest.toHexString(srcArray).idup;
 }
 
-//Набор тестов для функций преобразования
 unittest
 {	import std.digest.md;
 	import std.digest.digest;
@@ -93,7 +129,15 @@ enum trueStrings =
 enum falseStrings = 
 [`false`, `f`, `no`, `n`, `ложь`, `л`, `нет`, `н`, `off`, `0`];
 
-//Функция преобразования некоторых строковых значений в логическое
+/++
+$(LOCALE_EN_US
+	Function converts some string values into boolean value
+)
+
+$(LOCALE_RU_RU
+	Функция преобразования некоторых строковых значений в логическое
+)
++/
 bool toBool(string src)
 {	import std.string;
 	foreach( logicStr; trueStrings )
@@ -107,7 +151,15 @@ bool toBool(string src)
 }
 
 import std.datetime;
+/++
+$(LOCALE_EN_US
+	Function converts string of PostgreSQL timestamp into D std.datetime.DateTime
+)
 
+$(LOCALE_RU_RU
+	Функция преобразует строку штампа времени PostgreSQL в формат дата/время языка D
+)
++/
 DateTime DateTimeFromPGTimestamp( const(char)[] dateString )
 {	auto temp = dateString[0..10] ~ "T" ~ dateString[11..19];
 	return DateTime.fromISOExtString(temp);

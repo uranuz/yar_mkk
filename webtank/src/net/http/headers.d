@@ -164,8 +164,7 @@ protected:
 	size_t _parsedLinesCount = 0;
 }
 
-/// Class is representing HTTP headers for request and response.
-/// ---
+/// Class is representing HTTP headers for request and response
 /// Класс, представляющий HTTP заголовки для запроса и ответа
 class HTTPHeaders
 {	
