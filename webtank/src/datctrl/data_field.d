@@ -214,7 +214,7 @@ interface IBaseDataField
 	)
 	$(LOCALE_RU_RU
 		Функция возвращает строковое представление значения поля по номеру $(D_PARAM index)
-		Парметр $(D_PARAM defaultValue) определяет возвращаемое значение,
+		Параметр $(D_PARAM defaultValue) определяет возвращаемое значение,
 		если возвращаемое значение пусто (null)
 	)
 	+/
@@ -261,8 +261,8 @@ interface IDataField(FieldType FieldT) : IBaseDataField
 	)
 	$(LOCALE_RU_RU
 		Функция возвращает значениt поля по номеру $(D_PARAM index)
-		Парметр $(D_PARAM defaultValue) определяет возвращаемое значение,
-		если возвращаемое значение пусто (null)
+		Параметр $(D_PARAM defaultValue) определяет возвращаемое значение,
+		если значение поля пусто (null)
 	)
 	+/
  	T get(size_t index, T defaultValue);
