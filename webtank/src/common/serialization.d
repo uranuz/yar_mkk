@@ -16,7 +16,15 @@ class SerializationException : Exception {
 	}
 }
 
-///Шаблонная функция для сериализации данных в std.json
+/++
+$(LOCALE_EN_US
+	Function serializes D language value into std.json.JSONValue struct
+)
+
+$(LOCALE_RU_RU
+	Функция сериализует значение языка D в структуру типа std.json.JSONValue
+)
++/
 JSONValue getStdJSON(T)(T dValue)
 {	/+pragma(msg, T);+/
 	static if( is( T == JSONValue ) )
@@ -88,7 +96,15 @@ JSONValue getStdJSON(T)(T dValue)
 	}
 }
 
-///Шаблонная функция десериализации данных из std.json
+/++
+$(LOCALE_EN_US
+	Function deserializes std.json.JSONValue struct into D language value 
+)
+
+$(LOCALE_RU_RU
+	Функция десериализует структуру std.json.JSONValue в значение языка D
+)
++/
 T getDLangValue(T, uint recursionLevel = 1)(JSONValue jValue)
 {	pragma(msg, T, "  ",recursionLevel);
 	static if( is( T == JSONValue ) )

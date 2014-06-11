@@ -8,10 +8,27 @@ import std.array, std.conv, std.json, std.datetime;
 
 import   webtank.datctrl.record_format;
 
+/++
+$(LOCALE_EN_US
+	Enumerable representing types of possible data fields
+)
+
+$(LOCALE_RU_RU
+	Перечислимый тип представляющий типы возможных полей данных
+)
++/
 enum FieldType { Str, Int, Bool, IntKey, Date, Enum, Text };
 
-///Строковые значения, которые трактуются как true при преобразовании
-///типов. Любые другие трактуются как true
+/++
+$(LOCALE_EN_US
+	String values representing values that treated as boolean true value
+)
+
+$(LOCALE_RU_RU
+	Строковые значения, которые трактуются как true при преобразовании типов
+)
++/
+
 immutable(string[]) _logicTrueValues = 
 		 [`true`, `t`, `yes`, `y`, `on`, `истина`, `и`, `да`, `д`];
 		 
@@ -21,8 +38,17 @@ immutable(string[]) _logicFalseValues =
 ///Строка ошибки времени компиляции - что, мол, облом
 immutable(string) _notImplementedErrorMsg = `This conversion is not implemented: `;
 
-///Шаблон для получения реального типа поля по перечислимому 
-///значению семантического типа поля
+/++
+$(LOCALE_EN_US
+	Template that returns real D language type of data field by enumerable value
+	$(D_PARAM FieldT) of semantic field type
+)
+
+$(LOCALE_RU_RU
+	Шаблон для возвращает реальный типа языка D для поля данных по перечислимому
+	значению семантического типа поля $(D_PARAM FieldT)
+)
++/
 template DataFieldValueType(FieldType FieldT) 
 {	static if( FieldT == FieldType.Int || FieldT == FieldType.Enum )
 		alias int DataFieldValueType;
@@ -38,9 +64,19 @@ template DataFieldValueType(FieldType FieldT)
 		static assert( 0, _notImplementedErrorMsg ~ FieldT.to!string );
 }
 
-///Преобразование из различных настоящих типов в другой реальный
-///тип, который соотвествует семантическому типу поля, 
-///указанному в параметре шаблона FieldT
+/++
+$(LOCALE_EN_US
+	Function converts values from different real D types to another
+	real D types but coresponding to semantical field types set
+	by template argument $(D_PARAM FieldT)
+)
+
+$(LOCALE_RU_RU
+	Преобразование из различных настоящих типов в другой реальный
+	тип, который соотвествует семантическому типу поля,
+	указанному в параметре шаблона FieldT
+)
++/
 auto fldConv(FieldType FieldT, S)( S value )
 {	
 	import std.traits;
@@ -103,6 +139,15 @@ auto fldConv(FieldType FieldT, S)( S value )
 
 }
 
+/++
+$(LOCALE_EN_US
+	Returns true if $(D_PARAM FieldType) is key field type and false otherwise
+)
+
+$(LOCALE_RU_RU
+	Возвращает true если $(D_PARAM FieldT) является типом ключевого поля или false в противном случае
+)
++/
 //Возвращает true если данный тип поля является типом ключевого поля
 template isKeyFieldType(FieldType fieldType)
 {	static if( fieldType == FieldType.IntKey )
@@ -111,19 +156,70 @@ template isKeyFieldType(FieldType fieldType)
 		enum isKeyFieldType = false;
 }
 
-///Базовый и нешаблонный интерфейс данных поля
+/++
+$(LOCALE_EN_US
+	Base interface for data field
+)
+
+$(LOCALE_RU_RU
+	Базовый и нешаблонный интерфейс данных поля
+)
++/
 interface IBaseDataField
-{	//Свойства поля
-	FieldType type() @property;  //Должно возвращать тип поля данных
-	size_t length() @property;   //Должно возращать количество элементов
-	string name() @property;    //Должно возвращать имя поля данных
-	bool isNullable() @property;   //Поле может быть пустым (null), если true
-	bool isWriteable() @property;  //Возвращает true, если в поле можно записывать
-	
-	bool isNull(size_t index); //Должно возвращать true, если значение null
-	//Получение строкового значения по индексу. Функция вернёт defaultValue,
-	//если поле пустое. По-умолчанию defaultValue = null
+{
+	/++
+	$(LOCALE_EN_US Property returns type of data field)
+	$(LOCALE_RU_RU Свойство возвращает тип поля данных)
+	+/
+	FieldType type() @property;
+
+	/++
+	$(LOCALE_EN_US Property returns number of rows in data field)
+	$(LOCALE_RU_RU Свойство возвращает количество строк в поле данных)
+	+/
+	size_t length() @property;
+
+	/++
+	$(LOCALE_EN_US Property returns name of data field)
+	$(LOCALE_RU_RU Свойство возвращает имя поля данных)
+	+/
+	string name() @property;
+
+	/++
+	$(LOCALE_EN_US Property is true if field value could be null an false if otherwise)
+	$(LOCALE_RU_RU
+		Свойство равно true, если значение поле может быть пустым
+		(null) или равно false в противном случае
+	)
+	+/
+	bool isNullable() @property;
+
+	/++
+	$(LOCALE_EN_US Property is true if allowed to write into field)
+	$(LOCALE_RU_RU Свойство равно true, если разрешена запись в поле данных)
+	+/
+	bool isWriteable() @property;
+
+	/++
+	$(LOCALE_EN_US Function returns true if value of field with $(D_PARAM index) is null)
+	$(LOCALE_RU_RU Функция возвращает true, если значение поля с номером $(D_PARAM index) пустое (null) )
+	+/
+	bool isNull(size_t index);
+
+	/++
+	$(LOCALE_EN_US
+		Function returns string representation of field value at $(D_PARAM index).
+		Parameter $(D_PARAM defaultValue) determines returned value if value
+		by $(D_PARAM index) is null
+	)
+	$(LOCALE_RU_RU
+		Функция возвращает строковое представление значения поля по номеру $(D_PARAM index)
+		Парметр $(D_PARAM defaultValue) определяет возвращаемое значение,
+		если возвращаемое значение пусто (null)
+	)
+	+/
 	string getStr(size_t index, string defaultValue);
+
 	
 	JSONValue getStdJSONFormat();
 	
@@ -132,28 +228,67 @@ interface IBaseDataField
 // 	void isNullable(bool nullable) @property; //Установка возможности быть пустым
 }
 
-///Основной интерфейс данных поля
+/++
+$(LOCALE_EN_US
+	Common template interface for data field
+)
+
+$(LOCALE_RU_RU
+	Основной шаблонный интерфейс данных поля
+)
++/
 interface IDataField(FieldType FieldT) : IBaseDataField
 {	
 	alias DataFieldValueType!(FieldT) T;
 
-// 	//Методы и свойства по работе с диапазоном
-// 	ICell front() @property;
-// 	bool empty() @property;
-// 	void popFront();
-	
-	//Методы чтения данных из поля
-	///Нужно проверять, пусто или нет, иначе можно получить исключение
+	/++
+	$(LOCALE_EN_US
+		Function returns typed value of field by $(D_PARAM index).
+		If value is null then behavior is undefined
+	)
+	$(LOCALE_RU_RU
+		Функция возвращает значениt поля по номеру $(D_PARAM index)
+		Если значение пусто (null), то поведение не определено
+	)
+	+/
 	T get(size_t index);
+
+	/++
+	$(LOCALE_EN_US
+		Function returns typed value of field by $(D_PARAM index).
+		Parameter $(D_PARAM defaultValue) determines returned value if value
+		by $(D_PARAM index) is null
+	)
+	$(LOCALE_RU_RU
+		Функция возвращает значениt поля по номеру $(D_PARAM index)
+		Парметр $(D_PARAM defaultValue) определяет возвращаемое значение,
+		если возвращаемое значение пусто (null)
+	)
+	+/
  	T get(size_t index, T defaultValue);
  	
 	static if( isKeyFieldType!(FieldT) )
-	{	size_t getIndex(size_t key);
+	{
+		/++
+		$(LOCALE_EN_US Returns row index by record $(D_PARAM key))
+		$(LOCALE_RU_RU Возвращает номер строки по ключу записи $(D_PARAM key))
+		+/
+		size_t getIndex(size_t key);
+
+		/++
+		$(LOCALE_EN_US Returns record key by row $(D_PARAM index))
+		$(LOCALE_RU_RU Возвращает ключ записи по номеру строки $(D_PARAM index))
+		+/
 		size_t getKey(size_t index);
 	}
 	
 	static if( FieldT == FieldType.Enum )
-	{	EnumFormat enumFormat();
+	{
+		/++
+		$(LOCALE_EN_US Returns format for enum field)
+		$(LOCALE_RU_RU Возвращает формат для поля перечислимого типа)
+		+/
+		EnumFormat enumFormat();
 	}
 }
 

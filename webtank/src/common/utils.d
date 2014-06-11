@@ -1,12 +1,29 @@
 module webtank.common.utils;
 
-///Функции разделения массивов по разделителю delim
+/++
+$(LOCALE_EN_US
+	Function splits $(D_PARAM array) by delimeter $(D_PARAM delim)
+)
+
+$(LOCALE_RU_RU
+	Функция разделяет массив $(D_PARAM array) по разделителю $(D_PARAM delim)
+)
++/
 E[][] splitArray(E, D)(E[] array, D delim)
 	if( !is( D : E[] ) )
 {	import std.conv;
 	return splitArray( array, std.conv.to!(E[])(delim) );
 }
 
+/++
+$(LOCALE_EN_US
+	Function splits $(D_PARAM array) by set of delimeter $(D_PARAM delim)
+)
+
+$(LOCALE_RU_RU
+	Функция разделяет массив $(D_PARAM array) по набору разделителей $(D_PARAM delim)
+)
++/
 E[][] splitArray(E)(E[] array, E[] delim)
 {	E[][] result;
 	size_t startPos = 0;
@@ -24,13 +41,31 @@ E[][] splitArray(E)(E[] array, E[] delim)
 	return result;
 }
 
-///Возвращют первый элемент при разделении массива по delim
+/++
+$(LOCALE_EN_US
+	Function splits first splitted part of $(D_PARAM array) by delimeter $(D_PARAM delim)
+)
+
+$(LOCALE_RU_RU
+	Функция отделяет первую отделенную часть от массива $(D_PARAM array) по разделителю $(D_PARAM delim)
+)
++/
 E[] splitFirst(E, D)(E[] array, D delim)
 	if( !is( D : E[] ) )
 {	import std.conv;
 	return splitFirst( array, std.conv.to!(E[])(delim) );
 }
 
+/++
+$(LOCALE_EN_US
+	Function splits first splitted part of $(D_PARAM array) by set of delimeters $(D_PARAM delim)
+)
+
+$(LOCALE_RU_RU
+	Функция отделяет первую отделенную часть от массива $(D_PARAM array)
+	по набору разделителей $(D_PARAM delim)
+)
++/
 E[] splitFirst(E)(E[] array, E[] delim)
 {	E[] result;
 	foreach( i, e; array )
@@ -44,14 +79,33 @@ E[] splitFirst(E)(E[] array, E[] delim)
 	return null;
 }
 
+/++
+$(LOCALE_EN_US
+	Function splits last splitted part of $(D_PARAM array) by
+	delimeter $(D_PARAM delim)
+)
 
-///Возвращют последний элемент при разделении массива по delim
+$(LOCALE_RU_RU
+	Функция отделяет последнюю отделенную часть от массива $(D_PARAM array) по разделителю $(D_PARAM delim)
+)
++/
 E[] splitLast(E, D)(E[] array, D delim)
 	if( !is( D : E[] ) )
 {	import std.conv;
 	return splitLast( array, std.conv.to!(E[])(delim) );
 }
 
+/++
+$(LOCALE_EN_US
+	Function splits last splitted part of
+	$(D_PARAM array) by set of delimeters $(D_PARAM delim)
+)
+
+$(LOCALE_RU_RU
+	Функция отделяет последнюю отделенную часть от массива
+	$(D_PARAM array) по набору разделителей $(D_PARAM delim)
+)
++/
 E[] splitLast(E)(E[] array, E[] delim)
 {	E[] result;
 	foreach_reverse( i, e; array )
