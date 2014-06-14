@@ -8,6 +8,10 @@ import std.typetuple, std.typecons, std.conv, std.json;
 
 import webtank.common.optional, webtank.datctrl.data_field, webtank.db.database_field, webtank.common.serialization, webtank.common.utils;
 
+/++
+$(LOCALE_EN_US Struct representing format of record or record set)
+$(LOCALE_RU_RU Структура представляющая формат записи или набора записей)
++/
 struct RecordFormat(Args...)
 {	
 	size_t keyFieldIndex = 0; //Номер основного ключевого поля (если их несколько)
@@ -15,25 +19,33 @@ struct RecordFormat(Args...)
 	//(если значение = true) или нет (false)
 	bool[string] nullableFlags; ///Флаги "обнулябельности"
 	EnumFormat[string] enumFormats; ///Возможные значения для перечислимых полей
-	
-	///Метод получения типов полей (FieldType)
+
+	/++
+	$(LOCALE_EN_US Property returns array of semantic types of fields)
+	$(LOCALE_RU_RU Свойство возвращает массив семантических типов полей)
+	+/
 	static pure FieldType[] types() @property
 	{	FieldType[] result;
 		foreach( spec; _fieldSpecs )
 			result ~= spec.fieldType;
 		return result;
 	}
-	
-	///Метод получения имён полей
+
+	/++
+	$(LOCALE_EN_US Property returns array of field names for record format)
+	$(LOCALE_RU_RU Свойство возвращает массив имен полей для формата записи)
+	+/
 	static pure string[] names() @property
 	{	string[] result;
 		foreach( spec; _fieldSpecs )
 			result ~= spec.name;
 		return result;
 	}
-	
-	///Метод возыращает ассоциативный массив порядковых номеров
-	///полей в формате, индексируемых по именам полей
+
+	/++
+	$(LOCALE_EN_US Property returns AA of indexes of fields, indexed by their names)
+	$(LOCALE_RU_RU Свойство возвращает словарь номеров полей данных, индексируемых их именами)
+	+/
 	static pure size_t[string] indexes() @property
 	{	size_t[string] result;
 		foreach( i, spec; _fieldSpecs )
@@ -45,50 +57,88 @@ struct RecordFormat(Args...)
 	//Не использовать извне!!!
 	alias _parseRecordFormatArgs!Args _fieldSpecs;
 	
-	///АХТУНГ!!! ДАЛЕЕ ИДУТ СТРАШНЫЕ ШАБЛОННЫЕ ЗАКЛИНАНИЯ!!!
-	
+	//АХТУНГ!!! ДАЛЕЕ ИДУТ СТРАШНЫЕ ШАБЛОННЫЕ ЗАКЛИНАНИЯ!!!
+
+
+	/++
+	$(LOCALE_EN_US
+		Template returns tuple of names for fields having semantic types from
+		$(D_PARAM FilterFieldTypes) parameter. All elements from $(D_PARAM FilterFieldTypes)
+		tuple must be of FieldType type
+	)
+	$(LOCALE_RU_RU
+		Шаблон возвращает кортеж имен для полей, имеющих семантический тип из
+		кортежа $(D_PARAM FilterFieldTypes). Все элементы в кортеже $(D_PARAM FilterFieldTypes)
+		должны иметь тип FieldType
+	)
+	+/
 	///Шаблон возвращает кортеж имён полей отфильтрованных по типам FilterFieldTypes
 	///Элементы кортежа FilterFieldTypes должны иметь тип FieldType
 	template filterNamesByTypes(FilterFieldTypes...)
 	{	alias _getFieldNameTuple!( _filterFieldSpecs!(_fieldSpecs).ByTypes!(FilterFieldTypes) ) filterNamesByTypes;
 	}
-	
-	///Шаблон возвращает кортеж всех имён полей
+
+	/++
+	$(LOCALE_EN_US Template returns tuple of all field names for record format)
+	$(LOCALE_RU_RU Шаблон возвращает кортеж всех имен полей для формата записи)
+	+/
 	template tupleOfNames()
 	{	alias _getFieldNameTuple!(_fieldSpecs) tupleOfNames;
 	}
-	
-	///Шаблон для получения FieldType для поля с именем fieldName
+
+	/++
+	$(LOCALE_EN_US Template returns semantic field type $(D FieldType) for field with name $(D_PARAM fieldName))
+	$(LOCALE_RU_RU Шаблон возвращает семантический тип поля $(D FieldType) для поля с именем $(D_PARAM fieldName))
+	+/
 	template getFieldType(string fieldName)
 	{	alias _getFieldSpec!(fieldName, _fieldSpecs).fieldType getFieldType;
 	}
-	
-	///Шаблон для получения FieldType для поля с индексом fieldIndex
+
+	/++
+	$(LOCALE_EN_US Template returns semantic field type $(D FieldType) for field with index $(D_PARAM fieldIndex))
+	$(LOCALE_RU_RU Шаблон возвращает семантический тип поля $(D FieldType) для поля с номером $(D_PARAM fieldIndex))
+	+/
 	template getFieldType(size_t fieldIndex)
 	{	alias _getFieldSpec!(fieldIndex, _fieldSpecs).fieldType getFieldType;
 	}
-	
-	///Шаблон для получения типа значения поля с именем fieldName
+
+	/++
+	$(LOCALE_EN_US Template returns D value type for field with name $(D_PARAM fieldName))
+	$(LOCALE_RU_RU Шаблон возвращает тип языка D для поля с именем $(D_PARAM fieldName))
+	+/
 	template getValueType(string fieldName)
 	{	alias _getFieldSpec!(fieldName, _fieldSpecs).ValueType getValueType;
 	}
 	
-	///Шаблон для получения типа значения поля с индексом fieldIndex
+	/++
+	$(LOCALE_EN_US Template returns D value type for field with index $(D_PARAM fieldIndex))
+	$(LOCALE_RU_RU Шаблон возвращает тип языка D для поля с номером $(D_PARAM fieldIndex))
+	+/
 	template getValueType(size_t fieldIndex)
 	{	alias _getFieldSpec!(fieldIndex, _fieldSpecs).ValueType getValueType;
 	}
-	
-	///Шаблон для получения имени поля по индексу fieldIndex
+
+	/++
+	$(LOCALE_EN_US Template returns name for field with index $(D_PARAM fieldIndex))
+	$(LOCALE_RU_RU Шаблон возвращает имя для поля с номером $(D_PARAM fieldIndex))
+	+/
 	template getFieldName(size_t fieldIndex)
 	{	alias _getFieldSpec!(fieldIndex, _fieldSpecs).name getFieldName;
 	}
-	
-	///Шаблон получения порядкового номера поля в формате по имени fieldName
+
+	/++
+	$(LOCALE_EN_US Template returns index for field with name $(D_PARAM fieldName))
+	$(LOCALE_RU_RU Шаблон возвращает номер для поля с именем $(D_PARAM fieldName))
+	+/
 	template getFieldIndex(string fieldName)
 	{	alias _getFieldIndex!(fieldName, 0, _fieldSpecs) getFieldIndex;
 	}
 }
 
+/++
+$(LOCALE_EN_US Struct represents format for enumerated type of field)
+$(LOCALE_RU_RU Структура представляет формат для перечислимого типа поля)
++/
 ///Формат для перечислимого поля
 struct EnumFormat
 {	
@@ -98,9 +148,10 @@ protected:
 	string _defaultName;
 
 public:
-	///Конструктор формата получает на входе карту соответсвия
-	///ключей названиям элементов и параметр сортировки ключей 
-	///(возрастающий по-умолчанию)
+
+	//Конструктор формата получает на входе карту соответсвия
+	//ключей названиям элементов и параметр сортировки ключей
+	//(возрастающий по-умолчанию)
 	this(immutable(string[int]) names, bool isAscendingOrder = true) immutable
 	{	_names = names;
 		import std.algorithm, std.exception;
@@ -131,7 +182,10 @@ public:
 	{	return EnumFormat(this);
 	}
 	
-	///Сериализует формат перечислимого типа в std.json
+	/++
+	$(LOCALE_EN_US Serializes enumerated field format into std.json)
+	$(LOCALE_RU_RU Сериализует формат перечислимого типа в std.json)
+	+/
 	JSONValue getStdJSON() const
 	{	JSONValue jValue;
 		jValue.type = JSON_TYPE.OBJECT;
@@ -162,7 +216,12 @@ public:
 // 	{	_names = names.idup;
 // 		_keys = keys.idup;
 // 	}
-	
+
+
+	/++
+	$(LOCALE_EN_US Index operator for getting name of enumerated value by key)
+	$(LOCALE_RU_RU оператор индексации для получения имени перичислимого значения по ключу)
+	+/
 	///Оператор индексации по ключам для получения имени значения
 	///Возвращает null, если значения нет в контейнере
 	string opIndex(K)(K key) const
