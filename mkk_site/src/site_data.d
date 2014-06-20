@@ -27,25 +27,22 @@ immutable commonDBConnStr = "dbname=baza_MKK host=127.0.0.1 user=postgres passwo
 immutable authDBConnStr = "dbname=MKK_site_base host=127.0.0.1 user=postgres password=postgres";
 
 ///Далее идут пути относительно сайта
-immutable publicPath = "/pub/";     //Путь к директории общедоступного статического содержимого
-immutable cssPath = publicPath ~ "css/";  //Путь к директории таблиц стилей
-immutable jsPath = publicPath ~ "js/";   //Путь к директории javascript'ов
-immutable imgPath = publicPath ~ "img/";  //Путь к директории картинок
+immutable(string) publicPath;     //Путь к директории общедоступного статического содержимого
+immutable(string) cssPath;  //Путь к директории таблиц стилей
+immutable(string) jsPath;   //Путь к директории javascript'ов
+immutable(string) imgPath;  //Путь к директории картинок
 
-immutable webtankPublicPath = publicPath ~ "webtank/";
-immutable webtankCssPath = webtankPublicPath ~ "css/";  //Путь к директории скриптов библиотеки
-immutable webtankJsPath = webtankPublicPath ~ "js/";  //Путь к директории стилей библиотеки
-immutable webtankImgPath = webtankPublicPath ~ "img/";  //Путь к директории картинок библиотеки
+immutable(string) webtankPublicPath;
+immutable(string) webtankCssPath;  //Путь к директории скриптов библиотеки
+immutable(string) webtankJsPath;  //Путь к директории стилей библиотеки
+immutable(string) webtankImgPath;  //Путь к директории картинок библиотеки
 
-immutable dynamicPath = "/dyn/";    //Путь к директории динамического содержимого
-immutable restrictedPath = "/restricted/"; //Путь к директории содержимого с ограниченным доступом
-immutable JSON_RPC_Path = "/jsonrpc/"; //Путь для вызова удалённых процедур
+immutable(string) dynamicPath;    //Путь к директории динамического содержимого
+immutable(string) restrictedPath; //Путь к директории содержимого с ограниченным доступом
+immutable(string) JSON_RPC_Path; //Путь для вызова удалённых процедур
 
 
 ///Пути в файловой системе
-//Пути к директориям сайта в файловой системе
-private immutable _siteDir = "~/sites/mkk_site/"; //Директория сайта относительно $HOME с тильдой
-
 immutable(string) siteDir; //Директория сайта
 
 //Пути к ресурсам. Имеются в виду файлы, которые используются сервером
@@ -66,23 +63,125 @@ immutable(string) webtankEventLogFileName; //Логи событий библи�
 immutable(string) dbQueryLogFileName; //Логи событий библиотеки
 immutable(string) prioriteLogFileName; //Путь к журналу приоритетных сообщений
 
+///Ассоциативный массив с путями сайта в файловой системе
+immutable(string[string]) siteFileSystemPaths;
+
+///Ассоциативный массив с виртуальными путями сайта (те, что в адресной строке браузера)
+immutable(string[string]) siteVirtualPaths;
+
 shared static this()
-{	import std.path;
-	siteDir = std.path.expandTilde(_siteDir); //Расчёт директории сайта
+{	import std.file, std.json;
 
-	siteResDir = siteDir ~ "res/"; //Ресурсы сайта
-	webtankResDir = siteResDir ~ "webtank/"; //Ресурсы библиотеки
 
-	pageTemplatesDir = siteResDir ~ "templates/";
-	generalTemplateFileName = pageTemplatesDir ~ "general_template.html";
+	string configFile = readText("mkk_site_config.json");
 
-	siteLogsDir = siteDir ~ "logs/";
-	errorLogFileName = siteLogsDir ~ "error.log";
-	eventLogFileName = siteLogsDir ~ "event.log";
-	webtankErrorLogFileName = siteLogsDir ~ "webtank_error.log";
-	webtankEventLogFileName = siteLogsDir ~ "webtank_event.log";
-	dbQueryLogFileName = siteLogsDir ~ "db_query.log";
-	prioriteLogFileName = siteLogsDir ~ "priorite.log";
+	auto jsonConfig = parseJSON(configFile);
+
+	assert( jsonConfig.type == JSON_TYPE.OBJECT, `Config root JSON value must be object!!!` );
+
+	assert( "services" in jsonConfig.object, `Config must contain "services" object!!!` );
+	JSONValue jsonServices = jsonConfig["services"];
+	assert( jsonConfig.type == JSON_TYPE.OBJECT, `Config root JSON value must be object!!!` );
+
+	assert( "applications" in jsonConfig.object, `Config must contain "applications" object!!!` );
+	JSONValue jsonApps = jsonConfig["applications"];
+
+	assert( "MKK_site" in jsonApps.object, `Config section "applications" must contain "MKK_site" object!!!` );
+	JSONValue jsonMKK_site = jsonApps["MKK_site"];
+	assert( jsonMKK_site.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site" must be object!!!` );
+
+	assert( "fileSystemPaths" in jsonMKK_site.object, `Config section "applications.MKK_site" must contain "fileSystemPaths" object!!!` );
+	JSONValue jsonFSPaths = jsonMKK_site["fileSystemPaths"];
+	assert( jsonFSPaths.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site" must be object!!!` );
+
+	assert( "virtualPaths" in jsonMKK_site.object, `Config section "applications.MKK_site" must contain "virtualPaths" object!!!` );
+	JSONValue jsonVirtualPaths = jsonMKK_site["virtualPaths"];
+	assert( jsonVirtualPaths.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site.virtualPaths" must be object!!!` );
+
+	//Захардкодим пути в файловой ситеме, используемые по-умолчанию
+	string[string] defaultFileSystemPaths = [
+		"siteRoot": "~/sites/mkk_site/",
+		
+		"siteResources": "res/",
+		"sitePageTemplates": "res/templates/",
+		"siteGeneralTemplateFile": "res/templates/general_template.html",
+		
+		"siteLogs": "logs/",
+		"siteErrorLogFile": "logs/error.log",
+		"siteEventLogFile": "logs/event.log",
+		"webtankErrorLogFile": "logs/webtank_error.log",
+		"webtankEventLogFile": "logs/webtank_event.log",
+		"databaseQueryLogFile": "logs/db_query.log",
+		"sitePrioriteLogFile": "logs/priorite.log",
+		
+		"sitePublic": "pub/",
+		"siteCSS": "pub/css/",
+		"siteJS": "pub/js/",
+		"siteImg": "pub/img/",
+		
+		"webtankResources": "res/webtank/",
+		"webtankPublic": "pub/webtank/",
+		"webtankCSS": "pub/webtank/css/",
+		"webtankJS": "pub/webtank/js/",
+		"webtankImg": "pub/webtank/img/"
+	];
+	
+	//Захардкодим адреса сайта, используемые по-умолчанию
+	string[string] defaultVirtualPaths = [
+		"siteRoot": "/",
+		
+		"sitePublic": "pub/",
+		"siteDynamic": "dyn/",
+		"siteRestricted": "restricted/",
+		
+		"siteLogs": "logs/",
+		"siteResources": "res/",
+		
+		"siteCSS": "pub/css/",
+		"siteJS": "pub/js/",
+		"siteImg": "pub/img/",
+		
+		"webtankPublic": "pub/webtank/",
+		"webtankCSS": "pub/webtank/css/",
+		"webtankJS": "pub/webtank/js/",
+		"webtankImg": "pub/webtank/img/"
+	];
+	
+	import std.exception;
+	import mkk_site.site_config;
+	
+	siteFileSystemPaths = assumeUnique( resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot") );
+	siteVirtualPaths = assumeUnique( resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot") );
+	
+	//Задаем часто используемые виртуальные пути
+	publicPath = siteVirtualPaths["sitePublic"];
+	cssPath = siteVirtualPaths["siteCSS"];
+	jsPath = siteVirtualPaths["siteJS"];
+	imgPath = siteVirtualPaths["siteImg"];
+
+	webtankPublicPath = siteVirtualPaths["webtankPublic"];
+	webtankCssPath = siteVirtualPaths["webtankCSS"];
+	webtankJsPath = siteVirtualPaths["webtankJS"];
+	webtankImgPath = siteVirtualPaths["webtankImg"];
+
+	dynamicPath = siteVirtualPaths["siteDynamic"];    //Путь к директории динамического содержимого
+	restrictedPath = siteVirtualPaths["siteRestricted"]; //Путь к директории содержимого с ограниченным доступом
+	JSON_RPC_Path = siteVirtualPaths["siteJSON_RPC"]; //Путь для вызова удалённых процедур
+
+	//Задаем часто используемые пути файловой системы
+	siteResDir = siteFileSystemPaths["siteResources"]; //Ресурсы сайта
+	webtankResDir = siteFileSystemPaths["webtankResources"]; //Ресурсы библиотеки
+
+	pageTemplatesDir = siteFileSystemPaths["sitePageTemplates"];
+	generalTemplateFileName = siteFileSystemPaths["siteGeneralTemplateFile"];
+
+	//Пути в файловой системе к файлам журналов
+	errorLogFileName = siteFileSystemPaths["siteErrorLogFile"];
+	eventLogFileName = siteFileSystemPaths["siteEventLogFile"];
+	webtankErrorLogFileName = siteFileSystemPaths["webtankErrorLogFile"];
+	webtankEventLogFileName = siteFileSystemPaths["webtankEventLogFile"];
+	dbQueryLogFileName = siteFileSystemPaths["databaseQueryLogFile"];
+	prioriteLogFileName = siteFileSystemPaths["sitePrioriteLogFile"];
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)

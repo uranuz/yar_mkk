@@ -8,11 +8,13 @@ import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_t
 
 import mkk_site;
 
-immutable thisPagePath = dynamicPath ~ "edit_pohod";
-immutable authPagePath = dynamicPath ~ "auth";
+immutable(string) thisPagePath;
+immutable(string) authPagePath;
 
 shared static this()
 {	
+	thisPagePath = dynamicPath ~ "edit_pohod";
+	authPagePath = dynamicPath ~ "auth";
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(getTouristList);
 	JSONRPCRouter.join!(списокУчастниковПохода);

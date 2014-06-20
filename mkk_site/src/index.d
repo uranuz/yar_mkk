@@ -10,11 +10,14 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 
 import mkk_site;
 
-immutable thisPagePath = dynamicPath ~ "index";
-immutable authPagePath = dynamicPath ~ "auth";
+immutable(string) thisPagePath;
+immutable(string) authPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "index";
+	authPagePath = dynamicPath ~ "auth";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

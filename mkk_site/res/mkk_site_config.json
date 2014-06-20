@@ -1,0 +1,60 @@
+{
+	"services": {
+		"MKK": {
+			"databases": {
+				"commonDB": {
+					"host": "127.0.0.1",
+					"dbname": "baza_MKK",
+					"user": "postgres",
+					"password": "postgres"
+				},
+				"authDB": {
+					"host": "127.0.0.1",
+					"dbname": "MKK_site_base",
+					"user": "postgres",
+					"password": "postgres"
+				}
+			}
+		}
+	},
+	
+	"applications": {
+		"MKK_site": {
+			"fileSystemPaths": {
+				"siteRoot": "~/sites/mkk_site/",
+				"siteResources": "res/",
+				"siteLogs": "logs/",
+				"sitePublic": "pub/",
+				"siteCSS": "pub/css",
+				"siteJS": "pub/js",
+				"siteImg": "pub/img",
+				
+				"webtankResources": "res/webtank/",
+				"webtankPublic": "pub/webtank/",
+				"webtankCSS": "pub/webtank/css/",
+				"webtankJS": "pub/webtank/js/",
+				"webtankImg": "pub/webtank/img/"
+			},
+
+			"virtualPaths": {
+				"siteRoot": "/",
+				"siteJSON-RPC": "jsonrpc/",
+				"siteDynamic": "dyn/",
+				"siteRestricted": "restricted/",
+				"sitePublic": "pub/",
+				"siteCSS": "pub/css/",
+				"siteImg": "pub/img/",
+				"siteJS": "pub/js/",
+
+				"webtankPublic": "pub/webtank/",
+				"webtankCSS": "pub/webtank/css/",
+				"webtankJS": "pub/webtank/js/",
+				"webtankImg": "pub/webtank/img/"
+			}
+		}
+	},
+
+	"libraries": {
+	
+	}
+}

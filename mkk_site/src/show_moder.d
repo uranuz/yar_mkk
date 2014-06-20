@@ -9,10 +9,12 @@ import mkk_site;
 
 
 //----------------------
-immutable thisPagePath = dynamicPath ~ "show_moder";
+immutable(string) thisPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "show_moder";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

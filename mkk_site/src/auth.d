@@ -6,10 +6,12 @@ import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_
 
 import mkk_site, mkk_site.access_control;
 
-immutable thisPagePath = dynamicPath ~ "auth";
+immutable(string) thisPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "auth";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

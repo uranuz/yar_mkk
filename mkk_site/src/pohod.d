@@ -11,10 +11,12 @@ import mkk_site;
 //Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
 
 //----------------------
-immutable thisPagePath = dynamicPath ~ "pohod";
+immutable(string) thisPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "pohod";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

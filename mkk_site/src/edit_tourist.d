@@ -7,11 +7,14 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.dat
 import mkk_site;
 import std.conv, std.algorithm;
 
-immutable thisPagePath = dynamicPath ~ "edit_tourist";
-immutable authPagePath = dynamicPath ~ "auth";
+immutable(string) thisPagePath;
+immutable(string) authPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "edit_tourist";
+	authPagePath = dynamicPath ~ "auth";
+	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(тестНаличияПохожегоТуриста);
 }
 

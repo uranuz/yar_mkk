@@ -8,11 +8,14 @@ import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_t
 
 import mkk_site;
 
-immutable thisPagePath = dynamicPath ~ "reports";
-immutable authPagePath = dynamicPath ~ "auth";
+immutable(string) thisPagePath;
+immutable(string) authPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "reports";
+	authPagePath = dynamicPath ~ "auth";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

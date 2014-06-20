@@ -25,10 +25,12 @@ string result = strip(toUTF8(dstr1));
 return result;
 }
 //----------------------
-immutable thisPagePath = dynamicPath ~ "show_tourist";
+immutable(string) thisPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	
+	thisPagePath = dynamicPath ~ "show_tourist";
+	PageRouter.join!(netMain)(thisPagePath);
 }
 
 void netMain(HTTPContext context)

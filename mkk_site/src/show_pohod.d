@@ -7,10 +7,11 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 
 import mkk_site;
 
-immutable thisPagePath = dynamicPath ~ "show_pohod";
+immutable(string) thisPagePath;
 
 shared static this()
-{	PageRouter.join!(netMain)(thisPagePath);
+{	thisPagePath = dynamicPath ~ "show_tourist";
+	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(participantsList);
 }
 
