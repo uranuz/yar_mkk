@@ -100,3 +100,68 @@ string[string] resolveConfigPaths(bool shouldExpandTilde = false)( JSONValue jso
 	
 	return result;
 }
+
+string[string] resolveConfigDatabases(JSONValue jsonDatabases)
+{
+	import std.conv, std.string;
+	
+	string[string] result;
+	
+	foreach( string dbCaption, jsonDb; jsonDatabases )
+	{
+		string connStr = "";
+		bool isHostFound = false;
+		
+		if( "dbname" in jsonDb.object )
+		{
+			if( jsonDb["dbname"].type == JSON_TYPE.STRING )
+			{
+				connStr ~= "dbname=" ~ jsonDb["dbname"].str ~ " ";
+			
+			}
+		}
+		
+		if( "host" in jsonDb.object )
+		{
+			if( jsonDb["host"].type == JSON_TYPE.STRING )
+			{
+				isHostFound = true;
+				connStr ~= "host=" ~ jsonDb["host"].str ~ " ";
+			
+			}
+		}
+	
+		if( "port" in jsonDb.object )
+		{
+			if( jsonDb["host"].type == JSON_TYPE.UINTEGER )
+			{
+				if( !isHostFound )
+					connStr ~= "host=127.0.0.1";
+					
+				connStr ~= ":" ~ jsonDb["host"].uinteger.to!string ~ " ";
+			}
+		}
+		
+		if( "username" in jsonDb.object )
+		{
+			if( jsonDb["username"].type == JSON_TYPE.STRING )
+			{
+				connStr ~= "user=" ~ jsonDb["username"].str ~ " ";
+			
+			}
+		}
+		
+		if( "password" in jsonDb.object )
+		{
+			if( jsonDb["password"].type == JSON_TYPE.STRING )
+			{
+				connStr ~= "password=" ~ jsonDb["password"].str ~ " ";
+			
+			}
+		}
+		
+		result[dbCaption] = strip(connStr);
+	}
+	
+	return result;
+}

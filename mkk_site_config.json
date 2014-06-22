@@ -5,13 +5,13 @@
 				"commonDB": {
 					"host": "127.0.0.1",
 					"dbname": "baza_MKK",
-					"user": "postgres",
+					"username": "postgres",
 					"password": "postgres"
 				},
 				"authDB": {
 					"host": "127.0.0.1",
 					"dbname": "MKK_site_base",
-					"user": "postgres",
+					"username": "postgres",
 					"password": "postgres"
 				}
 			}

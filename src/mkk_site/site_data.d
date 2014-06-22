@@ -24,9 +24,9 @@ enum bool isMKKSiteDevelTarget = MKKSiteBuildTarget == BuildTarget.devel;
 
 ///Строки подключения к базам данных
 //Строка подключения к базе с общими данными
-immutable commonDBConnStr = "dbname=baza_MKK host=127.0.0.1 user=postgres password=postgres";
+immutable(string) commonDBConnStr;
 //Строка подключения к базе с данными аутентификации
-immutable authDBConnStr = "dbname=MKK_site_base host=127.0.0.1 user=postgres password=postgres";
+immutable(string) authDBConnStr;
 
 ///Далее идут пути относительно сайта
 immutable(string) publicPath;     //Путь к директории общедоступного статического содержимого
@@ -70,6 +70,9 @@ immutable(string[string]) siteFileSystemPaths;
 
 ///Ассоциативный массив с виртуальными путями сайта (те, что в адресной строке браузера)
 immutable(string[string]) siteVirtualPaths;
+
+///Массив со строками подключения к базам данных сервиса
+immutable(string[string]) serviceDBConnStrings;
 
 shared static this()
 {	import std.file, std.json;
@@ -169,9 +172,9 @@ shared static this()
 	webtankJsPath = siteVirtualPaths["webtankJS"];
 	webtankImgPath = siteVirtualPaths["webtankImg"];
 
-	dynamicPath = siteVirtualPaths["siteDynamic"];    //Путь к директории динамического содержимого
-	restrictedPath = siteVirtualPaths["siteRestricted"]; //Путь к директории содержимого с ограниченным доступом
-	JSON_RPC_Path = siteVirtualPaths["siteJSON_RPC"]; //Путь для вызова удалённых процедур
+	dynamicPath = siteVirtualPaths["siteDynamic"];
+	restrictedPath = siteVirtualPaths["siteRestricted"];
+	JSON_RPC_Path = siteVirtualPaths["siteJSON_RPC"];
 
 	//Задаем часто используемые пути файловой системы
 	siteResDir = siteFileSystemPaths["siteResources"]; //Ресурсы сайта
@@ -188,12 +191,26 @@ shared static this()
 	dbQueryLogFileName = siteFileSystemPaths["databaseQueryLogFile"];
 	prioriteLogFileName = siteFileSystemPaths["sitePrioriteLogFile"];
 	
-	import std.stdio;
-	writeln("siteFileSystemPaths");
-	writeln(siteFileSystemPaths);
+	//Вытаскиваем информацию об используемых базах данных
+	assert( "MKK" in jsonServices.object, `Config "services" section must contain "MKK" object!!!` );
+	JSONValue jsonMKKService = jsonServices["MKK"];
+	assert( jsonMKKService.type == JSON_TYPE.OBJECT, `Config section "services.MKK" value must be an object!!!` );
 	
-	writeln("siteVirtualPaths");
-	writeln(siteVirtualPaths);
+	//Вытаскиваем информацию об используемых базах данных
+	assert( "databases" in jsonMKKService.object, `Config "services.MKK" section must contain "databases" object!!!` );
+	JSONValue jsonDatabases = jsonMKKService["databases"];
+	assert( jsonDatabases.type == JSON_TYPE.OBJECT, `Config section "services.MKK.databases" value must be an object!!!` );
+	
+	//Получаем строки подключения к базам данных
+	auto dbConnStrings = resolveConfigDatabases(jsonDatabases);
+	serviceDBConnStrings = assumeUnique(dbConnStrings);
+	
+	commonDBConnStr = serviceDBConnStrings["commonDB"];
+	//Строка подключения к базе с данными аутентификации
+	authDBConnStr = serviceDBConnStrings["authDB"];
+	
+	import std.stdio;
+	writeln(serviceDBConnStrings);
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)
