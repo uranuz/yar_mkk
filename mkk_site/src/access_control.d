@@ -88,7 +88,7 @@ protected:
 class MKK_SiteAccessController: IAccessController
 {
 protected:
-	immutable(size_t) _sessionLifetime = 180; //Время жизни сессии в минутах
+	static immutable(size_t) _sessionLifetime = 180; //Время жизни сессии в минутах
 
 public:
 	///Реализация метода аутентификации контролёра доступа

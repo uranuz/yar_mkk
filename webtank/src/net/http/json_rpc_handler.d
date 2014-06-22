@@ -43,8 +43,8 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		
 		string jsonrpc;
 		if( "jsonrpc" in jMessageBody.object )
-		{	if( jMessageBody.object["jsonrpc"].type == JSON_TYPE.STRING )
-				jsonrpc = jMessageBody.object["jsonrpc"].str;
+		{	if( jMessageBody["jsonrpc"].type == JSON_TYPE.STRING )
+				jsonrpc = jMessageBody["jsonrpc"].str;
 		}
 		
 		if( jsonrpc != "2.0" )
@@ -52,8 +52,8 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 			
 		string methodName;
 		if( "method" in jMessageBody.object )
-		{	if( jMessageBody.object["method"].type == JSON_TYPE.STRING )
-				methodName = jMessageBody.object["method"].str;
+		{	if( jMessageBody["method"].type == JSON_TYPE.STRING )
+				methodName = jMessageBody["method"].str;
 		}
 		
 		if( methodName.length == 0 )
@@ -68,7 +68,7 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		//не передаётся. В последнем случае должно передаваться
 		//либо null в качестве параметра, либо пустой объект {}
 		if( "params" in jMessageBody.object )
-		{	auto paramsType = jMessageBody.object["params"].type;
+		{	auto paramsType = jMessageBody["params"].type;
 		
 			//В текущей реализации принимаем либо объект (список поименованных параметров)
 			//либо null, символизирующий их отсутствие
@@ -78,19 +78,17 @@ class JSON_RPC_Router: EventBasedHTTPHandler
 		else
 			throw new JSON_RPC_Exception(`JSON-RPC "params" property should be in JSON request object!!!`);
 		
-		JSONValue jResponse = JSONValue();
-		jResponse.type = JSON_TYPE.OBJECT;
+		JSONValue[string] jResponseArray;
 		
 		//Вызов метода
-		jResponse.object["result"] = method( jMessageBody.object["params"], context );
+		jResponseArray["result"] = method( jMessageBody["params"], context );
 		
-		jResponse.object["jsonrpc"] = JSONValue();
-		jResponse.object["jsonrpc"].type = JSON_TYPE.STRING;
-		jResponse.object["jsonrpc"].str = "2.0";
+		jResponseArray["jsonrpc"] = "2.0";
+		jResponseArray["id"] = jMessageBody["id"];
 		
-		jResponse.object["id"] = jMessageBody.object["id"];
+		JSONValue jResponse = jResponseArray;
 		
-		context.response ~= toJSON(&jResponse).idup;
+		context.response ~= toJSON( &jResponse );
 		
 		return HTTPHandlingResult.handled;
 	}
@@ -121,8 +119,7 @@ template callJSON_RPC_Method(alias Method)
 	alias ParameterIdentifierTuple!(Method) ParamNames;
 	
 	JSONValue callJSON_RPC_Method(ref const(JSONValue) jValue, HTTPContext context)
-	{	JSONValue result;
-		result.type = JSON_TYPE.NULL;  //По-умолчанию в качестве результата null
+	{	JSONValue result = null; //По-умолчанию в качестве результата null
 		
 		static if( ParamTypes.length == 0 )
 		{	

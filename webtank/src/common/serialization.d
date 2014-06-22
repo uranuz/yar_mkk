@@ -32,63 +32,88 @@ JSONValue getStdJSON(T)(T dValue)
 	else
 	{	JSONValue jValue;
 		static if( isBoolean!T )
-		{	jValue.type = ( dValue ? JSON_TYPE.TRUE : JSON_TYPE.FALSE );
+		{	jValue = dValue;
 		}
 		else static if( isIntegral!T )
 		{	static if( isSigned!T )
-			{	jValue.type = JSON_TYPE.INTEGER;
-				jValue.integer = dValue.to!long;
+			{	jValue = dValue.to!long;
 			}
 			else static if( isUnsigned!T )
-			{	jValue.type = JSON_TYPE.UINTEGER;
-				jValue.uinteger = dValue.to!ulong;
+			{	jValue = dValue.to!ulong;
 			}
 			else
 				static assert( 0, "This should never happen!!!" ); //Это не должно произойти))
 		}
 		else static if( isFloatingPoint!T )
-		{	jValue.type = JSON_TYPE.FLOAT;
-			jValue.floating = dValue.to!real;
+		{	jValue = dValue.to!real;
 		}
 		else static if( isSomeString!T )
-		{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.STRING );
-			jValue.str = dValue.to!string;
+		{	
+			if( dValue is null )
+				jValue = null;
+			else
+				jValue = dValue.to!string;
 		}
 		else static if( isArray!T )
-		{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.ARRAY );
-			foreach( elem; dValue )
-				jValue.array ~= getStdJSON( elem );
+		{	
+			if( dValue is null )
+				jValue = null;
+			else
+			{
+				JSONValue[] jArray;
+				jArray.length = dValue.length;
+				
+				foreach( i, elem; dValue )
+					jArray[i] = getStdJSON( elem );
+					
+				jValue = jArray;
+			}
 		}
 		else static if( isAssociativeArray!T )
 		{	static if( isSomeString!( KeyType!(T) ) )
-			{	jValue.type = ( dValue is null ? JSON_TYPE.NULL : JSON_TYPE.OBJECT );
-				foreach( key, val; dValue )
-					jValue.object[key] = getStdJSON( val );
+			{	
+				if( dValue is null )
+					jValue = null;
+				else
+				{
+					JSONValue[string] jArray;
+					
+					foreach( key, val; dValue )
+						jArray[key.to!string] = getStdJSON( val );
+						
+					jValue = jArray;
+				}
 			}
 			else
 				static assert( 0, "Only string types are allowed for object keys!!!" );
 		}
 		else static if( isTuple!T )
-		{	jValue.type = JSON_TYPE.ARRAY;
-			foreach( elem; dValue )
-				jValue.array ~= getStdJSON( elem );
+		{	
+			JSONValue[] jArray;
+			jArray.length = dValue.length;
+			
+			foreach( i, elem; dValue )
+				jArray[i] = getStdJSON( elem );
+				
+			jValue = jArray;
 		}
 		else static if( isOptional!T )
 		{	alias OptionalValueType!T BaseT;
 			if( dValue.isNull )
-				jValue.type = JSON_TYPE.NULL;
+				jValue = null;
 			else
 				jValue = getStdJSON( dValue.value );
 		}
 		else static if( is( T: IStdJSONSerializeable ) )
-		{	if( dValue is null ) 
-				jValue.type = JSON_TYPE.NULL;
+		{	
+			if( dValue is null ) 
+				jValue = null;
 			else
 				jValue = dValue.getStdJSON();
 		}
 		else static if( is( T: std.datetime.Date ) )
-		{	jValue.type = JSON_TYPE.STRING;
-			jValue.str = dValue.toISOExtString();
+		{	
+			jValue = dValue.toISOExtString();
 		}
 		else
 			static assert( 0, "This value's type is not of one implemented JSON type!!!" );

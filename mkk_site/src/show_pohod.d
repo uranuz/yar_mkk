@@ -10,7 +10,7 @@ import mkk_site;
 immutable(string) thisPagePath;
 
 shared static this()
-{	thisPagePath = dynamicPath ~ "show_tourist";
+{	thisPagePath = dynamicPath ~ "show_pohod";
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(participantsList);
 }

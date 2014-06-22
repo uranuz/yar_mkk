@@ -6,6 +6,23 @@ import webtank.templating.plain_templater, webtank.db.database, webtank.net.http
 
 import mkk_site.site_data;
 
+string buildNormalPath(T...)(T args)
+{
+	import std.path: buildNormalizedPath;
+	import std.algorithm: endsWith;
+	
+	string result = buildNormalizedPath(args);
+	
+	static if( args.length > 0 )
+	{
+		//Возвращаем на место слэш в конце пути, который выкидывает стандартная библиотека
+		if( result.length > 1 && args[$-1].endsWith("/") && !result.endsWith("/") )
+			result ~= '/'; 
+	}
+	
+	return result;
+}
+
 PlainTemplater getGeneralTemplate(HTTPContext context)
 {	auto tpl = getPageTemplate(generalTemplateFileName);
 	tpl.set("this page path", context.request.uri.path);

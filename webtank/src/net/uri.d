@@ -783,11 +783,11 @@ private pure
 	ushort hexValue(char c) nothrow
 	{
 		if( isDigit(c) )
-				return c - '0';
+				return cast(ushort)(c - '0');
 		else if (c >= 'a' && c <= 'f')
-				return c - 'a' + 10;
+				return cast(ushort)(c - 'a' + 10);
 		else if (c >= 'A' && c <= 'F')
-				return c - 'A' + 10;
+				return cast(ushort)(c - 'A' + 10);
 		else
 				return ushort.max;
 	}

@@ -187,26 +187,25 @@ public:
 	$(LOCALE_RU_RU Сериализует формат перечислимого типа в std.json)
 	+/
 	JSONValue getStdJSON() const
-	{	JSONValue jValue;
-		jValue.type = JSON_TYPE.OBJECT;
+	{	JSONValue[string] jArray; //Массив полей для формата перечислимого типа
 		
 		//Словарь перечислимых значений (числовой ключ --> строковое имя)
-		jValue.object["enum_n"] = JSONValue();
-		jValue.object["enum_n"].type = JSON_TYPE.OBJECT;
+		JSONValue[string] jEnumNames;
+		
 		foreach( key, name; _names )
-		{	string strKey = key.to!string;
-			jValue.object["enum_n"].object[strKey].type = JSON_TYPE.STRING;
-			jValue.object["enum_n"].object[strKey].str = name;
-		}
+			jEnumNames[key.to!string] = name;
+		jArray["enum_n"] = jEnumNames;
+		
 		
 		//Массив, определяющий порядок перечислимых значений
-		jValue.object["enum_k"] = JSONValue();
-		jValue.object["enum_k"].type = JSON_TYPE.ARRAY;
-		foreach( key; _keys )
-		{	jValue.object["enum_k"].array[key].type = JSON_TYPE.UINTEGER;
-			jValue.object["enum_k"].array[key].uinteger = key;
-		}
-		return jValue;
+		JSONValue[] jEnumKeys;
+		jEnumKeys.length = _keys.length;
+
+		foreach( i, key; _keys )
+			jEnumKeys[i] = key;
+		jArray["enum_k"] = jEnumKeys;
+		
+		return JSONValue(jArray);
 	}
 
 	///Конструктор формата получает на входе карту соответсвия

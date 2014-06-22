@@ -75,14 +75,11 @@ template Record(alias RecordFormatT)
 		
 		//Сериализаци записи в std.json
 		JSONValue getStdJSON()
-		{	JSONValue jValue = _recordSet.getStdJSONFormat();
+		{	
+			JSONValue jValue = _recordSet.getStdJSONFormat();
 			
-			jValue.object["d"] = 
-				_recordSet.getStdJSONDataAt( _recordSet.getRecordIndex(_recordKey) );
-			
-			jValue.object["t"] = JSONValue();
-			jValue.object["t"].type = JSON_TYPE.STRING;
-			jValue.object["t"].str = "record";
+			jValue["d"] = _recordSet.getStdJSONDataAt( _recordSet.getRecordIndex(_recordKey) );
+			jValue["t"] = "record";
 
 			return jValue;
 		}

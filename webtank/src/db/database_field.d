@@ -103,28 +103,19 @@ public:
 		
 		///Метод сериализации формата поля в std.json
 		JSONValue getStdJSONFormat()
-		{	JSONValue jValue;
+		{	
+			JSONValue[string] jArray;
 			
-			jValue.type = JSON_TYPE.OBJECT;
-			
-			//Вывод имени поля
-			jValue.object["n"] = JSONValue();
-			jValue.object["n"].type = JSON_TYPE.STRING;
-			jValue.object["n"].str = _name;
-			
-			//Вывод типа поля
-			jValue.object["t"] = JSONValue();
-			jValue.object["t"].type = JSON_TYPE.STRING;
-			jValue.object["t"].str = FieldT.to!string;
+			jArray["n"] = _name; //Вывод имени поля
+			jArray["t"] = FieldT.to!string; //Вывод типа поля
 			
 			static if( FieldT == FieldType.Enum )
-			{	//Сериализуем формат для перечислимого типа
-				auto enumJValue = _enumFormat.getStdJSON();
-				
-				foreach( key, val; enumJValue.object )
-					jValue[key] = val;
+			{	//Сериализуем формат для перечислимого типа (выбираем все поля формата)
+				foreach( string key, val; _enumFormat.getStdJSON() )
+					jArray[key] = val;
 			}
-			return jValue;
+			
+			return JSONValue(jArray);
 		}
 		
 		///Получение данных из поля по порядковому номеру index

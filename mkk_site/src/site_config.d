@@ -2,6 +2,8 @@ module mkk_site.site_config;
 
 import std.json, std.file, std.path;
 
+import mkk_site.utils;
+
 
 /++
 $(LOCALE_EN_US
@@ -64,7 +66,7 @@ string[string] resolveConfigPaths(bool shouldExpandTilde = false)( JSONValue jso
 	
 	assert( rootPath.length > 0 && isAbsolute(rootPath), `Config path "` ~ rootPathName  ~ `" value must be absolute!!!` );
 	
-	foreach( pathName, jsonPath; jsonPaths )
+	foreach( string pathName, jsonPath; jsonPaths )
 	{
 		if( pathName == rootPathName )
 			continue; //Ignore root path here
@@ -73,14 +75,14 @@ string[string] resolveConfigPaths(bool shouldExpandTilde = false)( JSONValue jso
 		if( jsonPath.type == JSON_TYPE.STRING && jsonPath.str.length > 0 )
 		{	
 			static if( shouldExpandTilde )
-				result[pathName] = buildNormalizedPath( rootPath, jsonPath.str.expandTilde() );
+				result[pathName] = buildNormalPath( rootPath, jsonPath.str.expandTilde() );
 			else
-				result[pathName] = buildNormalizedPath( rootPath, jsonPath.str );
+				result[pathName] = buildNormalPath( rootPath, jsonPath.str );
 		}
 	}
 
 			
-	foreach( pathName, path; defaultPaths )
+	foreach( string pathName, path; defaultPaths )
 	{
 		if( pathName == rootPathName )
 			continue; //Ignore root path here
@@ -88,9 +90,9 @@ string[string] resolveConfigPaths(bool shouldExpandTilde = false)( JSONValue jso
 		if( pathName !in result )
 		{
 			static if( shouldExpandTilde )
-				result[pathName] = buildNormalizedPath( rootPath, defaultPaths[pathName].expandTilde() );
+				result[pathName] = buildNormalPath( rootPath, defaultPaths[pathName].expandTilde() );
 			else
-				result[pathName] = buildNormalizedPath( rootPath, defaultPaths[pathName] );
+				result[pathName] = buildNormalPath( rootPath, defaultPaths[pathName] );
 		}
 	}
 	

@@ -1,5 +1,7 @@
 module mkk_site.site_data;
 
+import mkk_site.site_config;
+
 ///Перечисление целей сборки сайта
 enum BuildTarget {	release, test, devel};
 
@@ -133,6 +135,7 @@ shared static this()
 		"sitePublic": "pub/",
 		"siteDynamic": "dyn/",
 		"siteRestricted": "restricted/",
+		"siteJSON_RPC": "",
 		
 		"siteLogs": "logs/",
 		"siteResources": "res/",
@@ -148,10 +151,12 @@ shared static this()
 	];
 	
 	import std.exception;
-	import mkk_site.site_config;
 	
-	siteFileSystemPaths = assumeUnique( resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot") );
-	siteVirtualPaths = assumeUnique( resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot") );
+	auto fsPaths = resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot");
+	auto virtPaths = resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot");
+	
+	siteFileSystemPaths = assumeUnique(fsPaths);
+	siteVirtualPaths = assumeUnique(virtPaths);
 	
 	//Задаем часто используемые виртуальные пути
 	publicPath = siteVirtualPaths["sitePublic"];
@@ -182,6 +187,13 @@ shared static this()
 	webtankEventLogFileName = siteFileSystemPaths["webtankEventLogFile"];
 	dbQueryLogFileName = siteFileSystemPaths["databaseQueryLogFile"];
 	prioriteLogFileName = siteFileSystemPaths["sitePrioriteLogFile"];
+	
+	import std.stdio;
+	writeln("siteFileSystemPaths");
+	writeln(siteFileSystemPaths);
+	
+	writeln("siteVirtualPaths");
+	writeln(siteVirtualPaths);
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)

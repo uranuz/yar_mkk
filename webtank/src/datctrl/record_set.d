@@ -39,18 +39,16 @@ template RecordSet(alias RecordFormatT)
 		$(LOCALE_RU_RU Сериализует данные записи под номером $(D_PARAM index) в std.json)
 		+/
 		JSONValue getStdJSONDataAt(size_t index)
-		{	JSONValue recJSON;
-			recJSON.type = JSON_TYPE.ARRAY;
-			recJSON.array.length = FormatType.tupleOfNames!().length;
+		{	JSONValue[] recJSON;
+			recJSON.length = FormatType.tupleOfNames!().length;
 			
 			foreach( j, name; FormatType.tupleOfNames!() )
-			{	if( this.isNull(name, getRecordKey(index) ) )
-					recJSON[j].type = JSON_TYPE.NULL;
+			{	if( this.isNullAt(name, index) )
+					recJSON[j] = null;
 				else
-					recJSON[j] = 
-						webtank.common.serialization.getStdJSON( this.get!(name)( getRecordKey(index) ) );
+					recJSON[j] = webtank.common.serialization.getStdJSON( this.getAt!(name)(index) );
 			}
-			return recJSON;
+			return JSONValue(recJSON);
 		}
 		
 		/++
@@ -58,27 +56,24 @@ template RecordSet(alias RecordFormatT)
 		$(LOCALE_RU_RU Сериализует формат набора записей в std.json)
 		+/
 		JSONValue getStdJSONFormat()
-		{	JSONValue jValue = JSONValue();
-			jValue.type = JSON_TYPE.OBJECT;
+		{	JSONValue[string] jValues;
 			
 			//Выводим номер ключевого поля
-			jValue.object["kfi"] = JSONValue();
-			jValue.object["kfi"].type = JSON_TYPE.UINTEGER;
-			jValue.object["kfi"].uinteger = _keyFieldIndex;
+			jValues["kfi"] = _keyFieldIndex;
 			
 			//Выводим тип данных
-			jValue.object["t"] = JSONValue();
-			jValue.object["t"].type = JSON_TYPE.STRING;
-			jValue.object["t"].str = "recordset";
+			jValues["t"] = "recordset";
 			
 			//Образуем JSON-массив форматов полей
-			jValue.object["f"] = JSONValue();
-			jValue.object["f"].type = JSON_TYPE.ARRAY;
+			JSONValue[] jFieldFormats;
+			jFieldFormats.length = _dataFields.length;
 			
-			foreach( field; _dataFields )
-				jValue["f"].array ~= field.getStdJSONFormat();
+			foreach( i, field; _dataFields )
+				jFieldFormats[i] = field.getStdJSONFormat();
+				
+			jValues["f"] = jFieldFormats;
 
-			return jValue;
+			return JSONValue(jValues);
 		}
 
 		/++
@@ -86,16 +81,17 @@ template RecordSet(alias RecordFormatT)
 		$(LOCALE_RU_RU Сериализует формат и данные набора данных в std.json)
 		+/
 		JSONValue getStdJSON()
-		{	auto jValue = this.getStdJSONFormat();
+		{	auto jValues = this.getStdJSONFormat();
 			
-			jValue.object["d"] = JSONValue();
-			jValue.object["d"].type = JSON_TYPE.ARRAY;
-			jValue.object["d"].array.length = this.length;
+			JSONValue[] jData;
+			jData.length = this.length;
 			
 			foreach( i; 0..this.length )
-				jValue["d"].array[i] = this.getStdJSONDataAt(i);
+				jData[i] = this.getStdJSONDataAt(i);
+				
+			jValues["d"] = jData;
 
-			return jValue;
+			return jValues;
 		}
 		
 		this(IBaseDataField[] dataFields)
