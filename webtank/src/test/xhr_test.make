@@ -1,1 +1,0 @@
-./../make.py --projdir=../../../ --outfname=xhr_test webtank/src/sources.list webtank/src/test/xhr_test_sources.list

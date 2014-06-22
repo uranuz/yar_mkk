@@ -1,1 +1,0 @@
-./min_make.py test_threaded_app.d
