@@ -26,9 +26,14 @@ shared static this()
 		.join(PageRouter);
 		
 	Router.onError.join( (Throwable error, HTTPContext context) {
-		SiteLogger.error(error.to!string);
+		static if( isMKKSiteReleaseTarget )
+			string msg = error.msg;
+		else
+			string msg = typeid(error).to!string;
+		
+		SiteLogger.error(msg);
 		auto tpl = getGeneralTemplate(context);
-		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ error.msg );
+		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ msg );
 		context.response ~= tpl.getString();
 		return true;
 	} );
@@ -55,8 +60,13 @@ shared static this()
 	};
 	
 	JSONRPCRouter.onError.join( (Throwable error, HTTPContext context) {
+		static if( isMKKSiteReleaseTarget )
+			string msg = error.msg;
+		else
+			string msg = typeid(error).to!string;
+		
 		context.response ~= `{"jsonrpc":"2.0","error":{"msg":"`
-		~ error.msg ~ `"}}`;
+		~ msg ~ `"}}`;
 		return true;
 	} );
 }

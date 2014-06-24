@@ -208,9 +208,7 @@ shared static this()
 	commonDBConnStr = serviceDBConnStrings["commonDB"];
 	//Строка подключения к базе с данными аутентификации
 	authDBConnStr = serviceDBConnStrings["authDB"];
-	
-	import std.stdio;
-	writeln(serviceDBConnStrings);
+
 }
 
 // перечислимые значения(типы) в таблице данных (в форме ассоциативных массивов)
