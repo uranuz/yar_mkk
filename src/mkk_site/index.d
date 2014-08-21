@@ -1,6 +1,6 @@
 module mkk_site.index;
 
-import std.conv, std.string, std.file, std.array;
+import std.conv, std.string, std.file, std.array, std.typecons;
 
 import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
 
@@ -47,21 +47,32 @@ void netMain(HTTPContext context)
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 		//-----------------------------------------
-		
-			alias FieldType ft;
-	
-	
+
 	auto pohodRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "Номер книги", ft.Str, "Сроки", 
-	ft.Int, "Вид", ft.Int, "кс", ft.Int, "элем",
-	ft.Str,"Район",
-	ft.Str,"Руководитель", 
-	
-	ft.Str,"Город,<br>организация",	
-	ft.Str, "Нитка маршрута",
-	ft.Str, "Коментарий руководителя",
-	ft.Int, "Готовность",
-	ft.Int, "Статус")();
+		PrimaryKey!(size_t), "Ключ", 
+		string, "Номер книги", 
+		string, "Сроки", 
+		typeof(видТуризма), "Вид", 
+		typeof(категорияСложности), "кс", 
+		typeof(элементыКС), "элем",
+		string,"Район",
+		string,"Руководитель", 
+		
+		string,"Город,<br>организация",	
+		string, "Нитка маршрута",
+		string, "Коментарий руководителя",
+		typeof(готовностьПохода), "Готовность",
+		typeof(статусЗаявки), "Статус"
+	)(
+		null,
+		tuple(
+			видТуризма,
+			категорияСложности,
+			элементыКС,
+			готовностьПохода,
+			статусЗаявки
+		)
+	);
 	//WHERE
 	
 	string queryStr = // основное тело запроса
@@ -95,9 +106,9 @@ from pohod
     date_part('month', finish_date)||'.'||
     date_part('YEAR', finish_date)
      ) as dat ,  
-      coalesce( vid, '0' ) as vid,
-      coalesce( ks, '9' ) as ks,
-      coalesce( elem, '0' ) as elem,
+      vid,
+      ks,
+      elem,
 
      region_pohod , 
      t_chef.fio , 
@@ -130,14 +141,14 @@ from pohod
 	foreach(rec; rs)
 	{
 		last_dekada~=`<hr style="color:green;"><p> <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
-		~ rec.get!"Ключ"(0).to!string ~ `">` ~ видТуризма [rec.get!"Вид"(0)] ~
-		`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ категорияСложности [rec.get!"кс"(0)]~`&nbsp;`~элементыКС[rec.get!"элем"(0)]
+		~ rec.getStr!("Ключ")() ~ `">` ~ rec.getStr!("Вид")() ~
+		`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ rec.getStr!("кс")() ~ `&nbsp;` ~ rec.getStr!("элем")("")
 		~`&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
-		~ rec.get!"Район"("нет")~	` </a> </p>`~ "\r\n";
+		~ rec.getStr!("Район")() ~ ` </a> </p>`~ "\r\n";
 			
 	
-		last_dekada~=`<p class="last_pohod_comment"> По маршруту: `~ rec.get!"Нитка маршрута"("нет") ~`  </br>` ~"\r\n";
-		last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.get!"Руководитель"("нет") ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.get!"Сроки"("нет")~ "\r\n";
+		last_dekada~=`<p class="last_pohod_comment"> По маршруту: `~ rec.getStr!("Нитка маршрута")() ~`  </br>` ~"\r\n";
+		last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.getStr!("Руководитель")() ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.getStr!("Сроки")() ~ "\r\n";
 		last_dekada~=`</p></br>`~ "\r\n";
 	}
 	// Конец сведний о последних десяти записях

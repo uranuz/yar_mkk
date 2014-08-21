@@ -15,11 +15,13 @@ __gshared Logger PrioriteLogger;
 
 //Инициализация сайта МКК
 shared static this()
-{	Router = new HTTPRouter;
+{	
+	import std.exception: assumeUnique;
+	Router = new HTTPRouter;
 	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
-	SiteLogger = new ThreadedLogger( new FileLogger(eventLogFileName, LogLevel.error) );
-	PrioriteLogger = new ThreadedLogger( new FileLogger(prioriteLogFileName, LogLevel.info) );
+	SiteLogger = new ThreadedLogger( cast(shared) new FileLogger(eventLogFileName, LogLevel.error) );
+	PrioriteLogger = new ThreadedLogger( cast(shared) new FileLogger(prioriteLogFileName, LogLevel.info) );
 	
 	Router
 		.join(JSONRPCRouter)
@@ -29,7 +31,7 @@ shared static this()
 		static if( isMKKSiteReleaseTarget )
 			string msg = error.msg;
 		else
-			string msg = typeid(error).to!string;
+			string msg = error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(line: " ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
 		
 		SiteLogger.error(msg);
 		auto tpl = getGeneralTemplate(context);

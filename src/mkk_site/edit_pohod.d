@@ -22,10 +22,12 @@ shared static this()
 	JSONRPCRouter.join!(удалитьПоход);
 }
 
-alias FieldType ft;
-auto shortTouristRecFormat = RecordFormat!( 
-	ft.IntKey, "num", ft.Str, "family_name", 
-	ft.Str, "given_name", ft.Str, "patronymic", ft.Int, "birth_year" 
+static immutable shortTouristRecFormat = RecordFormat!( 
+	PrimaryKey!(int), "num", 
+	string, "family_name", 
+	string, "given_name", 
+	string, "patronymic", 
+	int, "birth_year" 
 )();
 
 immutable shortTouristFormatQueryBase = 
@@ -63,7 +65,7 @@ auto getTouristList(HTTPContext context, string фамилия)
 
 	auto queryRes = dbase.query(  
 		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
-		~ PGEscapeStr( фамилия ) ~ `%' limit 25;`
+		~ PGEscapeStr( фамилия ) ~ `%' limit 50;`
 	);
 
 	if( queryRes is null || queryRes.recordCount == 0 )
@@ -93,29 +95,44 @@ auto списокУчастниковПохода( size_t pohodKey )
 	return queryRes.getRecordSet(shortTouristRecFormat);
 }
 
+import std.datetime;
+import std.typecons;
 
-immutable(RecordFormat!(
-	ft.IntKey, "num", ft.Str, "kod_mkk", ft.Str, "nomer_knigi", ft.Str, "region_pohod",
-	ft.Str, "organization", ft.Str, "region_group", ft.Enum, "vid", ft.Enum, "elem",
-	ft.Enum, "ks", ft.Str, "marchrut", ft.Date, "begin_date",
-	ft.Date, "finish_date", ft.Int, "chef_grupp", ft.Int, "alt_chef",
-	ft.Int, "unit", ft.Enum, "prepar", ft.Enum, "stat",
-	ft.Str, "chef_coment", ft.Str, "MKK_coment", ft.Str, "unit_neim"
-)) pohodRecFormat;
+static immutable RecordFormat!(
+	PrimaryKey!(size_t), "num", 
+	string, "kod_mkk", 
+	string, "nomer_knigi", 
+	string, "region_pohod",
+	string, "organization", 
+	string, "region_group", 
+	typeof(видТуризма), "vid", 
+	typeof(элементыКС), "elem",
+	typeof(категорияСложности), "ks", 
+	string, "marchrut", 
+	Date, "begin_date",
+	Date, "finish_date", 
+	size_t, "chef_grupp", 
+	size_t, "alt_chef",
+	int, "unit", 
+	typeof(готовностьПохода), "prepar", 
+	typeof(статусЗаявки), "stat",
+	string, "chef_coment", 
+	string, "MKK_coment", 
+	string, "unit_neim"
+) pohodRecFormat = typeof(pohodRecFormat)(
+		null,
+		tuple(
+			видТуризма,
+			элементыКС,
+			категорияСложности,
+			готовностьПохода,
+			статусЗаявки
+		)
+	);
 
 
-shared static this()
-{	import webtank.common.utils;
-	pohodRecFormat.enumFormats =
-	[	"vid": видТуризма,
-		"ks": категорияСложности,
-		"elem": элементыКС,
-		"stat": статусЗаявки,
-		"prepar": готовностьПохода
-	];
-}
 
-immutable strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ].idup;
+immutable strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
 
 //Функция формирует форму редактирования похода
 void создатьФормуИзмененияПохода(
@@ -161,20 +178,18 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 
-	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	alias pohodEnumFieldNames = pohodRecFormat.filterNamesByTypes!(EnumFormat);
 	//Вывод перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
 	{	//Создаём экземпляр генератора выпадающего списка
-		auto dropdown =  new PlainDropDownList;
-		
-		import webtank.common.utils;
-		dropdown.values = pohodRecFormat.enumFormats[fieldName].mutCopy();
+		auto dropdown =  listBox( pohodRecFormat.getEnumFormat!(fieldName) );
+
 		dropdown.name = fieldName;
 		dropdown.id = fieldName;
 
 		//Задаём текущее значение
 		if( pohodRec && !pohodRec.isNull(fieldName) )
-			dropdown.currKey = pohodRec.get!(fieldName)();
+			dropdown.selectedValue = pohodRec.get!(fieldName)();
 		
 		pohodForm.set( fieldName, dropdown.print() );
 	}
@@ -272,7 +287,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValues ~= ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" );
 	}
 
-	alias pohodRecFormat.filterNamesByTypes!(FieldType.Enum) pohodEnumFieldNames;
+	alias pohodRecFormat.filterNamesByTypes!(EnumFormat) pohodEnumFieldNames;
 	
 	//Формируем часть запроса для вывода перечислимых полей
 	foreach( fieldName; pohodEnumFieldNames )
@@ -290,7 +305,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			}
 		}
 		
-		if( !enumKey.isNull && enumKey !in pohodRecFormat.enumFormats[fieldName] )
+		if( !enumKey.isNull && enumKey.value !in pohodRecFormat.getEnumFormat!(fieldName) )
 			throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
 	
 		fieldNames ~= fieldName;

@@ -2,4 +2,18 @@ module mkk_site;
 
 public import mkk_site.site_main, mkk_site.site_data, mkk_site.utils;
 
-import mkk_site.show_tourist, mkk_site.show_pohod, mkk_site.index, mkk_site.reports, mkk_site.stati, mkk_site.auth, mkk_site.show_moder, mkk_site.edit_tourist, mkk_site.edit_pohod, mkk_site.show_pohod_for_tourist, mkk_site.pohod, mkk_site.inform;
+//Главное меню
+import mkk_site.index; //Главная страница сайта
+import mkk_site.show_tourist; //Список туристов
+import mkk_site.show_pohod; //Список походов
+import mkk_site.show_moder; //Список модераторов
+import mkk_site.reports; //Отчеты
+import mkk_site.stati; //Статьи и документы
+
+// //Остальные разделы
+import mkk_site.auth; //Аутентификация пользователей
+// import mkk_site.edit_tourist; //Редактирование туристов
+// import mkk_site.edit_pohod; //Редактирование походов
+// import mkk_site.show_pohod_for_tourist; //Список походов, в которых участвовал турист
+import mkk_site.pohod; //Карточка похода
+import mkk_site.inform; //Цели и задачи сайта

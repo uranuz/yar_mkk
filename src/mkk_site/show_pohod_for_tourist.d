@@ -1,6 +1,6 @@
 module mkk_site.show_pohod_for_tourist;
 
-import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
+import std.conv, std.string, std.utf, std.typecons;//  strip()       Уибират начальные и конечные пробелы
 import std.file; //Стандартная библиотека по работе с файлами
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
@@ -26,9 +26,7 @@ void netMain(HTTPContext context)
 	uint offset=0; //Сдвиг по числу записей
 	uint limit=5;// число строк на странице
 	int число_походов;
-	enum string [int] видТуризма=[0:"", 1:"пешеходный",2:"лыжный",3:"горный",
-		4:"водный",5:"велосипедный",6:"автомото",7:"спелео",8:"парусный",
-		9:"конный",10:"комбинированный" ];
+
 	string vke;// вид туризма и категория сложности с элементыКС
 	string  ps;//готовность и статус похода 
 	auto rq = context.request;
@@ -40,7 +38,7 @@ void netMain(HTTPContext context)
 	string js_file = "../../js/page_view.js";
 		
 	//Создаём подключение к БД
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	auto dbase = getCommonDB();
 	if ( !dbase.isConnected )
 		output ~= "Ошибка соединения с БД";
 		
@@ -62,55 +60,61 @@ void netMain(HTTPContext context)
 	content=`<hr>`~ "\r\n";
 	
 	string qeri_ФИО = //по номеру в базе формируем строку ФИО г.р.
-	`SELECT num,
-(family_name||' '||coalesce(given_name,'')
-||' '||coalesce(patronymic,'')||
- coalesce(birth_date,'')||', '||birth_year ) as birth_date,
- coalesce(exp,'не определён') as opt,
-		razr,sud,
-( case 
+`
+SELECT 
+	num,
+	(	family_name || ' ' || coalesce(given_name,'')
+		||' '||coalesce(patronymic,'')||
+		coalesce(birth_date,'')||', '||birth_year 
+	) as birth_date,
+	coalesce(exp,'не определён') as opt,
+	razr, sud,
+	(	case 
 			 when( show_phone = true ) then phone||'<br> ' 
 			else '' 
 		end || 
 		case 
 			 when( show_email = true ) then email 
 			 else '' 
-		   end ) as contact, comment
- 
+		   end 
+	) as contact, 
+	comment
  
 FROM tourist 
-WHERE num=`~touristKey.to!string;
+WHERE num =` ~touristKey.to!string;
  
-  string qeri_число_походов= //получаем число походов
+  string qeri_число_походов = //получаем число походов
   `select count(1) from (
  select unnest(pohod.unit_neim ) as u      
  FROM pohod ) as uu where uu.u =`~touristKey.to!string;
   
 
-  
-	alias FieldType ft;
-
    //получаем данные о ФИО и г.р. туриста
    auto touristRecFormat = RecordFormat!(
-	 ft.IntKey, "Ключ",   ft.Str, "Имя", 
-	ft.Str,  "Опыт", 
-	ft.Int,  "Разряд", 
-	ft.Int, "Категория",
-	ft.Str, "Контакты",	
-	ft.Str, "Комментарий"
-	 
-	 
-	 )();
+		PrimaryKey!(size_t), "Ключ", 
+		string, "Имя", 
+		string, "Опыт", 
+		typeof(спортивныйРазряд), "Разряд", 
+		typeof(судейскаяКатегория), "Категория",
+		string, "Контакты",
+		string, "Комментарий"
+	)(
+		null,
+		tuple(
+			спортивныйРазряд,
+			судейскаяКатегория
+		)
+	);
 	 
 	 auto rs1 = dbase.query(qeri_ФИО).getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	 foreach(rec; rs1)
 	 { content~=`<h1>` ~ rec.get!"Имя"("") ~ `</h1>`~ "\r\n";
-	   content~=`<p>Туристский опыт: `~rec.get!"Опыт"("не определён")  ~ `.</p>`~ "\r\n";
-	   content~=`<p>Спортивный разряд: `~спортивныйРазряд [rec.get!"Разряд"(900)]~`.</p>`~ "\r\n";
-      content~=`<p>Судейская категория: `~судейскаяКатегория  [rec.get!"Категория"(900)]~`.</p>`~ "\r\n";
-       content~=`<p>Контакты: `~rec.get!"Контакты"("неопределёны")  ~ `.</p>`~ "\r\n";
+	   content~=`<p>Туристский опыт: ` ~ rec.get!"Опыт"("не определён") ~ `.</p>` ~ "\r\n";
+	   content~=`<p>Спортивный разряд: ` ~ rec.getStr!"Разряд"() ~ `.</p>` ~ "\r\n";
+      content~=`<p>Судейская категория: ` ~ rec.getStr!"Категория"() ~ `.</p>` ~ "\r\n";
+       content~=`<p>Контакты: `~ rec.get!"Контакты"("неопределёны")  ~ `.</p>` ~ "\r\n";
       
-      content~=`<p>Коментарий. `~rec.get!"Комментарий"("Отсутствует")  ~ `.</p><br>`~ "\r\n";
+      content~=`<p>Коментарий. `~ rec.get!"Комментарий"("Отсутствует")  ~ `.</p><br>`~ "\r\n";
 	 }
 	//-------------------------------------------------------------------
 	//получаем данные о количестве походов
@@ -139,7 +143,7 @@ WHERE num=`~touristKey.to!string;
 	offset = (curPageNum -1) * limit ; //Сдвиг по числу записей
 	content ~=`<form id="main_form" method="post">`;
 	
-		try { //Логирование запросов к БД для отладки
+	try { //Логирование запросов к БД для отладки
 		std.file.append( eventLogFileName, 
 			"--------------------\r\n"
 			"Количество записей: " ~ число_походов.to!string ~ "\r\n"
@@ -166,52 +170,63 @@ WHERE num=`~touristKey.to!string;
 	//образуем финальную таблицу
 	
 	auto pohodRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",
-	ft.Int, "турист",
-	ft.Str, "Номер книги",
-	ft.Str, "Сроки", 
-	ft.Int, "Вид",
-	ft.Int, "кс", ft.Int, "элем",	
-	ft.Int,"Руководитель",
-	ft.Str,"Город,<br>организация",
-	ft.Str,"Район",   
-	ft.Str, "Нитка маршрута",	
-	ft.Int, "Готовность",ft.Int, "Статус"
-	
-	)();
+		PrimaryKey!(size_t), "Ключ",
+		int, "турист",
+		string, "Номер книги",
+		string, "Сроки", 
+		typeof(видТуризма), "Вид",
+		typeof(категорияСложности), "кс", 
+		typeof(элементыКС), "элем",	
+		int, "Руководитель",
+		string, "Город,<br>организация",
+		string, "Район",   
+		string, "Нитка маршрута",
+		typeof(готовностьПохода), "Готовность",
+		typeof(статусЗаявки), "Статус"
+	)(
+		null,
+		tuple(
+			видТуризма,
+			категорияСложности,
+			элементыКС,
+			готовностьПохода,
+			статусЗаявки
+		)
+	);
 	
 	
 	 string qeri_походы=//основной запрос
-  `select * from (
- select
-     pohod.num,
-     unnest(pohod.unit_neim ) as u, 
-     (coalesce(kod_mkk,'000-00')||'<br>'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
-(
-    date_part('day', begin_date)||'.'||
-    date_part('month', begin_date)||'.'||
-    date_part('YEAR', begin_date)     
-      ||' <br> '||
-    date_part('day', finish_date)||'.'||
-    date_part('month', finish_date)||'.'||
-    date_part('YEAR', finish_date)
- ) as date ,  
-      coalesce( vid, '0' ) as vid,
-      coalesce( ks, '9' ) as ks,
-      coalesce( elem, '0' ) as с_элементами,
-      coalesce(chef_grupp,'0' ) as chef,     
-     (coalesce(organization,'')||'<br>'||coalesce(region_group,'')) as organiz ,
-     region_pohod ,     
-     coalesce(marchrut::text,'') as marshrut, 
-     coalesce(prepar,'0'),
-     coalesce(stat,'0')
- FROM pohod order by  pohod.begin_date DESC ) as uu where uu.u =` ~touristKey.to!string
-//~` order by  uu.begin_date DESC `//сортировка по дате в обратном порядке
- 
- ~` LIMIT `~limit.to!string 
- ~` OFFSET `~offset.to!string 
- ~` `
- ;
+`
+select * from (
+	select
+		pohod.num,
+		unnest(pohod.unit_neim ) as u, 
+		(coalesce(kod_mkk,'000-00')||'<br>'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
+		(
+			date_part('day', begin_date)||'.'||
+			date_part('month', begin_date)||'.'||
+			date_part('YEAR', begin_date)     
+			||' <br> '||
+			date_part('day', finish_date)||'.'||
+			date_part('month', finish_date)||'.'||
+			date_part('YEAR', finish_date)
+		) as date,  
+		coalesce( vid, '0' ) as vid,
+		coalesce( ks, '9' ) as ks,
+		coalesce( elem, '0' ) as с_элементами,
+		coalesce( chef_grupp, '0' ) as chef,     
+		( coalesce(organization,'') || '<br>' || coalesce(region_group,'') ) as organiz ,
+		region_pohod,     
+		coalesce(marchrut::text,'') as marshrut, 
+		coalesce(prepar,'0'),
+		coalesce(stat,'0')
+	FROM pohod order by pohod.begin_date DESC 
+) as uu 
+where uu.u =` ~ touristKey.to!string
+	~ ` LIMIT ` ~ limit.to!string 
+	~ ` OFFSET ` ~ offset.to!string 
+	~ ` `
+	;
 	
 	
 	
@@ -220,38 +235,41 @@ WHERE num=`~touristKey.to!string;
 	
 	string table = `<table class="tab1">`;
 		
-		if(_sverka) table~= `<td>Ключ</td>`;		
-		table ~=`<td>&nbspНомер&nbsp</td>
-		        <td>&nbsp&nbspСроки<br>похода&nbsp</td>
-		        <td>Вид<br>кс</td>
-		        <td>Район</td>
-		        <td>Руков.<br>Участ.</td>		        
-		        <td>Город,<br>организация</td>
-		        <td>Статус<br> похода</td>`~ "\r\n";
-		if(_sverka) table ~=`<td>Изменить</td>`~ "\r\n";
+	if(_sverka) table~= `<td>Ключ</td>`;
+	table ~=`<td>&nbspНомер&nbsp</td>
+				<td>&nbsp&nbspСроки<br>похода&nbsp</td>
+				<td>Вид<br>кс</td>
+				<td>Район</td>
+				<td>Руков.<br>Участ.</td>		        
+				<td>Город,<br>организация</td>
+				<td>Статус<br> похода</td>`~ "\r\n";
+	if(_sverka) table ~=`<td>Изменить</td>`~ "\r\n";
 		
 	foreach(rec; rs2)
-	  
 	{	
-	   vke = видТуризма [rec.get!"Вид"(0)] ~ `<br>` ~ категорияСложности [rec.get!"кс"(0)] ~ `<br>` ~ элементыКС[rec.get!"элем"(0)] ;
-	   ps  = готовностьПохода [rec.get!"Готовность"(0)] ~ `<br>` ~ статусЗаявки [rec.get!"Статус"(0)] ;
+	   vke = rec.getStr!"Вид"() ~ `<br>` ~ rec.getStr!"кс"() ~ `<br>` ~ rec.getStr!"элем"() ;
+	   ps  = rec.getStr!"Готовность"() ~ `<br>` ~ rec.getStr!"Статус"();
 	   
 	  
-	table ~= `<tr>`;  //Начинаем оформлять таблицу с данными
-	
-	if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
+		table ~= `<tr>`;  //Начинаем оформлять таблицу с данными
+		
+		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
 	  
 		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
 			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";
 		
 		
 		
-		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";		
+		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";
 		table ~= `<td>` ~  vke ~ `</td>`~ "\r\n";//вид категорияСложности
 		table ~= `<td>` ~  rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
 		table ~= `<td> `;
-		if(rec.get!"турист"==rec.get!"Руководитель") {table ~= `Руков.`;}
-		  else {table ~= `Участ.`;}
+		if( rec.get!"турист" == rec.get!"Руководитель" ) 
+		{	table ~= `Руков.`;
+		}
+		else
+		{	table ~= `Участ.`;
+		}
 		                        table ~=`</td>`~ "\r\n";
 		//руководство - участие
 		table ~= `<td>` ~ rec.get!"Город,<br>организация"("нет")  ~ `</td>`~ "\r\n";		
@@ -262,10 +280,10 @@ WHERE num=`~touristKey.to!string;
 			~ rec.get!"Ключ"(0).to!string ~ `">Изменить</a>  </td>`~ "\r\n";// появляется при наличии допуска
 		
 		table ~= `</tr>`~ "\r\n";
-		table ~= `<tr>` ~ `<td style=";background-color:#8dc0de"    colspan="`~ "\r\n";
+		table ~= `<tr>` ~ `<td style="background-color:#8dc0de;"    colspan="`~ "\r\n";
 		if(_sverka)
 		     table ~=`10`;
-		  else
+		else
 		     table ~=`8`;
 		
 		table ~= `"  >Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`~ "\r\n";

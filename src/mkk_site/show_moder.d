@@ -71,15 +71,14 @@ void netMain(HTTPContext context)
 
 
 	content ~= `<script type="text/javascript" src="` ~ js_file ~ `"></script>`;
-	
-	alias FieldType ft;
 
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",
-	ft.Str, "ФИО", 
-	ft.Str, "Статус", 
-	ft.Str, "Контакты")();
+		PrimaryKey!(size_t), "Ключ",
+		string, "ФИО", 
+		string, "Статус", 
+		string, "Контакты"
+	)();
 	
 	string queryStr;
 	

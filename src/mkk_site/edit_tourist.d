@@ -18,11 +18,12 @@ shared static this()
 	JSONRPCRouter.join!(тестНаличияПохожегоТуриста);
 }
 
-alias FieldType ft;
-
 auto короткийФорматТурист = immutable( RecordFormat!(
-	ft.IntKey, "ключ", ft.Str, "фамилия", ft.Str, "имя", ft.Str, "отчество",
-		ft.Int, "годРожд"
+	PrimaryKey!(size_t), "ключ", 
+	string, "фамилия", 
+	string, "имя", 
+	string, "отчество",
+	int, "годРожд"
 ) )();
 
 auto тестНаличияПохожегоТуриста(
@@ -103,13 +104,22 @@ string показатьФормуРедактТуриста(
 	size_t touristKey = size_t.max
 )
 {	
-	alias FieldType ft;
 	auto touristRecFormat = RecordFormat!(
-		ft.IntKey, "ключ", ft.Str, "фамилия", ft.Str, "имя", ft.Str, "отчество",
-		ft.Str, "дата рожд", ft.Int, "год рожд", ft.Str, "адрес", ft.Str, "телефон",
-		ft.Bool, "показать телефон", ft.Str, "эл почта", ft.Bool, "показать эл почту",
-		ft.Str, "тур опыт", ft.Str, "комент", ft.Int, "спорт разряд",
-		ft.Int, "суд категория"
+		PrimaryKey!(size_t), "ключ", 
+		string, "фамилия", 
+		string, "имя", 
+		string, "отчество",
+		string, "дата рожд", 
+		size_t, "год рожд", 
+		string, "адрес", 
+		string, "телефон",
+		bool, "показать телефон", 
+		string, "эл почта", 
+		bool, "показать эл почту",
+		string, "тур опыт", 
+		string, "комент", 
+		typeof(спортивныйРазряд), "спорт разряд",
+		typeof(судейскаяКатегория), "суд категория"
 	)();
 	
 	Record!( typeof(touristRecFormat) ) touristRec;
@@ -129,8 +139,8 @@ string показатьФормуРедактТуриста(
 	
 	import std.string;
 				
-	Nullable!(ubyte) birthDay;
-	Nullable!(ubyte) birthMonth;
+	Optional!(ubyte) birthDay;
+	Optional!(ubyte) birthMonth;
 	//Вывод даты рождения туриста из базы данных
 	if( isUpdateAction )
 	{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
@@ -145,27 +155,24 @@ string показатьФормуРедактТуриста(
 				if( birthDateParts[1].length != 0 )
 					birthMonth = birthDateParts[1].to!ubyte;
 			} catch(std.conv.ConvException e) {
-				birthDay.nullify();
-				birthMonth.nullify();
+				birthDay = null;
+				birthMonth = null;
 			}
 		}
 	}
 	
 	//Генератор выпадающего списка месяцев
-	auto monthDropdown = new PlainDropDownList;
-	monthDropdown.values = месяцы.mutCopy();
+	auto monthDropdown = listBox(месяцы);
 	monthDropdown.name = "birth_month";
 	monthDropdown.id = "birth_month";
 
 	//Генератор выпадющего списка спорт. разрядов
-	auto sportsGradeDropdown = new PlainDropDownList;
-	sportsGradeDropdown.values = спортивныйРазряд.mutCopy();
+	auto sportsGradeDropdown = listBox(спортивныйРазряд);
 	sportsGradeDropdown.name = "razr";
 	sportsGradeDropdown.id = "razr";
 	
 	//Генератор выпадающего списка судейских категорий
-	auto judgeCatDropdown = new PlainDropDownList;
-	judgeCatDropdown.values = судейскаяКатегория.mutCopy();
+	auto judgeCatDropdown = listBox(судейскаяКатегория);
 	judgeCatDropdown.name = "sud";
 	judgeCatDropdown.id = "sud";
 	
@@ -186,13 +193,13 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
 		
 		if( !birthMonth.isNull() )
-			monthDropdown.currKey = birthMonth.get();
+			monthDropdown.selectedValue = birthMonth.get();
 		
 		if( !touristRec.isNull("спорт разряд") )
-			sportsGradeDropdown.currKey = touristRec.get!"спорт разряд"();
+			sportsGradeDropdown.selectedValue = touristRec.get!"спорт разряд"();
 			
 		if( !touristRec.isNull("суд категория") )
-			judgeCatDropdown.currKey = touristRec.get!"суд категория"();
+			judgeCatDropdown.selectedValue = touristRec.get!"суд категория"();
 	}
 	//-----------------------------------------------------------------------------------
 

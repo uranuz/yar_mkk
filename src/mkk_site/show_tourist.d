@@ -124,14 +124,22 @@ void netMain(HTTPContext context)
 `	</form>
 	<script type="text/javascript" src="` ~ js_file ~ `"></script>`~ "\r\n";
 	
-	alias FieldType ft;
-
+	import std.typecons;
+	
    ///Начинаем оформлять таблицу с данными
    auto touristRecFormat = RecordFormat!(
-	ft.IntKey, "Ключ",   ft.Str, "Имя", ft.Str, "Дата рожд", 
-	ft.Str,  "Опыт",   ft.Str, "Контакты",
-	ft.Int,  "Разряд",   ft.Int, "Категория",
-	ft.Str, "Комментарий")();
+		PrimaryKey!(size_t), "Ключ", 
+		string, "Имя", 
+		string, "Дата рожд", 
+		string,  "Опыт", 
+		string, "Контакты",
+		typeof(спортивныйРазряд),  "Разряд", 
+		typeof(судейскаяКатегория), "Категория",
+		string, "Комментарий"
+	)(
+		null,
+		tuple(спортивныйРазряд, судейскаяКатегория)
+	);
 	
 	string queryStr;
 	
@@ -165,7 +173,7 @@ void netMain(HTTPContext context)
 	try {
 	foreach(rec; rs)
 	{	
-		raz_sud_kat= спортивныйРазряд [rec.get!"Разряд"(1000)] ~ `<br>` ~ судейскаяКатегория [rec.get!"Категория"(1000)] ~ "\r\n";
+		raz_sud_kat= rec.getStr!"Разряд"() ~ `<br>` ~ rec.getStr!"Категория"() ~ "\r\n";
 		
 		table ~= `<tr>`;
 		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";
