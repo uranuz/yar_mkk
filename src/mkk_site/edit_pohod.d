@@ -178,9 +178,11 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 
-	alias pohodEnumFieldNames = pohodRecFormat.filterNamesByTypes!(EnumFormat);
+	//pragma(msg, "filterNamesByTypes!(EnumFormat): ", pohodRecFormat.filterNamesByTypes!(EnumFormat));
+	
+	//alias pohodEnumFieldNames = 
 	//Вывод перечислимых полей
-	foreach( fieldName; pohodEnumFieldNames )
+	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	//Создаём экземпляр генератора выпадающего списка
 		auto dropdown =  listBox( pohodRecFormat.getEnumFormat!(fieldName) );
 
@@ -287,10 +289,11 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValues ~= ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" );
 	}
 
-	alias pohodRecFormat.filterNamesByTypes!(EnumFormat) pohodEnumFieldNames;
+	//alias pohodRecFormat.filterNamesByTypes!(EnumFormat) pohodEnumFieldNames;
+	//pragma(msg, pohodRecFormat.filterNamesByTypes!(EnumFormat)[0]);
 	
 	//Формируем часть запроса для вывода перечислимых полей
-	foreach( fieldName; pohodEnumFieldNames )
+	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	if( fieldName !in pVars )
 			continue;
 			

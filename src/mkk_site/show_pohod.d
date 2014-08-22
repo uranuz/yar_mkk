@@ -61,10 +61,11 @@ struct ФильтрПоходов
 	Optional!int вид;
 	int[] категории;
 	OptionalDate[string] сроки;
+	string районПохода;
 	
 	bool естьФильтрация() @property
 	{
-		if( !вид.isNull || категории.length > 0 )
+		if( !вид.isNull || категории.length > 0 || районПохода.length > 0 )
 			return true;
 			
 		foreach( дата; this.сроки )
@@ -95,7 +96,7 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 	{ "end_date_range_tail", "finish_date", ">=" }
 ];
 
-import webtank.view_logic.html_controls;
+import webtank.view_logic.html_controls, webtank.net.utils;
 
 string отрисоватьБлокФильтрации(ФильтрПоходов фильтрПоходов)
 {
@@ -123,14 +124,16 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		
 		поляДат[имяПоля] = полеДаты;
 	}
-	разметка ~= `Вид туризма: ` ~ списокВидовТуризма.print() ~ "<br>\r\n"
-		~ `Категория сложности: ` ~ списокКатегорий.print() ~ "<br>\r\n"
+	разметка ~= `Вид туризма ` ~ списокВидовТуризма.print() ~ "<br>\r\n"
+		~ `Категория сложности ` ~ списокКатегорий.print() ~ "<br>\r\n"
 		~ "Диапазон сроков начала похода: <br>\r\n"
 		~ "c " ~ поляДат["begin_date_range_head"].print() 
 		~ " по " ~ поляДат["begin_date_range_tail"].print() ~ "<br>\r\n"
 		~ "Диапазон сроков окончания похода: <br>\r\n"
 		~ "c " ~ поляДат["end_date_range_head"].print() 
-		~ " по " ~ поляДат["end_date_range_tail"].print() ~ "<br>\r\n";
+		~ " по " ~ поляДат["end_date_range_tail"].print() ~ "<br>\r\n"
+		~ `Район похода содержит <input type="text" name="region_pohod" value="` 
+		~ HTMLEscapeValue(фильтрПоходов.районПохода) ~ `">` ~ "<br>\r\n";
 	
 	разметка ~= `<input type="submit" value="Найти">` ~ "<br>\r\n";
 	
@@ -158,6 +161,10 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 			rq.bodyForm.get( соотвПоля.имяВФорме ~ "__day", null ).conv!(Optional!ubyte)
 		);
 	}
+	
+	import std.string;
+	
+	фильтрПоходов.районПохода = PGEscapeStr( strip( rq.bodyForm.get( "region_pohod", null ) ) );
 	
 	return фильтрПоходов;
 }
@@ -203,6 +210,9 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 	}
 	
 	частиЗапроса_фильтрыПоходов ~= частиЗапроса_фильтрыСроковПохода;
+	
+	if( фильтрПоходов.районПохода.length > 0 )
+		частиЗапроса_фильтрыПоходов ~= `region_pohod ILIKE '%` ~ фильтрПоходов.районПохода ~ `%'`;
 	
 	return ( частиЗапроса_фильтрыПоходов.length > 0 ?
 		" ( " ~ частиЗапроса_фильтрыПоходов.join(" ) and ( ") ~ " ) " : null );
@@ -341,7 +351,7 @@ LEFT OUTER JOIN t_chef
 	
 	~ "</td><td>"~ "\r\n"
 	~ ` Страница <input name="cur_page_num" type="text" size="4" maxlength="4" value="` ~ curPageNum.to!string ~ `"> из ` 
-	~ pageCount.to!string ~ ` <input type="submit" name="act" value="Перейти"> `
+	~ pageCount.to!string ~ ` <input type="submit" value="Перейти"> `
 	~ "</td><td>" ~ "\r\n"
 	~ ( (curPageNum < pageCount ) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum + 1).to!string ~ `)">Следующая</a>` : "")
 	~ "</td></tr></table>" ~ "\r\n";    
@@ -349,10 +359,15 @@ LEFT OUTER JOIN t_chef
 	// Начало формирования основной отображающей таблицы  
 	string table = `<table class="tab1" >`;
 	
-	if(_sverka) table ~= `<td>Кл.</td>`~ "\r\n";// появляется при наличии допуска
+	table ~= "<tr>";
+	if(_sverka)
+		table ~= `<th>#</th>`~ "\r\n";// появляется при наличии допуска
 	
-	table ~= `<td>Номер</td><td>Сроки похода</td><td>Вид, категория</td><td>Район</td><td>Руководитель</td><td>Участники</td><td>Город, организация</td><td>Статус похода</td>` ~ "\r\n";
-	if(_sverka) table ~=`<td>Изм.</td>`~ "\r\n";// появляется при наличии допуска
+	table ~= `<th>№ книги</th><th>Сроки похода</th><th>Вид, категория</th><th>Район</th><th>Руководитель</th><th>Участники</th><th>Город, организация</th><th>Статус похода</th>` ~ "\r\n";
+	
+	if(_sverka) table ~=`<th>Изм.</th>`~ "\r\n";// появляется при наличии допуска
+	table ~= "</tr>";
+	
 	foreach(rec; rs)
 	{
 	   string vke = rec.getStr!"Вид"() ~ `<br>` ~ rec.getStr!"кс"() ~ ` ` ~ rec.getStr!"элем"("") ;

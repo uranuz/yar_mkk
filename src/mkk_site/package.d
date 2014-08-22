@@ -12,8 +12,8 @@ import mkk_site.stati; //Статьи и документы
 
 // //Остальные разделы
 import mkk_site.auth; //Аутентификация пользователей
-// import mkk_site.edit_tourist; //Редактирование туристов
-// import mkk_site.edit_pohod; //Редактирование походов
-// import mkk_site.show_pohod_for_tourist; //Список походов, в которых участвовал турист
+import mkk_site.edit_tourist; //Редактирование туристов
+import mkk_site.edit_pohod; //Редактирование походов
+import mkk_site.show_pohod_for_tourist; //Список походов, в которых участвовал турист
 import mkk_site.pohod; //Карточка похода
 import mkk_site.inform; //Цели и задачи сайта

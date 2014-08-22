@@ -192,8 +192,7 @@ string показатьФормуРедактТуриста(
 		editTouristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
 		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
 		
-		if( !birthMonth.isNull() )
-			monthDropdown.selectedValue = birthMonth.get();
+		monthDropdown.selectedValue = birthMonth;
 		
 		if( !touristRec.isNull("спорт разряд") )
 			sportsGradeDropdown.selectedValue = touristRec.get!"спорт разряд"();

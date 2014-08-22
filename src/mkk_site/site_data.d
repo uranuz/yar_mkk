@@ -218,7 +218,7 @@ import std.typecons;
 
 alias t = tuple;
 
-static immutable месяцы = enumFormat(
+static immutable месяцы = enumFormat( 
 	[	t(1,"январь"), t(2,"февраль"), t(3,"март"), t(4,"апрель"), t(5,"май"), 
 		t(6,"июнь"), t(7,"июль"), t(8,"август"), t(9,"сентябрь"), 
 		t(10,"октябрь"), t(11,"ноябрь"), t(12,"декабрь")

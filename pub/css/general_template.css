@@ -191,8 +191,6 @@ body {
 }
 
 #content {
-	
-	
 	margin: 50px  280px 16px 16px;
 	padding: 5px;
 	background: #e4e2bf;
@@ -221,17 +219,16 @@ body {
 
 
 
-table.tab1 
-{
+table.tab1 {
+	
 	width: 100%; /* Ширина таблицы */
 	border: 3px ridge #666; /* Рамка вокруг таблицы */
-	border-spacing:	0px;
-	
+	border-spacing: 0px;
 }
 
-.tab1 td {
-	font-size: 80%; /* Размер шрифта в процентах */ 	
-	word-break: break-all;
+.tab1 td, .tab1 th {
+	font-size: 80%; /* Размер шрифта в процентах */
+	/*word-break: break-all;*/
 	/* padding: 1px; /* Поля вокруг содержимого таблицы */
 	border: 1px solid ; /* Параметры рамки */
 	border-right-style:ridge;
