@@ -211,8 +211,32 @@ body {
 	padding-left: 15px;
 }
 
+.main_menu_first_lvl > li {
+	float: left;
+	list-style: none;
+	margin-right: 10px;
+	
+}
+
+.main_menu_second_lvl {
+	position: absolute;
+	float: right;
+	margin-top: 5px;
+	background: #598d23;
+	display: none;
+	
+}
+
+.main_menu_second_lvl > li {
+	list-style: none;
+	display: block;
+	margin-bottom: 6px;
+	/*float: none;*/
+	
+}
+
 .pohod {
-		border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 

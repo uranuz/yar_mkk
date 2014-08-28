@@ -40,7 +40,7 @@ left join tourist
 	string result;//список туристов
 	
 	if( рез_запроса.recordCount<1) 
-		result ~=`Сведения об участниках <br> отсутствуют`;
+		result ~= `Сведения об участниках <br> отсутствуют`;
 	else
 	{
 		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
@@ -60,7 +60,7 @@ string linkList( size_t pohodNum ) //функция получения спис�
    string result;//список ссылок	
 	
 	if( рез_запроса.recordCount < 1 ) 
-		result ~=`Ссылки отсутствуют`;
+		result ~= `отсутствуют`;
 	else
 	{  //result ~=`Cписок ссылок	 `;
 		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
@@ -77,7 +77,7 @@ string linkList( size_t pohodNum ) //функция получения спис�
 	 
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
@@ -85,20 +85,8 @@ void netMain(HTTPContext context)
 	//auto pVars = rq.postVars;
 	auto qVars = rq.queryForm;
 	string content ;//  содержимое страницы 	
-	//---------------------------
-	string output; //"Выхлоп" программы 
-	scope(exit) rp.write(output);
-	string js_file = "../../js/page_view.js";
-	//------------------------------------
-	
-	auto tpl = getGeneralTemplate(context);
 
-	auto dbase = getCommonDB;
-	if ( !dbase.isConnected )
-	{	tpl.set( "content", "<h3>База данных МКК не доступна!</h3>" );
-		rp ~= tpl.getString();
-		return; //Завершаем
-	}
+	auto dbase = getCommonDB();
 	
 	size_t pohodKey;
 	try {
@@ -112,8 +100,8 @@ void netMain(HTTPContext context)
 `
 select 
 	pohod.num,
-	( coalesce(kod_mkk,'') ) as  kod_mkk,
-	( coalesce(nomer_knigi,'') ) as nomer_knigi,
+	kod_mkk,
+	nomer_knigi,
 	( coalesce(organization,'') || ' ' || coalesce(region_group,'') ) as organiz, 
 	(
 		date_part('day', begin_date) || '.' ||
@@ -124,29 +112,43 @@ select
 		date_part('month', finish_date) || '.' ||
 		date_part('YEAR', finish_date)
 	) as dat,  
-	coalesce( vid, '0' ) as vid,
-	coalesce( ks, '9' ) as ks,
-	coalesce( elem, '0' ) as elem,
+	vid,
+	ks,
+	elem,
 	region_pohod, 
-	( coalesce(marchrut::text,'') ) as marchrut,
-	( coalesce(pohod.unit,'') ) as kol_tur,
-	(
-		coalesce(chef.family_name,'нет данных') ||'  '
-		|| coalesce(chef.given_name,'') || '  '
-		|| coalesce(chef.patronymic,'') || ' '
-		|| coalesce(chef.birth_year::text,'')
-	) as chef_fio,  
-	(
-		coalesce(a_chef.family_name,'нет данных')||' '
-		||coalesce(a_chef.given_name,'')||' '
-		||coalesce(a_chef.patronymic,'')||' '
-		||coalesce(a_chef.birth_year::text,'')
-	) as a_chef_fio,
-	coalesce(alt_chef,'0') as a_ch,
-	coalesce(prepar,'0') as prepar,
-	coalesce(stat,'0') as stat,
-	coalesce(chef_coment,'') as chef_coment,
-	coalesce("MKK_coment",'') as mkk_coment
+	marchrut,
+	pohod.unit,
+	case 
+		when 
+			chef.family_name is null
+			and chef.given_name is null
+			and chef.patronymic is null
+		then
+			'нет данных'
+		else
+			coalesce(chef.family_name, '')
+			|| coalesce(' ' || chef.given_name,'')
+			|| coalesce(' ' || chef.patronymic,'')
+			|| coalesce(' ' || chef.birth_year::text,'')
+	end as chef_name,  
+	case 
+		when 
+			a_chef.family_name is null
+			and a_chef.given_name is null
+			and a_chef.patronymic is null
+		then
+			'нет'
+		else
+			coalesce(a_chef.family_name, '')
+			|| coalesce(' ' || a_chef.given_name,'')
+			|| coalesce(' ' || a_chef.patronymic,'')
+			|| coalesce(' ' || a_chef.birth_year::text,'')
+	end as a_chef_name,
+	alt_chef,
+	prepar,
+	stat,
+	chef_coment,
+	"MKK_coment"
 from pohod 
 left outer join tourist chef 
 	on pohod.chef_grupp = chef.num
@@ -194,33 +196,33 @@ left outer join tourist a_chef
 `	<p>Код МКК: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Код МКК" ) ~`</span></p>
 	<p>Маршрутная книжка: <span class="b-pohod e-value">№ ` ~ HTMLEscapeText( rec.getStr!"Номер книги" ) ~ `</span></p>
 	<p>Группа туристов: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Организация" ) ~ `</span></p>
-	<p>Сроки похода: <span class="b-pohod e-value"> с ` ~  rec.getStr!"Сроки"  ~ `</span></p>
+	<p>Сроки похода: <span class="b-pohod e-value"> с ` ~ rec.getStr!"Сроки"  ~ `</span></p>
 	<p>Вид туризма: <span class="b-pohod e-value">` ~ rec.getStr!"Вид" ~ `</span></p>
-	<p>Категория сложности: <span class="b-pohod e-value">` ~ rec.getStr!"Категория" ~ ` `;
+	<p>Категория сложности: <span class="b-pohod e-value">` ~ rec.getStr!"Категория";
 	
-	if( rec.get!"Элементы КС" > rec.get!"Категория" )
-		content ~= `c ` ~ rec.getStr!"Элементы КС"();
-		
+	if( !rec.isNull("Элементы КС") && !rec.isNull("Категория") && rec.get!"Элементы КС" > rec.get!"Категория"  )
+		content ~= ` ` ~ rec.getStr!"Элементы КС"();
+	
 	content ~= `</span></p>`;
 	
 	content ~= 
-`	<p>Регион похода <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Район" ) ~`</span></p>
+`	<p>Регион похода: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Район" ) ~ `</span></p>
 	<br>
 	<p>По маршруту: <br><span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Маршрут" ) ~ `</span></p>
 	<br>
-	<p>В составе: <span class="b-pohod e-value">`~ rec.getStr!"Число участников" ~`</b></font> человек</p>
+	<p>В составе: <span class="b-pohod e-value">` ~ rec.getStr!"Число участников" ~`</b></font> человек</p>
 	<br>
 	<p>Руководитель группы: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"ФИО руководителя" ) ~ `</span></p>
-	<p>Зам руководителя группы: <span class="b-pohod e-value">`~HTMLEscapeText( rec.getStr!"ФИО зам. руководителя"("отсутствует") ) ~`</span></p>
+	<p>Зам. руководителя группы: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"ФИО зам. руководителя" ) ~`</span></p>
 	<br>
 	<p>Состав группы:</p>
 	<p style="color: #556B2F; font-weight: bold;">` ~ participantsList( pohodKey ) ~ `</p>
 	<br>
-	<p>Готовность похода: <span class="b-pohod e-value">` ~ rec.getStr!"Готовность" ~ `</span></p>
-	<p>Статус заявки: <span class="b-pohod e-value">` ~ rec.getStr!"Статус" ~ `</span></p>
+	<p>Готовность похода: <span class="b-pohod e-value">` ~ rec.getStr!"Готовность"("не известна") ~ `</span></p>
+	<p>Статус заявки: <span class="b-pohod e-value">` ~ rec.getStr!"Статус"("не известен") ~ `</span></p>
 	<br>
-	<p>Коментарий руководителя: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий руководителя" ) ~ `</span></p>
-	<p>Коментарий MKK: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий МКК" ) ~ `</span></p>
+	<p>Коментарий руководителя: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий руководителя"("нет") ) ~ `</span></p>
+	<p>Коментарий MKK: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий МКК"("нет") ) ~ `</span></p>
 	<br>
 	<style>
 		.b-pohod.e-value {
@@ -231,8 +233,6 @@ left outer join tourist a_chef
 	<p>Дополнительные материалы:</p>` 
 	~ linkList( pohodKey );
 
-	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-
-	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
+	return content;
 }
 

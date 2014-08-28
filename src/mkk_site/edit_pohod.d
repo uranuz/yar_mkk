@@ -512,10 +512,9 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 }
 
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 	
 	auto pVars = rq.bodyForm;
 	auto qVars = rq.queryForm;
@@ -527,14 +526,8 @@ void netMain(HTTPContext context)
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем шаблон по файлу
-		auto tpl = getGeneralTemplate(context);
 	
 		auto dbase = getCommonDB;
-		if ( !dbase.isConnected )
-		{	tpl.set( "content", "<h3>База данных МКК не доступна!</h3>" );
-			rp ~= tpl.getString();
-			return; //Завершаем
-		}
 		
 		Optional!size_t pohodKey;
 		try {
@@ -569,15 +562,14 @@ void netMain(HTTPContext context)
 			content = pohodForm.getString();
 		}
 		
-		tpl.set( "content", content );
-		rp ~= tpl.getString();
+		return content;
 	}
 	
 	
 	else 
 	{	//Какой-то случайный аноним забрёл - отправим его на аутентификацию
-		rp.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
-		return;
+		context.response.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
+		return null;
 	}
 }
 

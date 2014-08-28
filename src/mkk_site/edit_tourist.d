@@ -382,31 +382,23 @@ string записатьТуриста(
 	return content;
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {
 	auto rq = context.request;
-	auto rp = context.response;
-	auto user = context.user;
 	
 	auto pVars = context.request.bodyForm;
 	auto qVars = context.request.queryForm;
 	
 	bool isAuthorized = 
-		user.isAuthenticated && 
-		( user.isInRole("moder") || user.isInRole("admin") );
+		context.user.isAuthenticated && 
+		( context.user.isInRole("moder") || context.user.isInRole("admin") );
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем общий шаблон страницы
-		auto tpl = getGeneralTemplate(context);
 	
 		//Создаём подключение к БД
 		auto dbase = getCommonDB();
-		if ( !dbase.isConnected )
-		{	tpl.set( "content", "<h3>База данных МКК не доступна!</h3>" );
-			rp ~= tpl.getString();
-			return; //Завершаем
-		}
 		
 		bool isTouristKeyAccepted = false; //Принят ли ключ туриста
 		
@@ -430,12 +422,11 @@ void netMain(HTTPContext context)
 			content = показатьФормуРедактТуриста( dbase, isTouristKeyAccepted, touristKey );
 		}
 		
-		tpl.set("content", content);
-		rp ~= tpl.getString();
+		return content;
 	}
 	else 
 	{	//Какой-то случайный аноним забрёл - отправим его на аутентификацию
-		rp.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
-		return;
+		context.response.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
+		return null;
 	}
 }

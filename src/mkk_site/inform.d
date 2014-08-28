@@ -11,42 +11,23 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site;
 
 immutable(string) thisPagePath;
-immutable(string) authPagePath;
 
 shared static this()
 {	
 	thisPagePath = dynamicPath ~ "inform";
-	authPagePath = dynamicPath ~ "auth";
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
 	
 	auto pVars = rq.queryForm;
 	auto qVars = rq.bodyForm;
-	
-	
 
-	string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
-	
-	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(context);
-	
-		//---------------------------
-	string output; //"Выхлоп" программы 
-	scope(exit) rp.write(output);
-	string js_file = "../../js/page_view.js";
-	//------------------------------------
-	
-
-
-	
-	
- string о_ресурсе = `
- <h5>Добро пожаловать на сайт!</h5></br>
+	string о_ресурсе = 
+`<h5>Добро пожаловать на сайт!</h5></br>
 	
 	<p><h4>Сведения о базе МКК</h4>
   Ресурс хранит сведения о планируемых, заявленных, пройденных и защищённых походах <br>
@@ -123,12 +104,8 @@ void netMain(HTTPContext context)
     </ul>
    </p>
        <br> 
-  
-  
+
 	`;
 
-	tpl.set( "content", о_ресурсе );
-	
-	
-	rp ~= tpl.getString();
+	return о_ресурсе;
 }

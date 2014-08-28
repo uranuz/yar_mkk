@@ -89,9 +89,24 @@ PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 	return tpl;
 }
 
+import webtank.db.database, webtank.db.postgresql;
+
+IDatabase _commonDatabase;
+IDatabase _authDatabase;
+
+static this()
+{
+	//Создаем объекты подключений при старте нити исполнения
+	_commonDatabase = new DBPostgreSQL(commonDBConnStr);
+	_authDatabase = new DBPostgreSQL(authDBConnStr);
+}
+
 IDatabase getCommonDB()
-{	import webtank.db.postgresql;
-	return new DBPostgreSQL(commonDBConnStr);
+{	return _commonDatabase;
+}
+
+IDatabase getAuthDB()
+{	return _authDatabase;
 }
 
 string[] parseExtraFileLink(string linkPair)

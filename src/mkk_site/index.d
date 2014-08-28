@@ -11,42 +11,22 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 import mkk_site;
 
 immutable(string) thisPagePath;
-immutable(string) authPagePath;
 
 shared static this()
 {	
 	thisPagePath = dynamicPath ~ "index";
-	authPagePath = dynamicPath ~ "auth";
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 	
 	auto pVars = rq.bodyForm;
 	auto qVars = rq.queryForm;
 	
-	
-
-	string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
-	
-	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(context);
-	
-		//---------------------------
-	string output; //"Выхлоп" программы 
-	scope(exit) rp.write(output);
-	string js_file = "../../js/page_view.js";
-	//------------------------------------
-	
-	
 	//Создаём подключение к БД
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
-	if ( !dbase.isConnected )
-		output ~= "Ошибка соединения с БД";
-		//-----------------------------------------
+	auto dbase = getCommonDB();
 
 	auto pohodRecFormat = RecordFormat!(
 		PrimaryKey!(size_t), "Ключ", 
@@ -58,7 +38,7 @@ void netMain(HTTPContext context)
 		string,"Район",
 		string,"Руководитель", 
 		
-		string,"Город,<br>организация",	
+		string,"Город, организация",
 		string, "Нитка маршрута",
 		string, "Коментарий руководителя",
 		typeof(готовностьПохода), "Готовность",
@@ -76,63 +56,52 @@ void netMain(HTTPContext context)
 	//WHERE
 	
 	string queryStr = // основное тело запроса
-	`with 
-t_chef as (
- select pohod.num,/*номер похода*/
-         
-        (
-    coalesce(T.family_name,'нет данных')||'&nbsp;'
-  ||coalesce(T.given_name,'')||'&nbsp;'
-  ||coalesce(T.patronymic,'')||'&nbsp;'
-  ||coalesce(T.birth_year::text,'')
-        ) as fio  
- /* создаётся таблица номера руководителей похода - их ФИО г.р.*/
-
-from pohod
- LEFT join tourist T
-   on pohod.chef_grupp = T.num
+`with t_chef as (
+	select pohod.num,
+	(
+		coalesce(T.family_name,'нет данных')||'&nbsp;'
+		||coalesce(T.given_name,'')||'&nbsp;'
+		||coalesce(T.patronymic,'')||'&nbsp;'
+		||coalesce(T.birth_year::text,'')
+	) as fio
+	from pohod
+	LEFT join tourist T
+		on pohod.chef_grupp = T.num
 )
+select pohod.num,
+	(coalesce(kod_mkk,'000-00')||'&nbsp;&nbsp;&nbsp;'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
+	(
+	date_part('day', begin_date)||'.'||
+	date_part('month', begin_date)||'.'||
+	date_part('YEAR', begin_date) 
 
+	||' &nbsp;&nbsp;по &nbsp;&nbsp'||
+	date_part('day', finish_date)||'.'||
+	date_part('month', finish_date)||'.'||
+	date_part('YEAR', finish_date)
+	) as dat ,  
+	vid,
+	ks,
+	elem,
 
-	  select pohod.num,
-   (coalesce(kod_mkk,'000-00')||'&nbsp;&nbsp;&nbsp;'||coalesce(nomer_knigi,'00-00')) as nomer_knigi,   
-     (
-    date_part('day', begin_date)||'.'||
-    date_part('month', begin_date)||'.'||
-    date_part('YEAR', begin_date) 
-    
-      ||' &nbsp;&nbsp;по &nbsp;&nbsp'||
-    date_part('day', finish_date)||'.'||
-    date_part('month', finish_date)||'.'||
-    date_part('YEAR', finish_date)
-     ) as dat ,  
-      vid,
-      ks,
-      elem,
+	region_pohod , 
+	t_chef.fio , 
 
-     region_pohod , 
-     t_chef.fio , 
-     
-     /*(coalesce(gr,'')) as gr, */
-     
-     (coalesce(organization,'')||'<br>'||coalesce(region_group,'')) as organiz, 
-     (coalesce(marchrut::text,'')) as marchrut, 
-     (coalesce(chef_coment::text,'')) as chef_coment, 
-     coalesce(prepar,'0') as prepar,
-        coalesce(stat,'0') as stat 
-             from pohod 
-               
-       
+	/*(coalesce(gr,'')) as gr, */
 
-       LEFT OUTER JOIN t_chef
-      on t_chef.num = pohod.num  `; 
+	(coalesce(organization,'')||'<br>'||coalesce(region_group,'')) as organiz, 
+	(coalesce(marchrut::text,'')) as marchrut, 
+	(coalesce(chef_coment::text,'')) as chef_coment, 
+	coalesce(prepar,'0') as prepar,
+		coalesce(stat,'0') as stat 
+				from pohod 
+LEFT OUTER JOIN t_chef
+	on t_chef.num = pohod.num  
+`; 
       
-      queryStr~=`WHERE  (pohod.reg_timestamp is not null )   order by  pohod.reg_timestamp DESC  LIMIT 10  `;
-      
-      auto response = dbase.query(queryStr); //запрос к БД
-	auto rs = response.getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	
-	
+	queryStr~=`WHERE  (pohod.reg_timestamp is not null )   order by  pohod.reg_timestamp DESC  LIMIT 10  `;
+
+	auto rs = dbase.query(queryStr).getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
 	
 	
 	// Начало сведний о последних десяти записях
@@ -140,16 +109,16 @@ from pohod
 	
 	foreach(rec; rs)
 	{
-		last_dekada~=`<hr style="color:green;"><p> <a  &nbsp;&nbsp;&nbsp  href="` ~ dynamicPath ~ `pohod?key=`
-		~ rec.getStr!("Ключ")() ~ `">` ~ rec.getStr!("Вид")() ~
-		`&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ rec.getStr!("кс")() ~ `&nbsp;` ~ rec.getStr!("элем")("")
-		~`&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
+		last_dekada ~= `<hr style="color:green;"><p> <a href="` ~ dynamicPath ~ `pohod?key=`
+		~ rec.getStr!("Ключ")() ~ `">` ~ rec.getStr!("Вид")() 
+		~ `&nbsp;&nbsp;поход &nbsp;&nbsp;&nbsp`~ rec.getStr!("кс")() ~ `&nbsp;` ~ rec.getStr!("элем")("")
+		~ `&nbsp;к.с.&nbsp;&nbsp;в районе &nbsp;&nbsp;`
 		~ rec.getStr!("Район")() ~ ` </a> </p>`~ "\r\n";
 			
 	
-		last_dekada~=`<p class="last_pohod_comment"> По маршруту: `~ rec.getStr!("Нитка маршрута")() ~`  </br>` ~"\r\n";
-		last_dekada~=`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.getStr!("Руководитель")() ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.getStr!("Сроки")() ~ "\r\n";
-		last_dekada~=`</p></br>`~ "\r\n";
+		last_dekada ~= `<p class="last_pohod_comment"> По маршруту: `~ rec.getStr!("Нитка маршрута")() ~`  </br>` ~"\r\n";
+		last_dekada ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Руководитель группы &nbsp;&nbsp;`~ rec.getStr!("Руководитель")() ~`</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Сроки похода c `~rec.getStr!("Сроки")() ~ "\r\n";
+		last_dekada ~= `</p></br>`~ "\r\n";
 	}
 	// Конец сведний о последних десяти записях
 
@@ -178,22 +147,11 @@ from pohod
         </p>
        
        <p>&nbsp;&nbsp;</p>`;
-       
-  
-	
+
 	string содержимоеГлавнойСтраницы;
 	
 	содержимоеГлавнойСтраницы ~= о_ресурсе_один;
-	
 	содержимоеГлавнойСтраницы ~= last_dekada;
 	
-	
-	
-	//содержимоеГлавнойСтраницы ~= table;
-	
-	
-	tpl.set( "content", содержимоеГлавнойСтраницы );
-	
-	
-	rp ~= tpl.getString();
+	return содержимоеГлавнойСтраницы;
 }

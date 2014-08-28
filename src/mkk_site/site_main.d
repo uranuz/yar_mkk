@@ -5,10 +5,10 @@ import std.conv, std.getopt;
 import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler,
 webtank.net.http.context, webtank.net.http.http;
 
-import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, webtank.common.logger;
+import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site.uri_page_router, webtank.common.logger;
 
 __gshared HTTPRouter Router;
-__gshared URIPageRouter PageRouter;
+__gshared MKK_Site_URIPageRouter PageRouter;
 __gshared JSON_RPC_Router JSONRPCRouter;
 __gshared Logger SiteLogger;
 __gshared Logger PrioriteLogger;
@@ -18,7 +18,7 @@ shared static this()
 {	
 	import std.exception: assumeUnique;
 	Router = new HTTPRouter;
-	PageRouter = new URIPageRouter( dynamicPath ~ "{remainder}" );
+	PageRouter = new MKK_Site_URIPageRouter( dynamicPath ~ "{remainder}" );
 	JSONRPCRouter = new JSON_RPC_Router( JSON_RPC_Path ~ "{remainder}" );
 	SiteLogger = new ThreadedLogger( cast(shared) new FileLogger(eventLogFileName, LogLevel.error) );
 	PrioriteLogger = new ThreadedLogger( cast(shared) new FileLogger(prioriteLogFileName, LogLevel.info) );

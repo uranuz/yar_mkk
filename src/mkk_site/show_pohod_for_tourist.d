@@ -18,7 +18,7 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
  	uint pageCount ; //Количество страниц
 	uint curPageNum;
@@ -30,19 +30,11 @@ void netMain(HTTPContext context)
 	string vke;// вид туризма и категория сложности с элементыКС
 	string  ps;//готовность и статус похода 
 	auto rq = context.request;
-	auto rp = context.response;
 
 	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
-	string output; //"Выхлоп" программы
-	scope(exit) rp.write(output);
 
-		
-	//Создаём подключение к БД
 	auto dbase = getCommonDB();
-	if ( !dbase.isConnected )
-		output ~= "Ошибка соединения с БД";
-		
-		
+	
 	bool isTouristKeyAccepted;
 	
 	size_t touristKey;
@@ -120,16 +112,12 @@ WHERE num =` ~touristKey.to!string;
 	 }
 	//-------------------------------------------------------------------
 	//получаем данные о количестве походов
-	
-// 	 auto kolRecFormat = RecordFormat!(
-// 	 ft.Int, "число_походов")();
-	 
 	 
 	 auto кол_воПоходовРез_т = dbase.query(qeri_число_походов);
 	 
     if( кол_воПоходовРез_т.recordCount )
     {
-		content~=`<h2> Походов ` ~ кол_воПоходовРез_т.get(0, 0, "0")~` </h2>`~ "\r\n";
+		content ~=`<h2> Походов ` ~ кол_воПоходовРез_т.get(0, 0, "0")~` </h2>`~ "\r\n";
 		число_походов=кол_воПоходовРез_т.get(0, 0, "0").to!int;
 	 }
 	 
@@ -290,9 +278,6 @@ where uu.u =` ~ touristKey.to!string
 	content ~= table ~ "\r\n";
 	content ~= `<script  type="text/JavaScript" src="pohod_filtr.js">  </script>` ~ "\r\n";
 	
-	auto tpl = getGeneralTemplate(context);
-	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-
-	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
+	return content;
 }
 

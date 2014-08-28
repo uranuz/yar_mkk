@@ -14,7 +14,7 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
@@ -43,22 +43,20 @@ void netMain(HTTPContext context)
 			rp.redirect(redirectTo);
 		}
 		else
-		{	auto tpl = getGeneralTemplate(context);
-			string content =
+		{	string content =
 `<h2>Аутентификация</h2>
 <hr>
 <b>Не удалось выполнить аутентификацию на сайте.<b>
 Проверьте, пожалуйста, правильность ввода учётных данных.
 Если ошибка повторяется, свяжитесь с администратором или модератором
 системы для решения возникшей проблемы.`;
-			tpl.set( "content", content );
-			rp.write( tpl.getString() );
+			
+			return content;
 		}
 	}
 	else //Если не пришёл логин с паролем, то работаем в обычном режиме
 	{	
 		string login = rq.cookies.get("user_login", "");
-		auto tpl = getGeneralTemplate(context);
 		
 		string content = `<h2>Аутентификация</h2>`;
 		
@@ -77,8 +75,9 @@ void netMain(HTTPContext context)
 //`<input type="hidden" name="returnTo" value="` ~ rq.bodyForm ~ `"
 `</form> <br>`;
 		
-		tpl.set( "content", content );
-		rp.write( tpl.getString() );
+		return content;
 	}
+	
+	assert(0);
 }
 

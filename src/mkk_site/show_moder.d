@@ -15,20 +15,13 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 
-	string output; //"Выхлоп" программы
-	scope(exit) rp.write(output);
-	
-	//Создаём подключение к БД
-	auto dbase = new DBPostgreSQL(authDBConnStr);
-	if ( !dbase.isConnected )
-		output ~= "Ошибка соединения с БД";
-	
 	string content;
+
+	auto authDB = getAuthDB(); //Объект подключения к БД аутентификации
 	
 	///Начинаем оформлять таблицу с данными
 	static immutable touristRecFormat = RecordFormat!(
@@ -44,10 +37,9 @@ void netMain(HTTPContext context)
 	( coalesce(status,'') || coalesce(', ' || region, '') ) as stat,
 	( coalesce(email,'') || coalesce('<br>' || contact_info, '') ) as contact 
 from site_user order by num 
-;`;
-		   
-	auto response = dbase.query(queryStr); //запрос к БД
-	auto rs = response.getRecordSet(touristRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
+;`; 
+	
+	auto rs = authDB.query(queryStr).getRecordSet(touristRecFormat);
 	
 	string table = `<div><table class="tab1">`;
 		
@@ -67,9 +59,7 @@ from site_user order by num
 
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	auto tpl = getGeneralTemplate(context);
-	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	
-	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
+	return content;
 }
+
 

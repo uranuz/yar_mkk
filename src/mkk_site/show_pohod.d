@@ -58,15 +58,20 @@ on tourist.num = tourist_nums.num
 
 struct ФильтрПоходов
 {
-	Optional!int вид;
+	int[] видыТуризма;
 	int[] категории;
+	int[] готовности;
+	int[] статусыЗаявки;
 	OptionalDate[string] сроки;
 	string районПохода;
 	
+	
 	bool естьФильтрация() @property
 	{
-		if( !вид.isNull || категории.length > 0 || районПохода.length > 0 )
-			return true;
+		if( видыТуризма.length > 0 || категории.length > 0 || 
+			готовности.length > 0 || статусыЗаявки.length > 0 ||
+			районПохода.length > 0 
+		) return true;
 			
 		foreach( дата; this.сроки )
 		{
@@ -100,19 +105,36 @@ import webtank.view_logic.html_controls, webtank.net.utils;
 
 string отрисоватьБлокФильтрации(ФильтрПоходов фильтрПоходов)
 {
-	string разметка;
-	
-	auto списокВидовТуризма = listBox(видТуризма);
+	auto списокВидовТуризма = checkBoxList(видТуризма);
 	списокВидовТуризма.nullName = "любой";
 	списокВидовТуризма.name = "vid";
-	списокВидовТуризма.selectedValue = фильтрПоходов.вид;
+	списокВидовТуризма.classes ~= [`b-pohod_filter_vid`, `e-block`];
+	списокВидовТуризма.selectedValues = фильтрПоходов.видыТуризма;
 	
-	auto списокКатегорий = listBox(категорияСложности);
+	auto списокКатегорий = checkBoxList(категорияСложности);
 	списокКатегорий.nullName = "любая";
 	списокКатегорий.name = "ks";
+	списокКатегорий.classes ~= [`b-pohod_filter_ks`, `e-block`];
 	списокКатегорий.selectedValues = фильтрПоходов.категории;
 	
-	PlainDatePicker[string] поляДат;
+	auto списокГотовностей = checkBoxList(готовностьПохода);
+	списокГотовностей.nullName = "любая";
+	списокГотовностей.name = "prepar";
+	списокГотовностей.classes ~= [`b-pohod_filter_prepar`, `e-block`];
+	списокГотовностей.selectedValues = фильтрПоходов.готовности;
+	
+	auto списокСтатусовЗаявки = checkBoxList(статусЗаявки);
+	списокСтатусовЗаявки.nullName = "любая";
+	списокСтатусовЗаявки.name = "stat";
+	списокСтатусовЗаявки.classes ~= [`b-pohod_filter_stat`, `e-block`];
+	списокСтатусовЗаявки.selectedValues = фильтрПоходов.статусыЗаявки;
+	
+	import std.file : read;
+	import std.path : buildPath;
+	
+	string текстШаблонаФормыФильтрации = cast(string) std.file.read( buildPath(pageTemplatesDir, "pohod_filter_form.html" ) );
+	auto формаФильтрации = new PlainTemplater( текстШаблонаФормыФильтрации );
+	
 	foreach( имяПоля, дата; фильтрПоходов.сроки )
 	{
 		auto полеДаты = new PlainDatePicker;
@@ -122,22 +144,20 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		полеДаты.nullMonthName = "месяц";
 		полеДаты.nullYearName = "год";
 		
-		поляДат[имяПоля] = полеДаты;
+		формаФильтрации.set( имяПоля, полеДаты.print() );
 	}
-	разметка ~= `Вид туризма ` ~ списокВидовТуризма.print() ~ "<br>\r\n"
-		~ `Категория сложности ` ~ списокКатегорий.print() ~ "<br>\r\n"
-		~ "Диапазон сроков начала похода: <br>\r\n"
-		~ "c " ~ поляДат["begin_date_range_head"].print() 
-		~ " по " ~ поляДат["begin_date_range_tail"].print() ~ "<br>\r\n"
-		~ "Диапазон сроков окончания похода: <br>\r\n"
-		~ "c " ~ поляДат["end_date_range_head"].print() 
-		~ " по " ~ поляДат["end_date_range_tail"].print() ~ "<br>\r\n"
-		~ `Район похода содержит <input type="text" name="region_pohod" value="` 
-		~ HTMLEscapeValue(фильтрПоходов.районПохода) ~ `">` ~ "<br>\r\n";
 	
-	разметка ~= `<input type="submit" value="Найти">` ~ "<br>\r\n";
+	with( формаФильтрации )
+	{
+		set( "vid", списокВидовТуризма.print() );
+		set( "ks", списокКатегорий.print() );
+		set( "prepar", списокГотовностей.print() );
+		set( "stat", списокСтатусовЗаявки.print() );
+		
+		set( "region_pohod", HTMLEscapeValue(фильтрПоходов.районПохода) );
+	}
 	
-	return разметка;
+	return формаФильтрации.getString();
 }
 
 
@@ -148,11 +168,11 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	//Получаем параметры фильтрации из запроса
 	ФильтрПоходов фильтрПоходов;
 	
-	фильтрПоходов.вид = rq.bodyForm.get("vid", null).conv!(Optional!(int))
-		.ifThrown!ConvException(Optional!int(null));
-		
+	фильтрПоходов.видыТуризма = rq.bodyForm.array("vid").conv!(int[]).ifThrown!ConvException(null);
 	фильтрПоходов.категории = rq.bodyForm.array("ks").conv!(int[]).ifThrown!ConvException(null);
-	
+	фильтрПоходов.готовности = rq.bodyForm.array("prepar").conv!(int[]).ifThrown!ConvException(null);
+	фильтрПоходов.статусыЗаявки = rq.bodyForm.array("stat").conv!(int[]).ifThrown!ConvException(null);
+
 	foreach( соотвПоля; соотвПолейСроков )
 	{
 		фильтрПоходов.сроки[соотвПоля.имяВФорме] = OptionalDate(
@@ -177,11 +197,17 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 	
 	string[] частиЗапроса_фильтрыПоходов;
 	
-	if( !фильтрПоходов.вид.isNull )
-		частиЗапроса_фильтрыПоходов ~= `vid = ` ~ фильтрПоходов.вид.conv!string; // добавлние запроса по виду туризма
+	if( фильтрПоходов.видыТуризма.length > 0 )
+		частиЗапроса_фильтрыПоходов ~= `vid in(` ~ фильтрПоходов.видыТуризма.conv!(string[]).join(", ") ~ `)`;
 	
-	if( фильтрПоходов.категории !is null )
+	if( фильтрПоходов.категории.length > 0 )
 		частиЗапроса_фильтрыПоходов ~= `ks in(` ~ фильтрПоходов.категории.conv!(string[]).join(", ") ~ `)`;
+		
+	if( фильтрПоходов.готовности.length > 0 )
+		частиЗапроса_фильтрыПоходов ~= `prepar in(` ~ фильтрПоходов.готовности.conv!(string[]).join(", ") ~ `)`;
+		
+	if( фильтрПоходов.статусыЗаявки.length > 0 )
+		частиЗапроса_фильтрыПоходов ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
 	
 	string[] частиЗапроса_фильтрыСроковПохода;
 	
@@ -191,7 +217,7 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 	{
 		OptionalDate фильтрДаты = фильтрПоходов.сроки[ соотвПоля.имяВФорме ];
 		
-		if( !фильтрДаты.year.isNull && !фильтрДаты.month.isNull && !фильтрДаты.day.isNull )
+		if( фильтрДаты.isDefined )
 		{
 			частиЗапроса_фильтрыСроковПохода ~= ` ('` ~ Date( фильтрДаты.tupleof ).conv!string ~ `'::date ` 
 				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
@@ -202,8 +228,8 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 			{
 				if( !частьДаты.isNull )
 				{
-					частиЗапроса_фильтрыСроковПохода ~= ` ( ` ~ частьДаты.conv!string ~ ` `
-						~ соотвПоля.опСравн ~ ` date_part('` ~ назвЧастейДаты[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `) ) `;
+					частиЗапроса_фильтрыСроковПохода ~= частьДаты.conv!string ~ ` `
+						~ соотвПоля.опСравн ~ ` date_part('` ~ назвЧастейДаты[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
 				}
 			}
 		}
@@ -219,20 +245,14 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 }
 
 
-
-
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 	
-	string output; //"Выхлоп" программы 
-	scope(exit) rp.write(output);
+	string content;
 	
 	//Создаём подключение к БД
 	auto dbase = getCommonDB();
-	if ( !dbase.isConnected )
-		output ~= "Ошибка соединения с БД";
 		
 	//string параметрыПоиска;//контроль изменения парамнтров фильтрации
 	//string параметрыПоиска_старое = rq.bodyForm.get("параметрыПоиска", "");
@@ -412,8 +432,6 @@ LEFT OUTER JOIN t_chef
 	table ~= `</table>` ~ "\r\n";
 	// конец формирования основной таблицы
 	
-	string content;
-	
 	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`;
 	
 	content ~= `<form id="main_form" method="post">`// содержимое страницы
@@ -425,9 +443,5 @@ LEFT OUTER JOIN t_chef
 	//Подключение JavaScript файла с именем, указанным в атрибуте src
 	content ~= `<script src="` ~ jsPath ~ "show_pohod.js" ~ `"></script>`;
 	
-	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(context);
-	tpl.set( "content", content ); //Устанавливаем содержимое по метке в шаблоне
-
-	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
+	return content;
 }

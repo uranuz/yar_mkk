@@ -10,7 +10,7 @@ static this()
 {	Router.setPathHandler(dynamicPath ~ "adminka", &netMain);
 }
 
-void netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
+string netMain(ServerRequest rq, ServerResponse rp)  //Определение главной функции приложения
 {	
 	auto auth = new Authentication( rq.cookies.get("sid", null), authDBConnStr, eventLogFileName );
 	

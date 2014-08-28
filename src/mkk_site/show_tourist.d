@@ -17,21 +17,15 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
-	auto rp = context.response;
 
 	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
 	
-	string output; //"Выхлоп" программы
-	scope(exit) rp.write(output);
-	
 	//Создаём подключение к БД
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
-	if ( !dbase.isConnected )
-		output ~= "Ошибка соединения с БД";
-	
+	auto dbase = getCommonDB();
+
 	string raz_sud_kat;
 	
 	string fem = PGEscapeStr( rq.bodyForm.get("family_name", null) ); // пропускаем фамилию через функцию отсечки
@@ -39,8 +33,8 @@ void netMain(HTTPContext context)
 	uint limit = 10;// максимальное  чмсло строк на странице
 
 	auto col_str_qres = // запрос на число строк
-	( fem.length == 0 ) ? dbase.query(`select count(1) from tourist` )://без фильтра
-	dbase.query(`select count(1) from tourist where family_name ILIKE '%`~ fem ~ `%'`);
+		fem.length == 0 ? dbase.query(`select count(1) from tourist` )://без фильтра
+		dbase.query(`select count(1) from tourist where family_name ILIKE '%`~ fem ~ `%'`);
 	//с фильтром фамилией
   
 	//if( col_str_qres.recordCount > 0 ) //Проверяем, что есть записи
@@ -161,9 +155,6 @@ from tourist `
 	
 	content ~= table; //Тобавляем таблицу с данными к содержимому страницы
 	
-	auto tpl = getGeneralTemplate(context);
-	tpl.set( "content", content ); //Устанваливаем содержимое по метке в шаблоне
-	
-	output ~= tpl.getString(); //Получаем результат обработки шаблона с выполненными подстановками
+	return content;
 }
 

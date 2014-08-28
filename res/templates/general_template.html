@@ -6,13 +6,12 @@
 	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
 	<link rel="stylesheet" type="text/css" href="{{css folder}}general_template.css">
 	<link rel="stylesheet" type="text/css" href="{{webtank css folder}}default_style.css">
-	<link rel="stylesheet" type="text/css" href="{{webtank css folder}}baza.css">
 	<script type="text/javascript" src="https://yandex.st/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="http://yandex.st/jquery-ui/1.10.4/jquery-ui.min.js"></script>
 	<link rel="stylesheet" href="http://yandex.st/jquery-ui/1.10.4/themes/south-street/jquery-ui.min.css">
 </head>
 
-<body   >
+<body>
 <div id="page">
 	<div id="page_bg"></div>
 	<div id="top"> 
@@ -41,12 +40,14 @@
 		<div id="menu_bg_left"></div>
 		<div id="menu_bg_right"></div>
 		<div id="main_menu">
-			<a href="/"><span>Главная</span></a>
-			<a href="{{dynamic path}}show_pohod"><span>Походы</span></a>
-			<a href="{{dynamic path}}show_tourist"><span>Туристы</span></a>
-			<a href="{{dynamic path}}show_moder"><span>Модераторы</span></a>
-			<a href="{{dynamic path}}reports"><span>Отчёты</span></a>
-			<a href="{{dynamic path}}stati"><span>Статьи и документы</span></a>
+			<ul class="main_menu_first_lvl">
+				<li><a href="/">Главная</a></li>
+				<li><a href="{{dynamic path}}show_pohod">Походы</a></li>
+				<li><a href="{{dynamic path}}show_tourist">Туристы</a></li>
+				<li><a href="{{dynamic path}}show_moder">Модераторы</a></li>
+				<li><a href="{{dynamic path}}reports">Отчёты</a></li>
+				<li><a href="{{dynamic path}}stati">Статьи и документы</a></li>
+			</ul>
 		</div> <!-- #main_menu -->
 		<div id="auth_bar">
 			<form action="{{authentication uri}}" id="auth_form" method="post" style="display: inline;">
@@ -65,11 +66,39 @@
 			<a href="http://tssr.ru">Туристско-спортивный<br> союз России</a> <br>
 			<a href="http://tkirbis.ru">Турклуб "Ирбис"</a> <br>
 			<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a> <br>
+			
+			<div id="pohod_collections">
+				<h3>Подборки походов:</h3>
+				<h4>По году:</h4>
+				<ul>
+					
+				</ul>
+				<h4>По видам туризма:</h4>
+				<ul>
+				
+				</ul>
+				<h4>По статусу:</h4>
+				<ul>
+					<li>Набор группы</li>
+				</ul>
+				
+				<ul>
+					<li><a>Походы 2014</a></li>
+					<li><a>Походы 2013</a></li>
+					<li><a>Походы 2012</a></li>
+					<li><a>Водные походы</a></li>
+					<li><a>Горные походы</a></li>
+					<li><a>Пешие походы</a></li>
+					<li><a>Велосипедные походы</a></li>
+					<li><a>Пешие походы</a></li>
+					<li><a>Велосипедные походы</a></li>
+					
+					<li><a>Идет набор группы</a></li>
+				</ul>
+			</div>
 		</div> <!-- #sidebar -->
 		<div id="content"><!-- основное содержание страницы -->
 			{{content}}
-			
-
 		</div> <!-- #content -->
 	</div> <!-- #middle -->
 	<div id="footer_pusher"></div> <!-- Толкатель footer'а -->

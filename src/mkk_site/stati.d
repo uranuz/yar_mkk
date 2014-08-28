@@ -18,26 +18,13 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-void netMain(HTTPContext context)
+string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
 	auto rp = context.response;
 	
 	auto pVars = rq.bodyForm;
 	auto qVars = rq.queryForm;
-
-	string generalTplStr = cast(string) std.file.read( generalTemplateFileName );
-	
-	//Создаем шаблон по файлу
-	auto tpl = getGeneralTemplate(context);
-
-	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
-	}
-	else 
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
-	}
 
 	string содержимоеГлавнойСтраницы = `
 	<h2>Нормативные статьи и документы</h2>
@@ -52,8 +39,6 @@ void netMain(HTTPContext context)
 	<p><a href="/pub/stati_dokument/TrekFinish120407-4.zip"   >Регламент.(zip) </a></p>
 	
 	`;
-	tpl.set( "content", содержимоеГлавнойСтраницы );
 	
-	
-	rp ~= tpl.getString();
+	return содержимоеГлавнойСтраницы;
 }
