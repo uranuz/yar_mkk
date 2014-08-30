@@ -53,4 +53,57 @@ function gotoPage(pageNum) {
 	var pageNumInput = window.document.getElementsByName("cur_page_num")[0];
 	pageNumInput.value = pageNum;
 	form.submit();
-} 
+}
+
+//Вешаем обработчики на ссылки на боковой панели с выборками походов по некоторым критериям
+$(window.document).ready( function() {
+	var 
+		pohod_filter_items = $(".b-pohod_filter_collection.e-list_item"),
+		i;
+		
+	for( i = 0; i < pohod_filter_items.length; i++ )
+	{
+		(function(ii) {
+			$(pohod_filter_items[ii]).on( "click", function() {
+				gotoPohodFilter(ii);
+			});
+		})(i);
+	}
+});
+
+//Переход на страницу отображения походов с одним из фильтров из списка
+function gotoPohodFilter(filterIndex) {
+	var 
+		filterSet = [
+			//Выборки по годам
+			{"begin_date_range_head__year": 2015},
+			{"begin_date_range_head__year": 2014},
+			{"begin_date_range_head__year": 2013},
+			{"begin_date_range_head__year": 2012},
+			
+			//Выборки по видам
+			{"vid": 4}, //водный
+			{"vid": 3}, //горный
+			{"vid": 1}, //пеший
+			{"vid": 5}, //велосипедный
+			{"vid": 2}, //лыжный
+			
+			//Выборки по статусу похода
+			{"prepar": 1}, //планируется
+			{"prepar": 2}, //набор группы
+			{"prepar": 3}, //набор завершен
+			{"prepar": 4}, //подготовка
+			{"prepar": 5}, //на маршруте
+		],
+		filterForm = $(".b-pohod_filter_collection.e-form"),
+		filterRecord = filterSet[filterIndex],
+		filterName;
+		
+	for( filterName in filterRecord ) //На будущее, если будет фильтр с неск. критериями
+	{
+		//Ищем нужный элемент формы и пихаем туда значение фильтра
+		$(".b-pohod_filter_collection.e-filter__" + filterName).val(filterRecord[filterName]);
+	}
+	
+	filterForm[0].submit();
+}

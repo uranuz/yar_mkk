@@ -235,6 +235,11 @@ body {
 	
 }
 
+.b-pohod_filter_collection.e-list_item {
+	list-style: none;
+	margin-left: 8px;
+}
+
 .pohod {
 	border-collapse: collapse;
 }
