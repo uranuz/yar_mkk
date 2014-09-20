@@ -3,6 +3,7 @@
 	padding: 0;
 	/*border: 0;*/
 	font-size: 16px;
+	box-sizing: border-box;
 }
 
 html {
@@ -10,27 +11,27 @@ html {
 }
 
 h1 {
-	font-size: 1.5em;
+	font-size: 1.5rem;
 }
 
 h2 {
-	font-size: 1.4em;
+	font-size: 1.4rem;
 }
 
 h3 {
-	font-size: 1.3em;
+	font-size: 1.3rem;
 }
 
 h4 {
-	font-size: 1.2em;
+	font-size: 1.2rem;
 }
 
 h5 {
-	font-size: 1.1em;
+	font-size: 1.1rem;
 }
 
 h6 {
-	font-size: 1.0em;
+	font-size: 1.0rem;
 }
 
 a {
@@ -164,15 +165,15 @@ body {
 #main_menu {
 	background: url("../img/design/menu_bg.png") repeat-x;
 	height: 36px;
+	padding-top: 6px;
 }
 
 #main_menu a {
 	position: relative;
-	top: 6px;
 }
 
 #main_menu > a > span {
-	font-size: 1.2em;
+	font-size: 1.2rem;
 }
 
 #menu_shadow_bottom {
@@ -188,16 +189,18 @@ body {
 	float: right;
 	background: #d4d2ab;
 	margin-right: 16px;
+	margin-bottom: 8px;
 }
 
 #content {
-	margin: 50px  280px 16px 16px;
-	padding: 5px;
+	margin: 8px  280px 16px 16px;
+	padding: 8px;
 	background: #e4e2bf;
 	
 }
 
 #footer_pusher {
+	clear: both;
 	height: 50px;
 }
 
@@ -235,18 +238,26 @@ body {
 	
 }
 
+.b-mkk_site_auth_bar.e-block {
+	display: inline-block;
+	float: right;
+	position: relative;
+	height: 100%;
+	font-size:
+}
+
 .b-pohod_filter_collection.e-list_item {
 	list-style: none;
 	margin-left: 8px;
 }
 
+.b-mkk_site_auth_bar.e-dialog_wrapper {
+	position: absolute;
+}
+
 .pohod {
 	border-collapse: collapse;
 }
-
-
-
-
 
 table.tab1 {
 	
@@ -264,4 +275,11 @@ table.tab1 {
 }
        
 .last_pohod_comment {font-size: 80%;}
-       
+
+.b-mkk_site_auth_bar.e-dialog_wrapper {
+	background: #e4e2bf;
+	/*margin-top: 17px;*/
+	padding: 16px 8px 16px 8px;
+	border: solid 2px #598d23;
+	z-index: 10;
+}
