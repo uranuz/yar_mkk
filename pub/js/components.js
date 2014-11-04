@@ -107,3 +107,40 @@ function gotoPohodFilter(filterIndex) {
 	
 	filterForm[0].submit();
 }
+
+$(window.document).ready( function() {
+	var 
+		block = $(".b-mkk_site_auth_bar"),
+		dialog = block.filter(".e-dialog_wrapper"),
+		form = block.filter(".e-form"),
+		loginInput = block.filter(".e-user_login"),
+		passwordInput = block.filter(".e-user_password"),
+		getIsDialogActive = function() {
+			var activeElement = window.document.activeElement;
+			if( activeElement )
+			{
+				if( loginInput[0] === activeElement || passwordInput[0] === activeElement )
+					return true;
+			}
+			
+			return false;
+		};
+		
+	$(window.document).on("click", function() {
+		dialog.hide();
+	});
+	
+	block.on("click", function(event) { event.stopPropagation(); })
+		
+	block.filter(".e-block").hover( 
+		function() {
+			dialog.show();
+		},
+		function() {
+			if( getIsDialogActive() === false )
+				dialog.hide();
+		}
+	);
+	
+	dialog.hide();
+});

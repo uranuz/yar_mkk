@@ -6,9 +6,10 @@
 	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
 	<link rel="stylesheet" type="text/css" href="{{css folder}}general_template.css">
 	<link rel="stylesheet" type="text/css" href="{{webtank css folder}}default_style.css">
-	<script type="text/javascript" src="https://yandex.st/jquery/1.10.2/jquery.min.js"></script>
-	<script type="text/javascript" src="http://yandex.st/jquery-ui/1.10.4/jquery-ui.min.js"></script>
-	<link rel="stylesheet" href="http://yandex.st/jquery-ui/1.10.4/themes/south-street/jquery-ui.min.css">
+	<script type="text/javascript" src="https://yastatic.net/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://yastatic.net/jquery-ui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://yastatic.net/jquery/cookie/1.0/jquery.cookie.min.js"></script>
+	<link rel="stylesheet" href="http://yastatic.net/jquery-ui/1.10.4/themes/south-street/jquery-ui.min.css">
 </head>
 
 <body>
@@ -48,15 +49,26 @@
 				<li><a href="{{dynamic path}}reports">Отчёты</a></li>
 				<li><a href="{{dynamic path}}stati">Статьи и документы</a></li>
 			</ul>
+			<span class="b-mkk_site_auth_bar e-block">
+				<a href="{{dynamic path}}auth">Аутентификация</a>: воити
+				<div class="b-mkk_site_auth_bar e-dialog_wrapper">
+					<form action="{{authentication uri}}" class="b-mkk_site_auth_bar e-form" method="post">
+						Логин: <input name="user_login" type="text" class="b-mkk_site_auth_bar e-user_login" value="{{user login}}" size="15"> <br>
+						Пароль: <input name="user_password" class="b-mkk_site_auth_bar e-user_password" type="password" size="15">
+						<input type="submit" value="Войти">
+					</form>
+				</div>
+			</span>
+			
 		</div> <!-- #main_menu -->
-		<div id="auth_bar">
+		<!--<div id="auth_bar">
 			<form action="{{authentication uri}}" id="auth_form" method="post" style="display: inline;">
 				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
 				Пароль: <input name="user_password" type="password" size="15">
 				<input type="submit" value="Войти">
 			</form>
 			{{auth header message}}
-		</div>
+		</div>-->
 		<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
 	</div> <!-- #top -->
 	
@@ -103,9 +115,9 @@
 		<div id="content"><!-- основное содержание страницы -->
 			{{content}}
 		</div> <!-- #content -->
+		<div id="footer_pusher"></div> <!-- Толкатель footer'а -->
 	</div> <!-- #middle -->
-	<div id="footer_pusher"></div> <!-- Толкатель footer'а -->
-	
+	<!--<div id="footer_pusher"></div>  Толкатель footer'а -->
 </div> <!-- #page -->
 <div id="footer_framing">
 <div id="footer">
