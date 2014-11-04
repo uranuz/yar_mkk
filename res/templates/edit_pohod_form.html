@@ -140,26 +140,89 @@
 
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
 
-<!-- Диалог редактирования участников похода -->
+<!-- Диалог редактирования участников похода**************************************** -->
 <div class="b-pohod_party_edit e-dlg" style="display: none;" title="Список участников">
-	<div class="b-pohod_party_edit e-select_message"></div>
-	<span>
-		<input type="text" placeholder="Введите фамилию туриста" class="b-pohod_party_edit e-search_filter">
-		<input type="button" value="Искать!" class="b-pohod_party_edit e-search_btn">
-	</span>
-	<span style="float: right;">
-		<input type="button" value="Сохранить" class="b-pohod_party_edit e-accept_btn">
-	</span>
-	<div style="clear: both"></div>
+
+	              <div class="b-pohod_party_edit e-select_message"></div>
 	
-	<div class="b-pohod_party_edit e-found_tourists_panel">
-		<h5>Найденные туристы</h5>
-		<div class="b-pohod_party_edit e-found_tourists"></div>
+	
+	<div class="b-pohod_party_edit e-selected_tourists_panel" >
+	
+	   <div  ><!-- Фильтр туристов ********* -->
+		   <input type="text" placeholder="Фамилия" class="b-pohod_party_edit e-family_filter">		
+		   <input type="text" placeholder="И"  size="1"  maxlength="1" class="b-pohod_party_edit e-name_filter"> 		
+		   <input type="text" placeholder="О"  size="1"  maxlength="1" class="b-pohod_party_edit e-patronymic_filter">		
+		   <input type="text" placeholder="г.р. "  size="4"  maxlength="4" class="b-pohod_party_edit e-year_filter"> </br>
+		
+		   <p>Элементы адреса</p>
+		
+		   <input type="text" placeholder="Ярославская"  size="15"  maxlength="15" class="b-pohod_party_edit e-region_filter">
+		  	
+		   <button  class="b-pohod_party_edit e-search_btn" >Искать!</button></br>	
+		   
+		   <input type="text" placeholder="Рыбинск"  size="15"  maxlength="15" class="b-pohod_party_edit e-city_filter"></br>
+		
+		   <input type="text" placeholder="Строителей"  size="15"  maxlength="15" class="b-pohod_party_edit e-street_filter">
+		
+	      <p> &nbsp </p>
+	      <input type="button" value="Сохранить" class="b-pohod_party_edit e-accept_btn">
+	      <p> &nbsp </p>
+	      
+		 </div>
+		 
+		 
+		 
+		 <div ><!-- Участники похода ********* -->
+		 <h5>Участники похода</h5>
+		 <div class="b-pohod_party_edit e-selected_tourists"></div>
+	    </div>
+		
 	</div>
-	<div class="b-pohod_party_edit e-selected_tourists_panel">
-		<h5>Участники похода</h5>
-		<div class="b-pohod_party_edit e-selected_tourists"></div>
-	</div>
+	
+	
+	
+	      <div class="b-pohod_party_edit e-found_tourists_panel"><!-- Найденные туристы ********* -->
+		       <h5>Найденные туристы</h5>
+	 	      <p> &nbsp </p>
+		           <p>
+		               <span class="b-pohod_party_edit e-label" > </span></br>
+		               <p> &nbsp </p>
+		               <button 
+		                 name="go_selected_btn"
+		                 class="b-pohod_party_edit e-go_selected_btn"		     
+		                  >Перейти на страницу
+		               </button>
+		               <input name="cur_page_num" type="text" value="1" size="3"  maxlength="3" class="b-pohod_party_edit e-page_selected"></br>
+	 </p> 
+		       
+		     
+		       <p> &nbsp </p><p> &nbsp </p>
+		       
+		       <button 
+		      name="e-go_prev_btn"
+		      class="b-pohod_party_edit e-go_prev_btn"
+		      
+		      >Предыдущая</button>
+		       
+		      
+		       &nbsp  &nbsp 	 &nbsp  &nbsp 	 
+		       
+		       <button 
+		      name="e-go_next_btn"
+		      class="b-pohod_party_edit e-go_next_btn"
+		     
+		      >Следующая</button>
+		       
+		       
+		      
+		       <p> &nbsp </p>
+		       
+		           <div class="b-pohod_party_edit e-found_tourists"></div>
+		           
+	      </div>
+	 
+	
+	
 </div>
 
 <!--Диалог редактирования руководителя похода-->
@@ -169,6 +232,7 @@
 	<input type="button" value="Искать!" class="b-pohod_chef_edit e-search_btn">
 	<div class="b-pohod_chef_edit e-search_results"></div>
 </div>
+
 
 <!--Диалог редактирования зам. руководителя похода-->
 <div class="b-pohod_alt_chef_edit e-dlg" style="display: none;" title="Выбор зам. руководителя">
