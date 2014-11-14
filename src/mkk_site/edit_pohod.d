@@ -2,6 +2,8 @@ module mkk_site.edit_pohod;
 
 import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.thread;
 
+import std.math;
+
 import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
@@ -32,6 +34,8 @@ static immutable shortTouristRecFormat = RecordFormat!(
 
 immutable shortTouristFormatQueryBase = 
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
+immutable shortTouristFormatQueryBase_count =	
+	`select count(1)  from tourist `; // количество найденных туристов
 
 //import std.stdio;
 	
@@ -56,24 +60,72 @@ void удалитьПоход(HTTPContext context, size_t pohodKey)
 
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto getTouristList(HTTPContext context, string фамилия)
-{	string result;
+auto getTouristList(/+HTTPContext context, +/string фамилия, string имя,string отчество, string год_рождения,string регион, string город, string  улица,string страница)
+{	
 	auto dbase = getCommonDB();
 	
 	if ( !dbase.isConnected )
-		return null; //Завершаем
+		return JSONValue(null); //Завершаем
+		
+	import std.stdio;
+	//writeln(фамилия,имя,отчество,год_рождения);
+	
+	   string addition_zapros = `where family_name ILIKE '`;	
+		             addition_zapros~=  PGEscapeStr( фамилия ) ~ `%' `;
+		
+		
+		if (имя.length > 0) 
+		    addition_zapros~= ` AND given_name ILIKE '` ~  PGEscapeStr( имя ) ~ `%' `;
+		    
+		if ( отчество.length > 0 )
+		    addition_zapros~= ` AND patronymic ILIKE '` ~  PGEscapeStr( отчество ) ~ `%' `;
+		    
+		if ( год_рождения.length > 0 ) 
+		    addition_zapros~= ` AND  birth_year ='` ~  PGEscapeStr( год_рождения ) ~ `' `; 
+		    
+		if ( регион.length > 0 )
+		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr( регион ) ~ `%' `; 
+		    
+		if (  город.length > 0 )
+		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr(  город ) ~ `%' `; 
+		    
+		if ( улица.length > 0 )
+		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr( улица ) ~ `%' `;     
+			
+		          string   addition_zapros2=  ` LIMIT 3`;
+		if ( страница.length <=0 || страница.to!int<2)
+		    addition_zapros2~= `OFFSET 0 ;`;
+		    else
+		    addition_zapros2~= ` OFFSET  `~(3*(страница) .to!int -3).to!string ~ ` ; `;                
+		             
+		             
+		             
+		string zapros       = shortTouristFormatQueryBase       ~ addition_zapros ~ addition_zapros2; 
+		string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros~`  ;`;
+		             
+		             
+	writeln(zapros);
 
-	auto queryRes = dbase.query(  
-		shortTouristFormatQueryBase ~ `where family_name ILIKE '`
-		~ PGEscapeStr( фамилия ) ~ `%' limit 50;`
-	);
+	auto queryRes       = dbase.query( 	zapros );
+	auto queryRes_count = dbase.query( 	zapros_count ) ;
+	uint col_str = ( queryRes_count.get(0, 0, "0") ).to!uint;// количество строк 
+	
+	string message = `Страниц ` ~ (ceil(cast(float)(col_str)/3)).to!string ~ `  Туристов `~(col_str).to!string;
+	writeln(col_str);
+	writeln(message);
 
-	if( queryRes is null || queryRes.recordCount == 0 )
-		return null;
+	//if( queryRes is null || queryRes.recordCount == 0 )
+		//return null;
 	
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 	
-	return rs;
+	JSONValue result;
+	JSONValue[string] tmp;
+	tmp[`recordCount`] = col_str;
+	tmp[`rs`] = rs.getStdJSON();
+	result.object = tmp;
+	
+	return result;
 }
 
 auto списокУчастниковПохода( size_t pohodKey )
