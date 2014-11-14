@@ -4,20 +4,24 @@ mkk_site = {
 
 //Инициализация страницы
 $(window.document).ready( function() {
-	
-	
+	mkk_site.edit_tourist = new EditTourist();
 } );
 
-mkk_site.edit_tourist = {
-	processSimilarTourists: function(table)
-	{	var
+EditTourist = (function(){
+	function EditTourist()
+	{
+		
+	}
+	
+	EditTourist.prototype.processSimilarTourists = function(table) {
+		var
 			doc = window.document,
 			contentDiv = doc.getElementById("send_tourist_win_content"),
 			similarTouristsDiv,
 			forceInsertBtn,
 			commentDiv;
 			
-		
+			
 		if( table === null )
 		{	editTouristForm.submit();
 			
@@ -25,9 +29,9 @@ mkk_site.edit_tourist = {
 		else
 		{	commentDiv = doc.createElement("div");
 			commentDiv.innerHTML = 
-				'В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе. '
-				+ 'Если это так, можно перейти к его редактированию. Если новый турист ещё не существует, можно '
-				+ 'продолжить добавление.';
+			'В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе. '
+			+ 'Если это так, можно перейти к его редактированию. Если новый турист ещё не существует, можно '
+			+ 'продолжить добавление.';
 			contentDiv.appendChild(commentDiv);
 			
 			forceInsertBtn = doc.createElement("input");
@@ -41,29 +45,27 @@ mkk_site.edit_tourist = {
 			similarTouristsDiv = doc.createElement("div");
 			similarTouristsDiv.innerHTML = table;
 			contentDiv.appendChild(similarTouristsDiv);
-			
-			
 		}
-		
-	},
-	sendButtonClick: function() {
+	}
+	
+	EditTourist.prototype.sendButtonClick = function() {
 		var 
-			windowYPos = webtank.getScrollTop() + 50,
-			touristSendWindow = webtank.wui.createModalWindow("Редактирование туриста", windowYPos),
-			windowContent = $(touristSendWindow).children(".modal_window_content")[0],
-			touristKey = NaN,
-			doc = window.document
-			editTouristForm = doc.getElementById("edit_tourist_form"),
-			birthYearInp = doc.getElementById("birth_year"),
-			birthYear = parseInt(birthYearInp.value, 10);
+		windowYPos = webtank.getScrollTop() + 50,
+		touristSendWindow = webtank.wui.createModalWindow("Редактирование туриста", windowYPos),
+		windowContent = $(touristSendWindow).children(".modal_window_content")[0],
+		touristKey = NaN,
+		doc = window.document
+		editTouristForm = doc.getElementById("edit_tourist_form"),
+		birthYearInp = doc.getElementById("birth_year"),
+		birthYear = parseInt(birthYearInp.value, 10);
 		
 		
-			
+		
 		if( isNaN(birthYear) )
 			birthYear = null;
 		
 		windowContent.id = "send_tourist_win_content";
-			
+		
 		try {
 			touristKey = parseInt( webtank.parseGetParams().key );
 		} catch(e) { touristKey = NaN; }
@@ -76,9 +78,9 @@ mkk_site.edit_tourist = {
 				method: "mkk_site.edit_tourist.тестНаличияПохожегоТуриста",
 				params: {
 					"имя": doc.getElementById("given_name").value,
-					"фамилия": doc.getElementById("family_name").value,
-					"отчество": doc.getElementById("patronymic").value,
-					"годРожд": birthYear
+											"фамилия": doc.getElementById("family_name").value,
+											"отчество": doc.getElementById("patronymic").value,
+											"годРожд": birthYear
 				},
 				success: mkk_site.edit_tourist.processSimilarTourists
 			});
@@ -87,6 +89,7 @@ mkk_site.edit_tourist = {
 		{	//Редактирование существующего
 			editTouristForm.submit();
 		}
-	},
+	}
 	
-};
+	return EditTourist;
+})();

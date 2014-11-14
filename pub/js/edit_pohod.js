@@ -5,16 +5,16 @@ mkk_site = {
 //Инициализация страницы
 $(window.document).ready( function() {
 	//Инициализаци блоков на странице
-	mkk_site.edit_pohod.blockInit();
-	mkk_site.pohod_chef_edit.blockInit();
-	mkk_site.pohod_party_edit.blockInit();
+	mkk_site.pohod_chef_edit = new PohodChefEdit();
+	mkk_site.pohod_party_edit = new PohodPartyEdit();
+	mkk_site.pohod_chef_edit = new PohodChefEdit();
+	mkk_site.edit_pohod = new EditPohod();
 } );
 
 //Редактирование руководителя и зам. руководителя похода
-mkk_site.pohod_chef_edit = {
-
+PohodChefEdit = (function() {
 	//Инициализация блока редактирования руководителя и зам. руководителя похода
-	blockInit: function()
+	function PohodChefEdit()
 	{	var
 			pohod_chef_edit = mkk_site.pohod_chef_edit,
 			blockChef = $(".b-pohod_chef_edit"),
@@ -45,10 +45,10 @@ mkk_site.pohod_chef_edit = {
 			{ "isAltChef": true },
 			pohod_chef_edit.onSearchChefCandidates_BtnClick
 		);
-	},
+	}
 	
 	//"Тык" по кнопке выбора руководителя или зама похода
-	onSelectChef_BtnClick: function(event) {
+	PohodChefEdit.prototype.onSelectChef_BtnClick = function(event) {
 		var
 			pohod = mkk_site.pohod_chef_edit,
 			isAltChef = event.data.isAltChef,
@@ -72,10 +72,10 @@ mkk_site.pohod_chef_edit = {
 		mkk_site.pohod_party_edit.renderParticipantsList();
 
 		block.filter(".e-dlg").dialog("destroy");
-	},
+	};
 
 	//"Тык" по кнопке поиска кандидатов на руководство похода
-	onSearchChefCandidates_BtnClick: function(event) {
+	PohodChefEdit.prototype.onSearchChefCandidates_BtnClick = function(event) {
 		var
 			pohod = mkk_site.pohod_chef_edit,
 			isAltChef = event.data.isAltChef,
@@ -134,10 +134,10 @@ mkk_site.pohod_chef_edit = {
 				block.filter(".e-search_results").replaceWith(searchResultsDiv); //Замена в DOM
 			}
 		});
-	},
+	};
 
 	//Тык по кнопке открытия окна выбора руководителя или зама
-	onOpenChefEditDlg_BtnClick: function(event)
+	PohodChefEdit.prototype.onOpenChefEditDlg_BtnClick = function(event)
 	{	var
 			pohod = mkk_site.pohod_chef_edit,
 			isAltChef = event.data.isAltChef,
@@ -145,23 +145,21 @@ mkk_site.pohod_chef_edit = {
 			rec;
 
 		block.filter(".e-dlg").dialog({modal: true, minWidth: 400});
-	},
+	};
 	
-};
+})();
 
-mkk_site.pohod_party_edit = {
-	participantsRS: null, //RecordSet с участниками похода
-	
-	selTouristsRS: null, //RecordSet с выбранными в поиске туристами
-	
-	page: 0,
-
+PohodPartyEdit = (function() {
 	//Инциализация блока редактирования списка участников
-	blockInit: function()
+	function PohodPartyEdit()
 	{
 		var
 			block = $(".b-pohod_party_edit"),
 			pohod_party_edit = mkk_site.pohod_party_edit;
+			
+		this.participantsRS = null; //RecordSet с участниками похода
+		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
+		this.page = 0;
 
 		block.filter(".e-search_btn")
 		.on( "click", pohod_party_edit.onSearchTourists_BtnClick );
@@ -183,10 +181,10 @@ mkk_site.pohod_party_edit = {
 
 		//Загрузка списка участников похода с сервера
 		pohod_party_edit.loadPohodParticipantsList();
-	},
+	}
 
 	//Метод образует разметку с информацией о выбранном туристе
-	renderSelectedTourist: function(rec)
+	PohodPartyEdit.prototype.renderSelectedTourist = function(rec)
 	{	var
 			pohod = mkk_site.pohod_party_edit,
 			block = $(".b-pohod_party_edit"),
@@ -205,10 +203,10 @@ mkk_site.pohod_party_edit = {
 			.appendTo(recordDiv);
 		
 		return recordDiv;
-	},
+	};
 	
 	//Выводит список участников похода из participantsRS в главное окно
-	renderParticipantsList: function()
+	PohodPartyEdit.prototype.renderParticipantsList = function()
 	{	var 
 			pohod = mkk_site.pohod_party_edit,
 			block = $(".b-pohod_party_edit"),
@@ -228,10 +226,10 @@ mkk_site.pohod_party_edit = {
 		}
 		
 		block.filter(".e-tourist_keys_inp").val(touristKeys);
-	},
+	};
 	
 	//Загрузка списка участников похода
-	loadPohodParticipantsList: function()
+	PohodPartyEdit.prototype.loadPohodParticipantsList = function()
 	{	var 
 			doc = window.document,
 			pohod = mkk_site.pohod_party_edit,
@@ -251,10 +249,10 @@ mkk_site.pohod_party_edit = {
 				pohod.renderParticipantsList();
 			}
 		});
-	},
+	};
 	
 	//Обработчик добавления найденной записи о туристе
-	onSelectTourist_BtnClick: function(event) {
+	PohodPartyEdit.prototype.onSelectTourist_BtnClick = function(event) {
 		var 
 			rec = event.data, //Добавляемая запись
 			pohod = mkk_site.pohod_party_edit,
@@ -278,10 +276,10 @@ mkk_site.pohod_party_edit = {
 			pohod.renderSelectedTourist(rec)
 			.appendTo( block.filter(".e-selected_tourists") );
 		}
-	},
+	};
 	
 	//Обработчик отмены выбора записи
-	onDeselectTourist_BtnClick: function(event) {
+	PohodPartyEdit.prototype.onDeselectTourist_BtnClick = function(event) {
 		var 
 			rec = event.data,
 			pohod = mkk_site.pohod_party_edit,
@@ -291,7 +289,7 @@ mkk_site.pohod_party_edit = {
 		
 		pohod.selTouristsRS.remove( rec.getKey() );
 		recordDiv.remove();
-	},
+	};
 	
 	//Обработчик тыка по кнопке сохранения списка выбранных участников
 	onSaveSelectedParticipants_BtnCLick: function() {
@@ -304,14 +302,12 @@ mkk_site.pohod_party_edit = {
 
 		block.filter(".e-dlg").dialog("destroy");
 			
-	},
-	
-	
-	
+	};
+
 	//---Блок поиска участников----------
 	
 	// Тык по кнопке поиска туристов 
-	onSearchTourists_BtnClick: function() {
+	PohodPartyEdit.prototype.onSearchTourists_BtnClick = function() {
 		var
 		   pohod = mkk_site.pohod_party_edit,//Переменные
 			block = $(".b-pohod_party_edit");
@@ -320,11 +316,11 @@ mkk_site.pohod_party_edit = {
 			
 			pohod.onSearchTourists();//Переход к действию по кнопке Искать
 				
-	},
+	};
 	
 	
 	// Тык по кнопке Перехода на нужную страницу 
-	onGoSelected_BtnClick: function() {
+	PohodPartyEdit.prototype.onGoSelected_BtnClick = function() {
 		var
 		   pohod = mkk_site.pohod_party_edit,//Переменные
 			block = $(".b-pohod_party_edit"),
@@ -336,47 +332,34 @@ mkk_site.pohod_party_edit = {
 		if(selected_page_value>pohod.page) 	block.filter(".e-page_selected").val(pohod.page);
 			
 			
-			pohod.onSearchTourists();//Переход к действию 
-				
-	},
-	
-	
-	
+		pohod.onSearchTourists();//Переход к действию 
+	};
 	
 	//Тык по кнопке Предыдущая страница
-	onGoPrev_BtnClick: function() {
+	PohodPartyEdit.prototype.onGoPrev_BtnClick = function() {
 		var
 	   	pohod = mkk_site.pohod_party_edit,//Переменные
-			block = $(".b-pohod_party_edit"),			
+			block = $(".b-pohod_party_edit"),
 			selected_page_value=block.filter(".e-page_selected").val();
-			
-			
-			block.filter(".e-page_selected").val(+selected_page_value - 1) ;
-			
-			
-			 
-			
-			pohod.onGoSelected_BtnClick();//Переход к действию 
-	},
+
+		block.filter(".e-page_selected").val(+selected_page_value - 1) ;
+		pohod.onGoSelected_BtnClick();//Переход к действию 
+	};
 	
 	//Тык по кнопке Следующая страница
-	onGoNext_BtnClick: function() {
+	PohodPartyEdit.prototype.onGoNext_BtnClick = function() {
 		var
 		   pohod = mkk_site.pohod_party_edit,//Переменные
 			block = $(".b-pohod_party_edit"),
 			selected_page_value=block.filter(".e-page_selected").val();
-			
-			
+
 		block.filter(".e-page_selected").val(+selected_page_value + 1) ;	
-		 
-			
-			
-			pohod.onGoSelected_BtnClick();//Переход к действию 
-	},
+		pohod.onGoSelected_BtnClick();//Переход к действию 
+	};
 	
 	
 	// переход от Тыка по  любой из  выше описанных кнопок  
-	onSearchTourists: function(event) {
+	PohodPartyEdit.prototype.onSearchTourists = function(event) {
 		var
 			pohod = mkk_site.pohod_party_edit,
 			block = $(".b-pohod_party_edit"),
@@ -393,13 +376,7 @@ mkk_site.pohod_party_edit = {
 			selected_submit=block.filter(".e-go_selected_btn"),			
 			prev_submit=block.filter(".e-go_prev_btn"),
 			next_submit=block.filter(".e-go_next_btn");
-			
-		
-				
-		
-		
-		  
-		  
+			 
 		if( family_filterInput.val().length < 2 )
 		{	messageDiv.text("Минимальная длина фильтра для поиска равна 2 символам");
 			return;
@@ -429,13 +406,10 @@ mkk_site.pohod_party_edit = {
 						class: "b-pohod_party_edit e-found_tourists"
 					}),
 					col_str = json.recordCount;// Количество строк
-					
-												
+
 				rs = webtank.datctrl.fromJSON(json.rs);
 				rs.rewind();
 
-						
-										
 				while( rec = rs.next() )
 				{	(function(record) {
 						var
@@ -453,8 +427,6 @@ mkk_site.pohod_party_edit = {
 								text: mkk_site.edit_pohod.getTouristInfoString(record)
 							}).appendTo(recordDiv);
 
-
-						
 						recordDiv.appendTo(searchResultsDiv);
 					})(rec);
 				}
@@ -497,21 +469,14 @@ mkk_site.pohod_party_edit = {
 				else
 					label = "Страница "+selected_page_value +
 					" из  " + pohod.page  + ". Туристов " + col_str+".";
-										
-				f1.html(label);						
-										
-				
+
+				f1.html(label);
 			}
-		}
-		
-		);// конец webtank.json_rpc.invoke
-		
-		
-		
-	},
+		});// конец webtank.json_rpc.invoke
+	};
 	
 	//Тык по кнопке открытия окна редактирования списка участников
-	onOpenParticipantsEditWindow_BtnClick: function() {
+	PohodPartyEdit.prototype.onOpenParticipantsEditWindow_BtnClick = function() {
 		var 
 			pohod = mkk_site.pohod_party_edit,
 			block = $(".b-pohod_party_edit"),
@@ -532,12 +497,12 @@ mkk_site.pohod_party_edit = {
 		}
 
 		block.filter(".e-dlg").dialog({"modal": true, minWidth: 500});
-	}
-};
+	};
+})();
 
-mkk_site.edit_pohod = {
+EditPohod = (function() {
 	//Инициализация блока редактирования похода
-	blockInit: function()
+	function EditPohod()
 	{	var
 			block = $(".b-edit_pohod");
 
@@ -559,19 +524,19 @@ mkk_site.edit_pohod = {
 		});
 
 		mkk_site.edit_pohod.loadListOfExtraFileLinks();
-	},
+	}
 	
 	//Возвращает строку описания туриста по записи
-	getTouristInfoString: function(rec) {
+	EditPohod.prototype.getTouristInfoString = function(rec) {
 		return " " + rec.get("family_name") + " " + rec.get("given_name") + " " 
 			+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р"
-	},
+	};
 
 	///Работа со списком ссылок на дополнительные ресурсы
 	//Размер одной "порции" полей ввода ссылок на доп. материалы
 	extraFileLinksInputPortion: 5,
 	//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
-	onAddMoreExtraFileLinks_BtnClick: function()
+	EditPohod.prototype.onAddMoreExtraFileLinks_BtnClick = function()
 	{	var
 			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
@@ -580,10 +545,10 @@ mkk_site.edit_pohod = {
 
 		for( ; i < inputPortion; i++ )
 			pohod.renderInputsForExtraFileLink([]).appendTo( block.filter(".e-link_list_table") );
-	},
+	};
 
 	//Создает элементы для ввода ссылки с описанием на доп. материалы
-	renderInputsForExtraFileLink: function(data)
+	EditPohod.prototype.renderInputsForExtraFileLink = function(data)
 	{	var
 			newTr = $("<tr>"),
 			leftTd = $("<td>").appendTo(newTr),
@@ -597,10 +562,10 @@ mkk_site.edit_pohod = {
 		}
 
 		return newTr;
-	},
+	};
 
 	//Отображает список ссылок на доп. материалы
-	renderListOfExtraFileLinks: function(linkList)
+	EditPohod.prototype.renderListOfExtraFileLinks = function(linkList)
 	{	var
 			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
@@ -619,10 +584,10 @@ mkk_site.edit_pohod = {
 			pohod.renderInputsForExtraFileLink( linkList[i] ).appendTo(newTable);
 		
 		block.filter(".e-link_list_table").replaceWith(newTable);
-	},
+	};
 
 	//Загрузка списка ссылок на доп. материалы с сервера
-	loadListOfExtraFileLinks: function()
+	EditPohod.prototype.loadListOfExtraFileLinks = function()
 	{	var
 			getParams = webtank.parseGetParams(),
 			pohodKey = parseInt(getParams["key"], 10);
@@ -632,10 +597,10 @@ mkk_site.edit_pohod = {
 			params: { "pohodKey": pohodKey },
 			success: mkk_site.edit_pohod.renderListOfExtraFileLinks
 		});
-	},
+	};
 
 	//Сохранение списка ссылок на доп. материалы
-	saveListOfExtraFileLinks: function()
+	EditPohod.prototype.saveListOfExtraFileLinks = function()
 	{	var
 			block = $(".b-edit_pohod"),
 			pohod = mkk_site.edit_pohod,
@@ -658,10 +623,10 @@ mkk_site.edit_pohod = {
 		}
 
 		block.filter(".e-extra_file_links_inp").val( JSON.stringify(data) );
-	},
+	};
 
 	//Обработчик тыка по кнопке подтверждения удаления похода
-	onDeleteConfirm_BtnClick: function() {
+	EditPohod.prototype.onDeleteConfirm_BtnClick = function() {
 		var
 			block = $(".b-edit_pohod"),
 			getParams = webtank.parseGetParams(),
@@ -680,5 +645,4 @@ mkk_site.edit_pohod = {
 		{	block.filter(".e-delete_confirm_inp").val("Не подтверждено!!!")
 		}
 	}
-
-};
+})();
