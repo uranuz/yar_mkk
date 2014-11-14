@@ -260,26 +260,30 @@ body {
 }
 
 table.tab1 {
-	
-	width: 100%; /* Ширина таблицы */
-	border: 3px ridge #666; /* Рамка вокруг таблицы */
+	width: 100%;
+	border: 3px ridge #666;
 	border-spacing: 0px;
 }
 
 .tab1 td, .tab1 th {
-	font-size: 80%; /* Размер шрифта в процентах */
-	/*word-break: break-all;*/
-	/* padding: 1px; /* Поля вокруг содержимого таблицы */
-	border: 1px solid ; /* Параметры рамки */
+	font-size: 80%;
+	border: 1px solid;
 	border-right-style:ridge;
 }
        
 .last_pohod_comment {font-size: 80%;}
 
-.b-mkk_site_auth_bar.e-dialog_wrapper {
+.b-main_menu_auth.e-dialog_wrapper {
 	background: #e4e2bf;
-	/*margin-top: 17px;*/
 	padding: 16px 8px 16px 8px;
 	border: solid 2px #598d23;
 	z-index: 10;
+}
+
+.b-main_menu_auth.e-header.is-hidden {
+	display: none;
+}
+
+.b-main_menu_auth.e-dialog_wrapper.is-hidden {
+	display: none;
 }

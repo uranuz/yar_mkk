@@ -32,13 +32,19 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 
 	tpl.set( "authentication uri", getAuthRedirectURI(context) );
 	
+	string authMenuCaption;
+	
 	if( context.user.isAuthenticated )
-	{	tpl.set("auth header message", "<i>Вход выполнен. Добро пожаловать, <b>" ~ context.user.name ~ "</b>!!!</i>");
-		tpl.set("user login", context.user.id );
+	{	
+		tpl.set( "without auth class", "is-hidden" );
+		tpl.set( "user name", context.user.name );
+		tpl.set( "user login", context.user.id );
 	}
 	else
-	{	tpl.set("auth header message", "<i>Вход не выполнен</i>");
+	{	
+		tpl.set( "with auth class", "is-hidden" );
 	}
+	
 	return tpl;
 }
 
