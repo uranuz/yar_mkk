@@ -7,64 +7,42 @@ $(window.document).ready( function() {
 	mkk_site.edit_tourist = new EditTourist();
 } );
 
-EditTourist = (function(){
+EditTourist = new (function(_super){
+	__extends(EditTourist, _super);
+	
 	function EditTourist()
 	{
+		_super.call(this);
 		
+		var self = this;
+		this.elems = $(".b-edit_tourist");
+		this.$el(".e-submit_btn").click( function(ev) { self.sendButtonClick($(this), ev); } )
 	}
 	
-	EditTourist.prototype.processSimilarTourists = function(table) {
+	
+	EditTourist.prototype.processSimilarTourists = function(data) {
 		var
-			doc = window.document,
-			contentDiv = doc.getElementById("send_tourist_win_content"),
-			similarTouristsDiv,
-			forceInsertBtn,
-			commentDiv;
-			
-			
-		if( table === null )
-		{	editTouristForm.submit();
-			
+			touristForm = this.$el(".e-tourist_form"),
+			dialog = this.$el(".e-similars_dlg").dialog({title: "Редактирование туриста", modal: true});
+
+		if( data )
+		{
+			this.$el(".e-similars_list").html(data);
+			this.$el(".e-force_submit_btn").click( function() { touristForm.submit(); });
 		}
 		else
-		{	commentDiv = doc.createElement("div");
-			commentDiv.innerHTML = 
-			'В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе. '
-			+ 'Если это так, можно перейти к его редактированию. Если новый турист ещё не существует, можно '
-			+ 'продолжить добавление.';
-			contentDiv.appendChild(commentDiv);
-			
-			forceInsertBtn = doc.createElement("input");
-			forceInsertBtn.type = "button";
-			forceInsertBtn.value = "Продолжить добавление";
-			forceInsertBtn.onclick = function() {
-				doc.getElementById("edit_tourist_form").submit();
-			}
-			contentDiv.appendChild(forceInsertBtn);
-			
-			similarTouristsDiv = doc.createElement("div");
-			similarTouristsDiv.innerHTML = table;
-			contentDiv.appendChild(similarTouristsDiv);
-		}
-	}
+			touristForm.submit();
+	};
 	
-	EditTourist.prototype.sendButtonClick = function() {
-		var 
-		windowYPos = webtank.getScrollTop() + 50,
-		touristSendWindow = webtank.wui.createModalWindow("Редактирование туриста", windowYPos),
-		windowContent = $(touristSendWindow).children(".modal_window_content")[0],
-		touristKey = NaN,
-		doc = window.document
-		editTouristForm = doc.getElementById("edit_tourist_form"),
-		birthYearInp = doc.getElementById("birth_year"),
-		birthYear = parseInt(birthYearInp.value, 10);
-		
-		
-		
+	EditTourist.prototype.sendButtonClick = function(el) {
+		var
+			self = this,
+			touristKey = NaN,
+			touristForm = this.$el(".e-tourist_form"),
+			birthYear = parseInt(this.$el(".e-birth_year").val(), 10);
+
 		if( isNaN(birthYear) )
 			birthYear = null;
-		
-		windowContent.id = "send_tourist_win_content";
 		
 		try {
 			touristKey = parseInt( webtank.parseGetParams().key );
@@ -72,24 +50,23 @@ EditTourist = (function(){
 		
 		if( isNaN(touristKey) )
 		{	//Добавление нового
-			
 			webtank.json_rpc.invoke({
 				uri: "/jsonrpc/",
 				method: "mkk_site.edit_tourist.тестНаличияПохожегоТуриста",
 				params: {
-					"имя": doc.getElementById("given_name").value,
-											"фамилия": doc.getElementById("family_name").value,
-											"отчество": doc.getElementById("patronymic").value,
-											"годРожд": birthYear
+					"имя": this.$el(".e-given_name").val(),
+					"фамилия": this.$el(".e-family_name").val(),
+					"отчество": this.$el(".e-patronymic").val(),
+					"годРожд": birthYear
 				},
-				success: mkk_site.edit_tourist.processSimilarTourists
+				success: function(data){ self.processSimilarTourists(data); }
 			});
 		}
 		else
 		{	//Редактирование существующего
-			editTouristForm.submit();
+			touristForm.submit();
 		}
-	}
+	};
 	
 	return EditTourist;
-})();
+})(webtank.WClass);
