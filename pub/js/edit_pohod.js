@@ -32,12 +32,16 @@ TouristSearch = new (function(_super) {
 		var self = this;
 		
 		this.elems = $(".b-tourist_search");
-		this.onItemSelect = null;
-		
+
 		this.$el(".e-search_btn").$on("click", self.onSearchTourists_BtnClick );
 		this.$el(".e-go_selected_btn").$on("click", self.onGoSelected_BtnClick );
 		this.$el(".e-go_next_btn").$on("click", self.onGoNext_BtnClick );
 		this.$el(".e-go_prev_btn").$on("click", self.onGoPrev_BtnClick );
+		
+		this.$el(".e-found_tourists").$on("click", ".e-tourist_select_btn", function(ev, el) {
+			var record = self.recordSet.getRecord($(el).data('id'))
+			self.$trigger('itemSelect', [self, record]);
+		});
 	}
 
 	// Тык по кнопке поиска туристов 
@@ -117,19 +121,18 @@ TouristSearch = new (function(_super) {
 					searchResultsDiv = $(".e-found_tourists"),
 					col_str = json.recordCount;// Количество строк
 				
-				rs = webtank.datctrl.fromJSON(json.rs);
-				rs.rewind();
+				self.recordSet = webtank.datctrl.fromJSON(json.rs);
+				self.recordSet.rewind();
 				
 				searchResultsDiv.empty();
-				while( rec = rs.next() )
+				while( rec = self.recordSet.next() )
 				{	(function(record) {
 					var
 						button,
 						recordDiv = $("<div>", {
-						class: "b-tourist_search e-tourist_select_btn"
+							class: "b-tourist_search e-tourist_select_btn",
 						})
-						//Вызываем обработчик выбора элемента
-						.on( "click", function(ev) { self.$trigger("itemSelect", [$(this), record]); }),
+						.data("id", record.getKey()),
 						button = $("<div>", {
 							class: "b-tourist_search e-tourist_select_icon"
 						})
@@ -207,8 +210,9 @@ PohodChefEdit = new (function(_super) {
 		this.elems = $(this.cssBlockName);
 		this.searchBlock = searchBlock;
 		this.isAltChef = false;
+		this.selTouristsRS = null;
 
-		this.$el(".e-open_dlg_btn").$on("click", this.onOpenDlg_BtnClick);
+		this.$el(".e-open_dlg_btn").$on("click", this.openDialog);
 
 		//Тык по кнопке удаления зам. руководителя похода
 		this.$el(".e-delete_btn").$on("click", function() {
@@ -216,8 +220,6 @@ PohodChefEdit = new (function(_super) {
 			self.$el(".e-open_dlg_btn").text("Редактировать");
 			self.$el(".e-dlg").dialog("destroy");
 		});
-		
-		this.$el(".e-")
 	}
 	
 	//"Тык" по кнопке выбора руководителя или зама похода
@@ -230,8 +232,7 @@ PohodChefEdit = new (function(_super) {
 		dbKeyInp.val( rec.get("num") );
 
 		if( !this.participantsRS )
-		{	this.participantsRS = new webtank.datctrl.RecordSet();
-			this.participantsRS._fmt = rec._fmt;
+		{	this.participantsRS = new webtank.datctrl.RecordSet(rec._fmt);
 		}
 
 		if( !this.participantsRS.hasKey( rec.getKey() ) )
@@ -244,33 +245,26 @@ PohodChefEdit = new (function(_super) {
 		this.$el(".e-dlg").dialog("destroy");
 	};
 	
-	PohodChefEdit.prototype.openDialog(isAltChef)
+	PohodChefEdit.prototype.openDialog = function(isAltChef)
 	{
-		
-	};
-
-	//Тык по кнопке открытия окна выбора руководителя или зама
-	PohodChefEdit.prototype.onOpenDlg_BtnClick = function(ev, el)
-	{	var
-			isAltChef = ev.data.isAltChef,
-			rec;
-
 		this.searchBlock.activate(this.$el(".e-search_block"));
-		this.searchBlock.$on("itemSelect", this.onSelectTourist_BtnClick);
-		
+		this.searchBlock.$on('itemSelect', this.onItemSelect.bind(this));
 		this.$el(".e-dlg").dialog({modal: true, minWidth: 400});
 	};
 	
+	PohodChefEdit.prototype.closeDialog = function() {
+		this.searchBlock.$off('itemSelect', this.onItemSelect.bind(this));
+		this.$el(".e-dlg").dialog('destroy');
+	};
+	
 	//Обработчик добавления найденной записи о туристе
-	PohodChefEdit.prototype.onSelectTourist_BtnClick = function(ev, el) {
+	PohodChefEdit.prototype.onItemSelect = function(ev, sender, rec) {
 		var 
-			rec = ev.data, //Добавляемая запись
 			recordDiv,
 			deselectBtn;
 
 		if( !this.selTouristsRS )
-		{	this.selTouristsRS = new webtank.datctrl.RecordSet();
-			this.selTouristsRS._fmt = rec._fmt;
+		{	this.selTouristsRS = new webtank.datctrl.RecordSet(rec._fmt);
 		}
 		
 		if( this.selTouristsRS.hasKey( rec.getKey() ) )
@@ -380,8 +374,7 @@ PohodPartyEdit = new (function(_super) {
 			deselectBtn;
 		
 		if( !this.selTouristsRS )
-		{	this.selTouristsRS = new webtank.datctrl.RecordSet();
-			this.selTouristsRS._fmt = rec._fmt;
+		{	this.selTouristsRS = new webtank.datctrl.RecordSet(rec._fmt);
 		}
 		
 		if( this.selTouristsRS.hasKey( rec.getKey() ) )
