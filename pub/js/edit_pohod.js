@@ -5,8 +5,22 @@ mkk_site = {
 mkk_site.utils = {
 	//Возвращает строку описания туриста по записи
 	getTouristInfoString: function(rec) {
-		return " " + rec.get("family_name") + " " + rec.get("given_name") + " " 
-			+ rec.get("patronymic") + ", " + rec.get("birth_year") + " г.р";
+		var 
+			output = "",
+			familyName = rec.get("family_name", ""),
+			givenName = rec.get("given_name", ""),
+			patronymic = rec.get("patronymic", ""),
+			birthYear = "" + rec.get("birth_year", "");
+		
+		if( familyName.length )
+			output += familyName;
+		if( givenName.length )
+			output += " " + givenName;
+		if( patronymic.length )
+			output += " " + patronymic;
+		if( birthYear.length )
+			output += ", " + birthYear + " г.р";
+		return output;
 	}
 };
 
@@ -16,9 +30,12 @@ var getParams = webtank.parseGetParams();
 $(window.document).ready( function() {
 	//Инициализаци блоков на странице
 	mkk_site.tourist_search = new TouristSearch();
-	mkk_site.pohod_chef_edit = new PohodChefEdit(mkk_site.tourist_search);
-	mkk_site.pohod_party_edit = new PohodPartyEdit();
-	mkk_site.edit_pohod = new EditPohod();
+	mkk_site.pohod_chef_edit = new PohodChefEdit({searchBlock: mkk_site.tourist_search});
+	mkk_site.pohod_party_edit = new PohodPartyEdit({searchBlock: mkk_site.tourist_search});
+	mkk_site.edit_pohod = new EditPohod({
+		chefEditBlock: mkk_site.pohod_chef_edit,
+		partyEditBlock: mkk_site.pohod_party_edit
+	});
 } );
 
 //Блок поиска туристов
@@ -118,7 +135,7 @@ TouristSearch = new (function(_super) {
 			{
 				var
 					rec,
-					searchResultsDiv = $(".e-found_tourists"),
+					searchResultsDiv = self.$el(".e-found_tourists"),
 					col_str = json.recordCount;// Количество строк
 				
 				self.recordSet = webtank.datctrl.fromJSON(json.rs);
@@ -189,7 +206,14 @@ TouristSearch = new (function(_super) {
 	
 	TouristSearch.prototype.activate = function(place)
 	{
-		this.$el(".e-block").detach().appendTo(place);
+		this.$el(".e-block").detach().appendTo(place).show();
+	};
+	
+	TouristSearch.prototype.deactivate = function(place)
+	{
+		this.$el(".e-block").detach().appendTo('body').hide();
+		this.$el(".e-found_tourists").empty();
+		this.recordSet = null;
 	};
 	
 	return TouristSearch;
@@ -200,19 +224,18 @@ PohodChefEdit = new (function(_super) {
 	__extends(PohodChefEdit, _super);
 	
 	//Инициализация блока редактирования руководителя и зам. руководителя похода
-	function PohodChefEdit(searchBlock)
+	function PohodChefEdit(opts)
 	{	
 		_super.call(this, ".b-pohod_chef_edit");
+		opts = opts || {}
 		
 		var
 			self = this;
 			
 		this.elems = $(this.cssBlockName);
-		this.searchBlock = searchBlock;
+		this.searchBlock = opts.searchBlock;
 		this.isAltChef = false;
-		this.selTouristsRS = null;
-
-		this.$el(".e-open_dlg_btn").$on("click", this.openDialog);
+		this.chefRecord = null;
 
 		//Тык по кнопке удаления зам. руководителя похода
 		this.$el(".e-delete_btn").$on("click", function() {
@@ -223,48 +246,92 @@ PohodChefEdit = new (function(_super) {
 	}
 	
 	//"Тык" по кнопке выбора руководителя или зама похода
-	PohodChefEdit.prototype.onSelectChef_BtnClick = function(ev, el) {
-		var
-			rec = ev.data.record,
-			dbKeyInp = this.$el(".e-tourist_key_inp"),
-			openDlgBtn = this.$el(".e-open_dlg_btn");
-
-		dbKeyInp.val( rec.get("num") );
-
-		if( !this.participantsRS )
-		{	this.participantsRS = new webtank.datctrl.RecordSet(rec._fmt);
-		}
-
-		if( !this.participantsRS.hasKey( rec.getKey() ) )
-			this.participantsRS.append( rec );
-
-		openDlgBtn.text( mkk_site.utils.getTouristInfoString(rec) );
-
-		mkk_site.pohod_party_edit.renderParticipantsList();
-
-		this.$el(".e-dlg").dialog("destroy");
+	PohodChefEdit.prototype.onSelectChef = function(ev, el, rec) {
+		this.chefRecord = rec;
+		this.$el(".e-tourist_key_inp").val( rec.get("num") );
+		this.$el(".e-open_dlg_btn").text( mkk_site.utils.getTouristInfoString(rec) );
+		this.closeDialog();
 	};
 	
-	PohodChefEdit.prototype.openDialog = function(isAltChef)
+	PohodChefEdit.prototype.openDialog = function(record, isAltChef)
 	{
+		this.chefRecord = record;
+		this.isAltChef = isAltChef;
 		this.searchBlock.activate(this.$el(".e-search_block"));
-		this.searchBlock.$on('itemSelect', this.onItemSelect.bind(this));
+		this.searchBlock.$on('itemSelect', this.onSelectChef.bind(this));
 		this.$el(".e-dlg").dialog({modal: true, minWidth: 400});
 	};
 	
 	PohodChefEdit.prototype.closeDialog = function() {
-		this.searchBlock.$off('itemSelect', this.onItemSelect.bind(this));
+		this.searchBlock.$off('itemSelect', this.onSelectChef.bind(this));
+		this.searchBlock.deactivate();
 		this.$el(".e-dlg").dialog('destroy');
 	};
 	
+	return PohodChefEdit;
+})(webtank.WClass);
+
+PohodPartyEdit = new (function(_super) {
+	__extends(PohodPartyEdit, _super);
+	
+	//Инциализация блока редактирования списка участников
+	function PohodPartyEdit(opts)
+	{
+		_super.call(this);
+		opts = opts || {};
+		
+		var self = this;
+		
+		this.elems = $(".b-pohod_party_edit");
+		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
+		this.page = 0;
+		this.searchBlock = opts.searchBlock;
+
+		this.$el(".e-accept_btn").$on("click", function() {
+			this.$trigger( 'saveData', [self, self.selTouristsRS] );
+		});
+		
+		this.$el(".e-selected_tourists").$on( "click", ".e-tourist_deselect_btn", this.onDeselectTourist_BtnClick );
+	}
+	
+	PohodPartyEdit.prototype.openDialog = function(recordSet)
+	{
+		this.selTouristsRS = recordSet;
+		this.renderSelectedTourists();
+		this.searchBlock.activate(this.$el(".e-search_block"));
+		this.searchBlock.$on('itemSelect', this.onSelectTourist.bind(this));
+		this.$el(".e-dlg").dialog({modal: true, minWidth: 400});
+	};
+
+	//Метод образует разметку с информацией о выбранном туристе
+	PohodPartyEdit.prototype.renderSelectedTourist = function(rec)
+	{	var
+			recordDiv = $("<div>", {
+				class: "b-pohod_party_edit e-tourist_deselect_btn"
+			}),
+			deselectBtn = $("<div>", {
+				class: "b-pohod_party_edit e-tourist_deselect_icon"
+			})
+			.appendTo(recordDiv),
+			recordLink = $("<a>", {
+				href: "#!",
+				text: mkk_site.utils.getTouristInfoString(rec)
+			})
+			.appendTo(recordDiv);
+		
+		return recordDiv;
+	};
+	
 	//Обработчик добавления найденной записи о туристе
-	PohodChefEdit.prototype.onItemSelect = function(ev, sender, rec) {
+	PohodPartyEdit.prototype.onSelectTourist = function(ev, el, rec) {
 		var 
 			recordDiv,
 			deselectBtn;
-
+		
 		if( !this.selTouristsRS )
-		{	this.selTouristsRS = new webtank.datctrl.RecordSet(rec._fmt);
+		{	this.selTouristsRS = new webtank.datctrl.RecordSet({
+				format: rec.copyFormat()
+			});
 		}
 		
 		if( this.selTouristsRS.hasKey( rec.getKey() ) )
@@ -280,53 +347,102 @@ PohodChefEdit = new (function(_super) {
 		}
 	};
 	
-	return PohodChefEdit;
+	//Обработчик отмены выбора записи
+	PohodPartyEdit.prototype.onDeselectTourist_BtnClick = function(ev, el) {
+		var 
+			recId = el.data('id'),
+			recordDiv = el,
+			touristSelectDiv = this.$el(".e-selected_tourists");
+		
+		this.selTouristsRS.remove( recId );
+		recordDiv.remove();
+	};
+	
+	//Тык по кнопке открытия окна редактирования списка участников
+	PohodPartyEdit.prototype.renderSelectedTourists = function() {
+		var 
+			self = this,
+			selectedTouristsDiv = this.$el(".e-selected_tourists"),
+			rec;
+			
+		//Очистка окна списка туристов перед заполнением
+		selectedTouristsDiv.empty();
+			
+		this.selTouristsRS.rewind();
+		while( rec = this.selTouristsRS.next() )
+		{	this.renderSelectedTourist(rec)
+			.data('id', rec.get('id'))
+			.appendTo( selectedTouristsDiv );
+		}
+
+		this.$el(".e-dlg").dialog({modal: true, minWidth: 500});
+	};
+	
+	return PohodPartyEdit;
 })(webtank.WClass);
 
-PohodPartyEdit = new (function(_super) {
-	__extends(PohodPartyEdit, _super);
+EditPohod = new (function(_super) {
+	__extends(EditPohod, _super);
 	
-	//Инциализация блока редактирования списка участников
-	function PohodPartyEdit()
-	{
-		_super.call(this, arguments);
+	//Инициализация блока редактирования похода
+	function EditPohod(opts)
+	{	
+		_super.call(this);
+		opts = opts || {};
 		
 		var self = this;
 		
-		this.elems = $(".b-pohod_party_edit");
+		this.elems = $(".b-edit_pohod");
+		this.chefEditBlock = opts.chefEditBlock;
+		this.partyEditBlock = opts.partyEditBlock;
 		this.participantsRS = null; //RecordSet с участниками похода
-		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
-		this.page = 0;
-
-		this.$el(".e-accept_btn").$on("click", self.onSaveSelectedParticipants_BtnCLick );
-		this.$el(".e-open_dlg_btn").$on("click", self.onOpenParticipantsEditWindow_BtnClick );
-
-		//Загрузка списка участников похода с сервера
-		this.loadPohodParticipantsList();
-	}
-
-	//Метод образует разметку с информацией о выбранном туристе
-	PohodPartyEdit.prototype.renderSelectedTourist = function(rec)
-	{	var
-			recordDiv = $("<div>", {
-				class: "b-pohod_party_edit e-tourist_deselect_btn"
-			})
-			.on( "click", rec, this.onDeselectTourist_BtnClick ),
-			deselectBtn = $("<div>", {
-				class: "b-pohod_party_edit e-tourist_deselect_icon"
-			})
-			.appendTo(recordDiv),
-			recordLink = $("<a>", {
-				href: "#_NOLink",
-				text: mkk_site.utils.getTouristInfoString(rec)
-			})
-			.appendTo(recordDiv);
+		this.chefRecord = null;
+		this.altChefRecord = null;
 		
-		return recordDiv;
+		///Работа со списком ссылок на дополнительные ресурсы
+		//Размер одной "порции" полей ввода ссылок на доп. материалы
+		this.extraFileLinksInputPortion = 5;
+
+		this.$el(".e-open_delete_dlg_btn").$on("click", function() {
+			this.$el(".e-delete_dlg").dialog({modal: true});
+		});
+
+		this.$el(".e-delete_confirm_btn").$on("click", self.onDeleteConfirm_BtnClick);
+		this.$el(".e-add_more_extra_file_links_btn").$on("click", self.onAddMoreExtraFileLinks_BtnClick);
+
+		this.$el(".e-submit_btn").$on("click", function(ev){
+			self.saveListOfExtraFileLinks( $(this), ev );
+			self.$el(".e-edit_pohod_form").submit();
+		});
+		
+		this.$el(".e-open_pohod_party_edit_btn").$on("click", function() {
+			self.partyEditBlock.openDialog(self.participantsRS.copy()); //Отдаем копию списка участников!
+		});
+		
+		this.partyEditBlock.$on( 'saveData', this.onSaveSelectedParticipants.bind(this) );
+		
+		//Загрузка списка участников похода с сервера
+		this.loadParticipantsList();
+		
+		this.$el(".e-open_chef_edit_btn").$on( 'click', function() {
+			this.chefEditBlock.openDialog(self.chefRecord, false);
+		});
+		
+		this.$el(".e-open_alt_chef_edit_btn").$on( 'click', function() {
+			this.chefEditBlock.openDialog(self.altChefRecord, true);
+		});
+
+		self.loadListOfExtraFileLinks();
+	}
+	
+	//Обработчик тыка по кнопке сохранения списка выбранных участников
+	EditPohod.prototype.onSaveSelectedParticipants = function(ev, sender, selTouristsRS) {
+		this.participantsRS = selTouristsRS;
+		this.renderParticipantsList();
 	};
 	
 	//Выводит список участников похода из participantsRS в главное окно
-	PohodPartyEdit.prototype.renderParticipantsList = function()
+	EditPohod.prototype.renderParticipantsList = function()
 	{	var
 			touristKeys = "",
 			touristsList = this.$el(".e-tourists_list"),
@@ -347,7 +463,7 @@ PohodPartyEdit = new (function(_super) {
 	};
 	
 	//Загрузка списка участников похода
-	PohodPartyEdit.prototype.loadPohodParticipantsList = function()
+	EditPohod.prototype.loadParticipantsList = function()
 	{	var 
 			self = this,
 			pohodKey = parseInt(getParams["key"], 10);
@@ -365,106 +481,6 @@ PohodPartyEdit = new (function(_super) {
 			}
 		});
 	};
-	
-	//Обработчик добавления найденной записи о туристе
-	PohodPartyEdit.prototype.onSelectTourist_BtnClick = function(ev, el) {
-		var 
-			rec = ev.data, //Добавляемая запись
-			recordDiv,
-			deselectBtn;
-		
-		if( !this.selTouristsRS )
-		{	this.selTouristsRS = new webtank.datctrl.RecordSet(rec._fmt);
-		}
-		
-		if( this.selTouristsRS.hasKey( rec.getKey() ) )
-		{	this.$el(".e-select_message").html(
-				"Турист <b>" + mkk_site.utils.getTouristInfoString(rec)
-				+ "</b> уже находится в списке выбранных туристов"
-			);
-		}
-		else
-		{	this.selTouristsRS.append(rec);
-			this.renderSelectedTourist(rec)
-			.appendTo( this.$el(".e-selected_tourists") );
-		}
-	};
-	
-	//Обработчик отмены выбора записи
-	PohodPartyEdit.prototype.onDeselectTourist_BtnClick = function(ev, el) {
-		var 
-			rec = ev.data,
-			recordDiv = el,
-			touristSelectDiv = this.$el(".e-selected_tourists");
-		
-		this.selTouristsRS.remove( rec.getKey() );
-		recordDiv.remove();
-	};
-	
-	//Обработчик тыка по кнопке сохранения списка выбранных участников
-	PohodPartyEdit.prototype.onSaveSelectedParticipants_BtnCLick = function() {
-		this.participantsRS = webtank.deepCopy(this.selTouristsRS);
-		this.renderParticipantsList();
-
-		this.$el(".e-dlg").dialog("destroy");
-	};
-	
-	//Тык по кнопке открытия окна редактирования списка участников
-	PohodPartyEdit.prototype.onOpenParticipantsEditWindow_BtnClick = function() {
-		var 
-			self = this,
-			rec;
-			
-		//Очистка окна списка туристов перед заполнением
-		this.$el(".e-selected_tourists").empty();
-		
-		if( this.participantsRS )
-		{	//Создаем копию набора записей
-			this.selTouristsRS = webtank.deepCopy(this.participantsRS);
-			
-			this.selTouristsRS.rewind();
-			while( rec = this.selTouristsRS.next() )
-			{	this.renderSelectedTourist(rec)
-				.appendTo( this.$el(".e-selected_tourists") );
-			}
-		}
-
-		this.$el(".e-dlg").dialog({modal: true, minWidth: 500});
-	};
-	
-	return PohodPartyEdit;
-})(webtank.WClass);
-
-EditPohod = new (function(_super) {
-	__extends(EditPohod, _super);
-	
-	//Инициализация блока редактирования похода
-	function EditPohod()
-	{	
-		_super.call(this, arguments);
-		
-		var self = this;
-		
-		this.elems = $(".b-edit_pohod");
-		
-		///Работа со списком ссылок на дополнительные ресурсы
-		//Размер одной "порции" полей ввода ссылок на доп. материалы
-		this.extraFileLinksInputPortion = 5;
-
-		this.$el(".e-open_delete_dlg_btn").$on("click", function() {
-			this.$el(".e-delete_dlg").dialog({modal: true});
-		});
-
-		this.$el(".e-delete_confirm_btn").$on("click", self.onDeleteConfirm_BtnClick);
-		this.$el(".e-add_more_extra_file_links_btn").$on("click", self.onAddMoreExtraFileLinks_BtnClick);
-
-		this.$el(".e-submit_btn").$on("click", function(ev){
-			self.saveListOfExtraFileLinks( $(this), ev );
-			self.$el(".e-edit_pohod_form").submit();
-		});
-
-		self.loadListOfExtraFileLinks();
-	}
 
 	//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
 	EditPohod.prototype.onAddMoreExtraFileLinks_BtnClick = function()

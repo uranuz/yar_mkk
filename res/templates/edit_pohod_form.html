@@ -82,29 +82,29 @@
 	<tr>
 		<td>Руководитель похода</td>
 		<td colspan="999">
-			<input type="hidden" name="chef_grupp" class="b-pohod_chef_edit e-tourist_key_inp"{{chef_grupp}}>
-			<a href="#_NOLink" class="b-pohod_chef_edit e-open_dlg_btn">{{chef_grupp_text}}</a>
+			<input type="hidden" name="chef_grupp" class="b-edit_pohod e-alt_chef_key_inp"{{chef_grupp}}>
+			<a href="#_NOLink" class="b-edit_pohod e-open_chef_edit_btn">{{chef_grupp_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Заместитель руководителя</td>
 		<td colspan="999">
-			<input type="hidden" name="b-pohod_alt_chef_edit e-tourist_key_inp" class="b-pohod_alt_chef_edit e-tourist_key_inp"{{alt_chef}}>
-			<a href="#_NOLink" class="b-pohod_alt_chef_edit e-open_dlg_btn">{{alt_chef_text}}</a>
+			<input type="hidden" name="alt_chef" class="b-edit_pohod e-chef_key_inp"{{alt_chef}}>
+			<a href="#_NOLink" class="b-edit_pohod e-open_alt_chef_edit_btn">{{alt_chef_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Участники</td>
 		<td>
-			<input type="hidden" name="unit_neim" class="b-pohod_party_edit e-tourist_keys_inp">
-			<a href="#_NOLink" class="b-pohod_party_edit e-open_dlg_btn">Редактировать</a>
+			<input type="hidden" name="unit_neim" class="b-edit_pohod e-tourist_keys_inp">
+			<a href="#_NOLink" class="b-edit_pohod e-open_pohod_party_edit_btn">Редактировать</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Количество участников</td><td><input type="text" size="4" name="unit"{{unit_count}}></td>
 	</tr>
 	<tr>
-		<td colspan="999"><div class="b-pohod_party_edit e-tourists_list">{{unit}}</div></td>
+		<td colspan="999"><div class="b-edit_pohod e-tourists_list">{{unit}}</div></td>
 	</tr>
 	</table>
 </div>
@@ -170,13 +170,10 @@
 		</div>
 	</div>
 
-	<div class="b-pohod_party_edit e-found_tourists_panel"><!--Найденные туристы-->
-	     
-	<div class="b-pohod_party_edit e-found_tourists"></div>
-	</div>
+	<div class="b-pohod_party_edit e-search_block"></div>
 	
 	<p>&nbsp;</p>
-	<input type="button" value="Сохранить" class="b-tourist_search e-accept_btn">
+	<input type="button" value="Сохранить" class="b-pohod_party_edit e-accept_btn">
 	<p>&nbsp;</p>
 </div>
 
