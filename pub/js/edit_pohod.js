@@ -49,6 +49,7 @@ TouristSearch = new (function(_super) {
 		var self = this;
 		
 		this.elems = $(".b-tourist_search");
+		this.resultsPanel = this.$el('.e-search_results_panel');
 
 		this.$el(".e-search_btn").$on("click", self.onSearchTourists_BtnClick );
 		this.$el(".e-go_selected_btn").$on("click", self.onGoSelected_BtnClick );
@@ -59,6 +60,8 @@ TouristSearch = new (function(_super) {
 			var record = self.recordSet.getRecord($(el).data('id'))
 			self.$trigger('itemSelect', [self, record]);
 		});
+		
+		this.$el('.e-block').hide();
 	}
 
 	// Тык по кнопке поиска туристов 
@@ -68,7 +71,7 @@ TouristSearch = new (function(_super) {
 	};
 	
 	// Тык по кнопке Перехода на нужную страницу 
-	TouristSearch.prototype.onGoSelected_BtnClick = function() {
+	TouristSearch.prototype.onGoSelected_BtnClick = function(ev, el) {
 		var
 			self = this,
 			selected_page_value = this.$el(".e-page_selected").val(),
@@ -93,7 +96,7 @@ TouristSearch = new (function(_super) {
 	};
 	
 	//Тык по кнопке Следующая страница
-	TouristSearch.prototype.onGoNext_BtnClick = function() {
+	TouristSearch.prototype.onGoNext_BtnClick = function(ev, el) {
 		var
 			selected_page_value = this.$el(".e-page_selected").val();
 		this.$el(".e-page_selected").val( +selected_page_value + 1 );
@@ -105,11 +108,8 @@ TouristSearch = new (function(_super) {
 		var
 			self = this,
 			messageDiv = this.$el(".e-select_message"),
-			selected_page_value = this.$el(".e-page_selected").val(),
-			selected_submit = this.$el(".e-go_selected_btn"),
-			prev_submit = this.$el(".e-go_prev_btn"),
-			next_submit = this.$el(".e-go_next_btn");
-							
+			selected_page_value = this.$el(".e-page_selected").val();
+
 // 		if( family_filterInput.val().length < 2 )
 // 		{	messageDiv.text("Минимальная длина фильтра для поиска равна 2 символам");
 // 			return;
@@ -136,6 +136,12 @@ TouristSearch = new (function(_super) {
 				var
 					rec,
 					searchResultsDiv = self.$el(".e-found_tourists"),
+					summaryDiv = self.$el(".e-tourists_found_summary"),
+					selected_submit = self.$el(".e-go_selected_btn"),
+					prev_submit = self.$el(".e-go_prev_btn"),
+					next_submit = self.$el(".e-go_next_btn"),
+					navigBar = self.$el(".e-page_navigation_bar"),
+					pageCountDiv = self.$el(".e-page_count"),
 					col_str = json.recordCount;// Количество строк
 				
 				self.recordSet = webtank.datctrl.fromJSON(json.rs);
@@ -143,33 +149,12 @@ TouristSearch = new (function(_super) {
 				
 				searchResultsDiv.empty();
 				while( rec = self.recordSet.next() )
-				{	(function(record) {
-					var
-						button,
-						recordDiv = $("<div>", {
-							class: "b-tourist_search e-tourist_select_btn",
-						})
-						.data("id", record.getKey()),
-						button = $("<div>", {
-							class: "b-tourist_search e-tourist_select_icon"
-						})
-						.appendTo(recordDiv),
-						recordLink = $("<a>", {
-							href: "#!",
-							text: mkk_site.utils.getTouristInfoString(record)
-						}).appendTo(recordDiv);
-						
-						recordDiv.appendTo(searchResultsDiv);
-					})(rec);
-				}
+					self.renderFoundTourist(rec).appendTo(searchResultsDiv);
 				
-				self.$el(".e-found_tourists_panel").show();
-				self.$el(".e-selected_tourists_panel").css("width", "50%");
-				self.$el(".e-dlg").dialog({modal: true, minWidth: 1000});
-				
-				var f1 = self.$el(".e-label");
+				self.resultsPanel.show();
+
 				if( col_str > 0 )
-					self.page = Math.ceil(col_str/3) ;
+					self.page = Math.ceil(col_str/3);
 				else
 					self.page = 0;
 				// ограничения кнопки перейти при наличи одой и менее страниц кнопка не видима
@@ -180,40 +165,63 @@ TouristSearch = new (function(_super) {
 				
 				//  состояние кнопки предыдущая 
 				if( selected_page_value < 2 || self.page <= 1 )
-					prev_submit.css('visibility', 'hidden')
-				else prev_submit.css('visibility', 'visible');
+					prev_submit.css('visibility', 'hidden');
+				else 
+					prev_submit.css('visibility', 'visible');
 
 				// состояние кнопки далее
 				if( selected_page_value >= self.page || self.page <= 1 ) 
-					next_submit.css('visibility', 'hidden')
-				else next_submit.css('visibility', 'visible');
+					next_submit.css('visibility', 'hidden');
+				else 
+					next_submit.css('visibility', 'visible');
 
-				var label;
 				if( col_str < 1 )
-				{	label = "Соответствия не найдено";
-					// selected_submit.css('visibility', 'hidden');
-					//prev_submit.css('visibility', 'hidden');
-					//	next_submit.css('visibility', 'hidden');
-				}					
+				{	summaryDiv.text("По данному запросу не найдено туристов");
+					navigBar.hide();
+				}
 				else
-					label = "Страница " + selected_page_value +
-					" из " + self.page  + ". Туристов " + col_str + ".";
-					
-				f1.html(label);
+				{
+					summaryDiv.text("Найдено " + col_str + " туристов");
+					pageCountDiv.text(self.page);
+					navigBar.show();
+				}
 			}
 		});// конец webtank.json_rpc.invoke
+	};
+	
+	TouristSearch.prototype.renderFoundTourist = function(record) {
+		var
+			recordDiv = $("<div>", {
+				class: "b-tourist_search e-tourist_select_btn",
+			})
+			.data("id", record.getKey()),
+			iconWrp = $("<span>", {
+				class: "b-tourist_search e-icon_wrapper"
+			}).appendTo(recordDiv),
+			button = $("<div>", {
+				class: "icon-small icon-append_item"
+			}).appendTo(iconWrp),
+			recordLink = $("<a>", {
+				class: "b-tourist_search e-tourist_link",
+				href: "#!",
+				text: mkk_site.utils.getTouristInfoString(record)
+			}).appendTo(recordDiv);
+		
+		return recordDiv;
 	};
 	
 	TouristSearch.prototype.activate = function(place)
 	{
 		this.$el(".e-block").detach().appendTo(place).show();
+		if( this.recordSet && this.recordSet.getLength() )
+			this.resultsPanel.show();
+		else
+			this.resultsPanel.hide()
 	};
 	
 	TouristSearch.prototype.deactivate = function(place)
 	{
 		this.$el(".e-block").detach().appendTo('body').hide();
-		this.$el(".e-found_tourists").empty();
-		this.recordSet = null;
 	};
 	
 	return TouristSearch;
@@ -236,36 +244,50 @@ PohodChefEdit = new (function(_super) {
 		this.searchBlock = opts.searchBlock;
 		this.isAltChef = false;
 		this.chefRecord = null;
+		this.dialog = this.$el(".e-dlg");
+		this.controlBar = this.$el('.e-control_bar');
 
 		//Тык по кнопке удаления зам. руководителя похода
 		this.$el(".e-delete_btn").$on("click", function() {
 			self.$el(".e-tourist_key_inp").val("null");
 			self.$el(".e-open_dlg_btn").text("Редактировать");
-			self.$el(".e-dlg").dialog("destroy");
+			self.dialog.dialog("close");
 		});
+		
+		this.dialog.$on( "dialogclose", this.onDialogClose.bind(this) );
 	}
 	
 	//"Тык" по кнопке выбора руководителя или зама похода
 	PohodChefEdit.prototype.onSelectChef = function(ev, el, rec) {
 		this.chefRecord = rec;
-		this.$el(".e-tourist_key_inp").val( rec.get("num") );
-		this.$el(".e-open_dlg_btn").text( mkk_site.utils.getTouristInfoString(rec) );
+		this.$trigger( "selectChef", [this, rec] );
 		this.closeDialog();
 	};
 	
 	PohodChefEdit.prototype.openDialog = function(record, isAltChef)
 	{
+		var dlgTitle = "";
 		this.chefRecord = record;
 		this.isAltChef = isAltChef;
+		if( isAltChef ) {
+			this.controlBar.show();
+			dlgTitle = 'Выбор зам. руководителя';
+		} else {
+			this.controlBar.hide();
+			dlgTitle = 'Выбор руководителя';
+		}
 		this.searchBlock.activate(this.$el(".e-search_block"));
 		this.searchBlock.$on('itemSelect', this.onSelectChef.bind(this));
-		this.$el(".e-dlg").dialog({modal: true, minWidth: 400});
+		this.dialog.dialog({modal: true, minWidth: 400, title: dlgTitle});
 	};
 	
 	PohodChefEdit.prototype.closeDialog = function() {
-		this.searchBlock.$off('itemSelect', this.onSelectChef.bind(this));
+		this.dialog.dialog('close');
+	};
+	
+	PohodChefEdit.prototype.onDialogClose = function() {
+		this.searchBlock.$off('itemSelect');
 		this.searchBlock.deactivate();
-		this.$el(".e-dlg").dialog('destroy');
 	};
 	
 	return PohodChefEdit;
@@ -286,12 +308,15 @@ PohodPartyEdit = new (function(_super) {
 		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
 		this.page = 0;
 		this.searchBlock = opts.searchBlock;
+		this.dialog = this.$el(".e-dlg");
 
 		this.$el(".e-accept_btn").$on("click", function() {
 			this.$trigger( 'saveData', [self, self.selTouristsRS] );
+			self.closeDialog();
 		});
 		
 		this.$el(".e-selected_tourists").$on( "click", ".e-tourist_deselect_btn", this.onDeselectTourist_BtnClick );
+		this.dialog.$on( 'dialogclose', this.onDialogClose.bind(this) );
 	}
 	
 	PohodPartyEdit.prototype.openDialog = function(recordSet)
@@ -300,7 +325,17 @@ PohodPartyEdit = new (function(_super) {
 		this.renderSelectedTourists();
 		this.searchBlock.activate(this.$el(".e-search_block"));
 		this.searchBlock.$on('itemSelect', this.onSelectTourist.bind(this));
-		this.$el(".e-dlg").dialog({modal: true, minWidth: 400});
+		this.dialog.dialog({modal: true, minWidth: 500});
+	};
+	
+	
+	PohodPartyEdit.prototype.closeDialog = function() {
+		this.dialog.dialog('close');
+	};
+	
+	PohodPartyEdit.prototype.onDialogClose = function() {
+		this.searchBlock.deactivate();
+		this.searchBlock.$off('itemSelect');
 	};
 
 	//Метод образует разметку с информацией о выбранном туристе
@@ -308,12 +343,16 @@ PohodPartyEdit = new (function(_super) {
 	{	var
 			recordDiv = $("<div>", {
 				class: "b-pohod_party_edit e-tourist_deselect_btn"
-			}),
-			deselectBtn = $("<div>", {
-				class: "b-pohod_party_edit e-tourist_deselect_icon"
 			})
-			.appendTo(recordDiv),
+			.data( 'num', rec.get('num') ),
+			iconWrp = $("<span>", {
+				class: "b-pohod_party_edit e-icon_wrapper"
+			}).appendTo(recordDiv),
+			deselectBtn = $("<div>", {
+				class: "icon-small icon-remove_item"
+			}).appendTo(iconWrp),
 			recordLink = $("<a>", {
+				class: "b-pohod_party_edit e-tourist_link",
 				href: "#!",
 				text: mkk_site.utils.getTouristInfoString(rec)
 			})
@@ -350,7 +389,7 @@ PohodPartyEdit = new (function(_super) {
 	//Обработчик отмены выбора записи
 	PohodPartyEdit.prototype.onDeselectTourist_BtnClick = function(ev, el) {
 		var 
-			recId = el.data('id'),
+			recId = el.data('num'),
 			recordDiv = el,
 			touristSelectDiv = this.$el(".e-selected_tourists");
 		
@@ -371,11 +410,9 @@ PohodPartyEdit = new (function(_super) {
 		this.selTouristsRS.rewind();
 		while( rec = this.selTouristsRS.next() )
 		{	this.renderSelectedTourist(rec)
-			.data('id', rec.get('id'))
+			.data('num', rec.get('num'))
 			.appendTo( selectedTouristsDiv );
 		}
-
-		this.$el(".e-dlg").dialog({modal: true, minWidth: 500});
 	};
 	
 	return PohodPartyEdit;
@@ -431,6 +468,8 @@ EditPohod = new (function(_super) {
 		this.$el(".e-open_alt_chef_edit_btn").$on( 'click', function() {
 			this.chefEditBlock.openDialog(self.altChefRecord, true);
 		});
+		
+		this.chefEditBlock.$on( "selectChef", this.onSelectChef.bind(this) );
 
 		self.loadListOfExtraFileLinks();
 	}
@@ -439,6 +478,15 @@ EditPohod = new (function(_super) {
 	EditPohod.prototype.onSaveSelectedParticipants = function(ev, sender, selTouristsRS) {
 		this.participantsRS = selTouristsRS;
 		this.renderParticipantsList();
+	};
+	
+	EditPohod.prototype.onSelectChef = function(ev, sender, rec) {
+		var 
+			keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ), 
+			chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
+		
+		keyInp.val( rec.get("num") );
+		chefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
 	};
 	
 	//Выводит список участников похода из participantsRS в главное окно

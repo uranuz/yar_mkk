@@ -60,66 +60,62 @@ void удалитьПоход(HTTPContext context, size_t pohodKey)
 
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto getTouristList(/+HTTPContext context, +/string фамилия, string имя,string отчество, string год_рождения,string регион, string город, string  улица,string страница)
+auto getTouristList(HTTPContext context, string фамилия, string имя, string отчество, string год_рождения, string регион, string город, string улица, string страница)
 {	
 	auto dbase = getCommonDB();
 	
 	if ( !dbase.isConnected )
 		return JSONValue(null); //Завершаем
-		
-	import std.stdio;
-	//writeln(фамилия,имя,отчество,год_рождения);
-	
-	   string addition_zapros = `where family_name ILIKE '`;	
-		             addition_zapros~=  PGEscapeStr( фамилия ) ~ `%' `;
-		
-		
-		if (имя.length > 0) 
-		    addition_zapros~= ` AND given_name ILIKE '` ~  PGEscapeStr( имя ) ~ `%' `;
-		    
-		if ( отчество.length > 0 )
-		    addition_zapros~= ` AND patronymic ILIKE '` ~  PGEscapeStr( отчество ) ~ `%' `;
-		    
-		if ( год_рождения.length > 0 ) 
-		    addition_zapros~= ` AND  birth_year ='` ~  PGEscapeStr( год_рождения ) ~ `' `; 
-		    
-		if ( регион.length > 0 )
-		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr( регион ) ~ `%' `; 
-		    
-		if (  город.length > 0 )
-		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr(  город ) ~ `%' `; 
-		    
-		if ( улица.length > 0 )
-		    addition_zapros~= ` AND address ILIKE '%` ~  PGEscapeStr( улица ) ~ `%' `;     
-			
-		          string   addition_zapros2=  ` LIMIT 3`;
-		if ( страница.length <=0 || страница.to!int<2)
-		    addition_zapros2~= `OFFSET 0 ;`;
-		    else
-		    addition_zapros2~= ` OFFSET  `~(3*(страница) .to!int -3).to!string ~ ` ; `;                
-		             
-		             
-		             
-		string zapros       = shortTouristFormatQueryBase       ~ addition_zapros ~ addition_zapros2; 
-		string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros~`  ;`;
-		             
-		             
-	writeln(zapros);
-
-	auto queryRes       = dbase.query( 	zapros );
-	auto queryRes_count = dbase.query( 	zapros_count ) ;
-	uint col_str = ( queryRes_count.get(0, 0, "0") ).to!uint;// количество строк 
-	
-	string message = `Страниц ` ~ (ceil(cast(float)(col_str)/3)).to!string ~ `  Туристов `~(col_str).to!string;
-	writeln(col_str);
-	writeln(message);
-
-	//if( queryRes is null || queryRes.recordCount == 0 )
-		//return null;
-	
-	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 	
 	JSONValue result;
+	
+	if( !context.user.isAuthenticated )
+		return result;
+		
+	import std.stdio;
+	
+	string addition_zapros = ` where family_name ILIKE '`;	
+	addition_zapros ~= PGEscapeStr(фамилия) ~ `%' `;
+
+	if (имя.length > 0) 
+		addition_zapros ~= ` AND given_name ILIKE '` ~ PGEscapeStr(имя) ~ `%' `;
+
+	if ( отчество.length > 0 )
+		addition_zapros ~= ` AND patronymic ILIKE '` ~ PGEscapeStr(отчество) ~ `%' `;
+
+	if ( год_рождения.length > 0 ) 
+		addition_zapros ~= ` AND  birth_year ='` ~ PGEscapeStr(год_рождения) ~ `' `; 
+			
+	if ( регион.length > 0 )
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(регион) ~ `%' `; 
+
+	if (  город.length > 0 )
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(город) ~ `%' `; 
+
+	if ( улица.length > 0 )
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(улица) ~ `%' `;     
+
+	string addition_zapros2 = ` LIMIT 3 `;
+	if ( страница.length <= 0 || страница.to!int < 2)
+		addition_zapros2 ~= ` OFFSET 0;`;
+	else
+		addition_zapros2 ~= ` OFFSET  ` ~ (3*(страница) .to!int -3).to!string ~ ` ; `;                
+
+	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ addition_zapros2; 
+	string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros ~ `;`;
+
+	writeln(zapros);
+
+	auto queryRes = dbase.query(zapros);
+	auto queryRes_count = dbase.query(zapros_count) ;
+	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
+	
+	string message = `Страниц ` ~ (ceil(cast(float)(col_str)/3)).to!string ~ `  Туристов ` ~ col_str.to!string;
+	writeln(col_str);
+	writeln(message);
+	
+	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
+
 	JSONValue[string] tmp;
 	tmp[`recordCount`] = col_str;
 	tmp[`rs`] = rs.getStdJSON();
@@ -181,8 +177,6 @@ static immutable RecordFormat!(
 			статусЗаявки
 		)
 	);
-
-
 
 immutable strFieldNames = [ "kod_mkk", "nomer_knigi", "region_pohod", "organization", "region_group", "marchrut" ];
 
@@ -563,7 +557,6 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	return message;
 }
 
-
 string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
@@ -624,7 +617,6 @@ string netMain(HTTPContext context)
 		return null;
 	}
 }
-
 
 string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
 {	auto dbase = getCommonDB;

@@ -66,7 +66,7 @@
 
 <hr>
 <h4>Группа</h4>
-<div style="clear: both;"></div><!--Чтобы предыдущее содержимое не обтекалось-->
+<!--<div style="clear: both;"></div>Чтобы предыдущее содержимое не обтекалось-->
 <!--Блок для вывода списка туристов при поиске-->
 <!-- <div id="tourist_select_div"></div> -->
 <div id="tourist_group_div">
@@ -82,14 +82,14 @@
 	<tr>
 		<td>Руководитель похода</td>
 		<td colspan="999">
-			<input type="hidden" name="chef_grupp" class="b-edit_pohod e-alt_chef_key_inp"{{chef_grupp}}>
+			<input type="hidden" name="chef_grupp" class="b-edit_pohod e-chef_key_inp"{{chef_grupp}}>
 			<a href="#_NOLink" class="b-edit_pohod e-open_chef_edit_btn">{{chef_grupp_text}}</a>
 		</td>
 	</tr>
 	<tr>
 		<td>Заместитель руководителя</td>
 		<td colspan="999">
-			<input type="hidden" name="alt_chef" class="b-edit_pohod e-chef_key_inp"{{alt_chef}}>
+			<input type="hidden" name="alt_chef" class="b-edit_pohod e-alt_chef_key_inp"{{alt_chef}}>
 			<a href="#_NOLink" class="b-edit_pohod e-open_alt_chef_edit_btn">{{alt_chef_text}}</a>
 		</td>
 	</tr>
@@ -138,52 +138,74 @@
 
 <!-- Поиск туристов-->
 <div class="b-tourist_search e-block" title="Поиск туристов">
-	<input type="text" placeholder="Фамилия" class="b-tourist_search e-family_filter">		
-	<input type="text" placeholder="И"  size="1"  maxlength="1" class="b-tourist_search e-name_filter"> 		
-	<input type="text" placeholder="О"  size="1"  maxlength="1" class="b-tourist_search e-patronymic_filter">		
-	<input type="text" placeholder="г.р."  size="4"  maxlength="4" class="b-tourist_search e-year_filter"> </br>
+	<label>Имя</label>
+	<input type="text" placeholder="Петечкин" class="b-tourist_search e-family_filter">
+	<input type="text" placeholder="В"  size="1"  maxlength="1" class="b-tourist_search e-name_filter">
+	<input type="text" placeholder="И"  size="1"  maxlength="1" class="b-tourist_search e-patronymic_filter"></br>
+	<label>Год рожд.</label>
+	<input type="text" placeholder="1812"  size="4"  maxlength="4" class="b-tourist_search e-year_filter"> </br>
 
-	<p>Элементы адреса</p>
-
-	<input type="text" placeholder="Ярославская"  size="15"  maxlength="15" class="b-tourist_search e-region_filter">
-	<button class="b-tourist_search e-search_btn">Искать!</button></br>
-	<input type="text" placeholder="Рыбинск"  size="15"  maxlength="15" class="b-tourist_search e-city_filter"></br>
-	<input type="text" placeholder="Строителей"  size="15"  maxlength="15" class="b-tourist_search e-street_filter"></br>
-	<input type="text" placeholder="Строителей"  size="15"  maxlength="15" class="b-tourist_search e-page_selected">
-	<h5>Найденные туристы</h5>
-	<span class="b-tourist_search e-label"></span>
-	<button name="go_selected_btn" class="b-tourist_search e-go_selected_btn">Перейти на страницу</button>
-	<input name="cur_page_num" type="text" value="1" size="3"  maxlength="3" class="b-tourist_search e-page_selected">
-	<button name="e-go_prev_btn" class="b-tourist_search e-go_prev_btn">Предыдущая</button>
-	<button name="e-go_next_btn" class="b-tourist_search e-go_next_btn">Следующая</button>
-
-	<div class="b-tourist_search e-found_tourists"></div>
+	
+	<fieldset class="b-tourist_search e-addr_filter_panel">
+		<legend>Адрес</legend>
+		<div class="b-tourist_search e-addr_element_item">
+			<label class="b-tourist_search e-addr_element_label">Область</label>
+			<input type="text" placeholder="Ярославская" size="15" maxlength="15" class="b-tourist_search e-region_filter e-addr_element_filter">
+		</div>
+		<div class="b-tourist_search e-addr_element_item">
+			<label class="b-tourist_search e-addr_element_label">Нас. пункт</label>
+			<input type="text" placeholder="Рыбинск" size="15" maxlength="15" class="b-tourist_search e-city_filter e-addr_element_filter">
+		</div>
+		<div class="b-tourist_search e-addr_element_item">
+			<label class="b-tourist_search e-addr_element_label">Улица</label>
+			<input type="text" placeholder="Строителей" size="15" maxlength="15" class="b-tourist_search e-street_filter e-addr_element_filter">
+		</div>
+	</fieldset>
+	<div style='clear: both;'></div>
+	<button type="button" class="b-tourist_search e-search_btn">Искать!</button>
+	<div class='b-tourist_search e-search_results_panel'>
+		<h5>Найденные туристы</h5>
+		<div class="b-tourist_search e-tourists_found_summary"></div>
+		<div class="b-tourist_search e-page_navigation_bar">
+			<button class="b-tourist_search e-go_prev_btn">&lt;</button>
+			Страница <input name="cur_page_num" type="text" value="1" size="3" maxlength="3" class="b-tourist_search e-page_selected">
+			из <span class="b-tourist_search e-page_count">0</span>
+			<button class="b-tourist_search e-go_selected_btn">Перейти</button>
+			<button class="b-tourist_search e-go_next_btn">&gt;</button>
+		</div>
+		<div class="b-tourist_search e-found_tourists"></div>
+	</div>
 </div>
 
 <!--Диалог редактирования участников похода-->
 <div class="b-pohod_party_edit e-dlg" style="display: none;" title="Список участников">
-	<div class="b-pohod_party_edit e-select_message"></div>
-	<div class="b-pohod_party_edit e-selected_tourists_panel">
-		<div>
-			<h5>Участники похода</h5>
-			<div class="b-pohod_party_edit e-selected_tourists"></div>
+	<div class="b-pohod_party_edit e-dlg_content">
+		<div class="b-pohod_party_edit e-control_bar">
+			<button type="button" class="b-pohod_party_edit e-accept_btn">Сохранить</button>
+		</div>
+		<div class="b-pohod_party_edit e-select_message"></div>
+		<div class="b-pohod_party_edit e-panels_area">
+			<div class="b-pohod_party_edit e-search_panel">
+				<h5>Поиск туристов</h5>
+				<div class="b-pohod_party_edit e-search_block"></div>
+			</div>
+			<div class="b-pohod_party_edit e-selected_tourists_panel">
+				<h5>Участники похода</h5>
+				<div class="b-pohod_party_edit e-selected_tourists"></div>
+			</div>
 		</div>
 	</div>
-
-	<div class="b-pohod_party_edit e-search_block"></div>
-	
-	<p>&nbsp;</p>
-	<input type="button" value="Сохранить" class="b-pohod_party_edit e-accept_btn">
-	<p>&nbsp;</p>
 </div>
 
 <!--Диалог редактирования руководителя похода-->
 <div class="b-pohod_chef_edit e-dlg" style="display: none;" title="Выбор руководителя">
-	<div class="b-pohod_chef_edit e-search_block"></div>
-	<div class="b-pohod_chef_edit e-delete_btn">
-		<div class="b-pohod_chef_edit e-delete_icon"></div>
-		<a href="#!">Нет заместителя</a>
+	<div class="b-pohod_chef_edit e-control_bar">
+		<button type="button" class="b-pohod_chef_edit e-delete_btn">
+			<div class="icon-small icon-remove_item"></div>
+			Без заместителя
+		</button>
 	</div>
+	<div class="b-pohod_chef_edit e-search_block"></div>
 </div>
 
 <script type="text/javascript" src="{{js folder}}edit_pohod.js"></script>
