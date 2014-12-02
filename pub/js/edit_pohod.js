@@ -249,9 +249,8 @@ PohodChefEdit = new (function(_super) {
 
 		//Тык по кнопке удаления зам. руководителя похода
 		this.$el(".e-delete_btn").$on("click", function() {
-			self.$el(".e-tourist_key_inp").val("null");
-			self.$el(".e-open_dlg_btn").text("Редактировать");
-			self.dialog.dialog("close");
+			self.$trigger('deleteChef', [self]);
+			self.closeDialog();
 		});
 		
 		this.dialog.$on( "dialogclose", this.onDialogClose.bind(this) );
@@ -261,6 +260,12 @@ PohodChefEdit = new (function(_super) {
 	PohodChefEdit.prototype.onSelectChef = function(ev, el, rec) {
 		this.chefRecord = rec;
 		this.$trigger( "selectChef", [this, rec] );
+		this.closeDialog();
+	};
+	
+	PohodChefEdit.prototype.onDeleteChef = function(ev, el) {
+		this.chefRecord = null;
+		this.$trigger( "selectChef", [this] );
 		this.closeDialog();
 	};
 	
@@ -309,6 +314,9 @@ PohodPartyEdit = new (function(_super) {
 		this.page = 0;
 		this.searchBlock = opts.searchBlock;
 		this.dialog = this.$el(".e-dlg");
+		this.panelsArea = self.$el(".e-panels_area");
+		this.searchPanel = self.$el(".e-search_panel");
+		this.selectedTouristsPanel = self.$el(".e-selected_tourists_panel");
 
 		this.$el(".e-accept_btn").$on("click", function() {
 			this.$trigger( 'saveData', [self, self.selTouristsRS] );
@@ -321,13 +329,38 @@ PohodPartyEdit = new (function(_super) {
 	
 	PohodPartyEdit.prototype.openDialog = function(recordSet)
 	{
+		var 
+			self = this;
+			
 		this.selTouristsRS = recordSet;
 		this.renderSelectedTourists();
 		this.searchBlock.activate(this.$el(".e-search_block"));
 		this.searchBlock.$on('itemSelect', this.onSelectTourist.bind(this));
-		this.dialog.dialog({modal: true, minWidth: 500});
+		this.dialog.dialog({
+			modal: true, minWidth: 500,
+			resize: function() {
+				setTimeout( self.onDialogResize.bind(self), 100 );
+			}
+		});
+		
+		this.onDialogResize();
 	};
 	
+	PohodPartyEdit.prototype.onDialogResize = function() {
+		if( this.dialog.innerWidth() < 700 ) {
+			this.panelsArea.css("display", "block");
+			this.searchPanel.css("display", "block");
+			this.searchPanel.css("width", "100%");
+			this.selectedTouristsPanel.css("display", "block");
+			this.selectedTouristsPanel.css("width", "100%");
+		} else {
+			this.panelsArea.css("display", "table");
+			this.searchPanel.css("display", "table-cell");
+			this.searchPanel.css("width", "50%");
+			this.selectedTouristsPanel.css("display", "table-cell");
+			this.selectedTouristsPanel.css("width", "50%");
+		}
+	};
 	
 	PohodPartyEdit.prototype.closeDialog = function() {
 		this.dialog.dialog('close');
@@ -470,6 +503,7 @@ EditPohod = new (function(_super) {
 		});
 		
 		this.chefEditBlock.$on( "selectChef", this.onSelectChef.bind(this) );
+		this.chefEditBlock.$on( "deleteChef", this.onDeleteChef.bind(this) );
 
 		self.loadListOfExtraFileLinks();
 	}
@@ -487,6 +521,15 @@ EditPohod = new (function(_super) {
 		
 		keyInp.val( rec.get("num") );
 		chefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
+	};
+	
+	EditPohod.prototype.onDeleteChef = function(ev, sender, rec) {
+		var 
+			keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ), 
+			chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
+		
+		keyInp.val("null");
+		chefBtn.text("Редактировать");
 	};
 	
 	//Выводит список участников похода из participantsRS в главное окно
@@ -533,10 +576,11 @@ EditPohod = new (function(_super) {
 	//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
 	EditPohod.prototype.onAddMoreExtraFileLinks_BtnClick = function()
 	{	var
-			i = 0;
+			i = 0,
+			tableBody = this.$el(".e-link_list_tbody");
 
 		for( ; i < this.extraFileLinksInputPortion; i++ )
-			this.renderInputsForExtraFileLink([]).appendTo( this.$el(".e-link_list_table") );
+			this.renderInputsForExtraFileLink([]).appendTo( tableBody );
 	};
 
 	//Создает элементы для ввода ссылки с описанием на доп. материалы
@@ -559,21 +603,14 @@ EditPohod = new (function(_super) {
 	//Отображает список ссылок на доп. материалы
 	EditPohod.prototype.renderListOfExtraFileLinks = function(linkList)
 	{	var
-			newTable = $( "<table>", {class: "b-edit_pohod e-link_list_table"} )
-			.append(
-				$("<thead>").append(
-					$("<tr>").append( $("<th>Ссылка</th>") ).append( $("<th>Название (комментарий)</th>") )
-				)
-			),
+			tableBody = $(".e-link_list_tbody"),
 			inputPortion = this.extraFileLinksInputPortion,
 			linkList = linkList ? linkList : [],
 			inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion,
 			i = 0;
 		
 		for( ; i < inputCount; i++ )
-			this.renderInputsForExtraFileLink( linkList[i] ).appendTo(newTable);
-		
-		this.$el(".e-link_list_table").replaceWith(newTable);
+			this.renderInputsForExtraFileLink( linkList[i] ).appendTo(tableBody);
 	};
 
 	//Загрузка списка ссылок на доп. материалы с сервера

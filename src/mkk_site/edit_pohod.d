@@ -41,8 +41,6 @@ immutable shortTouristFormatQueryBase_count =
 	
 void удалитьПоход(HTTPContext context, size_t pohodKey)
 {
-	//writeln("имя: ", context.user.name);
-	
 	if( !context.user.isAuthenticated )
 		return;
 		
@@ -104,16 +102,11 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ addition_zapros2; 
 	string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros ~ `;`;
 
-	writeln(zapros);
-
 	auto queryRes = dbase.query(zapros);
 	auto queryRes_count = dbase.query(zapros_count) ;
 	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
 	
 	string message = `Страниц ` ~ (ceil(cast(float)(col_str)/3)).to!string ~ `  Туристов ` ~ col_str.to!string;
-	writeln(col_str);
-	writeln(message);
-	
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 
 	JSONValue[string] tmp;
@@ -226,6 +219,7 @@ void создатьФормуИзмененияПохода(
 
 	//pragma(msg, "filterNamesByTypes!(EnumFormat): ", pohodRecFormat.filterNamesByTypes!(EnumFormat));
 	
+	import std.stdio;
 	//alias pohodEnumFieldNames = 
 	//Вывод перечислимых полей
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
