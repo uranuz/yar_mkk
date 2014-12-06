@@ -1,0 +1,1 @@
+rdmd --force "-Isrc/" "-I../webtank/src/" "-I../" -ofstatistics src/mkk_site/utilities/statistics.d
