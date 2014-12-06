@@ -2,12 +2,13 @@ mkk_site = {
 	version: "0.0"
 };
 
-//Инициализация страницы
+//Инициализация страницы 
 $(window.document).ready( function() {
 	//Инициализаци блоков на странице
 	mkk_site.edit_pohod.blockInit();
 	mkk_site.pohod_chef_edit.blockInit();
 	mkk_site.pohod_party_edit.blockInit();
+	
 } );
 
 //Редактирование руководителя и зам. руководителя похода
@@ -84,8 +85,8 @@ mkk_site.pohod_chef_edit = {
 			messageDiv = block.filter(".e-search_message"),
 			filterInput = block.filter(".e-search_filter");
 
-		if( filterInput.val().length < 3 )
-		{	messageDiv.text("Минимальная длина фильтра для поиска равна 3 символам");
+		if( filterInput.val().length < 2 )
+		{	messageDiv.text("Минимальная длина фильтра для поиска равна 2 символам");
 			return;
 		}
 		else
@@ -392,7 +393,10 @@ mkk_site.pohod_party_edit = {
 			selected_page_value=block.filter(".e-page_selected").val(),//значение			
 			selected_submit=block.filter(".e-go_selected_btn"),			
 			prev_submit=block.filter(".e-go_prev_btn"),
-			next_submit=block.filter(".e-go_next_btn");
+			next_submit=block.filter(".e-go_next_btn"),
+			
+			
+			;
 			
 		
 				
