@@ -60,10 +60,14 @@
 				</span>
 				<div class="b-main_menu_auth e-dialog_wrapper {{without auth class}}">
 					<form action="{{authentication uri}}" class="b-main_menu_auth e-form" method="post">
-						<label class="b-main_menu_auth e-label">Логин:</label>
-						<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15"> <br>
-						<label class="b-main_menu_auth e-label">Пароль:</label>
-						<input name="user_password" class="b-main_menu_auth e-user_password" type="password" size="15">
+						<div class="b-main_menu_auth e-form_item">
+							<label class="b-main_menu_auth e-label">Логин:</label>
+							<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15"> <br>
+						</div>
+						<div class="b-main_menu_auth e-form_item">
+							<label class="b-main_menu_auth e-label">Пароль:</label>
+							<input name="user_password" class="b-main_menu_auth e-user_password" type="password" size="15">
+						</div>
 						<input type="submit" value="Войти">
 					</form>
 				</div>
@@ -90,7 +94,7 @@
 			<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a> <br>
 			<br>
 			<div class="b-pohod_filter_collection e-block">
-				<form action="{{dynamic_path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
+				<form action="{{dynamic path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
 					<input type="hidden" name="vid" class="b-pohod_filter_collection e-filter__vid">
 					<input type="hidden" name="ks" class="b-pohod_filter_collection e-filter__ks">
 					<input type="hidden" name="prepar" class="b-pohod_filter_collection e-filter__prepar">

@@ -277,6 +277,7 @@ table.tab1 {
 	background: #e4e2bf;
 	padding: 16px 8px 16px 8px;
 	border: solid 2px #598d23;
+	position: relative;
 	z-index: 10;
 }
 
@@ -284,6 +285,6 @@ table.tab1 {
 	display: none;
 }
 
-.b-main_menu_auth.e-dialog_wrapper.is-hidden {
+.b-main_menu_auth.e-dialog_wrapper {
 	display: none;
 }
