@@ -6,7 +6,7 @@ import os
 from http.client import HTTPSConnection
 from urllib.parse import urlencode
 
-headers = {'Authorization': 'a3f797ad633349dbbf01bdd83281fa68'}
+headers = {'Authorization': '6824204b6459489d9429bc03ce60015a'}
 resource_url = '/v1/disk/resources'
 conn = HTTPSConnection('cloud-api.yandex.net')
 

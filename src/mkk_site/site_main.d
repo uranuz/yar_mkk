@@ -67,9 +67,6 @@ shared static this()
 		else
 			string msg = error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(line: " ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
 		
-		import std.stdio;
-		writeln(msg);
-		
 		context.response ~= `{"jsonrpc":"2.0","error":{"msg":"`
 		~ msg ~ `"}}`;
 		return true;

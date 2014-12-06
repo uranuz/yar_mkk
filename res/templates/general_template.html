@@ -6,10 +6,12 @@
 	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
 	<link rel="stylesheet" type="text/css" href="{{css folder}}general_template.css">
 	<link rel="stylesheet" type="text/css" href="{{webtank css folder}}default_style.css">
-	<script type="text/javascript" src="https://yastatic.net/jquery/1.10.2/jquery.min.js"></script>
-	<script type="text/javascript" src="http://yastatic.net/jquery-ui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="https://yastatic.net/jquery/1.11.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://yastatic.net/jquery-ui/1.11.2/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="http://yastatic.net/jquery/cookie/1.0/jquery.cookie.min.js"></script>
-	<link rel="stylesheet" href="http://yastatic.net/jquery-ui/1.10.4/themes/south-street/jquery-ui.min.css">
+	<link rel="stylesheet" href="http://yastatic.net/jquery-ui/1.11.2/themes/south-street/jquery-ui.min.css">
+	<script type="text/javascript" src="{{webtank js folder}}components.js"></script>
+	<script type="text/javascript" src="{{js folder}}components.js"></script>
 </head>
 
 <body>
@@ -49,15 +51,27 @@
 				<li><a href="{{dynamic path}}reports">Отчёты</a></li>
 				<li><a href="{{dynamic path}}stati">Статьи и документы</a></li>
 			</ul>
-			<span class="b-mkk_site_auth_bar e-block">
-				<a href="{{dynamic path}}auth">Аутентификация</a>: воити
-				<div class="b-mkk_site_auth_bar e-dialog_wrapper">
-					<form action="{{authentication uri}}" class="b-mkk_site_auth_bar e-form" method="post">
-						Логин: <input name="user_login" type="text" class="b-mkk_site_auth_bar e-user_login" value="{{user login}}" size="15"> <br>
-						Пароль: <input name="user_password" class="b-mkk_site_auth_bar e-user_password" type="password" size="15">
+			<span class="b-main_menu_auth e-block">
+				<span class="b-main_menu_auth e-header {{with auth class}}">
+					{{user name}}: <a class="b-main_menu_auth e-logout_btn">выйти</a>
+				</span>
+				<span class="b-main_menu_auth e-header {{without auth class}}">
+					Вход не выполнен: <a href="{{dynamic path}}auth" class="b-main_menu_auth e-login_btn">войти</a>
+				</span>
+				<div class="b-main_menu_auth e-dialog_wrapper {{without auth class}}">
+					<form action="{{authentication uri}}" class="b-main_menu_auth e-form" method="post">
+						<div class="b-main_menu_auth e-form_item">
+							<label class="b-main_menu_auth e-label">Логин:</label>
+							<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15"> <br>
+						</div>
+						<div class="b-main_menu_auth e-form_item">
+							<label class="b-main_menu_auth e-label">Пароль:</label>
+							<input name="user_password" class="b-main_menu_auth e-user_password" type="password" size="15">
+						</div>
 						<input type="submit" value="Войти">
 					</form>
 				</div>
+				
 			</span>
 			
 		</div> <!-- #main_menu -->
@@ -80,7 +94,7 @@
 			<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a> <br>
 			<br>
 			<div class="b-pohod_filter_collection e-block">
-				<form action="{{dynamic_path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
+				<form action="{{dynamic path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
 					<input type="hidden" name="vid" class="b-pohod_filter_collection e-filter__vid">
 					<input type="hidden" name="ks" class="b-pohod_filter_collection e-filter__ks">
 					<input type="hidden" name="prepar" class="b-pohod_filter_collection e-filter__prepar">
@@ -124,7 +138,5 @@
 	Все ходы записаны!!! г. Ярославль, 2013-2014 г.
 </div>
 </div> <!-- #footer_framing -->
-<script type="text/javascript" src="{{js folder}}components.js"></script>
-<script type="text/javascript" src="{{webtank js folder}}components.js"></script>
 </body>
 </html>
