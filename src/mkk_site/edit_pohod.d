@@ -71,6 +71,7 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 		return result;
 		
 	import std.stdio;
+	int perPage = 10;
 	
 	string addition_zapros = ` where family_name ILIKE '`;	
 	addition_zapros ~= PGEscapeStr(фамилия) ~ `%' `;
@@ -93,23 +94,24 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	if ( улица.length > 0 )
 		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(улица) ~ `%' `;     
 
-	string addition_zapros2 = ` LIMIT 3 `;
+	string addition_zapros2 = ` LIMIT ` ~ perPage.to!string ~ ` `;
 	if ( страница.length <= 0 || страница.to!int < 2)
 		addition_zapros2 ~= ` OFFSET 0;`;
 	else
-		addition_zapros2 ~= ` OFFSET  ` ~ (3*(страница) .to!int -3).to!string ~ ` ; `;                
+		addition_zapros2 ~= ` OFFSET ` ~ (perPage*страница.to!int-perPage).to!string ~ `;`;                
 
-	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ addition_zapros2; 
+	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ ` order by family_name ` ~ addition_zapros2; 
 	string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros ~ `;`;
 
 	auto queryRes = dbase.query(zapros);
 	auto queryRes_count = dbase.query(zapros_count) ;
 	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
 	
-	string message = `Страниц ` ~ (ceil(cast(float)(col_str)/3)).to!string ~ `  Туристов ` ~ col_str.to!string;
+	string message = `Страниц ` ~ (ceil(cast(float) col_str/perPage)).to!string ~ `  Туристов ` ~ col_str.to!string;
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 
 	JSONValue[string] tmp;
+	tmp[`perPage`] = perPage;
 	tmp[`recordCount`] = col_str;
 	tmp[`rs`] = rs.getStdJSON();
 	result.object = tmp;
@@ -127,7 +129,8 @@ auto списокУчастниковПохода( size_t pohodKey )
 			select unnest(unit_neim) as id from pohod where num=` ~ pohodKey.to!string ~ `
 		)
 		select num, family_name, given_name, patronymic, birth_year from tourist, nums
-		where num=nums.id::bigint;
+		where num=nums.id::bigint
+		order by family_name;
 `	);
 
 	if( queryRes is null || queryRes.recordCount == 0 )

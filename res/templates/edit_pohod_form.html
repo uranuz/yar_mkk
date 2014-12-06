@@ -143,14 +143,19 @@
 
 <!-- Поиск туристов-->
 <div class="b-tourist_search e-block" title="Поиск туристов">
-	<label>Имя</label>
-	<input type="text" placeholder="Петечкин" class="b-tourist_search e-family_filter">
-	<input type="text" placeholder="В"  size="1"  maxlength="1" class="b-tourist_search e-name_filter">
-	<input type="text" placeholder="И"  size="1"  maxlength="1" class="b-tourist_search e-patronymic_filter"></br>
-	<label>Год рожд.</label>
-	<input type="text" placeholder="1812"  size="4"  maxlength="4" class="b-tourist_search e-year_filter"> </br>
+	<div class="b-tourist_search e-filter_item">
+		<label>Имя
+			<input type="text" placeholder="Петечкин" class="b-tourist_search e-family_filter">
+		</label>
+		<input type="text" placeholder="В"  size="1"  maxlength="1" class="b-tourist_search e-name_filter">
+		<input type="text" placeholder="И"  size="1"  maxlength="1" class="b-tourist_search e-patronymic_filter">
+	</div>
+	<div class="b-tourist_search e-filter_item">
+		<label>Год рожд.
+			<input type="text" placeholder="1812"  size="4"  maxlength="4" class="b-tourist_search e-year_filter">
+		</label>
+	</div>
 
-	
 	<fieldset class="b-tourist_search e-addr_filter_panel">
 		<legend>Адрес</legend>
 		<div class="b-tourist_search e-addr_element_item">
@@ -172,11 +177,11 @@
 		<h5>Найденные туристы</h5>
 		<div class="b-tourist_search e-tourists_found_summary"></div>
 		<div class="b-tourist_search e-page_navigation_bar">
-			<button class="b-tourist_search e-go_prev_btn">&lt;</button>
+			<button class="b-tourist_search e-go_prev_btn">Пред.</button>
 			Страница <input name="cur_page_num" type="text" value="1" size="3" maxlength="3" class="b-tourist_search e-page_selected">
 			из <span class="b-tourist_search e-page_count">0</span>
 			<button class="b-tourist_search e-go_selected_btn">Перейти</button>
-			<button class="b-tourist_search e-go_next_btn">&gt;</button>
+			<button class="b-tourist_search e-go_next_btn">След.</button>
 		</div>
 		<div class="b-tourist_search e-found_tourists"></div>
 	</div>
