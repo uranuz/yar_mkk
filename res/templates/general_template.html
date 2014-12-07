@@ -53,7 +53,7 @@
 			</ul>
 			<span class="b-main_menu_auth e-block">
 				<span class="b-main_menu_auth e-header {{with auth class}}">
-					{{user name}}: <a class="b-main_menu_auth e-logout_btn">выйти</a>
+					{{user name}}: <a href="{{authentication uri}}&logout=true" class="b-main_menu_auth e-logout_btn">выйти</a>
 				</span>
 				<span class="b-main_menu_auth e-header {{without auth class}}">
 					Вход не выполнен: <a href="{{dynamic path}}auth" class="b-main_menu_auth e-login_btn">войти</a>

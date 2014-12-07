@@ -75,7 +75,7 @@ string netMain(HTTPContext context)
 			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `~ "\r\n";
 	}
 	
-	content ~= `</form>`;
+	content ~= `</form><br/>`;
 	
 	import std.typecons;
 	

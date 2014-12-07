@@ -51,8 +51,6 @@ on tourist.num = tourist_nums.num
 	}
 	           
 	return result;
-	
-	
 }
 
 
@@ -435,7 +433,7 @@ LEFT OUTER JOIN t_chef
 	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`;
 	
 	content ~= `<form id="main_form" method="post">`// содержимое страницы
-	~ отрисоватьБлокФильтрации(фильтрПоходов) ~ pageSelector ~ `</form><br><br>`~ "\r\n"
+	~ отрисоватьБлокФильтрации(фильтрПоходов) ~ pageSelector ~ `</form><br>`~ "\r\n"
 	~ ( _sverka ? `<a href="` ~ dynamicPath ~ `edit_pohod">Добавить новый поход</a><br>` ~ "\r\n" : "" )
 	~ `<p> Число походов ` ~ количествоПоходов.to!string ~ ` </p>`~ "\r\n"
 	~ table; //Тобавляем таблицу с данными к содержимому страницы

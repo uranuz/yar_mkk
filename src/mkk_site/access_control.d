@@ -76,6 +76,23 @@ class MKK_SiteUser: AnonymousUser
 	ref const(SessionId) sessionId() @property
 	{	return _sessionId; }
 	
+	bool logout()
+	{
+		if( !isAuthenticated )
+			return true;
+		
+		size_t user_num;
+		try {
+			user_num = _data.get(`user_num`, ``).to!size_t;
+		} catch( ConvException e ) { return false; }
+		
+		auto dbase = new DBPostgreSQL(authDBConnStr);
+		dbase.query(
+			`delete from session where "site_user_num" = ` ~ user_num.to!string ~ `;`
+		);
+		return true;
+	}
+	
 protected:
 	SessionId _sessionId; 
 	string _login;
