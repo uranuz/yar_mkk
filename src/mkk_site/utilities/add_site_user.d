@@ -1,4 +1,4 @@
-module mkk_site.utils.add_site_user;
+module mkk_site.utilities.add_site_user;
 
 ///Утилита для добавления пользователя сайта МКК
 

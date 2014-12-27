@@ -143,6 +143,7 @@ TouristSearch = new (function(_super) {
 					navigBar = self.$el(".e-page_navigation_bar"),
 					pageCountDiv = self.$el(".e-page_count"),
 					col_str = json.recordCount;// Количество строк
+					perPage = json.perPage || 10;
 				
 				self.recordSet = webtank.datctrl.fromJSON(json.rs);
 				self.recordSet.rewind();
@@ -154,7 +155,7 @@ TouristSearch = new (function(_super) {
 				self.resultsPanel.show();
 
 				if( col_str > 0 )
-					self.page = Math.ceil(col_str/3);
+					self.page = Math.ceil(col_str/perPage);
 				else
 					self.page = 0;
 				// ограничения кнопки перейти при наличи одой и менее страниц кнопка не видима
@@ -347,18 +348,27 @@ PohodPartyEdit = new (function(_super) {
 	};
 	
 	PohodPartyEdit.prototype.onDialogResize = function() {
-		if( this.dialog.innerWidth() < 700 ) {
+		if( this.selTouristsRS && this.selTouristsRS.getLength() ) {
+			if( this.dialog.innerWidth() < 700 ) {
+				this.panelsArea.css("display", "block");
+				this.searchPanel.css("display", "block");
+				this.searchPanel.css("width", "100%");
+				this.selectedTouristsPanel.css("display", "block");
+				this.selectedTouristsPanel.css("width", "100%");
+			} else {
+				this.panelsArea.css("display", "table");
+				this.searchPanel.css("display", "table-cell");
+				this.searchPanel.css("width", "50%");
+				this.selectedTouristsPanel.css("display", "table-cell");
+				this.selectedTouristsPanel.css("width", "50%");
+			}
+		}
+		else
+		{
 			this.panelsArea.css("display", "block");
 			this.searchPanel.css("display", "block");
 			this.searchPanel.css("width", "100%");
-			this.selectedTouristsPanel.css("display", "block");
-			this.selectedTouristsPanel.css("width", "100%");
-		} else {
-			this.panelsArea.css("display", "table");
-			this.searchPanel.css("display", "table-cell");
-			this.searchPanel.css("width", "50%");
-			this.selectedTouristsPanel.css("display", "table-cell");
-			this.selectedTouristsPanel.css("width", "50%");
+			this.selectedTouristsPanel.css("display", "none");
 		}
 	};
 	
@@ -417,6 +427,8 @@ PohodPartyEdit = new (function(_super) {
 			this.renderSelectedTourist(rec)
 			.appendTo( this.$el(".e-selected_tourists") );
 		}
+		
+		this.onDialogResize(); //Перестройка диалога
 	};
 	
 	//Обработчик отмены выбора записи
@@ -453,6 +465,7 @@ PohodPartyEdit = new (function(_super) {
 
 EditPohod = new (function(_super) {
 	__extends(EditPohod, _super);
+	var dctl = webtank.datctrl;
 	
 	//Инициализация блока редактирования похода
 	function EditPohod(opts)
@@ -486,7 +499,9 @@ EditPohod = new (function(_super) {
 		});
 		
 		this.$el(".e-open_pohod_party_edit_btn").$on("click", function() {
-			self.partyEditBlock.openDialog(self.participantsRS.copy()); //Отдаем копию списка участников!
+			//Отдаем копию списка участников!
+			var rs = self.participantsRS ? self.participantsRS.copy() : new dctl.RecordSet();
+			self.partyEditBlock.openDialog(rs); 
 		});
 		
 		this.partyEditBlock.$on( 'saveData', this.onSaveSelectedParticipants.bind(this) );
@@ -606,8 +621,11 @@ EditPohod = new (function(_super) {
 			tableBody = $(".e-link_list_tbody"),
 			inputPortion = this.extraFileLinksInputPortion,
 			linkList = linkList ? linkList : [],
-			inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion,
+			inputCount = inputPortion,
 			i = 0;
+
+		if( linkList.length )
+			inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion;
 		
 		for( ; i < inputCount; i++ )
 			this.renderInputsForExtraFileLink( linkList[i] ).appendTo(tableBody);
@@ -619,6 +637,12 @@ EditPohod = new (function(_super) {
 			self = this,
 			getParams = webtank.parseGetParams(),
 			pohodKey = parseInt(getParams["key"], 10);
+		
+		if( isNaN(pohodKey) ) {
+			this.renderListOfExtraFileLinks();
+			return;
+		}
+		
 		webtank.json_rpc.invoke({
 			uri: "/jsonrpc/",
 			method: "mkk_site.edit_pohod.списокСсылокНаДопМатериалы",

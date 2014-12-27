@@ -55,6 +55,20 @@ ShowPohod = new (function(_super) {
 		touristList.appendTo("body");
 		$(blackoutDiv).appendTo("body");
 	}
-	
+
 	return ShowPohod;
+})(webtank.WClass);
+
+CheckBoxList = new (function(_super) {
+	__extends(CheckBoxList, _super)
+	
+	function CheckBoxList ()
+	{
+		_super.call(this);
+		
+		var self = this;
+		this.elems = $('.b-wui-CheckBoxList');
+	}
+
+	return CheckBoxList;
 })(webtank.WClass);

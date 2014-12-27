@@ -17,13 +17,8 @@
 	</span>
 	<br><br>
 	<fieldset>
-		<legend>Диапазон сроков начала похода</legend>
-		с {{begin_date_range_head}} по {{begin_date_range_tail}}
-	</fieldset>
-	<br>
-	<fieldset>
-		<legend>Диапазон сроков окончания похода</legend>
-		с {{end_date_range_head}} по {{end_date_range_tail}}
+		<legend>Сроки похода</legend>
+		с {{begin_date_range_head}} по {{end_date_range_tail}}
 	</fieldset>
 	<br>
 	Район похода содержит <input type="text" name="region_pohod" value="{{region_pohod}}">
@@ -38,11 +33,11 @@
 	.b-pohod_filter_stat.e-wrapper
 	 {
 		display: inline-block;
-		margin-right: 20px;
+		margin-right: 15px;
 		vertical-align: top;
 	}
 	
-	/*Данные классы опеределены в коде на D страницы show_pohod*/
+	/*Данные классы определены в коде на D страницы show_pohod*/
 	.b-pohod_filter_vid.e-block,
 	.b-pohod_filter_ks.e-block,
 	.b-pohod_filter_prepar.e-block,
@@ -51,7 +46,6 @@
 		display: block;
 		position: relative;
 		height: 120px;
-		width: 190px;
 		overflow-y: scroll;
 		border: solid silver 2px;
 	}
