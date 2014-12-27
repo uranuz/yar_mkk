@@ -4,11 +4,13 @@ import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.t
 
 import std.math;
 
+
 import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
 
 // import webtank.net.javascript;
 
 import mkk_site;
+import std.stdio;
 
 immutable(string) thisPagePath;
 immutable(string) authPagePath;
@@ -150,8 +152,8 @@ static immutable RecordFormat!(
 	typeof(элементыКС), "elem",
 	typeof(категорияСложности), "ks", 
 	string, "marchrut", 
-	Date, "begin_date",
-	Date, "finish_date", 
+	Date, "begin_date",//*********************************
+	Date, "finish_date",//********************************* 
 	size_t, "chef_grupp", 
 	size_t, "alt_chef",
 	int, "unit", 
@@ -319,7 +321,10 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
 	
 	//Формируем набор строковых полей и значений
+	
+	
 	foreach( i, fieldName; allStringFields )
+	
 	{	if( fieldName !in pVars )
 			continue;
 			
@@ -333,6 +338,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	//pragma(msg, pohodRecFormat.filterNamesByTypes!(EnumFormat)[0]);
 	
 	//Формируем часть запроса для вывода перечислимых полей
+	
+	
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	if( fieldName !in pVars )
 			continue;
@@ -362,38 +369,36 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	Optional!(Date)[2] pohodDates;
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
 	
-	foreach( i; 0..2 )
-	{	string pre = dateParamNamePrefixes[i];
+	  	  
+		 int [6] partDtates;
 		
-		if( 
-			(pre ~ "year") !in pVars ||  
-			(pre ~ "month") !in pVars ||
-			(pre ~ "day") !in pVars
-		) continue;
-
-		string yearStr = pVars[ pre ~ "year" ];
-		string monthStr = pVars[ pre ~ "month" ];
-		string dayStr = pVars[ pre ~ "day" ];
-		
-		if( 
-			yearStr.length != 0 && toLower(yearStr) != "null" ||
-			monthStr.length != 0 && toLower(monthStr) != "null" ||
-			dayStr.length != 0 && toLower(dayStr) != "null"
-		)
-		{	try {
-				pohodDates[i] = Date(yearStr.to!int, monthStr.to!int, dayStr.to!int);
-			}
-			catch (std.conv.ConvException exc) 
+	    try {
+	    partDtates = [(pVars["begin__year"]).to!int, (pVars["begin__month"]).to!int, (pVars["begin__day"]).to!int,
+	                  (pVars["finish__year"]).to!int, (pVars["finish__month"]).to!int, (pVars["finish__day"]).to!int];
+	        } 
+	        catch (std.conv.ConvException exc) 
 			{	throw new Exception("Введенные компоненты дат не являются числовыми значениями");
+		
 				//TODO: Добавить обработку исключения
 			} 
-			catch (std.datetime.DateTimeException exc) 
+	        
+	       try {  
+	   	pohodDates[0] =  Date(partDtates[0], partDtates[1], partDtates[2]);
+		   pohodDates[1] =  Date(partDtates[3], partDtates[4], partDtates[5]);               
+	           }       
+	           catch (std.datetime.DateTimeException exc) 
 			{	throw new Exception("Некорректный формат даты");
+		
 				//TODO: Добавить обработку исключения
 				
-			}
-		}
-	}
+			}       
+		
+		
+		          
+		          
+		   writeln( pohodDates[0],"--------------",pohodDates[1]);
+	
+
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
@@ -429,12 +434,12 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 					throw new Exception("Указанное количество участников похода меньше количества добавленных в список!!!");
 			}
 			
-			auto existTouristCount_QRes = dbase.query(
+			auto existTouristCount_QRes = dbase.query(size_t
 				` with nums as ( select unnest( ARRAY[` ~ pVars["unit_neim"] ~ `] ) as n ) `
 				~ ` select count(1) from tourist join nums on nums.n = tourist.num; `
 			);
 			
-			if( existTouristCount_QRes.recordCount != 1 || existTouristCount_QRes.fieldCount != 1 )
+			if( existTouristCount_QRes.recordCount != 1 || existTouristCount_QRes.fieldCount != 1 )size_t
 				throw new Exception("Ошибка при запросе количества найденных записей о туристах!!!");
 			
 			size_t existTouristCount = existTouristCount_QRes.get(0, 0).to!size_t;
