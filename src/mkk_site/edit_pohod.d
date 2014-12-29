@@ -437,12 +437,12 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 					throw new Exception("Указанное количество участников похода меньше количества добавленных в список!!!");
 			}
 			
-			auto existTouristCount_QRes = dbase.query(size_t
+			auto existTouristCount_QRes = dbase.query (
 				` with nums as ( select unnest( ARRAY[` ~ pVars["unit_neim"] ~ `] ) as n ) `
 				~ ` select count(1) from tourist join nums on nums.n = tourist.num; `
 			);
 			
-			if( existTouristCount_QRes.recordCount != 1 || existTouristCount_QRes.fieldCount != 1 )size_t
+			if( existTouristCount_QRes.recordCount != 1 || existTouristCount_QRes.fieldCount != 1 )
 				throw new Exception("Ошибка при запросе количества найденных записей о туристах!!!");
 			
 			size_t existTouristCount = existTouristCount_QRes.get(0, 0).to!size_t;
