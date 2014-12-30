@@ -375,33 +375,16 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	  	  
 		 int [6] partDtates;
 		
-	    try {
+	  
 	    partDtates = [(pVars["begin__year"]).to!int, (pVars["begin__month"]).to!int, (pVars["begin__day"]).to!int,
 	                  (pVars["finish__year"]).to!int, (pVars["finish__month"]).to!int, (pVars["finish__day"]).to!int];
-	        } 
-	        catch (std.conv.ConvException exc) 
-			{	throw new Exception("Введенные компоненты дат не являются числовыми значениями");
+	     
 		
-				//TODO: Добавить обработку исключения
-			} 
-	        
-	       try {  
+	     
 	   	pohodDates[0] =  Date(partDtates[0], partDtates[1], partDtates[2]);
 		   pohodDates[1] =  Date(partDtates[3], partDtates[4], partDtates[5]);               
-	           }       
-	           catch (std.datetime.DateTimeException exc) 
-			{	throw new Exception("Некорректный формат даты");
-		
-				//TODO: Добавить обработку исключения
-				
-			}       
-		
-		
-		          
-		          
-		   writeln( pohodDates[0],"--------------",pohodDates[1]);
+	    
 	
-
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
