@@ -368,6 +368,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	//Формируем часть запроса для вбивания начальной и конечной даты
 	import std.datetime;
+	import std.conv;
 	
 	Optional!(Date)[2] pohodDates;
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];

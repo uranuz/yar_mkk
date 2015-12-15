@@ -116,9 +116,10 @@ IDatabase getAuthDB()
 }
 
 string[] parseExtraFileLink(string linkPair)
-{	import webtank.common.utils;
+{	import std.algorithm : splitter;
 	import std.algorithm : startsWith;
-	string link = linkPair.splitFirst("><");
+	auto linkPairSplitter = splitter(linkPair, "><");
+	string link = linkPairSplitter.empty ? null : linkPairSplitter.front;
 	string comment;
 
 	if( link.length > 0 && link.length+2 < linkPair.length )
