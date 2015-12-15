@@ -1,1 +1,1 @@
-rdmd --build-only --force -version=devel "-Isrc/" "-I../webtank/src/" "-I../" -ofadd_site_user_devel src/mkk_site/utilities/add_site_user.d
+rdmd --build-only --force -version=devel "-Isrc/" "-I../webtank/src/" "-I../openssl/" "-I../" -ofadd_site_user src/mkk_site/utilities/add_site_user.d
