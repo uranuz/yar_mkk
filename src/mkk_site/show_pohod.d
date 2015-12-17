@@ -427,8 +427,7 @@ LEFT OUTER JOIN t_chef
 		
 		table ~= `">Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`~ "\r\n";
 	}
-	table ~= `
-` ~ "\r\n";
+	table ~= "</table>\r\n";
 	// конец формирования основной таблицы
 	
 	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`;
