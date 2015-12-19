@@ -76,10 +76,11 @@ function gotoPohodFilter(filterIndex) {
 	var 
 		filterSet = [
 			//Выборки по годам
-			{"begin_date_range_head__year": 2015},
-			{"begin_date_range_head__year": 2014},
-			{"begin_date_range_head__year": 2013},
-			{"begin_date_range_head__year": 2012},
+			{"begin_date_range_head__year": 2016, "end_date_range_tail__year": 2016},
+			{"begin_date_range_head__year": 2015, "end_date_range_tail__year": 2015},
+			{"begin_date_range_head__year": 2014, "end_date_range_tail__year": 2014},
+			{"begin_date_range_head__year": 2013, "end_date_range_tail__year": 2013},
+			{"begin_date_range_head__year": 2012, "end_date_range_tail__year": 2012},
 			
 			//Выборки по видам
 			{"vid": 4}, //водный
