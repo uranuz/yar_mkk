@@ -322,7 +322,7 @@ string записатьТуриста(
 				}
 			}
 			
-			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
+			if( !enumKey.isNull && enumKey !in судейскаяКатегория )
 				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
 		
 			fieldNames ~= `"sud"`;

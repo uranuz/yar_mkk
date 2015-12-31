@@ -62,13 +62,14 @@ struct ФильтрПоходов
 	int[] статусыЗаявки;
 	OptionalDate[string] сроки;
 	string районПохода;
+	bool сМатериалами;
 	
 	
 	bool естьФильтрация() @property
 	{
 		if( видыТуризма.length > 0 || категории.length > 0 || 
 			готовности.length > 0 || статусыЗаявки.length > 0 ||
-			районПохода.length > 0 
+			районПохода.length > 0 || сМатериалами
 		) return true;
 			
 		foreach( дата; this.сроки )
@@ -153,6 +154,8 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		set( "stat", списокСтатусовЗаявки.print() );
 		
 		set( "region_pohod", HTMLEscapeValue(фильтрПоходов.районПохода) );
+		if( фильтрПоходов.сМатериалами )
+			set( "with_files", ` checked="checked"` );
 	}
 	
 	return формаФильтрации.getString();
@@ -170,6 +173,8 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	фильтрПоходов.категории = rq.bodyForm.array("ks").conv!(int[]).ifThrown!ConvException(null);
 	фильтрПоходов.готовности = rq.bodyForm.array("prepar").conv!(int[]).ifThrown!ConvException(null);
 	фильтрПоходов.статусыЗаявки = rq.bodyForm.array("stat").conv!(int[]).ifThrown!ConvException(null);
+	
+	фильтрПоходов.сМатериалами = rq.bodyForm.get( "with_files", null ) == "on";
 
 	foreach( соотвПоля; соотвПолейСроков )
 	{
@@ -206,6 +211,9 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 		
 	if( фильтрПоходов.статусыЗаявки.length > 0 )
 		частиЗапроса_фильтрыПоходов ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
+	
+	if( фильтрПоходов.сМатериалами )
+		частиЗапроса_фильтрыПоходов ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
 	
 	string[] частиЗапроса_фильтрыСроковПохода;
 	

@@ -26,5 +26,7 @@
 { 
 	vertical-align: middle;
 }
-	
-	
+
+.b-wui-CheckBoxList.e-wui-ListItem_labelText {
+	font-size: 90%;
+}

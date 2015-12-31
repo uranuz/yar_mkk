@@ -7,7 +7,6 @@ import mkk_site.index; //Главная страница сайта
 import mkk_site.show_tourist; //Список туристов
 import mkk_site.show_pohod; //Список походов
 import mkk_site.show_moder; //Список модераторов
-import mkk_site.reports; //Отчеты
 import mkk_site.stati; //Статьи и документы
 
 static if( isMKKSiteDevelTarget )
