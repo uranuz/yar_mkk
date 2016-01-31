@@ -2,12 +2,13 @@
 	margin: 0;
 	padding: 0;
 	/*border: 0;*/
-	font-size: 16px;
+	font-size: inherit;
 	box-sizing: border-box;
 }
 
 html {
 	height: 100%;
+	font-size: 16px;
 }
 
 h1 {
@@ -255,26 +256,6 @@ body {
 .b-mkk_site_auth_bar.e-dialog_wrapper {
 	position: absolute;
 }
-
-.pohod {
-	border-collapse: collapse;
-}
-
-table.tab1 {
-	width: 100%;
-	border: 3px ridge #666;
-	border-spacing: 0px;
-	text-align:center;
-}
-
-.tab1 td, .tab1 th {
-	font-size: 80%;
-	border: 1px solid;
-	border-right-style:ridge;
-	
-}
-       
-.last_pohod_comment {font-size: 80%;}
 
 .b-main_menu_auth.e-dialog_wrapper {
 	background: #e4e2bf;
