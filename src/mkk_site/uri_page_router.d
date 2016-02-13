@@ -49,13 +49,21 @@ class MKK_Site_URIPageRouter: EventBasedHTTPHandler
 		if( !commonDB.isConnected || !authDB.isConnected )
 			context.response.write("<h3>Ошибка соединения с базой данных!!!</h3>");
 			
-		auto generalTpl = getGeneralTemplate(context);
+		import webtank.templating.plain_templater: PlainTemplater;
+		import mkk_site.site_data;
+		
+		PlainTemplater tpl;
+		
+		if( context.request.bodyForm.get("for_print", null) == "on" )
+			tpl = getPageTemplate(printGeneralTemplateFileName);
+		else
+			tpl = getGeneralTemplate(context);
 		
 		string content = handler(context);
 
-		generalTpl.set( "content", content );
+		tpl.set( "content", content );
 		context.response.tryClearBody();
-		context.response.write( generalTpl.getString() );
+		context.response.write( tpl.getString() );
 	}
 
 	struct PageRoute

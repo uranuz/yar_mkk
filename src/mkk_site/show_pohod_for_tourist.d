@@ -20,18 +20,25 @@ shared static this()
 
 string netMain(HTTPContext context)
 {	
+  auto rq = context.request;
+   bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true форма для печати
  	uint pageCount ; //Количество страниц
 	uint curPageNum;
 	      //= 1; //Номер текущей страницы
 	uint offset=0; //Сдвиг по числу записей
-	uint limit=5;// число строк на странице
+	uint limit;// число строк на странице
+	if (isForPrint)//для печати 
+	limit=10000;// максимальное  число строк на странице	
+	else
+	 limit=5;// число строк на странице
 	int число_походов;
 
 	string vke;// вид туризма и категория сложности с элементыКС
 	string  ps;//готовность и статус похода 
-	auto rq = context.request;
+	
 
 	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
+	
 
 	auto dbase = getCommonDB();
 	
@@ -141,6 +148,15 @@ WHERE num =` ~touristKey.to!string;
 				);
 	} catch(Exception) {}
 	
+	
+	if (isForPrint)
+	{
+	 content ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
+	 ~ "</td><td>"~ "\r\n" ;
+	}	
+	else
+	{
+	//-----------------------------------
 	 if( (curPageNum > 0) && ( curPageNum <= pageCount ) ) 
 	{	if( curPageNum != 1 )
 			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum - 1).to!string ~ `)">Предыдущая</a> `;
@@ -152,6 +168,14 @@ WHERE num =` ~touristKey.to!string;
 		if( curPageNum != pageCount )
 			content ~= ` <a href="#" onClick="gotoPage(` ~ ( curPageNum + 1).to!string ~ `)">Следующая</a> `~ "\r\n";
 	}
+	//-----------------------------------------
+	}
+	content ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+	 
+	 if (isForPrint)//для печати
+	      {content ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;}
+	 else	     
+	    { content ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;}
 	
 	content ~= `</form>` ~ "\r\n";
 	

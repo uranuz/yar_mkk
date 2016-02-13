@@ -13,22 +13,22 @@
 	<span class="b-pohod_filter_stat e-wrapper">
 		Статус заявки <br>
 		{{stat}}
-	</span>
-	<br><br>
+	</span>	
+	<br/>
 	
-	<fieldset>
+	<style> #sroki {display:none;}</style>
+	
+		<div id="sroki">
 		<legend>Сроки похода</legend>
-		с {{begin_date_range_head}} по {{end_date_range_tail}}
-	</fieldset>
-	<br>
+		с {{begin_date_range_head}} по {{end_date_range_tail}}	
 	Район похода содержит <input type="text" name="region_pohod" value="{{region_pohod}}">
 	<label>
-		<input type="checkbox"  name="with_files"{{with_files}}>
-		с материалами
+		<input type="checkbox"  name="with_files"{{with_files}}>	с материалами
 	</label>
-	<br/><br/>
-	<input type="submit" value="  Найти  ">
-	<br/>
+
+	</div>
+	
+	
 
 <style>
 	.b-pohod_filter_vid.e-wrapper,
