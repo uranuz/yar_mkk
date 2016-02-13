@@ -5,6 +5,7 @@ import std.file, std.algorithm : endsWith;
 import webtank.templating.plain_templater, webtank.db.database, webtank.net.http.context;
 
 import mkk_site.site_data;
+import mkk_site;
 
 string buildNormalPath(T...)(T args)
 {
@@ -68,13 +69,7 @@ string getAuthRedirectURI(HTTPContext context)
 
 PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 {	
-	import std.file;
-	string templateStr;
-	
-	if( std.file.exists(tplFileName) )
-		templateStr = cast(string) std.file.read( tplFileName ); 
-
-	auto tpl = new PlainTemplater( templateStr ); //Создаем шаблон по файлу
+	PlainTemplater tpl = templateCache.get(tplFileName);
 	
 	if( shouldInit )
 	{	//Задаём местоположения всяких файлов

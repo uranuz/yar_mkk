@@ -18,13 +18,13 @@ shared static this()
 	JSONRPCRouter.join!(тестНаличияПохожегоТуриста);
 }
 
-auto короткийФорматТурист = immutable( RecordFormat!(
+static immutable короткийФорматТурист = RecordFormat!(
 	PrimaryKey!(size_t), "ключ", 
 	string, "фамилия", 
 	string, "имя", 
 	string, "отчество",
 	int, "годРожд"
-) )();
+)();
 
 auto тестНаличияПохожегоТуриста(
 	string фамилия,
@@ -40,7 +40,7 @@ auto тестНаличияПохожегоТуриста(
 	//запрос на наличие туриста в базе
 	string запросНаличияТуриста = `select num, family_name, given_name, patronymic, birth_year from tourist where `;
 			
-	запросНаличияТуриста ~= `family_name = '`~ фамилия ~`' ` ;// фамилия туриста
+	запросНаличияТуриста ~= `family_name = '`~ PGEscapeStr( фамилия ) ~`' ` ;// фамилия туриста
 	
 	if( имя.length != 0 )// если набираются имя или первая буква имени туриста
 	{	запросНаличияТуриста ~= ` and (`;
@@ -98,305 +98,25 @@ string создатьТаблицуПохожихТуристов(
 	return table;
 }
 
-string показатьФормуРедактТуриста(
-	IDatabase dbase,
-	bool isUpdateAction,
-	size_t touristKey = size_t.max
-)
-{	
-	auto touristRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "ключ", 
-		string, "фамилия", 
-		string, "имя", 
-		string, "отчество",
-		string, "дата рожд", 
-		size_t, "год рожд", 
-		string, "адрес", 
-		string, "телефон",
-		bool, "показать телефон", 
-		string, "эл почта", 
-		bool, "показать эл почту",
-		string, "тур опыт", 
-		string, "комент", 
-		typeof(спортивныйРазряд), "спорт разряд",
-		typeof(судейскаяКатегория), "суд категория"
-	)();
-	
-	Record!( typeof(touristRecFormat) ) touristRec;
-	
-	//Если нам говорят, что выполняется обновление существующего туриста, то проверяем его наличие
-	if( isUpdateAction )
-	{	auto touristRS = dbase.query( "select num, family_name, given_name, patronymic, birth_date, birth_year, address, phone, show_phone, email, show_email, exp, comment, razr, sud from tourist where num=" ~ touristKey.to!string ~ ";" ).getRecordSet(touristRecFormat);
-		if( ( touristRS !is null ) && ( touristRS.length == 1 ) ) //Если получили одну запись -> ключ верный
-		{	touristRec = touristRS.front;
-			isUpdateAction = true;
-		}
-		else
-			isUpdateAction = false;
-	}
-	
-	auto editTouristForm = getPageTemplate( pageTemplatesDir ~ "edit_tourist_form.html" );
-	
-	import std.string;
-				
-	Optional!(ubyte) birthDay;
-	Optional!(ubyte) birthMonth;
-	//Вывод даты рождения туриста из базы данных
-	if( isUpdateAction )
-	{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
-		if( birthDateParts.length != 2 )
-			birthDateParts = split( touristRec.get!"дата рожд"(""), "," );
-		if( birthDateParts.length == 2 ) 
-		{	import std.conv;
-			
-			try {
-				if( birthDateParts[0].length != 0 )
-					birthDay = birthDateParts[0].to!ubyte;
-				if( birthDateParts[1].length != 0 )
-					birthMonth = birthDateParts[1].to!ubyte;
-			} catch(std.conv.ConvException e) {
-				birthDay = null;
-				birthMonth = null;
-			}
-		}
-	}
-	
-	//Генератор выпадающего списка месяцев
-	auto monthDropdown = listBox(месяцы);
-	monthDropdown.name = "birth_month";
-	monthDropdown.id = "birth_month";
-
-	//Генератор выпадющего списка спорт. разрядов
-	auto sportsGradeDropdown = listBox(спортивныйРазряд);
-	sportsGradeDropdown.name = "razr";
-	sportsGradeDropdown.id = "razr";
-	
-	//Генератор выпадающего списка судейских категорий
-	auto judgeCatDropdown = listBox(судейскаяКатегория);
-	judgeCatDropdown.name = "sud";
-	judgeCatDropdown.id = "sud";
-	
-	//Вывод данных о туристе в форму редакирования
-	if( isUpdateAction )
-	{	/+editTouristForm.set( "num.value", touristRec.get!"ключ"(0).to!string );+/
-		editTouristForm.set(  "family_name", printHTMLAttr( `value`, touristRec.get!"фамилия"("") )  );
-		editTouristForm.set(  "given_name", printHTMLAttr( `value`, touristRec.get!"имя"("") )  );
-		editTouristForm.set(  "patronymic", printHTMLAttr( `value`, touristRec.get!"отчество"("") )  );
-		editTouristForm.set(  "birth_year", printHTMLAttr( `value`, touristRec.getStr("год рожд", null) )  );
-		editTouristForm.set(  "birth_day", printHTMLAttr( `value`, birthDay.isNull() ? null : birthDay.to!string  )  );
-		editTouristForm.set(  "address", printHTMLAttr( `value`, touristRec.get!"адрес"("") )  );
-		editTouristForm.set(  "phone", printHTMLAttr( `value`, touristRec.get!"телефон"("") )  );
-		editTouristForm.set(  "show_phone", ( touristRec.get!"показать телефон"(false) ? " checked" : "" )  );
-		editTouristForm.set(  "email", printHTMLAttr( `value`, touristRec.get!"эл почта"("") ) );
-		editTouristForm.set(  "show_email", ( touristRec.get!"показать эл почту"(false) ? " checked" : "" )  );
-		editTouristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
-		editTouristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
-		
-		monthDropdown.selectedValue = birthMonth;
-		
-		if( !touristRec.isNull("спорт разряд") )
-			sportsGradeDropdown.selectedValue = touristRec.get!"спорт разряд"();
-			
-		if( !touristRec.isNull("суд категория") )
-			judgeCatDropdown.selectedValue = touristRec.get!"суд категория"();
-	}
-	//-----------------------------------------------------------------------------------
-
-	editTouristForm.set( "birth_month", monthDropdown.print() );
-	editTouristForm.set( "razr", sportsGradeDropdown.print() );
-	editTouristForm.set( "sud", judgeCatDropdown.print() );
-	
-	editTouristForm.set( "action", ` value="write"` );
-	
-	return editTouristForm.getString();
-}
-
-string записатьТуриста(
-	IDatabase dbase, 
-	HTTPContext context,
-	bool isUpdateAction,
-	size_t touristKey = size_t.max
-)
-{
-	auto pVars = context.request.bodyForm;
-	
-	immutable(string[]) strFieldNames = 
-		[ "family_name", "given_name", "patronymic", "address", "phone", "email", "exp", "comment" ];
-		
-	string content;
-	
-	try
-	{	string[] fieldNames;  //имена полей для записи
-		string[] fieldValues; //значения полей для записи
-		
-		//Формирование запроса для записи строковых полей в БД
-		foreach( i, fieldName; strFieldNames )
-		{	string value = pVars.get(fieldName, null);
-			if( value.length > 0 )
-			{	fieldNames ~= "\"" ~ fieldName ~ "\"";
-				fieldValues ~=  "'" ~ PGEscapeStr(value) ~ "'";
-			}
-		}
-
-		//Формирование запроса на запись даты рождения туриста
-		if( "birth_day" in pVars || "birth_month" in pVars )
-		{	string birthDateStr;
-			if( "birth_day" in pVars )
-			{	if( pVars["birth_day"].length != 0 && pVars["birth_day"] != "null" )
-				{	auto birthDay = pVars["birth_day"].to!ubyte;
-					if( birthDay > 0u && birthDay <= 31 )
-						birthDateStr ~= birthDay.to!string;
-					else
-						throw new Exception("Номер дня в месяце должен быть в диапазоне от 1 до 31!!!");
-				}
-			}
-
-			birthDateStr ~= ".";
-
-			if( "birth_month" in pVars )
-			{	if( pVars["birth_month"].length != 0 && pVars["birth_month"] != "null" )
-				{	auto birthMonth = pVars["birth_month"].to!ubyte;
-					if( birthMonth > 0u && birthMonth <= 12 )
-						birthDateStr ~= birthMonth.to!string;
-					else
-						throw new Exception("Номер месяца должен лежать в диапазоне от 1 до 12!!!");
-				}
-			}
-
-			fieldNames ~= "\"birth_date\"";
-			fieldValues ~= "'" ~ birthDateStr ~ "'";
-		}
-
-		//Формирование запроса на запись года рождения туриста
-		if( "birth_year" in pVars )
-		{	if( pVars["birth_year"].length != 0 && pVars["birth_year"] != "null" )
-			{	auto birthYear = pVars["birth_year"].to!uint;
-				fieldValues ~= "'" ~ birthYear.to!string ~ "'";
-			}
-			else
-				fieldValues ~= "NULL";
-
-			fieldNames ~= "\"birth_year\"";
-		}
-		
-		//Логические значения
-		//Показать телефон
-		bool showPhone = toBool( pVars.get("show_phone", "no") );
-		fieldNames ~= "\"show_phone\"";
-		fieldValues ~= "'" ~ ( showPhone ? "true" : "false" ) ~ "'";
-		
-		//Показать емэйл
-		bool showEmail = toBool( pVars.get("show_email", "no") );
-		fieldNames ~= "\"show_email\"";
-		fieldValues ~= "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
-
-		if( "razr" in pVars )
-		{	Optional!(int) enumKey;
-		
-			string strKey = pVars["razr"];
-			if( strKey.length != 0 && toLower(strKey) != "null" )
-			{	try {
-					enumKey = strKey.to!int;
-				} catch (std.conv.ConvException e) {
-					throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"спортивный разряд\"!!!");
-				}
-			}
-			
-			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
-				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"спортивный разряд\"!!!");
-		
-			fieldNames ~= `"razr"`;
-			
-			fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
-		}
-			
-		if( "sud" in pVars )
-		{	Optional!(int) enumKey;
-		
-			string strKey = pVars["sud"];
-			if( strKey.length != 0 && toLower(strKey) != "null" )
-			{	try {
-					enumKey = strKey.to!int;
-				} catch (std.conv.ConvException e) {
-					throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
-				}
-			}
-			
-			if( !enumKey.isNull && enumKey !in судейскаяКатегория )
-				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"судейская категория\"!!!");
-		
-			fieldNames ~= `"sud"`;
-			
-			fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
-		}
-
-		import std.array : join;
-		
-		//Запись автора последних изменений и даты этих изменений
-		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
-
-		string queryStr;
-		
-		if( fieldNames.length > 0 && fieldValues.length > 0 )
-		{	if( isUpdateAction )
-				queryStr = "update tourist set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num='" ~ touristKey.to!string ~ "';";
-			else
-			{	fieldNames ~= ["registrator_num", "reg_timestamp"] ;
-				fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
-				queryStr = "insert into tourist ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
-			}
-		}
-		
-		dbase.query(queryStr);
-	}
-	catch(Throwable e)
-	{	//TODO: Выдавать ошибку
-		content = "<h3>Ошибка при разборе данных формы!!!</h3><br>\r\n";
-		//content ~= e.msg;
-		content ~= e.to!string;
-		return content;
-	}
-	
-	if( isUpdateAction  )
-	{	if( dbase.lastErrorMessage is null )
-			content = "<h3>Данные о туристе успешно обновлены!!!</h3>"
-			~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
-			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
-		else
-			content = "<h3>Произошла ошибка при обновлении данных!!!</h3>"
-			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
-			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
-			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
-	}
-	else
-	{	if( dbase.lastErrorMessage is null )
-			content = "<h3>Данные о туристе успешно добавлены в базу данных!!!</h3>"
-			~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
-		else
-			content = "<h3>Произошла ошибка при добавлении данных в базу данных!!!</h3>"
-			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
-			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>";
-	}
-
-	return content;
-}
-
 string netMain(HTTPContext context)
 {
+	SiteLogger.info("netMain debug 0");
 	auto rq = context.request;
 	
 	auto pVars = context.request.bodyForm;
 	auto qVars = context.request.queryForm;
+	SiteLogger.info("netMain debug 1");
 	
 	bool isAuthorized = 
 		context.user.isAuthenticated && 
 		( context.user.isInRole("moder") || context.user.isInRole("admin") );
+		
+	SiteLogger.info("netMain debug 2");
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем общий шаблон страницы
-	
+		SiteLogger.info("netMain debug 3");
 		//Создаём подключение к БД
 		auto dbase = getCommonDB();
 		
@@ -410,17 +130,31 @@ string netMain(HTTPContext context)
 		}
 		catch(std.conv.ConvException e)
 		{	isTouristKeyAccepted = false; }
+		SiteLogger.info("netMain debug 4");
 		
 		string content;
 		
 		if( pVars.get("action", "") == "write" )
-		{	content = записатьТуриста( dbase, context, isTouristKeyAccepted, touristKey );
+		{	
+			bool isOk = EditTourist.writeTourist( context, isTouristKeyAccepted, touristKey );
 			
+			content = EditTouristView.renderWriteResult( isTouristKeyAccepted, !isOk, touristKey );
 		}
 		else
 		{	
-			content = показатьФормуРедактТуриста( dbase, isTouristKeyAccepted, touristKey );
+			SiteLogger.info("Готовимся к выводу формы туриста!");
+			auto touristRec = EditTourist.getTourist(touristKey);
+			
+			SiteLogger.info("Запрос данных о туристе завершен!");
+			
+			if( touristRec )
+				SiteLogger.info("Данные о туристе получены!");
+			
+			content = EditTouristView.renderEditForm(touristRec);
+			SiteLogger.info("Вывод формы туриста завершен!");
 		}
+		
+		SiteLogger.info("netMain debug 5");
 		
 		return content;
 	}
@@ -428,5 +162,342 @@ string netMain(HTTPContext context)
 	{	//Какой-то случайный аноним забрёл - отправим его на аутентификацию
 		context.response.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );
 		return null;
+	}
+}
+
+class EditTourist
+{
+public:
+
+	static immutable touristRecFormat = RecordFormat!(
+		PrimaryKey!(size_t), "ключ", 
+		string, "фамилия", 
+		string, "имя", 
+		string, "отчество",
+		string, "дата рожд", 
+		size_t, "год рожд",
+		string, "адрес", 
+		string, "телефон",
+		bool, "показать телефон", 
+		string, "эл почта", 
+		bool, "показать эл почту",
+		string, "тур опыт", 
+		string, "комент", 
+		typeof(спортивныйРазряд), "спорт разряд",
+		typeof(судейскаяКатегория), "суд категория"
+	)();
+
+	static auto getTourist(size_t touristKey)
+	{
+		SiteLogger.info("getTourist 0");
+		
+		string touristQuery = 
+`select num, family_name, given_name, patronymic, 
+	birth_date, birth_year, address, phone, show_phone, email, show_email, 
+	exp, comment, razr, sud from tourist where num=` ~ touristKey.text ~ `;`;
+	
+		SiteLogger.info("getTourist 1");
+		
+		auto rs = getCommonDB().query(touristQuery).getRecordSet(touristRecFormat);
+		
+		SiteLogger.info("getTourist 2");
+		
+		if( rs && rs.length == 1 )
+			return rs.front;
+		else
+			return null;
+	}
+	
+	static auto writeTourist(
+		HTTPContext context,
+		bool isUpdateAction,
+		size_t touristKey = size_t.max
+	)
+	{
+		import std.range: empty;
+		
+		auto pVars = context.request.bodyForm;
+		
+		static immutable(string[]) strFieldNames = 
+			[ "family_name", "given_name", "patronymic", "address", "phone", "email", "exp", "comment" ];
+			
+		string[] fieldNames;  //имена полей для записи
+		string[] fieldValues; //значения полей для записи
+		
+		//Формирование запроса для записи строковых полей в БД
+		foreach( i, fieldName; strFieldNames )
+		{	string value = pVars.get(fieldName, null);
+			if( value.length > 0 )
+			{	fieldNames ~= fieldName;
+				fieldValues ~=  "'" ~ PGEscapeStr(value) ~ "'";
+			}
+		}
+
+		//Формирование запроса на запись даты рождения туриста
+		string birthDateStr;
+		string birthDayStr = pVars.get("birth_day", null);
+		string birthMonthStr = pVars.get("birth_month", null);
+
+		bool hasBirthDay = !birthDayStr.empty && birthDayStr != "null";
+		bool hasBirthMonth = !birthMonthStr.empty && birthMonthStr != "null";
+		bool isNullDate = birthDayStr == "null" && birthMonthStr == "null";
+		
+		if( hasBirthDay || hasBirthMonth || isNullDate )
+			fieldNames ~= "birth_date";
+		
+		if( hasBirthDay || hasBirthMonth )
+		{
+			if( hasBirthDay )
+			{
+				auto birthDay = birthDayStr.to!ubyte;
+				if( birthDay > 0u && birthDay <= 31 )
+					birthDateStr ~= birthDayStr;
+				else
+					throw new Exception("Номер дня в месяце должен быть в диапазоне от 1 до 31!!!");
+			}
+			
+			birthDateStr ~= ".";
+			
+			if( hasBirthMonth )
+			{	
+				auto birthMonth = birthMonthStr.to!ubyte;
+				if( birthMonth > 0u && birthMonth <= 12 )
+					birthDateStr ~= birthMonthStr;
+				else
+					throw new Exception("Номер месяца должен лежать в диапазоне от 1 до 12!!!");
+			}
+			
+			fieldValues ~= "'" ~ birthDateStr ~ "'";
+		}
+		else if( isNullDate ) //Если в обоих полях написано "null" - то в БД пишем null
+		{
+			fieldValues ~= "null";
+		}
+
+		//Формирование запроса на запись года рождения туриста
+		if( auto param = pVars.get("birth_year", null) )
+		{	if( !param.empty && param != "null" )
+			{	auto birthYear = param.to!uint;
+				fieldValues ~= "'" ~ param ~ "'";
+			}
+			else
+				fieldValues ~= "null";
+
+			fieldNames ~= "birth_year";
+		}
+		
+		//Логические значения
+		//Показать телефон
+		bool showPhone = toBool( pVars.get("show_phone", "no") );
+		fieldNames ~= "show_phone";
+		fieldValues ~= "'" ~ ( showPhone ? "true" : "false" ) ~ "'";
+		
+		//Показать емэйл
+		bool showEmail = toBool( pVars.get("show_email", "no") );
+		fieldNames ~= "show_email";
+		fieldValues ~= "'" ~ ( showEmail ? "true" : "false" ) ~ "'";
+
+		if( auto param = pVars.get("razr", null) )
+		{	Optional!(int) enumKey;
+		
+			if( !param.empty && param != "null" )
+			{	try {
+					enumKey = param.to!int;
+				} catch (std.conv.ConvException e) {
+					throw new std.conv.ConvException("Выражение \"" ~ param ~ "\" не является значением типа \"спортивный разряд\"!!!");
+				}
+			}
+			
+			if( !enumKey.isNull && enumKey !in спортивныйРазряд )
+				throw new std.conv.ConvException("Выражение \"" ~ param ~ "\" не является значением типа \"спортивный разряд\"!!!");
+		
+			fieldNames ~= "razr";
+			
+			fieldValues ~= enumKey.isNull ? "null" : enumKey.value.to!string;
+		}
+			
+		if( auto param = pVars.get("sud", null) )
+		{	Optional!(int) enumKey;
+
+			if( !param.empty && param != "null" )
+			{	try {
+					enumKey = param.to!int;
+				} catch (std.conv.ConvException e) {
+					throw new std.conv.ConvException("Выражение \"" ~ param ~ "\" не является значением типа \"судейская категория\"!!!");
+				}
+			}
+			
+			if( !enumKey.isNull && enumKey !in судейскаяКатегория )
+				throw new std.conv.ConvException("Выражение \"" ~ param ~ "\" не является значением типа \"судейская категория\"!!!");
+		
+			fieldNames ~= "sud";
+			
+			fieldValues ~= enumKey.isNull ? "null" : enumKey.value.to!string;
+		}
+
+		import std.array : join;
+		
+		//Запись автора последних изменений и даты этих изменений
+		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+		string fieldNamesList = `"` ~ fieldNames.join(`", "`) ~ `"`;
+		string fieldValuesList = fieldValues.join(", ");
+
+		string queryStr;
+		
+		if( fieldNames.length > 0 && fieldValues.length > 0 )
+		{	if( isUpdateAction )
+			{
+				queryStr = "update tourist set( " ~ fieldNamesList ~ " ) = ( " ~ fieldValuesList ~ " ) where num='" ~ touristKey.to!string ~ "';";
+			}
+			else
+			{	fieldNames ~= ["registrator_num", "reg_timestamp"] ;
+				fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+				queryStr = "insert into tourist ( " ~ fieldNamesList ~ " ) values( " ~ fieldValuesList ~ " );";
+			}
+		}
+		
+		auto dbase = getCommonDB();
+		dbase.query(queryStr);
+
+		return dbase.lastErrorMessage is null;
+	}
+	
+	
+}
+
+
+class EditTouristView
+{
+public:
+	static string renderEditForm(Rec)(Rec touristRec)
+	{
+		import std.string;
+		
+		SiteLogger.info("Получаем шаблон формы редактировагия туриста");
+		
+		auto touristForm = getPageTemplate( pageTemplatesDir ~ "edit_tourist_form.html" );
+		
+		if( touristForm )
+			SiteLogger.info("Шаблон формы получен");
+		
+		SiteLogger.info("Начало разбора данных о дате рождения туриста");
+		Optional!(ubyte) birthDay;
+		Optional!(ubyte) birthMonth;
+		//Вывод даты рождения туриста из базы данных
+		if( touristRec )
+		{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
+			if( birthDateParts.length != 2 )
+				birthDateParts = split( touristRec.get!"дата рожд"(""), "," );
+			if( birthDateParts.length == 2 ) 
+			{	import std.conv;
+				
+				try {
+					if( birthDateParts[0].length != 0 )
+						birthDay = birthDateParts[0].to!ubyte;
+					if( birthDateParts[1].length != 0 )
+						birthMonth = birthDateParts[1].to!ubyte;
+				} catch(std.conv.ConvException e) {
+					birthDay = null;
+					birthMonth = null;
+				}
+			}
+		}
+		SiteLogger.info("Разбор данных о дате рождения завершен");
+		
+		SiteLogger.info("Создание компонентов вывода перечислимых типов");
+		//Генератор выпадающего списка месяцев
+		auto monthDropdown = listBox(месяцы);
+		monthDropdown.name = "birth_month";
+		monthDropdown.id = "birth_month";
+
+		//Генератор выпадющего списка спорт. разрядов
+		auto sportsGradeDropdown = listBox(спортивныйРазряд);
+		sportsGradeDropdown.name = "razr";
+		sportsGradeDropdown.id = "razr";
+		
+		//Генератор выпадающего списка судейских категорий
+		auto judgeCatDropdown = listBox(судейскаяКатегория);
+		judgeCatDropdown.name = "sud";
+		judgeCatDropdown.id = "sud";
+		
+		SiteLogger.info("Компонентов вывода перечислимых типов созданы");
+		
+		//Вывод данных о туристе в форму редакирования
+		if( touristRec )
+		{	
+			SiteLogger.info("Начало вывода данных о туристе");
+			SiteLogger.info("Начало вывода простых полей");
+			
+			/+touristForm.set( "num.value", touristRec.get!"ключ"(0).to!string );+/
+			touristForm.set(  "family_name", printHTMLAttr( `value`, touristRec.get!"фамилия"("") )  );
+			touristForm.set(  "given_name", printHTMLAttr( `value`, touristRec.get!"имя"("") )  );
+			touristForm.set(  "patronymic", printHTMLAttr( `value`, touristRec.get!"отчество"("") )  );
+			touristForm.set(  "birth_year", printHTMLAttr( `value`, touristRec.getStr("год рожд", null) )  );
+			touristForm.set(  "birth_day", printHTMLAttr( `value`, birthDay.isNull() ? null : birthDay.to!string  )  );
+			touristForm.set(  "address", printHTMLAttr( `value`, touristRec.get!"адрес"("") )  );
+			touristForm.set(  "phone", printHTMLAttr( `value`, touristRec.get!"телефон"("") )  );
+			touristForm.set(  "show_phone", ( touristRec.get!"показать телефон"(false) ? " checked" : "" )  );
+			touristForm.set(  "email", printHTMLAttr( `value`, touristRec.get!"эл почта"("") ) );
+			touristForm.set(  "show_email", ( touristRec.get!"показать эл почту"(false) ? " checked" : "" )  );
+			touristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
+			touristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
+			
+			SiteLogger.info("Вывод простых полей завершен");
+			
+			SiteLogger.info("Заполнение данными перечислимых полей");
+			monthDropdown.selectedValue = birthMonth;
+			
+			if( !touristRec.isNull("спорт разряд") )
+				sportsGradeDropdown.selectedValue = touristRec.get!"спорт разряд"();
+				
+			if( !touristRec.isNull("суд категория") )
+				judgeCatDropdown.selectedValue = touristRec.get!"суд категория"();
+			SiteLogger.info("...завершено");
+		}
+		
+		SiteLogger.info("Начало вывода контролов перечислимых типов");
+
+		touristForm.set( "birth_month", monthDropdown.print() );
+		touristForm.set( "razr", sportsGradeDropdown.print() );
+		touristForm.set( "sud", judgeCatDropdown.print() );
+		SiteLogger.info("...завершено");
+		
+		touristForm.set( "action", ` value="write"` );
+		
+		
+		SiteLogger.info("Формирование формы редактирования туриста завершено");
+		
+		return touristForm.getString();
+	}
+	
+	static auto renderWriteResult( bool isUpdateAction, bool hasError, size_t touristKey )
+	{
+		import std.array: appender;
+		
+		auto content = appender!string();
+		
+		if( isUpdateAction  )
+		{	if( hasError )
+				content ~= "<h3>Данные о туристе успешно обновлены!!!</h3>"
+				~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+				~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
+			else
+				content ~= "<h3>Произошла ошибка при обновлении данных!!!</h3>"
+				~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+				~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ touristKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+				~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
+		}
+		else
+		{	if( hasError )
+				content ~= "<h3>Данные о туристе успешно добавлены в базу данных!!!</h3>"
+				~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
+			else
+				content ~= "<h3>Произошла ошибка при добавлении данных в базу данных!!!</h3>"
+				~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+				~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>";
+		}
+		
+		return content.data();
 	}
 }

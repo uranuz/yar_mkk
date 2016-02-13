@@ -27,6 +27,180 @@
 	vertical-align: middle;
 }
 
-.b-wui-CheckBoxList.e-wui-ListItem_labelText {
-	font-size: 90%;
+.pohod {
+	border-collapse: collapse;
 }
+
+.pohod {
+	border-collapse: collapse;
+}
+
+table.tab1 {
+	width: 100%;
+	border: 6px ridge #666;
+	border-spacing: 1px;
+	text-align: center;
+}
+
+.tab1 td, .tab1 th {
+	font-size: 0.9rem;
+	border: 1px solid;
+	border-right-style: ridge;
+	width: 70px;
+}
+
+.b-wui-CheckBoxList.e-wui-ListItem_labelText {
+	font-size: 0.9rem;
+}
+
+/* !sect-begin: index */
+
+.b-recent_pohod.e-item_block {
+	border-top: 2px solid #BECDA0;
+	padding-top: 3px;
+	margin-bottom: 15px;
+}
+
+.b-recent_pohod.e-details_par {
+	padding-left: 20px;
+}
+
+.b-recent_pohod.e-item_details_block {
+	font-size: 0.90rem;
+}
+
+/* !sect-end: index */
+
+/* !sect-begin: edit_pohod */
+.b-pohod_party_edit.e-control_bar,
+.b-pohod_chef_edit.e-control_bar{
+	background: rgb(232,237,187); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(232,237,187,1) 0%, rgba(232,226,176,1) 48%, rgba(225,233,160,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(232,237,187,1)), color-stop(48%,rgba(232,226,176,1)), color-stop(100%,rgba(225,233,160,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(232,237,187,1) 0%,rgba(232,226,176,1) 48%,rgba(225,233,160,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(232,237,187,1) 0%,rgba(232,226,176,1) 48%,rgba(225,233,160,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(232,237,187,1) 0%,rgba(232,226,176,1) 48%,rgba(225,233,160,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, rgba(232,237,187,1) 0%,rgba(232,226,176,1) 48%,rgba(225,233,160,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8edbb', endColorstr='#e1e9a0',GradientType=0 ); /* IE6-9 */
+	border-radius: 4px;
+	border: 1px solid #D0D67E;
+	padding: 5px 10px 5px 10px;
+	text-align: right;
+}
+	
+	/* !sub!sect-begin: edit_pohod.pohod_party */
+		.b-pohod_party_edit.e-panels_area {
+			display: table;
+			margin: 10px 0 10px 0;
+			width: 100%;
+		}
+
+		.b-pohod_party_edit.e-search_panel {
+			/*float: right;*/
+			display: table-cell;
+			width: 50%;
+			border-radius: 4px;
+			border: 1px solid #D0D67E;
+			padding: 8px;
+			margin-right: 10px;
+			min-width: 350px;
+		}
+
+		.b-pohod_party_edit.e-selected_tourists_panel {
+			display: table-cell;
+			/*float: left;*/
+			border-radius: 4px;
+			border: 1px solid #D0D67E;	
+			padding: 8px;
+			min-width: 350px;
+		}
+	/* !sub!sect-end: edit_pohod.pohod_party */
+	
+.icon-small {
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	padding: 0;
+}
+
+.icon-remove_item {
+	background-image: url("../img/icons/remove_icon.png");
+}
+
+.icon-append_item {
+	background-image: url("../img/icons/append_icon.png");
+}
+
+.b-pohod_party_edit.e-icon_wrapper,
+.b-tourist_search.e-icon_wrapper {
+	display: block;
+	float: left;
+	margin-right: 5px;
+}
+
+.b-pohod_party_edit.e-tourist_link,
+.b-tourist_search.e-tourist_link {
+	display: block;
+	text-decoration: none;
+}
+
+.b-pohod_party_edit.e-tourist_deselect_btn,
+.b-tourist_search.e-tourist_select_btn
+{
+	clear: both;
+	padding: 4px 0 2px 0;
+	border-top: 1px solid #778877;
+}
+
+	/* !sub!sect-begin: edit_pohod.tourist_search */
+		.b-tourist_search.e-filter_item { padding: 2px 0 6px 0;  }
+
+		.b-tourist_search.e-addr_filter_panel {
+			display: block;
+			float: left;
+			clear: both;
+			padding: 6px 8px 6px 8px;
+			margin: 8px 0 8px 0;
+		}
+
+		.b-tourist_search.e-addr_element_item {
+			display: block;
+			clear: both;
+			text-align: right;
+			padding: 3px 0 2px 0;
+		}
+
+		.b-tourist_search.e-addr_element_label {
+			display: inline-block;
+			float: left;
+			padding: 4px 10px 0 0;
+		}
+
+		.b-tourist_search.e-addr_element_filter {
+			display: inline-block;
+		}
+
+		.b-tourist_search.e-search_results_panel {
+			margin-top: 15px;
+		}
+		
+		.b-tourist_search.e-page_navigation_bar {
+			padding: 5px 0 5px 0;
+		}
+	/* !sub!sect-end: edit_pohod.tourist_search */
+
+	/* !sub!sect-begin: edit_pohod.pohod_chef_edit */
+		.b-pohod_chef_edit.e-search_block {
+			margin: 10px 0 10px 0;
+		}
+
+		.b-pohod_chef_edit.e-delete_btn {
+			vertical-align: top;
+			padding: 3px 4px 0 4px;
+		}
+	/* !sub!sect-end: edit_pohod.pohod_chef_edit */
+
+/* !sect-end: edit_pohod */
