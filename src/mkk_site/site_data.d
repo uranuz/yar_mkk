@@ -55,6 +55,7 @@ immutable(string) webtankResDir; //Ресурсы библиотеки
 //Путь к файлу шаблона
 immutable(string) pageTemplatesDir;
 immutable(string) generalTemplateFileName;
+immutable(string) printGeneralTemplateFileName;
 
 ///Журналы ошибок и событий (логи)
 immutable(string) siteLogsDir;
@@ -182,6 +183,7 @@ shared static this()
 
 	pageTemplatesDir = siteFileSystemPaths["sitePageTemplates"];
 	generalTemplateFileName = siteFileSystemPaths["siteGeneralTemplateFile"];
+	printGeneralTemplateFileName = pageTemplatesDir ~ "print_general_template.html";
 
 	//Пути в файловой системе к файлам журналов
 	errorLogFileName = siteFileSystemPaths["siteErrorLogFile"];
@@ -223,6 +225,13 @@ static immutable месяцы = enumFormat(
 		t(6,"июнь"), t(7,"июль"), t(8,"август"), t(9,"сентябрь"), 
 		t(10,"октябрь"), t(11,"ноябрь"), t(12,"декабрь")
 	]);
+	
+	
+static immutable месяцы_родительный = enumFormat( 
+	[	t(1,"января"), t(2,"февраля"), t(3,"марта"), t(4,"апреля"), t(5,"майя"), 
+		t(6,"июня"), t(7,"июля"), t(8,"августа"), t(9,"сентября"), 
+		t(10,"октября"), t(11,"ноября"), t(12,"декабря")
+	]);	
 
 static immutable видТуризма = enumFormat(
 	[	t(1,"пешеходный"), t(2,"лыжный"), t(3,"горный"), t(4,"водный"), 

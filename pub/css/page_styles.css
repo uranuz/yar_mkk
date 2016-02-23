@@ -31,18 +31,22 @@
 	border-collapse: collapse;
 }
 
+.pohod {
+	border-collapse: collapse;
+}
+
 table.tab1 {
 	width: 100%;
-	border: 3px ridge #666;
-	border-spacing: 0px;
-	text-align:center;
+	border: 6px ridge #666;
+	border-spacing: 1px;
+	text-align: center;
 }
 
 .tab1 td, .tab1 th {
 	font-size: 0.9rem;
 	border: 1px solid;
-	border-right-style:ridge;
-	
+	border-right-style: ridge;
+	width: 70px;
 }
 
 .b-wui-CheckBoxList.e-wui-ListItem_labelText {

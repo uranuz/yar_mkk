@@ -23,166 +23,452 @@ shared static this()
 }
 
 string netMain(HTTPContext context)
+
 {	
 	auto rq = context.request;//запрос
 	auto rp = context.response;//ответ
 	
-	auto pVars = rq.queryForm;
-	auto qVars = rq.bodyForm;
-
+ bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
  string content;
  string table;
- content = `Вася`;
+ content = `Относительно полная информация с 1992 года, ранее фрагментарный характер информации`;
  
- table~=`
- 
- <table class="tab1" >
- <tr>
-    <td rowspan="2">Год</td>
-    <th colspan="2">Все</th>
-    <th colspan="2">Пеший</th>
-    <th colspan="2">Лыжный</th>
-    <th colspan="2">Горный</th>
-    <th colspan="2">Водный</th>
-    <th colspan="2">Вело</th>
-    <th colspan="2">Авто</th>
-    <th colspan="2">Спелео</th>
-    <th colspan="2">Парус</th>
-    <th colspan="2">Конный</th>
-    <th colspan="2">Комбинир</th>
-    
-   </tr>
-   <tr>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    <th>гр.</th><th>чел.</th>
-    
-   </tr>
-
- `;
-
 
 import std.typecons;
 	
    ///Начинаем оформлять таблицу с данными
-   static immutable statRecFormat = RecordFormat!(
-		PrimaryKey!(string), "Год", 
-		string, "гр_всего", 
-		string,  "уч_всего", 
-		string, "гр_пешый",
-		string,  "уч_пешый",
-		string, "гр_лыжный", 
-		string,  "уч_лыжный", 
-		string, "гр_горный",
-		string,  "уч_горный",
-		string, "гр_водный", 
-		string,  "уч_водный", 
-		string, "гр_вело",
-		string,  "уч_вело",
-		string, "гр_авто", 
-		string,  "уч_авто", 
-		string, "гр_спелео",
-		string,  "уч_спелео",
-		string, "гр_парус", 
-		string,  "уч_парус", 
-		string, "гр_конный",
-		string,  "уч_конный",
-		string, "гр_комби", 
-		string,  "уч_комби" 
-		
-	)(
-		null,
-		tuple()
-	);
+   static immutable statRecFormatVid = RecordFormat!(
+		PrimaryKey!(string), "Год", 		 
+		string,"Пешый", string,"Лыжный", 	string,"Горный",	string,"Водный", 	string," Вело ",
+		string," Авто ", 	string,"Спелео",	string, "Парус", 	string,"Конный",	string, "Комби", 
+		string, "ВСЕГО"		
+	)(		null,	tuple()	);
+	
+	 static immutable statRecFormatKC = RecordFormat!(
+		PrimaryKey!(string), "Вид/КС", 		 
+		string,"н.к.", string,"первая", 	string,"вторая",	string,"третья", 	string,"четвёртая",
+		string,"пятая", 	string,"шестая",	string, "пут.", 
+		string, "ВСЕГО"		
+	)(		null,	tuple()	);
+	
+	
+	//int[string]ks=["н.к.","первая","вторая","третья","четвёртая","пятая","шестая","пут.","всего"];
+	string[] групп_человек;
+	
  auto dbase = getCommonDB(); //Подключение к базе
  
-	string тело_статистика = ` WITH 
-      st AS (select kod_mkk,  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer) FROM pohod WHERE kod_mkk='176-00'  ORDER BY year ),
-
-      всего  AS ( SELECT year,count(unit) AS gr_всего,sum (unit)     AS un_всего   FROM st               GROUP BY year ORDER BY year ),
-      пешый  AS ( SELECT year,count(unit) AS gr_пешый,sum (unit)     AS un_пешый   FROM st  WHERE vid=1  GROUP BY year ORDER BY year ),
-      лыжный AS ( SELECT year,count(unit) AS gr_лыжный,sum (unit)    AS un_лыжный  FROM st  WHERE vid=2  GROUP BY year ORDER BY year ),
-      горный AS ( SELECT year,count(unit) AS gr_горный,sum (unit)    AS un_горный  FROM st  WHERE vid=3  GROUP BY year ORDER BY year ),
-      водный AS ( SELECT year,count(unit) AS gr_водный, sum (unit)   AS un_водный  FROM st  WHERE vid=4  GROUP BY year ORDER BY year ),
-      вело   AS ( SELECT year,count(unit) AS gr_вело, sum (unit)     AS un_вело    FROM st  WHERE vid=5  GROUP BY year ORDER BY year ),
-      авто   AS ( SELECT year,count(unit) AS gr_авто, sum (unit)     AS un_авто    FROM st  WHERE vid=6  GROUP BY year ORDER BY year ),
-      спелео AS ( SELECT year,count(unit) AS gr_спелео ,sum (unit)   AS un_спелео  FROM st  WHERE vid=7  GROUP BY year ORDER BY year ),
-      парус  AS ( SELECT year,count(unit) AS gr_парус, sum (unit)    AS un_парус   FROM st  WHERE vid=8  GROUP BY year ORDER BY year ),
-      конный AS ( SELECT year,count(unit) AS gr_конный, sum (unit)   AS un_конный  FROM st  WHERE vid=9  GROUP BY year ORDER BY year ),
-      комби  AS ( SELECT year,count(unit) AS gr_комби, sum (unit)    AS un_комби   FROM st  WHERE vid=10 GROUP BY year ORDER BY year )
-      
-      SELECT
-      всего.year,
-      gr_всего,un_всего,
-      gr_пешый,un_пешый,
-      gr_лыжный,un_лыжный,
-      gr_горный,un_горный,
-      gr_водный,un_водный,
-      gr_вело,un_вело,
-      gr_авто,un_авто,
-      gr_спелео,un_спелео,
-      gr_парус,un_парус,
-      gr_конный,un_конный,
-      gr_комби,un_комби
-
-
-
-           FROM всего 
-      LEFT JOIN пешый ON всего.year   = пешый.year
-      LEFT JOIN лыжный ON всего.year  = лыжный.year
-      LEFT JOIN горный ON всего.year  = горный.year
-      LEFT JOIN водный ON всего.year  = водный.year
-      LEFT JOIN вело ON всего.year    = вело.year
-      LEFT JOIN авто ON всего.year    = авто.year
-      LEFT JOIN спелео  ON всего.year = спелео .year
-      LEFT JOIN парус ON всего.year   = парус.year
-      LEFT JOIN конный ON всего.year  = конный.year
-      LEFT JOIN комби ON всего.year   = комби.year `;
-      
-      auto rs = dbase.query(тело_статистика).getRecordSet(statRecFormat);
+ bool b_kod=false, b_org=false, b_terr=false;
  
-  foreach(rec; rs)
+ string kod= PGEscapeStr( rq.bodyForm.get("kod_MKK",     "") );
+ string org= PGEscapeStr( rq.bodyForm.get("organization", "") );
+ string terr= PGEscapeStr( rq.bodyForm.get("territory",   "") );
+ string year= PGEscapeStr( rq.bodyForm.get("year",   "2014") );
+ string prezent_vid= PGEscapeStr( rq.bodyForm.get("prezent_vid","Весь период."));
+ 
+ string [] prezent=["Весь период.","За год."]; 
+  bool[string] заголовок;
+  string [] вид= ["Вид/КС","Пешый","Лыжный","Горный","Водный"," Вело ",	" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ИТОГО"] ;
+  
+   if( prezent_vid=="Весь период.")
+   { групп_человек=statRecFormatVid.names;
+     заголовок= 
+	["Год":true, 	 "Пешый":true,  "Лыжный":true,  "Горный":true,  "Водный":true, 	" Вело ":true,      
+	" Авто ":true,  "Спелео":true, "Парус":true,  	"Конный":true,  "Комби":true,   	"ВСЕГО":true
+	] ;
+	}
+   
+	if( prezent_vid=="За год.")  
+	{групп_человек=statRecFormatKC.names;
+		заголовок=
+	  ["Вид/КС":true,"н.к.":true,"первая":true,"вторая":true,"третья":true,
+	  "четвёртая":true, "пятая":true,"шестая":true,"пут.":true,"ВСЕГО":true];
+	  
+	}
+  //writeln(групп_человек);
+   if(kod!="")  b_kod= true;
+   if(org!="")  b_org= true;
+   if(terr!="") b_terr=true;
+ 
+	string запрос_статистика;
+	///////-----Весь период---------
+	if( prezent_vid=="Весь период.")
+{
+	запрос_статистика= ` WITH 
+      stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod`;
+      if (b_kod || b_org ||  b_terr )   запрос_статистика ~=` WHERE `;
+      if (b_kod) 
+            { запрос_статистика ~=` kod_mkk ILIKE '%`~ kod ~`%'`;      
+                if (b_org ||  b_terr ) запрос_статистика ~=` AND `;
+            }
+              
+       if (b_org) 
+             {запрос_статистика ~=` organization ILIKE '%`~ org ~`%'`;
+                 if (b_terr ) запрос_статистика ~=` AND `;
+              }
+                 
+       if (b_terr ) запрос_статистика ~=` region_group ILIKE '%`~ terr ~`%'`;           
+     
+     запрос_статистика ~=` ORDER BY year ),
+
+      st1 AS ( SELECT year, 
+                                COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+                             ) AS un_1   FROM stat  WHERE  vid=1  GROUP BY year ORDER BY year  ),
+
+st2 AS ( SELECT year,
+   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_2   FROM stat  WHERE  vid=2  GROUP BY year ORDER BY year ),
+ st3 AS ( SELECT year,
+   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_3   FROM stat  WHERE  vid=3  GROUP BY year ORDER BY year  ),
+ st4 AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_4   FROM stat  WHERE  vid=4  GROUP BY year ORDER BY year  ),
+st5 AS ( SELECT year,
+   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_5   FROM stat  WHERE  vid=5  GROUP BY year ORDER BY year  ),
+ st6 AS ( SELECT year,
+   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+  )   AS un_6   FROM stat  WHERE  vid=6  GROUP BY year ORDER BY year  ),
+
+
+st7 AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_7   FROM stat  WHERE  vid=7  GROUP BY year ORDER BY year  ),
+
+st8 AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_8  FROM stat  WHERE  vid=8 GROUP BY year ORDER BY year  ),
+
+ st9 AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_9   FROM stat  WHERE  vid=9  GROUP BY year ORDER BY year  ),
+
+st10 AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_10   FROM stat  WHERE  vid=10  GROUP BY year ORDER BY year  ),
+
+
+
+ всего AS ( SELECT year,
+  COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+                                CAST(sum (unit)  AS VARCHAR)  ||  ')'
+ )    AS un_всего   FROM stat GROUP BY year ORDER BY year )
+
+SELECT
+всего.year,
+ 
+ 
+ un_1,
+ un_2,
+ un_3,
+ un_4,
+ un_5,
+ un_6,
+ un_7,
+ un_8,
+ un_9,
+ un_10,
+
+un_всего 
+
+
+ FROM  всего
+
+  LEFT JOIN st1 ON всего.year   = st1.year
+  LEFT JOIN st2 ON всего.year   = st2.year
+  LEFT JOIN st3 ON всего.year   = st3.year
+  LEFT JOIN st4 ON всего.year   = st4.year
+  LEFT JOIN st5 ON всего.year  = st5.year
+  LEFT JOIN st6 ON всего.year  = st6.year
+  LEFT JOIN st7 ON всего.year  = st7.year
+  LEFT JOIN st8 ON всего.year  = st8.year
+  LEFT JOIN st9 ON всего.year  = st9.year
+  LEFT JOIN st10 ON всего.year  = st10.year `;
+}
+     //-----конец -- Весь период---
+     
+     
+   //  --------За год-----------
+   
+  
+   
+  if( prezent_vid=="За год.")
+{
+   запрос_статистика= `
+   
+   WITH stat_by_year AS (
+    SELECT CAST(unit AS integer) AS unit,vid,ks
+    FROM pohod 
+    WHERE (date_part('YEAR', begin_date)=`~year~` )     
+    `;   
+    
+  if (b_kod) 
+            { запрос_статистика ~=` AND  kod_mkk ILIKE '%`~ kod ~`%' `;      
+               // if (b_org ||  b_terr ) запрос_статистика ~=` AND `;
+            }
+              
+       if (b_org) 
+             {запрос_статистика ~=`  AND  organization ILIKE '%`~ org ~`%'`;
+               //  if (b_terr ) запрос_статистика ~=` AND `;
+              }
+                 
+       if (b_terr ) 
+              запрос_статистика ~=`  AND  region_group ILIKE '%`~ terr ~`%'`;         
+    
+             // запрос_статистика ~= ` AND  (date_part('YEAR', begin_date)=2000` ;
+              
+    
+ запрос_статистика~= ` ) ,`;
+ 
+ 
+запрос_статистика~= `
+
+
+
+ks0 AS ( SELECT vid,count(unit) AS gr_ks0,sum (unit)    AS un_ks0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 )GROUP BY vid ORDER BY vid  ),
+ ks1 AS ( SELECT vid,count(unit) AS gr_ks1,sum (unit)    AS un_ks1   FROM stat_by_year  WHERE  ks=1  GROUP BY vid ORDER BY vid  ),
+ ks2 AS ( SELECT vid,count(unit) AS gr_ks2,sum (unit)    AS un_ks2   FROM stat_by_year  WHERE  ks=2  GROUP BY vid ORDER BY vid  ),
+ ks3 AS ( SELECT vid,count(unit) AS gr_ks3,sum (unit)    AS un_ks3   FROM stat_by_year  WHERE  ks=3  GROUP BY vid ORDER BY vid  ),
+ ks4 AS ( SELECT vid,count(unit) AS gr_ks4,sum (unit)    AS un_ks4   FROM stat_by_year  WHERE  ks=4  GROUP BY vid ORDER BY vid  ),
+ ks5 AS ( SELECT vid,count(unit) AS gr_ks5,sum (unit)    AS un_ks5   FROM stat_by_year  WHERE  ks=5  GROUP BY vid ORDER BY vid  ),
+ ks6 AS ( SELECT vid,count(unit) AS gr_ks6,sum (unit)    AS un_ks6   FROM stat_by_year  WHERE  ks=6  GROUP BY vid ORDER BY vid  ),
+ put AS ( SELECT vid,count(unit) AS gr_put,sum (unit)    AS un_put   FROM stat_by_year  WHERE  ks=7  GROUP BY vid ORDER BY vid  ),
+ всего  AS ( 
+    SELECT vid,count(unit) AS gr_всего,sum (unit)    AS un_всего   FROM stat_by_year GROUP BY vid ORDER BY vid ),
+
+
+st AS (
+SELECT
+всего.vid,
+gr_ks0, un_ks0,
+gr_ks1, un_ks1,
+gr_ks2, un_ks2,
+gr_ks3, un_ks3,
+gr_ks4, un_ks4,
+gr_ks5, un_ks5,
+gr_ks6, un_ks6,
+gr_put, un_put,
+gr_всего, un_всего 
+
+ FROM  всего
+  LEFT JOIN ks0 ON всего.vid   = ks0.vid
+  LEFT JOIN ks1 ON всего.vid   = ks1.vid
+  LEFT JOIN ks2 ON всего.vid   = ks2.vid
+  LEFT JOIN ks3 ON всего.vid   = ks3.vid
+  LEFT JOIN ks4 ON всего.vid   = ks4.vid
+  LEFT JOIN ks5 ON всего.vid   = ks5.vid
+  LEFT JOIN ks6 ON всего.vid   = ks6.vid
+  LEFT JOIN put ON всего.vid   = put.vid
+),
+
+st1 AS ( 
+    SELECT 11 AS vid,
+    sum(gr_ks0) AS gr_ks0,      sum(un_ks0)   AS  un_ks0,
+    sum(gr_ks1) AS gr_ks1,      sum(un_ks1)   AS  un_ks1,
+    sum(gr_ks2) AS gr_ks2,      sum(un_ks2)   AS  un_ks2,
+    sum(gr_ks3) AS gr_ks3,      sum(un_ks3)   AS  un_ks3,
+    sum(gr_ks4) AS gr_ks4,      sum(un_ks4)   AS  un_ks4,
+    sum(gr_ks5) AS gr_ks5,      sum(un_ks5)   AS  un_ks5,
+    sum(gr_ks6) AS gr_ks6,      sum(un_ks6)   AS  un_ks6,
+    sum(gr_put) AS gr_put,      sum(un_put)   AS  un_put,
+    sum(gr_всего) AS gr_всего,  sum(un_всего) AS  un_всего    
+    FROM st ),
+
+st2 AS (
+  (SELECT vid,
+      COALESCE( CAST(gr_ks0 AS VARCHAR)  ||'('  || CAST(un_ks0 AS VARCHAR )  ||  ')') AS ks0,
+      COALESCE( CAST(gr_ks1 AS VARCHAR)  ||'('  || CAST(un_ks1 AS VARCHAR )  ||  ')') AS ks1,
+      COALESCE( CAST(gr_ks2 AS VARCHAR)  ||'('  || CAST(un_ks2 AS VARCHAR )  ||  ')') AS ks2,
+      COALESCE( CAST(gr_ks3 AS VARCHAR)  ||'('  || CAST(un_ks3  AS VARCHAR)  ||  ')') AS ks3,
+      COALESCE( CAST(gr_ks4 AS VARCHAR)  ||'('  || CAST(un_ks4 AS VARCHAR )  ||  ')') AS ks4,
+      COALESCE( CAST(gr_ks5 AS VARCHAR)  ||'('  || CAST(un_ks5 AS VARCHAR )  ||  ')') AS ks5,
+      COALESCE( CAST(gr_ks6 AS VARCHAR)  ||'('  || CAST(un_ks6 AS VARCHAR )  ||  ')') AS ks6,
+      COALESCE( CAST(gr_put AS VARCHAR)  ||'('  || CAST(un_put  AS VARCHAR)  ||  ')') AS put,
+      COALESCE( CAST(gr_всего AS VARCHAR)||'('  || CAST(un_всего AS VARCHAR) ||  ')') AS всего
+               FROM  st  )
+
+  UNION 
+
+  (SELECT vid,
+      COALESCE( CAST(gr_ks0 AS VARCHAR)  ||'('  || CAST(un_ks0 AS VARCHAR )  ||  ')') AS ks0,
+      COALESCE( CAST(gr_ks1 AS VARCHAR)  ||'('  || CAST(un_ks1 AS VARCHAR )  ||  ')') AS ks1,
+      COALESCE( CAST(gr_ks2 AS VARCHAR)  ||'('  || CAST(un_ks2 AS VARCHAR )  ||  ')') AS ks2,
+      COALESCE( CAST(gr_ks3 AS VARCHAR)  ||'('  || CAST(un_ks3  AS VARCHAR)  ||  ')') AS ks3,
+      COALESCE( CAST(gr_ks4 AS VARCHAR)  ||'('  || CAST(un_ks4 AS VARCHAR )  ||  ')') AS ks4,
+      COALESCE( CAST(gr_ks5 AS VARCHAR)  ||'('  || CAST(un_ks5 AS VARCHAR )  ||  ')') AS ks5,
+      COALESCE( CAST(gr_ks6 AS VARCHAR)  ||'('  || CAST(un_ks6 AS VARCHAR )  ||  ')') AS ks6,
+      COALESCE( CAST(gr_put AS VARCHAR)  ||'('  || CAST(un_put  AS VARCHAR)  ||  ')') AS put,
+      COALESCE( CAST(gr_всего AS VARCHAR)||'('  || CAST(un_всего AS VARCHAR) ||  ')') AS всего
+
+              FROM  st1 )
+
+              )
+
+SELECT*FROM st2 ORDER BY vid 
+  
+  
+  `;
+  
+  
+} 
+  
+
+   //-----конец --За год
+     
+     
+     
+      IBaseRecordSet rs;
+      
+   if( prezent_vid=="Весь период.")  rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
+   if( prezent_vid=="За год.")       rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
+   
+  /* auto q_res = dbase.query(запрос_статистика);
+   for( size_t i = 0; i < q_res.recordCount; ++i )
+   {
+		for( size_t j = 0; j < q_res.fieldCount; ++j )
+		{
+			std.stdio.write( q_res.get(j, i), "; " );
+		}
+		std.stdio.writeln();
+   }*/
+   
+   
+//writeln(rs.getStr);
+      
+  //--------проверка пустых столбцов------------------------ 
+
+   foreach(k;заголовок.byKey())
+	  {
+	   string kl;
+	   for( size_t i = 0; i < rs.length; ++i  )
+	   {  
+			kl ~= rs[i].getStr(k, "");
+		}
+   	//foreach(rec; rs) kl~=rec.getStr(k, "");;
+   	if(kl=="") заголовок[k]=false;
+	
+	  }
+  
+   
+   
+  //---------заголовок таблицы -------------------------------------- 
+   
+   
+   table~=`<table class="tab1" >`;
+   table~=`<tr>`;
+  
+    
+    foreach(td; групп_человек)
+     {
+      if(заголовок[td]) table     ~=`<td>`~td~`</td>`~ "\r\n";
+      
+     }   
+ 
+    
+  table ~=` </tr>
+
+ `;
+   //-----------------------------------------------
+  for( size_t i = 0; i < rs.length; ++i  )//формирование ячеек таблицы
   {
   table ~= `<tr>`;
-  table ~= `<td>` ~ rec.get!"Год"("нет")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_всего"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_всего"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_пешый"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_пешый"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_лыжный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_лыжный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_горный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_горный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_водный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_водный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_вело"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_вело"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_авто"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_авто"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_спелео"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_спелео"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_парус"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_парус"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_конный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_конный"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"гр_комби"("-")  ~ `</td>`~ "\r\n";
-  table ~= `<td>` ~ rec.get!"уч_комби"("-")  ~ `</td>`~ "\r\n";
-  
-  
-  
+      foreach(v,td; групп_человек)
+      {
+      if(v==0  &&  prezent_vid=="Весь период." )
+              table ~= `<td>` ~rs[i].getStr(td, "-") ~ `</td>`~ "\r\n" ;
+   
+      if(v==0  &&  prezent_vid=="За год.")
+              table ~= `<td>`
+               ~  вид [ rs[i].getStr(td, "").to!int ]~ `</td>`~ "\r\n" ;
+              
+      if(заголовок[td] && v!=0) table ~= `<td>` ~rs[i].getStr(td, "-") ~ `</td>`~ "\r\n";
+      }
   table ~= `</tr>`~ "\r\n";
   }
+  
+  table ~=` </table>`; 
+  //---------------------------------------------------
+content ~=`<form id="main_form" method="post">`
+//--блок переключения вида
+~`<fieldset>`;  
+
+ if (isForPrint)
+  {
+     if(prezent_vid=="Весь период.") content ~=`Весь период.`;
+     if(prezent_vid=="За год.") content ~=`За `~year~` год.`;
+      content ~=`<div  class="no_print">`; 
+   } 
+  else content~=`<div >`;
+  
+    foreach(d; prezent)
+    {
+        content ~=`<input  type="radio"    
+        name="prezent_vid" value="`~ d ~`"`;
+        if(d==prezent_vid) content ~=`  checked `;
+        content ~= `>`~d;
+    } 
+ content ~=`</div> </fieldset> `;
+   
+ // блок фильтров   
  
  
- content~= table~` </table>`;
+  content ~=`<fieldset>`;
+   if(!isForPrint || kod~org~terr!=``)  content ~=`<legend>Фильтры</legend>`;
+  
+   if (isForPrint)
+   {
+       if (kod!=`` ) content ~=`Код МКК `~ kod~`<br/>`; 
+       if (org!=`` )content ~=`Организация `~ org~`<br/>`;
+       if (terr!=``)content ~=`Территория `~terr;
+   
+    content ~=`<div  class="no_print">`; 
+   }
+   else content~=`<div >`;
+   
+  content ~=`<input type="text" name="kod_MKK"  size="6"  value="`
+  ~  HTMLEscapeValue( rq.bodyForm.get("kod_MKK", "176-00") ) 
+  ~ `" > 
+                                 код МКК (176-00, 000-00, и т.п.)<br/>`
+  ~`<input type="text" name="organization" size="12" value="`
+  ~HTMLEscapeValue( rq.bodyForm.get("organization", "") )
+  ~ `"  >
+                                  организация<br/>`
+  ~`<input type="text" name="territory"  size="12"value="`
+  ~HTMLEscapeValue( rq.bodyForm.get("territory", "") )
+  ~`"  > 
+                                  территория ( Ярославль, Тутаев, Москва, и т.п.) <br/>`;
+                                  
+   if(prezent_vid=="За год.")                              
+  content ~=`<input type="text" name="year"  size="4" value="`                               
+  ~HTMLEscapeValue( rq.bodyForm.get("year", "2000") )
+  ~`"  > 
+                                 год <br/>`;                                 
+                                
+content ~=`</div></fieldset><br/>`;
+
+   if (isForPrint)
+	{
+	 content ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
+	 ~ "\r\n" ;}
+	 else content ~=`<button  name="filtr" type="submit" class="noprint" > Обновить </button>`;
+content ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+
+   if (isForPrint)//для печати
+	      {content ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;}
+	 else	     
+	    { content ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;}
+ content ~= `</form>` ~ "\r\n";
+ content~= table;
  content~=`<canvas width="300" height="225"></canvas>`~ "\r\n";
  
 	return content;

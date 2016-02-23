@@ -12,7 +12,12 @@
 	<script type="text/javascript" src="http://yastatic.net/jquery/cookie/1.0/jquery.cookie.min.js"></script>
 	<link rel="stylesheet" href="http://yastatic.net/jquery-ui/1.11.2/themes/south-street/jquery-ui.min.css">
 	<script type="text/javascript" src="{{webtank js folder}}components.js"></script>
-	<script type="text/javascript" src="{{js folder}}components.js"></script>
+	<script type="text/javascript" src="{{js folder}}components.js"></script>  
+	
+	<link rel="stylesheet" type="text/css" href="/pub/css/page_styles.css">
+	<link rel="shortcut icon" href="{{img folder}}znak.png" type="image/png">
+	
+	
 </head>
 
 <body>
@@ -39,21 +44,23 @@
 			<div id="site_title">
 				<h1>Маршрутно-квалификационная комиссия Ярославской области</h1>
 			</div>
+			
 		</div> <!-- #header -->
-		
+		                                                        
 		<div id="menu_bg_left"></div>
 		<div id="menu_bg_right"></div>
+		  
 		<div id="main_menu">
+
 			<ul class="main_menu_first_lvl">
-				<li><a href="/">Главная</a></li>
-				<li><a href="{{dynamic path}}show_pohod">Походы</a></li>
-				<li><a href="{{dynamic path}}show_tourist">Туристы</a></li>
-				<li><a href="{{dynamic path}}show_moder">Модераторы</a></li>
-				
-				<li><a href="{{dynamic path}}stati">Статьи и документы</a></li>
+				<li><a href="/"  >Главная</a></li>
+				<li><a href="{{dynamic path}}show_pohod"   >Походы</a></li>
+				<li><a href="{{dynamic path}}show_tourist"  >Туристы</a></li>
+				<li><a href="{{dynamic path}}show_moder"    >Модераторы</a></li>				
+				<li><a href="{{dynamic path}}stati"         >Статьи и документы</a></li>
 			</ul>
-			<span class="b-main_menu_auth e-block">
-				<span class="b-main_menu_auth e-header {{with auth class}}">
+			<span class="b-main_menu_auth e-block"  >
+				<span class="b-main_menu_auth e-header {{with auth class}}"   >
 					{{user name}}: <a href="{{authentication uri}}&logout=true" class="b-main_menu_auth e-logout_btn">выйти</a>
 				</span>
 				<span class="b-main_menu_auth e-header {{without auth class}}">
@@ -74,8 +81,9 @@
 				</div>
 				
 			</span>
-			
+		  
 		</div> <!-- #main_menu -->
+			
 		<!--<div id="auth_bar">
 			<form action="{{authentication uri}}" id="auth_form" method="post" style="display: inline;">
 				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
@@ -86,9 +94,12 @@
 		</div>-->
 		<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
 	</div> <!-- #top -->
-	
+	 
+	  
+	  
 	<div id="middle">
-		<div id="sidebar"><!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
+	      
+		<div id="sidebar"   ><!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
 			<h4>Полезные ссылки:</h4>
 			<a href="http://tssr.ru">Туристско-спортивный<br> союз России</a> <br>
 			<a href="http://tkirbis.ru">Турклуб "Ирбис"</a> <br>
@@ -128,17 +139,26 @@
 					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">На маршруте</a></li>
 				</ul>
 			</div>
-		</div> <!-- #sidebar -->
+			  
+		</div> <!-- #sidebar -->		      
+		
+		
 		<div id="content"><!-- основное содержание страницы -->
 			{{content}}
 		</div> <!-- #content -->
 		<div id="footer_pusher"></div> <!-- Толкатель footer'а -->
-	</div> <!-- #middle -->
+	</div> <!-- #middle -->  
+	
+	 
+	 
+	 
 	<!--<div id="footer_pusher"></div>  Толкатель footer'а -->
 </div> <!-- #page -->
 <div id="footer_framing">
 <div id="footer">
-	Все ходы записаны!!! г. Ярославль, 2013-2014 г.
+	Все ходы записаны!!! г. Ярославль, 2013-2016 г.
+
+<!-- печать страницы -->
 </div>
 </div> <!-- #footer_framing -->
 </body>

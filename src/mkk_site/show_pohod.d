@@ -9,8 +9,31 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 import webtank.common.optional;
 import webtank.common.conv;
 
-import mkk_site;
-
+import mkk_site,std.stdio;
+//--дипазон дата
+/*печатьДиапазонаДат()
+{
+OptionalDate фильтрДаты фильтрДаты = фильтрПоходов.сроки[ соотвПоля.имяВФорме ];
+		
+		if( фильтрДаты.isDefined )
+		{
+			частиЗапроса_фильтрыСроковПохода ~= ` ('` ~ Date( фильтрДаты.tupleof ).conv!string ~ `'::date ` 
+				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
+		}
+		else
+		{
+			foreach( j, частьДаты; фильтрДаты.tupleof )
+			{
+				if( !частьДаты.isNull )
+				{
+					частиЗапроса_фильтрыСроковПохода ~= частьДаты.conv!string ~ ` `
+						~ соотвПоля.опСравн ~ ` date_part('` ~ назвЧастейДаты[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
+				}
+			}
+		}
+	return	
+}
+//-----------------------*/
 static immutable string thisPagePath;
 
 shared static this()
@@ -62,9 +85,8 @@ struct ФильтрПоходов
 	int[] статусыЗаявки;
 	OptionalDate[string] сроки;
 	string районПохода;
-	bool сМатериалами;
-	
-	
+	bool сМатериалами;	
+		
 	bool естьФильтрация() @property
 	{
 		if( видыТуризма.length > 0 || категории.length > 0 || 
@@ -101,6 +123,8 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 ];
 
 import webtank.view_logic.html_controls, webtank.net.utils;
+
+/////////////////////////////////////
 
 string отрисоватьБлокФильтрации(ФильтрПоходов фильтрПоходов)
 {
@@ -157,11 +181,127 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		if( фильтрПоходов.сМатериалами )
 			set( "with_files", ` checked="checked"` );
 	}
+
+	return формаФильтрации.getString();
+}
+	/////////////////////	
+	
+string отрисоватьБлокФильтрации_для_печати(ФильтрПоходов фильтрПоходов)
+{   import std.array: join;
+//----------вид Туризма--------------------------------------
+	string[] строкиВидов;
+	if (фильтрПоходов.видыТуризма.length)
+	{
+		foreach( вид;	фильтрПоходов.видыТуризма )
+		{	
+			if( видТуризма.hasValue(вид) ) //Проверяет наличие значения в перечислимом типе
+			{
+				строкиВидов ~= видТуризма.getName(вид);
+			}
+		}
+	}
+	else
+	{
+		строкиВидов ~= "Все виды";
+	}	
+	
+	string списокВидовТуризма = строкиВидов.join(",<br>");
+	//-------категория Сложности---------------------------------------------
+	string[] строкиКС;
+	if (фильтрПоходов.видыТуризма.length)
+	{
+		foreach( кс;	фильтрПоходов.видыТуризма )
+		{	
+			if( готовностьПохода.hasValue(кс) ) //Проверяет наличие значения в перечислимом типе
+			{
+				строкиКС ~= готовностьПохода.getName(кс);
+			}
+		}
+	}
+	else
+	{
+		строкиКС ~= "Все категории";
+	}	
+	
+	string списокКС = строкиКС.join(",<br>");
+	
+	//------готовность похода----------------------------------------------
+	string[] строкиПодготовка;
+	if (фильтрПоходов.видыТуризма.length)
+	{
+		foreach( гп;	фильтрПоходов.видыТуризма )
+		{	
+			if( статусЗаявки.hasValue(гп) ) //Проверяет наличие значения в перечислимом типе
+			{
+				строкиПодготовка ~= статусЗаявки.getName(гп);
+			}
+		}
+	}
+	else
+	{
+		строкиПодготовка ~= "Все походы";
+	}	
+	
+	string списокПодготовка = строкиПодготовка.join(",<br>");
+	
+	//---------статус Заявка-------------------------------------------
+		string[] строкиЗаявка;
+	if (фильтрПоходов.видыТуризма.length)
+	{
+		foreach( сз;	фильтрПоходов.видыТуризма )
+		{	
+			if( готовностьПохода.hasValue(сз) ) //Проверяет наличие значения в перечислимом типе
+			{
+				строкиЗаявка ~= готовностьПохода.getName(сз);
+			}
+		}
+	}
+	else
+	{
+		строкиЗаявка ~= "Все походы";
+	}	
+	
+	string списокЗаявка = строкиЗаявка.join(",<br>");
+	
+	//----------------------------------------------------
+	
+
+	
+	import std.file : read;
+	import std.path : buildPath;
+	
+	string текстШаблонаФормыФильтрации = cast(string) std.file.read( buildPath(pageTemplatesDir, "pohod_filter_print.html" ) );
+	auto формаФильтрации = new PlainTemplater( текстШаблонаФормыФильтрации );
+	
+	foreach( имяПоля, дата; фильтрПоходов.сроки )
+	{
+		auto полеДаты = new PlainDatePicker;
+		полеДаты.name = имяПоля;
+		полеДаты.date = дата;
+		полеДаты.nullDayName = "день";
+		полеДаты.nullMonthName = "месяц";
+		полеДаты.nullYearName = "год";
+		
+		формаФильтрации.set( имяПоля, полеДаты.print() );
+	}
+	
+	with( формаФильтрации )
+	{
+		set( "vid", списокВидовТуризма );
+		set( "ks" , списокКС);
+		set( "prepar", списокПодготовка );
+		set( "stat", списокЗаявка);
+		
+		set( "region_pohod", HTMLEscapeValue(фильтрПоходов.районПохода) );
+		if( фильтрПоходов.сМатериалами )
+			set( "with_files", ` checked="checked"` );
+	}
+
 	
 	return формаФильтрации.getString();
 }
 
-
+	//////////////////////////////////////////////////////////////////////////////////////////////
 ФильтрПоходов получитьФильтрПоходов(HTTPContext context)
 {
 	auto rq = context.request;
@@ -249,11 +389,64 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 	return ( частиЗапроса_фильтрыПоходов.length > 0 ?
 		" ( " ~ частиЗапроса_фильтрыПоходов.join(" ) and ( ") ~ " ) " : null );
 }
+//-------------------------------------------------------------
 
+// -------Формирует информационную строку о временном диапозоне поиска походов
+string поисковый_диапозон_Походов(const ref ФильтрПоходов фильтрПоходов)
+{
+	import std.datetime: Date;		
+	
+		OptionalDate фильтрДатыНачало = фильтрПоходов.сроки[ "begin_date_range_head" ];
+		OptionalDate фильтрДатыКонец = фильтрПоходов.сроки[ "end_date_range_tail" ];
+		//writeln(фильтрДатыНачало);
+		//writeln(фильтрДатыКонец);
+		string [] _месяцы =["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+		string район;
+		string beginDateStr;
+		string endDateStr;
+		
+		if( фильтрПоходов.районПохода!="" ) район~="<br/>Район похода содержит [ "~фильтрПоходов.районПохода~" ].<br/>";
+		if( фильтрПоходов.сМатериалами ) район~=" По данным походам имеются отчёты или дополнительные материалы.<br/><br/>";
+		
+		if(фильтрДатыНачало.isNull) beginDateStr~=" не определено";
+		else
+		{
+		   if(  !фильтрДатыНачало.day.isNull ||  !фильтрДатыНачало.month.isNull)
+		   {
+		   beginDateStr ~= фильтрДатыНачало.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
+		       if(фильтрДатыНачало.day.isNull)
+		           beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы.getName(фильтрДатыНачало.month);
+		       else 		          
+		          
+		           beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы_родительный.getName(фильтрДатыНачало.month);
+		   }
+		beginDateStr ~=` `~ (фильтрДатыНачало.year.isNull ? "" : фильтрДатыНачало.year.to!string);
+		}
+		
+		if(фильтрДатыКонец.isNull) endDateStr~=" не определён ";
+		else
+		{ 
+		   if(  !фильтрДатыКонец.day.isNull ||  !фильтрДатыКонец.month.isNull)
+		    {
+		     endDateStr ~= фильтрДатыКонец.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
+		         if(фильтрДатыКонец.day.isNull)
+		             endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы.getName(фильтрДатыКонец.month);
+		         else  		    
+		             endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы_родительный.getName(фильтрДатыКонец.month);
+		    }
+		endDateStr ~=` `~(фильтрДатыКонец.year.isNull ? " " : фильтрДатыКонец.year.to!string);
+		}
+		
+	return (район~`<fieldset><legend>Сроки похода</legend> Начало похода `~beginDateStr ~`<br/> Конец похода  `~endDateStr~`</fieldset>`);
+}
+
+//-----------------------------------------------------------------------------
 
 string netMain(HTTPContext context)
 {	
 	auto rq = context.request;
+	
+	bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true форма для печати
 	
 	string content;
 	
@@ -273,9 +466,15 @@ string netMain(HTTPContext context)
 	string запросКоличестваПоходов = `select count(1) from pohod`;
  	
 	if( фильтрПоходов.естьФильтрация )
-		запросКоличестваПоходов ~= ` where ` ~ строкаЗапроса_фильтрыПохода;
+		запросКоличестваПоходов ~= ` where ` ~ строкаЗапроса_фильтрыПохода; 
+		
+	uint limit;	
+		
+	if (isForPrint)//для печати 
+	limit=10000;// максимальное  число строк на странице	
+	else	
+	limit = 10;// максимальное  число строк на странице
 	
-	uint limit = 10;// максимальное  число строк на странице
 	uint количествоПоходов = dbase.query(запросКоличестваПоходов).get(0, 0, "0").to!uint;
 	
 	uint pageCount = количествоПоходов/limit+1; //Количество страниц
@@ -371,19 +570,40 @@ LEFT OUTER JOIN t_chef
 	
 	auto rs = dbase.query(запросСпискаПоходов).getRecordSet(pohodRecFormat);
 
+	string pageSelector;// окна выбора страницы
+	 pageSelector ~= `<table class="ou_print"><tr><td style='width: 100px;'>`;
+	if (isForPrint)
+	{
+	 pageSelector ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
+	 ~ "</td><td>"~ "\r\n"
+	 
+	 ;
+	}
+	else
+	{
+	
 	// окна выбора страницы
-	string pageSelector = `<table><tr><td style='width: 100px;'>`
-	~ ( (curPageNum > 1) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum - 1).to!string ~ `)">Предыдущая</a>` : "" )
+	
+	pageSelector ~=( (curPageNum > 1) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum - 1).to!string ~ `)">Предыдущая</a>` : "" )
 	
 	~ "</td><td>"~ "\r\n"
 	~ ` Страница <input name="cur_page_num" type="text" size="4" maxlength="4" value="` ~ curPageNum.to!string ~ `"> из ` 
 	~ pageCount.to!string ~ ` <input type="submit" value="Перейти"> `
 	~ "</td><td>" ~ "\r\n"
 	~ ( (curPageNum < pageCount ) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum + 1).to!string ~ `)">Следующая</a>` : "")
-	~ "</td></tr></table>" ~ "\r\n";    
-	    
+		~ "\r\n";
+		}
+	  pageSelector ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+	 
+	 if (isForPrint)//для печати
+	      pageSelector ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;
+	   else	     
+	      pageSelector ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;
+	 
+	 pageSelector ~=   "</td></tr></table>"~ "\r\n";    
+	 
 	// Начало формирования основной отображающей таблицы  
-	string table = `<table class="tab1" >`;
+	string table = `<table class="tab1"    >`;
 	
 	table ~= "<tr>";
 	if(_sverka)
@@ -413,7 +633,7 @@ LEFT OUTER JOIN t_chef
 		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
 		
 		table ~= `<td  class="show_participants_btn"  style="text-align: center;">`~ "\r\n" 
-		~ (  rec.get!"Число участников"("Не задано") ) ~ `<img src="` ~ imgPath ~ `icons/list_icon.png">`
+		~ (  rec.get!"Число участников"("Не задано") ) ~ `<img class="noprint" src="` ~ imgPath ~ `icons/list_icon.png">`
 		~ `	<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
 		</td>`~ "\r\n";
 		
@@ -436,13 +656,24 @@ LEFT OUTER JOIN t_chef
 		table ~= `">Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`~ "\r\n";
 	}
 	table ~= "</table>\r\n";
-	// конец формирования основной таблицы
 	
-	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`;
 	
-	content ~= `<form id="main_form" method="post">`// содержимое страницы
-	~ отрисоватьБлокФильтрации(фильтрПоходов) ~ pageSelector ~ `</form><br>`~ "\r\n"
-	~ ( _sverka ? `<a href="` ~ dynamicPath ~ `edit_pohod">Добавить новый поход</a><br>` ~ "\r\n" : "" )
+  if (isForPrint)	//для печати 
+	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`~ "\r\n";
+	//content ~=поисковый_диапозон_Походов(фильтрПоходов)~ "\r\n";
+	content ~= `<form id="main_form" method="post">`~ "\r\n";// содержимое страницы
+	
+	if (isForPrint)//для печати
+	   {
+		content ~=`<fieldset><legend>Поисковые фильтры</legend>`
+		~отрисоватьБлокФильтрации_для_печати(фильтрПоходов)  
+		~`</span></fieldset>`~ "\r\n";
+		content ~=поисковый_диапозон_Походов(фильтрПоходов)~ pageSelector~ `</form><br>`~ "\r\n";
+		}
+	else
+		content ~= отрисоватьБлокФильтрации(фильтрПоходов) ~ pageSelector ~ `</form><br>`~ "\r\n";
+		
+	content ~=( _sverka ? `<a href="` ~ dynamicPath ~ `edit_pohod">Добавить новый поход</a><br>` ~ "\r\n" : "" )
 	~ `<p> Число походов ` ~ количествоПоходов.to!string ~ ` </p>`~ "\r\n"
 	~ table; //Тобавляем таблицу с данными к содержимому страницы
 	
