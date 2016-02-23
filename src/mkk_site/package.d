@@ -19,3 +19,4 @@ import mkk_site.edit_pohod; //Редактирование походов
 import mkk_site.show_pohod_for_tourist; //Список походов, в которых участвовал турист
 import mkk_site.pohod; //Карточка похода
 import mkk_site.inform; //Цели и задачи сайта
+import mkk_site.template_service; //Сервис получения HTML шаблонов

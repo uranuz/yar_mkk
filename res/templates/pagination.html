@@ -1,0 +1,18 @@
+<div class="b-pagination e-block">
+	<input type="hidden" name="cur_page_num" value="{{cur_page_num}}"/>
+	<span class="b-pagination e-prev_elem">
+		<a class="b-pagination e-prev_btn {{prev_btn_cls}}" href="#" 
+			onClick="gotoPage({{prev_page_num}})" {{prev_btn_attr}}>Предыдущая</a>
+	</span>
+	<span class="b-pagination e-current_elem">
+		<input class="b-pagination e-page_num_input" type="text" value="{{cur_page_num}}"/>
+	</span>
+	<span class="b-pagination e-total_elem">
+		{{page_count}}
+	</span>
+	<button type="submit">Перейти</button>
+	<span class="b-pagination e-next_elem">
+		<a class="b-pagination e-next_btn {{next_btn_cls}}" href="#" 
+			onClick="gotoPage({{next_page_num}})" {{next_btn_attr}}>Следующая</a>
+	</span>
+</div>
