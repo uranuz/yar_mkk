@@ -31,8 +31,8 @@ string netMain(HTTPContext context)
  bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
  string content;
  string table;
- content = `Относительно полная информация с 1992 года, ранее фрагментарный характер информации`;
- 
+ content = `<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>`~ "\r\n";
+ content ~=  ` <p><a href="/pub/stati_dokument/stat1992_2010.rar"   > Отчёты за 1992-2010 годы.(zip) </a></p> `~ "\r\n";
 
 import std.typecons;
 	
