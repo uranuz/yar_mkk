@@ -70,7 +70,7 @@ import std.typecons;
   string [] вид= ["Вид/КС","Пешый","Лыжный","Горный","Водный"," Вело ",	" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ИТОГО"] ;
   
    if( prezent_vid=="Весь период.")
-   { групп_человек=statRecFormatVid.names;
+   { групп_человек=statRecFormatVid.names.dup;
      заголовок= 
 	["Год":true, 	 "Пешый":true,  "Лыжный":true,  "Горный":true,  "Водный":true, 	" Вело ":true,      
 	" Авто ":true,  "Спелео":true, "Парус":true,  	"Конный":true,  "Комби":true,   	"ВСЕГО":true
@@ -78,7 +78,7 @@ import std.typecons;
 	}
    
 	if( prezent_vid=="За год.")  
-	{групп_человек=statRecFormatKC.names;
+	{групп_человек=statRecFormatKC.names.dup;
 		заголовок=
 	  ["Вид/КС":true,"н.к.":true,"первая":true,"вторая":true,"третья":true,
 	  "четвёртая":true, "пятая":true,"шестая":true,"пут.":true,"ВСЕГО":true];
