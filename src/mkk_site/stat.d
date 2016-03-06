@@ -65,12 +65,12 @@ import std.typecons;
  string year= PGEscapeStr( rq.bodyForm.get("year",   "2014") );
  string prezent_vid= PGEscapeStr( rq.bodyForm.get("prezent_vid","Весь период."));
  
- string[] prezent=["Весь период.","За год."]; 
+ string [] prezent=["Весь период.","За год."]; 
   bool[string] заголовок;
   string [] вид= ["Вид/КС","Пешый","Лыжный","Горный","Водный"," Вело ",	" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ИТОГО"] ;
   
    if( prezent_vid=="Весь период.")
-   { групп_человек=statRecFormatVid.names.dup;
+   { групп_человек=statRecFormatVid.names;
      заголовок= 
 	["Год":true, 	 "Пешый":true,  "Лыжный":true,  "Горный":true,  "Водный":true, 	" Вело ":true,      
 	" Авто ":true,  "Спелео":true, "Парус":true,  	"Конный":true,  "Комби":true,   	"ВСЕГО":true
@@ -78,7 +78,7 @@ import std.typecons;
 	}
    
 	if( prezent_vid=="За год.")  
-	{групп_человек=statRecFormatKC.names.dup;
+	{групп_человек=statRecFormatKC.names;
 		заголовок=
 	  ["Вид/КС":true,"н.к.":true,"первая":true,"вторая":true,"третья":true,
 	  "четвёртая":true, "пятая":true,"шестая":true,"пут.":true,"ВСЕГО":true];

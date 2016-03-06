@@ -65,7 +65,7 @@ public:
 	chef.given_name as "Имя рук",
 	chef.patronymic as "Отчество рук",
 	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "Организация", 
-	( coalesce(marchrut, '') ) as "Маршрут",
+	( coalesce(marchrut, '') ) as "Маршрут", 
 	( coalesce(chef_coment, '') ) as "Коментарий рук"
 from pohod 
 left outer join tourist as chef
@@ -153,6 +153,7 @@ class IndexView
 			chefName = HTMLEscapeText(chefName);
 			
 			string chefComment = HTMLEscapeText( rec.getStr!("Коментарий рук").take(100).text() );
+			
 			
 			string beginDate;
 			string endDate;
