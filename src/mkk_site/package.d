@@ -9,7 +9,7 @@ import mkk_site.show_pohod; //Список походов
 import mkk_site.show_moder; //Список модераторов
 import mkk_site.stati; //Статьи и документы
 
-static if( isMKKSiteDevelTarget )
+//static if( isMKKSiteDevelTarget )
 	import mkk_site.stat; //Статистика сайта
 
 // //Остальные разделы
