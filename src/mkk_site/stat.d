@@ -23,92 +23,106 @@ shared static this()
 }
 
 string netMain(HTTPContext context)
-
 {	
+	SiteLogger.trace("Начало обработки страницы stat");
+	
 	auto rq = context.request;//запрос
 	auto rp = context.response;//ответ
-	
- bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
- string content;
- string table;
- content = `<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>`~ "\r\n";
- content ~=  ` <p><a href="/pub/stati_dokument/stat1992_2010.rar"   > Отчёты за 1992-2010 годы.(zip) </a></p> `~ "\r\n";
 
-import std.typecons;
+	bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
+	SiteLogger.trace( "Задана версия страницы " ~ ( isForPrint ? "для печати" : "обычная" ) ) ;
+ 
+	string content;
+	string table;
+	content ~= `<h3>Статистические данные по походам</h3>` ~ "\r\n";
+	content ~= `<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>` ~ "\r\n";
+	content ~= `<p><a href="/pub/stati_dokument/stat1992_2010.rar"> Отчёты за 1992-2010 годы (zip) </a></p>` ~ "\r\n";
+
+	import std.typecons;
 	
    ///Начинаем оформлять таблицу с данными
    static immutable statRecFormatVid = RecordFormat!(
-		PrimaryKey!(string), "Год", 		 
-		string,"Пешый", string,"Лыжный", 	string,"Горный",	string,"Водный", 	string," Вело ",
-		string," Авто ", 	string,"Спелео",	string, "Парус", 	string,"Конный",	string, "Комби", 
-		string, "ВСЕГО"		
-	)(		null,	tuple()	);
+		PrimaryKey!(string), "Год",
+		string, "Пеший", string, "Лыжный", string, "Горный", string, "Водный", string, "Вело",
+		string, "Авто", string, "Спелео", string, "Парус", string, "Конный", string, "Комби", 
+		string, "ВСЕГО"
+	)( null, tuple() );
 	
 	 static immutable statRecFormatKC = RecordFormat!(
-		PrimaryKey!(string), "Вид/КС", 		 
-		string,"н.к.", string,"первая", 	string,"вторая",	string,"третья", 	string,"четвёртая",
-		string,"пятая", 	string,"шестая",	string, "пут.", 
-		string, "ВСЕГО"		
-	)(		null,	tuple()	);
-	
-	
+		PrimaryKey!(string), "Вид/КС",
+		string, "н.к.", string, "первая", string, "вторая", string, "третья", string, "четвёртая",
+		string, "пятая", string, "шестая", string, "пут.", 
+		string, "ВСЕГО"
+	)( null, tuple() );
+
 	//int[string]ks=["н.к.","первая","вторая","третья","четвёртая","пятая","шестая","пут.","всего"];
 	string[] групп_человек;
 	
- auto dbase = getCommonDB(); //Подключение к базе
+	auto dbase = getCommonDB(); //Подключение к базе
+	
+	bool b_kod = false, b_org = false, b_terr = false;
+	
+	string kod = PGEscapeStr( rq.bodyForm.get("kod_MKK", "") );
+	string org = PGEscapeStr( rq.bodyForm.get("organization", "") );
+	string terr = PGEscapeStr( rq.bodyForm.get("territory", "") );
+	string year = PGEscapeStr( rq.bodyForm.get("year", "2014") );
+	string prezent_vid = PGEscapeStr( rq.bodyForm.get("prezent_vid", "Весь период") );
  
- bool b_kod=false, b_org=false, b_terr=false;
- 
- string kod= PGEscapeStr( rq.bodyForm.get("kod_MKK",     "") );
- string org= PGEscapeStr( rq.bodyForm.get("organization", "") );
- string terr= PGEscapeStr( rq.bodyForm.get("territory",   "") );
- string year= PGEscapeStr( rq.bodyForm.get("year",   "2014") );
- string prezent_vid= PGEscapeStr( rq.bodyForm.get("prezent_vid","Весь период."));
- 
- string [] prezent=["Весь период.","За год."]; 
-  bool[string] заголовок;
-  string [] вид= ["Вид/КС","Пешый","Лыжный","Горный","Водный"," Вело ",	" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ИТОГО"] ;
+	string [] prezent = [ "Весь период", "За год" ]; 
+	bool[string] заголовок;
+	SiteLogger.trace( "Составление списка видов" );
+	string[] вид = [ "Вид/КС", "Пеший", "Лыжный", "Горный", "Водный", "Вело", "Авто", "Спелео", "Парус", "Конный", "Комби", "ИТОГО" ] ;
   
-   if( prezent_vid=="Весь период.")
-   { групп_человек=statRecFormatVid.names.dup;
-     заголовок= 
-	["Год":true, 	 "Пешый":true,  "Лыжный":true,  "Горный":true,  "Водный":true, 	" Вело ":true,      
-	" Авто ":true,  "Спелео":true, "Парус":true,  	"Конный":true,  "Комби":true,   	"ВСЕГО":true
-	] ;
+	SiteLogger.trace( "Составление словаря имен полей" );
+	if( prezent_vid == "Весь период" )
+	{ 
+		групп_человек = statRecFormatVid.names.dup;
+		заголовок = [
+			"Год": true, "Пеший": true,  "Лыжный": true, "Горный": true,  "Водный": true, "Вело": true,      
+			"Авто": true, "Спелео": true, "Парус": true, "Конный": true,  "Комби": true, "ВСЕГО": true
+		] ;
 	}
    
-	if( prezent_vid=="За год.")  
-	{групп_человек=statRecFormatKC.names.dup;
-		заголовок=
-	  ["Вид/КС":true,"н.к.":true,"первая":true,"вторая":true,"третья":true,
-	  "четвёртая":true, "пятая":true,"шестая":true,"пут.":true,"ВСЕГО":true];
-	  
+	if( prezent_vid == "За год" )  
+	{
+		групп_человек = statRecFormatKC.names.dup;
+		заголовок = [
+			"Вид/КС": true, "н.к.": true, "первая": true, "вторая": true, "третья": true,
+			"четвёртая": true, "пятая": true, "шестая": true, "пут.": true, "ВСЕГО": true
+		];
 	}
   //writeln(групп_человек);
-   if(kod!="")  b_kod= true;
-   if(org!="")  b_org= true;
-   if(terr!="") b_terr=true;
+   if( kod != "" )  b_kod = true;
+   if( org != "" )  b_org = true;
+   if( terr != "" ) b_terr = true;
  
+	SiteLogger.trace( "Генерация запроса выбора статистики за весь период" );
 	string запрос_статистика;
-	///////-----Весь период---------
-	if( prezent_vid=="Весь период.")
+///////-----Весь период---------
+if( prezent_vid=="Весь период")
 {
-	запрос_статистика= ` WITH 
-      stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod`;
-      if (b_kod || b_org ||  b_terr )   запрос_статистика ~=` WHERE `;
-      if (b_kod) 
-            { запрос_статистика ~=` kod_mkk ILIKE '%`~ kod ~`%'`;      
-                if (b_org ||  b_terr ) запрос_статистика ~=` AND `;
-            }
-              
-       if (b_org) 
-             {запрос_статистика ~=` organization ILIKE '%`~ org ~`%'`;
-                 if (b_terr ) запрос_статистика ~=` AND `;
-              }
-                 
-       if (b_terr ) запрос_статистика ~=` region_group ILIKE '%`~ terr ~`%'`;           
+	запрос_статистика = ` WITH 
+      stat AS (select  CAST ( date_part('YEAR', begin_date) AS integer) AS year, vid, ks, CAST (unit AS integer)  AS unit FROM pohod`;
+	if( b_kod || b_org ||  b_terr )
+		запрос_статистика ~= ` WHERE `;
+	if( b_kod ) 
+	{ 
+		запрос_статистика ~= ` kod_mkk ILIKE '%` ~ kod ~ `%'`;      
+		if (b_org ||  b_terr ) 
+			запрос_статистика ~=` AND `;
+	}
+			
+	if( b_org ) 
+	{
+		запрос_статистика ~=` organization ILIKE '%` ~ org ~ `%'`;
+		if( b_terr ) 
+			запрос_статистика ~=` AND `;
+	}
+				
+	if( b_terr ) 
+		запрос_статистика ~= ` region_group ILIKE '%` ~ terr ~ `%'`;           
      
-     запрос_статистика ~=` ORDER BY year ),
+	запрос_статистика ~= ` ORDER BY year ),
 
       st1 AS ( SELECT year, 
                                 COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
@@ -120,7 +134,7 @@ st2 AS ( SELECT year,
                                 CAST(sum (unit)  AS VARCHAR)  ||  ')'
  )    AS un_2   FROM stat  WHERE  vid=2  GROUP BY year ORDER BY year ),
  st3 AS ( SELECT year,
-   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
+   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('||
                                 CAST(sum (unit)  AS VARCHAR)  ||  ')'
  )    AS un_3   FROM stat  WHERE  vid=3  GROUP BY year ORDER BY year  ),
  st4 AS ( SELECT year,
@@ -135,7 +149,6 @@ st5 AS ( SELECT year,
    COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
                                 CAST(sum (unit)  AS VARCHAR)  ||  ')'
   )   AS un_6   FROM stat  WHERE  vid=6  GROUP BY year ORDER BY year  ),
-
 
 st7 AS ( SELECT year,
   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
@@ -157,17 +170,13 @@ st10 AS ( SELECT year,
                                 CAST(sum (unit)  AS VARCHAR)  ||  ')'
  )    AS un_10   FROM stat  WHERE  vid=10  GROUP BY year ORDER BY year  ),
 
-
-
- всего AS ( SELECT year,
+всего AS ( SELECT year,
   COALESCE(  CAST(count(unit) AS VARCHAR)  ||  '('|| 
                                 CAST(sum (unit)  AS VARCHAR)  ||  ')'
  )    AS un_всего   FROM stat GROUP BY year ORDER BY year )
 
 SELECT
 всего.year,
- 
- 
  un_1,
  un_2,
  un_3,
@@ -180,7 +189,6 @@ SELECT
  un_10,
 
 un_всего 
-
 
  FROM  всего
 
@@ -195,47 +203,39 @@ un_всего
   LEFT JOIN st9 ON всего.year  = st9.year
   LEFT JOIN st10 ON всего.year  = st10.year `;
 }
-     //-----конец -- Весь период---
-     
-     
-   //  --------За год-----------
-   
-  
-   
-  if( prezent_vid=="За год.")
+	//-----конец -- Весь период---
+
+	SiteLogger.trace( "Генерация запроса выбора статистики за указанный год" );
+	//  --------За год-----------
+  if( prezent_vid == "За год" )
 {
-   запрос_статистика= `
-   
+   запрос_статистика = `
    WITH stat_by_year AS (
     SELECT CAST(unit AS integer) AS unit,vid,ks
     FROM pohod 
-    WHERE (date_part('YEAR', begin_date)=`~year~` )     
+    WHERE (date_part('YEAR', begin_date)=` ~ year ~ ` )     
     `;   
     
-  if (b_kod) 
-            { запрос_статистика ~=` AND  kod_mkk ILIKE '%`~ kod ~`%' `;      
-               // if (b_org ||  b_terr ) запрос_статистика ~=` AND `;
-            }
+	if (b_kod) 
+	{ 
+		запрос_статистика ~=` AND kod_mkk ILIKE '%` ~ kod ~ `%' `;
+		// if (b_org ||  b_terr ) запрос_статистика ~=` AND `;
+	}
               
-       if (b_org) 
-             {запрос_статистика ~=`  AND  organization ILIKE '%`~ org ~`%'`;
-               //  if (b_terr ) запрос_статистика ~=` AND `;
-              }
-                 
-       if (b_terr ) 
-              запрос_статистика ~=`  AND  region_group ILIKE '%`~ terr ~`%'`;         
-    
-             // запрос_статистика ~= ` AND  (date_part('YEAR', begin_date)=2000` ;
-              
-    
- запрос_статистика~= ` ) ,`;
- 
- 
-запрос_статистика~= `
+	if (b_org) 
+	{
+		запрос_статистика ~= ` AND organization ILIKE '%` ~ org ~ `%'`;
+		//  if (b_terr ) запрос_статистика ~=` AND `;
+	}
+				
+	if (b_terr ) 
+	запрос_статистика ~= ` AND region_group ILIKE '%` ~ terr ~ `%'`;
+	// запрос_статистика ~= ` AND  (date_part('YEAR', begin_date)=2000` ;
 
+	запрос_статистика ~= ` ), `;
 
-
-ks0 AS ( SELECT vid,count(unit) AS gr_ks0,sum (unit)    AS un_ks0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 )GROUP BY vid ORDER BY vid  ),
+	запрос_статистика ~= `
+ks0 AS ( SELECT vid,count(unit) AS gr_ks0,sum (unit)    AS un_ks0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 ) GROUP BY vid ORDER BY vid  ),
  ks1 AS ( SELECT vid,count(unit) AS gr_ks1,sum (unit)    AS un_ks1   FROM stat_by_year  WHERE  ks=1  GROUP BY vid ORDER BY vid  ),
  ks2 AS ( SELECT vid,count(unit) AS gr_ks2,sum (unit)    AS un_ks2   FROM stat_by_year  WHERE  ks=2  GROUP BY vid ORDER BY vid  ),
  ks3 AS ( SELECT vid,count(unit) AS gr_ks3,sum (unit)    AS un_ks3   FROM stat_by_year  WHERE  ks=3  GROUP BY vid ORDER BY vid  ),
@@ -245,7 +245,6 @@ ks0 AS ( SELECT vid,count(unit) AS gr_ks0,sum (unit)    AS un_ks0   FROM stat_by
  put AS ( SELECT vid,count(unit) AS gr_put,sum (unit)    AS un_put   FROM stat_by_year  WHERE  ks=7  GROUP BY vid ORDER BY vid  ),
  всего  AS ( 
     SELECT vid,count(unit) AS gr_всего,sum (unit)    AS un_всего   FROM stat_by_year GROUP BY vid ORDER BY vid ),
-
 
 st AS (
 SELECT
@@ -260,7 +259,7 @@ gr_ks6, un_ks6,
 gr_put, un_put,
 gr_всего, un_всего 
 
- FROM  всего
+ FROM "всего"
   LEFT JOIN ks0 ON всего.vid   = ks0.vid
   LEFT JOIN ks1 ON всего.vid   = ks1.vid
   LEFT JOIN ks2 ON всего.vid   = ks2.vid
@@ -314,87 +313,60 @@ st2 AS (
 
               )
 
-SELECT*FROM st2 ORDER BY vid 
-  
-  
-  `;
-  
-  
+SELECT * FROM st2 ORDER BY vid`;
 } 
-  
-
-   //-----конец --За год
-     
-     
-     
-      IBaseRecordSet rs;
+	SiteLogger.trace( "Подготовка к исполнению запроса на выбор статистики" );
+	//-----конец --За год
+	IBaseRecordSet rs;
       
-   if( prezent_vid=="Весь период.")  rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
-   if( prezent_vid=="За год.")       rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
+	if( prezent_vid == "Весь период" )
+		rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
+	if( prezent_vid == "За год" )
+		rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
+	SiteLogger.trace( "Запрос выполнен" );
    
-  /* auto q_res = dbase.query(запрос_статистика);
-   for( size_t i = 0; i < q_res.recordCount; ++i )
-   {
-		for( size_t j = 0; j < q_res.fieldCount; ++j )
-		{
-			std.stdio.write( q_res.get(j, i), "; " );
-		}
-		std.stdio.writeln();
-   }*/
-   
-   
-//writeln(rs.getStr);
-      
   //--------проверка пустых столбцов------------------------ 
-
+	SiteLogger.trace( "Проверка пустых столбцов" );
    foreach(k;заголовок.byKey())
-	  {
-	   string kl;
-	   for( size_t i = 0; i < rs.length; ++i  )
-	   {  
-			kl ~= rs[i].getStr(k, "");
+	{
+		string kl;
+		for( size_t i = 0; i < rs.length; ++i  )
+		{  
+			kl ~= rs[i].getStr( k, "" );
 		}
-   	//foreach(rec; rs) kl~=rec.getStr(k, "");;
-   	if(kl=="") заголовок[k]=false;
-	
-	  }
-  
-   
-   
-  //---------заголовок таблицы -------------------------------------- 
-   
-   
-   table~=`<table class="tab1" >`;
-   table~=`<tr>`;
-  
-    
-    foreach(td; групп_человек)
-     {
-      if(заголовок[td]) table     ~=`<td>`~td~`</td>`~ "\r\n";
-      
-     }   
- 
-    
-  table ~=` </tr>
+		//foreach(rec; rs) kl~=rec.getStr(k, "");;
+		if( kl == "" )
+			заголовок[k] = false;
+	}
 
- `;
+	//---------заголовок таблицы -------------------------------------- 
+	table ~= `<table class="tab1">`;
+	table ~= `<tr>`;
+	SiteLogger.trace( "Построение заголовка таблицы" );
+	foreach(td; групп_человек)
+	{
+		if( заголовок[td] ) 
+			table ~= `<td>` ~ td ~ `</td>` ~ "\r\n";
+	}
+
+	table ~= `</tr>`;
    //-----------------------------------------------
-  for( size_t i = 0; i < rs.length; ++i  )//формирование ячеек таблицы
-  {
-  table ~= `<tr>`;
-      foreach(v,td; групп_человек)
-      {
-      if(v==0  &&  prezent_vid=="Весь период." )
-              table ~= `<td>` ~rs[i].getStr(td, "-") ~ `</td>`~ "\r\n" ;
-   
-      if(v==0  &&  prezent_vid=="За год.")
-              table ~= `<td>`
-               ~  вид [ rs[i].getStr(td, "").to!int ]~ `</td>`~ "\r\n" ;
-              
-      if(заголовок[td] && v!=0) table ~= `<td>` ~rs[i].getStr(td, "-") ~ `</td>`~ "\r\n";
-      }
-  table ~= `</tr>`~ "\r\n";
-  }
+	for( size_t i = 0; i < rs.length; ++i  )//формирование ячеек таблицы
+	{
+		table ~= `<tr>`;
+		foreach( v, td; групп_человек )
+		{
+			if( v==0 && prezent_vid == "Весь период" )
+				table ~= `<td>` ~ rs[i].getStr(td, "-") ~ `</td>` ~ "\r\n" ;
+
+			if( v==0 && prezent_vid == "За год" )
+				table ~= `<td>` ~ вид[ rs[i].getStr(td, "").to!int ] ~ `</td>` ~ "\r\n" ;
+						
+			if( заголовок[td] && v != 0 )
+				table ~= `<td>` ~ rs[i].getStr( td, "-" ) ~ `</td>` ~ "\r\n";
+		}
+		table ~= `</tr>` ~ "\r\n";
+	}
   
   table ~=` </table>`; 
   //---------------------------------------------------
@@ -402,74 +374,84 @@ content ~=`<form id="main_form" method="post">`
 //--блок переключения вида
 ~`<fieldset>`;  
 
- if (isForPrint)
-  {
-     if(prezent_vid=="Весь период.") content ~=`Весь период.`;
-     if(prezent_vid=="За год.") content ~=`За `~year~` год.`;
-      content ~=`<div  class="no_print">`; 
-   } 
-  else content~=`<div >`;
+	if( isForPrint )
+	{
+		if( prezent_vid == "Весь период" )
+			content ~= `Весь период`;
+		if( prezent_vid == "За год" )
+			content ~= `За ` ~ year ~ ` год`;
+		content ~= `<div  class="no_print">`; 
+	} 
+	else content ~= `<div>`;
   
-    foreach(d; prezent)
-    {
-        content ~=`<input  type="radio"    
-        name="prezent_vid" value="`~ d ~`"`;
-        if(d==prezent_vid) content ~=`  checked `;
-        content ~= `>`~d;
-    } 
- content ~=`</div> </fieldset> `;
+	foreach(d; prezent)
+	{
+		content ~= `<label><input type="radio" name="prezent_vid" value="` ~ d ~ `"`;
+		if( d == prezent_vid ) 
+			content ~=` checked `;
+		content ~= `>` ~ d ~ `</label> `;
+	} 
+	content ~= `</div> </fieldset> `;
    
- // блок фильтров   
- 
- 
-  content ~=`<fieldset>`;
-   if(!isForPrint || kod~org~terr!=``)  content ~=`<legend>Фильтры</legend>`;
+	// блок фильтров
+	content ~= `<fieldset>`;
+	if( !isForPrint || kod ~ org ~ terr != `` )  content ~=`<legend>Фильтры</legend>`;
   
-   if (isForPrint)
-   {
-       if (kod!=`` ) content ~=`Код МКК `~ kod~`<br/>`; 
-       if (org!=`` )content ~=`Организация `~ org~`<br/>`;
-       if (terr!=``)content ~=`Территория `~terr;
-   
-    content ~=`<div  class="no_print">`; 
-   }
-   else content~=`<div >`;
-   
-  content ~=`<input type="text" name="kod_MKK"  size="6"  value="`
-  ~  HTMLEscapeValue( rq.bodyForm.get("kod_MKK", "176-00") ) 
-  ~ `" > 
-                                 код МКК (176-00, 000-00, и т.п.)<br/>`
-  ~`<input type="text" name="organization" size="12" value="`
-  ~HTMLEscapeValue( rq.bodyForm.get("organization", "") )
-  ~ `"  >
-                                  организация<br/>`
-  ~`<input type="text" name="territory"  size="12"value="`
-  ~HTMLEscapeValue( rq.bodyForm.get("territory", "") )
-  ~`"  > 
-                                  территория ( Ярославль, Тутаев, Москва, и т.п.) <br/>`;
-                                  
-   if(prezent_vid=="За год.")                              
-  content ~=`<input type="text" name="year"  size="4" value="`                               
-  ~HTMLEscapeValue( rq.bodyForm.get("year", "2000") )
-  ~`"  > 
-                                 год <br/>`;                                 
-                                
-content ~=`</div></fieldset><br/>`;
+	if( isForPrint )
+	{
+		if( kod != `` )
+			content ~= `Код МКК ` ~ PGEscapeStr(kod) ~ `<br/>`; 
+		if( org != `` )
+			content ~= `Организация ` ~ PGEscapeStr(org) ~ `<br/>`;
+		if( terr != `` )
+			content ~= `Территория ` ~ PGEscapeStr(terr);
 
+		content ~= `<div class="no_print">`; 
+	}
+	else content ~= `<div >`;
+	
+	SiteLogger.trace( "Формирование полей фильтрации страницы" );
+	content ~= `<input type="text" name="kod_MKK"  size="6" value="`
+		~ HTMLEscapeValue( rq.bodyForm.get("kod_MKK", "176-00") ) 
+		~ `"> код МКК (176-00, 000-00, и т.п.)<br/>`
+		
+		~ `<input type="text" name="organization" size="12" value="`
+		~ HTMLEscapeValue( rq.bodyForm.get("organization", "") )
+		~ `"> организация<br/>`
+		
+		~ `<input type="text" name="territory" size="12" value="`
+		~ HTMLEscapeValue( rq.bodyForm.get("territory", "") )
+		~ `"> территория ( Ярославль, Тутаев, Москва, и т.п.) <br/>`;
+                                  
+	if( prezent_vid == "За год" )                              
+		content ~= `<input type="text" name="year" size="4" value="`                               
+		~ HTMLEscapeValue( rq.bodyForm.get("year", "2016") )
+		~ `"> год <br/>`;
+                                
+	content ~= `</div></fieldset><br/>`;
+
+	SiteLogger.trace( "Формирование управляющих кнопок" );
    if (isForPrint)
 	{
-	 content ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
-	 ~ "\r\n" ;}
-	 else content ~=`<button  name="filtr" type="submit" class="noprint" > Обновить </button>`;
-content ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-
+		content ~= ` <a href='javascript:window.print(); void 0;' class="noprint"><img  height="60" width="60" class="noprint" src="/pub/img/icons/printer.png"/></a> <!-- печать страницы -->`
+		~ "\r\n" ;
+	}
+	else 
+		content ~= `<button name="filtr" type="submit" class="noprint">Обновить</button>`;
+	content ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+	
+	SiteLogger.trace( "Формирование кнопок смены версии страницы" );
    if (isForPrint)//для печати
-	      {content ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;}
-	 else	     
-	    { content ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;}
- content ~= `</form>` ~ "\r\n";
- content~= table;
- content~=`<canvas width="300" height="225"></canvas>`~ "\r\n";
- 
+	{
+		content ~= ` <button name="for_print" type="submit" class="noprint">Назад</button>`;
+	}
+	else
+	{ 
+		content ~= ` <button name="for_print" type="submit" value="on">Для печати</button>`;
+	}
+	content ~= `</form>` ~ "\r\n";
+	content ~= table;
+
+	SiteLogger.trace( "Обработка страницы stat завершена" );
 	return content;
 }
