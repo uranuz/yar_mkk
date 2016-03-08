@@ -1,3 +1,4 @@
+<hr/>
 <div class="b-tourist_info e-block">
 	<h3>{{Фамилия}} {{Имя}} {{Отчество}}</h3>
 	<div class="b-tourist_info e-property">
@@ -21,8 +22,35 @@
 		<br/>
 		<span class="b-tourist_info e-property_value">{{Коментарий}}</span>
 	</div>
-	<!--<button>Do smth!</button>-->
-	<div class="b-tourist_info e-pohod_container">
-		{{pohod_list}}
+	<!-- <button class="do-smth_btn">Do smth!</button> -->
+	<p class="{{no_pohods_found_msg_cls}}">
+		Нет сведений о походах данного туриста
+	</p>
+	<div class="{{found_pohods_sect_cls}}">
+		<p> {{pohod_count}} походов найдено </p>
+		<form id="main_form" method="post">
+			{{tourist_list_pagination}}
+		</form>
+		<div class="b-tourist_info e-pohod_container">
+			<table>
+				<tbody>
+					<tr>
+						<th class="{{pohod_num_col_header_cls}}">#</th>
+						<th>№ книги</th>
+						<th>Сроки похода</th>
+						<th>Вид, категория</th>
+						<th>Район</th>
+						<th>Должность</th>
+						<th>Город, организация</th>
+						<th>Статус похода</th>
+						<th class="{{edit_pohod_col_header_cls}}">Изменить</th>
+					</tr>
+				</tbody>
+				<tbody class="b-tourist_info e-pohod_list">
+					{{pohod_list}}
+				</tbody>
+				<p class=""></p>
+			</table>
+		</div>
 	</div>
 </div>

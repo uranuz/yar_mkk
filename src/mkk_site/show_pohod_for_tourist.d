@@ -1,6 +1,6 @@
 module mkk_site.show_pohod_for_tourist;
 
-import std.conv, std.string, std.utf, std.typecons;
+import std.conv, std.string, std.utf, std.typecons, std.json;
 import std.file;
 
 import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.templating.plain_templater_datctrl, webtank.net.http.context, webtank.common.optional;
@@ -8,11 +8,13 @@ import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.pos
 import mkk_site;
 
 immutable(string) thisPagePath;
+static immutable size_t pohodsPerPage = 10;
 
 shared static this()
 {	
 	thisPagePath = dynamicPath ~ "show_pohod_for_tourist";
 	PageRouter.join!(netMain)(thisPagePath);
+	JSONRPCRouter.join!(getPohodsForTourist);
 }
 
 string netMain(HTTPContext context)
@@ -42,10 +44,8 @@ string netMain(HTTPContext context)
 	
 	bool isAuthorized = user.isAuthenticated && ( user.isInRole("admin") || user.isInRole("moder") );
 	auto touristInfo = TouristInfo.getTouristInfo(touristKey);
-	content ~= TouristInfoView.renderTouristProps(touristInfo);
 	
 	size_t pohodCount = TouristInfo.getPohodCount(touristKey.value);
-	size_t pohodsPerPage = 10;
 	size_t pageCount = pohodCount / pohodsPerPage + 1;
 	
 	if( curPageNum == 0 || curPageNum > pageCount )
@@ -55,17 +55,46 @@ string netMain(HTTPContext context)
 		touristKey.value, curPageNum, pohodsPerPage
 	);
 	
-	PohodListParams params;
-	params.touristKey = touristKey.value;
-	params.isAuthorized = isAuthorized;
-	params.curPageNum = curPageNum;
-	params.pohodCount = pohodCount;
-	params.pohodsPerPage = pohodsPerPage;
-	params.pageCount = pageCount;
+	static struct ViewModel
+	{
+		typeof(pohodsList) pohodsRS; //RecordSet
+		typeof(touristInfo) touristRec; //Record
+		size_t touristKey;
+		bool isAuthorized;
+		size_t curPageNum;
+		size_t pohodCount;
+		size_t pohodsPerPage;
+		size_t pageCount;
+	}
 	
-	content ~= TouristInfoView.renderPohods( pohodsList, params );
+	ViewModel vm = ViewModel(
+		pohodsList,
+		touristInfo,
+		touristKey.value,
+		isAuthorized,
+		curPageNum,
+		pohodCount,
+		pohodsPerPage,
+		pageCount
+	);
+	
+	return TouristInfoView.renderTouristProps(vm);
+}
 
-	return content;
+JSONValue getPohodsForTourist( HTTPContext context, size_t touristKey, size_t curPageNum )
+{
+	JSONValue vm;
+	
+	auto user = context.user;
+	
+	vm["isAuthorized"] = user.isAuthenticated && ( user.isInRole("admin") || user.isInRole("moder") );
+	vm["pohodsRS"] = 
+		TouristInfo.getPohodsList( touristKey, curPageNum, pohodsPerPage )
+		.getStdJSON();
+	vm["dynamicPath"] = dynamicPath;
+	vm["touristKey"] = touristKey;
+	
+	return vm;
 }
 
 class TouristInfo
@@ -199,31 +228,16 @@ where ` ~  touristKey.text ~ ` = any( unit_neim );
 		
 		return pohodCount;
 	}
-
-
-}
-
-struct PohodListParams
-{
-	size_t touristKey;
-	bool isAuthorized;
-	size_t curPageNum;
-	size_t pohodCount;
-	size_t pohodsPerPage;
-	size_t pageCount;
 }
 
 class TouristInfoView
 {
 public:
-	static string renderTouristProps(Rec)(Rec rec)
+	static string renderTouristProps(VM)(ref VM vm)
 	{
-		string content = `<hr>` ~ "\r\n";
-		
-		if( rec is null )
+		if( vm.touristRec is null )
 		{
-			content ~= `<p>Не удалось получить информацию по туристу</p>`;
-			return content;
+			return `<p>Не удалось получить информацию по туристу</p>`;
 		}
 		
 		auto tpl = getPageTemplate(pageTemplatesDir ~ "show_pohod_for_tourist.html");
@@ -237,71 +251,53 @@ public:
 			"Комментарий": ""
 		];
 		
-		tpl.fillFrom(rec, fillAttrs);
-
-		content ~= tpl.getString();
+		tpl.fillFrom( vm.touristRec, fillAttrs );
 		
-		return content;
-	}
-	
-	static string renderPohods(RS)(RS rs, ref const(PohodListParams) params)
-	{
-		string content;
-		
-		if( params.pohodCount == 0 )
+		if( vm.pohodCount == 0 )
 		{
-			content ~= "Нет сведений о походах данного туриста";
-			return content;
+			tpl.set( "found_pohods_sect_cls", "is-hidden" );
 		}
-
-		content ~=`<h2> Походов ` ~ params.pohodCount.text ~` </h2>`~ "\r\n";
-		content ~= `<form id="main_form" method="post">`;
+		else
+		{
+			tpl.set( "no_pohods_found_msg_cls", "is-hidden" );
+		}
 		
+		tpl.set( "pohod_count", vm.pohodCount.text );
+
 		auto paginTpl = getPageTemplate(pageTemplatesDir ~ "pagination.html");
 		
-		if( params.curPageNum <= 1 )
+		if( vm.curPageNum <= 1 )
 		{
 			paginTpl.set( "prev_btn_cls", ".is-inactive_link" );
 			paginTpl.set( "prev_btn_attr", `disabled="disabled"` );
 		}
 			
-		paginTpl.set( "prev_page_num", (params.curPageNum - 1).text );
-		paginTpl.set( "cur_page_num", params.curPageNum.text );
-		paginTpl.set( "page_count", params.pageCount.text );
-		paginTpl.set( "next_page_num", (params.curPageNum + 1).text );
+		paginTpl.set( "prev_page_num", (vm.curPageNum - 1).text );
+		paginTpl.set( "cur_page_num", vm.curPageNum.text );
+		paginTpl.set( "page_count", vm.pageCount.text );
+		paginTpl.set( "next_page_num", (vm.curPageNum + 1).text );
 		
-		if( params.curPageNum >= params.pageCount )
+		if( vm.curPageNum >= vm.pageCount )
 		{
 			paginTpl.set( "next_btn_cls", ".is-inactive_link" );
 			paginTpl.set( "next_btn_attr", `disabled="disabled"` );
 		}
 		
-		content ~= paginTpl.getString();
+		tpl.set( "tourist_list_pagination", paginTpl.getString() );
 		
-		content ~= "</form>\r\n";
+		if( !vm.isAuthorized )
+		{
+			tpl.set( "pohod_num_col_header_cls", "is-hidden" );
+			tpl.set( "edit_pohod_col_header_cls", "is-hidden" );
+		}
 		
-		string table = `<table class="tab1">`;
+		tpl.set( "pohod_list", renderPohods(vm) );
+
+		return tpl.getString();
+	}
 	
-		table ~= "<tr>";
-		
-		if( params.isAuthorized )
-			table ~= `<th>#</th>`;
-			
-		table ~=
-`<th>№ книги</th>
-<th>Сроки похода</th>
-<th>Вид, категория</th>
-<th>Район</th>
-<th>Роль в группе</th>
-<th>Город, организация</th>
-<th>Статус похода</th>` ~ "\r\n";
-		
-		if( params.isAuthorized ) 
-			table ~= `<th>Изменить</th>` ~ "\r\n";
-		table ~= "</tr>";
-		
-		table ~= `<tbody>`;
-		
+	static string renderPohods(VM)(ref VM vm)
+	{
 		auto pohodTpl = getPageTemplate(pageTemplatesDir ~ "pohod_for_tourist.html");
 		FillAttrs pohodFillAttrs;
 		pohodFillAttrs.noEscaped = [ "Номер книги", "Организация" ];
@@ -315,8 +311,10 @@ public:
 			"Статус": "не известно",
 			"Маршрут": "не известно",
 		];
+		
+		string content;
 			
-		foreach(rec; rs)
+		foreach(rec; vm.pohodsRS)
 		{	
 			pohodTpl.fillFrom(rec, pohodFillAttrs);
 
@@ -324,7 +322,7 @@ public:
 			string endDate = rec.isNull("Дата конца") ? null : rec.get!"Дата конца"().rusFormat();
 			pohodTpl.set( "Сроки", beginDate ~ "<br>\r\n" ~ endDate );
 			
-			if( params.isAuthorized )
+			if( vm.isAuthorized )
 			{
 				string pohodKey = rec.isNull("Ключ") ? "" : rec.get!"Ключ"().text;
 				pohodTpl.set( "Колонка ключ",  `<td>` ~ pohodKey ~ `</td>` );
@@ -332,17 +330,12 @@ public:
 					~ pohodKey ~ `">Изменить</a></td>` );
 			}
 
-			pohodTpl.set( "Роль",
-				params.touristKey == rec.get!"Ключ рук"() ? `Руков` : `Участ`
+			pohodTpl.set( "Должность",
+				vm.touristKey == rec.get!"Ключ рук"() ? `Руков` : `Участ`
 			);
 
-			//`<td style="background-color:#8dc0de;" colspan="`;
-			table ~= pohodTpl.getString();
+			content ~= pohodTpl.getString();
 		}
-		table ~= `</tbody>`;
-		table ~= `</table>` ~ "\r\n";
-		
-		content ~= table;
 	
 		return content;
 	}

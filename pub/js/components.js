@@ -186,12 +186,69 @@ mkk_site._initAuthBar = function() {
 };
 
 mkk_site._initPagination = function() {
+	var tplr = webtank.templating.plain_templater
 	
+	mkk_site.paging = {};
+	mkk_site.paging.renderPohods = function(data)
+	{
+		var rec,
+			tp = mkk_site.templateService.getTemplater("pohod_for_tourist.html"),
+			rs = webtank.datctrl.fromJSON(data.pohodsRS),
+			result = "", pohodKey = "";
+			
+		function rusFormat(date) {
+			var dt = new Date(date);
+			return dt.getDate() + "." + ( dt.getMonth() + 1 ) + "." + dt.getFullYear();
+		}
+			
+		while( rec = rs.next() ) {
+			tplr.fillFromRecord(tp, rec);
+			tp.set( "Сроки", 
+				rusFormat( rec.get("Дата начала") ) 
+				+ "<br>\r\n" + rusFormat( rec.get("Дата конца") ) 
+			);
+			
+			if( data.isAuthorized ) {
+				pohodKey = rec.get("Ключ", "") + '';
+				tp.set( "Колонка ключ",  '<td>' + pohodKey + '</td>' );
+				tp.set( "Колонка изменить", '<td><a href="' + data.dynamicPath + 'edit_pohod?key='
+					+ pohodKey + '">Изменить</a></td>' );
+			}
+			
+			tp.set( "Должность", 
+				data.touristKey == rec.get("Ключ рук") ? 'Руков' : 'Участ'
+			);
+			
+			result += tp.getString();
+		}
+		return result;
+	};
+	mkk_site.paging.loadAndRenderPohods = function(touristKey, pageNum) {
+		webtank.json_rpc.invoke({
+			uri: '/dyn/jsonrpc/',
+			method: 'mkk_site.show_pohod_for_tourist.getPohodsForTourist',
+			params: {touristKey: touristKey, curPageNum: pageNum },
+			success: function(data) { 
+				var content = mkk_site.paging.renderPohods(data);
+				
+				$(".b-tourist_info.e-pohod_list").html(content);
+			}
+		})
+	};
+	
+	$(".do-smth_btn").on("click", function() {
+		var 
+			curPageNum = parseInt( $(".cur_page_num").val() ),
+			touristKey = parseInt( webtank.parseGetParams()["key"] );
+		mkk_site.paging.loadAndRenderPohods( touristKey, curPageNum );
+	});
 };
 
-$(window.document).ready( function() {
-	mkk_site._initPohodFilters();
-	mkk_site._initAuthBar();
-	mkk_site._initTemplateService();
-	mkk_site._initPagination();
-});
+(function() {
+	$(window.document).ready( function() {
+		mkk_site._initPohodFilters();
+		mkk_site._initAuthBar();
+		mkk_site._initTemplateService();
+		mkk_site._initPagination();
+	});
+})();
