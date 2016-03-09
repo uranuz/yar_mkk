@@ -84,6 +84,11 @@ PlainTemplater getPageTemplate(string tplFileName, bool shouldInit = true)
 		tpl.set("webtank css folder", webtankCssPath);
 		tpl.set("webtank js folder", webtankJsPath);
 		
+		tpl.set("foundation public", siteVirtualPaths["foundationPublic"]);
+		tpl.set("foundation img folder", siteVirtualPaths["foundationImg"]);
+		tpl.set("foundation css folder", siteVirtualPaths["foundationCSS"]);
+		tpl.set("foundation js folder", siteVirtualPaths["foundationJS"]);
+		
 		tpl.set("dynamic path", dynamicPath);
 	}
 	

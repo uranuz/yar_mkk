@@ -678,7 +678,7 @@ LEFT OUTER JOIN t_chef
 	~ table; //Тобавляем таблицу с данными к содержимому страницы
 	
 	//Подключение JavaScript файла с именем, указанным в атрибуте src
-	content ~= `<script src="` ~ jsPath ~ "show_pohod.js" ~ `"></script>`;
+	content ~= `<script src="` ~ jsPath ~ "show_pohod.js" ~ `" defer></script>`;
 	
 	return content;
 }

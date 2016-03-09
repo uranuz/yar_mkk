@@ -33,7 +33,12 @@
 				"webtankPublic": "pub/webtank/",
 				"webtankCSS": "pub/webtank/css/",
 				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/"
+				"webtankImg": "pub/webtank/img/",
+				
+				"foundationPublic": "pub/foundation/",
+				"foundationCSS": "pub/foundation/css/",
+				"foundationJS": "pub/foundation/js/",
+				"foundationImg": "pub/foundation/img/"
 			},
 
 			"virtualPaths": {
@@ -49,7 +54,12 @@
 				"webtankPublic": "pub/webtank/",
 				"webtankCSS": "pub/webtank/css/",
 				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/"
+				"webtankImg": "pub/webtank/img/",
+				
+				"foundationPublic": "pub/foundation/",
+				"foundationCSS": "pub/foundation/css/",
+				"foundationJS": "pub/foundation/js/",
+				"foundationImg": "pub/foundation/img/"
 			}
 		}
 	}
