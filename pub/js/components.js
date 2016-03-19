@@ -1,3 +1,7 @@
+var mkk_site = mkk_site || {
+	version: "0.0"
+};
+
 //----- Функции проверки даты на правильность
 function isLeapYear(year) //Скажет true, если год високосный и false, если нет
 {	if (  ( (year%4==0) && (year%100!=0) ) || (year%400==0) ) return true;
@@ -47,6 +51,26 @@ function addDatePicker(container, dayFieldName, monthFieldName, yearFieldName, s
 }
 
 
+mkk_site.Pagination = (function(_super) {
+	__extends(Pagination, _super);
+	
+	function Pagination(opts)
+	{
+		opts = opts || {};
+		_super.call(this, ".b-pagination");
+		
+		
+		
+	}
+	
+	return __mixinProto(Pagination, {
+		gotoPage: function(pageNum)
+		{
+			
+		}
+	});
+})(webtank.WClass);
+
 //----- Вспомогательная функция для организации постраничного просмотра
 function gotoPage(pageNum) {
 	var form = window.document.getElementById("main_form");
@@ -54,22 +78,6 @@ function gotoPage(pageNum) {
 	pageNumInput.value = pageNum;
 	form.submit();
 }
-
-//Вешаем обработчики на ссылки на боковой панели с выборками походов по некоторым критериям
-$(window.document).ready( function() {
-	var 
-		pohod_filter_items = $(".b-pohod_filter_collection.e-list_item"),
-		i;
-		
-	for( i = 0; i < pohod_filter_items.length; i++ )
-	{
-		(function(ii) {
-			$(pohod_filter_items[ii]).on( "click", function() {
-				gotoPohodFilter(ii);
-			});
-		})(i);
-	}
-});
 
 //Переход на страницу отображения походов с одним из фильтров из списка
 function gotoPohodFilter(filterIndex) {
@@ -109,7 +117,38 @@ function gotoPohodFilter(filterIndex) {
 	filterForm[0].submit();
 }
 
-$(window.document).ready( function() {
+mkk_site._initTemplateService = function() {
+	var 
+		tplr = webtank.templating.plain_templater;
+	
+	mkk_site.templateService = new tplr.TemplateService(
+		"/dyn/jsonrpc/",
+		"mkk_site.template_service.getTemplates",
+		[]
+	);
+	
+	mkk_site.templateService.getMultAsync(["pohod_for_tourist.html"], function(templates, names) {
+		console.log("Templates loaded: ", names);
+	});
+};
+
+//Вешаем обработчики на ссылки на боковой панели с выборками походов по некоторым критериям
+mkk_site._initPohodFilters = function() {
+	var 
+		pohod_filter_items = $(".b-pohod_filter_collection.e-list_item"),
+		i;
+		
+	for( i = 0; i < pohod_filter_items.length; i++ )
+	{
+		(function(ii) {
+			$(pohod_filter_items[ii]).on( "click", function() {
+				gotoPohodFilter(ii);
+			});
+		})(i);
+	}
+};
+
+mkk_site._initAuthBar = function() {
 	var 
 		block = $(".b-mkk_site_auth_bar"),
 		dialog = block.filter(".e-dialog_wrapper"),
@@ -144,7 +183,11 @@ $(window.document).ready( function() {
 	);
 	
 	dialog.hide();
+};
+
+mkk_site._initPagination = function() {
 	var tplr = webtank.templating.plain_templater
+	
 	mkk_site.paging = {};
 	mkk_site.paging.renderPohods = function(data)
 	{
@@ -199,7 +242,7 @@ $(window.document).ready( function() {
 			touristKey = parseInt( webtank.parseGetParams()["key"] );
 		mkk_site.paging.loadAndRenderPohods( touristKey, curPageNum );
 	});
-});
+};
 
 (function() {
 	$(window.document).ready( function() {
