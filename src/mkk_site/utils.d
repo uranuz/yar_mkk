@@ -131,3 +131,14 @@ string[] parseExtraFileLink(string linkPair)
 
 	return [ link, comment ];
 }
+
+import std.datetime: Date;
+
+string rusFormat(Date date)
+{
+	import std.conv: text;
+	return 
+		date.day.text
+		~ "." ~ ( cast(ubyte) date.month ).text
+		~ "." ~ date.year.text;
+}
