@@ -199,6 +199,8 @@ $(window.document).ready( function() {
 			touristKey = parseInt( webtank.parseGetParams()["key"] );
 		mkk_site.paging.loadAndRenderPohods( touristKey, curPageNum );
 	});
+});
+
 (function() {
 	$(window.document).ready( function() {
 		mkk_site._initPohodFilters();
