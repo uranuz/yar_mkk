@@ -1,39 +1,24 @@
 module mkk_site.show_pohod;
 
-import std.conv, std.string , std.array;
+import std.conv, std.string, std.array, std.stdio;
 import std.exception : ifThrown;
 import std.file; //Стандартная библиотека по работе с файлами
 //import webtank.db.database;
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.templating.plain_templater, webtank.net.http.context;
+import 
+	webtank.datctrl.data_field, 
+	webtank.datctrl.record_format, 
+	webtank.db.postgresql, 
+	webtank.db.datctrl_joint, 
+	webtank.datctrl.record, 
+	webtank.templating.plain_templater, 
+	webtank.net.http.context, 
+	webtank.templating.plain_templater_datctrl;
 
 import webtank.common.optional;
 import webtank.common.conv;
 
-import mkk_site,std.stdio;
-//--дипазон дата
-/*печатьДиапазонаДат()
-{
-OptionalDate фильтрДаты фильтрДаты = фильтрПоходов.сроки[ соотвПоля.имяВФорме ];
-		
-		if( фильтрДаты.isDefined )
-		{
-			частиЗапроса_фильтрыСроковПохода ~= ` ('` ~ Date( фильтрДаты.tupleof ).conv!string ~ `'::date ` 
-				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
-		}
-		else
-		{
-			foreach( j, частьДаты; фильтрДаты.tupleof )
-			{
-				if( !частьДаты.isNull )
-				{
-					частиЗапроса_фильтрыСроковПохода ~= частьДаты.conv!string ~ ` `
-						~ соотвПоля.опСравн ~ ` date_part('` ~ назвЧастейДаты[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
-				}
-			}
-		}
-	return	
-}
-//-----------------------*/
+import mkk_site;
+
 static immutable string thisPagePath;
 
 shared static this()
@@ -334,28 +319,28 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 
 
 //Формирует чать запроса по фильтрации походов (для SQL-секции where)
-string получитьЧастьЗапроса_фильтрПоходов(const ref ФильтрПоходов фильтрПоходов)
+string getPohodFilterQueryPart(ref const(ФильтрПоходов) фильтрПоходов)
 {
 	import std.datetime: Date;
 	
-	string[] частиЗапроса_фильтрыПоходов;
+	string[] filters;
 	
 	if( фильтрПоходов.видыТуризма.length > 0 )
-		частиЗапроса_фильтрыПоходов ~= `vid in(` ~ фильтрПоходов.видыТуризма.conv!(string[]).join(", ") ~ `)`;
+		filters ~= `vid in(` ~ фильтрПоходов.видыТуризма.conv!(string[]).join(", ") ~ `)`;
 	
 	if( фильтрПоходов.категории.length > 0 )
-		частиЗапроса_фильтрыПоходов ~= `ks in(` ~ фильтрПоходов.категории.conv!(string[]).join(", ") ~ `)`;
+		filters ~= `ks in(` ~ фильтрПоходов.категории.conv!(string[]).join(", ") ~ `)`;
 		
 	if( фильтрПоходов.готовности.length > 0 )
-		частиЗапроса_фильтрыПоходов ~= `prepar in(` ~ фильтрПоходов.готовности.conv!(string[]).join(", ") ~ `)`;
+		filters ~= `prepar in(` ~ фильтрПоходов.готовности.conv!(string[]).join(", ") ~ `)`;
 		
 	if( фильтрПоходов.статусыЗаявки.length > 0 )
-		частиЗапроса_фильтрыПоходов ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
+		filters ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
 	
 	if( фильтрПоходов.сМатериалами )
-		частиЗапроса_фильтрыПоходов ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
+		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
 	
-	string[] частиЗапроса_фильтрыСроковПохода;
+	string[] dateFiilters;
 	
 	static immutable назвЧастейДаты = [ "year", "month", "day" ];
 	
@@ -365,7 +350,7 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 		
 		if( фильтрДаты.isDefined )
 		{
-			частиЗапроса_фильтрыСроковПохода ~= ` ('` ~ Date( фильтрДаты.tupleof ).conv!string ~ `'::date ` 
+			dateFiilters ~= ` ('` ~ Date( фильтрДаты.tupleof ).conv!string ~ `'::date ` 
 				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
 		}
 		else
@@ -374,150 +359,103 @@ string получитьЧастьЗапроса_фильтрПоходов(const
 			{
 				if( !частьДаты.isNull )
 				{
-					частиЗапроса_фильтрыСроковПохода ~= частьДаты.conv!string ~ ` `
+					dateFiilters ~= частьДаты.conv!string ~ ` `
 						~ соотвПоля.опСравн ~ ` date_part('` ~ назвЧастейДаты[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
 				}
 			}
 		}
 	}
 	
-	частиЗапроса_фильтрыПоходов ~= частиЗапроса_фильтрыСроковПохода;
+	filters ~= dateFiilters;
 	
 	if( фильтрПоходов.районПохода.length > 0 )
-		частиЗапроса_фильтрыПоходов ~= `region_pohod ILIKE '%` ~ фильтрПоходов.районПохода ~ `%'`;
+		filters ~= `region_pohod ILIKE '%` ~ фильтрПоходов.районПохода ~ `%'`;
 	
-	return ( частиЗапроса_фильтрыПоходов.length > 0 ?
-		" ( " ~ частиЗапроса_фильтрыПоходов.join(" ) and ( ") ~ " ) " : null );
+	return ( filters.length > 0 ?
+		" ( " ~ filters.join(" ) and ( ") ~ " ) " : null );
 }
 //-------------------------------------------------------------
 
 // -------Формирует информационную строку о временном диапозоне поиска походов
-string поисковый_диапозон_Походов(const ref ФильтрПоходов фильтрПоходов)
+string поисковый_диапазон_Походов(const ref ФильтрПоходов фильтрПоходов)
 {
-	import std.datetime: Date;		
+	import std.datetime: Date;
 	
-		OptionalDate фильтрДатыНачало = фильтрПоходов.сроки[ "begin_date_range_head" ];
-		OptionalDate фильтрДатыКонец = фильтрПоходов.сроки[ "end_date_range_tail" ];
-		//writeln(фильтрДатыНачало);
-		//writeln(фильтрДатыКонец);
-		string [] _месяцы =["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
-		string район;
-		string beginDateStr;
-		string endDateStr;
-		
-		if( фильтрПоходов.районПохода!="" ) район~="<br/>Район похода содержит [ "~фильтрПоходов.районПохода~" ].<br/>";
-		if( фильтрПоходов.сМатериалами ) район~=" По данным походам имеются отчёты или дополнительные материалы.<br/><br/>";
-		
-		if(фильтрДатыНачало.isNull) beginDateStr~=" не определено";
-		else
+	OptionalDate фильтрДатыНачало = фильтрПоходов.сроки[ "begin_date_range_head" ];
+	OptionalDate фильтрДатыКонец = фильтрПоходов.сроки[ "end_date_range_tail" ];
+	//writeln(фильтрДатыНачало);
+	//writeln(фильтрДатыКонец);
+	string[] _месяцы =["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+	string район;
+	string beginDateStr;
+	string endDateStr;
+	
+	if( фильтрПоходов.районПохода != "" ) район ~= "<br/>Район похода содержит [ " ~ фильтрПоходов.районПохода ~ " ].<br/>";
+	if( фильтрПоходов.сМатериалами ) район ~= " По данным походам имеются отчёты или дополнительные материалы.<br/><br/>";
+	
+	if(фильтрДатыНачало.isNull) beginDateStr~=" не определено";
+	else
+	{
+		if(  !фильтрДатыНачало.day.isNull || !фильтрДатыНачало.month.isNull)
 		{
-		   if(  !фильтрДатыНачало.day.isNull ||  !фильтрДатыНачало.month.isNull)
-		   {
-		   beginDateStr ~= фильтрДатыНачало.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
-		       if(фильтрДатыНачало.day.isNull)
-		           beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы.getName(фильтрДатыНачало.month);
-		       else 		          
-		          
-		           beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы_родительный.getName(фильтрДатыНачало.month);
-		   }
-		beginDateStr ~=` `~ (фильтрДатыНачало.year.isNull ? "" : фильтрДатыНачало.year.to!string);
+			beginDateStr ~= фильтрДатыНачало.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
+			if(фильтрДатыНачало.day.isNull)
+				beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы.getName(фильтрДатыНачало.month);
+			else 		          
+				
+				beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы_родительный.getName(фильтрДатыНачало.month);
 		}
-		
-		if(фильтрДатыКонец.isNull) endDateStr~=" не определён ";
-		else
-		{ 
-		   if(  !фильтрДатыКонец.day.isNull ||  !фильтрДатыКонец.month.isNull)
-		    {
-		     endDateStr ~= фильтрДатыКонец.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
-		         if(фильтрДатыКонец.day.isNull)
-		             endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы.getName(фильтрДатыКонец.month);
-		         else  		    
-		             endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы_родительный.getName(фильтрДатыКонец.month);
-		    }
-		endDateStr ~=` `~(фильтрДатыКонец.year.isNull ? " " : фильтрДатыКонец.year.to!string);
+		beginDateStr ~= ` ` ~ (фильтрДатыНачало.year.isNull ? "" : фильтрДатыНачало.year.to!string);
+	}
+	
+	if( фильтрДатыКонец.isNull )
+		endDateStr~=" не определён ";
+	else
+	{ 
+		if( !фильтрДатыКонец.day.isNull || !фильтрДатыКонец.month.isNull )
+		{
+			endDateStr ~= фильтрДатыКонец.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
+			if( фильтрДатыКонец.day.isNull )
+				endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы.getName(фильтрДатыКонец.month);
+			else
+				endDateStr ~= фильтрДатыКонец.month.isNull ? " число любого месяца" : месяцы_родительный.getName(фильтрДатыКонец.month);
 		}
+		endDateStr ~= ` ` ~ ( фильтрДатыКонец.year.isNull ? " " : фильтрДатыКонец.year.to!string );
+	}
 		
 	return (район~`<fieldset><legend>Сроки похода</legend> Начало похода `~beginDateStr ~`<br/> Конец похода  `~endDateStr~`</fieldset>`);
 }
 
 //-----------------------------------------------------------------------------
 
-string netMain(HTTPContext context)
-{	
-	auto rq = context.request;
-	
-	bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true форма для печати
-	
-	string content;
-	
-	//Создаём подключение к БД
-	auto dbase = getCommonDB();
-		
-	//string параметрыПоиска;//контроль изменения парамнтров фильтрации
-	//string параметрыПоиска_старое = rq.bodyForm.get("параметрыПоиска", "");
-	
-// 	bool естьФильтрация;    // котроль необходимости фильтрации
-	bool _sverka = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
-	
-	ФильтрПоходов фильтрПоходов = получитьФильтрПоходов(context);
-	
-	string строкаЗапроса_фильтрыПохода = получитьЧастьЗапроса_фильтрПоходов(фильтрПоходов);
-	
-	string запросКоличестваПоходов = `select count(1) from pohod`;
- 	
-	if( фильтрПоходов.естьФильтрация )
-		запросКоличестваПоходов ~= ` where ` ~ строкаЗапроса_фильтрыПохода; 
-		
-	uint limit;	
-		
-	if (isForPrint)//для печати 
-	limit=10000;// максимальное  число строк на странице	
-	else	
-	limit = 10;// максимальное  число строк на странице
-	
-	uint количествоПоходов = dbase.query(запросКоличестваПоходов).get(0, 0, "0").to!uint;
-	
-	uint pageCount = количествоПоходов/limit+1; //Количество страниц
-	uint curPageNum = rq.bodyForm.get("cur_page_num", "1").to!(uint).ifThrown!ConvException(1); //Номер текущей страницы
-	
-	if( curPageNum > pageCount ) curPageNum = pageCount; 
-	//если номер страницы больше числа страниц переходим на последнюю 
-	//?? может лучше на первую
+import std.typecons: tuple;
 
-	//if( параметрыПоиска_старое != параметрыПоиска ) curPageNum = 1;
-	//если параметры поиска изменились переходим на 1-ю страницу
-	
-	uint offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
-	
-	import std.typecons;
-	
-	auto pohodRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "Ключ", 
-		string, "Номер книги", 
-		string, "Сроки", 
-		typeof(видТуризма), "Вид", 
-		typeof(категорияСложности), "кс", 
-		typeof(элементыКС), "элем",
-		string,"Район",
-		string,"Руководитель", 
-		string, "Число участников",
-		string,"Организация",
-		string, "Нитка маршрута",
-		typeof(готовностьПохода), "Готовность",
-		typeof(статусЗаявки), "Статус"
-	)(
-		null,
-		tuple(
-			видТуризма,
-			категорияСложности,
-			элементыКС,
-			готовностьПохода,
-			статусЗаявки
-		)
-	);
-	//WHERE
-	
-	string запросСпискаПоходов = // основное тело запроса
+auto pohodRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "Ключ", 
+	string, "Номер книги", 
+	string, "Сроки", 
+	typeof(видТуризма), "Вид", 
+	typeof(категорияСложности), "КС", 
+	typeof(элементыКС), "Элем КС",
+	string,"Район",
+	string,"Руководитель", 
+	string, "Число участников",
+	string,"Организация",
+	string, "Маршрут",
+	typeof(готовностьПохода), "Готовность",
+	typeof(статусЗаявки), "Статус"
+)(
+	null,
+	tuple(
+		видТуризма,
+		категорияСложности,
+		элементыКС,
+		готовностьПохода,
+		статусЗаявки
+	)
+);
+
+private static immutable pohodListQueryPart =
 `
 with 
 t_chef as (
@@ -555,130 +493,182 @@ select
 	t_chef.fio, 
 	( coalesce(pohod.unit, '') ) as kol_tur,
 	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz, 
-	( coalesce(marchrut::text, '') || '<br>' || coalesce(chef_coment::text, '') ) as marchrut, 
+	coalesce(marchrut::text, '') as marchrut, 
 	prepar,
 	stat 
 from pohod 
 LEFT OUTER JOIN t_chef
 	on t_chef.num = pohod.num
-`;     
-      
-	if( фильтрПоходов.естьФильтрация )
-		запросСпискаПоходов ~= ` where ` ~ строкаЗапроса_фильтрыПохода; // добавляем фильтрации
-		
-	запросСпискаПоходов ~= ` order by pohod.begin_date DESC LIMIT ` ~ limit.to!string ~ ` OFFSET ` ~ offset.to!string ~ ` `;
-	
-	auto rs = dbase.query(запросСпискаПоходов).getRecordSet(pohodRecFormat);
+`;
 
-	string pageSelector;// окна выбора страницы
-	 pageSelector ~= `<table class="ou_print"><tr><td style='width: 100px;'>`;
-	if (isForPrint)
+size_t getPohodCount(ФильтрПоходов filter)
+{
+	string query = `select count(1) from pohod`;
+	
+	if( filter.естьФильтрация )
+		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
+	
+	 return getCommonDB()
+		.query(query)
+		.get(0, 0, "0").to!size_t;
+}
+
+auto getPohodList(ФильтрПоходов filter, size_t offset, size_t limit )
+{
+	string query = pohodListQueryPart;
+	
+	if( filter.естьФильтрация )
+		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
+		
+	query ~= ` order by pohod.begin_date desc offset ` ~ offset.to!string ~ ` limit ` ~ limit.to!string;
+	
+	 return getCommonDB()
+		.query(query)
+		.getRecordSet(pohodRecFormat);
+}
+
+string renderShowPohod(VM)( ref VM vm )
+{
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "show_pohod.html" );
+	
+	tpl.set( "pohod_count", vm.pohodCount.text );
+	
+	auto paginTpl = getPageTemplate( pageTemplatesDir ~ "pagination.html" );
+	
+	if( vm.curPageNum <= 1 )
 	{
-	 pageSelector ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
-	 ~ "</td><td>"~ "\r\n"
-	 
-	 ;
+		paginTpl.set( "prev_btn_cls", ".is-inactive_link" );
+		paginTpl.set( "prev_btn_attr", `disabled="disabled"` );
+	}
+		
+	paginTpl.set( "prev_page_num", (vm.curPageNum - 1).text );
+	paginTpl.set( "cur_page_num", vm.curPageNum.text );
+	paginTpl.set( "page_count", vm.pageCount.text );
+	paginTpl.set( "next_page_num", (vm.curPageNum + 1).text );
+	
+	if( vm.curPageNum >= vm.pageCount )
+	{
+		paginTpl.set( "next_btn_cls", ".is-inactive_link" );
+		paginTpl.set( "next_btn_attr", `disabled="disabled"` );
+	}
+	
+	tpl.set( "pohod_list_pagination", paginTpl.getString() );
+	
+	if( !vm.isAuthorized )
+	{
+		tpl.set( "pohod_num_col_header_cls", "is-hidden" );
+		tpl.set( "edit_pohod_col_header_cls", "is-hidden" );
+	}
+	
+	if( vm.isForPrint )
+	{
+		tpl.set( "pohod_filter_regular_cls", "is-hidden" );
+		tpl.set( "pohod_filter_for_print", 
+			отрисоватьБлокФильтрации_для_печати(vm.filter)
+			~ поисковый_диапазон_Походов(vm.filter)
+		);
+		tpl.set( "print_switch_btn_text", "Назад" );
+		tpl.set( "print_switch_btn_cls", "noprint" );
 	}
 	else
 	{
-	
-	// окна выбора страницы
-	
-	pageSelector ~=( (curPageNum > 1) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum - 1).to!string ~ `)">Предыдущая</a>` : "" )
-	
-	~ "</td><td>"~ "\r\n"
-	~ ` Страница <input name="cur_page_num" type="text" size="4" maxlength="4" value="` ~ curPageNum.to!string ~ `"> из ` 
-	~ pageCount.to!string ~ ` <input type="submit" value="Перейти"> `
-	~ "</td><td>" ~ "\r\n"
-	~ ( (curPageNum < pageCount ) ? `<a href="#" onClick="gotoPage(` ~ (curPageNum + 1).to!string ~ `)">Следующая</a>` : "")
-		~ "\r\n";
-		}
-	  pageSelector ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-	 
-	 if (isForPrint)//для печати
-	      pageSelector ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;
-	   else	     
-	      pageSelector ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;
-	 
-	 pageSelector ~=   "</td></tr></table>"~ "\r\n";    
-	 
-	// Начало формирования основной отображающей таблицы  
-	string table = `<table class="tab1"    >`;
-	
-	table ~= "<tr>";
-	if(_sverka)
-		table ~= `<th>#</th>`~ "\r\n";// появляется при наличии допуска
-	
-	table ~= `<th>№ книги</th><th>Сроки похода</th><th>Вид, категория</th><th>Район</th><th>Руководитель</th><th>Участники</th><th>Город, организация</th><th>Статус похода</th>` ~ "\r\n";
-	
-	if(_sverka) table ~=`<th>Изм.</th>`~ "\r\n";// появляется при наличии допуска
-	table ~= "</tr>";
-	
-	foreach(rec; rs)
-	{
-	   string vke = rec.getStr!"Вид"() ~ `<br>` ~ rec.getStr!"кс"() ~ ` ` ~ rec.getStr!"элем"("") ;
-	   string ps  = ( rec.isNull("Готовность") ? "" : rec.getStr!"Готовность"("") ~ `<br>` ) ~ rec.getStr!"Статус"("");
-	  
-		table ~= `<tr>`;
-	  
-		if(_sverka) table ~= `<td>` ~ rec.get!"Ключ"(0).to!string ~ `</td>`~ "\r\n";// появляется при наличии допуска
-		
-		table ~= `<td> <a href="` ~ dynamicPath ~ `pohod?key=`
-			~ rec.get!"Ключ"(0).to!string ~ `">`~rec.get!"Номер книги"("нет") ~`</a>  </td>`~ "\r\n";
-	
-		 
-		table ~= `<td>` ~ rec.get!"Сроки"("нет")  ~ `</td>`~ "\r\n";
-		table ~= `<td>` ~  vke ~ `</td>`~ "\r\n";
-		table ~= `<td width="8%">` ~ rec.get!"Район"("нет") ~ `</td>`~ "\r\n";
-		table ~= `<td>` ~ rec.get!"Руководитель"("нет")  ~ `</td>`~ "\r\n";
-		
-		table ~= `<td  class="show_participants_btn"  style="text-align: center;">`~ "\r\n" 
-		~ (  rec.get!"Число участников"("Не задано") ) ~ `<img class="noprint" src="` ~ imgPath ~ `icons/list_icon.png">`
-		~ `	<input type="hidden" value="`~rec.get!"Ключ"(0).to!string~`"> 
-		</td>`~ "\r\n";
-		
-		
-		table ~= `<td>` ~ rec.get!"Организация"("нет")  ~ `</td>`~ "\r\n";
-
-		table ~= `<td>` ~ ps  ~ `</td>`~ "\r\n";
-		
-		if(_sverka)
-			table ~= `<td> <a href="` ~ dynamicPath ~ `edit_pohod?key=`
-			~ rec.get!"Ключ"(0).to!string ~ `">Изм.</a> </td>`~ "\r\n";// появляется при наличии допуска
-			
-		table ~= `</tr>` ~ "\r\n";
-		table ~= `<tr>` ~ `<td style="background-color:#8dc0de;" colspan="`;
-		if(_sverka)
-			table ~= `10`;
-		else
-			table ~= `8`;
-		
-		table ~= `">Нитка маршрута: ` ~ rec.get!"Нитка маршрута"("нет") ~ `</td>` ~ `</tr>`~ "\r\n";
+		tpl.set( "pohod_filter_for_print_cls", "is-hidden" );
+		tpl.set( "pohod_filter_regular", отрисоватьБлокФильтрации(vm.filter) );
+		tpl.set( "print_switch_btn_text", "Для печати" );
+		tpl.set( "print_switch_btn_value", "on" );
 	}
-	table ~= "</table>\r\n";
 	
+	tpl.set( "pohod_list", renderPohodList(vm) );
 	
-  if (isForPrint)	//для печати 
-	content ~= `<link rel="stylesheet" type="text/css" href="` ~ cssPath ~ `page_styles.css">`~ "\r\n";
-	//content ~=поисковый_диапозон_Походов(фильтрПоходов)~ "\r\n";
-	content ~= `<form id="main_form" method="post">`~ "\r\n";// содержимое страницы
+	return tpl.getString();
+}
+
+string renderPohodList(VM)( ref VM vm )
+{
+	auto pohodTpl = getPageTemplate( pageTemplatesDir ~ "show_pohod_item.html" );
 	
-	if (isForPrint)//для печати
-	   {
-		content ~=`<fieldset><legend>Поисковые фильтры</legend>`
-		~отрисоватьБлокФильтрации_для_печати(фильтрПоходов)  
-		~`</span></fieldset>`~ "\r\n";
-		content ~=поисковый_диапозон_Походов(фильтрПоходов)~ pageSelector~ `</form><br>`~ "\r\n";
-		}
-	else
-		content ~= отрисоватьБлокФильтрации(фильтрПоходов) ~ pageSelector ~ `</form><br>`~ "\r\n";
+	FillAttrs fillAttrs;
+	fillAttrs.noEscaped = [ "Номер книги", "Сроки", "Руководитель", "Организация" ];
+	//fillAttrs.defaults = [];
+	
+	string content;
+	
+	foreach(rec; vm.pohodsRS)
+	{
+		pohodTpl.fillFrom(rec, fillAttrs);
 		
-	content ~=( _sverka ? `<a href="` ~ dynamicPath ~ `edit_pohod">Добавить новый поход</a><br>` ~ "\r\n" : "" )
-	~ `<p> Число походов ` ~ количествоПоходов.to!string ~ ` </p>`~ "\r\n"
-	~ table; //Тобавляем таблицу с данными к содержимому страницы
-	
-	//Подключение JavaScript файла с именем, указанным в атрибуте src
-	content ~= `<script src="` ~ jsPath ~ "show_pohod.js" ~ `" defer></script>`;
+		if( vm.isAuthorized )
+		{
+			string pohodKey = rec.isNull("Ключ") ? "" : rec.get!"Ключ"().text;
+			pohodTpl.set( "Колонка ключ",  `<td>` ~ pohodKey ~ `</td>` );
+			pohodTpl.set( "Колонка изменить", `<td><a href="` ~ dynamicPath ~ `edit_pohod?key=`
+				~ pohodKey ~ `">Изменить</a></td>` );
+		}
+		
+		content ~= pohodTpl.getString();
+	}
 	
 	return content;
+}
+
+
+string netMain(HTTPContext context)
+{	
+	auto rq = context.request;
+	
+	bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true форма для печати
+	//string параметрыПоиска;//контроль изменения парамнтров фильтрации
+	//string параметрыПоиска_старое = rq.bodyForm.get("параметрыПоиска", "");
+	
+// 	bool естьФильтрация;    // котроль необходимости фильтрации
+	bool isAuthorized = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );    // наличие сверки
+	ФильтрПоходов фильтрПоходов = получитьФильтрПоходов(context);
+	size_t pohodsPerPage;
+	
+	if( isForPrint ) //для печати 
+		pohodsPerPage = 10000; // максимальное  число строк на странице	
+	else
+		pohodsPerPage = 10; // максимальное  число строк на странице
+	
+	size_t pohodCount = getPohodCount( фильтрПоходов );
+	
+	size_t pageCount = pohodCount / pohodsPerPage+1; //Количество страниц
+	size_t curPageNum = rq.bodyForm.get("cur_page_num", "1").to!(size_t).ifThrown!ConvException(1); //Номер текущей страницы
+	
+	if( curPageNum > pageCount ) curPageNum = pageCount; 
+	//если номер страницы больше числа страниц переходим на последнюю 
+	//?? может лучше на первую
+
+	//if( параметрыПоиска_старое != параметрыПоиска ) curPageNum = 1;
+	//если параметры поиска изменились переходим на 1-ю страницу
+	
+	size_t offset = (curPageNum - 1) * pohodsPerPage ; //Сдвиг по числу записей
+	
+	auto pohodsList = getPohodList( фильтрПоходов, offset, pohodsPerPage );
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "show_pohod.html" );
+	
+	static struct ViewModel
+	{
+		typeof(pohodsList) pohodsRS; //RecordSet
+		bool isAuthorized;
+		bool isForPrint;
+		size_t curPageNum;
+		size_t pohodCount;
+		size_t pohodsPerPage;
+		size_t pageCount;
+		ФильтрПоходов filter;
+	}
+	
+	ViewModel vm = ViewModel(
+		pohodsList,
+		isAuthorized,
+		isForPrint,
+		curPageNum,
+		pohodCount,
+		pohodsPerPage,
+		pohodCount,
+		фильтрПоходов
+	);
+	
+	return renderShowPohod(vm);
 }

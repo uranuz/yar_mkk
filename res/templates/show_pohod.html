@@ -1,0 +1,39 @@
+<form id="main_form" method="post">
+	<div class="{{pohod_filter_for_print_cls}}">
+		<fieldset>
+			<legend>Поисковые фильтры</legend>
+			{{pohod_filter_for_print}}
+
+		</fieldset>
+		
+		<a href='javascript:window.print(); void 0;' class="noprint"><img height="60" width="60" class="noprint" src="/pub/img/icons/printer.png"/></a>
+	</div>
+	<div class="{{pohod_filter_regular_cls}}">
+		{{pohod_filter_regular}}
+		{{pohod_list_pagination}}
+	</div>
+	<button type="submit" name="for_print" class="{{print_switch_btn_cls}}" value="{{print_switch_btn_value}}">{{print_switch_btn_text}}</button>
+</form>
+
+<p>Число походов {{pohod_count}}</p>
+<a href="{{dynamic path}}edit_pohod">Добавить новый поход</a>
+<table class="tab1">
+	<tbody>
+		<tr>
+			<th class="{{pohod_num_col_header_cls}}">#</th>
+			<th>№ книги</th>
+			<th>Сроки похода</th>
+			<th>Вид, категория</th>
+			<th>Район</th>
+			<th>Руководитель</th>
+			<th>Участники</th>
+			<th>Город, организация</th>
+			<th>Статус похода</th>
+			<th class="{{edit_pohod_col_header_cls}}">Изм.</th>
+		</tr>
+	</tbody>
+	<tbody>
+		{{pohod_list}}
+	</tbody>
+</table>
+<script src="{{js folder}}show_pohod.js" defer></script>

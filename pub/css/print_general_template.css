@@ -282,8 +282,6 @@ table.tab1 {
 	border: 1px solid;
 	border-right-style:ridge;
 	width: 70px;
-	
-	
 }
        
 .last_pohod_comment {font-size: 80%;}
@@ -306,53 +304,45 @@ table.tab1 {
 .no_print {display: none;}
 
 
-	@media print {
+@media print {
+	#navbar-iframe 
+	{
+		display: none; 
+		height: 0px; 
+		visibility: hidden;
 		
+	}
 
+	.noprint { display: none; }
+	title { display:none; }
 
-#navbar-iframe 
-        {
-				display: none; 
-				height: 0px; 
-				visibility: hidden;
-			 
-			}
-			
-			.noprint {display: none;}
-
-title { display:none; }			
-			
-body 
-        {
-				font-size: 10pt;
-				font-family:serif;
-				margin:0px ;
-				height: auto;
-				width:670pt;
-				text-align: justify;
-				
-				
-			}
-.page { width:80%; }   
-
-#main_menu { display: none; }
-			
-			
-table.tab1
-			{
-	     width: 100%;
-	     border: 3px ridge #666;
-	     border-spacing: 0px;
-	     text-align:center;
-         }
-
-.tab1 td, .tab1 th 
-   {
-	font-size: 80%;
-	border: 1px solid;
-	border-right-style:ridge;
-	height:8pt;
-   }
-			
+	body {
+		font-size: 10pt;
+		font-family:serif;
+		margin:0px ;
+		height: auto;
+		width:670pt;
+		text-align: justify;
 		
-		}
+		
+	}
+	
+	.page { width: 80%; }   
+	#main_menu { display: none; }
+
+	table.tab1
+	{
+		width: 100%;
+		border: 3px ridge #666;
+		border-spacing: 0px;
+		text-align:center;
+	}
+
+	.tab1 td, .tab1 th 
+	{
+		font-size: 80%;
+		border: 1px solid;
+		border-right-style:ridge;
+		height:8pt;
+	}
+}

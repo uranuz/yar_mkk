@@ -53,10 +53,33 @@ table.tab1 {
 	font-size: 0.9rem;
 }
 
+/* !sect-begin: Общие модификаторы */
+.is-hidden {
 	display: none;
 }
 
 .is-invisible {
+	visibility: hidden;
+}
+
+.is-inactive_link {
+	color: gray;
+}
+/* !sect-end: Общие модификаторы */
+
+/* !sect-begin: show_pohod_for_tourist */
+	.b-pohod_for_tourist.e-route_cell {
+		background-color: #8dc0de;
+	}
+/* !sect-end: show_pohod_for_tourist */
+
+/* !sect-begin: pagination */
+	.b-pagination.e-route_cell {
+		background-color: #8dc0de;
+	}
+/* !sect-end: pagination */
+
+
 /* !sect-begin: index */
 
 .b-recent_pohod.e-item_block {
