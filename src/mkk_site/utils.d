@@ -142,3 +142,28 @@ string rusFormat(Date date)
 		~ "." ~ ( cast(ubyte) date.month ).text
 		~ "." ~ date.year.text;
 }
+
+string renderPaginationTemplate(VM)( ref VM vm )
+{
+	import std.conv: text;
+	auto paginTpl = getPageTemplate( pageTemplatesDir ~ "pagination.html" );
+	
+	if( vm.curPageNum <= 1 )
+	{
+		paginTpl.set( "prev_btn_cls", ".is-inactive_link" );
+		paginTpl.set( "prev_btn_attr", `disabled="disabled"` );
+	}
+		
+	paginTpl.set( "prev_page_num", (vm.curPageNum - 1).text );
+	paginTpl.set( "cur_page_num", vm.curPageNum.text );
+	paginTpl.set( "page_count", vm.pageCount.text );
+	paginTpl.set( "next_page_num", (vm.curPageNum + 1).text );
+	
+	if( vm.curPageNum >= vm.pageCount )
+	{
+		paginTpl.set( "next_btn_cls", ".is-inactive_link" );
+		paginTpl.set( "next_btn_attr", `disabled="disabled"` );
+	}
+	
+	return paginTpl.getString();
+}
