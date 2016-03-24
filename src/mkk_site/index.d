@@ -55,7 +55,7 @@ public:
 		coalesce(nomer_knigi, '00-00')
 	) as "Номер книги",
 	begin_date as "Дата начала",
-	begin_date as "Дата конца",
+	finish_date as "Дата конца",
 	vid as "Вид",
 	ks as "КС",
 	elem as "Элем КС",

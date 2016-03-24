@@ -1,4 +1,4 @@
-mkk_site = {
+mkk_site = mkk_site || {
 	version: "0.0"
 };
 

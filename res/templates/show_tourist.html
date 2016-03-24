@@ -1,0 +1,26 @@
+<form id="main_form" method="post">
+	<div>
+		Фамилия: <input name="family_name" type="text" value="{{family_name}}">
+		<input type="submit" name="act" value="Найти">
+	</div>
+	{{tourist_list_pagination}}
+</form>
+<div>Найдено {{tourist_count}} туристов</div>
+<a href="{{dynamic path}}edit_tourist">Добавить нового туриста</a>
+<div style="max-width: 98%;">
+	<table class="tab1">
+		<tbody>
+			<tr>
+				<th class="{{tourist_num_col_header_cls}}">#</th>
+				<th width="20%">Имя, дата рожд.</th>
+				<th>Опыт</th>
+				<th>Спорт. разряд, cуд. категория</th>
+				<th>Комментарий</th>
+				<th class="{{edit_tourist_col_header_cls}}">Изм.</th>
+			<tr>
+		</tbody>
+		<tbody>
+			{{tourist_list}}
+		</tbody>
+	</table>
+</div>
