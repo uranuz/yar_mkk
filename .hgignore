@@ -3,3 +3,8 @@ syntax: regexp
 /[^/]*\..+~$
 /\.directory$
 ^.hgignore~$
+syntax: glob
+pub_src/node_modules
+pub_src/dist/
+mkk_site_devel
+mkk_site_release
