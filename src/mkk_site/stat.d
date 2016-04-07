@@ -29,10 +29,9 @@ string netMain(HTTPContext context)
 	auto rp = context.response;//ответ
 	
  bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
- string content;
+
  string table;
- content = `<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>`~ "\r\n";
- content ~=  ` <p><a href="/pub/stati_dokument/stat1992_2010.rar"   > Отчёты за 1992-2010 годы (zip) </a></p> `~ "\r\n";
+
 
 import std.typecons;
 	
@@ -102,7 +101,7 @@ import std.typecons;
    
 	if( prezent_vid=="За год.")  
 	{ групп_человек=statRecFormatKC.names.dup;
-	  заголовок = ["Вид/к.с.","н.к.","Первая","Вторая","Третья",
+	  заголовок = ["Вид-к.с.","н.к.","Первая","Вторая","Третья",
 	               "Четвёртая","Пятая","Шестая","Путеш.","ВСЕГО"];
 		bool_заголовок=
 	  [true,true,true,true,true,
@@ -285,30 +284,43 @@ bool parity;
 
  // writeln(rs.length);
 string [][] for_tabl;   // массив данных для таблицы
+string [][] for_graf;   // массив данных для графика
 	for( size_t i = 0; i < строк; i++  )//формирование ячеек таблицы
 	{
 			auto rec = rs[i];
-			string[] line;
-			line.length = колонок;
+			string[] line_tabl;
+			string[] line_graf;
+			line_tabl.length = колонок;
+			line_graf.length = колонок;
 			 parity=false;
-			 string resurs;
+			 string resurs_tabl;
+			 string resurs_graf;
 
 			foreach(v,td; групп_человек)
 			{
 			 			  
 					if(v==0  &&  prezent_vid=="Весь период.")
-							line[v]= rec.getStr(td, "");
+				     	{
+							line_tabl[v]= rec.getStr(td, "");
+							line_graf[v]= rec.getStr(td, "");
+						}
 
 					if(v==0  &&  prezent_vid=="За год.")
-							line[v]=  вид [ rec.getStr(td, "").to!int ];
+					  {
+							line_tabl[v]=  вид [ rec.getStr(td, "").to!int ];
+							line_graf[v]=  вид [ rec.getStr(td, "").to!int ];
+						}
 
 					if(v!=0)
 					{   
 							if(parity  ) 
-							  resurs= rec.getStr(td, "").to!string;
+							  resurs_tabl= rec.getStr(td, "").to!string;
 							  
 							if(!parity && rec.getStr(td, "") != "" ) 
-							  line[(v)/2]~=resurs~ `(`~rec.getStr(td, "")~`)`;
+							 {
+							  line_tabl[(v)/2]~=resurs_tabl~ `(`~rec.getStr(td, "")~`)`;
+							  line_graf[(v)/2] = rec.getStr(td, "") ;
+							 }
 
 							
 					}
@@ -316,11 +328,20 @@ string [][] for_tabl;   // массив данных для таблицы
 			} 
 
 
-			for_tabl~=line;
+			for_tabl~=line_tabl;
+			for_graf~=line_graf;
   }
-  writeln(for_tabl);
+ // writeln(for_graf);
 
-      
+  //---------------------строки для передачи данных в скрипт----------
+  string [] _list 
+  =["year_list","walking_list", "ski_list", "munt_listvater", "velo_list",
+   "auto_list","speleo_list","sail_list","horse_list","kombi_list","total_list"];
+         
+    string    bool_list;    
+   //------------шаблон страницы
+  auto tpl = getPageTemplate( pageTemplatesDir ~ "show_stat.html" );
+  //создаёт  страницу из шаблона
   //--------проверка пустых столбцов------------------------ position 
 
   
@@ -328,22 +349,61 @@ string [][] for_tabl;   // массив данных для таблицы
 	  {
 	 
 	   string kl;
+	   
+	   
+	   
 	   for( size_t i = 0; i < строк; i++  )
 			{  		
 				kl ~= for_tabl[i][j];			
 			}
    	
-   	if(kl=="") bool_заголовок[j]=false;	
+   	if(kl=="") bool_заголовок[j]=false;
+   	
+   	
 	  }
+	  
 	
   //string []заг;   foreach(td;  bool_заголовок){ if(td)заг~="true"; else заг~="false";}   writeln( заг);
+  // ------------формируем данные для скрипта----------
+  tpl.set( "строк", строк.to!string);
+  tpl.set( "bool_list", bool_list);
   
-  
+     for( size_t j = 0; j< bool_заголовок.length; j++  )
+         {
+             string kl,kk,pref;
+             kk="";
+	   
+	          if(j == 0) pref=""; else pref=","; 
+					
+							for( size_t i = 0; i < строк; i++  )
+						{ 
+						   string pr;
+	   
+	                 if(i == 0) pr=""; else pr=","; 
+	                 
+							kl ~= for_graf[i][j];
+							if(for_graf[i][j]=="") kk ~=pr ~"0";
+							  else kk ~=pr ~ for_graf[i][j];
+						}
+   	
+         	if(kl=="") bool_list~=pref~"false";
+   	              else bool_list~=pref~"true";
+   	              
+   	
+          	tpl.set( заголовок[j],    	kk);
+          	writeln( заголовок[j]," -- ",kk);
+         
+         }
+         
+      tpl.set( "bool_list", bool_list);
+	  
+	  writeln( bool_list);   
+         
 
   //---------заголовок таблицы -------------------------------------- 
    
    
-   table~=`<table class="tab1" >`;
+  
    table~=`<tr>`;
   
     
@@ -375,77 +435,103 @@ string [][] for_tabl;   // массив данных для таблицы
   table ~=` </table>`; // writeln(table);
   //---------------------------------------------------
   
-content ~=`<form id="main_form" method="post">`
+
 //--блок переключения вида
-~`<fieldset>`;  
+
 
  if (isForPrint)
   {
-     if(prezent_vid=="Весь период.") content ~=`Весь период.`;
-     if(prezent_vid=="За год.") content ~=`За `~year~` год.`;
-      content ~=`<div  class="no_print">`; 
+     if(prezent_vid=="Весь период.") {tpl.set( "period", "Весь период" );}
+     if(prezent_vid=="За год.") {tpl.set( "period", `За `~year~` год.`); }
+     
+        tpl.set( "no_print", `class="no_print"` );
+      
    } 
-  else content~=`<div >`;
+  else { tpl.set( "no_print", `` );}
+  string vvv;
   
     foreach(d; prezent)
     {
-        content ~=`<input  type="radio"    
+                
+        vvv ~=`<input  type="radio"    
         name="prezent_vid" value="`~ d ~`"`;
-        if(d==prezent_vid) content ~=`  checked `;
-        content ~= `>`~d;
+        if(d==prezent_vid) vvv ~=`  checked `;
+        vvv ~= `>`~d;
+     
     } 
- content ~=`</div> </fieldset> `;
+     tpl.set( "prezent_vid", vvv );
+    
+    
+ 
    
  // блок фильтров   
 
  
-  content ~=`<fieldset>`;
-   if(!isForPrint || kod~org~terr!=``)  content ~=`<legend>Фильтры</legend>`;
+ 
+
   
    if (isForPrint)
    {
-       if (kod!=`` ) content ~=`Код МКК `~ kod~`<br/>`; 
-       if (org!=`` )content ~=`Организация `~ org~`<br/>`;
-       if (terr!=``)content ~=`Территория `~terr;
+          string ffl="";
    
-    content ~=`<div  class="no_print">`; 
+       if (kod!=`` )  ffl ~=`Код МКК `~ kod~`<br/>`; 
+                    
+       if (org!=`` )  ffl  ~=`Организация `~ org~`<br/>`;
+                      
+       if (terr!=``)  ffl  ~=`Территория `~terr;
+                        
+                       
+                       
+          tpl.set( "filtrum",  ffl);             
+                       
    }
-   else content~=`<div >`;
    
-  content ~=`<input type="text" name="kod_MKK"  size="6"  value="`
-  ~  HTMLEscapeValue( rq.bodyForm.get("kod_MKK", "176-00") ) 
-  ~ `" >  код МКК (176-00, 000-00, и т.п.)<br/>`
+   
   
-  ~`<input type="text" name="organization" size="12" value="`
-  ~HTMLEscapeValue( rq.bodyForm.get("organization", "") )
-  ~ `"  >   организация<br/>`
   
-  ~`<input type="text" name="territory"  size="12"value="`
-  ~HTMLEscapeValue( rq.bodyForm.get("territory", "") )
-  ~`"  >  территория ( Ярославль, Тутаев, Москва, и т.п.) <br/>`;
+   tpl.set( "kod_MKK", HTMLEscapeValue( rq.bodyForm.get("kod_MKK", "176-00") ));
+   tpl.set( "organization", HTMLEscapeValue( rq.bodyForm.get("organization", "") ) );
+   tpl.set( "territory", HTMLEscapeValue( rq.bodyForm.get("territory", "") ));
+  
                                   
-   if(prezent_vid=="За год.")                              
-  content ~=`<input type="text" name="year"  size="4" value="`                               
-  ~HTMLEscapeValue( rq.bodyForm.get("year", "2016") )
-  ~`"  >  год <br/>`;                                 
+   if(prezent_vid=="За год.")
+   {
+  
+   tpl.set( "year", 
+   `<input type="text" name="year"  size="4" value="`                               
+  ~HTMLEscapeValue( rq.bodyForm.get("year", "2014") )
+  ~`"  >  год <br/>`);
+   }
                                 
-content ~=`</div></fieldset><br/>`;
+
 
    if (isForPrint)
 	{
-	 content ~=` <a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`
-	 ~ "\r\n" ;}
-	 else content ~=`<button  name="filtr" type="submit" class="noprint" > Обновить </button>`;
-content ~= `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+	
+	 tpl.set( "ckript_or_button",
+	          `<a href='javascript:window.print(); void 0;' class="noprint" > <img  height="60" width="60"  class="noprint"   src="/pub/img/icons/printer.png" /></a> <!-- печать страницы -->`);
+	 
+	 }
+	 
+	 else
+	 { 
+	   tpl.set( "ckript_or_button",`<button  name="filtr" type="submit" class="noprint" > Обновить </button>`);
+	 }
+
 
 
    if (isForPrint)//для печати
-	      {content ~=` <button name="for_print" type="submit"  class="noprint" > Назад </button>`;}
+	      {
+	      tpl.set( "for_print", `class="noprint"`); tpl.set( "MESSAGE", "Назад");
+	      }
 	 else	     
-	    { content ~=` <button name="for_print" type="submit"  value="on"  > Для печати </button>`;}
- content ~= `</form>` ~ "\r\n";
- content~= table;
+	    { 
+	     tpl.set( "for_print", `value="on"`); tpl.set( "MESSAGE", "Для печати");
+	    }
+
+ tpl.set( "stat_table", table );
  
- 
-	return content;
+	
+	
+	return tpl.getString();
 }
