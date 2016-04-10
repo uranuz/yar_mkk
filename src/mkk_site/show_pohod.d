@@ -17,6 +17,10 @@ import
 import webtank.common.optional;
 import webtank.common.conv;
 
+import webtank.ui.list_control: checkBoxList;
+import webtank.ui.date_picker: PlainDatePicker;
+import webtank.net.utils: HTMLEscapeValue, PGEscapeStr;
+
 import mkk_site;
 
 static immutable string thisPagePath;
@@ -107,50 +111,56 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 	{ "end_date_range_tail", "finish_date", ">=" }
 ];
 
-import webtank.view_logic.html_controls, webtank.net.utils;
-
 /////////////////////////////////////
 
 string отрисоватьБлокФильтрации(ФильтрПоходов фильтрПоходов)
 {
 	auto списокВидовТуризма = checkBoxList(видТуризма);
-	списокВидовТуризма.nullName = "любой";
-	списокВидовТуризма.name = "vid";
-	списокВидовТуризма.classes ~= [`b-pohod_filter_vid`, `e-block`];
-	списокВидовТуризма.selectedValues = фильтрПоходов.видыТуризма;
+	with( списокВидовТуризма )
+	{
+		nullText = "любой";
+		dataFieldName = "vid";
+		selectedValues = фильтрПоходов.видыТуризма;
+		addElementClasses("list_wrapper", `b-pohod_filter_vid e-block`);
+	}
 	
 	auto списокКатегорий = checkBoxList(категорияСложности);
-	списокКатегорий.nullName = "любая";
-	списокКатегорий.name = "ks";
-	списокКатегорий.classes ~= [`b-pohod_filter_ks`, `e-block`];
-	списокКатегорий.selectedValues = фильтрПоходов.категории;
+	with( списокКатегорий )
+	{
+		nullText = "любая";
+		dataFieldName = "ks";
+		selectedValues = фильтрПоходов.категории;
+		addElementClasses("list_wrapper", `b-pohod_filter_ks e-block`);
+	}
 	
 	auto списокГотовностей = checkBoxList(готовностьПохода);
-	списокГотовностей.nullName = "любая";
-	списокГотовностей.name = "prepar";
-	списокГотовностей.classes ~= [`b-pohod_filter_prepar`, `e-block`];
-	списокГотовностей.selectedValues = фильтрПоходов.готовности;
+	with( списокГотовностей )
+	{
+		nullText = "любой";
+		dataFieldName = "prepar";
+		selectedValues = фильтрПоходов.готовности;
+		addElementClasses("list_wrapper", `b-pohod_filter_prepar e-block`);
+	}
 	
 	auto списокСтатусовЗаявки = checkBoxList(статусЗаявки);
-	списокСтатусовЗаявки.nullName = "любая";
-	списокСтатусовЗаявки.name = "stat";
-	списокСтатусовЗаявки.classes ~= [`b-pohod_filter_stat`, `e-block`];
-	списокСтатусовЗаявки.selectedValues = фильтрПоходов.статусыЗаявки;
+	with( списокСтатусовЗаявки )
+	{
+		nullText = "любой";
+		dataFieldName = "stat";
+		selectedValues = фильтрПоходов.статусыЗаявки;
+		addElementClasses("list_wrapper", `b-pohod_filter_stat e-block`);
+	}
 	
-	import std.file : read;
-	import std.path : buildPath;
-	
-	string текстШаблонаФормыФильтрации = cast(string) std.file.read( buildPath(pageTemplatesDir, "pohod_filter_form.html" ) );
-	auto формаФильтрации = new PlainTemplater( текстШаблонаФормыФильтрации );
+	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_filter_form.html" );
 	
 	foreach( имяПоля, дата; фильтрПоходов.сроки )
 	{
 		auto полеДаты = new PlainDatePicker;
-		полеДаты.name = имяПоля;
+		полеДаты.dataFieldName = имяПоля;
 		полеДаты.date = дата;
-		полеДаты.nullDayName = "день";
-		полеДаты.nullMonthName = "месяц";
-		полеДаты.nullYearName = "год";
+		полеДаты.nullDayText = "день";
+		полеДаты.nullMonthText = "месяц";
+		полеДаты.nullYearText = "год";
 		
 		формаФильтрации.set( имяПоля, полеДаты.print() );
 	}
@@ -177,8 +187,8 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	string[] строкиВидов;
 	if (фильтрПоходов.видыТуризма.length)
 	{
-		foreach( вид;	фильтрПоходов.видыТуризма )
-		{	
+		foreach( вид; фильтрПоходов.видыТуризма )
+		{
 			if( видТуризма.hasValue(вид) ) //Проверяет наличие значения в перечислимом типе
 			{
 				строкиВидов ~= видТуризма.getName(вид);
@@ -188,15 +198,15 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	else
 	{
 		строкиВидов ~= "Все виды";
-	}	
+	}
 	
 	string списокВидовТуризма = строкиВидов.join(",<br>");
 	//-------категория Сложности---------------------------------------------
 	string[] строкиКС;
 	if (фильтрПоходов.категории.length)
 	{
-		foreach( кс;	фильтрПоходов.категории )
-		{	
+		foreach( кс; фильтрПоходов.категории )
+		{
 			if( категорияСложности.hasValue(кс) ) //Проверяет наличие значения в перечислимом типе
 			{
 				строкиКС ~= категорияСложности.getName(кс);
@@ -206,7 +216,7 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	else
 	{
 		строкиКС ~= "Все категории";
-	}	
+	}
 	
 	string списокКС = строкиКС.join(",<br>");
 	
@@ -214,7 +224,7 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	string[] строкиПодготовка;
 	if (фильтрПоходов.готовности.length)
 	{
-		foreach( гп;	фильтрПоходов.готовности )
+		foreach( гп; фильтрПоходов.готовности )
 		{	
 			if( готовностьПохода.hasValue(гп) ) //Проверяет наличие значения в перечислимом типе
 			{
@@ -233,7 +243,7 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 		string[] строкиЗаявка;
 	if (фильтрПоходов.статусыЗаявки.length)
 	{
-		foreach( сз;	фильтрПоходов.статусыЗаявки )
+		foreach( сз; фильтрПоходов.статусыЗаявки )
 		{	
 			if( статусЗаявки.hasValue(сз) ) //Проверяет наличие значения в перечислимом типе
 			{
@@ -250,22 +260,16 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	
 	//----------------------------------------------------
 	
-
-	
-	import std.file : read;
-	import std.path : buildPath;
-	
-	string текстШаблонаФормыФильтрации = cast(string) std.file.read( buildPath(pageTemplatesDir, "pohod_filter_print.html" ) );
-	auto формаФильтрации = new PlainTemplater( текстШаблонаФормыФильтрации );
+	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_filter_print.html" );
 	
 	foreach( имяПоля, дата; фильтрПоходов.сроки )
 	{
 		auto полеДаты = new PlainDatePicker;
-		полеДаты.name = имяПоля;
+		полеДаты.dataFieldName = имяПоля;
 		полеДаты.date = дата;
-		полеДаты.nullDayName = "день";
-		полеДаты.nullMonthName = "месяц";
-		полеДаты.nullYearName = "год";
+		полеДаты.nullDayText = "день";
+		полеДаты.nullMonthText = "месяц";
+		полеДаты.nullYearText = "год";
 		
 		формаФильтрации.set( имяПоля, полеДаты.print() );
 	}
@@ -282,7 +286,6 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 			set( "with_files", ` checked="checked"` );
 	}
 
-	
 	return формаФильтрации.getString();
 }
 
@@ -385,7 +388,7 @@ string поисковый_диапазон_Походов(const ref Фильтр
 	OptionalDate фильтрДатыКонец = фильтрПоходов.сроки[ "end_date_range_tail" ];
 	//writeln(фильтрДатыНачало);
 	//writeln(фильтрДатыКонец);
-	string[] _месяцы =["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+	string[] _месяцы = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 	string район;
 	string beginDateStr;
 	string endDateStr;
@@ -430,7 +433,7 @@ string поисковый_диапазон_Походов(const ref Фильтр
 
 import std.typecons: tuple;
 
-auto pohodRecFormat = RecordFormat!(
+static immutable pohodRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "Ключ", 
 	string, "Номер книги", 
 	string, "Сроки", 

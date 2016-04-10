@@ -2,8 +2,14 @@ module mkk_site.site_main;
 
 import std.conv, std.getopt;
 
-import webtank.net.web_server, webtank.net.http.handler, webtank.net.http.json_rpc_handler,
-webtank.net.http.context, webtank.net.http.http, webtank.templating.plain_templater;
+import 
+	webtank.net.web_server, 
+	webtank.net.http.handler, 
+	webtank.net.http.json_rpc_handler,
+	webtank.net.http.context, 
+	webtank.net.http.http, 
+	webtank.templating.plain_templater,
+	webtank.ui.templating;
 
 import mkk_site.site_data, mkk_site.access_control, mkk_site.utils, mkk_site.uri_page_router, webtank.common.logger;
 
@@ -14,6 +20,7 @@ __gshared PlainTemplateCache!(useTemplateCache) templateCache;
 shared static this()
 {
 	templateCache = new PlainTemplateCache!(useTemplateCache)();
+	webtank.ui.templating.setTemplatesDir( webtankResDir ~ "templates" );
 }
 
 

@@ -56,7 +56,7 @@ JSONValue serializeTemplate(PlainTemplate tpl)
 	
 	import std.utf: toUTF8;
 	//TODO: Немного костыльно. Возможно стоит исправить
-	jTemplate["src"] = std.utf.toUTF8( tpl._sourceStr );
+	jTemplate["src"] = toUTF8( tpl._sourceStr );
 	
 	return JSONValue(jTemplate);
 }
