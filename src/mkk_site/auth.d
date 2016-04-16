@@ -2,11 +2,14 @@ module mkk_site.auth;
 
 import std.conv, std.base64;
 
-import webtank.net.http.handler, webtank.net.http.context/+, webtank.net.access_control+/;
+import webtank.net.http.handler, webtank.net.http.context;
 
-import mkk_site, mkk_site.access_control;
+import mkk_site;
+import 
+	mkk_site.access_control,
+	mkk_site.routing;
 
-immutable(string) thisPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	

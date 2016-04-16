@@ -1,13 +1,10 @@
 module mkk_site.show_moder;
 
 import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
-import std.file; //Стандартная библиотека по работе с файлами
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context;
+import mkk_site.page_devkit;
 
-import mkk_site;
-
-static immutable string thisPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	

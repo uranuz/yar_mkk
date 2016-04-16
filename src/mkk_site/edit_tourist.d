@@ -1,14 +1,11 @@
 module mkk_site.edit_tourist;
 
-import std.conv, std.string, std.file, std.utf, std.typecons;
+import std.conv, std.string, std.utf, std.typecons;
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.database, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.datctrl.record_set, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.net.http.context, webtank.net.http.json_rpc_handler, webtank.view_logic.html_controls, webtank.common.optional;
+import mkk_site.page_devkit;
 
-import mkk_site;
-import std.conv, std.algorithm;
-
-immutable(string) thisPagePath;
-immutable(string) authPagePath;
+static immutable(string) thisPagePath;
+static immutable(string) authPagePath;
 
 shared static this()
 {	
@@ -405,21 +402,20 @@ public:
 		}
 		SiteLogger.info("Разбор данных о дате рождения завершен");
 		
+		import webtank.ui.list_control: listBox;
+		
 		SiteLogger.info("Создание компонентов вывода перечислимых типов");
 		//Генератор выпадающего списка месяцев
 		auto monthDropdown = listBox(месяцы);
-		monthDropdown.name = "birth_month";
-		monthDropdown.id = "birth_month";
+		monthDropdown.dataFieldName = "birth_month";
 
 		//Генератор выпадющего списка спорт. разрядов
 		auto sportsGradeDropdown = listBox(спортивныйРазряд);
-		sportsGradeDropdown.name = "razr";
-		sportsGradeDropdown.id = "razr";
+		sportsGradeDropdown.dataFieldName = "razr";
 		
 		//Генератор выпадающего списка судейских категорий
 		auto judgeCatDropdown = listBox(судейскаяКатегория);
-		judgeCatDropdown.name = "sud";
-		judgeCatDropdown.id = "sud";
+		judgeCatDropdown.dataFieldName = "sud";
 		
 		SiteLogger.info("Компонентов вывода перечислимых типов созданы");
 		

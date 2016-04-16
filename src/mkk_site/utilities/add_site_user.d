@@ -30,7 +30,6 @@ void main(string[] progAgs) {
 
 	if( isHelp )
 	{	writeln("Утилита для добавления пользователя сайта МКК.");
-		writeln("Возвращает ИД сессии в виде числа в кодировке Base64");
 		writeln(
 			"Опции:\r\n",
 			"  --login=ЛОГИН         Минимум " ~ minLoginLength.to!string ~ " символов\r\n",
@@ -88,9 +87,19 @@ void main(string[] progAgs) {
 	ubyte[] pwHash = makePasswordHash( password, pwSaltStr, regTimestampStr );
 	string pwHashStr = encodePasswordHash( pwHash );
 	
-	dbase.query(
+	auto addUserResult = dbase.query(
 		`insert into site_user ( login, name, user_group, email, pw_hash, pw_salt, reg_timestamp ) `
 		~ ` values( '` ~ login ~ `', '` ~ name ~ `', '` ~ group ~ `', '` 
 		~ email ~ `', '` ~ pwHashStr ~ `', '` ~ pwSaltStr ~ `', '` ~ regTimestampStr ~ `' ) `
+		~ ` returning 'user added'`
 	);
+	
+	if( addUserResult.recordCount != 1 || addUserResult.get(0, 0, null) != `user added` )
+	{
+		writeln( `При запросе на регистрацию пользователя произошла ошибка!` );
+	}
+	else
+	{
+		writeln( `Пользователь с логином "`, login, `" успешно зарегистрирован!` );
+	}
 } 

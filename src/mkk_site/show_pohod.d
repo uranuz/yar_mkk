@@ -2,28 +2,13 @@ module mkk_site.show_pohod;
 
 import std.conv, std.string, std.array, std.stdio;
 import std.exception : ifThrown;
-import std.file; //Стандартная библиотека по работе с файлами
-//import webtank.db.database;
-import 
-	webtank.datctrl.data_field, 
-	webtank.datctrl.record_format, 
-	webtank.db.postgresql, 
-	webtank.db.datctrl_joint, 
-	webtank.datctrl.record, 
-	webtank.templating.plain_templater, 
-	webtank.net.http.context, 
-	webtank.templating.plain_templater_datctrl;
 
-import webtank.common.optional;
-import webtank.common.conv;
+import mkk_site.page_devkit;
 
 import webtank.ui.list_control: checkBoxList;
 import webtank.ui.date_picker: PlainDatePicker;
-import webtank.net.utils: HTMLEscapeValue, PGEscapeStr;
 
-import mkk_site;
-
-static immutable string thisPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	thisPagePath = dynamicPath ~ "show_pohod";
@@ -34,7 +19,7 @@ shared static this()
 
 string participantsList( size_t pohodNum )
 {
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	auto dbase = getCommonDB();
 	if ( !dbase.isConnected )
 		return null;
 	
@@ -111,17 +96,19 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 	{ "end_date_range_tail", "finish_date", ">=" }
 ];
 
+import mkk_site.ui.list_control;
+
 /////////////////////////////////////
 
 string отрисоватьБлокФильтрации(ФильтрПоходов фильтрПоходов)
 {
-	auto списокВидовТуризма = checkBoxList(видТуризма);
+	auto списокВидовТуризма = bsCheckBoxList(видТуризма);
 	with( списокВидовТуризма )
 	{
 		nullText = "любой";
 		dataFieldName = "vid";
 		selectedValues = фильтрПоходов.видыТуризма;
-		addElementClasses("list_wrapper", `b-pohod_filter_vid e-block`);
+		addElementClasses("block", `b-pohod_filter_vid e-block`);
 	}
 	
 	auto списокКатегорий = checkBoxList(категорияСложности);
@@ -130,7 +117,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		nullText = "любая";
 		dataFieldName = "ks";
 		selectedValues = фильтрПоходов.категории;
-		addElementClasses("list_wrapper", `b-pohod_filter_ks e-block`);
+		addElementClasses("block", `b-pohod_filter_ks e-block`);
 	}
 	
 	auto списокГотовностей = checkBoxList(готовностьПохода);
@@ -139,7 +126,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		nullText = "любой";
 		dataFieldName = "prepar";
 		selectedValues = фильтрПоходов.готовности;
-		addElementClasses("list_wrapper", `b-pohod_filter_prepar e-block`);
+		addElementClasses("block", `b-pohod_filter_prepar e-block`);
 	}
 	
 	auto списокСтатусовЗаявки = checkBoxList(статусЗаявки);
@@ -148,7 +135,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		nullText = "любой";
 		dataFieldName = "stat";
 		selectedValues = фильтрПоходов.статусыЗаявки;
-		addElementClasses("list_wrapper", `b-pohod_filter_stat e-block`);
+		addElementClasses("block", `b-pohod_filter_stat e-block`);
 	}
 	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_filter_form.html" );

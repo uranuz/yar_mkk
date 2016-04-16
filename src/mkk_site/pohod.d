@@ -1,17 +1,10 @@
 module mkk_site.pohod;
 
-import std.conv, std.string, std.utf, std.stdio, std.typecons;//  strip()       Уибират начальные и конечные пробелы
-import std.file; //Стандартная библиотека по работе с файлами
+import std.conv, std.string, std.utf, std.typecons;
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context,webtank.net.utils;
+import mkk_site.page_devkit;
 
-import mkk_site;
-
-
-//Функция отсечки SQL иньекций.отсечь все символы кромье букв и -
-
-//----------------------
-immutable(string) thisPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	
@@ -21,7 +14,7 @@ shared static this()
 
 string participantsList( size_t pohodNum ) //функция получения списка участников
 {
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	auto dbase = getCommonDB();
 	if ( !dbase.isConnected )
 		return null;
 	
@@ -52,7 +45,7 @@ left join tourist
 
 string linkList( size_t pohodNum ) //функция получения списка ссылок
 {
-	auto dbase = new DBPostgreSQL(commonDBConnStr);
+	auto dbase = getCommonDB();
 	if ( !dbase.isConnected )
 		return null;
 	 auto рез_запроса= dbase.query(`select unnest(links) as num from pohod where pohod.num = ` ~ pohodNum.to!string ~ ` `); 

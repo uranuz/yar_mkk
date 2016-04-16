@@ -1,13 +1,8 @@
 module mkk_site.show_tourist;
 
-import std.conv, std.string, std.utf;//  strip()       Уибират начальные и конечные пробелы
-import std.file; //Стандартная библиотека по работе с файлами
+import std.conv, std.string, std.utf;
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.net.http.context, webtank.templating.plain_templater_datctrl;
-
-import webtank.net.utils;
-
-import mkk_site;
+import mkk_site.page_devkit;
 
 immutable(string) thisPagePath;
 

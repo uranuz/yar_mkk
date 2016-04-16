@@ -1,13 +1,10 @@
 module mkk_site.show_pohod_for_tourist;
 
 import std.conv, std.string, std.utf, std.typecons, std.json;
-import std.file;
 
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint, webtank.datctrl.record, webtank.net.http.handler, webtank.templating.plain_templater, webtank.templating.plain_templater_datctrl, webtank.net.http.context, webtank.common.optional;
+import mkk_site.page_devkit;
 
-import mkk_site;
-
-immutable(string) thisPagePath;
+static immutable(string) thisPagePath;
 static immutable size_t pohodsPerPage = 10;
 
 shared static this()

@@ -49,10 +49,6 @@ table.tab1 {
 	width: 70px;
 }
 
-.b-wui-CheckBoxList.e-wui-ListItem_labelText {
-	font-size: 0.9rem;
-}
-
 /* !sect-begin: Общие модификаторы */
 .is-hidden {
 	display: none;

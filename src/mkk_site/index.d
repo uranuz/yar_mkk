@@ -1,16 +1,10 @@
 module mkk_site.index;
 
-import std.conv, std.string, std.file, std.array, std.typecons;
+import std.conv, std.string, std.array, std.typecons;
 
-import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+import mkk_site.page_devkit;
 
-// import webtank.net.javascript;
-import webtank.datctrl.data_field, webtank.datctrl.record_format, webtank.db.postgresql, webtank.db.datctrl_joint,webtank.datctrl.record, webtank.net.http.context;
-
-
-import mkk_site;
-
-immutable(string) thisPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	

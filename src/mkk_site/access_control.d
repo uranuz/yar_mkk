@@ -2,7 +2,13 @@ module mkk_site.access_control;
 
 import std.conv, std.digest.digest, std.datetime, std.utf, std.base64 : Base64URL;
 
-import webtank.db.postgresql, webtank.net.utils, webtank.security.access_control, webtank.net.http.context, webtank.common.conv, webtank.common.crypto_scrypt;
+import 
+	webtank.db.postgresql, 
+	webtank.net.utils, 
+	webtank.security.access_control, 
+	webtank.net.http.context, 
+	webtank.common.conv, 
+	webtank.common.crypto_scrypt;
 
 import mkk_site.site_data;
 
@@ -307,18 +313,3 @@ bool checkPassword( const(char)[] encodedPwHash, const(char)[] password, const(c
 	
 	return makePasswordHash( password, salt, pepper, params[2].to!size_t, params[3].to!ulong, params[4].to!uint, params[5].to!uint ) == pwHash;
 }
-
-// void main()
-// {	string password = "rtghrthggrth";
-// 	string salt = "1jyuj11";
-// 	string pepper = "pp11ppp6";
-// 
-// 	auto time = Clock.currTime();
-// 	auto hash1 = makePasswordHash(password, salt, pepper);
-// 	string encodedHash = encodePasswordHash( hash1 );
-// 	writeln( "Hashing time: ", Clock.currTime() - time, ". Encoded hash string:" );
-// 	writeln( encodedHash );
-// 	writeln( "Password checking returned: ", checkPassword(encodedHash, password, salt, pepper) );
-// 	
-// 	
-// }

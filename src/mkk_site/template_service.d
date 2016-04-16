@@ -3,6 +3,9 @@ module mkk_site.template_service;
 import webtank.templating.plain_templater;
 
 import mkk_site;
+import 
+	mkk_site.routing,
+	mkk_site.templating;
 
 shared static this()
 {
