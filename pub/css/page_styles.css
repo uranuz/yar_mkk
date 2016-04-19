@@ -228,6 +228,15 @@ table.tab1 {
 			vertical-align: top;
 			padding: 3px 4px 0 4px;
 		}
+		
+
+
+.legendLabel  {
+	font-size: 10pt;
+	font-weight:bold;
+	
+}
+		
 	/* !sub!sect-end: edit_pohod.pohod_chef_edit */
 
 /* !sect-end: edit_pohod */

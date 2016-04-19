@@ -64,7 +64,9 @@ import std.typecons;
 		string,"gr_7",     string,"un_7",		
 		string,"gr_всего", string,"un_всего"		
 	)(		null,	tuple()	);
-	
+	//------------шаблон страницы
+  auto tpl = getPageTemplate( pageTemplatesDir ~ "show_stat.html" );
+  //создаёт  страницу из шаблона
 	
 	//int[string]ks=["н.к.","первая","вторая","третья","четвёртая","пятая","шестая","пут.","всего"];
 	string[] групп_человек;
@@ -90,8 +92,9 @@ import std.typecons;
   
    if( prezent_vid=="Весь период.")
    { групп_человек=statRecFormatVid.names.dup;
-   заголовок = ["Год","Пешый","Лыжный","Горный","Водный"," Вело ",
-                " Авто ", "Спелео","Парус","Конный","Комби","ВСЕГО"];
+   заголовок = ["Год","Пешый","Лыжный","Горный","Водный","Вело",
+                "Авто", "Спелео","Парус","Конный","Комби","ВСЕГО"];
+     tpl.set( "skript_Neim", "stat_all.js");          
      bool_заголовок= 
 	[true,true,true,true,true,true,      
 	true,true,true,true,true,true
@@ -103,6 +106,7 @@ import std.typecons;
 	{ групп_человек=statRecFormatKC.names.dup;
 	  заголовок = ["Вид-к.с.","н.к.","Первая","Вторая","Третья",
 	               "Четвёртая","Пятая","Шестая","Путеш.","ВСЕГО"];
+	   tpl.set( "skript_Neim", "stat_year.js");             
 		bool_заголовок=
 	  [true,true,true,true,true,
 	   true,true,true,true,true];
@@ -298,9 +302,9 @@ string [][] for_graf;   // массив данных для графика
 
 			foreach(v,td; групп_человек)
 			{
-			 			  
+				  
 					if(v==0  &&  prezent_vid=="Весь период.")
-				     	{
+						{
 							line_tabl[v]= rec.getStr(td, "");
 							line_graf[v]= rec.getStr(td, "");
 						}
@@ -321,8 +325,6 @@ string [][] for_graf;   // массив данных для графика
 							  line_tabl[(v)/2]~=resurs_tabl~ `(`~rec.getStr(td, "")~`)`;
 							  line_graf[(v)/2] = rec.getStr(td, "") ;
 							 }
-
-							
 					}
              parity=!parity;
 			} 
@@ -331,26 +333,21 @@ string [][] for_graf;   // массив данных для графика
 			for_tabl~=line_tabl;
 			for_graf~=line_graf;
   }
- // writeln(for_graf);
+  //writeln(for_graf);
+
 
   //---------------------строки для передачи данных в скрипт----------
-  string [] _list 
-  =["year_list","walking_list", "ski_list", "munt_listvater", "velo_list",
-   "auto_list","speleo_list","sail_list","horse_list","kombi_list","total_list"];
+
          
-    string    bool_list;    
-   //------------шаблон страницы
-  auto tpl = getPageTemplate( pageTemplatesDir ~ "show_stat.html" );
-  //создаёт  страницу из шаблона
+    bool [12]   bool_list =   false;    
+   
   //--------проверка пустых столбцов------------------------ position 
 
   
   for( size_t j = 0; j< bool_заголовок.length; j++  )
 	  {
 	 
-	   string kl;
-	   
-	   
+	   string kl;	   
 	   
 	   for( size_t i = 0; i < строк; i++  )
 			{  		
@@ -359,47 +356,112 @@ string [][] for_graf;   // массив данных для графика
    	
    	if(kl=="") bool_заголовок[j]=false;
    	
-   	
-	  }
-	  
+	  }	  
 	
   //string []заг;   foreach(td;  bool_заголовок){ if(td)заг~="true"; else заг~="false";}   writeln( заг);
   // ------------формируем данные для скрипта----------
-  tpl.set( "строк", строк.to!string);
-  tpl.set( "bool_list", bool_list);
   
-     for( size_t j = 0; j< bool_заголовок.length; j++  )
-         {
-             string kl,kk,pref;
-             kk="";
-	   
-	          if(j == 0) pref=""; else pref=","; 
+  
+  string skript_Surs="";
+  //---------------------------
+  if(prezent_vid=="Весь период.")
+  {   skript_Surs~="prez=1,"~"\r\n";
+			for( size_t j = 0; j< bool_заголовок.length; j++  ) 
+			{
+						string kl,kk="",pref;
+				
+						if(j == 0) pref=""; else pref=","; 
+							
+									for( size_t i = 0; i < строк; i++  )
+								{ 
+									string pr;
+				
+								if(i == 0) pr=""; else pr=","; 
+								
+									kl ~= for_graf[i][j];
+									if(for_graf[i][j]=="") kk ~=pr ~"0";
+									else kk ~=pr ~ for_graf[i][j];
+								}
+				
+						if(kl=="") bool_list[j]=false;
+						       else bool_list[j]=true;
+								
+				skript_Surs~="Surs" ~ j.to!string ~ "=[" ~ kk ~ "],"~"\r\n" ;
+						tpl.set( заголовок[j],    	kk);
 					
-							for( size_t i = 0; i < строк; i++  )
-						{ 
-						   string pr;
-	   
-	                 if(i == 0) pr=""; else pr=","; 
-	                 
-							kl ~= for_graf[i][j];
-							if(for_graf[i][j]=="") kk ~=pr ~"0";
-							  else kk ~=pr ~ for_graf[i][j];
-						}
-   	
-         	if(kl=="") bool_list~=pref~"false";
-   	              else bool_list~=pref~"true";
-   	              
-   	
-          	tpl.set( заголовок[j],    	kk);
-          	writeln( заголовок[j]," -- ",kk);
+			}    
+			
+			
+    }  
+     
+    //////////////////////"За год."//////////////////////////////////// 
+    
+     int [string] vid =["Пешый":1,"Лыжный":2,"Горный":3,"Водный":4,"Вело":5,
+    "Авто":6,"Спелео":7,"Парус":8,"Конный":9,"Комби":10,"ВСЕГО":11];
+    
+      
+  if(prezent_vid=="За год.")  
+  {
+     //  string neim_vid="";        
+     skript_Surs="prez=2,"~"\r\n";  
+   //----формируем  bool_list
+         bool_list[0]=true;
          
-         }
+           foreach(v,td; for_graf)
+       {              
+          bool_list[vid[td[0]]]=true;          
+       }    
+        
+ //------------------
+  skript_Surs~="Surs0=[0,1,2,3,4,5,6,7],"~"\r\n";
+  int qqq=0;
+  
+  
+       for(int v=1; v<12; v++) 
+       {
+         string kk="";
+        
          
-      tpl.set( "bool_list", bool_list);
+         if(!bool_list[v])   
+            skript_Surs~="Surs" ~v.to!string~"=[0,0,0,0,0,0,0,0],"~"\r\n";
+            else
+            {
+               foreach(t,tt; for_graf[qqq]) 
+               {
+                 if(t>0)
+                 {
+                    string pref;				
+						if(t==1) pref=""; else pref=","; 
+                 
+                 
+                    if(tt.to!string=="")kk~=pref~"0";
+                       else kk~=pref~ tt.to!string;
+                 }
+               }
+               qqq=qqq+1;
+               skript_Surs ~="Surs" ~v.to!string~ "=[" ~ kk ~ "],"~"\r\n" ;  
+            }              
+        }   
+        
+                
+  }  
+  
+             	string bl ="bool_list = [";
+					 foreach(m,tr;bool_list)	
+					 {
+					   if(m==0) bl~=tr.to!string; else bl~=","~tr.to!string;
+					 }
+							
+							
+						 bl~="],";
+  
+            skript_Surs~=bl ~ "\r\n";                
+            skript_Surs~="y="~  строк.to!string ~ "\r\n" ;
+            tpl.set( "skript_Surs", skript_Surs);
 	  
-	  writeln( bool_list);   
+	
          
-
+writeln( skript_Surs); 
   //---------заголовок таблицы -------------------------------------- 
    
    
