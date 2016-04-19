@@ -2,19 +2,13 @@ module mkk_site.stati;
 
 import std.conv, std.string, std.file, std.array;
 
-import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv;
+import mkk_site.page_devkit;
 
-// import webtank.net.javascript;
-
-import mkk_site;
-
-immutable(string) thisPagePath;
-immutable(string) authPagePath;
+static immutable(string) thisPagePath;
 
 shared static this()
 {	
 	thisPagePath = dynamicPath ~ "stati";
-	authPagePath = dynamicPath ~ "auth";
 	PageRouter.join!(netMain)(thisPagePath);
 }
 

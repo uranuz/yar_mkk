@@ -1,16 +1,8 @@
 module mkk_site.edit_pohod;
 
-import std.conv, std.string, std.file, std.array, std.json, std.typecons, core.thread;
+import std.conv, std.string, std.array, std.json, std.typecons;
 
-import std.math;
-
-
-import webtank.datctrl, webtank.db, webtank.net.http, webtank.templating.plain_templater, webtank.net.utils, webtank.common.conv, webtank.view_logic.html_controls, webtank.common.optional;
-
-// import webtank.net.javascript;
-
-import mkk_site;
-import std.stdio;
+import mkk_site.page_devkit;
 
 immutable(string) thisPagePath;
 immutable(string) authPagePath;
@@ -109,6 +101,8 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	auto queryRes_count = dbase.query(zapros_count) ;
 	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
 	
+	import std.math: ceil;
+	
 	string message = `Страниц ` ~ (ceil(cast(float) col_str/perPage)).to!string ~ `  Туристов ` ~ col_str.to!string;
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 
@@ -192,26 +186,26 @@ void создатьФормуИзмененияПохода(
 		foreach( fieldName; strFieldNames )
 			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr(fieldName, "") ) );
 	}
+	
+	import webtank.ui.date_picker: PlainDatePicker;
 
 	//Создаём компонент выбора даты начала похода
 	auto beginDatePicker = new PlainDatePicker;
-	beginDatePicker.name = "begin"; //Задаём часть имени (компонент допишет _day, _year или _month)
-	beginDatePicker.id = "begin"; //аналогично для id
+	beginDatePicker.dataFieldName = "begin";
 	
 	//Создаём компонент выбора даты завершения похода
 	auto finishDatePicker = new PlainDatePicker;
-	finishDatePicker.name = "finish";
-	finishDatePicker.id = "finish";
+	finishDatePicker.dataFieldName = "finish";
 	
 	//Получаем данные о датах (если режим редактирования)
 	if( pohodRec )
 	{	//Извлекаем данные из БД
 		if( !pohodRec.isNull("begin_date") )
-			beginDatePicker.date = pohodRec.get!("begin_date");
+			beginDatePicker.date = OptionalDate( pohodRec.get!("begin_date") );
 		//Если данные не получены, то компонент выбора даты будет пустым
 		
 		if( !pohodRec.isNull("finish_date") )
-			finishDatePicker.date = pohodRec.get!("finish_date");
+			finishDatePicker.date = OptionalDate( pohodRec.get!("finish_date") );
 	}
 	
 	pohodForm.set( "begin_date", beginDatePicker.print() );
@@ -222,17 +216,14 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 
-	//pragma(msg, "filterNamesByTypes!(EnumFormat): ", pohodRecFormat.filterNamesByTypes!(EnumFormat));
+	import webtank.ui.list_control: listBox;
 	
-	import std.stdio;
-	//alias pohodEnumFieldNames = 
 	//Вывод перечислимых полей
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	//Создаём экземпляр генератора выпадающего списка
 		auto dropdown =  listBox( pohodRecFormat.getEnumFormat!(fieldName) );
 
-		dropdown.name = fieldName;
-		dropdown.id = fieldName;
+		dropdown.dataFieldName = fieldName;
 
 		//Задаём текущее значение
 		if( pohodRec && !pohodRec.isNull(fieldName) )

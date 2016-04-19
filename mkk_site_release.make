@@ -1,1 +1,1 @@
-rdmd --build-only --force -version=release "-Isrc/" "-I../webtank/src/" "-I../openssl/" "-I../" -ofmkk_site_release src/mkk_site/package.d
+rdmd --build-only --force -version=release "-Isrc/" "-I../webtank/src/" "-I../openssl/" "-I../" -ofmkk_site_release src/mkk_site/site_build_package.d

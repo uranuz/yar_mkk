@@ -3,6 +3,9 @@ module mkk_site.template_service;
 import webtank.templating.plain_templater;
 
 import mkk_site;
+import 
+	mkk_site.routing,
+	mkk_site.templating;
 
 shared static this()
 {
@@ -56,7 +59,7 @@ JSONValue serializeTemplate(PlainTemplate tpl)
 	
 	import std.utf: toUTF8;
 	//TODO: Немного костыльно. Возможно стоит исправить
-	jTemplate["src"] = std.utf.toUTF8( tpl._sourceStr );
+	jTemplate["src"] = toUTF8( tpl._sourceStr );
 	
 	return JSONValue(jTemplate);
 }

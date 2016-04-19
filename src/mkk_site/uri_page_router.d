@@ -51,6 +51,7 @@ class MKK_Site_URIPageRouter: EventBasedHTTPHandler
 			
 		import webtank.templating.plain_templater: PlainTemplater;
 		import mkk_site.site_data;
+		import mkk_site.templating;
 		
 		PlainTemplater tpl;
 		

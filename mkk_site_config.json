@@ -35,10 +35,10 @@
 				"webtankJS": "pub/webtank/js/",
 				"webtankImg": "pub/webtank/img/",
 				
-				"foundationPublic": "pub/foundation/",
-				"foundationCSS": "pub/foundation/css/",
-				"foundationJS": "pub/foundation/js/",
-				"foundationImg": "pub/foundation/img/"
+				"bootstrapPublic": "pub/bootstrap/",
+				"bootstrapCSS": "pub/bootstrap/css/",
+				"bootstrapJS": "pub/bootstrap/js/",
+				"bootstrapImg": "pub/bootstrap/img/"
 			},
 
 			"virtualPaths": {
@@ -56,10 +56,10 @@
 				"webtankJS": "pub/webtank/js/",
 				"webtankImg": "pub/webtank/img/",
 				
-				"foundationPublic": "pub/foundation/",
-				"foundationCSS": "pub/foundation/css/",
-				"foundationJS": "pub/foundation/js/",
-				"foundationImg": "pub/foundation/img/"
+				"bootstrapPublic": "pub/bootstrap/",
+				"bootstrapCSS": "pub/bootstrap/css/",
+				"bootstrapJS": "pub/bootstrap/js/",
+				"bootstrapImg": "pub/bootstrap/img/"
 			}
 		}
 	}
