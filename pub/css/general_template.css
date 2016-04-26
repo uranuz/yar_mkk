@@ -199,10 +199,16 @@ body {
 	margin-bottom: 8px;
 }
 
-#content {
+#content_column {
 	margin: 8px  280px 16px 16px;
+	position: relative;
+}
+
+#content {
 	padding: 8px;
 	background: #e4e2bf;
+	display: inline-block; /* Создает новый Block formatting context */
+	width: 100%;
 	
 }
 

@@ -5,9 +5,6 @@ import std.exception : ifThrown;
 
 import mkk_site.page_devkit;
 
-import webtank.ui.list_control: checkBoxList;
-import webtank.ui.date_picker: PlainDatePicker;
-
 static immutable(string) thisPagePath;
 
 shared static this()
@@ -97,6 +94,7 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 ];
 
 import mkk_site.ui.list_control;
+import mkk_site.ui.date_picker;
 
 /////////////////////////////////////
 
@@ -111,7 +109,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		addElementClasses("block", `b-pohod_filter_vid e-block`);
 	}
 	
-	auto списокКатегорий = checkBoxList(категорияСложности);
+	auto списокКатегорий = bsCheckBoxList(категорияСложности);
 	with( списокКатегорий )
 	{
 		nullText = "любая";
@@ -120,7 +118,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		addElementClasses("block", `b-pohod_filter_ks e-block`);
 	}
 	
-	auto списокГотовностей = checkBoxList(готовностьПохода);
+	auto списокГотовностей = bsCheckBoxList(готовностьПохода);
 	with( списокГотовностей )
 	{
 		nullText = "любой";
@@ -129,7 +127,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 		addElementClasses("block", `b-pohod_filter_prepar e-block`);
 	}
 	
-	auto списокСтатусовЗаявки = checkBoxList(статусЗаявки);
+	auto списокСтатусовЗаявки = bsCheckBoxList(статусЗаявки);
 	with( списокСтатусовЗаявки )
 	{
 		nullText = "любой";
@@ -142,9 +140,8 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	
 	foreach( имяПоля, дата; фильтрПоходов.сроки )
 	{
-		auto полеДаты = new PlainDatePicker;
+		auto полеДаты = bsPlainDatePicker(дата);
 		полеДаты.dataFieldName = имяПоля;
-		полеДаты.date = дата;
 		полеДаты.nullDayText = "день";
 		полеДаты.nullMonthText = "месяц";
 		полеДаты.nullYearText = "год";
@@ -251,9 +248,8 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	
 	foreach( имяПоля, дата; фильтрПоходов.сроки )
 	{
-		auto полеДаты = new PlainDatePicker;
+		auto полеДаты = bsPlainDatePicker(дата);
 		полеДаты.dataFieldName = имяПоля;
-		полеДаты.date = дата;
 		полеДаты.nullDayText = "день";
 		полеДаты.nullMonthText = "месяц";
 		полеДаты.nullYearText = "год";
