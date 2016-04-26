@@ -9,6 +9,6 @@ import mkk_site.templating;
 
 shared static this()
 {
-	templateCache = new PlainTemplateCache!(useTemplateCache)();
+	templateCache = new PlainTemplateCache!(withTemplateCache)();
 	webtank.ui.templating.setTemplatesDir( webtankResDir ~ "templates" );
 } 
