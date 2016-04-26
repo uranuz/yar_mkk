@@ -14,33 +14,15 @@ shared static this()
 
 string participantsList( size_t pohodNum ) //функция получения списка участников
 {
-	auto dbase = getCommonDB();
-	if ( !dbase.isConnected )
-		return null;
+	auto rs = getPohodParticipants( pohodNum );
 	
-	auto рез_запроса = dbase.query(
-`with tourist_nums as (
-	select unnest(unit_neim) as num from pohod where pohod.num = ` ~ pohodNum.to!string ~ `
-)
-select coalesce(family_name, '') || coalesce( ' ' || given_name, '' )
-	||coalesce(' '||patronymic, '')||coalesce(', '||birth_year::text,'') from tourist_nums 
-left join tourist
-	on tourist.num = tourist_nums.num
-`);
+	static struct VM { typeof(rs) touristsRS; }
+	VM vm = VM(rs);
 	
-
-	
-	string result;//список туристов
-	
-	if( рез_запроса.recordCount<1) 
-		result ~= `Сведения об участниках <br> отсутствуют`;
+	if( rs.length )
+		return renderPohodParticipants(vm);
 	else
-	{
-		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-		{	result ~=HTMLEscapeText(рез_запроса.get(0, i, "")) ~ `<br>`;	}
-	}        
-	           
-	return result;
+		return `Сведения об участниках <br> отсутствуют`;
 }
 
 string linkList( size_t pohodNum ) //функция получения списка ссылок
@@ -66,8 +48,6 @@ string linkList( size_t pohodNum ) //функция получения спис�
 	}        
 	           
 	return result;
-	
-	 
 }
 
 string netMain(HTTPContext context)
@@ -77,9 +57,8 @@ string netMain(HTTPContext context)
 	
 	//auto pVars = rq.postVars;
 	auto qVars = rq.queryForm;
-	string content ;//  содержимое страницы 	
 
-	auto dbase = getCommonDB();
+	//auto dbase = getCommonDB();
 	
 	size_t pohodKey;
 	try {
@@ -87,11 +66,32 @@ string netMain(HTTPContext context)
 	}
 	catch(std.conv.ConvException e)
 	{	pohodKey = 0; }
+	
+	
+	auto pohodRecord = getPohodInfo(pohodKey);
+	auto touristList = getPohodParticipants(pohodKey);
+	auto extraFileList = getExtraFileLinks(pohodKey);
+	
+	static struct ViewModel
+	{
+		size_t pohodKey;
+		typeof(pohodRecord) pohodRec;
+		typeof(touristList) touristsRS;
+		typeof(extraFileList) extraLinkList;
+	}
+	
+	ViewModel vm = ViewModel(
+		pohodKey,
+		pohodRecord,
+		touristList,
+		extraFileList
+	);
 
+	return renderPohodPage(vm);
+}
 
-	string queryStr = // основное тело запроса
-`
-select 
+static immutable pohodInfoQueryBase =
+`select
 	pohod.num,
 	kod_mkk,
 	nomer_knigi,
@@ -111,6 +111,8 @@ select
 	region_pohod, 
 	marchrut,
 	pohod.unit,
+	chef,
+	alt_chef,
 	case 
 		when 
 			chef.family_name is null
@@ -137,7 +139,6 @@ select
 			|| coalesce(' ' || a_chef.patronymic,'')
 			|| coalesce(' ' || a_chef.birth_year::text,'')
 	end as a_chef_name,
-	alt_chef,
 	prepar,
 	stat,
 	chef_coment,
@@ -147,85 +148,152 @@ left outer join tourist chef
 	on pohod.chef_grupp = chef.num
 left outer join tourist a_chef 
 	on pohod.alt_chef = a_chef.num
-`;     
-      
-	queryStr ~= ` where pohod.num = ` ~ pohodKey.to!string ~ ` ` ;
+`;
 
-		
-	auto pohodRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "Ключ", 
-		string, "Код МКК",
-		string, "Номер книги",
-		string, "Организация",
-		string, "Сроки", 
-		typeof(видТуризма), "Вид", 
-		typeof(категорияСложности), "Категория", 
-		typeof(элементыКС), "Элементы КС",
-		string, "Район",
-		string, "Маршрут",
-		size_t, "Число участников",
-		string, "ФИО руководителя",
-		string, "ФИО зам. руководителя",
-		size_t, "Номер зам. руководителя",
-		typeof(готовностьПохода), "Готовность",
-		typeof(статусЗаявки), "Статус",
-		string, "Комментарий руководителя",
-		string, "Комментарий МКК",
-	)(
-		null,
-		tuple(
-			видТуризма,
-			категорияСложности,
-			элементыКС,
-			готовностьПохода,
-			статусЗаявки
-		)
-	);
-	
-	auto rs = dbase.query(queryStr).getRecordSet(pohodRecFormat);  //трансформирует ответ БД в RecordSet (набор записей)
-	auto rec = rs.front;
+static immutable pohodRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "Ключ", 
+	string, "Код МКК",
+	string, "Номер книги",
+	string, "Организация",
+	string, "Сроки", 
+	typeof(видТуризма), "Вид", 
+	typeof(категорияСложности), "Категория", 
+	typeof(элементыКС), "Элементы КС",
+	string, "Район",
+	string, "Маршрут",
+	size_t, "Число участников",
+	size_t, "Номер рук.",
+	size_t, "Номер зам. рук.",
+	string, "Руководитель",
+	string, "Заместитель рук.",
+	typeof(готовностьПохода), "Готовность",
+	typeof(статусЗаявки), "Статус",
+	string, "Комментарий руководителя",
+	string, "Комментарий МКК",
+)(
+	null,
+	tuple(
+		видТуризма,
+		категорияСложности,
+		элементыКС,
+		готовностьПохода,
+		статусЗаявки
+	)
+);
 
-	content ~= 
-`	<p>Код МКК: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Код МКК" ) ~`</span></p>
-	<p>Маршрутная книжка: <span class="b-pohod e-value">№ ` ~ HTMLEscapeText( rec.getStr!"Номер книги" ) ~ `</span></p>
-	<p>Группа туристов: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Организация" ) ~ `</span></p>
-	<p>Сроки похода: <span class="b-pohod e-value"> с ` ~ rec.getStr!"Сроки"  ~ `</span></p>
-	<p>Вид туризма: <span class="b-pohod e-value">` ~ rec.getStr!"Вид" ~ `</span></p>
-	<p>Категория сложности: <span class="b-pohod e-value">` ~ rec.getStr!"Категория";
+auto getPohodInfo(size_t pohodKey)
+{
+	string queryStr = pohodInfoQueryBase ~ ` where pohod.num = ` ~ pohodKey.to!string ~ `;`;
+	auto rs = getCommonDB().query(queryStr).getRecordSet(pohodRecFormat);
 	
-	if( !rec.isNull("Элементы КС") && !rec.isNull("Категория") && rec.get!"Элементы КС" > rec.get!"Категория"  )
-		content ~= ` ` ~ rec.getStr!"Элементы КС"();
-	
-	content ~= `</span></p>`;
-	
-	content ~= 
-`	<p>Регион похода: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Район" ) ~ `</span></p>
-	<br>
-	<p>По маршруту: <br><span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Маршрут" ) ~ `</span></p>
-	<br>
-	<p>В составе: <span class="b-pohod e-value">` ~ rec.getStr!"Число участников" ~`</b></font> человек</p>
-	<br>
-	<p>Руководитель группы: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"ФИО руководителя" ) ~ `</span></p>
-	<p>Зам. руководителя группы: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"ФИО зам. руководителя" ) ~`</span></p>
-	<br>
-	<p>Состав группы:</p>
-	<p style="color: #556B2F; font-weight: bold;">` ~ participantsList( pohodKey ) ~ `</p>
-	<br>
-	<p>Готовность похода: <span class="b-pohod e-value">` ~ rec.getStr!"Готовность"("не известна") ~ `</span></p>
-	<p>Статус заявки: <span class="b-pohod e-value">` ~ rec.getStr!"Статус"("не известен") ~ `</span></p>
-	<br>
-	<p>Коментарий руководителя: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий руководителя"("нет") ) ~ `</span></p>
-	<p>Коментарий MKK: <span class="b-pohod e-value">` ~ HTMLEscapeText( rec.getStr!"Комментарий МКК"("нет") ) ~ `</span></p>
-	<br>
-	<style>
-		.b-pohod.e-value {
-			color: #006400;
-			font-weight: bold;
-		}
-	</style>
-	<p>Дополнительные материалы:</p>` 
-	~ linkList( pohodKey );
-
-	return content;
+	if( rs && rs.length == 1 )
+		return rs.front;
+	else
+		return null;
 }
 
+static immutable touristRecFormat = RecordFormat!(
+	string, "ФИО и год"
+)();
+
+auto getPohodParticipants(size_t pohodKey)
+{
+	string queryStr =
+`with tourist_nums as (
+	select unnest(unit_neim) as num from pohod where pohod.num = ` ~ pohodKey.to!string ~ `
+)
+select coalesce(family_name, '') || coalesce( ' ' || given_name, '' )
+	||coalesce(' '||patronymic, '')||coalesce(', '||birth_year::text,'') from tourist_nums 
+left join tourist
+	on tourist.num = tourist_nums.num
+`;
+
+	return getCommonDB()
+		.query(queryStr)
+		.getRecordSet(touristRecFormat);
+}
+
+string renderPohodPage(VM)( ref VM vm )
+{
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod.html" );
+	
+	FillAttrs fillAttrs;
+	
+	tpl.fillFrom( vm.pohodRec, fillAttrs );
+
+	tpl.set( "tourist_list", renderPohodParticipants(vm) );
+	tpl.set( "file_link_list", renderExtraFileLinks(vm) );
+	
+	return tpl.getString();
+}
+
+static immutable extraFileLinkRecordFormat = RecordFormat!(
+	string, "Ссылка"
+)();
+
+import std.typecons: Tuple;
+
+alias ExtraFileLink = Tuple!( string, "uri", string, "descr" );
+
+auto getExtraFileLinks( size_t pohodKey )
+{
+	string queryStr = 
+	`select unnest(links) as num from pohod where pohod.num = ` ~ pohodKey.to!string;
+	
+	auto rs = getCommonDB()
+		.query(queryStr)
+		.getRecordSet(extraFileLinkRecordFormat);
+	
+	ExtraFileLink[] links;
+	links.length = rs.length;
+	
+	size_t i = 0;
+	foreach( rec; rs )
+	{
+		string[] linkPair = parseExtraFileLink( rec.get!"Ссылка"(null) );
+		links[i].uri = linkPair[0];
+		links[i].descr = linkPair[1];
+		
+		++i;
+	}
+	
+	return links;
+}
+
+string renderExtraFileLinks(VM)( ref VM vm )
+{
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod_extra_file_link.html" );
+	
+	string extraFilesList;
+	
+	foreach( rec; vm.extraLinkList )
+	{
+		tpl.setHTMLValue( "uri_input_value", rec.uri );
+		tpl.setHTMLValue( "descr_input_value", rec.descr );
+		
+		extraFilesList ~= tpl.getString();
+	}
+
+	return extraFilesList;
+}
+
+string renderPohodParticipants(VM)( ref VM vm )
+{
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod_tourist_item.html" );
+	
+	FillAttrs fillAttrs;
+	
+	string touristList;
+	
+	//foreach( rec; vm.touristsRS )
+	for( size_t i = 0; i < vm.touristsRS.length ; ++i )
+	{
+		import std.stdio;
+		writeln( i, " ", vm.touristsRS[i].get!"ФИО и год"() );
+		
+		tpl.fillFrom( vm.touristsRS[i], fillAttrs );
+		touristList ~= tpl.getString().dup;
+	}
+	
+	return touristList;
+}
