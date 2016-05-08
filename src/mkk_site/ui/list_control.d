@@ -17,7 +17,7 @@ auto bsCheckBoxList(T)(T valueSet)
 	import std.array: join;
 	
 	foreach( elName, elClass; elemClasses )
-		ctrl.addElementClasses( elName, elClass.join(' ') );
+		ctrl.addElementHTMLClasses( elName, elClass.join(' ') );
 		
 	return ctrl;
 }

@@ -1,16 +1,16 @@
-	<span class="b-pohod_filter_vid e-wrapper">
+	<span class="t-pohod_filter_form e-list_filter">
 		Вид туризма <br>
 		{{vid}}
 	</span>
-	<span class="b-pohod_filter_ks e-wrapper">
+	<span class="t-pohod_filter_form e-list_filter">
 		Категория сложности <br>
 		{{ks}}
 	</span>
-	<span class="b-pohod_filter_prepar e-wrapper">
+	<span class="t-pohod_filter_form e-list_filter">
 		Статус подготовки <br>
 		{{prepar}}
 	</span>
-	<span class="b-pohod_filter_stat e-wrapper">
+	<span class="t-pohod_filter_form e-list_filter">
 		Статус заявки <br>
 		{{stat}}
 	</span>
@@ -31,28 +31,11 @@
 
 	
 <style>
-	.b-pohod_filter_vid.e-wrapper,
-	.b-pohod_filter_ks.e-wrapper,
-	.b-pohod_filter_prepar.e-wrapper,
-	.b-pohod_filter_stat.e-wrapper
+	.t-pohod_filter_form.e-list_filter
 	{
 		display: inline-block;
 		margin-right: 15px;
 		vertical-align: top;
 	}
-	
-	/*Данные классы определены в коде на D страницы show_pohod*/
-	.b-pohod_filter_vid.e-block,
-	.b-pohod_filter_ks.e-block,
-	.b-pohod_filter_prepar.e-block,
-	.b-pohod_filter_stat.e-block
-	{
-		display: block;
-		position: relative;
-		height: 120px;
-		overflow-y: scroll;
-		border: solid silver 2px;
-	}
-	
-	
+
 </style>

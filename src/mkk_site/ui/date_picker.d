@@ -13,14 +13,11 @@ auto bsPlainDatePicker( OptionalDate optDate = OptionalDate() )
 		"item_label": [`checkbox-inline`]
 	];
 
-	auto ctrl = new PlainDatePicker;
-	ctrl.date = optDate;
-
-
+	auto ctrl = plainDatePicker(optDate);
 	import std.array: join;
 
 	foreach( elName, elClass; elemClasses )
-		ctrl.addElementClasses( elName, elClass.join(' ') );
+		ctrl.addElementHTMLClasses( elName, elClass.join(' ') );
 
 	return ctrl;
 }

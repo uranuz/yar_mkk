@@ -105,8 +105,9 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	{
 		nullText = "любой";
 		dataFieldName = "vid";
+		controlName = "pohod_filter_vid";
 		selectedValues = фильтрПоходов.видыТуризма;
-		addElementClasses("block", `b-pohod_filter_vid e-block`);
+		//addElementHTMLClasses("block", `b-pohod_filter_vid e-block`);
 	}
 	
 	auto списокКатегорий = bsCheckBoxList(категорияСложности);
@@ -114,8 +115,9 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	{
 		nullText = "любая";
 		dataFieldName = "ks";
+		controlName = "pohod_filter_ks";
 		selectedValues = фильтрПоходов.категории;
-		addElementClasses("block", `b-pohod_filter_ks e-block`);
+		//addElementHTMLClasses("block", `b-pohod_filter_ks e-block`);
 	}
 	
 	auto списокГотовностей = bsCheckBoxList(готовностьПохода);
@@ -123,8 +125,9 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	{
 		nullText = "любой";
 		dataFieldName = "prepar";
+		controlName = "pohod_filter_prepar";
 		selectedValues = фильтрПоходов.готовности;
-		addElementClasses("block", `b-pohod_filter_prepar e-block`);
+		//addElementHTMLClasses("block", `b-pohod_filter_prepar e-block`);
 	}
 	
 	auto списокСтатусовЗаявки = bsCheckBoxList(статусЗаявки);
@@ -132,8 +135,9 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	{
 		nullText = "любой";
 		dataFieldName = "stat";
+		controlName = "pohod_filter_stat";
 		selectedValues = фильтрПоходов.статусыЗаявки;
-		addElementClasses("block", `b-pohod_filter_stat e-block`);
+		//addElementHTMLClasses("block", `b-pohod_filter_stat e-block`);
 	}
 	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_filter_form.html" );
@@ -142,6 +146,7 @@ string отрисоватьБлокФильтрации(ФильтрПоходо
 	{
 		auto полеДаты = bsPlainDatePicker(дата);
 		полеДаты.dataFieldName = имяПоля;
+		полеДаты.controlName = имяПоля;
 		полеДаты.nullDayText = "день";
 		полеДаты.nullMonthText = "месяц";
 		полеДаты.nullYearText = "год";
@@ -250,6 +255,7 @@ string отрисоватьБлокФильтрации_для_печати(Фи
 	{
 		auto полеДаты = bsPlainDatePicker(дата);
 		полеДаты.dataFieldName = имяПоля;
+		полеДаты.controlName = имяПоля;
 		полеДаты.nullDayText = "день";
 		полеДаты.nullMonthText = "месяц";
 		полеДаты.nullYearText = "год";
