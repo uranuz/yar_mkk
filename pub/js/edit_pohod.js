@@ -226,7 +226,7 @@ TouristSearch = (function(_super) {
 			this.$el(".e-block").detach().appendTo('body').hide();
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);
 
 //Редактирование руководителя и зам. руководителя похода
 PohodChefEdit = (function(_super) {
@@ -297,7 +297,7 @@ PohodChefEdit = (function(_super) {
 			this.searchBlock.deactivate();
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);
 
 PohodPartyEdit = (function(_super) {
 	__extends(PohodPartyEdit, _super);
@@ -461,7 +461,7 @@ PohodPartyEdit = (function(_super) {
 			}
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);
 
 EditPohod = (function(_super) {
 	__extends(EditPohod, _super);
@@ -697,6 +697,6 @@ EditPohod = (function(_super) {
 			}
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);
 
 
