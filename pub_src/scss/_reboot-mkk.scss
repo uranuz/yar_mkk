@@ -25,6 +25,8 @@ html {
 *::before,
 *::after {
   box-sizing: inherit;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 
@@ -346,3 +348,8 @@ output {
 [hidden] {
   display: none !important;
 }
+
+.form-control {
+	min-height: (1.55 * $font-size-base + 2 * $input-padding-y);
+}
+

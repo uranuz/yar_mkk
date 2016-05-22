@@ -26,17 +26,17 @@
 			<fieldset class="t-pohod_navigation e-date_range_area">
 				<legend>Сроки похода</legend>
 				<div class="t-pohod_navigation e-date_range_wrapper">
-					с {{begin_date_range_head}} по {{end_date_range_tail}}
+					<span>с</span> {{begin_date_range_head}} <span>по</span> {{end_date_range_tail}}
 				</div>
 			</fieldset>
-			<div>
+			<div class="form-inline">
 				<label>
-					<span>Район похода содержит</span>
-					<input type="text" name="region_pohod" value="{{region_pohod}}"/>
+					<span class="font-control-label">Район похода содержит</span>
+					<input type="text" name="region_pohod" class="form-control" value="{{region_pohod}}"/>
 				</label>
 				<label>
 					<input type="checkbox" name="with_files"{{with_files}}/>
-					<span>с материалами</span>
+					<span class="font-control-label">с материалами</span>
 				</label>
 			</div>
 			<div>

@@ -7,10 +7,13 @@ import webtank.common.optional: OptionalDate;
 auto bsPlainDatePicker( OptionalDate optDate = OptionalDate() )
 {
 	auto elemClasses = [
-		"block": [],
+		"block": [`form-inline`],
 		"list_item": [],
 		"item_input": [],
-		"item_label": [`checkbox-inline`]
+		"item_label": [`checkbox-inline`],
+		"day_field": [`form-control`],
+		"month_field": [`form-control`],
+		"year_field": [`form-control`]
 	];
 
 	auto ctrl = plainDatePicker(optDate);

@@ -519,10 +519,10 @@ string renderShowPohod(VM)( ref VM vm )
 	
 	tpl.set( "pohod_list_pagination", renderPaginationTemplate(vm) );
 	
-	if( !vm.isAuthorized )
+	if( vm.isAuthorized )
 	{
-		tpl.set( "pohod_num_col_header_cls", "is-hidden" );
-		tpl.set( "edit_pohod_col_header_cls", "is-hidden" );
+		tpl.set( "num_column_header", `<th>#</th>` );
+		tpl.set( "edit_column_header", `<th>Изм.</th>` );
 	}
 
 	tpl.set( "pohod_navigation",

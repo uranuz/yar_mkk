@@ -55,6 +55,8 @@ html {
 *::after {
   -webkit-box-sizing: inherit;
           box-sizing: inherit;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 @-moz-viewport {
@@ -250,6 +252,10 @@ output {
 
 [hidden] {
   display: none !important;
+}
+
+.form-control {
+  min-height: 2.3rem;
 }
 
 h1, h2, h3, h4, h5, h6,

@@ -194,12 +194,13 @@ body {
 }
 
 #content_column {
-	margin: 8px  280px 16px 16px;
+	margin: 8px  280px 0 16px;
 	position: relative;
 }
 
 #content {
 	padding: 8px;
+	margin-bottom: 16px;
 	background: #e4e2bf;
 	display: inline-block; /* Создает новый Block formatting context */
 	width: 100%;
@@ -212,6 +213,7 @@ body {
 }
 
 #footer {
+	padding: 8px;
 	background: #becda0;
 	height: 100%;
 }

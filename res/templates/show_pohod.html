@@ -5,7 +5,7 @@
 	</div>
 	<div class="e-table_bar t-page_show_pohod row">
 		<div class="col-md-6">
-			<span class="e-pohod_count t-page_show_pohod">Найдено походов {{pohod_count}}</span>
+			<span class="e-pohod_count t-page_show_pohod">Найдено походов: {{pohod_count}}</span>
 		</div>
 		<div class="col-md-6" style="text-align: right;">
 			<a href="{{dynamic path}}edit_pohod" class="e-add_pohod_btn t-page_show_pohod btn btn-primary">
@@ -14,9 +14,9 @@
 		</div>
 	</div>
 	<table class="tab1 e-pohod_table t-page_show_pohod">
-		<tbody>
+		<tbody class="e-pohod_table_header_body t-page_show_pohod">
 			<tr>
-				<th class="{{pohod_num_col_header_cls}}">#</th>
+				{{num_column_header}}
 				<th>№ книги</th>
 				<th>Сроки похода</th>
 				<th>Вид, категория</th>
@@ -25,7 +25,7 @@
 				<th>Участники</th>
 				<th>Город, организация</th>
 				<th>Статус похода</th>
-				<th class="{{edit_pohod_col_header_cls}}">Изм.</th>
+				{{edit_column_header}}
 			</tr>
 		</tbody>
 		<tbody class="i-page_show_pohod e-pohod_table_body t-page_show_pohod">

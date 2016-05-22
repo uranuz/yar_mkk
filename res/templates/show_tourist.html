@@ -1,7 +1,10 @@
 <form id="main_form" method="post">
-	<div>
-		Фамилия: <input name="family_name" type="text" value="{{family_name}}">
-		<input type="submit" name="act" value="Найти">
+	<div class="form-inline">
+		<label>
+			<span>Фамилия:</span>
+			<input name="family_name" type="text" class="form-control" value="{{family_name}}">
+		</label>
+		<button type="submit" name="act" class="btn btn-primary">Найти</button>
 	</div>
 	{{tourist_list_pagination}}
 </form>
