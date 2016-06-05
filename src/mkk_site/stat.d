@@ -1,6 +1,6 @@
 module mkk_site.stat;
 
-import std.conv, std.string, std.file, std.array;
+import std.conv, std.string, std.file, std.array, std.stdio;
 
 import mkk_site.page_devkit;
 
@@ -68,19 +68,21 @@ import std.typecons;
  string kod= PGEscapeStr( rq.bodyForm.get("kod_MKK",     "") );
  string org= PGEscapeStr( rq.bodyForm.get("organization", "") );
  string terr= PGEscapeStr( rq.bodyForm.get("territory",   "") );
- string year= PGEscapeStr( rq.bodyForm.get("year",   "2014") );
- string prezent_vid= PGEscapeStr( rq.bodyForm.get("prezent_vid","Весь период."));
+ string year_B= PGEscapeStr( rq.bodyForm.get("year_B",   "1992") );
+ string year_E= PGEscapeStr( rq.bodyForm.get("year_E",   "2016") );
+ string prezent_vid= PGEscapeStr( rq.bodyForm.get("prezent_vid","по годам"));
  
   
  
-  string [] prezent=["Весь период.","За год."];  
+  string [] prezent=["по годам","по КС"];  
   string [] заголовок;
   bool[] bool_заголовок;
   size_t колонок;
   size_t строк;
-  string [] вид= ["Вид/к.с.","Пешый","Лыжный","Горный","Водный"," Вело ",	" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ВСЕГО"];
+  string [] вид= ["Вид/к.с.","Пешый","Лыжный","Горный","Водный","Вело",	
+" Авто ", "Спелео","Парус",  "Конный", "Комби",	"ВСЕГО"];
   
-   if( prezent_vid=="Весь период.")
+   if( prezent_vid=="по годам")
    { групп_человек=statRecFormatVid.names.dup;
    заголовок = ["Год","Пешый","Лыжный","Горный","Водный","Вело",
                 "Авто", "Спелео","Парус","Конный","Комби","ВСЕГО"];
@@ -92,7 +94,7 @@ import std.typecons;
 	колонок=12;
 	}
    
-	if( prezent_vid=="За год.")  
+	if( prezent_vid=="по КС")  
 	{ групп_человек=statRecFormatKC.names.dup;
 	  заголовок = ["Вид-к.с.","н.к.","Первая","Вторая","Третья",
 	               "Четвёртая","Пятая","Шестая","Путеш.","ВСЕГО"];
@@ -108,8 +110,8 @@ import std.typecons;
    if(terr!="") b_terr=true;
  
 	string запрос_статистика;
-	///////---запрос--Весь период---------
-	if( prezent_vid=="Весь период.")
+	///////---запрос--по годам---------
+	if( prezent_vid=="по годам")
 {
 	запрос_статистика= ` WITH 
       stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod`;
@@ -168,22 +170,24 @@ gr_всего, un_всего
   LEFT JOIN st9 ON всего.year   = st9.year
   LEFT JOIN st10 ON всего.year  = st10.year `;
 }
-     //-----конец -запроса-- Весь период---
+     //-----конец -запроса-- по годам---
      
      
-   //  ----запрос----За год-----------
+   //  ----запрос----"по КС"-----------
     
  
    
-  if( prezent_vid=="За год.")
+  if( prezent_vid=="по КС")
 {
    запрос_статистика= `
    
    WITH stat_by_year AS (
     SELECT CAST(unit AS integer) AS unit,vid,ks
     FROM pohod 
-    WHERE (date_part('YEAR', begin_date)=`~year~` )     
-    `;   
+    WHERE
+        (date_part('YEAR', begin_date)>=`~year_B
+    ~` AND
+        date_part('YEAR', begin_date)<=`~year_E ~`)`;   
     
    if (b_kod) 
              запрос_статистика ~=` AND  kod_mkk ILIKE '%`~ kod ~`%' `;            
@@ -261,13 +265,15 @@ SELECT*FROM st2 ORDER BY vid
 } 
   
 
-   //-----конец -запроса--За год   
+   //-----конец -запроса--"по КС"   
   
      
       IBaseRecordSet rs;
       
-   if( prezent_vid=="Весь период.")  rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
-   if( prezent_vid=="За год.")       rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
+   if( prezent_vid=="по годам")  rs = 
+dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
+   if( prezent_vid=="по КС")       rs = 
+dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
    
  
 
@@ -293,13 +299,13 @@ string [][] for_graf;   // массив данных для графика
 			foreach(v,td; групп_человек)
 			{
 				  
-					if(v==0  &&  prezent_vid=="Весь период.")
+					if(v==0  &&  prezent_vid=="по годам")
 						{
 							line_tabl[v]= rec.getStr(td, "");
 							line_graf[v]= rec.getStr(td, "");
 						}
 
-					if(v==0  &&  prezent_vid=="За год.")
+					if(v==0  &&  prezent_vid=="по КС")
 					  {
 							line_tabl[v]=  вид [ rec.getStr(td, "").to!int ];
 							line_graf[v]=  вид [ rec.getStr(td, "").to!int ];
@@ -354,7 +360,7 @@ string [][] for_graf;   // массив данных для графика
   
   string skript_Surs="";
   //---------------------------
-  if(prezent_vid=="Весь период.")
+  if(prezent_vid=="по годам")
   {   skript_Surs~="prez=1,"~"\r\n";
 			for( size_t j = 0; j< bool_заголовок.length; j++  ) 
 			{
@@ -384,24 +390,26 @@ string [][] for_graf;   // массив данных для графика
 			
     }  
      
-    //////////////////////"За год."//////////////////////////////////// 
+    //////////////////////"по КС"//////////////////////////////////// 
     
      int [string] vid =["Пешый":1,"Лыжный":2,"Горный":3,"Водный":4,"Вело":5,
     "Авто":6,"Спелео":7,"Парус":8,"Конный":9,"Комби":10,"ВСЕГО":11];
     
       
-  if(prezent_vid=="За год.")  
+  if(prezent_vid=="по КС")  
   {
      //  string neim_vid="";        
      skript_Surs="prez=2,"~"\r\n";  
    //----формируем  bool_list
          bool_list[0]=true;
+   // writeln(for_graf);    
          
            foreach(v,td; for_graf)
-       {              
+       {   
+       
           bool_list[vid[td[0]]]=true;          
        }    
-        
+  
  //------------------
   skript_Surs~="Surs0=[0,1,2,3,4,5,6,7],"~"\r\n";
   int qqq=0;
@@ -493,8 +501,9 @@ string [][] for_graf;   // массив данных для графика
 
  if (isForPrint)
   {
-     if(prezent_vid=="Весь период.") {tpl.set( "period", "Весь период" );}
-     if(prezent_vid=="За год.") {tpl.set( "period", `За `~year~` год.`); }
+     if(prezent_vid=="по годам") {tpl.set( "period", "по годам" );}
+     if(prezent_vid=="по КС") {tpl.set( "period", `За `~year_B
+     ~` - `~year_E~` годы`); }
      
         tpl.set( "no_print", `class="no_print"` );
       
@@ -546,13 +555,17 @@ string [][] for_graf;   // массив данных для графика
    tpl.set( "territory", HTMLEscapeValue( rq.bodyForm.get("territory", "") ));
   
                                   
-   if(prezent_vid=="За год.")
+   if(prezent_vid=="по КС")
    {
   
-   tpl.set( "year", 
-   `<input type="text" name="year"  size="4" value="`                               
-  ~HTMLEscapeValue( rq.bodyForm.get("year", "2014") )
-  ~`"  >  год <br/>`);
+   tpl.set( "year_S", 
+   
+   `С `~
+   `<input type="text" name="year_B"  size="4" value="`                          
+     
+  ~HTMLEscapeValue( rq.bodyForm.get("year_B", "1992") )
+  ~`"  > по <input type="text" name="year_E"  size="4" value="`
+  ~ HTMLEscapeValue( rq.bodyForm.get("year_E", "2016") ) ~ `"> год <br/>`);
    }
                                 
 

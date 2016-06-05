@@ -22,6 +22,6 @@ import mkk_site.show_pohod_for_tourist; //Список походов, в кот
 import mkk_site.pohod; //Карточка похода
 import mkk_site.inform; //Цели и задачи сайта
 import mkk_site.template_service; //Сервис получения шаблонов
-import mkk_site.route_book; //Маршрутная книжка
+import mkk_site.pohod_monitoring; //Маршрутная книжка
 
 import mkk_site.user_settings;

@@ -1,0 +1,92 @@
+ 
+
+      
+       
+        <script type="text/javascript" 
+        src="{{js folder}}flot/jquery.flot.js" defer  ></script>
+        
+        <script type="text/javascript"
+        src="{{js folder}}flot/jquery.flot.time.js" defer  ></script>
+        
+        <script type="text/javascript"
+        src="{{js folder}}stat.js" defer ></script>
+        
+
+        
+          <script >     
+
+  var
+  {{skript_Surs}}
+;
+    
+      </script>  
+ 
+ 
+ 
+ 
+ 
+			<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>
+ <p><a href="/pub/stati_dokument/stat1992_2010.rar"   > Отчёты МКК за 1992-2010 годы (zip) </a></p> 
+ 
+ 
+<form id="main_form" method="post">
+  <fieldset>{{period}}
+  
+         <div  {{no_print}} >
+      
+								
+							{{prezent_vid}}	
+        </div> 
+   </fieldset> 
+  
+  <fieldset>
+  <legend>Фильтры</legend>
+  {{filtrum}}
+   <div {{no_print}}>
+			<input type="text" name="kod_MKK"  size="6"  
+			       value="{{kod_MKK}}"   > <!-- по умолчанию "176-00" -->
+			              код МКК (176-00, 000-00, и т.п.)<br/>
+			<input type="text" name="organization" size="12"  
+				    value="{{organization}}" ><!-- по умолчанию "" пустое -->
+				           организация<br/>
+			<input type="text" name="territory"  size="12" 
+			       value="{{territory}}"  >  <!-- по умолчанию "" пустое -->
+			              территория ( Ярославль, Тутаев, Москва, и т.п.) <br/>
+			 {{year_S}}             
+			              
+   </div>
+  </fieldset><br/>
+  
+    {{ckript_or_button}}
+  <!--
+     <button  name="filtr" type="submit" class="noprint" > Обновить</button>
+     
+       <a href='javascript:window.print(); void 0;' class="noprint"><img  height="60" width="60" class="noprint" src="/pub/img/icons/printer.png"/></a>  печать страницы -->
+        
+     
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     
+     <button name="for_print" type="submit"   {{for_print}} > {{MESSAGE}} </button>
+     
+
+</form>
+
+
+<div style="margin: 0% -15% 3% 0%;padding: 2px 0px 120px 2px; width:100%;"  >
+
+ <div id="placeholder" style="position:relative;margin: 0% 0% -350px 0%; width:80%; height:400px; left:0%; right:auto; "></div><!--окно для графика-->
+ <div id="legend" style="position:relative; left:81%; right:auto;  margin: 0% -3% 0% 0%; width:15%; border:4px solid DarkGreen;border-radius: 10px;"> 
+   
+</div><!--Это заглушка для легенды-->
+
+</div>
+ <br/>
+ <h2>    Содержание ячейки [ групп(человек) ]</h2>
+ <br/>
+  
+  <table class="tab1" >
+   {{stat_table}}
+  </table>
+  
+  
+   <!-- #content -->
