@@ -1,18 +1,34 @@
-<div class="b-pagination e-block">
-	<input type="hidden" name="cur_page_num" class="cur_page_num" value="{{cur_page_num}}"/>
-	<span class="b-pagination e-prev_elem">
-		<a class="b-pagination e-prev_btn {{prev_btn_cls}}" href="#" 
-			onClick="gotoPage({{prev_page_num}})" {{prev_btn_attr}}>Предыдущая</a>
-	</span>
-	<span class="b-pagination e-current_elem">
-		<input class="b-pagination e-page_num_input" type="text" value="{{cur_page_num}}"/>
-	</span>
-	<span class="b-pagination e-total_elem">
-		{{page_count}}
-	</span>
-	<button type="submit">Перейти</button>
-	<span class="b-pagination e-next_elem">
-		<a class="b-pagination e-next_btn {{next_btn_cls}}" href="#" 
-			onClick="gotoPage({{next_page_num}})" {{next_btn_attr}}>Следующая</a>
-	</span>
+<div class="i-pagination e-block t-pagination form-inline">
+	<h6>Переход по страницам</h6>
+	<div class="e-form_row t-pagination form-group">
+		<input type="hidden" name="cur_page_num" class="e-cur_page_num_input t-pagination" value="{{cur_page_num}}"/>
+		<span class="e-prev_elem t-pagination">
+			<a class="e-prev_btn t-pagination btn btn-secondary {{prev_btn_cls}}" href="#"
+				onClick="gotoPage({{prev_page_num}})" {{prev_btn_attr}}>Предыдущая</a>
+		</span>
+
+		<div class="input-group">
+			<span class="e-current_elem t-pagination">
+				<input type="text"
+					class="e-page_num_input t-pagination form-control"
+					value="{{cur_page_num}}"
+					name="curr_page_num"/>
+			</span>
+			<span class="e-total_elem t-pagination input-group-addon">
+				из {{page_count}}
+			</span>
+
+			<span class="input-group-btn">
+				<button type="submit"
+					class="e-goto_page_btn t-pagination btn btn-secondary">
+					Перейти
+				</button>
+			</span>
+		</div>
+
+		<span class="e-next_elem t-pagination">
+			<a class="e-next_btn t-pagination btn btn-secondary {{next_btn_cls}}" href="#"
+				onClick="gotoPage({{next_page_num}})" {{next_btn_attr}}>Следующая</a>
+		</span>
+	</div>
 </div>

@@ -7,8 +7,41 @@ $(window.document).ready( function() {
 	mkk_site.show_pohod = new ShowPohod();
 } );
 
+mkk_site.PohodParticipantsListDialog = (function(_super) {
+	__extends(PohodParticipantsListDialog, _super);
+
+	function PohodParticipantsListDialog( controlName ) {
+		_super.call(this, arguments);
+
+		var
+			self = this;
+
+		this._controlName = controlName;
+		this._controlTypeName = 'PohodParticipantsListDialog';
+
+	}
+
+	return __mixinProto( PohodParticipantsListDialog, {
+		open: function() {
+
+		},
+		onClose: function() {
+
+		},
+		getInstanceHTMLClass: function() {
+			return 'i-' + this._controlName;
+		},
+		getControlName: function() {
+			return this._controlName;
+		},
+		getControlTypeName: function() {
+			return this._controlTypeName;
+		}
+	});
+})(webtank.ITEMControl);
+
 ShowPohod = (function(_super) {
-	__extends(ShowPohod, _super)
+	__extends(ShowPohod, _super);
 	
 	function ShowPohod ()
 	{
@@ -56,18 +89,4 @@ ShowPohod = (function(_super) {
 			$(blackoutDiv).appendTo("body");
 		}
 	});
-})(webtank.WClass);
-
-CheckBoxList = (function(_super) {
-	__extends(CheckBoxList, _super)
-	
-	function CheckBoxList ()
-	{
-		_super.call(this);
-		
-		var self = this;
-		this.elems = $('.b-wui-CheckBoxList');
-	}
-
-	return CheckBoxList;
-})(webtank.WClass);
+})(webtank.ITEMControl);

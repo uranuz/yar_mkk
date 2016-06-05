@@ -26,13 +26,11 @@ static immutable shortTouristRecFormat = RecordFormat!(
 	int, "birth_year" 
 )();
 
-immutable shortTouristFormatQueryBase = 
+static immutable shortTouristFormatQueryBase =
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
-immutable shortTouristFormatQueryBase_count =	
+static immutable shortTouristFormatQueryBase_count =
 	`select count(1)  from tourist `; // количество найденных туристов
 
-//import std.stdio;
-	
 void удалитьПоход(HTTPContext context, size_t pohodKey)
 {
 	if( !context.user.isAuthenticated )
@@ -187,16 +185,18 @@ void создатьФормуИзмененияПохода(
 			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr(fieldName, "") ) );
 	}
 	
-	import webtank.ui.date_picker: PlainDatePicker;
+	import mkk_site.ui.date_picker: bsPlainDatePicker;
 
 	//Создаём компонент выбора даты начала похода
-	auto beginDatePicker = new PlainDatePicker;
+	auto beginDatePicker = bsPlainDatePicker();
 	beginDatePicker.dataFieldName = "begin";
+	beginDatePicker.controlName = "pohod_begin_date_picker";
 	
 	//Создаём компонент выбора даты завершения похода
-	auto finishDatePicker = new PlainDatePicker;
+	auto finishDatePicker = bsPlainDatePicker();
 	finishDatePicker.dataFieldName = "finish";
-	
+	finishDatePicker.controlName = "pohod_begin_date_picker";
+
 	//Получаем данные о датах (если режим редактирования)
 	if( pohodRec )
 	{	//Извлекаем данные из БД
@@ -216,12 +216,12 @@ void создатьФормуИзмененияПохода(
 		pohodForm.set( "MKK_coment", HTMLEscapeValue( pohodRec.get!"MKK_coment"("") ) );
 	}
 
-	import webtank.ui.list_control: listBox;
+	import mkk_site.ui.list_control: bsListBox;
 	
 	//Вывод перечислимых полей
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	//Создаём экземпляр генератора выпадающего списка
-		auto dropdown =  listBox( pohodRecFormat.getEnumFormat!(fieldName) );
+		auto dropdown =  bsListBox( pohodRecFormat.getEnumFormat!(fieldName) );
 
 		dropdown.dataFieldName = fieldName;
 
@@ -364,19 +364,13 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	Optional!(Date)[2] pohodDates;
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
 	
-	  	  
-		 int [6] partDtates;
-		
-	  
-	    partDtates = [(pVars["begin__year"]).to!int, (pVars["begin__month"]).to!int, (pVars["begin__day"]).to!int,
+	int [6] partDtates;
+
+	partDtates = [(pVars["begin__year"]).to!int, (pVars["begin__month"]).to!int, (pVars["begin__day"]).to!int,
 	                  (pVars["finish__year"]).to!int, (pVars["finish__month"]).to!int, (pVars["finish__day"]).to!int];
-	     
-		
-	     
-	   	pohodDates[0] =  Date(partDtates[0], partDtates[1], partDtates[2]);
-		   pohodDates[1] =  Date(partDtates[3], partDtates[4], partDtates[5]);               
-	    
-	
+
+	pohodDates[0] =  Date(partDtates[0], partDtates[1], partDtates[2]);
+	pohodDates[1] =  Date(partDtates[3], partDtates[4], partDtates[5]);
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
@@ -549,7 +543,7 @@ string netMain(HTTPContext context)
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем шаблон по файлу
 	
-		auto dbase = getCommonDB;
+		auto dbase = getCommonDB();
 		
 		Optional!size_t pohodKey;
 		try {

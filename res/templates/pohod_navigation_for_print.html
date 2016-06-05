@@ -1,3 +1,17 @@
+<form id="main_form" method="post" class="i-pohod_navigation e-block">
+		<div class="{{pohod_filter_for_print_cls}}">
+			<fieldset>
+				<legend>Поисковые фильтры</legend>
+				{{pohod_filter_for_print}}
+			</fieldset>
+			<a href='javascript:window.print(); void 0;' class="noprint"><img height="60" width="60" class="noprint" src="/pub/img/icons/printer.png"/></a>
+		</div>
+		<div class="{{pohod_filter_regular_cls}}">
+			{{pohod_filter_regular}}
+			{{pohod_list_pagination}}
+		</div>
+		<button type="submit" name="for_print" class="btn btn-secondary {{print_switch_btn_cls}}" value="{{print_switch_btn_value}}">{{print_switch_btn_text}}</button>
+</form>
 	<span class="b-pohod_filter_vid e-wrapper">
 		Вид туризма <br>
 		{{vid}}
@@ -13,23 +27,23 @@
 	<span class="b-pohod_filter_stat e-wrapper">
 		Статус заявки <br>
 		{{stat}}
-	</span>
-	<br><br>
+	</span>	
+	<br/>
 	
-	<fieldset>
+	<style> #sroki {display:none;}</style>
+	
+		<div id="sroki">
 		<legend>Сроки похода</legend>
-		с {{begin_date_range_head}} по {{end_date_range_tail}}
-	</fieldset>
-	<br>
+		с {{begin_date_range_head}} по {{end_date_range_tail}}	
 	Район похода содержит <input type="text" name="region_pohod" value="{{region_pohod}}">
 	<label>
-		<input type="checkbox" name="with_files"{{with_files}}>		с материалами
+		<input type="checkbox"  name="with_files"{{with_files}}>	с материалами
 	</label>
-	<br/><br/>
-	<input type="submit" value="  Найти  ">
-	<br/>
 
+	</div>
 	
+	
+
 <style>
 	.b-pohod_filter_vid.e-wrapper,
 	.b-pohod_filter_ks.e-wrapper,

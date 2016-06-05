@@ -7,20 +7,20 @@ import webtank.common.optional: OptionalDate;
 auto bsPlainDatePicker( OptionalDate optDate = OptionalDate() )
 {
 	auto elemClasses = [
-		"block": [],
+		"block": [`form-inline`],
 		"list_item": [],
 		"item_input": [],
-		"item_label": [`checkbox-inline`]
+		"item_label": [`checkbox-inline`],
+		"day_field": [`form-control`],
+		"month_field": [`form-control`],
+		"year_field": [`form-control`]
 	];
 
-	auto ctrl = new PlainDatePicker;
-	ctrl.date = optDate;
-
-
+	auto ctrl = plainDatePicker(optDate);
 	import std.array: join;
 
 	foreach( elName, elClass; elemClasses )
-		ctrl.addElementClasses( elName, elClass.join(' ') );
+		ctrl.addElementHTMLClasses( elName, elClass.join(' ') );
 
 	return ctrl;
 }

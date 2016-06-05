@@ -68,4 +68,4 @@ EditTourist = (function(_super){
 			}
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);

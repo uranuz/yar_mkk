@@ -1,39 +1,36 @@
-<form id="main_form" method="post">
-	<div class="{{pohod_filter_for_print_cls}}">
-		<fieldset>
-			<legend>Поисковые фильтры</legend>
-			{{pohod_filter_for_print}}
-
-		</fieldset>
-		
-		<a href='javascript:window.print(); void 0;' class="noprint"><img height="60" width="60" class="noprint" src="/pub/img/icons/printer.png"/></a>
+<div class="i-page_show_pohod e-block t-page_show_pohod">
+	<h2>Походы</h2>
+	<div class="e-navigation t-page_show_pohod">
+		{{pohod_navigation}}
 	</div>
-	<div class="{{pohod_filter_regular_cls}}">
-		{{pohod_filter_regular}}
-		{{pohod_list_pagination}}
+	<div class="e-table_bar t-page_show_pohod row">
+		<div class="col-md-6">
+			<span class="e-pohod_count t-page_show_pohod">Найдено походов: {{pohod_count}}</span>
+		</div>
+		<div class="col-md-6" style="text-align: right;">
+			<a href="{{dynamic path}}edit_pohod" class="e-add_pohod_btn t-page_show_pohod btn btn-primary">
+				Добавить поход
+			</a>
+		</div>
 	</div>
-	<button type="submit" name="for_print" class="btn btn-secondary {{print_switch_btn_cls}}" value="{{print_switch_btn_value}}">{{print_switch_btn_text}}</button>
-</form>
-
-<p>Число походов {{pohod_count}}</p>
-<a href="{{dynamic path}}edit_pohod">Добавить новый поход</a>
-<table class="tab1">
-	<tbody>
-		<tr>
-			<th class="{{pohod_num_col_header_cls}}">#</th>
-			<th>№ книги</th>
-			<th>Сроки похода</th>
-			<th>Вид, категория</th>
-			<th>Район</th>
-			<th>Руководитель</th>
-			<th>Участники</th>
-			<th>Город, организация</th>
-			<th>Статус похода</th>
-			<th class="{{edit_pohod_col_header_cls}}">Изм.</th>
-		</tr>
-	</tbody>
-	<tbody>
-		{{pohod_list}}
-	</tbody>
-</table>
-<script src="{{js folder}}show_pohod.js" defer></script>
+	<table class="tab1 e-pohod_table t-page_show_pohod">
+		<tbody class="e-pohod_table_header_body t-page_show_pohod">
+			<tr>
+				{{num_column_header}}
+				<th>№ книги</th>
+				<th>Сроки похода</th>
+				<th>Вид, категория</th>
+				<th>Район</th>
+				<th>Руководитель</th>
+				<th>Участники</th>
+				<th>Город, организация</th>
+				<th>Статус похода</th>
+				{{edit_column_header}}
+			</tr>
+		</tbody>
+		<tbody class="i-page_show_pohod e-pohod_table_body t-page_show_pohod">
+			{{pohod_list}}
+		</tbody>
+	</table>
+	<script src="{{js folder}}show_pohod.js" defer></script>
+</div>

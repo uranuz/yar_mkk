@@ -69,7 +69,7 @@ mkk_site.Pagination = (function(_super) {
 			
 		}
 	});
-})(webtank.WClass);
+})(webtank.ITEMControl);
 
 //----- Вспомогательная функция для организации постраничного просмотра
 function gotoPage(pageNum) {

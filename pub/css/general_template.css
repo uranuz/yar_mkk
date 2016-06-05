@@ -58,12 +58,6 @@ body {
 	overflow-y: scroll;
 }
 
-
-
-
-
-
-
 #page, #footer_framing {
 	/*Обязательные поля по краям*/
 	padding: 0 25px;
@@ -200,12 +194,13 @@ body {
 }
 
 #content_column {
-	margin: 8px  280px 16px 16px;
+	margin: 8px  280px 0 16px;
 	position: relative;
 }
 
 #content {
 	padding: 8px;
+	margin-bottom: 16px;
 	background: #e4e2bf;
 	display: inline-block; /* Создает новый Block formatting context */
 	width: 100%;
@@ -218,6 +213,7 @@ body {
 }
 
 #footer {
+	padding: 8px;
 	background: #becda0;
 	height: 100%;
 }
@@ -270,20 +266,6 @@ body {
 
 .pohod {
 	border-collapse: collapse;
-}
-
-table.tab1 {
-	width: 100%;
-	border: 6px ridge #666;
-	border-spacing: 1px;
-	text-align:center;
-}
-
-.tab1 td, .tab1 th {
-	font-size: 90%;
-	border: 1px double;
-	border-right-style:ridge;
-	width: 70px;
 }
        
 .last_pohod_comment {font-size: 80%;}

@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!doctype html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -18,7 +18,6 @@
 	<script type="text/javascript" src="{{bootstrap js folder}}bootstrap.min.js" defer></script>
 	<script type="text/javascript" src="{{webtank js folder}}components.js" defer></script>
 	<script type="text/javascript" src="{{js folder}}components.js" defer></script>
-
 </head>
 
 <body>
@@ -53,16 +52,18 @@
 		  
 		<div id="main_menu">
 			<ul class="main_menu_first_lvl">
-				<li><a href="/"  >Главная</a></li>
-				<li><a href="{{dynamic path}}show_pohod">Походы</a></li>
-				<li><a href="{{dynamic path}}show_tourist">Туристы</a></li>
-				<li><a href="{{dynamic path}}show_moder">Модераторы</a></li>
-				<li><a href="{{dynamic path}}stati">Статьи и документы</a></li>
-				<li><a href="{{dynamic path}}stat">Статистика</a></li>
+				<li><a href="/" title="Главная страница сайта">Главная</a></li>
+				<li><a href="{{dynamic path}}show_pohod" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
+				<li><a href="{{dynamic path}}show_tourist" title="Просмотр данных и поиск туристов">Туристы</a></li>
+				<li><a href="{{dynamic path}}show_moder" title="Список модераторов системы">Модераторы</a></li>
+				<li><a href="{{dynamic path}}stati" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
+				<li><a href="{{dynamic path}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 			</ul>
 			<span class="b-main_menu_auth e-block">
 				<span class="b-main_menu_auth e-header {{with auth class}}">
-					{{user name}}: <a href="{{authentication uri}}&logout=true" class="b-main_menu_auth e-logout_btn">выйти</a>
+					<span>{{user name}}:</span>
+					<a href="{{dynamic path}}user_settings" title="Просмотр и редактирование персональных настроек">настройки</a>
+					<a href="{{authentication uri}}&logout=true" class="b-main_menu_auth e-logout_btn" title="Завершить сеанс работы под пользователем">выйти</a>
 				</span>
 				<span class="b-main_menu_auth e-header {{without auth class}}">
 					Вход не выполнен: <a href="{{dynamic path}}auth" class="b-main_menu_auth e-login_btn">войти</a>
@@ -71,7 +72,7 @@
 					<form action="{{authentication uri}}" class="b-main_menu_auth e-form" method="post">
 						<div class="b-main_menu_auth e-form_item">
 							<label class="b-main_menu_auth e-label">Логин:</label>
-							<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15"> <br>
+							<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15">
 						</div>
 						<div class="b-main_menu_auth e-form_item">
 							<label class="b-main_menu_auth e-label">Пароль:</label>
@@ -80,31 +81,20 @@
 						<input type="submit" value="Войти">
 					</form>
 				</div>
-				
 			</span>
 		  
 		</div> <!-- #main_menu -->
-			
-		<!--<div id="auth_bar">
-			<form action="{{authentication uri}}" id="auth_form" method="post" style="display: inline;">
-				Логин: <input name="user_login" type="text" value="{{user login}}" size="15">
-				Пароль: <input name="user_password" type="password" size="15">
-				<input type="submit" value="Войти">
-			</form>
-			{{auth header message}}
-		</div>-->
 		<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
 	</div> <!-- #top -->
-	 
-	  
-	  
+
 	<div id="middle">
 		<div id="sidebar"><!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
 			<h4>Полезные ссылки:</h4>
-			<a href="http://tssr.ru">Туристско-спортивный<br> союз России</a> <br>
-			<a href="http://tkirbis.ru">Турклуб "Ирбис"</a> <br>
-			<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a> <br>
-			<br>
+			<ul>
+				<li><a href="http://tssr.ru" class="">Туристско-спортивный союз России</a></li>
+				<li><a href="http://tkirbis.ru" class="">Турклуб "Ирбис"</a></li>
+				<li><a href="http://tkrassvet.ru" class="">Турклуб "Рассвет"</a></li>
+			</ul>
 			<div class="b-pohod_filter_collection e-block">
 				<form action="{{dynamic path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
 					<input type="hidden" name="vid" class="b-pohod_filter_collection e-filter__vid">
@@ -139,8 +129,7 @@
 					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">На маршруте</a></li>
 				</ul>
 			</div>
-
-		</div> <!-- #sidebar -->		      
+		</div> <!-- #sidebar -->
 
 		<div id="content_column">
 			<div id="content"><!-- основное содержание страницы -->
@@ -151,11 +140,9 @@
 	</div> <!-- #middle -->  
 </div> <!-- #page -->
 <div id="footer_framing">
-<div id="footer">
-	Все ходы записаны!!! г. Ярославль, 2013-2016 г.
-
-<!-- печать страницы -->
-</div>
+	<div id="footer">
+		Все ходы записаны!!! г. Ярославль, 2013-2016 г.
+	</div>
 </div> <!-- #footer_framing -->
 </body>
 </html>
