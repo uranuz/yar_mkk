@@ -4,6 +4,7 @@ import std.conv;
 
 import
 	webtank.net.http.context,
+	webtank.net.utils,
 	webtank.templating.plain_templater,
 	webtank.ui.templating;
 
@@ -33,13 +34,15 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 	
 	if( context.user.isAuthenticated )
 	{	
-		tpl.set( "without auth class", "is-hidden" );
-		tpl.set( "user name", context.user.name );
-		tpl.set( "user login", context.user.id );
+		tpl.set( "auth_state_cls", "m-with_auth" );
+		tpl.set( "auth_popdown_btn_text", HTMLEscapeText( context.user.name ) );
+		tpl.set( "auth_popdown_btn_title", "Открыть список опций для учетной записи" );
 	}
 	else
 	{	
-		tpl.set( "with auth class", "is-hidden" );
+		tpl.set( "auth_state_cls", "m-without_auth" );
+		tpl.set( "auth_popdown_btn_text", "Вход не выполнен" );
+		tpl.set( "auth_popdown_btn_title", "Вход на сайт не выполнен" );
 	}
 	
 	return tpl;

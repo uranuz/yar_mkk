@@ -1,7 +1,6 @@
 <div class="i-pagination e-block t-pagination form-inline">
 	<h6>Переход по страницам</h6>
 	<div class="e-form_row t-pagination form-group">
-		<input type="hidden" name="cur_page_num" class="e-cur_page_num_input t-pagination" value="{{cur_page_num}}"/>
 		<span class="e-prev_elem t-pagination">
 			<a class="e-prev_btn t-pagination btn btn-secondary {{prev_btn_cls}}" href="#"
 				onClick="gotoPage({{prev_page_num}})" {{prev_btn_attr}}>Предыдущая</a>
@@ -12,7 +11,7 @@
 				<input type="text"
 					class="e-page_num_input t-pagination form-control"
 					value="{{cur_page_num}}"
-					name="curr_page_num"/>
+					name="cur_page_num"/>
 			</span>
 			<span class="e-total_elem t-pagination input-group-addon">
 				из {{page_count}}

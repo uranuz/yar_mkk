@@ -4,10 +4,8 @@ import std.conv, std.base64;
 
 import webtank.net.http.handler, webtank.net.http.context;
 
-import mkk_site;
-import 
-	mkk_site.access_control,
-	mkk_site.routing;
+import mkk_site.page_devkit;
+import mkk_site.access_control;
 
 static immutable(string) thisPagePath;
 
@@ -22,20 +20,29 @@ string netMain(HTTPContext context)
 	auto rq = context.request;
 	auto rp = context.response;
 
+	// Адрес страницы для перенаправления после аутентификации
+	string redirectTo = rq.queryForm.get("redirectTo", null);
+
 	auto accessController = new MKK_SiteAccessController;
 
-	string content = "<h2>Аутентификация</h2><hr>\r\n";
-	bool isAuthenticated = false;
+	bool isAuthenticatedNow = false;
+	bool isAuthFailed = false;
+
+	auto tpl = getPageTemplate( pageTemplatesDir ~ "page_auth.html" );
 	
 	if( "logout" in rq.queryForm )
 	{
+		// Получаем удостоверение пользователя
 		auto identity = cast(MKK_SiteUser) context.user;
 		
 		if( identity )
+			identity.logout(); // Делаем "разаутентификацию""
+
+		// Если есть куда перенаправлять - перенаправляем...
+		if( redirectTo.length > 0 )
 		{
-			identity.logout();
-			rp.redirect( rq.queryForm.get("redirectTo", "#") );
-			return null;
+			rp.redirect(redirectTo);
+			return `Перенаправление...`;
 		}
 	}
 	
@@ -48,52 +55,37 @@ string netMain(HTTPContext context)
 			rq.headers.get("user-agent", "")
 		);
 		string sidStr;
-		if( newIdentity !is null && newIdentity.isAuthenticated )
+		if( newIdentity && newIdentity.isAuthenticated )
 		{	sidStr = Base64URL.encode( newIdentity.sessionId ) ;
 			
 			rp.cookies["__sid__"] = sidStr;
 			rp.cookies["user_login"] = rq.bodyForm["user_login"];
 			rp.cookies["__sid__"].path = "/";
 			rp.cookies["user_login"].path = "/";
-			isAuthenticated = true;
+			isAuthenticatedNow = true;
 
-			//Добавляем перенаправление на другую страницу
-			string redirectTo = rq.queryForm.get("redirectTo", "");
-			
+			// Если есть куда перенаправлять - перенаправляем...
 			if( redirectTo.length > 0 )
+			{
 				rp.redirect(redirectTo);
+				return `Перенаправление...`;
+			}
 		}
 		else
-		{	content ~=
-`<b>Не удалось выполнить аутентификацию на сайте.<b>
-Проверьте, пожалуйста, правильность ввода учётных данных.
-Если ошибка повторяется, свяжитесь с администратором или модератором
-системы для решения возникшей проблемы.`;
-			return content;
+		{
+			isAuthFailed = true;
+			tpl.setHTMLText( "auth_msg",
+`Не удалось выполнить аутентификацию на сайте.
+Проверьте, пожалуйста, правильность ввода учётных данных и попробуйте еще раз.
+Если ошибка повторяется, свяжитесь с администратором системы для решения возникшей проблемы.`
+			);
 		}
 	}
 
-	 //Если не пришёл логин с паролем, то работаем в обычном режиме
-	string login = rq.cookies.get("user_login", "");
+	tpl.setHTMLText( "user_login", rq.cookies.get("user_login", null) );
 
-	if( context.user.isAuthenticated || isAuthenticated )
-		content ~= "Вход на сайт выполнен";
-		
-	content ~=
-`<form method="post" action="#"><table>
-	<tr>
-		<th>Логин</th> <td><input name="user_login" type="text" value="` ~ login ~ `"></td>
-	</tr>
-	<tr>
-		<th>Пароль</th> <td><input name="user_password" type="password"></td>
-	</tr>
-	<tr>
-		<th></th> <td><input value="     Войти     " type="submit"></td>
-	</tr>
-</table>`
-//`<input type="hidden" name="returnTo" value="` ~ rq.bodyForm ~ `"
-`</form> <br>`;
+	if( !isAuthFailed && ( context.user.isAuthenticated || isAuthenticatedNow ) )
+		tpl.setHTMLText( "auth_msg", `Вход на сайт выполнен` );
 
-	return content;
+	return tpl.getString();
 }
-

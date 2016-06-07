@@ -7,15 +7,16 @@
 	<link rel="stylesheet" href="{{bootstrap css folder}}app.css">
 	<link rel="stylesheet" type="text/css" href="{{css folder}}general_template.css">
 	<link rel="stylesheet" type="text/css" href="{{webtank css folder}}components.css">
-	<link rel="stylesheet" href="http://yastatic.net/jquery-ui/1.11.2/themes/south-street/jquery-ui.min.css">	
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/themes/south-street/theme.min.css">
 	<link rel="stylesheet" type="text/css" href="{{css folder}}page_styles.css">
 	<link rel="shortcut icon" href="{{img folder}}znak.png" type="image/png">
 	
-	<script type="text/javascript" src="https://yastatic.net/jquery/1.11.1/jquery.min.js" defer></script>
-	<script type="text/javascript" src="http://yastatic.net/jquery/cookie/1.0/jquery.cookie.min.js" defer></script>
-	<script type="text/javascript" src="http://yastatic.net/jquery-ui/1.11.2/jquery-ui.min.js" defer></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" defer></script>
 	<script type="text/javascript" src="{{bootstrap js folder}}bootstrap.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" defer></script>
 	<script type="text/javascript" src="{{webtank js folder}}components.js" defer></script>
 	<script type="text/javascript" src="{{js folder}}components.js" defer></script>
 </head>
@@ -46,55 +47,74 @@
 			</div>
 			
 		</div> <!-- #header -->
-		                                                        
-		<div id="menu_bg_left"></div>
-		<div id="menu_bg_right"></div>
-		  
-		<div id="main_menu">
-			<ul class="main_menu_first_lvl">
-				<li><a href="/" title="Главная страница сайта">Главная</a></li>
-				<li><a href="{{dynamic path}}show_pohod" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
-				<li><a href="{{dynamic path}}show_tourist" title="Просмотр данных и поиск туристов">Туристы</a></li>
-				<li><a href="{{dynamic path}}show_moder" title="Список модераторов системы">Модераторы</a></li>
-				<li><a href="{{dynamic path}}stati" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
-				<li><a href="{{dynamic path}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
-			</ul>
-			<span class="b-main_menu_auth e-block">
-				<span class="b-main_menu_auth e-header {{with auth class}}">
-					<span>{{user name}}:</span>
-					<a href="{{dynamic path}}user_settings" title="Просмотр и редактирование персональных настроек">настройки</a>
-					<a href="{{authentication uri}}&logout=true" class="b-main_menu_auth e-logout_btn" title="Завершить сеанс работы под пользователем">выйти</a>
-				</span>
-				<span class="b-main_menu_auth e-header {{without auth class}}">
-					Вход не выполнен: <a href="{{dynamic path}}auth" class="b-main_menu_auth e-login_btn">войти</a>
-				</span>
-				<div class="b-main_menu_auth e-dialog_wrapper {{without auth class}}">
-					<form action="{{authentication uri}}" class="b-main_menu_auth e-form" method="post">
-						<div class="b-main_menu_auth e-form_item">
-							<label class="b-main_menu_auth e-label">Логин:</label>
-							<input name="user_login" type="text" class="b-main_menu_auth e-user_login" value="{{user login}}" size="15">
-						</div>
-						<div class="b-main_menu_auth e-form_item">
-							<label class="b-main_menu_auth e-label">Пароль:</label>
-							<input name="user_password" class="b-main_menu_auth e-user_password" type="password" size="15">
-						</div>
-						<input type="submit" value="Войти">
-					</form>
-				</div>
-			</span>
-		  
-		</div> <!-- #main_menu -->
-		<div id="menu_shadow_bottom"></div> <!-- #menu_shadow_bottom -->
+		<div class="e-block t-main_menu">
+			<div class="e-bg_left t-main_menu"></div>
+			<div class="e-bg_right t-main_menu"></div>
+			<div class="e-menu_bar t-main_menu">
+				<ul class="e-menu t-main_menu">
+					<li><a href="/" title="Главная страница сайта">Главная</a></li>
+					<li><a href="{{dynamic path}}show_pohod" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
+					<li><a href="{{dynamic path}}show_tourist" title="Просмотр данных и поиск туристов">Туристы</a></li>
+					<li><a href="{{dynamic path}}show_moder" title="Список модераторов системы">Модераторы</a></li>
+					<li><a href="{{dynamic path}}stati" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
+					<li><a href="{{dynamic path}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
+					<li class="e-auth_item t-main_menu">
+						<span class="i-main_menu_auth e-block t-main_menu_auth">
+							<a
+								href="javascript:void(0)"
+								class="i-main_menu_auth e-popdown_btn t-main_menu_auth"
+								title="{{auth_popdown_btn_title}}">
+								<span>{{auth_popdown_btn_text}}</span>
+								<span>&#x25BC;</span>
+							</a>
+							<ul class="i-main_menu_auth e-popdown_menu t-main_menu_auth {{auth_state_cls}}">
+								<li>
+									<a href="{{authentication uri}}"
+										class="t-main_menu_auth e-login_btn {{auth_state_cls}}"
+										title="Перейти на страницу аутентификации">
+										Войти
+									</a>
+								</li>
+								<li>
+									<a href="{{authentication uri}}&logout=true"
+										class="t-main_menu_auth e-logout_btn {{auth_state_cls}}"
+										title="Завершить сеанс работы под пользователем">
+										Выйти
+									</a>
+								</li>
+								<div class="t-main_menu_auth e-buttons_separator {{auth_state_cls}}"></div>
+								<li>
+									<a href="{{dynamic path}}user_settings"
+										class="t-main_menu_auth e-user_settings_btn {{auth_state_cls}}"
+										title="Открыть страницу персональных настроек">
+										Настройки
+									</a>
+								</li>
+							</ul>
+						</span>
+					</li>
+				</ul>
+			</div> <!-- e-menu_bar t-main_menu -->
+			<div class="e-shadow_bottom t-main_menu"></div> <!-- e-shadow_bottom t-main_menu -->
+		</div>
 	</div> <!-- #top -->
 
 	<div id="middle">
 		<div id="sidebar"><!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
-			<h4>Полезные ссылки:</h4>
-			<ul>
-				<li><a href="http://tssr.ru" class="">Туристско-спортивный союз России</a></li>
-				<li><a href="http://tkirbis.ru" class="">Турклуб "Ирбис"</a></li>
-				<li><a href="http://tkrassvet.ru" class="">Турклуб "Рассвет"</a></li>
-			</ul>
+			<div class="i-useful_links_side_menu e-block t-useful_links_side_menu">
+				<h4>Полезные ссылки:</h4>
+				<ul class="e-link_list t-useful_links_side_menu">
+					<li class="e-list_item t-useful_links_side_menu">
+						<a href="http://tssr.ru">Туристско-спортивный союз России</a>
+					</li>
+					<li class="e-list_item t-useful_links_side_menu">
+						<a href="http://tkirbis.ru">Турклуб "Ирбис"</a>
+					</li>
+					<li class="e-list_item t-useful_links_side_menu">
+						<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a>
+					</li>
+				</ul>
+			</div>
 			<div class="b-pohod_filter_collection e-block">
 				<form action="{{dynamic path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
 					<input type="hidden" name="vid" class="b-pohod_filter_collection e-filter__vid">

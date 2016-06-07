@@ -1,13 +1,15 @@
 * {
 	margin: 0;
 	padding: 0;
-	/*border: 0;*/
-	font-size: 16px;
-	box-sizing: border-box;
+	/*font-size: inherit;*/
+	box-sizing: inherit;
 }
+
 
 html {
 	height: 100%;
+	font-size: 16px;
+	box-sizing: border-box;
 }
 
 h1 {
@@ -48,13 +50,13 @@ a:hover {
 }
 
 body {
-	/*--------------- 100% высота контейнера div.page далее */
+
 	min-height:100%;
 	height: 100%;
-	/*---------------*/
+
 	background: url("../img/design/body_bg.png");
 	z-index: -5;
-	overflow: -moz-scrollbars-vertical; /*Прокрутка всегда*/
+	overflow: -moz-scrollbars-vertical;
 	overflow-y: scroll;
 }
 
@@ -148,38 +150,95 @@ body {
 	z-index: 10;
 }
 
-#menu_bg_left {
+.t-main_menu.e-block {
+	/*display: inline-block;
+	float: right;
+	position: relative;
+	height: 100%;
+	font-size:*/
+}
+
+.t-main_menu.e-bg_left {
 	background: url("../img/design/menu_bg_left.png") no-repeat;
 	width: 40px;
 	height: 36px;
 	float: left;
 }
 
-#menu_bg_right {
+.t-main_menu.e-bg_right {
 	background: url("../img/design/menu_bg_right.png") no-repeat;
 	width: 40px;
 	height: 36px;
 	float: right;
 }
 
-#main_menu {
+.t-main_menu.e-menu_bar {
 	background: url("../img/design/menu_bg.png") repeat-x;
 	height: 36px;
 	padding-top: 6px;
-}
-
-#main_menu a {
-	position: relative;
 	color: #2b3f3d;
 }
 
-#main_menu > a > span {
-	font-size: 1.2rem;
+.t-main_menu.e-menu > li {
+	display: inline-block;
+	list-style: none;
+	margin-right: 0.5rem;
 }
 
-#menu_shadow_bottom {
+.t-main_menu.e-menu > li > a {
+	color: #2b3f3d;
+}
+
+.t-main_menu.e-menu > li > a:hover {
+	/*background: linear-gradient(to top, rgba(54,90,29, 0.8), rgba(1,84,155,0.2));
+	border-radius: 4px;*/
+}
+
+.t-main_menu.e-auth_item {
+	float: right;
+}
+
+.t-main_menu.e-shadow_bottom {
 	background: url("../img/design/menu_shadow_bottom.png") repeat-x;
 	height: 6px;
+}
+
+.t-main_menu_auth.e-dialog_wrapper {
+	background: #e4e2bf;
+	padding: 16px 8px 16px 8px;
+	border: solid 2px #598d23;
+	position: relative;
+	z-index: 10;
+}
+
+.t-main_menu_auth.e-popdown_menu {
+	position: absolute;
+	background: #e4e2bf;
+	padding: 16px 8px 16px 8px;
+	border: solid 2px #598d23;
+	border-radius: 4px;
+	z-index: 10;
+	list-style: none;
+	display: none;
+}
+
+.t-main_menu_auth.e-buttons_separator {
+	border-top: solid 2px #598d23;
+}
+
+.t-main_menu_auth.e-login_btn.m-with_auth {
+	display: none;
+}
+
+.t-main_menu_auth.e-logout_btn.m-without_auth,
+.t-main_menu_auth.e-user_settings_btn.m-without_auth,
+.t-main_menu_auth.e-buttons_separator.m-without_auth {
+	display: none;
+}
+
+.t-main_menu_auth.e-popdown_btn,
+.t-main_menu_auth.e-popdown_menu > li > a {
+	color: #2b3f3d;
 }
 
 #middle {
@@ -204,7 +263,6 @@ body {
 	background: #e4e2bf;
 	display: inline-block; /* Создает новый Block formatting context */
 	width: 100%;
-	
 }
 
 #footer_pusher {
@@ -218,70 +276,40 @@ body {
 	height: 100%;
 }
 
-#auth_bar {
-	background: #598d23;
-	padding-left: 15px;
-}
-
-.main_menu_first_lvl > li {
-	float: left;
-	list-style: none;
-	margin-right: 10px;
-	
-}
-
-.main_menu_second_lvl {
-	position: absolute;
-	float: right;
-	margin-top: 5px;
-	background: #598d23;
-	display: none;
-	
-}
-
-.main_menu_second_lvl > li {
-	list-style: none;
-	display: block;
-	margin-bottom: 6px;
-	/*float: none;*/
-	
-}
-
-.b-mkk_site_auth_bar.e-block {
-	display: inline-block;
-	float: right;
-	position: relative;
-	height: 100%;
-	font-size:
-}
-
-.b-pohod_filter_collection.e-list_item {
-	list-style: none;
-	margin-left: 8px;
-}
-
-.b-mkk_site_auth_bar.e-dialog_wrapper {
-	position: absolute;
-}
-
 .pohod {
 	border-collapse: collapse;
 }
-       
+
 .last_pohod_comment {font-size: 80%;}
 
-.b-main_menu_auth.e-dialog_wrapper {
-	background: #e4e2bf;
-	padding: 16px 8px 16px 8px;
-	border: solid 2px #598d23;
-	position: relative;
-	z-index: 10;
+
+
+.b-pohod_filter_collection.e-list_item {
+	list-style: none;
+	margin-left: 0.5rem;
 }
 
-.b-main_menu_auth.e-header.is-hidden {
-	display: none;
+.t-useful_links_side_menu.e-block {
+	padding: 0.5rem;
 }
 
-.b-main_menu_auth.e-dialog_wrapper {
-	display: none;
+
+.t-useful_links_side_menu.e-link_list {
+	/*padding-left: 0.5rem;*/
 }
+
+.t-useful_links_side_menu.e-list_item {
+	list-style: none;
+	margin-left: 0.5rem;
+}
+
+
+/*начало: Для jQuery UI*/
+.ui-dialog, .ui-dialog-conent {
+	-webkit-box-sizing: content-box!important;
+	-moz-box-sizing:content-box!important;
+	box-sizing: content-box!important;
+}
+
+
+/*конец: Для jQuery UI*/

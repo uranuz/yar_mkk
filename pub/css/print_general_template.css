@@ -286,7 +286,7 @@ table.tab1 {
        
 .last_pohod_comment {font-size: 80%;}
 
-.b-main_menu_auth.e-dialog_wrapper {
+.t-main_menu_auth.e-dialog_wrapper {
 	background: #e4e2bf;
 	padding: 16px 8px 16px 8px;
 	border: solid 2px #598d23;
@@ -294,11 +294,11 @@ table.tab1 {
 	z-index: 10;
 }
 
-.b-main_menu_auth.e-header.is-hidden {
+.t-main_menu_auth.e-header.is-hidden {
 	display: none;
 }
 
-.b-main_menu_auth.e-dialog_wrapper {
+.t-main_menu_auth.e-dialog_wrapper {
 	display: none;
 }
 .no_print {display: none;}

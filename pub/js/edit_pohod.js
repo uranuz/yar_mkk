@@ -26,29 +26,18 @@ mkk_site.utils = {
 
 var getParams = webtank.parseGetParams();
 
-//Инициализация страницы
-$(window.document).ready( function() {
-	//Инициализаци блоков на странице
-	mkk_site.tourist_search = new TouristSearch();
-	mkk_site.pohod_chef_edit = new PohodChefEdit({searchBlock: mkk_site.tourist_search});
-	mkk_site.pohod_party_edit = new PohodPartyEdit({searchBlock: mkk_site.tourist_search});
-	mkk_site.edit_pohod = new EditPohod({
-		chefEditBlock: mkk_site.pohod_chef_edit,
-		partyEditBlock: mkk_site.pohod_party_edit
-	});
-} );
-
 //Блок поиска туристов
-TouristSearch = (function(_super) {
+mkk_site.TouristSearch = (function(_super) {
 	__extends(TouristSearch, _super);
 	
-	function TouristSearch()
+	function TouristSearch(opts)
 	{
-		_super.call(this);
+		opts = opts || {};
+		_super.call(this, opts);
 		
 		var self = this;
 		
-		this.elems = $(".b-tourist_search");
+		this.elems = $(this._cssBlockName);
 		this.resultsPanel = this.$el('.e-search_results_panel');
 
 		this.$el(".e-search_btn").$on("click", self.onSearchTourists_BtnClick );
@@ -229,19 +218,19 @@ TouristSearch = (function(_super) {
 })(webtank.ITEMControl);
 
 //Редактирование руководителя и зам. руководителя похода
-PohodChefEdit = (function(_super) {
+mkk_site.PohodChefEdit = (function(_super) {
 	__extends(PohodChefEdit, _super);
 	
 	//Инициализация блока редактирования руководителя и зам. руководителя похода
 	function PohodChefEdit(opts)
 	{	
-		_super.call(this, ".b-pohod_chef_edit");
 		opts = opts || {}
-		
+		_super.call(this, opts);
+
 		var
 			self = this;
 			
-		this.elems = $(this.cssBlockName);
+		this.elems = $(this._cssBlockName);
 		this.searchBlock = opts.searchBlock;
 		this.isAltChef = false;
 		this.chefRecord = null;
@@ -299,18 +288,18 @@ PohodChefEdit = (function(_super) {
 	});
 })(webtank.ITEMControl);
 
-PohodPartyEdit = (function(_super) {
+mkk_site.PohodPartyEdit = (function(_super) {
 	__extends(PohodPartyEdit, _super);
 	
 	//Инциализация блока редактирования списка участников
 	function PohodPartyEdit(opts)
 	{
-		_super.call(this);
 		opts = opts || {};
+		_super.call(this, opts);
 		
 		var self = this;
 		
-		this.elems = $(".b-pohod_party_edit");
+		this.elems = $(this._cssBlockName);
 		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
 		this.page = 0;
 		this.searchBlock = opts.searchBlock;
@@ -463,19 +452,19 @@ PohodPartyEdit = (function(_super) {
 	});
 })(webtank.ITEMControl);
 
-EditPohod = (function(_super) {
+mkk_site.EditPohod = (function(_super) {
 	__extends(EditPohod, _super);
 	var dctl = webtank.datctrl;
 	
 	//Инициализация блока редактирования похода
 	function EditPohod(opts)
 	{	
-		_super.call(this);
 		opts = opts || {};
+		_super.call(this, opts);
 		
 		var self = this;
 		
-		this.elems = $(".b-edit_pohod");
+		this.elems = $(this._cssBlockName);
 		this.chefEditBlock = opts.chefEditBlock;
 		this.partyEditBlock = opts.partyEditBlock;
 		this.participantsRS = null; //RecordSet с участниками похода
@@ -699,4 +688,23 @@ EditPohod = (function(_super) {
 	});
 })(webtank.ITEMControl);
 
-
+//Инициализация страницы
+$(window.document).ready( function() {
+	//Инициализаци блоков на странице
+	mkk_site.tourist_search = new mkk_site.TouristSearch({
+		cssBlockName: ".b-tourist_search"
+	});
+	mkk_site.pohod_chef_edit = new mkk_site.PohodChefEdit({
+		cssBlockName: ".b-pohod_chef_edit",
+		searchBlock: mkk_site.tourist_search
+	});
+	mkk_site.pohod_party_edit = new mkk_site.PohodPartyEdit({
+		cssBlockName: ".b-pohod_party_edit",
+		searchBlock: mkk_site.tourist_search
+	});
+	mkk_site.edit_pohod = new mkk_site.EditPohod({
+		cssBlockName: ".b-edit_pohod",
+		chefEditBlock: mkk_site.pohod_chef_edit,
+		partyEditBlock: mkk_site.pohod_party_edit
+	});
+} );

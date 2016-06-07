@@ -2,12 +2,7 @@ mkk_site = mkk_site || {
 	version: "0.0"
 };
 
-//Инициализация страницы
-$(window.document).ready( function() {
-	mkk_site.edit_tourist = new EditTourist();
-} );
-
-EditTourist = (function(_super){
+mkk_site.EditTourist = (function(_super){
 	__extends(EditTourist, _super);
 	
 	function EditTourist()
@@ -69,3 +64,8 @@ EditTourist = (function(_super){
 		}
 	});
 })(webtank.ITEMControl);
+
+//Инициализация страницы
+$(window.document).ready( function() {
+	mkk_site.edit_tourist = new mkk_site.EditTourist();
+} );

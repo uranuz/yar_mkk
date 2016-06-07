@@ -222,10 +222,6 @@ textarea {
   border-radius: 0;
 }
 
-textarea {
-  resize: vertical;
-}
-
 fieldset {
   min-width: 0;
   padding: .2rem .5rem;

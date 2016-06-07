@@ -53,6 +53,7 @@ public:
 		import std.array: appender;
 		
 		auto table = appender!string();
+		table ~= `<h2>Модераторы</h2>`;
 		
 		table ~= `<div><table class="tab1">`;
 		

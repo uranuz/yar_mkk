@@ -50,6 +50,46 @@ function addDatePicker(container, dayFieldName, monthFieldName, yearFieldName, s
 	container.innerHTML=Result;
 }
 
+mkk_site.MainMenuAuth = (function(_super) {
+	__extends(MainMenuAuth, _super);
+
+	function MainMenuAuth(opts)
+	{
+		opts = opts || {};
+		opts.controlTypeName = 'MainMenuAuth';
+		_super.call(this, opts);
+		var
+			popdownBtn = this._elems().filter('.e-popdown_btn');
+
+		this._outsideClickHdlInstance = this.addOutsideClickHandler.bind(this);
+		popdownBtn.on( 'click', this.onPopdownBtnClick.bind(this) );
+	}
+
+	return __mixinProto(MainMenuAuth, {
+		onPopdownBtnClick: function(ev) {
+			var
+				elems = this._elems(),
+				popdownMenu = elems.filter('.e-popdown_menu');
+
+				if( popdownMenu.is(':visible') ) {
+					$('html').off( 'click', this._outsideClickHdlInstance );
+				} else {
+					$('html').on( 'click', this._outsideClickHdlInstance );
+				}
+				popdownMenu.toggle();
+		},
+		addOutsideClickHandler: function(ev) {
+			var
+				block = this._elems().filter('.e-block'),
+				popdownMenu = this._elems().filter('.e-popdown_menu'),
+				popdownBtn = this._elems().filter('.e-popdown_btn');
+			if( !$(ev.target).closest(block).length ) {
+					$('html').off( 'click', this._outsideClickHdlInstance );
+					popdownMenu.hide();
+			}
+		}
+	});
+})(webtank.ITEMControl);
 
 mkk_site.Pagination = (function(_super) {
 	__extends(Pagination, _super);
@@ -58,7 +98,7 @@ mkk_site.Pagination = (function(_super) {
 	{
 		opts = opts || {};
 		_super.call(this, ".b-pagination");
-		
+
 		
 		
 	}
@@ -149,40 +189,9 @@ mkk_site._initPohodFilters = function() {
 };
 
 mkk_site._initAuthBar = function() {
-	var 
-		block = $(".b-mkk_site_auth_bar"),
-		dialog = block.filter(".e-dialog_wrapper"),
-		form = block.filter(".e-form"),
-		loginInput = block.filter(".e-user_login"),
-		passwordInput = block.filter(".e-user_password"),
-		getIsDialogActive = function() {
-			var activeElement = window.document.activeElement;
-			if( activeElement )
-			{
-				if( loginInput[0] === activeElement || passwordInput[0] === activeElement )
-					return true;
-			}
-			
-			return false;
-		};
-		
-	$(window.document).on("click", function() {
-		dialog.hide();
+	mkk_site.main_menu_auth = new mkk_site.MainMenuAuth({
+		controlName: "main_menu_auth"
 	});
-	
-	block.on("click", function(event) { event.stopPropagation(); })
-		
-	block.filter(".e-block").hover( 
-		function() {
-			dialog.show();
-		},
-		function() {
-			if( getIsDialogActive() === false )
-				dialog.hide();
-		}
-	);
-	
-	dialog.hide();
 };
 
 mkk_site._initPagination = function() {

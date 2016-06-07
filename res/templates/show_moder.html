@@ -1,0 +1,36 @@
+<div class="e-block t-show_moder">
+	<h2>Модераторы</h2>
+
+	<div class="e-block t-mkk_table">
+		<table class="e-table t-mkk_table">
+			<tbody class="e-header_body t-mkk_table">
+				<tr>
+					<th>Имя</th>
+					<th>Статус</th>
+					<th>Контакты</th>
+				</tr>
+			</tbody>
+			<tbody class="e-content_body t-mkk_table">
+
+			table ~=``;
+			foreach(rec; rs)
+			{
+				table ~= `<tr>`;
+
+				table ~= `<td>`;
+					if( rec.isNull("Ключ туриста") )
+						table ~= rec.get!"ФИО"("");
+					else //Делаем ссылку на туриста, если пользователь связан с туристом
+						table ~= `<a href="` ~ dynamicPath ~ "show_pohod_for_tourist?key=" ~ rec.getStr!"Ключ туриста"() ~ `">` ~ rec.get!"ФИО"("") ~ `</a>`;
+
+				table ~= `</td>`;
+
+				table ~= `<td>` ~ rec.get!"Статус"("") ~ `</td>`
+					~ `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;
+
+				table ~= `</tr>`;
+			}
+			</tbody>
+		</table>
+	</div>
+</div>

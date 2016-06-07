@@ -13,24 +13,26 @@
 			</a>
 		</div>
 	</div>
-	<table class="tab1 e-pohod_table t-page_show_pohod">
-		<tbody class="e-pohod_table_header_body t-page_show_pohod">
-			<tr>
-				{{num_column_header}}
-				<th>№ книги</th>
-				<th>Сроки похода</th>
-				<th>Вид, категория</th>
-				<th>Район</th>
-				<th>Руководитель</th>
-				<th>Участники</th>
-				<th>Город, организация</th>
-				<th>Статус похода</th>
-				{{edit_column_header}}
-			</tr>
-		</tbody>
-		<tbody class="i-page_show_pohod e-pohod_table_body t-page_show_pohod">
-			{{pohod_list}}
-		</tbody>
-	</table>
+	<div class="e-block t-mkk_table e-table_wrapper t-page_show_pohod">
+		<table class="e-table t-mkk_table">
+			<tbody class="e-header_body t-mkk_table">
+				<tr class="e-header_row t-mkk_table">
+					{{num_column_header}}
+					<th>№ книги</th>
+					<th>Сроки похода</th>
+					<th>Вид, категория</th>
+					<th>Район</th>
+					<th>Руководитель</th>
+					<th>Участники</th>
+					<th>Город, организация</th>
+					<th>Статус похода</th>
+					{{edit_column_header}}
+				</tr>
+			</tbody>
+			<tbody class="e-content_body t-mkk_table">
+				{{pohod_list}}
+			</tbody>
+		</table>
+	</div>
 	<script src="{{js folder}}show_pohod.js" defer></script>
 </div>

@@ -17,27 +17,27 @@
 	<form method="post">
 		<h3>Сменить пароль</h3>
 		<div class="form-group row">
-			<label class="form-control-static col-md-3">Старый пароль</label>
+			<label for="old_password_field" class="form-control-static col-md-3">Старый пароль</label>
 			<div class="col-md-7">
-				<input type="password" name="old_password" class="form-control">
+				<input type="password" name="old_password" id="old_password_field" class="form-control">
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="form-control-static col-md-3">Новый пароль</label>
+			<label for="new_password_field" class="form-control-static col-md-3">Новый пароль</label>
 			<div class="col-md-7">
-				<input type="password" name="new_password" class="form-control">
+				<input type="password" name="new_password" id="new_password_field" class="form-control">
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="form-control-static col-md-3">Повтор пароля</label>
+			<label for="repeat_password_field" class="form-control-static col-md-3">Повтор пароля</label>
 			<div class="col-md-7">
-				<input type="password" name="repeat_password" class="form-control">
+				<input type="password" name="repeat_password" id="repeat_password_field" class="form-control">
 			</div>
 		</div>
 		<div class="form-group row">
 			<span class="form-control-static col-md-3"></span>
 			<div class="col-md-7">
-				<button type="submit" class="form-control btn btn-primary">Выполнить</button>
+				<button type="submit" class="form-control btn btn-primary">Сохранить</button>
 			</div>
 		</div>
 	</form>
