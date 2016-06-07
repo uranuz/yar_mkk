@@ -14,9 +14,9 @@ import
 
 import mkk_site.templating_init;
 
-enum useTemplateCache = !isMKKSiteDevelTarget;
+enum withTemplateCache = !isMKKSiteDevelTarget;
 
-__gshared PlainTemplateCache!(useTemplateCache) templateCache;
+__gshared PlainTemplateCache!(withTemplateCache) templateCache;
 
 PlainTemplater getGeneralTemplate(HTTPContext context)
 {	
