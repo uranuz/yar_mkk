@@ -1,6 +1,6 @@
 module mkk_site.templating;
 
-import std.conv;
+import std.conv, std.json;
 
 import
 	webtank.net.http.context,
@@ -18,6 +18,78 @@ enum withTemplateCache = !isMKKSiteDevelTarget;
 
 __gshared PlainTemplateCache!(withTemplateCache) templateCache;
 
+// Функция отрисовки списка фильтров походов в боковом меню сайта
+// на основе данных из pohodFiltersJSON.
+string renderPohodFilterMenuSections()
+{
+	if( pohodFiltersJSON.type != JSON_TYPE.ARRAY )
+		return null;
+
+	string sectionsHTML;
+
+	auto sectionTpl = getPageTemplate( pageTemplatesDir ~ "pohod_filter_menu_section.html" );
+	auto itemTpl = getPageTemplate( pageTemplatesDir ~ "pohod_filter_menu_item.html" );
+
+	// Проход по секциям фильтров походов
+	foreach( size_t i, ref section; pohodFiltersJSON.array )
+	{
+		if( section.type != JSON_TYPE.OBJECT )
+			return null;
+
+		string itemsHTML;
+
+		// Добавляем текст заголовка секции
+		string sectionTitle;
+		if( auto s = "title" in section )
+			sectionTitle = s.type == JSON_TYPE.STRING ? s.str : null;
+		sectionTpl.setHTMLText( "section_title", sectionTitle );
+
+		// Проход по элементам меню
+		foreach( size_t j, ref item; section["items"].array )
+		{
+			if( item.type != JSON_TYPE.OBJECT )
+				return null;
+
+			// Добавляем текст пункта меню
+			string itemText;
+			if( auto s = "text" in item )
+				itemText = s.type == JSON_TYPE.STRING ? s.str : null;
+			itemTpl.setHTMLText( "item_text", itemText );
+
+			import std.conv: text;
+			// Сохраняем позицию фильтра в самом теге
+			itemTpl.setHTMLValue( "item_pos", i.text ~ "/" ~ j.text );
+
+			itemsHTML ~= itemTpl.getString();
+		}
+
+		sectionTpl.set( "filter_items", itemsHTML );
+
+		sectionsHTML ~= sectionTpl.getString();
+	}
+
+	return sectionsHTML;
+}
+
+// Функция вывода элементов скрытой формы для отправки фильтров
+string renderPohodFilterMenuInputs()
+{
+	if( pohodFilterFields.length == 0 )
+		return null;
+
+	string formInputsHTML;
+	auto inputTpl = getPageTemplate( pageTemplatesDir ~ "pohod_filter_menu_input.html" );
+
+	foreach( fieldName; pohodFilterFields )
+	{
+		inputTpl.setHTMLValue( "filter_field_name", fieldName );
+		formInputsHTML ~= inputTpl.getString();
+	}
+
+	return formInputsHTML;
+}
+
+
 PlainTemplater getGeneralTemplate(HTTPContext context)
 {	
 	import std.algorithm: endsWith;
@@ -29,8 +101,6 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 		tpl.set( "transport_proto", context.request.headers.get("x-forwarded-proto", "http") );
 
 	tpl.set( "authentication uri", getAuthRedirectURI(context) );
-	
-	string authMenuCaption;
 	
 	if( context.user.isAuthenticated )
 	{	
@@ -44,6 +114,10 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 		tpl.set( "auth_popdown_btn_text", "Вход не выполнен" );
 		tpl.set( "auth_popdown_btn_title", "Вход на сайт не выполнен" );
 	}
+
+	tpl.set( "pohod_filter_menu_sections", renderPohodFilterMenuSections() );
+	tpl.set( "pohod_filter_menu_inputs", renderPohodFilterMenuInputs() );
+	tpl.set( "pohod_filter_menu_data", toJSON( &pohodFiltersJSON ) );
 	
 	return tpl;
 }

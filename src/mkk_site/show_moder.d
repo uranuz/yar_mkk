@@ -51,33 +51,29 @@ public:
 	static string render(RS)(RS rs)
 	{
 		import std.array: appender;
+
+		auto tpl = getPageTemplate( pageTemplatesDir ~ "show_moder.html" );
+		auto itemTpl = getPageTemplate( pageTemplatesDir ~ "show_moder_item.html" );
 		
 		auto table = appender!string();
-		table ~= `<h2>Модераторы</h2>`;
-		
-		table ~= `<div><table class="tab1">`;
-		
-		table ~=`<tr><th>Имя</th><th>Статус</th><th>Контакты</th></tr>`;
+
 		foreach(rec; rs)
 		{	
-			table ~= `<tr>`;
+			itemTpl.set( "ФИО",
+				rec.isNull("Ключ туриста") ? rec.get!"ФИО"("[имя не задано]")
+				: `<a href="` ~ dynamicPath ~ "show_pohod_for_tourist?key="
+					~ rec.getStr!"Ключ туриста"() ~ `">` ~ rec.get!"ФИО"("[имя не задано]") ~ `</a>`
+			);
 			
-			table ~= `<td>`;
-				if( rec.isNull("Ключ туриста") )
-					table ~= rec.get!"ФИО"("");
-				else //Делаем ссылку на туриста, если пользователь связан с туристом
-					table ~= `<a href="` ~ dynamicPath ~ "show_pohod_for_tourist?key=" ~ rec.getStr!"Ключ туриста"() ~ `">` ~ rec.get!"ФИО"("") ~ `</a>`;
-					
-			table ~= `</td>`;
-			
-			table ~= `<td>` ~ rec.get!"Статус"("") ~ `</td>`
-				~ `<td>` ~ rec.get!"Контакты"("нет") ~ `</td>`;
-			
-			table ~= `</tr>`;
-		}
-		table ~= `</table></div>`;
+			itemTpl.setHTMLText( "Статус", rec.get!"Статус"("") );
+			itemTpl.setHTMLText( "Контакты", rec.get!"Контакты"("нет") );
 
-		return table.data();
+			table ~= itemTpl.getString();
+		}
+
+		tpl.set( "moder_list", table.data() );
+
+		return tpl.getString();
 	}
 
 }

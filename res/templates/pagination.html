@@ -2,14 +2,17 @@
 	<h6>Переход по страницам</h6>
 	<div class="e-form_row t-pagination form-group">
 		<span class="e-prev_elem t-pagination">
-			<a class="e-prev_btn t-pagination btn btn-secondary {{prev_btn_cls}}" href="#"
-				onClick="gotoPage({{prev_page_num}})" {{prev_btn_attr}}>Предыдущая</a>
+			<a class="i-pagination e-prev_btn t-pagination btn btn-secondary {{prev_btn_cls}}"
+				href="javascript:void(0)"
+				{{prev_btn_attr}}>
+				Предыдущая
+			</a>
 		</span>
 
 		<div class="input-group">
 			<span class="e-current_elem t-pagination">
 				<input type="text"
-					class="e-page_num_input t-pagination form-control"
+					class="i-pagination e-page_num_input t-pagination form-control"
 					value="{{cur_page_num}}"
 					name="cur_page_num"/>
 			</span>
@@ -18,16 +21,19 @@
 			</span>
 
 			<span class="input-group-btn">
-				<button type="submit"
-					class="e-goto_page_btn t-pagination btn btn-secondary">
+				<button type="button"
+					class="i-pagination e-goto_page_btn t-pagination btn btn-secondary">
 					Перейти
 				</button>
 			</span>
 		</div>
 
 		<span class="e-next_elem t-pagination">
-			<a class="e-next_btn t-pagination btn btn-secondary {{next_btn_cls}}" href="#"
-				onClick="gotoPage({{next_page_num}})" {{next_btn_attr}}>Следующая</a>
+			<a class="i-pagination e-next_btn t-pagination btn btn-secondary {{next_btn_cls}}"
+				href="javascript:void(0)"
+				{{next_btn_attr}}>
+				Следующая
+			</a>
 		</span>
 	</div>
 </div>

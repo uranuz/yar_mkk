@@ -115,39 +115,20 @@
 					</li>
 				</ul>
 			</div>
-			<div class="b-pohod_filter_collection e-block">
-				<form action="{{dynamic path}}show_pohod" method="post" class="b-pohod_filter_collection e-form">
-					<input type="hidden" name="vid" class="b-pohod_filter_collection e-filter__vid">
-					<input type="hidden" name="ks" class="b-pohod_filter_collection e-filter__ks">
-					<input type="hidden" name="prepar" class="b-pohod_filter_collection e-filter__prepar">
-					<input type="hidden" name="begin_date_range_head__year" class="b-pohod_filter_collection e-filter__begin_date_range_head__year">
-					<input type="hidden" name="end_date_range_tail__year" class="b-pohod_filter_collection e-filter__end_date_range_tail__year">
+			<div class="e-block t-pohod_filter_menu">
+				<form action="{{dynamic path}}show_pohod"
+					method="post"
+					class="i-pohod_filter_menu e-form t-pohod_filter_menu">
+					{{pohod_filter_menu_inputs}}
 				</form>
+				<script>
+					var mkk_site = mkk_site || {};
+					mkk_site.pohodFilterMenuData = {{pohod_filter_menu_data}};
+				</script>
 				<h4>Подборки походов:</h4>
-				<h5>По годам:</h5>
-				<ul>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">2016</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">2015</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">2014</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">2013</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">2012</a></li>
-				</ul>
-				<h5>По видам туризма:</h5>
-				<ul>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Водные</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Горные</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Пешеходные</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Велосипедные</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Лыжные</a></li>
-				</ul>
-				<h5>По статусу:</h5>
-				<ul>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Планируется</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Набор группы</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Набор завершен</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">Идет подготовка</a></li>
-					<li class="b-pohod_filter_collection e-list_item"><a href="#_NOLink">На маршруте</a></li>
-				</ul>
+				<div>
+					{{pohod_filter_menu_sections}}
+				</div>
 			</div>
 		</div> <!-- #sidebar -->
 

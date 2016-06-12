@@ -97,65 +97,78 @@ mkk_site.Pagination = (function(_super) {
 	function Pagination(opts)
 	{
 		opts = opts || {};
-		_super.call(this, ".b-pagination");
+		_super.call(this, opts);
 
-		
-		
+		this._form = opts.form;
+
+		this._prevBtn = this._elems().filter('.e-prev_btn')
+			.on( 'click', this.gotoPrev.bind(this) );
+		this._nextBtn = this._elems().filter('.e-next_btn')
+			.on( 'click', this.gotoNext.bind(this) );
+		this._gotoPageBtn = this._elems().filter('.e-goto_page_btn')
+			.on( 'click', this.gotoPage.bind(this) );
+		this._pageNumInput = this._elems().filter('.e-page_num_input');
+
+		this._currPageNum = +this._pageNumInput.val() || 1;
 	}
 	
 	return __mixinProto(Pagination, {
-		gotoPage: function(pageNum)
-		{
-			
+		gotoPrev: function() {
+			this._pageNumInput.val( this._currPageNum - 1 );
+			this.gotoPage();
+		},
+		gotoNext: function() {
+			this._pageNumInput.val( this._currPageNum + 1 );
+			this.gotoPage();
+		},
+		gotoPage: function() {
+			this._form[0].submit();
 		}
 	});
 })(webtank.ITEMControl);
 
-//----- Вспомогательная функция для организации постраничного просмотра
-function gotoPage(pageNum) {
-	var form = window.document.getElementById("main_form");
-	var pageNumInput = window.document.getElementsByName("cur_page_num")[0];
-	pageNumInput.value = pageNum;
-	form.submit();
-}
+mkk_site.PohodFilterMenu = (function(_super) {
+	__extends(PohodFilterMenu, _super);
 
-//Переход на страницу отображения походов с одним из фильтров из списка
-function gotoPohodFilter(filterIndex) {
-	var 
-		filterSet = [
-			//Выборки по годам
-			{"begin_date_range_head__year": 2016, "end_date_range_tail__year": 2016},
-			{"begin_date_range_head__year": 2015, "end_date_range_tail__year": 2015},
-			{"begin_date_range_head__year": 2014, "end_date_range_tail__year": 2014},
-			{"begin_date_range_head__year": 2013, "end_date_range_tail__year": 2013},
-			{"begin_date_range_head__year": 2012, "end_date_range_tail__year": 2012},
-			
-			//Выборки по видам
-			{"vid": 4}, //водный
-			{"vid": 3}, //горный
-			{"vid": 1}, //пеший
-			{"vid": 5}, //велосипедный
-			{"vid": 2}, //лыжный
-			
-			//Выборки по статусу похода
-			{"prepar": 1}, //планируется
-			{"prepar": 2}, //набор группы
-			{"prepar": 3}, //набор завершен
-			{"prepar": 4}, //подготовка
-			{"prepar": 5}, //на маршруте
-		],
-		filterForm = $(".b-pohod_filter_collection.e-form"),
-		filterRecord = filterSet[filterIndex],
-		filterName;
-		
-	for( filterName in filterRecord ) //На будущее, если будет фильтр с неск. критериями
-	{
-		//Ищем нужный элемент формы и пихаем туда значение фильтра
-		$(".b-pohod_filter_collection.e-filter__" + filterName).val(filterRecord[filterName]);
+	function PohodFilterMenu(opts) {
+		opts = opts || {};
+		_super.call(this, opts);
+
+		this._filterSet = opts.filterSet || {};
+		this._form = this._elems().filter('.e-form');
+		this._itemLinks = this._elems().filter('.e-item_link');
+		this._inputs = this._elems().filter('.e-filter_input');
+
+		this._itemLinks.on( 'click', this.onFilterItemClick.bind(this) );
 	}
-	
-	filterForm[0].submit();
-}
+
+	return __mixinProto(PohodFilterMenu, {
+		onFilterItemClick: function(ev)
+		{
+			var
+				itemPos = $(ev.currentTarget).attr( 'data-mkk-item_pos' ).split('/'),
+				sectionIndex, itemIndex, filterData, sectionElem, inputElem;
+
+			if( itemPos.length != 2 )
+				return;
+
+			sectionIndex = +itemPos[0];
+			itemIndex = +itemPos[1];
+			filterData = this._filterSet[sectionIndex].items[itemIndex].fields;
+
+			if( !filterData )
+				return;
+
+			for( var fieldName in filterData ) //Для фильтра с неск. критериями
+			{
+				//Ищем нужный элемент формы и пихаем туда значение фильтра
+				this._inputs.filter('.e-filter__' + fieldName).val(filterData[fieldName]);
+			}
+
+			this._form[0].submit();
+		}
+	});
+})(webtank.ITEMControl);
 
 mkk_site._initTemplateService = function() {
 	var 
@@ -169,28 +182,6 @@ mkk_site._initTemplateService = function() {
 	
 	mkk_site.templateService.getMultAsync(["pohod_for_tourist.html"], function(templates, names) {
 		console.log("Templates loaded: ", names);
-	});
-};
-
-//Вешаем обработчики на ссылки на боковой панели с выборками походов по некоторым критериям
-mkk_site._initPohodFilters = function() {
-	var 
-		pohod_filter_items = $(".b-pohod_filter_collection.e-list_item"),
-		i;
-		
-	for( i = 0; i < pohod_filter_items.length; i++ )
-	{
-		(function(ii) {
-			$(pohod_filter_items[ii]).on( "click", function() {
-				gotoPohodFilter(ii);
-			});
-		})(i);
-	}
-};
-
-mkk_site._initAuthBar = function() {
-	mkk_site.main_menu_auth = new mkk_site.MainMenuAuth({
-		controlName: "main_menu_auth"
 	});
 };
 
@@ -255,8 +246,18 @@ mkk_site._initPagination = function() {
 
 (function() {
 	$(window.document).ready( function() {
-		mkk_site._initPohodFilters();
-		mkk_site._initAuthBar();
+		mkk_site.pohodFilterMenu = new mkk_site.PohodFilterMenu({
+			controlName: "pohod_filter_menu",
+			filterSet: mkk_site.pohodFilterMenuData
+		});
+		mkk_site.main_menu_auth = new mkk_site.MainMenuAuth({
+			controlName: "main_menu_auth"
+		});
+		mkk_site.pagination = new mkk_site.Pagination({
+			controlName: "pagination",
+			form: $('#main_form')
+		});
+
 		mkk_site._initTemplateService();
 		mkk_site._initPagination();
 	});
