@@ -4,44 +4,44 @@
 	}
 </style>
 
-<form class="b-edit_tourist e-tourist_form" method="POST"{{edit_tourist_form}}>
+<form class="b-edit_tourist e-tourist_form form" method="POST"{{edit_tourist_form}}>
+	<h2>Редактирование данных туриста</h2>
 	<input type="hidden" name="num"{{num}}>
-	<table>
+	<table style="width: 100%;">
 		<tr><td>Фамилия</td>
-			<td><input type="text" name="family_name" class="b-edit_tourist e-family_name"{{family_name}}></td>
+			<td><input type="text" name="family_name" class="b-edit_tourist e-family_name form-control"{{family_name}}></td>
 		</tr>
 		<tr><td>Имя</td>
-			<td><input type="text" name="given_name" class="b-edit_tourist e-given_name"{{given_name}}></td>
+			<td><input type="text" name="given_name" class="b-edit_tourist e-given_name form-control"{{given_name}}></td>
 		</tr>
 		<tr><td>Отчество</td>
-			<td><input type="text" name="patronymic" class="b-edit_tourist e-patronymic"{{patronymic}}></td>
+			<td><input type="text" name="patronymic" class="b-edit_tourist e-patronymic form-control"{{patronymic}}></td>
 		</tr>
 		<tr><td>Дата рождения</td>
-			<td><input type="text" name="birth_day" class="b-edit_tourist e-birth_day" size="2"{{birth_day}}>
-				{{birth_month}}
-				<input type="text" name="birth_year" class="b-edit_tourist e-birth_year" size="4"{{birth_year}}>
+			<td>
+				{{birth_date_picker}}
 			</td>
 		</tr>
 		<tr><td>Адрес проживания</td>
-			<td><input type="text" name="address"{{address}}></td>
+			<td><input type="text" name="address" class="form-control"{{address}}></td>
 		</tr>
 		<tr><td>Номер телефона</td>
-			<td><input type="text" name="phone"{{phone}}></td>
+			<td><input type="text" name="phone"{{phone}} class="form-control"></td>
 		</tr>
 		<tr><td>Показывать номер телефона</td>
-			<td><input type="checkbox" name="show_phone" value="yes"{{show_phone}}></td>
+			<td><input type="checkbox" name="show_phone" class="checkbox-inline"{{show_phone}}></td>
 		</tr>
 		<tr><td>Электронная почта</td>
-			<td><input type="text" name="email"{{email}}></td>
+			<td><input type="text" name="email" class="form-control"{{email}}></td>
 		</tr>
 		<tr><td>Показывать адрес эл. почты</td>
-			<td><input type="checkbox" name="show_email" value="yes"{{show_email}}></td>
+			<td><input type="checkbox" name="show_email" class="checkbox-inline"{{show_email}}></td>
 		</tr>
 		<tr><td>Туристский опыт</td>
-			<td><input type="text" name="exp"{{exp}}></td>
+			<td><input type="text" name="exp" class="form-control"{{exp}}></td>
 		</tr>
 		<tr><td>Комментарий</td>
-			<td><textarea name="comment">{{comment}}</textarea></td>
+			<td><textarea name="comment" class="form-control">{{comment}}</textarea></td>
 		</tr>
 		<tr><td>Спортивный разряд</td>
 			<td>{{razr}}</td>
@@ -50,7 +50,7 @@
 			<td>{{sud}}</td>
 		</tr>
 		<tr><td> &nbsp; </td>
-			<td><input type="button" class="b-edit_tourist e-submit_btn" value="Отправить!"></td>
+			<td><button type="button" class="b-edit_tourist e-submit_btn btn btn-primary btn-block">Сохранить</td>
 		</tr>
 	</table>
 	<input type="hidden" name="action"{{action}}>

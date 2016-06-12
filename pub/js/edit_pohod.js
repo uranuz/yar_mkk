@@ -594,8 +594,8 @@ mkk_site.EditPohod = (function(_super) {
 				newTr = $("<tr>"),
 				leftTd = $("<td>").appendTo(newTr),
 				rightTd = $("<td>").appendTo(newTr),
-				linkInput = $( "<input>", { type: "text" } ).appendTo(leftTd),
-				commentInput = $( "<input>", { type: "text" } ).appendTo(rightTd);
+				linkInput = $( "<input>", { type: "text", class: "form-control" } ).appendTo(leftTd),
+				commentInput = $( "<input>", { type: "text", class: "form-control" } ).appendTo(rightTd);
 
 			if( data )
 			{	linkInput.val( data[0] || "" );

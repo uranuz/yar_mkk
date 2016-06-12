@@ -27,10 +27,7 @@ auto bsCheckBoxList(T)(T valueSet)
 auto bsListBox(T)(T valueSet)
 {
 	string[][string] elemClasses = [
-		"block": [],
-		"list_item": [],
-		"item_input": [],
-		"item_label": []
+		"select": [`form-inline`, `form-control`]
 	];
 
 	auto ctrl = listBox(valueSet);

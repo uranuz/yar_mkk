@@ -189,13 +189,25 @@ void создатьФормуИзмененияПохода(
 
 	//Создаём компонент выбора даты начала похода
 	auto beginDatePicker = bsPlainDatePicker();
-	beginDatePicker.dataFieldName = "begin";
-	beginDatePicker.controlName = "pohod_begin_date_picker";
-	
+	with( beginDatePicker )
+	{
+		dataFieldName = "begin";
+		controlName = "pohod_begin_date_picker";
+		nullDayText = "день";
+		nullMonthText = "месяц";
+		nullYearText = "год";
+	}
+
 	//Создаём компонент выбора даты завершения похода
 	auto finishDatePicker = bsPlainDatePicker();
-	finishDatePicker.dataFieldName = "finish";
-	finishDatePicker.controlName = "pohod_begin_date_picker";
+	with( finishDatePicker )
+	{
+		dataFieldName = "finish";
+		controlName = "pohod_begin_date_picker";
+		nullDayText = "день";
+		nullMonthText = "месяц";
+		nullYearText = "год";
+	}
 
 	//Получаем данные о датах (если режим редактирования)
 	if( pohodRec )
@@ -224,6 +236,7 @@ void создатьФормуИзмененияПохода(
 		auto dropdown =  bsListBox( pohodRecFormat.getEnumFormat!(fieldName) );
 
 		dropdown.dataFieldName = fieldName;
+		dropdown.nullText = `не задано`;
 
 		//Задаём текущее значение
 		if( pohodRec && !pohodRec.isNull(fieldName) )

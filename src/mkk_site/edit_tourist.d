@@ -172,7 +172,7 @@ public:
 		string, "имя", 
 		string, "отчество",
 		string, "дата рожд", 
-		size_t, "год рожд",
+		int, "год рожд",
 		string, "адрес", 
 		string, "телефон",
 		bool, "показать телефон", 
@@ -379,11 +379,12 @@ public:
 			SiteLogger.info("Шаблон формы получен");
 		
 		SiteLogger.info("Начало разбора данных о дате рождения туриста");
-		Optional!(ubyte) birthDay;
-		Optional!(ubyte) birthMonth;
+
+		OptionalDate birthDate;
 		//Вывод даты рождения туриста из базы данных
 		if( touristRec )
-		{	auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
+		{
+			auto birthDateParts = split( touristRec.get!"дата рожд"(""), "." );
 			if( birthDateParts.length != 2 )
 				birthDateParts = split( touristRec.get!"дата рожд"(""), "," );
 			if( birthDateParts.length == 2 ) 
@@ -391,31 +392,52 @@ public:
 				
 				try {
 					if( birthDateParts[0].length != 0 )
-						birthDay = birthDateParts[0].to!ubyte;
+						birthDate.day = birthDateParts[0].to!ubyte;
 					if( birthDateParts[1].length != 0 )
-						birthMonth = birthDateParts[1].to!ubyte;
-				} catch(std.conv.ConvException e) {
-					birthDay = null;
-					birthMonth = null;
-				}
+						birthDate.month = birthDateParts[1].to!ubyte;
+				} catch(std.conv.ConvException e) {}
 			}
+
+			if( !touristRec.isNull("год рожд") )
+				birthDate.year = touristRec.get!"год рожд"();
 		}
+
+
 		SiteLogger.info("Разбор данных о дате рождения завершен");
 		
-		import webtank.ui.list_control: listBox;
+		import mkk_site.ui.list_control;
+		import mkk_site.ui.date_picker;
 		
 		SiteLogger.info("Создание компонентов вывода перечислимых типов");
-		//Генератор выпадающего списка месяцев
-		auto monthDropdown = listBox(месяцы);
-		monthDropdown.dataFieldName = "birth_month";
+		//Генератор компонента выбора даты рождения
+		auto birthDatePicker = bsPlainDatePicker();
+		with( birthDatePicker )
+		{
+			dataFieldName = "birth";
+			controlName = "birth_date";
+			nullDayText = "день";
+			nullMonthText = "месяц";
+			nullYearText = "год";
+		}
 
 		//Генератор выпадющего списка спорт. разрядов
-		auto sportsGradeDropdown = listBox(спортивныйРазряд);
-		sportsGradeDropdown.dataFieldName = "razr";
+		auto sportsGradeDropdown = bsListBox(спортивныйРазряд);
+		with( sportsGradeDropdown )
+		{
+			dataFieldName = "razr";
+			controlName = "sports_grade_edit";
+			nullText = "не задано";
+		}
+
 		
 		//Генератор выпадающего списка судейских категорий
-		auto judgeCatDropdown = listBox(судейскаяКатегория);
-		judgeCatDropdown.dataFieldName = "sud";
+		auto judgeCatDropdown = bsListBox(судейскаяКатегория);
+		with( judgeCatDropdown )
+		{
+			dataFieldName = "sud";
+			controlName = "judge_category_edit";
+			nullText = "не задано";
+		}
 		
 		SiteLogger.info("Компонентов вывода перечислимых типов созданы");
 		
@@ -429,8 +451,6 @@ public:
 			touristForm.set(  "family_name", printHTMLAttr( `value`, touristRec.get!"фамилия"("") )  );
 			touristForm.set(  "given_name", printHTMLAttr( `value`, touristRec.get!"имя"("") )  );
 			touristForm.set(  "patronymic", printHTMLAttr( `value`, touristRec.get!"отчество"("") )  );
-			touristForm.set(  "birth_year", printHTMLAttr( `value`, touristRec.getStr("год рожд", null) )  );
-			touristForm.set(  "birth_day", printHTMLAttr( `value`, birthDay.isNull() ? null : birthDay.to!string  )  );
 			touristForm.set(  "address", printHTMLAttr( `value`, touristRec.get!"адрес"("") )  );
 			touristForm.set(  "phone", printHTMLAttr( `value`, touristRec.get!"телефон"("") )  );
 			touristForm.set(  "show_phone", ( touristRec.get!"показать телефон"(false) ? " checked" : "" )  );
@@ -442,7 +462,7 @@ public:
 			SiteLogger.info("Вывод простых полей завершен");
 			
 			SiteLogger.info("Заполнение данными перечислимых полей");
-			monthDropdown.selectedValue = birthMonth;
+			birthDatePicker.date = birthDate;
 			
 			if( !touristRec.isNull("спорт разряд") )
 				sportsGradeDropdown.selectedValue = touristRec.get!"спорт разряд"();
@@ -454,7 +474,7 @@ public:
 		
 		SiteLogger.info("Начало вывода контролов перечислимых типов");
 
-		touristForm.set( "birth_month", monthDropdown.print() );
+		touristForm.set( "birth_date_picker", birthDatePicker.print() );
 		touristForm.set( "razr", sportsGradeDropdown.print() );
 		touristForm.set( "sud", judgeCatDropdown.print() );
 		SiteLogger.info("...завершено");
