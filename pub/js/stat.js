@@ -6,22 +6,27 @@
     a10 = [],a11 = [];
  
 
+ function reloadPage()
+	{
+		document.forms.main_form.submit()
+	}
+
+
  
- 
- function doFlot ()
+function doFlot ()
 { 
-    var f,i,j;
-	 
-			if(prez==1)
-			{
-						for (j = 0; j < y; j += 1)
-						{
-							f = new Date(2000,12,31);
-							f=Date.parse(Surs0[j]);
-							dx .push(f);
-							}
-							t=y;
-			}
+	var f,i,j;
+
+	if(prez==1)
+	{
+		for (j = 0; j < y; j += 1)
+		{
+			f = new Date(2000,12,31);
+			f=Date.parse(Surs0[j]);
+			dx .push(f);
+		}
+		t=y;
+	}
 			
 			if(prez==2) {dx=Surs0; t=8;}
 			

@@ -501,7 +501,7 @@ string [][] for_graf;   // массив данных для графика
 
  if (isForPrint)
   {
-     if(prezent_vid=="по годам") {tpl.set( "period", "по годам" );}
+     if(prezent_vid=="по годам") {tpl.set( "period", "по годам" );}     
      if(prezent_vid=="по КС") {tpl.set( "period", `За `~year_B
      ~` - `~year_E~` годы`); }
      
@@ -509,21 +509,14 @@ string [][] for_graf;   // массив данных для графика
       
    } 
   else { tpl.set( "no_print", `` );}
-  string vvv;
   
-    foreach(d; prezent)
-    {
-                
-        vvv ~=`<input  type="radio"    
-        name="prezent_vid" value="`~ d ~`"`;
-        if(d==prezent_vid) vvv ~=`  checked `;
-        vvv ~= `>`~d;
-     
-    } 
-     tpl.set( "prezent_vid", vvv );
     
     
- 
+   if(prezent_vid=="по годам")
+	{ tpl.set("on_years","checked"); tpl.set( "on_KC"  ," " );};
+   
+   if(prezent_vid=="по КС")
+	{ tpl.set( "on_KC"  ,"checked"); tpl.set("on_years"," " );};
    
  // блок фильтров   
 

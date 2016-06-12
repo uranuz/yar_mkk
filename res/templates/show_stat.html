@@ -1,6 +1,6 @@
  
 
-      
+
        
         <script type="text/javascript" 
         src="{{js folder}}flot/jquery.flot.js" defer  ></script>
@@ -32,10 +32,10 @@
 <form id="main_form" method="post">
   <fieldset>{{period}}
   
-         <div  {{no_print}} >
-      
-								
-							{{prezent_vid}}	
+		<div  {{no_print}} >
+			<input  type="radio" name="prezent_vid" value="по годам"  onclick="reloadPage()" {{on_years}}  >по годам
+			<input  type="radio" name="prezent_vid" value="по КС"     onclick="reloadPage()" {{on_KC}}      > по КС 					
+						
         </div> 
    </fieldset> 
   
