@@ -50,7 +50,6 @@ a:hover {
 }
 
 body {
-
 	min-height:100%;
 	height: 100%;
 
@@ -282,9 +281,11 @@ body {
 
 .last_pohod_comment {font-size: 80%;}
 
+.t-pohod_filter_menu.e-block {
+	padding: 0.5rem;
+}
 
-
-.b-pohod_filter_collection.e-list_item {
+.t-pohod_filter_menu.e-list_item {
 	list-style: none;
 	margin-left: 0.5rem;
 }

@@ -161,6 +161,8 @@ string renderShowTourist(VM)( ref VM vm )
 		tpl.set( "tourist_num_col_header_cls", "is-hidden" );
 		tpl.set( "edit_tourist_col_header_cls", "is-hidden" );
 	}
+
+	tpl.set( "auth_state_cls", vm.isAuthorized ? "m-with_auth" : "m-without_auth" );
 	
 	tpl.set( "tourist_list_pagination", renderPaginationTemplate(vm) );
 	

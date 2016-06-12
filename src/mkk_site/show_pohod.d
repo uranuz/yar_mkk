@@ -525,6 +525,8 @@ string renderShowPohod(VM)( ref VM vm )
 		tpl.set( "edit_column_header", `<th>Изм.</th>` );
 	}
 
+	tpl.set( "auth_state_cls", vm.isAuthorized ? "m-with_auth" : "m-without_auth" );
+
 	tpl.set( "pohod_navigation",
 		( vm.isForPrint ?
 			отрисоватьБлокНавигацииДляПечати(vm) :

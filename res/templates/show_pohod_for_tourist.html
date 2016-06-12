@@ -26,29 +26,33 @@
 		Нет сведений о походах данного туриста
 	</p>
 	<div class="{{found_pohods_sect_cls}}">
-		<p> {{pohod_count}} походов найдено </p>
 		<form id="main_form" method="post">
 			{{tourist_list_pagination}}
 		</form>
-		<div class="b-tourist_info e-pohod_container">
-			<table>
-				<tbody>
-					<tr>
-						<th class="{{pohod_num_col_header_cls}}">#</th>
-						<th>№ книги</th>
-						<th>Сроки похода</th>
-						<th>Вид, категория</th>
-						<th>Район</th>
-						<th>Должность</th>
-						<th>Город, организация</th>
-						<th>Статус похода</th>
-						<th class="{{edit_pohod_col_header_cls}}">Изменить</th>
-					</tr>
-				</tbody>
-				<tbody class="b-tourist_info e-pohod_list">
-					{{pohod_list}}
-				</tbody>
-			</table>
+		<div>
+			<span class="e-pohod_count t-show_pohod">Найдено походов с участием туриста: {{pohod_count}}</span>
+		</div>
+		<div class="b-tourist_info e-pohod_container e-block t-mkk_table">
+			<div class="e-scroll_wrapper t-mkk_table">
+				<table class="e-table t-mkk_table">
+					<tbody class="e-header_body t-mkk_table">
+						<tr>
+							<th class="{{pohod_num_col_header_cls}}">#</th>
+							<th>№ книги</th>
+							<th>Сроки похода</th>
+							<th>Вид, категория</th>
+							<th>Район</th>
+							<th>Должность</th>
+							<th>Город, организация</th>
+							<th>Статус похода</th>
+							<th class="{{edit_pohod_col_header_cls}}">Изменить</th>
+						</tr>
+					</tbody>
+					<tbody class="b-tourist_info e-pohod_list e-content_body t-mkk_table">
+						{{pohod_list}}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,42 +1,47 @@
-<div class="e-block t-show_tourist">
+<div class="i-show_tourist e-block t-show_tourist">
 	<h2>Туристы</h2>
 	<form id="main_form" method="post">
-		<div class="e-filter t-show_pohod form-inline">
+		<div class="e-filter t-show_tourist form-inline">
 			<label>
 				<span>Фамилия</span>
 				<input name="family_name" type="text" class="form-control" value="{{family_name}}">
 			</label>
 			<button type="submit" name="act" class="btn btn-primary">Найти</button>
 		</div>
-		<div class="e-pagination t-show_pohod">
+		<div class="e-pagination t-show_tourist">
 			{{tourist_list_pagination}}
 		</div>
 	</form>
 	<div class="e-table_bar t-show_tourist row">
 		<div class="col-md-6">
 			<div class="form-control-static">
-				Найдено {{tourist_count}} туристов
+				Найдено туристов: {{tourist_count}}
 			</div>
 		</div>
 		<div class="col-md-6" style="text-align: right;">
-			<a href="{{dynamic path}}edit_tourist" class="btn btn-primary">Добавить нового туриста</a>
+			<a href="{{dynamic path}}edit_tourist"
+				class="e-add_tourist_btn t-show_tourist {{auth_state_cls}} btn btn-primary">
+				Добавить нового туриста
+			</a>
 		</div>
 	</div>
 	<div class="e-block t-mkk_table">
-		<table class="e-table t-mkk_table">
-			<tbody class="e-header_body t-mkk_table">
-				<tr>
-					<th class="{{tourist_num_col_header_cls}}">#</th>
-					<th width="20%">Имя, дата рожд.</th>
-					<th>Опыт</th>
-					<th>Спорт. разряд, cуд. категория</th>
-					<th>Комментарий</th>
-					<th class="{{edit_tourist_col_header_cls}}">Изм.</th>
-				<tr>
-			</tbody>
-			<tbody class="e-content_body t-mkk_table">
-				{{tourist_list}}
-			</tbody>
-		</table>
+		<div class="e-scroll_wrapper t-mkk_table">
+			<table class="e-table t-mkk_table">
+				<tbody class="e-header_body t-mkk_table">
+					<tr>
+						<th class="{{tourist_num_col_header_cls}}">#</th>
+						<th width="20%">Имя, дата рожд.</th>
+						<th>Опыт</th>
+						<th>Спорт. разряд, cуд. категория</th>
+						<th>Комментарий</th>
+						<th class="{{edit_tourist_col_header_cls}}">Изм.</th>
+					<tr>
+				</tbody>
+				<tbody class="e-content_body t-mkk_table">
+					{{tourist_list}}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
