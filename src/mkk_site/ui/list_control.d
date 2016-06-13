@@ -9,7 +9,8 @@ auto bsCheckBoxList(T)(T valueSet)
 		"block": [],
 		"list_item": [],
 		"item_input": [],
-		"item_label": [`checkbox-inline`]
+		"item_label": [`checkbox-inline`],
+		"container": []
 	];
 	
 	auto ctrl = checkBoxList(valueSet);

@@ -1,16 +1,20 @@
-<tr>
+<tr class="i-show_pohod_table e-row">
 	{{Колонка ключ}}
 	<td>
 		<a href="{{dynamic path}}pohod?key={{Ключ}}">{{Номер книги}}</a>
 	</td>
 	<td>{{Сроки}}</td>
-	<td>{{Вид}}<br>{{КС}} {{Элем КС}}</td>
+	<td>{{Вид}}<br>{{КС}} {{Элем КС}}
+
+	</td>
 	<td width="8%">{{Район}}</td>
 	<td>{{Руководитель}}</td>
-	<td class="show_participants_btn" style="text-align: center;">
-		{{Число участников}}
-		<img class="noprint" src="{{img folder}}icons/list_icon.png">
-		<input type="hidden" value="{{Ключ}}"> 
+	<td class="i-show_pohod_table e-show_participants_btn t-show_pohod_table"
+		data-pohod-num="{{Ключ}}"
+		title="Щелкните для просмотра списка участников">
+		<img class="e-show_participants_btn_icon t-show_pohod_table noprint" src="{{img folder}}icons/list_icon.png">
+		<span class="e-show_participants_btn_text t-show_pohod_table"
+			title="Количество участников">{{Число участников}}</span>
 	</td>
 	<td>{{Организация}}</td>
 	<td>{{Готовность}}<br>{{Статус}}</td>
