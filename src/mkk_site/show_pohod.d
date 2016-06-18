@@ -175,6 +175,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 string отрисоватьБлокНавигацииДляПечати(VM)( ref VM vm )
 {
 	import std.array: join;
+	
 	//----------вид Туризма--------------------------------------
 	string[] строкиВидов;
 	if (vm.filter.видыТуризма.length)
@@ -238,6 +239,7 @@ string отрисоватьБлокНавигацииДляПечати(VM)( ref
 	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_navigation_for_print.html" );
 	
+	формаФильтрации.set("print_switch_btn_text","Назад");
 	foreach( имяПоля, дата; vm.filter.сроки )
 	{
 		auto полеДаты = bsPlainDatePicker(дата);
