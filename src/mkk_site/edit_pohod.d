@@ -4,6 +4,8 @@ import std.conv, std.string, std.array, std.json, std.typecons;
 
 import mkk_site.page_devkit;
 
+import std.algorithm.searching;
+
 immutable(string) thisPagePath;
 immutable(string) authPagePath;
 
@@ -368,13 +370,42 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	Optional!(Date)[2] pohodDates;
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
 	
-	int [6] partDtates;
-
-	partDtates = [(pVars["begin__year"]).to!int, (pVars["begin__month"]).to!int, (pVars["begin__day"]).to!int,
-	                  (pVars["finish__year"]).to!int, (pVars["finish__month"]).to!int, (pVars["finish__day"]).to!int];
-
-	pohodDates[0] =  Date(partDtates[0], partDtates[1], partDtates[2]);
-	pohodDates[1] =  Date(partDtates[3], partDtates[4], partDtates[5]);
+	string [6] partDatesString;
+	int    [6] partDatesInt;
+	
+	
+	string[] namesDateFields = ["begin__year", "begin__month","begin__day","finish__year", "finish__month","finish__day"];
+	
+	
+	for(size_t i=0;i<6;i++) partDatesString[i] = pVars[namesDateFields[i]];
+	
+	
+	if( all!( (a) => !a.length  )(partDatesString[0..3])) pohodDates[0] = null;
+	 else
+		{
+			for(size_t i=0;i<3;i++)		
+			{
+				if(!isNumeric( pVars[namesDateFields[i]]) )
+					throw new Exception("Неправильный формат даты");
+				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
+			}
+		pohodDates[0] =  Date(partDatesInt[0], partDatesInt[1], partDatesInt[2]);
+		}		
+		
+	
+	if( all!( (a) => !a.length  )(partDatesString[4..6])) pohodDates[1] = null;
+	 else
+		{
+			for(size_t i=3;i<6;i++)		
+			{
+				if(!isNumeric( pVars[namesDateFields[i]]) )
+					throw new Exception("Неправильный формат даты");
+				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);					
+			}
+		pohodDates[1] =  Date(partDatesInt[3], partDatesInt[4], partDatesInt[5]);
+		}
+	
+	
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
