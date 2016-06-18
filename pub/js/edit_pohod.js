@@ -484,6 +484,31 @@ mkk_site.EditPohod = (function(_super) {
 
 		this.$el(".e-submit_btn").$on("click", function(ev){
 			self.saveListOfExtraFileLinks( $(this), ev );
+
+			var
+				countInput = self.$el(".e-tourist_count_input")
+				inputCount = parseInt( countInput.val() ),
+				listItems = self.$el(".e-tourists_list").children(),
+				listCount = listItems.length;
+
+			if( isNaN( inputCount ) || inputCount < 0 || inputCount % 1 != 0 ) {
+				$('<div title="Ошибка ввода">Требуется ввести неотрицательное целое число в поле количества участников</div>')
+					.dialog({ modal: true });
+				//countInput.triggerHandler('focus');
+				ev.preventDefault();
+				return;
+			}
+
+			if( listCount > inputCount ) {
+				$('<div title="Ошибка ввода">Количество участников в списке '
+					+ listCount + ' больше числа в поле ввода ' + inputCount
+					+ '. Пожалуйста, исправьте введенное значение</div>')
+						.dialog({ modal: true });
+				//countInput.triggerHandler('focus');
+				ev.preventDefault();
+				return;
+			}
+
 			self.$el(".e-edit_pohod_form").submit();
 		});
 		

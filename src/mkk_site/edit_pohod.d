@@ -29,7 +29,7 @@ static immutable shortTouristRecFormat = RecordFormat!(
 static immutable shortTouristFormatQueryBase =
 	` select num, family_name, given_name, patronymic, birth_year from tourist `;
 static immutable shortTouristFormatQueryBase_count =
-	`select count(1)  from tourist `; // количество найденных туристов
+	`select count(1) from tourist `; // количество найденных туристов
 
 void удалитьПоход(HTTPContext context, size_t pohodKey)
 {
@@ -90,7 +90,7 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	if ( страница.length <= 0 || страница.to!int < 2)
 		addition_zapros2 ~= ` OFFSET 0;`;
 	else
-		addition_zapros2 ~= ` OFFSET ` ~ (perPage*страница.to!int-perPage).to!string ~ `;`;                
+		addition_zapros2 ~= ` OFFSET ` ~ (perPage*страница.to!int-perPage).to!string ~ `;`;
 
 	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ ` order by family_name ` ~ addition_zapros2; 
 	string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros ~ `;`;
@@ -137,25 +137,25 @@ import std.datetime;
 import std.typecons;
 
 static immutable RecordFormat!(
-	PrimaryKey!(size_t), "num", 
-	string, "kod_mkk", 
-	string, "nomer_knigi", 
+	PrimaryKey!(size_t), "num",
+	string, "kod_mkk",
+	string, "nomer_knigi",
 	string, "region_pohod",
-	string, "organization", 
-	string, "region_group", 
-	typeof(видТуризма), "vid", 
+	string, "organization",
+	string, "region_group",
+	typeof(видТуризма), "vid",
 	typeof(элементыКС), "elem",
-	typeof(категорияСложности), "ks", 
-	string, "marchrut", 
-	Date, "begin_date",//*********************************
-	Date, "finish_date",//********************************* 
-	size_t, "chef_grupp", 
+	typeof(категорияСложности), "ks",
+	string, "marchrut",
+	Date, "begin_date",
+	Date, "finish_date",
+	size_t, "chef_grupp",
 	size_t, "alt_chef",
-	int, "unit", 
-	typeof(готовностьПохода), "prepar", 
+	int, "unit",
+	typeof(готовностьПохода), "prepar",
 	typeof(статусЗаявки), "stat",
-	string, "chef_coment", 
-	string, "MKK_coment", 
+	string, "chef_coment",
+	string, "MKK_coment",
 	string, "unit_neim"
 ) pohodRecFormat = typeof(pohodRecFormat)(
 		null,
@@ -236,6 +236,7 @@ void создатьФормуИзмененияПохода(
 		auto dropdown =  bsListBox( pohodRecFormat.getEnumFormat!(fieldName) );
 
 		dropdown.dataFieldName = fieldName;
+		dropdown.controlName = fieldName ~ `_listbox`;
 		dropdown.nullText = `не задано`;
 
 		//Задаём текущее значение
@@ -319,20 +320,15 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	auto dbase = getCommonDB();
 	
-	if( !dbase.isConnected )
-		throw new Exception("База данных МКК не доступна!!!");
-	
 	string[] fieldNames;
 	string[] fieldValues;
 	
 	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
 	
-	//Формируем набор строковых полей и значений
-	
-	
+	SiteLogger.info( "Формируем набор строковых полей и значений", "Изменение данных похода" );
 	foreach( i, fieldName; allStringFields )
-	
-	{	if( fieldName !in pVars )
+	{
+		if( fieldName !in pVars )
 			continue;
 			
 		string value = pVars[fieldName];
@@ -340,13 +336,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldNames ~= `"` ~ fieldName ~ `"` ;
 		fieldValues ~= ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" );
 	}
-
-	//alias pohodRecFormat.filterNamesByTypes!(EnumFormat) pohodEnumFieldNames;
-	//pragma(msg, pohodRecFormat.filterNamesByTypes!(EnumFormat)[0]);
 	
-	//Формируем часть запроса для вывода перечислимых полей
-	
-	
+	SiteLogger.info( "Формируем часть запроса для вывода перечислимых полей", "Изменение данных похода" );
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	if( fieldName !in pVars )
 			continue;
@@ -370,7 +361,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 	}
 	
-	//Формируем часть запроса для вбивания начальной и конечной даты
+	SiteLogger.info( "Формируем часть запроса для вбивания начальной и конечной даты", "Изменение данных похода" );
 	import std.datetime;
 	import std.conv;
 	
@@ -404,7 +395,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 
 	size_t[] touristKeys;
 	
-	//Разбор списка туристов
+	SiteLogger.info( "Разбор списка туристов", "Изменение данных похода" );
 	if( "unit_neim" in pVars )
 	{	import std.array;
 		
@@ -447,7 +438,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 
 	import std.algorithm : canFind;
 	
-	//Бадяжим часть запроса для записи руководителя и его заместителя
+	SiteLogger.info( "Создаем часть запроса для записи руководителя и его заместителя", "Изменение данных похода" );
 	if( "chef_grupp" in pVars )
 	{	if( pVars["chef_grupp"] != "null" && pVars["chef_grupp"].length != 0 )
 		{	size_t chefGruppKey = pVars["chef_grupp"].to!size_t;
@@ -476,7 +467,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldNames ~= "alt_chef";
 	}
 	
-	//Запись автора последних изменений и даты этих изменений
+	SiteLogger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 
@@ -484,7 +475,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	import std.json, std.string;
 	import webtank.common.serialization;
 
-	//Запись списка ссылок на доп. материалы по походу
+	SiteLogger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
 	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.getDLangValue!(string[][]);
 	string[] processedLinks;
 	URI uri;
@@ -498,13 +489,14 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	fieldNames ~= "links";
 	fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
 
-	
-	//Формирование и выполнение запроса к БД
+	SiteLogger.info( "Формирование и выполнение запроса к БД", "Изменение данных похода" );
 	string queryStr;
 
 	import std.array : join;
 	if( pohodKey.isNull )
-	{	//Запись пользователя, добавившего поход и даты добавления
+	{
+		SiteLogger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
+
 		fieldNames ~= ["registrator_num", "reg_timestamp"];
 		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 		queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
@@ -515,6 +507,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	}
 	auto writeDBQueryRes = dbase.query(queryStr);
 	
+	SiteLogger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
+
 	string message;
 	
 	if( pohodKey.isNull  )
@@ -537,6 +531,8 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
 			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>\r\n";
 	}
+
+	SiteLogger.info( "Возврат сообщения о результате операции", "Изменение данных похода" );
 	
 	return message;
 }

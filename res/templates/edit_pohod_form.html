@@ -109,7 +109,8 @@
 		</td>
 	</tr>
 	<tr>
-		<td>Количество участников</td><td><input type="text" size="4" name="unit" class="form-control" style="width: 5em;"{{unit_count}}></td>
+		<td>Количество участников</td>
+		<td><input type="text" size="4" name="unit" class="b-edit_pohod e-tourist_count_input form-control" style="width: 5em;"{{unit_count}}></td>
 	</tr>
 	<tr>
 		<td colspan="999"><div class="b-edit_pohod e-tourists_list">{{unit}}</div></td>
@@ -151,8 +152,10 @@
 <div class="b-edit_pohod e-delete_dlg" title="Удаление похода" style="display: none;">
 	<p>Для подтверждения удаления похода введите слово "удалить" (без кавычек) и нажмите на кнопку</p>
 
-	<input type="text" class="b-edit_pohod e-delete_confirm_inp">
-	<input type="button" class="b-edit_pohod e-delete_confirm_btn" value="OK">
+	<div class="form-inline">
+		<input type="text" class="b-edit_pohod e-delete_confirm_inp form-control">
+		<input type="button" class="b-edit_pohod e-delete_confirm_btn btn btn-danger" value="OK">
+	</div>
 </div>
 
 <!-- Поиск туристов-->
@@ -186,7 +189,7 @@
 		</div>
 	</fieldset>
 	<div style='clear: both;'></div>
-	<button type="button" class="b-tourist_search e-search_btn">Искать!</button>
+	<button type="button" class="b-tourist_search e-search_btn btn btn-primary">Искать!</button>
 	<div class='b-tourist_search e-search_results_panel'>
 		<h5>Найденные туристы</h5>
 		<div class="b-tourist_search e-tourists_found_summary"></div>
@@ -205,7 +208,7 @@
 <div class="b-pohod_party_edit e-dlg" style="display: none;" title="Список участников">
 	<div class="b-pohod_party_edit e-dlg_content">
 		<div class="b-pohod_party_edit e-control_bar">
-			<button type="button" class="b-pohod_party_edit e-accept_btn">Сохранить</button>
+			<button type="button" class="b-pohod_party_edit e-accept_btn btn btn-primary btn-secondary">Сохранить</button>
 		</div>
 		<div class="b-pohod_party_edit e-select_message"></div>
 		<div class="b-pohod_party_edit e-panels_area">
@@ -224,7 +227,7 @@
 <!--Диалог редактирования руководителя похода-->
 <div class="b-pohod_chef_edit e-dlg" style="display: none;" title="Выбор руководителя">
 	<div class="b-pohod_chef_edit e-control_bar">
-		<button type="button" class="b-pohod_chef_edit e-delete_btn">
+		<button type="button" class="b-pohod_chef_edit e-delete_btn btn btn-secondary">
 			<div class="icon-small icon-remove_item"></div>
 			Без заместителя
 		</button>
