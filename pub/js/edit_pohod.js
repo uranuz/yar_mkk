@@ -470,6 +470,14 @@ mkk_site.EditPohod = (function(_super) {
 		this.participantsRS = null; //RecordSet с участниками похода
 		this.chefRecord = null;
 		this.altChefRecord = null;
+
+		this.beginDatePicker = new webtank.ui.PlainDatePicker({
+			controlName: 'pohod_begin_date_picker'
+		});
+
+		this.finishDatePicker = new webtank.ui.PlainDatePicker({
+			controlName: 'pohod_finish_date_picker'
+		});
 		
 		///Работа со списком ссылок на дополнительные ресурсы
 		//Размер одной "порции" полей ввода ссылок на доп. материалы
@@ -485,31 +493,11 @@ mkk_site.EditPohod = (function(_super) {
 		this.$el(".e-submit_btn").$on("click", function(ev){
 			self.saveListOfExtraFileLinks( $(this), ev );
 
-			var
-				countInput = self.$el(".e-tourist_count_input")
-				inputCount = parseInt( countInput.val() ),
-				listItems = self.$el(".e-tourists_list").children(),
-				listCount = listItems.length;
-
-			if( isNaN( inputCount ) || inputCount < 0 || inputCount % 1 != 0 ) {
-				$('<div title="Ошибка ввода">Требуется ввести неотрицательное целое число в поле количества участников</div>')
-					.dialog({ modal: true });
-				//countInput.triggerHandler('focus');
+			if( self.validateFormData() ) {
+				self.$el(".e-edit_pohod_form").submit();
+			} else {
 				ev.preventDefault();
-				return;
 			}
-
-			if( listCount > inputCount ) {
-				$('<div title="Ошибка ввода">Количество участников в списке '
-					+ listCount + ' больше числа в поле ввода ' + inputCount
-					+ '. Пожалуйста, исправьте введенное значение</div>')
-						.dialog({ modal: true });
-				//countInput.triggerHandler('focus');
-				ev.preventDefault();
-				return;
-			}
-
-			self.$el(".e-edit_pohod_form").submit();
 		});
 		
 		this.$el(".e-open_pohod_party_edit_btn").$on("click", function() {
@@ -689,6 +677,90 @@ mkk_site.EditPohod = (function(_super) {
 			}
 
 			this.$el(".e-extra_file_links_inp").val( JSON.stringify(data) );
+		},
+
+		showErrorDialog: function( errorMsg ) {
+			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
+		},
+
+		// Функция проверки данных формы перед отправкой
+		validateFormData: function() {
+			var
+				self = this,
+				beginDay = self.beginDatePicker.rawDay(),
+				beginMonth = self.beginDatePicker.rawMonth(),
+				beginYear = self.beginDatePicker.rawYear(),
+				finishMonth = self.finishDatePicker.rawMonth(),
+				finishDay = self.finishDatePicker.rawDay(),
+				finishYear = self.finishDatePicker.rawYear(),
+				beginDateEmpty = !beginDay.length && !beginMonth.length && !beginYear.length,
+				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
+				countInput = self.$el(".e-tourist_count_input")
+				inputCount = parseInt( countInput.val() ),
+				listItems = self.$el(".e-tourists_list").children(),
+				listCount = listItems.length;
+
+			if( !beginDateEmpty && ( !beginDay.length || !beginMonth.length || !beginYear.length ) ) {
+				self.showErrorDialog( 'Нужно заполнить все поля даты начала, либо оставить их все пустыми' );
+				return false;
+			}
+
+			if( !finishDateEmpty && ( !finishDay.length || !finishMonth.length || !finishYear.length ) ) {
+				self.showErrorDialog( 'Нужно заполнить все поля даты завершения, либо оставить их все пустыми' );
+				return false;
+			}
+
+			if( beginDay.length > 0 ) {
+				if( !mkk_site.checkInt( beginDay, 1, 31 ) ) {
+					self.showErrorDialog( 'День начала похода должен быть целым числом в диапазоне [1, 31]' );
+					return false;
+				}
+			}
+
+			if( finishDay.length > 0 ) {
+				if( !mkk_site.checkInt( finishDay, 1, 31 ) ) {
+					self.showErrorDialog( 'День завершения похода должен быть целым числом в диапазоне [1, 31]' );
+					return false;
+				}
+			}
+
+			if( beginYear.length > 0 ) {
+				if( !mkk_site.checkInt( beginYear, 1000, 9999 ) ) {
+					self.showErrorDialog( 'Год начала похода должен быть четырехзначным целым числом' );
+					return false;
+				}
+			}
+
+			if( finishYear.length > 0 ) {
+				if( !mkk_site.checkInt( finishYear, 1000, 9999 ) ) {
+					self.showErrorDialog( 'Год завершения похода должен быть четырехзначным целым числом' );
+					return false;
+				}
+			}
+
+			if( !beginDateEmpty && !finishDateEmpty &&
+				( new Date( +beginYear, +beginMonth, +beginDay ) > new Date( +finishYear, +finishMonth, +finishDay ) ) ) {
+				self.showErrorDialog( 'Дата начала похода не может быть позже даты его завершения' );
+				return false;
+			}
+
+			if( !mkk_site.checkInt( inputCount, 0 ) ) {
+				self.showErrorDialog( 'Требуется ввести неотрицательное целое число в поле количества участников' );
+				return false;
+			}
+
+			if( mkk_site.checkInt( inputCount, 9000 ) ) {
+				self.showErrorDialog( 'Вы должно быть шутите?! В вашем походе более 9000 участников?!?!' );
+				return false;
+			}
+
+			if( listCount > inputCount ) {
+				self.showErrorDialog( 'Количество участников в списке '  + listCount + ' больше числа в поле ввода '
+					+ inputCount + '. Пожалуйста, исправьте введенное значение' );
+				return false;
+			}
+
+			return true;
 		},
 
 		//Обработчик тыка по кнопке подтверждения удаления похода

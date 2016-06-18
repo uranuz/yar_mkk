@@ -1,4 +1,4 @@
-mkk_site = mkk_site || {
+var mkk_site = mkk_site || {
 	version: "0.0"
 };
 
@@ -11,7 +11,11 @@ mkk_site.EditTourist = (function(_super){
 		
 		var self = this;
 		this.elems = $(".b-edit_tourist");
-		this.$el(".e-submit_btn").click( function(ev) { self.sendButtonClick($(this), ev); } )
+		this.$el(".e-submit_btn").click( this.sendButtonClick.bind(this) )
+
+		this.birthDatePicker = new webtank.ui.PlainDatePicker({
+			controlName: "birth_date"
+		});
 	}
 	
 	return __mixinProto(EditTourist, {
@@ -28,13 +32,44 @@ mkk_site.EditTourist = (function(_super){
 			else
 				touristForm.submit();
 		},
-		
-		sendButtonClick: function(el) {
+
+		showErrorDialog: function( errorMsg ) {
+			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
+		},
+
+		// Проверка данных формы
+		validateFormData: function() {
 			var
 				self = this,
+				birthYear = this.birthDatePicker.rawYear(),
+				birthMonth = this.birthDatePicker.rawMonth(),
+				birthDay = this.birthDatePicker.rawDay();
+
+			if( birthDay.length && !mkk_site.checkInt( birthDay, 1, 31 ) ) {
+				self.showErrorDialog( 'День рождения должен быть целым числом в диапазоне [1, 31]' );
+				return false;
+			}
+
+			if( birthYear.length && !mkk_site.checkInt( birthYear, 1000, 9999 ) ) {
+				self.showErrorDialog( 'Год рождения похода должен быть четырехзначным целым числом' );
+				return false;
+			}
+
+			return true;
+		},
+		
+		sendButtonClick: function(ev) {
+			var
+				self = this,
+				el = $(ev.target),
 				touristKey = NaN,
 				touristForm = this.$el(".e-tourist_form"),
 				birthYear = parseInt(this.$el(".e-birth_year").val(), 10);
+
+			if( !self.validateFormData() ) {
+				ev.preventDefault();
+				return;
+			}
 
 			if( isNaN(birthYear) )
 				birthYear = null;
