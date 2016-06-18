@@ -37,7 +37,7 @@ on tourist.num = tourist_nums.num
 	result ~= поход.get(0, 0, null) ~ `<hr>`;
 	
 	
-	if( рез_запроса.recordCount < 1 ) result ~= `Сведения об участниках <br> отсутствуют`;
+	if( рез_запроса.recordCount < 1 ) result ~= `Сведения об участниках отсутствуют`;
 	else
 	{
 		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
@@ -107,7 +107,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 		dataFieldName = "vid";
 		controlName = "pohod_filter_vid";
 		selectedValues = vm.filter.видыТуризма;
-		//addElementHTMLClasses("block", `b-pohod_filter_vid e-block`);
+		setNullable(false);
 	}
 	
 	auto списокКатегорий = bsCheckBoxList(категорияСложности);
@@ -117,7 +117,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 		dataFieldName = "ks";
 		controlName = "pohod_filter_ks";
 		selectedValues = vm.filter.категории;
-		//addElementHTMLClasses("block", `b-pohod_filter_ks e-block`);
+		setNullable(false);
 	}
 	
 	auto списокГотовностей = bsCheckBoxList(готовностьПохода);
@@ -127,7 +127,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 		dataFieldName = "prepar";
 		controlName = "pohod_filter_prepar";
 		selectedValues = vm.filter.готовности;
-		//addElementHTMLClasses("block", `b-pohod_filter_prepar e-block`);
+		setNullable(false);
 	}
 	
 	auto списокСтатусовЗаявки = bsCheckBoxList(статусЗаявки);
@@ -137,7 +137,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 		dataFieldName = "stat";
 		controlName = "pohod_filter_stat";
 		selectedValues = vm.filter.статусыЗаявки;
-		//addElementHTMLClasses("block", `b-pohod_filter_stat e-block`);
+		setNullable(false);
 	}
 	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_navigation.html" );
@@ -170,8 +170,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 
 	return формаФильтрации.getString();
 }
-	/////////////////////	
-	
+
 string отрисоватьБлокНавигацииДляПечати(VM)( ref VM vm )
 {
 	import std.array: join;
@@ -357,7 +356,7 @@ string getPohodFilterQueryPart(ref const(ФильтрПоходов) фильт�
 }
 //-------------------------------------------------------------
 
-// -------Формирует информационную строку о временном диапозоне поиска походов
+// -------Формирует информационную строку о временном диапазоне поиска походов
 string поисковыйДиапазонПоходов(const ref ФильтрПоходов фильтрПоходов)
 {
 	import std.datetime: Date;
@@ -518,15 +517,6 @@ string renderShowPohod(VM)( ref VM vm )
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "show_pohod.html" );
 	
 	tpl.set( "pohod_count", vm.pohodCount.text );
-	
-	tpl.set( "pohod_list_pagination", renderPaginationTemplate(vm) );
-	
-	if( vm.isAuthorized )
-	{
-		tpl.set( "num_column_header", `<th>#</th>` );
-		tpl.set( "edit_column_header", `<th>Изм.</th>` );
-	}
-
 	tpl.set( "auth_state_cls", vm.isAuthorized ? "m-with_auth" : "m-without_auth" );
 
 	tpl.set( "pohod_navigation",

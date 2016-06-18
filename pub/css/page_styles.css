@@ -35,6 +35,7 @@
 .t-mkk_table.e-header_body > tr > th,
 .t-mkk_table.e-content_body > tr > td {
 	border: 1px solid #666;
+	padding: 0.25rem;
 }
 
 /* !sect-end: mkk_table */
@@ -230,8 +231,12 @@
 /* !sect-begin: show_pohod */
 
 	/* !sub!sect-begin: show_pohod.pohod_navigation */
+		.t-pohod_navigation.e-enum_filter_block {
+			margin: 0 -0.2rem 1rem -0.2rem;
+		}
+
 		.t-pohod_navigation.e-enum_filter {
-			margin-bottom: 1rem;
+			padding: 0 0.2rem 0 0.2rem;
 		}
 
 		.t-pohod_navigation.e-date_range_area {
@@ -260,6 +265,25 @@
 	.t-show_pohod.e-add_pohod_btn.m-without_auth {
 		display: none;
 	}
+
+	/* !sub!sect-begin: show_pohod.show_pohod_table */
+		.t-show_pohod_table.e-header_num_cell.m-without_auth,
+		.t-show_pohod_table.e-header_edit_cell.m-without_auth {
+			display: none;
+		}
+
+		.t-show_pohod_table.e-show_participants_btn {
+			cursor: pointer;
+		}
+
+		.t-show_pohod_table.e-show_participants_btn_icon {
+			vertical-align: bottom;
+		}
+
+		.t-show_pohod_table.e-show_participants_btn_text {
+			vertical-align: middle;
+		}
+	/* !sub!sect-end: show_pohod.show_pohod_table */
 
 /* !sect-end: show_pohod */
 

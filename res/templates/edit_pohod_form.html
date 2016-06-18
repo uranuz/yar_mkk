@@ -1,16 +1,16 @@
 <link rel="stylesheet" type="text/css" href="{{css folder}}edit_pohod.css">
 
 <form id="b-edit_pohod e-edit_pohod_form" method="post"{{edit_pohod_form}}>
-
+<h2>Редактирование данных похода</h2>
 <hr>
 <h4>Маршрутная книжка</h4>
-<table>
+<table style="width: 100%">
 <tr>
 	<td><label for="kod_mkk">Код МКК</label><br>
-		<input type="text" id="kod_MKK" name="kod_mkk"{{kod_mkk}}>
+		<input type="text" id="kod_MKK" name="kod_mkk" class="form-control"{{kod_mkk}}>
 	</td>
 	<td><label for="nomer_knigi">Номер книжки</label><br>
-		<input type="text" id="nomer_knigi" name="nomer_knigi"{{nomer_knigi}}>
+		<input type="text" id="nomer_knigi" name="nomer_knigi" class="form-control"{{nomer_knigi}}>
 	</td>
 <!--</tr>
 <tr>-->
@@ -20,15 +20,15 @@
 </tr>
 </table>
 <label for="MKK_coment">Коментарий МКК</label><br>
-<textarea id="MKK_coment" name="MKK_coment" cols="40">{{MKK_coment}}</textarea>
+<textarea id="MKK_coment" name="MKK_coment" cols="40" class="form-control">{{MKK_coment}}</textarea>
 
 
 <hr>
 <h4>Поход</h4>
-<table>
+<table style="width: 100%">
 <tr>
 	<td><label for="region_pohod">Район похода</label></td>
-	<td><input type="text" id="region_pohod" name="region_pohod"{{region_pohod}}></td>
+	<td><input type="text" id="region_pohod" name="region_pohod" class="form-control"{{region_pohod}}></td>
 </tr>
 <tr>
 	<td><label for="vid">Вид туризма</label></td>
@@ -36,10 +36,13 @@
 </tr>
 <tr>
 	<td><label for="marchrut">Нитка маршрута</label></td>
-	<td colspan="999"><input type="text" id="marchrut" name="marchrut" size="55"{{marchrut}}></td>
+	<td colspan="999"><input type="text" id="marchrut" name="marchrut" size="55" class="form-control"{{marchrut}}></td>
 </tr>
 <tr>
-	<td><label for="ks">Категория сложности</label></td>
+	<td><label for="ks">
+		Категория сложности<br/>
+		(элементы к.с.)
+	</label></td>
 	<td colspan="999">
 		{{ks}}
 		{{elem}}
@@ -47,11 +50,16 @@
 </tr>
 <tr>
 	<td><label for="begin_day">Сроки проведения</label></td>
-	<td colspan="999">с &nbsp; &nbsp;
-		{{begin_date}}
+	<td colspan="999">
+		<label>
+			<span style="display: inline-block; width: 3ex;">с</span>
+			{{begin_date}}
+		</label>
 		<br>
-		<label for="finish_day">по&nbsp;</label>
-		{{finish_date}}
+		<label>
+			<span style="display: inline-block; width: 3ex;">по</span>
+			{{finish_date}}
+		</label>
 	</td>
 </tr>
 <tr>
@@ -62,7 +70,7 @@
 </tr>
 </table>
 <label for="chef_coment">Коментарий руководителя</label><br>
-<textarea id="chef_coment" name="chef_coment" cols="40">{{chef_coment}}</textarea>
+<textarea id="chef_coment" name="chef_coment" cols="40" class="form-control">{{chef_coment}}</textarea>
 
 <hr>
 <h4>Группа</h4>
@@ -70,14 +78,14 @@
 <!--Блок для вывода списка туристов при поиске-->
 <!-- <div id="tourist_select_div"></div> -->
 <div id="tourist_group_div">
-	<table>
+	<table style="width: 100%">
 	<tr>
 		<td>Организация, клуб, команда</td>
-		<td><input type="text" name="organization"{{organization}}></td>
+		<td><input type="text" name="organization" class="form-control"{{organization}}></td>
 	</tr>
 	<tr>
 		<td>Область, город и т.д.</td>
-		<td><input type="text" name="region_group"{{region_group}}></td>
+		<td><input type="text" name="region_group" class="form-control"{{region_group}}></td>
 	</tr>
 	<tr>
 		<td>Руководитель похода</td>
@@ -101,7 +109,8 @@
 		</td>
 	</tr>
 	<tr>
-		<td>Количество участников</td><td><input type="text" size="4" name="unit"{{unit_count}}></td>
+		<td>Количество участников</td>
+		<td><input type="text" size="4" name="unit" class="b-edit_pohod e-tourist_count_input form-control" style="width: 5em;"{{unit_count}}></td>
 	</tr>
 	<tr>
 		<td colspan="999"><div class="b-edit_pohod e-tourists_list">{{unit}}</div></td>
@@ -112,23 +121,29 @@
 <hr>
 <h4>Ссылки на доп. материалы</h4>
 <div class="b-edit_pohod e-link_list">
-	<table class="b-edit_pohod e-link_list_table">
+	<table class="b-edit_pohod e-link_list_table" style="width: 100%">
 		<thead>
 			<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
 		</thead>
 		<tbody class="b-edit_pohod e-link_list_tbody"></tbody>
+		<tbody>
+			<tr><td>
+				<input type="hidden" class="b-edit_pohod e-extra_file_links_inp" name="extra_file_links">
+				<button type="button" class="b-edit_pohod e-add_more_extra_file_links_btn btn btn-primary btn-block">
+					Добавить ещё
+				</button>
+			</td></tr>
+		</tbody>
 	</table>
 </div>
-<input type="hidden" class="b-edit_pohod e-extra_file_links_inp" name="extra_file_links">
-<input type="button" class="b-edit_pohod e-add_more_extra_file_links_btn" value="  Добавить ещё  ">
 
 <div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 <hr>
 
 <input type="hidden" name="action"{{form_input_action}}>
 
-<span><input type="submit" class="b-edit_pohod e-submit_btn" value="Сохранить"></span>
-<span style="float: right;"><input type="button" class="b-edit_pohod e-open_delete_dlg_btn" value="Удалить поход"></span>
+<span><input type="submit" class="b-edit_pohod e-submit_btn btn btn-primary" value="Сохранить"></span>
+<span style="float: right;"><input type="button" class="b-edit_pohod e-open_delete_dlg_btn btn btn-secondary" value="Удалить поход"></span>
 <div style="clear: both"></div>
 
 </form>
@@ -137,8 +152,10 @@
 <div class="b-edit_pohod e-delete_dlg" title="Удаление похода" style="display: none;">
 	<p>Для подтверждения удаления похода введите слово "удалить" (без кавычек) и нажмите на кнопку</p>
 
-	<input type="text" class="b-edit_pohod e-delete_confirm_inp">
-	<input type="button" class="b-edit_pohod e-delete_confirm_btn" value="OK">
+	<div class="form-inline">
+		<input type="text" class="b-edit_pohod e-delete_confirm_inp form-control">
+		<input type="button" class="b-edit_pohod e-delete_confirm_btn btn btn-danger" value="OK">
+	</div>
 </div>
 
 <!-- Поиск туристов-->
@@ -172,7 +189,7 @@
 		</div>
 	</fieldset>
 	<div style='clear: both;'></div>
-	<button type="button" class="b-tourist_search e-search_btn">Искать!</button>
+	<button type="button" class="b-tourist_search e-search_btn btn btn-primary">Искать!</button>
 	<div class='b-tourist_search e-search_results_panel'>
 		<h5>Найденные туристы</h5>
 		<div class="b-tourist_search e-tourists_found_summary"></div>
@@ -191,7 +208,7 @@
 <div class="b-pohod_party_edit e-dlg" style="display: none;" title="Список участников">
 	<div class="b-pohod_party_edit e-dlg_content">
 		<div class="b-pohod_party_edit e-control_bar">
-			<button type="button" class="b-pohod_party_edit e-accept_btn">Сохранить</button>
+			<button type="button" class="b-pohod_party_edit e-accept_btn btn btn-primary btn-secondary">Сохранить</button>
 		</div>
 		<div class="b-pohod_party_edit e-select_message"></div>
 		<div class="b-pohod_party_edit e-panels_area">
@@ -210,7 +227,7 @@
 <!--Диалог редактирования руководителя похода-->
 <div class="b-pohod_chef_edit e-dlg" style="display: none;" title="Выбор руководителя">
 	<div class="b-pohod_chef_edit e-control_bar">
-		<button type="button" class="b-pohod_chef_edit e-delete_btn">
+		<button type="button" class="b-pohod_chef_edit e-delete_btn btn btn-secondary">
 			<div class="icon-small icon-remove_item"></div>
 			Без заместителя
 		</button>

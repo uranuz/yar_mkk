@@ -13,27 +13,29 @@
 			</a>
 		</div>
 	</div>
-	<div class="e-block t-mkk_table e-table_wrapper t-show_pohod">
-		<div class="e-scroll_wrapper t-mkk_table">
-			<table class="e-table t-mkk_table">
-				<tbody class="e-header_body t-mkk_table">
-					<tr class="e-header_row t-mkk_table">
-						{{num_column_header}}
-						<th>№ книги</th>
-						<th>Сроки похода</th>
-						<th>Вид, категория</th>
-						<th>Район</th>
-						<th>Руководитель</th>
-						<th>Участники</th>
-						<th>Город, организация</th>
-						<th>Статус похода</th>
-						{{edit_column_header}}
-					</tr>
-				</tbody>
-				<tbody class="e-content_body t-mkk_table">
-					{{pohod_list}}
-				</tbody>
-			</table>
+	<div class="e-table_wrapper t-show_pohod">
+		<div class="i-show_pohod_table e-block t-mkk_table">
+			<div class="e-scroll_wrapper t-mkk_table">
+				<table class="e-table t-mkk_table">
+					<tbody class="e-header_body t-mkk_table">
+						<tr class="e-header_row t-mkk_table">
+							<th class="e-header_num_cell t-show_pohod_table {{auth_state_cls}}">#</th>
+							<th>№ книги</th>
+							<th>Сроки похода</th>
+							<th>Вид, категория</th>
+							<th>Район</th>
+							<th>Руководитель</th>
+							<th>Участники</th>
+							<th>Город, организация</th>
+							<th>Статус похода</th>
+							<th class="e-header_edit_cell t-show_pohod_table {{auth_state_cls}}">Изменить</th>
+						</tr>
+					</tbody>
+					<tbody class="e-content_body t-mkk_table">
+						{{pohod_list}}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 	<script src="{{js folder}}show_pohod.js" defer></script>
