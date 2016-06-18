@@ -203,7 +203,7 @@ void создатьФормуИзмененияПохода(
 	with( finishDatePicker )
 	{
 		dataFieldName = "finish";
-		controlName = "pohod_begin_date_picker";
+		controlName = "pohod_finish_date_picker";
 		nullDayText = "день";
 		nullMonthText = "месяц";
 		nullYearText = "год";

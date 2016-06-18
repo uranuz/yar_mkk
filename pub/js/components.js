@@ -2,6 +2,23 @@ var mkk_site = mkk_site || {
 	version: "0.0"
 };
 
+// Проверяет, что value - число. Если заданы low и/или high,
+// то проверяет, что проверяет, что low <= value <= high
+mkk_site.checkInt = function( value, low, high ) {
+	value = parseInt(value);
+
+	if( isNaN( value ) || value % 1 != 0 )
+		return false;
+
+	if( low != null && value < low )
+		return false;
+
+	if( high != null && value > high )
+		return false;
+
+	return true;
+};
+
 //----- Функции проверки даты на правильность
 function isLeapYear(year) //Скажет true, если год високосный и false, если нет
 {	if (  ( (year%4==0) && (year%100!=0) ) || (year%400==0) ) return true;
