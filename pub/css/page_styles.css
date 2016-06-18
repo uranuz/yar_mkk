@@ -267,6 +267,11 @@
 	}
 
 	/* !sub!sect-begin: show_pohod.show_pohod_table */
+		.t-show_pohod_table.e-header_num_cell.m-without_auth,
+		.t-show_pohod_table.e-header_edit_cell.m-without_auth {
+			display: none;
+		}
+
 		.t-show_pohod_table.e-show_participants_btn {
 			cursor: pointer;
 		}

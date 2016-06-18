@@ -170,8 +170,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 
 	return формаФильтрации.getString();
 }
-	/////////////////////	
-	
+
 string отрисоватьБлокНавигацииДляПечати(VM)( ref VM vm )
 {
 	import std.array: join;
@@ -355,7 +354,7 @@ string getPohodFilterQueryPart(ref const(ФильтрПоходов) фильт�
 }
 //-------------------------------------------------------------
 
-// -------Формирует информационную строку о временном диапозоне поиска походов
+// -------Формирует информационную строку о временном диапазоне поиска походов
 string поисковыйДиапазонПоходов(const ref ФильтрПоходов фильтрПоходов)
 {
 	import std.datetime: Date;
@@ -516,15 +515,6 @@ string renderShowPohod(VM)( ref VM vm )
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "show_pohod.html" );
 	
 	tpl.set( "pohod_count", vm.pohodCount.text );
-	
-	tpl.set( "pohod_list_pagination", renderPaginationTemplate(vm) );
-	
-	if( vm.isAuthorized )
-	{
-		tpl.set( "num_column_header", `<th>#</th>` );
-		tpl.set( "edit_column_header", `<th>Изм.</th>` );
-	}
-
 	tpl.set( "auth_state_cls", vm.isAuthorized ? "m-with_auth" : "m-without_auth" );
 
 	tpl.set( "pohod_navigation",
