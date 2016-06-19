@@ -514,7 +514,20 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	URI uri;
 	
 	foreach( ref linkPair; rawLinks )
-	{	uri = URI( strip(linkPair[0]) );
+	{
+		string uriStr = strip(linkPair[0]);
+		if( !uriStr.length )
+			continue;
+
+		try
+		{
+			uri = URI( uriStr );
+		}
+		catch(Exception ex)
+		{
+			throw new Exception("Некорректная ссылка на доп. материалы!!!");
+		}
+
 		if( uri.scheme.length == 0 )
 			uri.scheme = "http";
 		processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
