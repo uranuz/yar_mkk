@@ -517,6 +517,12 @@ string renderShowPohod(VM)( ref VM vm )
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "show_pohod.html" );
 	
 	tpl.set( "pohod_count", vm.pohodCount.text );
+	
+	
+	if( vm.isForPrint ) //для печати
+	tpl.set( "auth_state_cls",  "m-without_auth" );	
+	// с авториззацией без авторизации
+	else
 	tpl.set( "auth_state_cls", vm.isAuthorized ? "m-with_auth" : "m-without_auth" );
 
 	tpl.set( "pohod_navigation",
@@ -545,7 +551,7 @@ string renderPohodList(VM)( ref VM vm )
 	{
 		pohodTpl.fillFrom(rec, fillAttrs);
 		
-		if( vm.isAuthorized )
+		if( vm.isAuthorized && !vm.isForPrint)
 		{
 			string pohodKey = rec.isNull("Ключ") ? "" : rec.get!"Ключ"().text;
 			pohodTpl.set( "Колонка ключ",  `<td>` ~ pohodKey ~ `</td>` );
