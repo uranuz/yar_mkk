@@ -658,7 +658,7 @@ mkk_site.EditPohod = (function(_super) {
 		saveListOfExtraFileLinks: function()
 		{	var
 				self = this,
-				tableRows = this.$el(".e-link_list_body").children("tr"),
+				tableRows = this.$el(".e-link_list_tbody").children("tr"),
 				currInputs,
 				link,
 				comment,
