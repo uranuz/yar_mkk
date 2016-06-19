@@ -371,41 +371,43 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
 	
 	string [6] partDatesString;
-	int    [6] partDatesInt;
-	
-	
+	int[6] partDatesInt;
 	string[] namesDateFields = ["begin__year", "begin__month","begin__day","finish__year", "finish__month","finish__day"];
+
+	for( size_t i = 0; i < 6; ++i )
+		partDatesString[i] = pVars[namesDateFields[i]];
 	
 	
-	for(size_t i=0;i<6;i++) partDatesString[i] = pVars[namesDateFields[i]];
-	
-	
-	if( all!( (a) => !a.length  )(partDatesString[0..3])) pohodDates[0] = null;
-	 else
+	if( all!( (a) => !a.length )(partDatesString[0..3]) )
+	{
+		pohodDates[0] = null;
+	}
+	else
+	{
+		for( size_t i = 0; i < 3; ++i )
 		{
-			for(size_t i=0;i<3;i++)		
-			{
-				if(!isNumeric( pVars[namesDateFields[i]]) )
-					throw new Exception("Неправильный формат даты");
-				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
-			}
+			if(!isNumeric( pVars[namesDateFields[i]]) )
+				throw new Exception("Неправильный формат даты начала похода");
+			partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
+		}
 		pohodDates[0] =  Date(partDatesInt[0], partDatesInt[1], partDatesInt[2]);
-		}		
+	}
 		
 	
-	if( all!( (a) => !a.length  )(partDatesString[4..6])) pohodDates[1] = null;
-	 else
+	if( all!( (a) => !a.length )(partDatesString[4..6]) )
+	{
+		pohodDates[1] = null;
+	}
+	else
+	{
+		for( size_t i = 3; i < 6; ++i )
 		{
-			for(size_t i=3;i<6;i++)		
-			{
-				if(!isNumeric( pVars[namesDateFields[i]]) )
-					throw new Exception("Неправильный формат даты");
-				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);					
-			}
-		pohodDates[1] =  Date(partDatesInt[3], partDatesInt[4], partDatesInt[5]);
+			if(!isNumeric( pVars[namesDateFields[i]]) )
+				throw new Exception("Неправильный формат даты завершения похода");
+			partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
 		}
-	
-	
+		pohodDates[1] =  Date(partDatesInt[3], partDatesInt[4], partDatesInt[5]);
+	}
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
@@ -630,7 +632,9 @@ string netMain(HTTPContext context)
 }
 
 string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
-{	auto dbase = getCommonDB;
+{
+	import std.string: strip;
+	auto dbase = getCommonDB;
 
 	if( !dbase.isConnected )
 		return null;
@@ -642,7 +646,12 @@ string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
 	string[][] result;
 	
 	foreach( i; 0..links_QRes.recordCount )
-		result ~= parseExtraFileLink( links_QRes.get(0, i, "") );
+	{
+		string linkData = strip( links_QRes.get( 0, i, null ) );
+		if( !linkData.length )
+			continue;
+		result ~= parseExtraFileLink( linkData );
+	}
 
 	return result;
 }
