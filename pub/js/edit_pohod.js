@@ -100,14 +100,6 @@ mkk_site.TouristSearch = (function(_super) {
 				messageDiv = this.$el(".e-select_message"),
 				selected_page_value = this.$el(".e-page_selected").val();
 
-	// 		if( family_filterInput.val().length < 2 )
-	// 		{	messageDiv.text("Минимальная длина фильтра для поиска равна 2 символам");
-	// 			return;
-	// 		}
-	// 		else
-	// 		{	messageDiv.empty();
-	// 		}
-
 			webtank.json_rpc.invoke({
 				uri: "/jsonrpc/",
 				method: "mkk_site.edit_pohod.getTouristList",
@@ -233,7 +225,7 @@ mkk_site.PohodChefEdit = (function(_super) {
 		this.elems = $(this._cssBlockName);
 		this.searchBlock = opts.searchBlock;
 		this.isAltChef = false;
-		this.chefRecord = null;
+		this.chefRec = null;
 		this.dialog = this.$el(".e-dlg");
 		this.controlBar = this.$el('.e-control_bar');
 
@@ -249,13 +241,13 @@ mkk_site.PohodChefEdit = (function(_super) {
 	return __mixinProto(PohodChefEdit, {
 		//"Тык" по кнопке выбора руководителя или зама похода
 		onSelectChef: function(ev, el, rec) {
-			this.chefRecord = rec;
+			this.chefRec = rec;
 			this.$trigger( "selectChef", [this, rec] );
 			this.closeDialog();
 		},
 		
 		onDeleteChef: function(ev, el) {
-			this.chefRecord = null;
+			this.chefRec = null;
 			this.$trigger( "selectChef", [this] );
 			this.closeDialog();
 		},
@@ -263,7 +255,7 @@ mkk_site.PohodChefEdit = (function(_super) {
 		openDialog: function(record, isAltChef)
 		{
 			var dlgTitle = "";
-			this.chefRecord = record;
+			this.chefRec = record;
 			this.isAltChef = isAltChef;
 			if( isAltChef ) {
 				this.controlBar.show();
@@ -452,6 +444,49 @@ mkk_site.PohodPartyEdit = (function(_super) {
 	});
 })(webtank.ITEMControl);
 
+// Диалог подтверждения добавления руководителя похода и/или зама
+// к списку участников
+mkk_site.AddChefToPartyDlg = (function(_super) {
+	__extends(AddChefToPartyDlg, _super);
+
+	function AddChefToPartyDlg(opts)
+	{
+		opts = opts || {};
+		_super.call(this, opts);
+
+		this._dlg = this._elems().filter(".e-block");
+		this._okBtn = this._elems().filter(".e-ok_btn");
+		this._cancelBtn = this._elems().filter(".e-cancel_btn");
+		this._touristsCountField = this._elems().filter(".e-tourists_count");
+
+		this._okBtn.on( 'click', this.onOk_BtnClick.bind(this) );
+		this._cancelBtn.on( 'click', this.onCancel_BtnClick.bind(this) );
+	}
+
+	return __mixinProto(AddChefToPartyDlg, {
+		open: function(touristsCount) {
+			this._touristsCountField.text( ( touristsCount || '[не задано]' ) + ' человек');
+			this._dlg.dialog({
+				modal: true,
+				width: 400,
+				close: this.onDlgClose.bind(this)
+			});
+		},
+
+		onOk_BtnClick: function() {
+			$(this).trigger( 'ok' );
+		},
+
+		onCancel_BtnClick: function() {
+			this._dlg.dialog( 'close' );
+		},
+
+		onDlgClose: function() {
+			$(this).trigger( 'cancel' );
+		}
+	});
+})(webtank.ITEMControl);
+
 mkk_site.EditPohod = (function(_super) {
 	__extends(EditPohod, _super);
 	var dctl = webtank.datctrl;
@@ -467,15 +502,16 @@ mkk_site.EditPohod = (function(_super) {
 		this.elems = $(this._cssBlockName);
 		this.chefEditBlock = opts.chefEditBlock;
 		this.partyEditBlock = opts.partyEditBlock;
-		this.participantsRS = null; //RecordSet с участниками похода
-		this.chefRecord = null;
-		this.altChefRecord = null;
+		this.partyRS = null; //RecordSet с участниками похода
+		this.chefRec = opts.chefRecord;
+		this.altChefRec = opts.altChefRecord;
+		this._addChefToPartyDlg = opts.addChefToPartyDlg;
 
-		this.beginDatePicker = new webtank.ui.PlainDatePicker({
+		this._beginDatePicker = new webtank.ui.PlainDatePicker({
 			controlName: 'pohod_begin_date_picker'
 		});
 
-		this.finishDatePicker = new webtank.ui.PlainDatePicker({
+		this._finishDatePicker = new webtank.ui.PlainDatePicker({
 			controlName: 'pohod_finish_date_picker'
 		});
 		
@@ -488,92 +524,85 @@ mkk_site.EditPohod = (function(_super) {
 		});
 
 		this.$el(".e-delete_confirm_btn").$on("click", self.onDeleteConfirm_BtnClick);
-		this.$el(".e-add_more_extra_file_links_btn").$on("click", self.onAddMoreExtraFileLinks_BtnClick);
+		this.$el(".e-add_more_extra_file_links_btn").$on("click", self.onAddFileLinkInputs_BtnClick);
 
-		this.$el(".e-submit_btn").$on("click", function(ev){
-			self.saveListOfExtraFileLinks( $(this), ev );
-
-			if( self.validateFormData() ) {
-				self.$el(".e-edit_pohod_form").submit();
-			} else {
-				ev.preventDefault();
-			}
-		});
+		this.$el(".e-submit_btn").$on( "click", this.onSavePohod_BtnClick.bind(this) );
 		
 		this.$el(".e-open_pohod_party_edit_btn").$on("click", function() {
 			//Отдаем копию списка участников!
-			var rs = self.participantsRS ? self.participantsRS.copy() : new dctl.RecordSet();
+			var rs = self.partyRS ? self.partyRS.copy() : new dctl.RecordSet();
 			self.partyEditBlock.openDialog(rs); 
 		});
 		
-		this.partyEditBlock.$on( 'saveData', this.onSaveSelectedParticipants.bind(this) );
+		this.partyEditBlock.$on( 'saveData', this.onSaveSelectedParty.bind(this) );
 		
 		//Загрузка списка участников похода с сервера
-		this.loadParticipantsList();
+		this.loadPartyFromServer();
 		
 		this.$el(".e-open_chef_edit_btn").$on( 'click', function() {
-			this.chefEditBlock.openDialog(self.chefRecord, false);
+			this.chefEditBlock.openDialog(self.chefRec, false);
 		});
 		
 		this.$el(".e-open_alt_chef_edit_btn").$on( 'click', function() {
-			this.chefEditBlock.openDialog(self.altChefRecord, true);
+			this.chefEditBlock.openDialog(self.altChefRec, true);
 		});
 		
 		this.chefEditBlock.$on( "selectChef", this.onSelectChef.bind(this) );
 		this.chefEditBlock.$on( "deleteChef", this.onDeleteChef.bind(this) );
 
-		self.loadListOfExtraFileLinks();
+		self.loadFileLinksFromServer();
 	}
 	
 	return __mixinProto(EditPohod, {
 		//Обработчик тыка по кнопке сохранения списка выбранных участников
-		onSaveSelectedParticipants: function(ev, sender, selTouristsRS) {
-			this.participantsRS = selTouristsRS;
-			this.renderParticipantsList();
+		onSaveSelectedParty: function(ev, sender, selTouristsRS) {
+			this.saveParty(selTouristsRS);
 		},
 		
 		onSelectChef: function(ev, sender, rec) {
 			var 
-				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ), 
+				chefRec = sender.isAltChef ? this.altChefRec : this.chefRec,
+				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
 				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
 			
+			chefRec = rec;
 			keyInp.val( rec.get("num") );
 			chefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
 		},
 		
-		onDeleteChef: function(ev, sender, rec) {
+		onDeleteChef: function(ev, sender) {
 			var 
-				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ), 
+				chefRec = sender.isAltChef ? this.altChefRec : this.chefRec,
+				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
 				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
 			
+			chefRec = null;
 			keyInp.val("null");
 			chefBtn.text("Редактировать");
 		},
 		
-		//Выводит список участников похода из participantsRS в главное окно
-		renderParticipantsList: function()
-		{	var
-				touristKeys = "",
+		//Сохраняет список участников группы и выводит его в главное окно
+		saveParty: function( rs ) {
+			var
 				touristsList = this.$el(".e-tourists_list"),
 				rec;
 
+			this.partyRS = rs;
+
 			touristsList.empty();
 			
-			this.participantsRS.rewind();
-			while( rec = this.participantsRS.next() )
-			{	touristKeys += ( touristKeys.length ? "," : "" ) + rec.getKey();
+			this.partyRS.rewind();
+			while( rec = this.partyRS.next() ) {
 				$("<div>", {
 					text: mkk_site.utils.getTouristInfoString(rec)
 				})
 				.appendTo(touristsList);
 			}
-			
-			this.$el(".e-tourist_keys_inp").val(touristKeys);
 		},
-		
+
 		//Загрузка списка участников похода
-		loadParticipantsList: function()
-		{	var 
+		loadPartyFromServer: function() {
+			var
 				self = this,
 				pohodKey = parseInt(getParams["key"], 10);
 			
@@ -585,24 +614,23 @@ mkk_site.EditPohod = (function(_super) {
 				method: "mkk_site.edit_pohod.списокУчастниковПохода",
 				params: { "pohodKey": pohodKey },
 				success: function(json) {
-					self.participantsRS = webtank.datctrl.fromJSON(json);
-					self.renderParticipantsList();
+					self.saveParty( webtank.datctrl.fromJSON(json) );
 				}
 			});
 		},
 
 		//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
-		onAddMoreExtraFileLinks_BtnClick: function()
+		onAddFileLinkInputs_BtnClick: function()
 		{	var
 				i = 0,
 				tableBody = this.$el(".e-link_list_tbody");
 
 			for( ; i < this.extraFileLinksInputPortion; i++ )
-				this.renderInputsForExtraFileLink([]).appendTo( tableBody );
+				this.renderFileLinkInput([]).appendTo( tableBody );
 		},
 
 		//Создает элементы для ввода ссылки с описанием на доп. материалы
-		renderInputsForExtraFileLink: function(data)
+		renderFileLinkInput: function(data)
 		{	var
 				newTr = $("<tr>"),
 				leftTd = $("<td>").appendTo(newTr),
@@ -619,7 +647,7 @@ mkk_site.EditPohod = (function(_super) {
 		},
 
 		//Отображает список ссылок на доп. материалы
-		renderListOfExtraFileLinks: function(linkList)
+		renderFileLinkInputs: function(linkList)
 		{	var
 				tableBody = $(".e-link_list_tbody"),
 				inputPortion = this.extraFileLinksInputPortion,
@@ -631,18 +659,18 @@ mkk_site.EditPohod = (function(_super) {
 				inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion;
 			
 			for( ; i < inputCount; i++ )
-				this.renderInputsForExtraFileLink( linkList[i] ).appendTo(tableBody);
+				this.renderFileLinkInput( linkList[i] ).appendTo(tableBody);
 		},
 
 		//Загрузка списка ссылок на доп. материалы с сервера
-		loadListOfExtraFileLinks: function()
+		loadFileLinksFromServer: function()
 		{	var
 				self = this,
 				getParams = webtank.parseGetParams(),
 				pohodKey = parseInt(getParams["key"], 10);
 			
 			if( isNaN(pohodKey) ) {
-				this.renderListOfExtraFileLinks();
+				this.renderFileLinkInputs();
 				return;
 			}
 			
@@ -650,12 +678,12 @@ mkk_site.EditPohod = (function(_super) {
 				uri: "/jsonrpc/",
 				method: "mkk_site.edit_pohod.списокСсылокНаДопМатериалы",
 				params: { "pohodKey": pohodKey },
-				success: function(data) { self.renderListOfExtraFileLinks(data) }
+				success: function(data) { self.renderFileLinkInputs(data) }
 			});
 		},
 
 		//Сохранение списка ссылок на доп. материалы
-		saveListOfExtraFileLinks: function()
+		saveFileLinksToForm: function()
 		{	var
 				self = this,
 				tableRows = this.$el(".e-link_list_tbody").children("tr"),
@@ -687,12 +715,12 @@ mkk_site.EditPohod = (function(_super) {
 		validateFormData: function() {
 			var
 				self = this,
-				beginDay = self.beginDatePicker.rawDay(),
-				beginMonth = self.beginDatePicker.rawMonth(),
-				beginYear = self.beginDatePicker.rawYear(),
-				finishMonth = self.finishDatePicker.rawMonth(),
-				finishDay = self.finishDatePicker.rawDay(),
-				finishYear = self.finishDatePicker.rawYear(),
+				beginDay = self._beginDatePicker.rawDay(),
+				beginMonth = self._beginDatePicker.rawMonth(),
+				beginYear = self._beginDatePicker.rawYear(),
+				finishMonth = self._finishDatePicker.rawMonth(),
+				finishDay = self._finishDatePicker.rawDay(),
+				finishYear = self._finishDatePicker.rawYear(),
 				beginDateEmpty = !beginDay.length && !beginMonth.length && !beginYear.length,
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
 				countInput = self.$el(".e-tourist_count_input")
@@ -739,12 +767,12 @@ mkk_site.EditPohod = (function(_super) {
 			}
 
 			if( !beginDateEmpty && !finishDateEmpty &&
-				( new Date( +beginYear, +beginMonth, +beginDay ) > new Date( +finishYear, +finishMonth, +finishDay ) ) ) {
+				(  new Date( +beginYear, +beginMonth, +beginDay ) > new Date( +finishYear, +finishMonth, +finishDay )  ) ) {
 				self.showErrorDialog( 'Дата начала похода не может быть позже даты его завершения' );
 				return false;
 			}
 
-			if( !mkk_site.checkInt( inputCount, 0 ) ) {
+			if( countInput.val().length && !mkk_site.checkInt( inputCount, 0 ) ) {
 				self.showErrorDialog( 'Требуется ввести неотрицательное целое число в поле количества участников' );
 				return false;
 			}
@@ -763,14 +791,146 @@ mkk_site.EditPohod = (function(_super) {
 			return true;
 		},
 
+		// Заполняет поля формы из объекта класса
+		fillFormFields: function() {
+			var
+				chefKeyField = this.$el('.e-chef_key_inp'),
+				altChefKeyField = this.$el('.e-alt_chef_key_inp'),
+				partyKeysField = this.$el('.e-tourist_keys_inp'),
+				touristKeys = '';
+
+			if( this.chefRec ) {
+				chefKeyField.val( this.chefRec.get('num') );
+			} else {
+				chefKeyField.val( 'null' )
+			}
+
+			if( this.altChefRec ) {
+				altChefKeyField.val( this.altChefRec.get('num') );
+			} else {
+				altChefKeyField.val( 'null' );
+			}
+
+			if( this.partyRS ) {
+				this.partyRS.rewind();
+				while( rec = this.partyRS.next() ) {
+					touristKeys += ( touristKeys.length ? "," : "" ) + rec.getKey();
+				}
+
+				partyKeysField.val(touristKeys);
+			} else {
+				partyKeysField.val( 'null' );
+			}
+
+			this.saveFileLinksToForm();
+		},
+
+		// Возвражает true, если нужно добавить руководителя в список участников
+		shouldAddChefToParty: function() {
+			return this.chefRec && !this.partyRS.hasKey( this.chefRec.get('num') );
+		},
+
+		// Возвражает true, если нужно добавить зама в список участников
+		shouldAddAltChefToParty: function() {
+			return this.altChefRec && !this.partyRS.hasKey( this.altChefRec.get('num') );
+		},
+
+		getPartySizeFromInput: function() {
+			return parseInt( this.$el('.e-tourist_count_input').val() ) || null;
+		},
+
+		// Функция корректировки значения количества участников для поля ввода
+		getNewPartySizeForInput: function() {
+			var
+				rsCount = this.partyRS ? this.partyRS.getLength() : 0,
+				inpCount = this.getPartySizeFromInput();
+				newRSCount = rsCount,
+				newInpCount = inpCount;
+
+			if( inpCount != null ) {
+				if( this.shouldAddChefToParty() ) {
+					++newRSCount;
+				}
+
+				if( this.shouldAddAltChefToParty() ) {
+					++newRSCount;
+				}
+
+				if( newRSCount > inpCount )
+					newInpCount = newRSCount;
+			}
+
+			return newInpCount;
+		},
+
+		// Выполняет проверку данных. Записывает данные о походе из JS-класса в форму.
+		// Отправляет данные на сервер после проверки
+		onSavePohod: function() {
+			// Добавляем к списку участников руководителя и зама
+			if( this.shouldAddChefToParty() ) {
+				this.partyRS.append( this.chefRec );
+			}
+
+			if( this.shouldAddAltChefToParty() ) {
+				this.partyRS.append( this.altChefRec );
+			}
+
+			// Устанавливаем новое количество участников, если оно было не пустым
+			this.$el( '.e-tourist_count_input' ).val( this.getNewPartySizeForInput() );
+
+			if( this.validateFormData() ) {
+				this.fillFormFields(); // Пишем данные в поля формы
+				this.$el(".e-edit_pohod_form").submit();
+			}
+		},
+
+		// Обработчик тыка по кнопке сохранения похода
+		onSavePohod_BtnClick: function(ev) {
+			var
+				self = this,
+				newTouristsCount = this.getNewPartySizeForInput(),
+				shouldAddChef = this.shouldAddChefToParty(),
+				shouldAddAltChef = this.shouldAddAltChefToParty(),
+				cancelHandler = function() {
+					ev.preventDefault();
+				};
+
+			// Сами отправим форму, когда нужно сами
+			ev.preventDefault();
+
+			if( self.chefRec == null ) {
+				self.showErrorDialog( 'Необходимо выбрать руководителя похода!' );
+				ev.preventDefault();
+				return;
+			}
+
+			if( self.partyRS == null ) {
+				self.partyRS = new dctl.RecordSet({
+					format: self.chefRec.copyFormat()
+				});
+			}
+
+			if( shouldAddChef || shouldAddAltChef ) {
+				// Если есть записи руководителя и зама, но их нет в списке
+				// участников, то открываем диалог подтверждения их добавления
+				$(this._addChefToPartyDlg).one( 'ok', this.onSavePohod.bind(this) );
+				$(this._addChefToPartyDlg).one( 'cancel', cancelHandler );
+
+				this._addChefToPartyDlg.open( newTouristsCount );
+
+			} else {
+				// Если руководитель и зам есть, то сразу продолжаем
+				this.onSavePohod();
+			}
+		},
+
 		//Обработчик тыка по кнопке подтверждения удаления похода
 		onDeleteConfirm_BtnClick: function() {
 			var
 				getParams = webtank.parseGetParams(),
 				pohodKey = parseInt(getParams["key"], 10);
 			
-			if( this.$el(".e-delete_confirm_inp").val() === "удалить" )
-			{
+			if( this.$el(".e-delete_confirm_inp").val() === "удалить" ) {
 				webtank.json_rpc.invoke({
 					uri: "/jsonrpc/",
 					method: "mkk_site.edit_pohod.удалитьПоход",
@@ -778,8 +938,8 @@ mkk_site.EditPohod = (function(_super) {
 				});
 				document.location.replace("/dyn/show_pohod");
 			}
-			else
-			{	this.$el(".e-delete_confirm_inp").val("Не подтверждено!!!")
+			else {
+				this.$el(".e-delete_confirm_inp").val("Не подтверждено!!!")
 			}
 		}
 	});
@@ -787,6 +947,18 @@ mkk_site.EditPohod = (function(_super) {
 
 //Инициализация страницы
 $(window.document).ready( function() {
+	var
+		chefRecord = null,
+		altChefRecord = null;
+
+	if( mkk_site.pohod_chef_record ) {
+		chefRecord = webtank.datctrl.fromJSON( mkk_site.pohod_chef_record );
+	}
+
+	if( mkk_site.pohod_alt_chef_record ) {
+		altChefRecord = webtank.datctrl.fromJSON( mkk_site.pohod_alt_chef_record );
+	}
+
 	//Инициализаци блоков на странице
 	mkk_site.tourist_search = new mkk_site.TouristSearch({
 		cssBlockName: ".b-tourist_search"
@@ -799,9 +971,16 @@ $(window.document).ready( function() {
 		cssBlockName: ".b-pohod_party_edit",
 		searchBlock: mkk_site.tourist_search
 	});
+	mkk_site.add_chef_to_party_dlg = new mkk_site.AddChefToPartyDlg({
+		controlName: "add_chef_to_party_dlg"
+	});
+
 	mkk_site.edit_pohod = new mkk_site.EditPohod({
 		cssBlockName: ".b-edit_pohod",
 		chefEditBlock: mkk_site.pohod_chef_edit,
-		partyEditBlock: mkk_site.pohod_party_edit
+		partyEditBlock: mkk_site.pohod_party_edit,
+		chefRecord: chefRecord,
+		altChefRecord: altChefRecord,
+		addChefToPartyDlg: mkk_site.add_chef_to_party_dlg
 	});
 } );
