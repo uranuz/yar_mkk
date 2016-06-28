@@ -77,16 +77,16 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 		addition_zapros ~= ` AND patronymic ILIKE '` ~ PGEscapeStr(отчество) ~ `%' `;
 
 	if ( год_рождения.length > 0 ) 
-		addition_zapros ~= ` AND  birth_year ='` ~ PGEscapeStr(год_рождения) ~ `' `; 
+		addition_zapros ~= ` AND  birth_year ='` ~ PGEscapeStr(год_рождения) ~ `' `;
 			
 	if ( регион.length > 0 )
-		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(регион) ~ `%' `; 
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(регион) ~ `%' `;
 
 	if (  город.length > 0 )
-		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(город) ~ `%' `; 
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(город) ~ `%' `;
 
 	if ( улица.length > 0 )
-		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(улица) ~ `%' `;     
+		addition_zapros ~= ` AND address ILIKE '%` ~ PGEscapeStr(улица) ~ `%' `;
 
 	string addition_zapros2 = ` LIMIT ` ~ perPage.to!string ~ ` `;
 	if ( страница.length <= 0 || страница.to!int < 2)
@@ -94,11 +94,11 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	else
 		addition_zapros2 ~= ` OFFSET ` ~ (perPage*страница.to!int-perPage).to!string ~ `;`;
 
-	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ ` order by family_name ` ~ addition_zapros2; 
+	string zapros = shortTouristFormatQueryBase ~ addition_zapros ~ ` order by family_name ` ~ addition_zapros2;
 	string zapros_count = shortTouristFormatQueryBase_count ~ addition_zapros ~ `;`;
 
 	auto queryRes = dbase.query(zapros);
-	auto queryRes_count = dbase.query(zapros_count) ;
+	auto queryRes_count = dbase.query(zapros_count);
 	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
 	
 	import std.math: ceil;
@@ -132,6 +132,17 @@ auto списокУчастниковПохода( size_t pohodKey )
 	if( queryRes is null || queryRes.recordCount == 0 )
 		return null;
 	
+	return queryRes.getRecordSet(shortTouristRecFormat);
+}
+
+auto getTouristInfoByKey( size_t pohodKey )
+{
+	auto dbase = getCommonDB();
+
+	auto queryRes = dbase.query(
+		shortTouristFormatQueryBase ~ ` where num = ` ~ pohodKey.to!string
+	);
+
 	return queryRes.getRecordSet(shortTouristRecFormat);
 }
 
@@ -247,69 +258,53 @@ void создатьФормуИзмененияПохода(
 		
 		pohodForm.set( fieldName, dropdown.print() );
 	}
-	
+
+	import std.meta: AliasSeq;
 	//Выводим руководителя похода и его зама
-	if( pohodRec )
-	{	auto dbase = getCommonDB();
-	
-		if( !dbase.isConnected )
-			throw new Exception("База данных МКК не доступна!!!");
-			
-		if( pohodRec.isNull("chef_grupp") )
-			pohodForm.set( "chef_grupp_text", "Редактировать");
-		else {
-			auto chefInfo_QRes = dbase.query( 
-				shortTouristFormatQueryBase ~ ` where num=` ~ pohodRec.get!("chef_grupp").to!string ~ `;` 
-			);
-			if( chefInfo_QRes.recordCount == 1 && chefInfo_QRes.fieldCount == 5 )
-			{	string chefInfoStr;
-				
-				foreach( i; 1..4 )
-				{	if( !chefInfo_QRes.isNull( i, 0 ) )
-						chefInfoStr ~= ( chefInfoStr.length == 0 ? "" : " " ) ~ chefInfo_QRes.get( i, 0 ) ;
+	foreach( fieldName; AliasSeq!( "chef_grupp", "alt_chef" ) )
+	{
+		string btnText = "Редактировать";
+		string recordStr = "null";
+
+		if( pohodRec && !pohodRec.isNull( fieldName ) )
+		{
+			auto touristRS = getTouristInfoByKey( pohodRec.get!fieldName() );
+
+			import std.string: join;
+			if( touristRS && touristRS.length )
+			{
+				auto touristRec = touristRS.front;
+				string[] touristInfoArr;
+
+				foreach( i; AliasSeq!( "family_name", "given_name", "patronymic" ) )
+				{
+					if( !touristRec.isNull(i) )
+						touristInfoArr ~= touristRec.getStr!i();
 				}
-				
-				chefInfoStr ~= chefInfo_QRes.isNull(4, 0) ? "" : ", " ~ chefInfo_QRes.get( 4, 0) ~ " г.р.";
-				
-				pohodForm.set( "chef_grupp_text", chefInfoStr );
-				pohodForm.set( "chef_grupp", printHTMLAttr( "value", chefInfo_QRes.get( 0,0, "" ) ) );
+
+				btnText = touristInfoArr.join(' ')
+					~ ( touristRec.isNull("birth_year") ? null : ", " ~ touristRec.getStr!"birth_year"() ~ " г.р." );
+
+				auto jsonRec = touristRec.getStdJSON();
+				recordStr = toJSON( &jsonRec );
 			}
 			else
-				pohodForm.set( "chef_grupp_text", "Отсутствует в БД");
-		}
-		
-		if( pohodRec.isNull("alt_chef") )
-			pohodForm.set( "alt_chef_text", "Редактировать");
-		else {
-			auto chefInfo_QRes = dbase.query( 
-				shortTouristFormatQueryBase ~ ` where num=` ~ pohodRec.get!("alt_chef").to!string ~ `;`
-			);
-			if( chefInfo_QRes.recordCount == 1 && chefInfo_QRes.fieldCount == 5 )
-			{	string chefInfoStr;
-				
-				foreach( i; 1..4 )
-				{	if( !chefInfo_QRes.isNull( i, 0 ) )
-						chefInfoStr ~= ( chefInfoStr.length == 0 ? "" : " " ) ~ chefInfo_QRes.get( i, 0 );
-				}
-				
-				chefInfoStr ~= chefInfo_QRes.isNull(4, 0) ? "" : ", " ~ chefInfo_QRes.get( 4, 0) ~ " г.р.";
-				
-				pohodForm.set( "alt_chef_text", chefInfoStr );
-				pohodForm.set( "alt_chef", printHTMLAttr( "value", chefInfo_QRes.get( 0,0, "" ) ) );
+			{
+				btnText = "[Турист не найден]";
 			}
-			else
-				pohodForm.set( "alt_chef_text", "Отсутствует в БД");
+
+			pohodForm.set( fieldName, printHTMLAttr( "value", pohodRec.getStr!fieldName() ) );
 		}
-	}
-	else
-	{	pohodForm.set( "chef_grupp_text", "Редактировать");
-		pohodForm.set( "alt_chef_text", "Редактировать");
+
+
+		pohodForm.set( fieldName ~ "_text", btnText );
+		pohodForm.set( fieldName ~ "_record", recordStr );
 	}
 
 	if( pohodRec )
 		pohodForm.set( "unit_count", ( pohodRec.isNull("unit") ? "" : printHTMLAttr( "value", pohodRec.get!("unit") ) ) );
-	//Задаём действие, чтобы при след. обращении к обработчику
-	//перейти на этап записи в БД
+
+	//Задаём действие, чтобы при след. обращении к обработчику перейти на этап записи в БД
 	pohodForm.set( "form_input_action", ` value="write"` );
 }
 
@@ -371,41 +366,45 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	string[2] dateParamNamePrefixes = ["begin_", "finish_"];
 	
 	string [6] partDatesString;
-	int    [6] partDatesInt;
+	int[6] partDatesInt;
+	static immutable string[] namesDateFields = [
+		"begin__year", "begin__month","begin__day","finish__year", "finish__month","finish__day"
+	];
+
+	for( size_t i = 0; i < 6; ++i )
+		partDatesString[i] = pVars[namesDateFields[i]];
 	
 	
-	string[] namesDateFields = ["begin__year", "begin__month","begin__day","finish__year", "finish__month","finish__day"];
-	
-	
-	for(size_t i=0;i<6;i++) partDatesString[i] = pVars[namesDateFields[i]];
-	
-	
-	if( all!( (a) => !a.length  )(partDatesString[0..3])) pohodDates[0] = null;
-	 else
+	if( all!( (a) => !a.length )(partDatesString[0..3]) )
+	{
+		pohodDates[0] = null;
+	}
+	else
+	{
+		for( size_t i = 0; i < 3; ++i )
 		{
-			for(size_t i=0;i<3;i++)		
-			{
-				if(!isNumeric( pVars[namesDateFields[i]]) )
-					throw new Exception("Неправильный формат даты");
-				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
-			}
-		pohodDates[0] =  Date(partDatesInt[0], partDatesInt[1], partDatesInt[2]);
-		}		
+			if(!isNumeric( pVars[namesDateFields[i]]) )
+				throw new Exception("Неправильный формат даты начала похода");
+			partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
+		}
+		pohodDates[0] = Date(partDatesInt[0], partDatesInt[1], partDatesInt[2]);
+	}
 		
 	
-	if( all!( (a) => !a.length  )(partDatesString[4..6])) pohodDates[1] = null;
-	 else
+	if( all!( (a) => !a.length )(partDatesString[4..6]) )
+	{
+		pohodDates[1] = null;
+	}
+	else
+	{
+		for( size_t i = 3; i < 6; ++i )
 		{
-			for(size_t i=3;i<6;i++)		
-			{
-				if(!isNumeric( pVars[namesDateFields[i]]) )
-					throw new Exception("Неправильный формат даты");
-				partDatesInt[i] = to!int(pVars[namesDateFields[i]]);					
-			}
-		pohodDates[1] =  Date(partDatesInt[3], partDatesInt[4], partDatesInt[5]);
+			if(!isNumeric( pVars[namesDateFields[i]]) )
+				throw new Exception("Неправильный формат даты завершения похода");
+			partDatesInt[i] = to!int(pVars[namesDateFields[i]]);
 		}
-	
-	
+		pohodDates[1] =  Date(partDatesInt[3], partDatesInt[4], partDatesInt[5]);
+	}
 
 	if( !pohodDates[0].isNull && !pohodDates[1].isNull )
 	{	if( pohodDates[1].value < pohodDates[0].value )
@@ -419,7 +418,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 
 	Optional!size_t overalTouristCount;
 	if( "unit" in pVars )
-	{	if( pVars["unit"].length != 0 )
+	{	if( pVars["unit"]!= "null"  && pVars["unit"].length != 0 )
 		{	overalTouristCount = pVars["unit"].to!size_t;
 		}
 	}
@@ -512,7 +511,20 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	URI uri;
 	
 	foreach( ref linkPair; rawLinks )
-	{	uri = URI( strip(linkPair[0]) );
+	{
+		string uriStr = strip(linkPair[0]);
+		if( !uriStr.length )
+			continue;
+
+		try
+		{
+			uri = URI( uriStr );
+		}
+		catch(Exception ex)
+		{
+			throw new Exception("Некорректная ссылка на доп. материалы!!!");
+		}
+
 		if( uri.scheme.length == 0 )
 			uri.scheme = "http";
 		processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
@@ -630,7 +642,9 @@ string netMain(HTTPContext context)
 }
 
 string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
-{	auto dbase = getCommonDB;
+{
+	import std.string: strip;
+	auto dbase = getCommonDB;
 
 	if( !dbase.isConnected )
 		return null;
@@ -642,7 +656,12 @@ string[][] списокСсылокНаДопМатериалы(size_t pohodKey)
 	string[][] result;
 	
 	foreach( i; 0..links_QRes.recordCount )
-		result ~= parseExtraFileLink( links_QRes.get(0, i, "") );
+	{
+		string linkData = strip( links_QRes.get( 0, i, null ) );
+		if( !linkData.length )
+			continue;
+		result ~= parseExtraFileLink( linkData );
+	}
 
 	return result;
 }

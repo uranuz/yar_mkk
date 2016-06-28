@@ -86,6 +86,11 @@
 /* !sect-end: index */
 
 /* !sect-begin: edit_pohod */
+
+.t-add_chef_to_party_dlg.e-msg  {
+	padding-bottom: 1rem;
+}
+
 .b-pohod_party_edit.e-control_bar,
 .b-pohod_chef_edit.e-control_bar{
 	background: rgb(232,237,187); /* Old browsers */

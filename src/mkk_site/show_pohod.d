@@ -37,13 +37,18 @@ on tourist.num = tourist_nums.num
 	result ~= поход.get(0, 0, null) ~ `<hr>`;
 	
 	
-	if( рез_запроса.recordCount < 1 ) result ~= `Сведения об участниках отсутствуют`;
+	if( рез_запроса.recordCount < 1 )
+	{
+		result ~= `Сведения об участниках отсутствуют`;
+	}
 	else
 	{
 		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-		{	result ~= рез_запроса.get(0, i, "") ~ ` <br>`; }
+		{
+			result ~= рез_запроса.get(0, i, "") ~ ` <br>`;
+		}
 	}
-	           
+
 	return result;
 }
 
@@ -141,7 +146,6 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 	}
 	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_navigation.html" );
-	
 	foreach( имяПоля, дата; vm.filter.сроки )
 	{
 		auto полеДаты = bsPlainDatePicker(дата);
@@ -382,10 +386,9 @@ string поисковыйДиапазонПоходов(const ref ФильтрП
 		if(  !фильтрДатыНачало.day.isNull || !фильтрДатыНачало.month.isNull)
 		{
 			beginDateStr ~= фильтрДатыНачало.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
-			if(фильтрДатыНачало.day.isNull)
+			if( фильтрДатыНачало.day.isNull )
 				beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы.getName(фильтрДатыНачало.month);
-			else 		          
-				
+			else
 				beginDateStr ~= фильтрДатыНачало.month.isNull ? "число любого месяца" : месяцы_родительный.getName(фильтрДатыНачало.month);
 		}
 		beginDateStr ~= ` ` ~ (фильтрДатыНачало.year.isNull ? "" : фильтрДатыНачало.year.to!string);

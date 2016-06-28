@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="{{css folder}}edit_pohod.css">
 
-<form id="b-edit_pohod e-edit_pohod_form" method="post"{{edit_pohod_form}}>
+<form class="b-edit_pohod e-edit_pohod_form" method="post"{{edit_pohod_form}}>
 <h2>Редактирование данных похода</h2>
 <hr>
 <h4>Маршрутная книжка</h4>
@@ -92,6 +92,9 @@
 		<td colspan="999">
 			<input type="hidden" name="chef_grupp" class="b-edit_pohod e-chef_key_inp"{{chef_grupp}}>
 			<a href="#_NOLink" class="b-edit_pohod e-open_chef_edit_btn">{{chef_grupp_text}}</a>
+			<script>
+				mkk_site.pohod_chef_record = {{chef_grupp_record}};
+			</script>
 		</td>
 	</tr>
 	<tr>
@@ -99,6 +102,9 @@
 		<td colspan="999">
 			<input type="hidden" name="alt_chef" class="b-edit_pohod e-alt_chef_key_inp"{{alt_chef}}>
 			<a href="#_NOLink" class="b-edit_pohod e-open_alt_chef_edit_btn">{{alt_chef_text}}</a>
+			<script>
+				mkk_site.pohod_alt_chef_record = {{alt_chef_record}};
+			</script>
 		</td>
 	</tr>
 	<tr>
@@ -233,6 +239,26 @@
 		</button>
 	</div>
 	<div class="b-pohod_chef_edit e-search_block"></div>
+</div>
+
+<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
+<div class="i-add_chef_to_party_dlg e-block" title="Подтвердите операцию" style="display: none;">
+	<div class="e-msg t-add_chef_to_party_dlg">
+		Обнаружено, что руководитель или заместитель отсутствует в списке участников похода.
+		Нажмите "Продолжить", чтобы добавить их автоматически. Число участников составит
+		<span class="i-add_chef_to_party_dlg e-tourists_count"></span>
+	</div>
+	<div class="e-msg t-add_chef_to_party_dlg">
+		Нажмите "Отмена", чтобы прервать операцию и вернуться к редактированию похода.
+	</div>
+	<button type="button"
+		class="i-add_chef_to_party_dlg e-ok_btn btn btn-primary">
+		Продолжить
+	</button>
+	<button type="button"
+		class="i-add_chef_to_party_dlg e-cancel_btn btn btn-secondary">
+		Отмена
+	</button>
 </div>
 
 <script type="text/javascript" src="{{js folder}}edit_pohod.js" defer></script>
