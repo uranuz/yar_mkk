@@ -84,9 +84,21 @@
  <h2>    Содержание ячейки [ групп(человек) ]</h2>
  <br/>
   
-  <table class="tab1" >
-   {{stat_table}}
-  </table>
+  <div class="i-show_pohod_table e-block t-mkk_table">
+			<div class="e-scroll_wrapper t-mkk_table">
+				<table class="e-table t-mkk_table">
+					<tbody class="e-header_body t-mkk_table">
+						<tr class="e-header_row t-mkk_table">
+							{{stat_table_header}}
+					</tbody>
+					<tbody class="e-content_body t-mkk_table">
+						{{stat_table}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+  
+  
   
   
    <!-- #content -->
