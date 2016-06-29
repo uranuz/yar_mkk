@@ -66,28 +66,10 @@ body {
 		
 	}
 	
-html {
-	height: auto;
-	font-size: 16px;
-	box-sizing: border-box;
-}
+
 	
 	.page { width: 80%; }   
 	#main_menu { display: none; }
 
-	table.tab1
-	{
-		width: 100%;
-		border: 3px ridge #666;
-		border-spacing: 0px;
-		text-align:center;
-	}
-
-	.tab1 td, .tab1 th 
-	{
-		font-size: 80%;
-		border: 1px solid;
-		border-right-style:ridge;
-		height:8pt;
-	}
+	
 }
