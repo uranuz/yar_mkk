@@ -19,7 +19,8 @@ string netMain(HTTPContext context)
 	auto rp = context.response;//ответ
 	
  bool isForPrint = rq.bodyForm.get("for_print", null) == "on";//если on то true
-
+ 
+ string table_header;
  string table;
 
 
@@ -464,22 +465,22 @@ string [][] for_graf;   // массив данных для графика
    
    
   
-   table~=`<tr>`;
+ 
   
     
     foreach(v,td; заголовок)
      {
-      if(bool_заголовок[v]) table     ~=`<td>`~td~`</td>`~ "\r\n";
+      if(bool_заголовок[v]) table_header     ~=`<th>`~td~`</th>`~ "\r\n";
       
      }   
  
     
-  table ~=` </tr> `;
+ tpl.set( "stat_table_header", table_header );
    //-----------------------------------------------
   
   for( size_t i = 0; i < строк; i++ )//формирование ячеек таблицы
   {
-  table ~= `<tr>`;
+  table ~= `<tr class="i-show_pohod_table e-row" >`;
      
       for( size_t v = 0; v < колонок; ++v )
       {
