@@ -71,16 +71,16 @@ string netMain(HTTPContext context)
 	size_t колонок;
 	size_t строк;
 	string[] вид = [
-		"Вид/к.с.", "Пешый", "Лыжный", "Горный", "Водный", "Вело",
-		" Авто ", "Спелео", "Парус", "Конный", "Комби", "ВСЕГО"
+		"Вид/ к.с.", "Пеший", "Лыжный", "Горный", "Водный", "Вело",
+		"Авто", "Спелео", "Парус", "Конный", "Комби", "ВСЕГО"
 	];
 
 	if( prezent_vid == "по годам" )
 	{
 		групп_человек = statRecFormatVid.names.dup;
 		заголовок = [
-			"Год", "Пешый", "Лыжный", "Горный", "Водный", "Вело",
-			"Авто", "Спелео", "Парус", "Конный","Комби","ВСЕГО"
+			"Год", "Пеший", "Лыжный", "Горный", "Водный", "Вело",
+			"Авто", "Спелео", "Парус", "Конный", "Комби", "ВСЕГО"
 		];
 		tpl.set( "skript_Neim", "stat_all.js");
 		bool_заголовок = [ true,true,true,true,true,true,true,true,true,true,true,true ];
@@ -91,10 +91,10 @@ string netMain(HTTPContext context)
 	{
 		групп_человек = statRecFormatKC.names.dup;
 		заголовок = [
-			"Вид-к.с.", "н.к.", "Первая", "Вторая", "Третья",
+			"Вид/ к.с.", "н.к.", "Первая", "Вторая", "Третья",
 			"Четвёртая", "Пятая", "Шестая", "Путеш.", "ВСЕГО"
 		];
-		tpl.set( "skript_Neim", "stat_year.js");
+		tpl.set( "skript_Neim", "stat_year.js" );
 		bool_заголовок = [true,true,true,true,true,true,true,true,true,true];
 		колонок = 10;
 	}
@@ -108,7 +108,7 @@ string netMain(HTTPContext context)
 
 	string запрос_статистика;
 	///////---запрос--по годам---------
-	if( prezent_vid=="по годам")
+	if( prezent_vid == "по годам" )
 	{
 		запрос_статистика =
 			` WITH stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod `;
@@ -207,7 +207,7 @@ ks5 AS ( SELECT vid,count(unit) AS gr_5,  sum (unit)  AS un_5      FROM stat_by_
 ks6 AS ( SELECT vid,count(unit) AS gr_6,  sum (unit)  AS un_6      FROM stat_by_year  WHERE  ks=6  GROUP BY vid ORDER BY vid  ),
 put AS ( SELECT vid,count(unit) AS gr_7,  sum (unit)  AS un_7      FROM stat_by_year  WHERE  (ks=7 OR ks is NULL)  GROUP BY vid ORDER BY vid  ),
 всего AS ( SELECT vid,count(unit) AS gr_всего,sum (unit)  AS un_всего
-																						FROM stat_by_year GROUP BY vid ORDER BY vid ),
+FROM stat_by_year GROUP BY vid ORDER BY vid ),
 
 st AS (
 SELECT
@@ -248,9 +248,8 @@ st1 AS (
 
  st2 AS ( SELECT*FROM st UNION  SELECT*FROM st1 )
 
-SELECT*FROM st2 ORDER BY vid    
-  
-  `;
+SELECT*FROM st2 ORDER BY vid
+`;
 }
 
 	//-----конец -запроса--"по КС"
@@ -277,7 +276,7 @@ SELECT*FROM st2 ORDER BY vid
 		string resurs_tabl;
 		string resurs_graf;
 
-		foreach(v,td; групп_человек)
+		foreach( v, td; групп_человек)
 		{
 			if( v == 0 && prezent_vid == "по годам" )
 			{
@@ -323,11 +322,8 @@ SELECT*FROM st2 ORDER BY vid
 			bool_заголовок[j] = false;
 	}
 
-	//string []заг;   foreach(td;  bool_заголовок){ if(td)заг~="true"; else заг~="false";}   writeln( заг);
-	// ------------формируем данные для скрипта----------
-
-  string skript_Surs = "";
-  //---------------------------
+	string skript_Surs = "";
+	//---------------------------
 	if( prezent_vid == "по годам" )
 	{
 		skript_Surs ~= "prez=1," ~ "\r\n";
@@ -367,7 +363,7 @@ SELECT*FROM st2 ORDER BY vid
 
 	//////////////////////"по КС"////////////////////////////////////
 	int[string] vid = [
-		"Пешый": 1, "Лыжный": 2, "Горный": 3,"Водный": 4, "Вело": 5,
+		"Пеший": 1, "Лыжный": 2, "Горный": 3,"Водный": 4, "Вело": 5,
 		"Авто": 6, "Спелео": 7, "Парус": 8, "Конный": 9, "Комби": 10, "ВСЕГО": 11
 	];
 
@@ -387,7 +383,7 @@ SELECT*FROM st2 ORDER BY vid
 		int qqq = 0;
 		for( int v = 1; v < 12; v++ )
 		{
-			string kk="";
+			string kk = "";
 			if( !bool_list[v] )
 			{
 				skript_Surs ~= "Surs" ~ v.to!string ~ "=[0,0,0,0,0,0,0,0]," ~ "\r\n";
@@ -443,7 +439,7 @@ SELECT*FROM st2 ORDER BY vid
 	//-----------------------------------------------
 	for( size_t i = 0; i < строк; i++ ) //формирование ячеек таблицы
 	{
-		table ~= `<tr class="i-show_pohod_table e-row">`;
+		table ~= `<tr class="e-row t-mkk_table">`;
 
 		for( size_t v = 0; v < колонок; ++v )
 		{
@@ -456,13 +452,10 @@ SELECT*FROM st2 ORDER BY vid
 		}
 		table ~= `</tr>`~ "\r\n";
 	}
-
-	table ~=` </table>`; // writeln(table);
 	//---------------------------------------------------
 
-
 	//--блок переключения вида
-	if (isForPrint)
+	if( isForPrint )
 	{
 		if( prezent_vid == "по годам" )
 		{
@@ -488,7 +481,8 @@ SELECT*FROM st2 ORDER BY vid
 
 	if( prezent_vid == "по КС" )
 	{
-		tpl.set( "on_KC", "checked"); tpl.set( "on_years", " " );
+		tpl.set( "on_KC", "checked");
+		tpl.set( "on_years", " " );
 	};
 
 	// блок фильтров
@@ -522,7 +516,7 @@ SELECT*FROM st2 ORDER BY vid
 		~ HTMLEscapeValue( rq.bodyForm.get("year_E", "2016") ) ~ `">год<br/>`);
 	}
 
-	if (isForPrint)
+	if( isForPrint )
 	{
 		tpl.set( "ckript_or_button",
 			`<a href='javascript:window.print(); void 0;' class="noprint">
@@ -530,10 +524,9 @@ SELECT*FROM st2 ORDER BY vid
 			</a> <!-- печать страницы -->`
 		);
 	}
-	 
 	else
 	{
-		tpl.set( "ckript_or_button",`<button  name="filtr" type="submit" class="noprint" > Обновить </button>`);
+		tpl.set( "ckript_or_button",`<button name="filtr" type="submit" class="noprint btn btn-primary">Обновить</button>`);
 	}
 
 	if (isForPrint) //для печати
