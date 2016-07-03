@@ -288,9 +288,6 @@ string renderPohodParticipants(VM)( ref VM vm )
 	//foreach( rec; vm.touristsRS )
 	for( size_t i = 0; i < vm.touristsRS.length ; ++i )
 	{
-		import std.stdio;
-		writeln( i, " ", vm.touristsRS[i].get!"ФИО и год"() );
-		
 		tpl.fillFrom( vm.touristsRS[i], fillAttrs );
 		touristList ~= tpl.getString().dup;
 	}

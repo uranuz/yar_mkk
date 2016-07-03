@@ -561,22 +561,30 @@ mkk_site.EditPohod = (function(_super) {
 		
 		onSelectChef: function(ev, sender, rec) {
 			var 
-				chefRec = sender.isAltChef ? this.altChefRec : this.chefRec,
 				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
 				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
 			
-			chefRec = rec;
+			if( sender.isAltChef ) {
+				this.altChefRec = rec;
+			} else {
+				this.chefRec = rec;
+			}
+
 			keyInp.val( rec.get("num") );
 			chefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
 		},
 		
 		onDeleteChef: function(ev, sender) {
 			var 
-				chefRec = sender.isAltChef ? this.altChefRec : this.chefRec,
 				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
 				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
 			
-			chefRec = null;
+			if( sender.isAltChef ) {
+				this.altChefRec = null;
+			} else {
+				this.chefRec = null;
+			}
+
 			keyInp.val("null");
 			chefBtn.text("Редактировать");
 		},
@@ -718,8 +726,8 @@ mkk_site.EditPohod = (function(_super) {
 				beginDay = self._beginDatePicker.rawDay(),
 				beginMonth = self._beginDatePicker.rawMonth(),
 				beginYear = self._beginDatePicker.rawYear(),
-				finishMonth = self._finishDatePicker.rawMonth(),
 				finishDay = self._finishDatePicker.rawDay(),
+				finishMonth = self._finishDatePicker.rawMonth(),
 				finishYear = self._finishDatePicker.rawYear(),
 				beginDateEmpty = !beginDay.length && !beginMonth.length && !beginYear.length,
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
@@ -827,12 +835,12 @@ mkk_site.EditPohod = (function(_super) {
 
 		// Возвражает true, если нужно добавить руководителя в список участников
 		shouldAddChefToParty: function() {
-			return this.chefRec && !this.partyRS.hasKey( this.chefRec.get('num') );
+			return !!this.chefRec && !this.partyRS.hasKey( this.chefRec.get('num') );
 		},
 
 		// Возвражает true, если нужно добавить зама в список участников
 		shouldAddAltChefToParty: function() {
-			return this.altChefRec && !this.partyRS.hasKey( this.altChefRec.get('num') );
+			return !!this.altChefRec && !this.partyRS.hasKey( this.altChefRec.get('num') );
 		},
 
 		getPartySizeFromInput: function() {
