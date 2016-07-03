@@ -129,9 +129,9 @@ string netMain(HTTPContext context)
 		}
 
 		if( b_terr )
-			запрос_статистика ~=` region_group ILIKE '%` ~ terr ~ `%'`;
+			запрос_статистика ~= ` region_group ILIKE '%` ~ terr ~ `%'`;
 
-		запрос_статистика ~=` ORDER BY year ),`;
+		запрос_статистика ~= ` ORDER BY year ),`;
 
 		for( int i = 1; i < 11; i++ )
 		{
@@ -142,7 +142,7 @@ string netMain(HTTPContext context)
 				~ ` GROUP BY year ORDER BY year  ),`;
 		}
 
-	запрос_статистика ~=`
+		запрос_статистика ~= `
 всего AS ( SELECT year, count(unit) AS gr_всего ,  sum (unit)  AS un_всего
               FROM stat GROUP BY year ORDER BY year )
 
@@ -255,17 +255,17 @@ SELECT*FROM st2 ORDER BY vid
 	//-----конец -запроса--"по КС"
 	IBaseRecordSet rs;
 
-	if( prezent_vid == "по годам")
+	if( prezent_vid == "по годам" )
 		rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatVid);
-	if( prezent_vid == "по КС")
+	if( prezent_vid == "по КС" )
 		rs = dbase.query(запрос_статистика).getRecordSet(statRecFormatKC);
 
 	// --формируем исходные матрицы------///////////
 	bool parity;
 	строк = rs.length;
-	string [][] for_tabl;   // массив данных для таблицы
-	string [][] for_graf;   // массив данных для графика
-	for( size_t i = 0; i < строк; i++  )//формирование ячеек таблицы
+	string[][] for_tabl;   // массив данных для таблицы
+	string[][] for_graf;   // массив данных для графика
+	for( size_t i = 0; i < строк; i++ )//формирование ячеек таблицы
 	{
 		auto rec = rs[i];
 		string[] line_tabl;
@@ -509,11 +509,24 @@ SELECT*FROM st2 ORDER BY vid
 	if( prezent_vid == "по КС" )
 	{
 		tpl.set( "year_S",
-		`С `~
-		`<input type="text" name="year_B" size="4" value="`
-		~HTMLEscapeValue( rq.bodyForm.get("year_B", "1992") )
-		~`"> по <input type="text" name="year_E" size="4" value="`
-		~ HTMLEscapeValue( rq.bodyForm.get("year_E", "2016") ) ~ `">год<br/>`);
+			`
+			<div class="form-inline">
+				<label>
+					<span class="form-control-label">С</span>
+					<input type="text" name="year_B" class="form-control" style="width: 8em;" value="`
+						~ HTMLEscapeValue( rq.bodyForm.get("year_B", "1992") )
+					~ `">
+				</label>
+				<label>
+					<span class="form-control-label">по</span>
+					<input type="text" name="year_E" class="form-control" style="width: 8em;" value="`
+						~ HTMLEscapeValue( rq.bodyForm.get("year_E", "2016") )
+					~ `">
+				</label>
+				<span class="form-control-label">годы</span>
+			</div>
+			`
+		);
 	}
 
 	if( isForPrint )

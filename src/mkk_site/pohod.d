@@ -57,8 +57,7 @@ string netMain(HTTPContext context)
 	
 	//auto pVars = rq.postVars;
 	auto qVars = rq.queryForm;
-
-	//auto dbase = getCommonDB();
+	bool isAuthorized = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );
 	
 	size_t pohodKey;
 	try {
@@ -78,13 +77,15 @@ string netMain(HTTPContext context)
 		typeof(pohodRecord) pohodRec;
 		typeof(touristList) touristsRS;
 		typeof(extraFileList) extraLinkList;
+		bool isAuthorized;
 	}
 	
 	ViewModel vm = ViewModel(
 		pohodKey,
 		pohodRecord,
 		touristList,
-		extraFileList
+		extraFileList,
+		isAuthorized
 	);
 
 	return renderPohodPage(vm);
@@ -218,11 +219,26 @@ string renderPohodPage(VM)( ref VM vm )
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod.html" );
 	
 	FillAttrs fillAttrs;
+	fillAttrs.defaults = [
+		"Маршрут": `Сведения отсутствуют`,
+		"Комментарий руководителя": `Не задано`,
+		"Комментарий МКК": `Не задано`
+	];
 	
 	tpl.fillFrom( vm.pohodRec, fillAttrs );
 
 	tpl.set( "tourist_list", renderPohodParticipants(vm) );
 	tpl.set( "file_link_list", renderExtraFileLinks(vm) );
+
+	if( vm.pohodRec && vm.isAuthorized && !vm.pohodRec.isNull("Ключ")  )
+	{
+		tpl.set( "edit_btn_href", dynamicPath ~ "edit_pohod?key=" ~ vm.pohodRec.getStr!"Ключ"(null) );
+	}
+	else
+	{
+		tpl.set( "edit_btn_cls", "is-hidden" );
+	}
+
 	
 	return tpl.getString();
 }
@@ -265,13 +281,20 @@ string renderExtraFileLinks(VM)( ref VM vm )
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod_extra_file_link.html" );
 	
 	string extraFilesList;
-	
-	foreach( rec; vm.extraLinkList )
+
+	if( vm.extraLinkList.length )
 	{
-		tpl.setHTMLValue( "uri_input_value", rec.uri );
-		tpl.setHTMLValue( "descr_input_value", rec.descr );
-		
-		extraFilesList ~= tpl.getString();
+		foreach( rec; vm.extraLinkList )
+		{
+			tpl.setHTMLValue( "uri_input_value", rec.uri );
+			tpl.setHTMLValue( "descr_input_value", rec.descr );
+
+			extraFilesList ~= tpl.getString();
+		}
+	}
+	else
+	{
+		extraFilesList = `Нет данных`;
 	}
 
 	return extraFilesList;
