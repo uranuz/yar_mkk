@@ -232,8 +232,8 @@ public:
 
 		//Формирование запроса на запись даты рождения туриста
 		string birthDateStr;
-		string birthDayStr = pVars.get("birth_day", null);
-		string birthMonthStr = pVars.get("birth_month", null);
+		string birthDayStr = pVars.get("birth__day", null);
+		string birthMonthStr = pVars.get("birth__month", null);
 
 		bool hasBirthDay = !birthDayStr.empty && birthDayStr != "null";
 		bool hasBirthMonth = !birthMonthStr.empty && birthMonthStr != "null";
@@ -272,7 +272,7 @@ public:
 		}
 
 		//Формирование запроса на запись года рождения туриста
-		if( auto param = pVars.get("birth_year", null) )
+		if( auto param = pVars.get("birth__year", null) )
 		{	if( !param.empty && param != "null" )
 			{	auto birthYear = param.to!uint;
 				fieldValues ~= "'" ~ param ~ "'";
