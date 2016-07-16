@@ -34,8 +34,9 @@ on tourist.num = tourist_nums.num
 	||'.<br> Район проведения '||coalesce(region_pohod, '')) as poh from pohod where pohod.num = ` ~ pohodNum.to!string ~ ` `);
 	
 	string result;//список туристов
-	result ~= поход.get(0, 0, null) ~ `<hr>`;
-	
+
+	if( поход.recordCount == 1 )
+		result ~= поход.get(0, 0, null) ~ `<hr>`;
 	
 	if( рез_запроса.recordCount < 1 )
 	{
@@ -373,8 +374,10 @@ string поисковыйДиапазонПоходов(const ref ФильтрП
 	string beginDateStr;
 	string endDateStr;
 	
-	if( фильтрПоходов.районПохода != "" ) район ~= "<br/>Район похода содержит [ " ~ фильтрПоходов.районПохода ~ " ].<br/>";
-	if( фильтрПоходов.сМатериалами ) район ~= " По данным походам имеются отчёты или дополнительные материалы.<br/><br/>";
+	if( фильтрПоходов.районПохода.length > 0 )
+		район ~= "<br/>Район похода содержит [ " ~ фильтрПоходов.районПохода ~ " ].<br/>";
+	if( фильтрПоходов.сМатериалами )
+		район ~= " По данным походам имеются отчёты или дополнительные материалы.<br/><br/>";
 	
 	if( фильтрДатыНачало.isNull )
 	{
@@ -382,7 +385,7 @@ string поисковыйДиапазонПоходов(const ref ФильтрП
 	}
 	else
 	{
-		if(  !фильтрДатыНачало.day.isNull || !фильтрДатыНачало.month.isNull)
+		if( !фильтрДатыНачало.day.isNull || !фильтрДатыНачало.month.isNull )
 		{
 			beginDateStr ~= фильтрДатыНачало.day.isNull ? "" : фильтрДатыНачало.day.to!string ~ ` `;
 			if( фильтрДатыНачало.day.isNull )
@@ -410,7 +413,7 @@ string поисковыйДиапазонПоходов(const ref ФильтрП
 		endDateStr ~= ` ` ~ ( фильтрДатыКонец.year.isNull ? " " : фильтрДатыКонец.year.to!string );
 	}
 		
-	return (район~`<fieldset><legend>Сроки похода</legend> Начало похода `~beginDateStr ~`<br/> Конец похода  `~endDateStr~`</fieldset>`);
+	return (район~`<fieldset><legend>Сроки похода</legend> Начало похода ` ~ beginDateStr ~ `<br/> Конец похода  ` ~ endDateStr ~ `</fieldset>`);
 }
 
 //-----------------------------------------------------------------------------
