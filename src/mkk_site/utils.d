@@ -37,11 +37,23 @@ static this()
 }
 
 IDatabase getCommonDB()
-{	return _commonDatabase;
+{
+	if( !_commonDatabase.isConnected )
+	{
+		_commonDatabase.destroy();
+		_commonDatabase = new DBPostgreSQL(commonDBConnStr);
+	}
+	return _commonDatabase;
 }
 
 IDatabase getAuthDB()
-{	return _authDatabase;
+{
+	if( !_authDatabase.isConnected )
+	{
+		_authDatabase.destroy();
+		_authDatabase = new DBPostgreSQL(authDBConnStr);
+	}
+	return _authDatabase;
 }
 
 string[] parseExtraFileLink(string linkPair)

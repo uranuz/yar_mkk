@@ -16,6 +16,12 @@ import
 
 import mkk_site.routing;
 
+string makeExtendedErrorMsg( Throwable error )
+{
+	import std.conv;
+	return error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(" ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
+}
+
 //Инициализация маршрутизации сайта МКК
 shared static this()
 {	
@@ -33,24 +39,28 @@ shared static this()
 	//Для сообщений об ошибках базового класса Throwable не используем шаблон страницы,
 	//поскольку нить исполнения находится в некорректном состоянии
 	Router.onError.join( (Throwable error, HTTPContext context) {
+		string extendedMsg = makeExtendedErrorMsg(error);
 		static if( isMKKSiteReleaseTarget )
 			string msg = error.msg;
 		else
-			string msg = error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(line: " ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
+			string msg = extendedMsg;
 		
-		SiteLogger.error(msg);
-		context.response ~= "<h2>500 Internal Server Error</h2>\r\n" ~ msg;
-		return true;
+		PrioriteLogger.error(extendedMsg);
+		SiteLogger.error(extendedMsg);
+		//context.response ~= "<h2>500 Internal Server Error</h2>\r\n" ~ msg;
+		throw error;
+		return true; //Dummy error
 	} );
 	
 	//Обработка "обычных" исключений
 	Router.onError.join( (Exception error, HTTPContext context) {
+		string extendedMsg = makeExtendedErrorMsg(error);
 		static if( isMKKSiteReleaseTarget )
 			string msg = error.msg;
 		else
-			string msg = error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(line: " ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
+			string msg = extendedMsg;
 		
-		SiteLogger.error(msg);
+		SiteLogger.error(extendedMsg);
 		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ msg );
 		context.response ~= tpl.getString();
@@ -70,8 +80,7 @@ shared static this()
 		context.response ~= tpl.getString();
 		return true;
 	} );
-	
-	
+
 	auto accessController = new MKK_SiteAccessController;
 	
 	Router.onPostPoll ~= (HTTPContext context, bool isMatched) {
@@ -82,13 +91,16 @@ shared static this()
 	
 	//Обработка ошибок в JSON-RPC вызовах
 	JSONRPCRouter.onError.join( (Throwable error, HTTPContext context) {
+		string extendedMsg = makeExtendedErrorMsg(error);
 		static if( isMKKSiteReleaseTarget )
 			string msg = error.msg;
 		else
-			string msg = error.msg ~ "Module: " ~ error.file ~ "(line: " ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
+			string msg = extendedMsg;
 		
-		context.response ~= `{"jsonrpc":"2.0","error":{"msg":"`
-		~ msg ~ `"}}`;
-		return true;
+		PrioriteLogger.error(extendedMsg);
+		SiteLogger.error(extendedMsg);
+		//context.response ~= `{"jsonrpc":"2.0","error":{"msg":"` ~ msg ~ `"}}`;
+		throw error;
+		return true; //Dummy return
 	} );
 }
