@@ -3,8 +3,12 @@
 	<form id="main_form" method="post">
 		<div class="e-filter t-show_tourist form-inline">
 			<label>
-				<span>Фамилия</span>
-				<input name="family_name" type="text" class="form-control" value="{{family_name}}">
+				<span>Фамилия И О</span>
+				<input name="family_name" type="text" class="form-control" value="{{family_name}}" placeholder="Смирнов">
+				<input name="given_name" type="text" maxlength="1" size="1"
+ class="form-control" value="{{given_name}}" placeholder="И">
+				<input name="patronymic" type="text" maxlength="1" size="1" class="form-control" value="{{patronymic}}" placeholder="П">
+				
 			</label>
 			<button type="submit" name="act" class="btn btn-primary">Найти</button>
 		</div>
