@@ -593,10 +593,6 @@ string netMain(HTTPContext context)
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
-		//Создаем шаблон по файлу
-	
-		auto dbase = getCommonDB();
-		
 		Optional!size_t pohodKey;
 		try {
 			pohodKey = qVars.get("key", null).to!size_t;
@@ -609,31 +605,43 @@ string netMain(HTTPContext context)
 		
 		//Если в принципе ключ является числом, то получаем данные из БД
 		if( !pohodKey.isNull )
-		{	auto pohodRS = dbase.query( 
-				`select num, kod_mkk, nomer_knigi, region_pohod, organization, region_group, vid, elem, ks, marchrut, begin_date, finish_date, chef_grupp, alt_chef, unit, prepar, stat, chef_coment, "MKK_coment", unit_neim from pohod where num=` ~ pohodKey.value.to!string ~ `;`
+		{
+			auto dbase = getCommonDB();
+			SiteLogger.info( `Запрашиваем данные о походе с идентификатором ` ~ pohodKey.value.text );
+
+			auto pohodRS = dbase.query(
+				`select num, kod_mkk, nomer_knigi, region_pohod, organization, region_group, vid, elem, ks, marchrut, begin_date, finish_date, chef_grupp, alt_chef, unit, prepar, stat, chef_coment, "MKK_coment", unit_neim from pohod where num=` ~ pohodKey.value.text
 			).getRecordSet(pohodRecFormat);
 			if( ( pohodRS !is null ) && ( pohodRS.length == 1 ) ) //Если получили одну запись -> ключ верный
+			{
 				pohodRec = pohodRS.front;
+				SiteLogger.info( `Получены данные о походе с идентификатором ` ~ pohodKey.value.text );
+			}
 			else
-				pohodKey = null;
+			{
+				string errorMsg = `<h3>Невозможно открыть редактирование похода. Не найден поход с номером ` ~ pohodKey.value.text ~ `</h3>`;
+				SiteLogger.info( errorMsg );
+				return errorMsg;
+			}
 		}
 
 		string content;
 		
 		//Определяем выполняемое страницей действие
 		if( pVars.get("action", "") == "write" )
-		{	content = изменитьДанныеПохода(context, pohodKey);
+		{
+			content = изменитьДанныеПохода(context, pohodKey);
 		}
 		else
-		{	auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
+		{
+			auto pohodForm = getPageTemplate( pageTemplatesDir ~ "edit_pohod_form.html" );
 			создатьФормуИзмененияПохода(pohodForm, pohodRec);
 			content = pohodForm.getString();
 		}
 		
 		return content;
 	}
-	
-	
+
 	else 
 	{	//Какой-то случайный аноним забрёл - отправим его на аутентификацию
 		context.response.redirect( authPagePath ~ "?redirectTo=" ~ thisPagePath );

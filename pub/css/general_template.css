@@ -312,6 +312,9 @@ body {
 	box-sizing: content-box!important;
 }
 
+.ui-dialog .ui-button-icon-only .ui-button-text {
+	padding: 0;
+}
 
 /*конец: Для jQuery UI*/
 

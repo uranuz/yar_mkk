@@ -102,51 +102,36 @@ static immutable СоотвПолейСроков[] соотвПолейСрок
 import mkk_site.ui.list_control;
 import mkk_site.ui.date_picker;
 
+import std.meta: AliasSeq, Alias;
+import std.typecons: tuple;
+
 /////////////////////////////////////
+alias PohodEnumFields = AliasSeq!(
+	tuple("vid", видТуризма, "видыТуризма"),
+	tuple("ks", категорияСложности, "категории"),
+	tuple("prepar", готовностьПохода, "готовности"),
+	tuple("stat", статусЗаявки, "статусыЗаявки")
+);
 
 string отрисоватьБлокНавигации(VM)( ref VM vm )
 {
-	auto списокВидовТуризма = bsCheckBoxList(видТуризма);
-	with( списокВидовТуризма )
-	{
-		nullText = "любой";
-		dataFieldName = "vid";
-		controlName = "pohod_filter_vid";
-		selectedValues = vm.filter.видыТуризма;
-		setNullable(false);
-	}
-	
-	auto списокКатегорий = bsCheckBoxList(категорияСложности);
-	with( списокКатегорий )
-	{
-		nullText = "любая";
-		dataFieldName = "ks";
-		controlName = "pohod_filter_ks";
-		selectedValues = vm.filter.категории;
-		setNullable(false);
-	}
-	
-	auto списокГотовностей = bsCheckBoxList(готовностьПохода);
-	with( списокГотовностей )
-	{
-		nullText = "любой";
-		dataFieldName = "prepar";
-		controlName = "pohod_filter_prepar";
-		selectedValues = vm.filter.готовности;
-		setNullable(false);
-	}
-	
-	auto списокСтатусовЗаявки = bsCheckBoxList(статусЗаявки);
-	with( списокСтатусовЗаявки )
-	{
-		nullText = "любой";
-		dataFieldName = "stat";
-		controlName = "pohod_filter_stat";
-		selectedValues = vm.filter.статусыЗаявки;
-		setNullable(false);
-	}
-	
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_navigation.html" );
+
+	foreach( fieldDescr; PohodEnumFields )
+	{
+		auto ctrl = bsCheckBoxList( fieldDescr[1] );
+		with( ctrl )
+		{
+			nullText = "любой";
+			dataFieldName = fieldDescr[0];
+			controlName = "pohod_filter_" ~ fieldDescr[0];
+			mixin( `selectedValues = vm.filter.` ~ fieldDescr[2] ~ `;` );
+			setNullable(false);
+		}
+
+		формаФильтрации.set( fieldDescr[0], ctrl.print() );
+	}
+
 	foreach( имяПоля, дата; vm.filter.сроки )
 	{
 		auto полеДаты = bsPlainDatePicker(дата);
@@ -161,11 +146,6 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 	
 	with( формаФильтрации )
 	{
-		set( "vid", списокВидовТуризма.print() );
-		set( "ks", списокКатегорий.print() );
-		set( "prepar", списокГотовностей.print() );
-		set( "stat", списокСтатусовЗаявки.print() );
-		
 		set( "region_pohod", HTMLEscapeValue(vm.filter.районПохода) );
 		if( vm.filter.сМатериалами )
 			set( "with_files", ` checked="checked"` );
@@ -179,70 +159,30 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 string отрисоватьБлокНавигацииДляПечати(VM)( ref VM vm )
 {
 	import std.array: join;
-	
-	//----------вид Туризма--------------------------------------
-	string[] строкиВидов;
-	if (vm.filter.видыТуризма.length)
-	{
-		foreach( вид; vm.filter.видыТуризма )
-		{
-			if( видТуризма.hasValue(вид) ) //Проверяет наличие значения в перечислимом типе
-				строкиВидов ~= видТуризма.getName(вид);
-		}
-	}
-	else
-	{
-		строкиВидов ~= "Все виды";
-	}
-	
-	//-------категория Сложности---------------------------------------------
-	string[] строкиКС;
-	if (vm.filter.категории.length)
-	{
-		foreach( кс; vm.filter.категории )
-		{
-			if( категорияСложности.hasValue(кс) ) //Проверяет наличие значения в перечислимом типе
-				строкиКС ~= категорияСложности.getName(кс);
-		}
-	}
-	else
-	{
-		строкиКС ~= "Все категории";
-	}
-	
-	//------готовность похода----------------------------------------------
-	string[] строкиПодготовка;
-	if (vm.filter.готовности.length)
-	{
-		foreach( гп; vm.filter.готовности )
-		{
-			if( готовностьПохода.hasValue(гп) ) //Проверяет наличие значения в перечислимом типе
-				строкиПодготовка ~= готовностьПохода.getName(гп);
-		}
-	}
-	else
-	{
-		строкиПодготовка ~= "Все походы";
-	}
-	
-	//---------статус Заявка-------------------------------------------
-	string[] строкиЗаявка;
-	if (vm.filter.статусыЗаявки.length)
-	{
-		foreach( сз; vm.filter.статусыЗаявки )
-		{	
-			if( статусЗаявки.hasValue(сз) ) //Проверяет наличие значения в перечислимом типе
-				строкиЗаявка ~= статусЗаявки.getName(сз);
-		}
-	}
-	else
-	{
-		строкиЗаявка ~= "Все походы";
-	}
-	//----------------------------------------------------
-	
+
 	auto формаФильтрации = getPageTemplate( pageTemplatesDir ~ "pohod_navigation_for_print.html" );
-	
+
+	foreach( fieldDescr; PohodEnumFields )
+	{
+		string[] selectedNames;
+		mixin( `auto FilterField = &vm.filter.` ~ fieldDescr[2] ~ `;` );
+
+		if( FilterField.length)
+		{
+			foreach( el; *FilterField )
+			{
+				if( fieldDescr[1].hasValue(el) ) //Проверяет наличие значения в перечислимом типе
+					selectedNames ~= fieldDescr[1].getName(el);
+			}
+		}
+		else
+		{
+			selectedNames ~= "Показаны все";
+		}
+
+		формаФильтрации.set( fieldDescr[0], selectedNames.join(",<br/>\r\n") );
+	}
+
 	формаФильтрации.set("print_switch_btn_text","Назад");
 	foreach( имяПоля, дата; vm.filter.сроки )
 	{
@@ -258,11 +198,6 @@ string отрисоватьБлокНавигацииДляПечати(VM)( ref
 	
 	with( формаФильтрации )
 	{
-		set( "vid", строкиВидов.join(",<br/>\r\n") );
-		set( "ks" , строкиКС.join(",<br/>\r\n") );
-		set( "prepar", строкиПодготовка.join(",<br/>\r\n") );
-		set( "stat", строкиЗаявка.join(",<br/>\r\n") );
-		
 		set( "region_pohod", HTMLEscapeValue(vm.filter.районПохода) );
 		if( vm.filter.сМатериалами )
 			set( "with_files", ` checked="checked"` );
