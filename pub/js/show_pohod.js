@@ -56,64 +56,6 @@ mkk_site.PohodNavigation = (function(_super) {
 	});
 })(webtank.ITEMControl);
 
-mkk_site.PohodFilterCheckBoxList = (function(_super) {
-	__extends(PohodFilterCheckBoxList, _super);
-
-	function PohodFilterCheckBoxList( opts ) {
-		opts = opts || {};
-		opts.controlTypeName = 'mkk_site.PohodFilterCheckBoxList';
-		_super.call(this, opts);
-
-		this._block = this._elems().filter(".e-block");
-		this._allCheckBox = $('<input>', {
-			type: "checkbox",
-			class: this.instanceHTMLClass() + ' e-all_checkbox'
-		})
-		.prependTo(this._block)
-		.on( 'click', this.onAllCheckBoxClick.bind(this) );
-
-		this._itemLabels = this._elems().filter('.e-item_label')
-			.on( 'click', this.onItemClick.bind(this) );
-		this._checkboxes = this._elems().filter('.e-item_input');
-	}
-
-	return __mixinProto( PohodFilterCheckBoxList, {
-		onAllCheckBoxClick: function() {
-			for( var i = 0; i < this._checkboxes.length; ++i ) {
-				checkbox = $(this._checkboxes[i]);
-				checkbox.prop( 'checked', this._allCheckBox.prop( 'checked' ) );
-			}
-		},
-		onItemClick: function(ev) {
-			var
-				allChecked = true,
-				allUnchecked = true,
-				checkbox;
-
-			for( var i = 0; i < this._checkboxes.length; ++i ) {
-				checkbox = $(this._checkboxes[i]);
-				if( checkbox.prop('checked') ) {
-					allUnchecked = false;
-				} else {
-					allChecked = false;
-				}
-				if( !allUnchecked && !allChecked )
-					break;
-			}
-
-			if( !allChecked && !allUnchecked ) {
-				this._allCheckBox.prop( 'indeterminate', true );
-			} else {
-				this._allCheckBox.prop( 'indeterminate', false );
-				if( allUnchecked ) {
-					this._allCheckBox.prop( 'checked', false );
-				} else if( allChecked ) {
-					this._allCheckBox.prop( 'checked', true );
-				}
-			}
-		}
-	});
-})(webtank.ITEMControl);
 
 //Инициализация страницы
 $(window.document).ready( function() {
@@ -134,7 +76,7 @@ $(window.document).ready( function() {
 
 	for( var i = 0; i < filterCtrlNames.length; ++i ) {
 		filterCtrlName = filterCtrlNames[i];
-		mkk_site[filterCtrlName] = new mkk_site.PohodFilterCheckBoxList({
+		mkk_site[filterCtrlName] = new webtank.ui.CheckBoxList({
 			controlName: filterCtrlName
 		});
 	}

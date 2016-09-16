@@ -28,7 +28,9 @@ string netMain(HTTPContext context)
 	
 	if( touristKey.isNull )
 	{
-		return "Не задан корректный идентификатор туриста";
+		static immutable errorMsg = "<h3>Не задан корректный идентификатор туриста</h3>";
+		SiteLogger.error( errorMsg );
+		return errorMsg;
 	}
 	
 	size_t curPageNum = 1; //Номер текущей страницы

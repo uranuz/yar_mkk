@@ -12,61 +12,33 @@ shared static this()
 	PageRouter.join!(netMain)(thisPagePath);
 }
 
-string participantsList( size_t pohodNum ) //функция получения списка участников
-{
-	auto rs = getPohodParticipants( pohodNum );
-	
-	static struct VM { typeof(rs) touristsRS; }
-	VM vm = VM(rs);
-	
-	if( rs.length )
-		return renderPohodParticipants(vm);
-	else
-		return `Сведения об участниках <br> отсутствуют`;
-}
-
-string linkList( size_t pohodNum ) //функция получения списка ссылок
-{
-	auto dbase = getCommonDB();
-	if ( !dbase.isConnected )
-		return null;
-	 auto рез_запроса= dbase.query(`select unnest(links) as num from pohod where pohod.num = ` ~ pohodNum.to!string ~ ` `); 
-	  
-   string result;//список ссылок	
-	
-	if( рез_запроса.recordCount < 1 ) 
-		result ~= `отсутствуют`;
-	else
-	{  //result ~=`Cписок ссылок	 `;
-		for( size_t i = 0; i < рез_запроса.recordCount; i++ )
-		{	string[] linkPair = parseExtraFileLink( рез_запроса.get(0, i, "") );
-			string link = HTMLEscapeText(linkPair[0]);
-			string linkComment = ( linkPair[1].length ? HTMLEscapeText(linkPair[1]) : link );
-			result ~=`<p><a href="` ~ link ~ `">` ~ linkComment ~ `</a></p>`;
-			
-		}
-	}        
-	           
-	return result;
-}
-
 string netMain(HTTPContext context)
-{	
-	auto rq = context.request;
-	auto rp = context.response;
+{
+	auto req = context.request;
 	
-	//auto pVars = rq.postVars;
-	auto qVars = rq.queryForm;
+	auto queryForm = req.queryForm;
 	bool isAuthorized = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );
 	
 	size_t pohodKey;
-	try {
-		pohodKey = qVars.get("key", "0").to!size_t;
+
+	if( queryForm.get("key", null).empty )
+	{
+		static immutable errorMsg = `<h3>Невозможно отобразить данные похода. Номер похода не задан</h3>`;
+		SiteLogger.error( errorMsg );
+		return errorMsg;
 	}
-	catch(std.conv.ConvException e)
-	{	pohodKey = 0; }
-	
-	
+
+	try
+	{
+		pohodKey = queryForm.get("key", null).to!size_t;
+	}
+	catch( ConvException e )
+	{
+		static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
+		SiteLogger.error( errorMsg2 );
+		return errorMsg2;
+	}
+
 	auto pohodRecord = getPohodInfo(pohodKey);
 	auto touristList = getPohodParticipants(pohodKey);
 	auto extraFileList = getExtraFileLinks(pohodKey);
@@ -216,6 +188,13 @@ left join tourist
 
 string renderPohodPage(VM)( ref VM vm )
 {
+	if( vm.pohodRec is null )
+	{
+		string errorMsg = `<h3>Невозможно отобразить данные похода с номером ` ~ vm.pohodKey.text ~ `. Поход не найден</h3>`;
+		SiteLogger.error( errorMsg );
+		return errorMsg;
+	}
+
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod.html" );
 	
 	FillAttrs fillAttrs;
@@ -230,7 +209,7 @@ string renderPohodPage(VM)( ref VM vm )
 	tpl.set( "tourist_list", renderPohodParticipants(vm) );
 	tpl.set( "file_link_list", renderExtraFileLinks(vm) );
 
-	if( vm.pohodRec && vm.isAuthorized && !vm.pohodRec.isNull("Ключ")  )
+	if( vm.isAuthorized && !vm.pohodRec.isNull("Ключ")  )
 	{
 		tpl.set( "edit_btn_href", dynamicPath ~ "edit_pohod?key=" ~ vm.pohodRec.getStr!"Ключ"(null) );
 	}
@@ -239,7 +218,6 @@ string renderPohodPage(VM)( ref VM vm )
 		tpl.set( "edit_btn_cls", "is-hidden" );
 	}
 
-	
 	return tpl.getString();
 }
 
@@ -302,16 +280,22 @@ string renderExtraFileLinks(VM)( ref VM vm )
 
 string renderPohodParticipants(VM)( ref VM vm )
 {
+	if( vm.touristsRS is null )
+	{
+		string errorMsg = `Не удалось получить список участников похода с номером ` ~ vm.pohodKey.text;
+		SiteLogger.error(errorMsg);
+		return errorMsg;
+	}
+
 	auto tpl = getPageTemplate( pageTemplatesDir ~ "pohod_tourist_item.html" );
 	
 	FillAttrs fillAttrs;
 	
 	string touristList;
 	
-	//foreach( rec; vm.touristsRS )
-	for( size_t i = 0; i < vm.touristsRS.length ; ++i )
+	foreach( rec; vm.touristsRS )
 	{
-		tpl.fillFrom( vm.touristsRS[i], fillAttrs );
+		tpl.fillFrom( rec, fillAttrs );
 		touristList ~= tpl.getString().dup;
 	}
 	
