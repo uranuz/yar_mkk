@@ -18,9 +18,13 @@ string netMain(HTTPContext context)
 
 	bool isAuthorized = context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );
 	string familyName = PGEscapeStr( rq.bodyForm.get("family_name", null) );
+	string givenyName = PGEscapeStr( rq.bodyForm.get("given_name", null) );
+	string patronName = PGEscapeStr( rq.bodyForm.get("patronymic", null) );
+	
+	
 	size_t limit = 10;
 	
-	size_t touristCount = getTouristCount(familyName);// количество строк 
+	size_t touristCount = getTouristCount(familyName,givenyName,patronName);// количество строк 
 	
 	size_t pageCount = touristCount / limit + 1; //Количество страниц
 	size_t curPageNum = 1; //Номер текущей страницы
@@ -40,13 +44,15 @@ string netMain(HTTPContext context)
 	size_t offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
 	
 
-	auto touristList = getTouristList(familyName, offset, limit);  //трансформирует ответ БД в RecordSet (набор записей)
+	auto touristList = getTouristList(familyName, givenyName, patronName, offset, limit);  //трансформирует ответ БД в RecordSet (набор записей)
 	
 	struct ViewModel
 	{
 		typeof(touristList) touristsRS;
 		bool isAuthorized;
 		string familyName;
+		string givenyName;
+		string patronName;
 		size_t curPageNum;
 		size_t touristsPerPage;
 		size_t pageCount;
@@ -57,6 +63,8 @@ string netMain(HTTPContext context)
 		touristList,
 		isAuthorized,
 		familyName,
+		givenyName,
+		patronName,
 		curPageNum,
 		limit,
 		pageCount,
@@ -82,17 +90,19 @@ static immutable touristRecFormat = RecordFormat!(
 	tuple(спортивныйРазряд, судейскаяКатегория)
 );
 
-size_t getTouristCount(string familyName)
+size_t getTouristCount(string familyName,string givenyName,string patronName)
 {
 	string queryStr = `select count(1) from tourist` 
-		~ ( familyName.length == 0 ? "" : ` where family_name ILIKE '%` ~ familyName ~ `%'` );
+		~ ( familyName.length == 0 ? "" : ` where family_name ILIKE '%` ~ familyName ~ `%'` )
+		~ (` AND given_name ILIKE '` ~ givenyName ~ `%'`)
+		~ (` AND patronymic ILIKE '` ~ patronName ~ `%'`);
 	
 	return getCommonDB()
 		.query(queryStr)
 		.get(0, 0, "0").to!size_t;
 }
 
-auto getTouristList(string familyName, size_t offset, size_t limit)
+auto getTouristList(string familyName,string givenyName,string patronName, size_t offset, size_t limit)
 {
 	string queryStr =
 `select 
@@ -115,6 +125,8 @@ auto getTouristList(string familyName, size_t offset, size_t limit)
 	razr, sud, comment 
 from tourist `
 	~ ( familyName.length == 0 ? "" : ` WHERE family_name ILIKE '%` ~ familyName ~"%'" ) 
+	~ ( givenyName.length == 0 ? "" : ` AND given_name ILIKE '` ~ givenyName ~ `%'`)
+	~ ( patronName.length == 0 ? "" : ` AND patronymic ILIKE '` ~ patronName ~ `%'`)
 	~ ` order by num LIMIT `~ limit.to!string ~ ` OFFSET `~ offset.to!string ~` `; 
 	
 	return getCommonDB()
@@ -168,6 +180,11 @@ string renderShowTourist(VM)( ref VM vm )
 	
 	tpl.set( "tourist_list", renderTouristList(vm) );
 	
+	tpl.set( "family_name", vm.familyName );
+	tpl.set( "given_name", vm.givenyName );
+	tpl.set( "patronymic", vm.patronName );
+	
 
 	return tpl.getString();
+
 }
