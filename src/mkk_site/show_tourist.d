@@ -125,8 +125,8 @@ auto getTouristList(string familyName,string givenyName,string patronName, size_
 	razr, sud, comment 
 from tourist `
 	~ ( familyName.length == 0 ? "" : ` WHERE family_name ILIKE '%` ~ familyName ~"%'" ) 
-	~ (` AND given_name ILIKE '` ~ givenyName ~ `%'`)
-	~ (` AND patronymic ILIKE '` ~ patronName ~ `%'`)
+	~ ( givenyName.length == 0 ? "" : ` AND given_name ILIKE '` ~ givenyName ~ `%'`)
+	~ ( patronName.length == 0 ? "" : ` AND patronymic ILIKE '` ~ patronName ~ `%'`)
 	~ ` order by num LIMIT `~ limit.to!string ~ ` OFFSET `~ offset.to!string ~` `; 
 	
 	return getCommonDB()

@@ -4,6 +4,7 @@ import std.conv, std.string, std.array, std.stdio;
 import std.exception : ifThrown;
 
 import mkk_site.page_devkit;
+//import std.stdio;
 
 static immutable(string) thisPagePath;
 
@@ -63,12 +64,13 @@ struct ФильтрПоходов
 	OptionalDate[string] сроки;
 	string районПохода;
 	bool сМатериалами;	
+	bool контрольДанных;
 		
 	bool естьФильтрация() @property
 	{
 		if( видыТуризма.length > 0 || категории.length > 0 || 
 			готовности.length > 0 || статусыЗаявки.length > 0 ||
-			районПохода.length > 0 || сМатериалами
+			районПохода.length > 0 || сМатериалами || контрольДанных
 		) return true;
 			
 		foreach( дата; this.сроки )
@@ -169,8 +171,16 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 		set( "region_pohod", HTMLEscapeValue(vm.filter.районПохода) );
 		if( vm.filter.сМатериалами )
 			set( "with_files", ` checked="checked"` );
+		if( vm.filter.контрольДанных )
+			set( "data_check", ` checked="checked"` );	
+			
+		if( !vm.isAuthorized )
+			set( "none", ` style="display:none" ` );	
+				
 
 		set( "pohod_list_pagination", renderPaginationTemplate( vm ) );
+		
+		
 	}
 
 	return формаФильтрации.getString();
@@ -266,6 +276,12 @@ string отрисоватьБлокНавигацииДляПечати(VM)( ref
 		set( "region_pohod", HTMLEscapeValue(vm.filter.районПохода) );
 		if( vm.filter.сМатериалами )
 			set( "with_files", ` checked="checked"` );
+			
+		if( vm.filter.контрольДанных )
+			set( "data_check", ` checked="checked"` );
+			
+			if( !vm.isAuthorized )
+			set( "none", ` style="display:none" ` );
 	}
 
 	return формаФильтрации.getString();
@@ -285,6 +301,8 @@ string отрисоватьБлокНавигацииДляПечати(VM)( ref
 	фильтрПоходов.статусыЗаявки = rq.bodyForm.array("stat").conv!(int[]).ifThrown!ConvException(null);
 	
 	фильтрПоходов.сМатериалами = rq.bodyForm.get( "with_files", null ) == "on";
+	
+	фильтрПоходов.контрольДанных = rq.bodyForm.get( "data_check", null ) == "on";
 
 	foreach( соотвПоля; соотвПолейСроков )
 	{
@@ -321,6 +339,19 @@ string getPohodFilterQueryPart(ref const(ФильтрПоходов) фильт�
 		
 	if( фильтрПоходов.статусыЗаявки.length > 0 )
 		filters ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
+		
+	if (фильтрПоходов.контрольДанных  )
+		filters ~= `(
+		  finish_date<current_date and prepar<6 OR /*поход завершён  изменить состояние подготовки*/
+    nomer_knigi!='' and stat=0            OR /*Присвоен номер маршрутки - не указано состояние по заявке*/
+    begin_date<current_date 
+     and  finish_date>current_date  
+     and prepar!=5                        OR /*Отметить, что группа на маршруте на маршруте*/
+     region_pohod=''                      OR /*несответствие не указан район похода*/
+     marchrut=''                          OR /*несответствие не указана нитка маршрута*/
+     vid is NULL                               OR /*несответствие не указан вид туризма*/
+     ks  is NULL                                  /*несответствие не указана категория сложности*/
+		)`;	
 	
 	if( фильтрПоходов.сМатериалами )
 		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
@@ -482,14 +513,48 @@ select
 	region_pohod, 
 	t_chef.fio, 
 	( coalesce(pohod.unit, '') ) as kol_tur,
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz, 
-	coalesce(marchrut::text, '') as marchrut, 
-	prepar,
-	stat 
-from pohod 
-LEFT OUTER JOIN t_chef
-	on t_chef.num = pohod.num
-`;
+	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz, `;
+	
+	
+	
+	
+	private static immutable	pohodListQueryPart_data_check = 
+				`
+				(
+
+					(CASE WHEN  finish_date<current_date and prepar<6 
+						THEN 'Поход завершён  изменить состояние подготовки. <br>' 
+							ELSE '' END)||
+					(CASE WHEN nomer_knigi!='' and stat=0  
+						THEN 'Присвоен номер маршрутки - не указано состояние по заявке. <br>'  
+							ELSE '' END)||
+					(CASE WHEN begin_date<current_date   and  finish_date>current_date  and prepar!=5 
+						THEN 'Отметить, что группа на маршруте на маршруте. <br>'
+							ELSE '' END)||	
+					(CASE WHEN region_pohod=''  
+						THEN 'Не указан район похода. <br>' 
+							ELSE '' END)||
+					(CASE WHEN marchrut='' 
+						THEN 'Не указана нитка маршрута. <br>'  
+							ELSE '' END)||
+					(CASE WHEN vid  is NULL
+						THEN 'Не указан вид туризма. <br>'  
+							ELSE '' END)||
+					(CASE WHEN ks is NULL
+						THEN 'Не указана категория сложности. <br>'  
+							ELSE '' END)  
+					) as marchrut,
+				`;
+	
+	
+	private static immutable  pohodListQueryPart_marchrut ="('Нитка маршрута: ' || coalesce(marchrut::text, '') )as marchrut,";
+	
+	private static immutable pohodListQueryPart2 =
+			`prepar,	stat 
+			from pohod 
+			LEFT OUTER JOIN t_chef
+				on t_chef.num = pohod.num
+			`;
 
 size_t getPohodCount(ФильтрПоходов filter)
 {
@@ -506,6 +571,13 @@ size_t getPohodCount(ФильтрПоходов filter)
 auto getPohodList(ФильтрПоходов filter, size_t offset, size_t limit )
 {
 	string query = pohodListQueryPart;
+	
+	if(filter.контрольДанных)
+		query~=pohodListQueryPart_data_check;
+		else	
+			query~=pohodListQueryPart_marchrut;
+	
+	query~=pohodListQueryPart2;
 	
 	if( filter.естьФильтрация )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
@@ -548,6 +620,11 @@ string renderPohodList(VM)( ref VM vm )
 	
 	FillAttrs fillAttrs;
 	fillAttrs.noEscaped = [ "Номер книги", "Сроки", "Руководитель", "Организация" ];
+	if(vm.filter.контрольДанных)
+		fillAttrs.noEscaped ~= "Маршрут";
+		
+			
+	
 	//fillAttrs.defaults = [];
 	
 	string content;
@@ -565,8 +642,9 @@ string renderPohodList(VM)( ref VM vm )
 		}
 		
 		content ~= pohodTpl.getString();
+		
 	}
-	
+	//writeln(content);
 	return content;
 }
 
