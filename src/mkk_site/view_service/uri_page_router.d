@@ -1,14 +1,10 @@
-module mkk_site.uri_page_router;
-
-import std.conv;
+module mkk_site.view_service.uri_page_router;
 
 import webtank.net.http.context, webtank.common.event, webtank.net.http.handler, webtank.net.http.http;
 import webtank.net.uri_pattern;
 
-import mkk_site.utils;
-
 ///Маршрутизатор запросов к страницам сайта по URI
-class MKK_Site_URIPageRouter: EventBasedHTTPHandler
+class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 {	
 	this( string URIPatternStr, string[string] regExprs, string[string] defaults )
 	{	_uriPattern = new URIPattern(URIPatternStr, regExprs, defaults);
@@ -43,28 +39,8 @@ class MKK_Site_URIPageRouter: EventBasedHTTPHandler
 	
 	void renderMessageBody(PageHandler handler, HTTPContext context)
 	{
-		auto commonDB = getCommonDB();
-		auto authDB = getAuthDB();
-		
-		if( !commonDB.isConnected || !authDB.isConnected )
-			context.response.write("<h3>Ошибка соединения с базой данных!!!</h3>");
-			
-		import webtank.templating.plain_templater: PlainTemplater;
-		import mkk_site.site_data;
-		import mkk_site.templating;
-		
-		PlainTemplater tpl;
-		
-		if( context.request.bodyForm.get("for_print", null) == "on" )
-			tpl = getPageTemplate(printGeneralTemplateFileName);
-		else
-			tpl = getGeneralTemplate(context);
-		
-		string content = handler(context);
-
-		tpl.set( "content", content );
 		context.response.tryClearBody();
-		context.response.write( tpl.getString() );
+		context.response.write( handler(context) );
 	}
 
 	struct PageRoute
@@ -75,13 +51,13 @@ class MKK_Site_URIPageRouter: EventBasedHTTPHandler
 	template join(alias Method)
 	{
 		import std.functional: toDelegate;
-		MKK_Site_URIPageRouter join(string URIPatternStr, string[string] regExprs, string[string] defaults)
+		MKK_ViewService_URIPageRouter join(string URIPatternStr, string[string] regExprs, string[string] defaults)
 		{	auto uriPattern = new URIPattern(URIPatternStr, regExprs, defaults);
 			_pageRoutes ~= PageRoute( uriPattern, toDelegate( &Method ) );
 			return this;
 		}
 		
-		MKK_Site_URIPageRouter join(string URIPatternStr, string[string] defaults = null)
+		MKK_ViewService_URIPageRouter join(string URIPatternStr, string[string] defaults = null)
 		{	return this.join!(Method)( URIPatternStr, null, defaults );
 		}
 	}

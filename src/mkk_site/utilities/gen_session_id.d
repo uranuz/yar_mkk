@@ -1,4 +1,4 @@
-module mkk_site.utilities.gen_pw_hash;
+module mkk_site.utilities.gen_session_id;
 
 ///Утилита для генерации хэша пароля пользователя для сайта МКК
 
