@@ -158,9 +158,7 @@ string отрисоватьБлокНавигации(VM)( ref VM vm )
 			set( "none", ` style="display:none" ` );	
 				
 
-		set( "pohod_list_pagination", renderPaginationTemplate( vm ) );
-		
-		
+		set( "pohod_list_pagination", renderPaginationTemplate(vm) );
 	}
 
 	return формаФильтрации.getString();
@@ -276,17 +274,18 @@ string getPohodFilterQueryPart(ref const(ФильтрПоходов) фильт�
 		filters ~= `stat in(` ~ фильтрПоходов.статусыЗаявки.conv!(string[]).join(", ") ~ `)`;
 		
 	if (фильтрПоходов.контрольДанных  )
-		filters ~= `(
-		  finish_date<current_date and prepar<6 OR /*поход завершён  изменить состояние подготовки*/
-    nomer_knigi!='' and stat=0            OR /*Присвоен номер маршрутки - не указано состояние по заявке*/
-    begin_date<current_date 
-     and  finish_date>current_date  
-     and prepar!=5                        OR /*Отметить, что группа на маршруте на маршруте*/
-     region_pohod=''                      OR /*несответствие не указан район похода*/
-     marchrut=''                          OR /*несответствие не указана нитка маршрута*/
-     vid is NULL                               OR /*несответствие не указан вид туризма*/
-     ks  is NULL                                  /*несответствие не указана категория сложности*/
-		)`;	
+		filters ~=
+`(
+	finish_date < current_date and prepar < 6 OR /*поход завершён  изменить состояние подготовки*/
+	nomer_knigi != '' and stat = 0            OR /*Присвоен номер маршрутки - не указано состояние по заявке*/
+	begin_date < current_date
+	and finish_date > current_date
+	and prepar != 5                        OR /*Отметить, что группа на маршруте на маршруте*/
+	region_pohod = ''                      OR /*несответствие не указан район похода*/
+	marchrut = ''                          OR /*несответствие не указана нитка маршрута*/
+	vid is NULL                               OR /*несответствие не указан вид туризма*/
+	ks is NULL                                  /*несответствие не указана категория сложности*/
+)`;
 	
 	if( фильтрПоходов.сМатериалами )
 		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
@@ -412,8 +411,7 @@ static immutable pohodRecFormat = RecordFormat!(
 );
 
 private static immutable pohodListQueryPart =
-`
-with 
+`with
 t_chef as (
 	select 
 		pohod.num, /*номер похода*/
@@ -430,9 +428,9 @@ t_chef as (
 		on pohod.chef_grupp = T.num
 )
 
-select 
+select
 	pohod.num,
-	( coalesce(kod_mkk,'000-00') || '<br>' || coalesce(nomer_knigi, '00-00') ) as nomer_knigi,   
+	( coalesce(kod_mkk,'000-00') || '<br>' || coalesce(nomer_knigi, '00-00') ) as nomer_knigi,
 	(
 		date_part('day', begin_date) || '.' ||
 		date_part('month', begin_date) || '.' ||
@@ -441,55 +439,51 @@ select
 		date_part('day', finish_date) || '.' ||
 		date_part('month', finish_date) || '.' ||
 		date_part('YEAR', finish_date)
-	) as dat,  
+	) as dat,
 	vid,
 	ks,
 	elem,
-	region_pohod, 
-	t_chef.fio, 
+	region_pohod,
+	t_chef.fio,
 	( coalesce(pohod.unit, '') ) as kol_tur,
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz, `;
+	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz,
+`;
+	
+private static immutable pohodListQueryPart_data_check =
+`(
+	(CASE WHEN finish_date < current_date and prepar < 6
+		THEN 'Поход завершён изменить состояние подготовки. <br>'
+			ELSE '' END) ||
+	(CASE WHEN nomer_knigi != '' and stat = 0
+		THEN 'Присвоен номер маршрутки - не указано состояние по заявке. <br>'
+			ELSE '' END) ||
+	(CASE WHEN begin_date < current_date and finish_date > current_date and prepar != 5
+		THEN 'Отметить, что группа на маршруте на маршруте. <br>'
+			ELSE '' END) ||
+	(CASE WHEN region_pohod = ''
+		THEN 'Не указан район похода. <br>'
+			ELSE '' END) ||
+	(CASE WHEN marchrut = ''
+		THEN 'Не указана нитка маршрута. <br>'
+			ELSE '' END) ||
+	(CASE WHEN vid is NULL
+		THEN 'Не указан вид туризма. <br>'
+			ELSE '' END) ||
+	(CASE WHEN ks is NULL
+		THEN 'Не указана категория сложности. <br>'
+			ELSE '' END)
+) as marchrut,
+`;
 	
 	
-	
-	
-	private static immutable	pohodListQueryPart_data_check = 
-				`
-				(
+private static immutable pohodListQueryPart_marchrut = "('Нитка маршрута: ' || coalesce(marchrut::text, '') ) as marchrut,";
 
-					(CASE WHEN  finish_date<current_date and prepar<6 
-						THEN 'Поход завершён  изменить состояние подготовки. <br>' 
-							ELSE '' END)||
-					(CASE WHEN nomer_knigi!='' and stat=0  
-						THEN 'Присвоен номер маршрутки - не указано состояние по заявке. <br>'  
-							ELSE '' END)||
-					(CASE WHEN begin_date<current_date   and  finish_date>current_date  and prepar!=5 
-						THEN 'Отметить, что группа на маршруте на маршруте. <br>'
-							ELSE '' END)||	
-					(CASE WHEN region_pohod=''  
-						THEN 'Не указан район похода. <br>' 
-							ELSE '' END)||
-					(CASE WHEN marchrut='' 
-						THEN 'Не указана нитка маршрута. <br>'  
-							ELSE '' END)||
-					(CASE WHEN vid  is NULL
-						THEN 'Не указан вид туризма. <br>'  
-							ELSE '' END)||
-					(CASE WHEN ks is NULL
-						THEN 'Не указана категория сложности. <br>'  
-							ELSE '' END)  
-					) as marchrut,
-				`;
-	
-	
-	private static immutable  pohodListQueryPart_marchrut ="('Нитка маршрута: ' || coalesce(marchrut::text, '') )as marchrut,";
-	
-	private static immutable pohodListQueryPart2 =
-			`prepar,	stat 
-			from pohod 
-			LEFT OUTER JOIN t_chef
-				on t_chef.num = pohod.num
-			`;
+private static immutable pohodListQueryPart2 =
+`	prepar, stat
+	from pohod
+	LEFT OUTER JOIN t_chef
+		on t_chef.num = pohod.num
+`;
 
 size_t getPohodCount(ФильтрПоходов filter)
 {
@@ -507,19 +501,19 @@ auto getPohodList(ФильтрПоходов filter, size_t offset, size_t limit
 {
 	string query = pohodListQueryPart;
 	
-	if(filter.контрольДанных)
-		query~=pohodListQueryPart_data_check;
-		else	
-			query~=pohodListQueryPart_marchrut;
+	if( filter.контрольДанных )
+		query ~= pohodListQueryPart_data_check;
+	else
+		query ~= pohodListQueryPart_marchrut;
 	
-	query~=pohodListQueryPart2;
+	query ~= pohodListQueryPart2;
 	
 	if( filter.естьФильтрация )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 		
 	query ~= ` order by pohod.begin_date desc offset ` ~ offset.to!string ~ ` limit ` ~ limit.to!string;
 	
-	 return getCommonDB()
+	return getCommonDB()
 		.query(query)
 		.getRecordSet(pohodRecFormat);
 }
@@ -557,9 +551,7 @@ string renderPohodList(VM)( ref VM vm )
 	fillAttrs.noEscaped = [ "Номер книги", "Сроки", "Руководитель", "Организация" ];
 	if(vm.filter.контрольДанных)
 		fillAttrs.noEscaped ~= "Маршрут";
-		
-			
-	
+
 	//fillAttrs.defaults = [];
 	
 	string content;

@@ -148,8 +148,8 @@ public:
 		//Делаем запрос к БД за информацией о сессии
 		auto session_QRes = dbase.query(
 			//Получим адрес машины и тип клиентской программы, если срок действия не истек или ничего
-			` select client_address, user_agent from session `
-			~ ` where sid = '` ~ Base64URL.encode( sessionId ) ~ `' and current_timestamp < "expires";`
+			`select client_address, user_agent from session where sid = '`
+			~ Base64URL.encode( sessionId ) ~ `' and current_timestamp < "expires";`
 		);
 		
 		if( session_QRes.recordCount != 1 || session_QRes.fieldCount != 2 )
@@ -162,12 +162,11 @@ public:
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto user_QRes = dbase.query(
-			` select U.num, U.email, U.login, U.name, U.user_group `
-			` from session `
-			` join site_user as U `
-			` on U.num = site_user_num `
-			` where session.sid = '` 
-			~ Base64URL.encode( sessionId ) ~ `';`
+`select U.num, U.email, U.login, U.name, U.user_group
+from session
+join site_user as U
+	on U.num = site_user_num
+where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 		);
 		
 		if( (user_QRes.recordCount != 1) && (user_QRes.fieldCount != 5) )
@@ -209,10 +208,9 @@ public:
 		
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
-			` select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email `
-			` from site_user `
-			` where login='`
-			~ PGEscapeStr( login ) ~ `';`
+`select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email
+from site_user
+where login = '` ~ PGEscapeStr( login ) ~ `';`
 		);
 		
 		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
@@ -330,9 +328,9 @@ bool changeUserPassword(bool doPwCheck = true)( string login, string oldPassword
 
 	SiteLogger.info( `Получаем данные о пользователе из БД`, `Смена пароля пользователя` );
 	auto userQueryRes = dbase.query(
-		` select num, pw_hash, pw_salt, reg_timestamp `
-		` from site_user `
-		` where login='` ~ PGEscapeStr( login ) ~ `';`
+`select num, pw_hash, pw_salt, reg_timestamp
+from site_user
+where login = '` ~ PGEscapeStr( login ) ~ `';`
 	);
 	SiteLogger.info( `Запрос данных о пользователе успешно завершен`, `Смена пароля пользователя` );
 
@@ -362,10 +360,9 @@ bool changeUserPassword(bool doPwCheck = true)( string login, string oldPassword
 
 	SiteLogger.info( `Выполняем запрос на смену пароля`, `Смена пароля пользователя` );
 	auto changePwQueryRes = dbase.query(
-		` update site_user set pw_hash = '` ~ PGEscapeStr( pwHashStr ) ~ `', `
-		` pw_salt = '` ~ PGEscapeStr( pwSaltStr ) ~ `' `
-		` where login='` ~ PGEscapeStr( login ) ~ `' `
-		` returning 'pw_changed';`
+`update site_user set pw_hash = '` ~ PGEscapeStr( pwHashStr ) ~ `', pw_salt = '` ~ PGEscapeStr( pwSaltStr ) ~ `'
+where login = '` ~ PGEscapeStr( login ) ~ `'
+returning 'pw_changed';`
 	);
 
 	SiteLogger.info( `Проверка успешности выполнения запроса смены пароля`, `Смена пароля пользователя` );

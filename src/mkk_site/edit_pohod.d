@@ -286,7 +286,7 @@ void создатьФормуИзмененияПохода(
 					~ ( touristRec.isNull("birth_year") ? null : ", " ~ touristRec.getStr!"birth_year"() ~ " г.р." );
 
 				auto jsonRec = touristRec.getStdJSON();
-				recordStr = toJSON( &jsonRec );
+				recordStr = toJSON(jsonRec);
 			}
 			else
 			{

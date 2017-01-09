@@ -117,7 +117,7 @@ PlainTemplater getGeneralTemplate(HTTPContext context)
 
 	tpl.set( "pohod_filter_menu_sections", renderPohodFilterMenuSections() );
 	tpl.set( "pohod_filter_menu_inputs", renderPohodFilterMenuInputs() );
-	tpl.set( "pohod_filter_menu_data", toJSON( &pohodFiltersJSON ) );
+	tpl.set( "pohod_filter_menu_data", toJSON(pohodFiltersJSON) );
 	
 	return tpl;
 }
