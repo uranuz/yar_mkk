@@ -90,12 +90,24 @@ static immutable touristRecFormat = RecordFormat!(
 	tuple(спортивныйРазряд, судейскаяКатегория)
 );
 
-size_t getTouristCount(string familyName,string givenyName,string patronName)
+size_t getTouristCount(string familyName, string givenyName, string patronName)
 {
-	string queryStr = `select count(1) from tourist` 
-		~ ( familyName.length == 0 ? "" : ` where family_name ILIKE '%` ~ familyName ~ `%'` )
-		~ (` AND given_name ILIKE '` ~ givenyName ~ `%'`)
-		~ (` AND patronymic ILIKE '` ~ patronName ~ `%'`);
+	import std.array: join;
+	import std.range: empty;
+
+	string[] filters;
+
+	if( !familyName.empty )
+		filters ~= `family_name ILIKE '%` ~ familyName ~ `%'`;
+
+	if( !givenyName.empty )
+		filters ~= `given_name ILIKE '` ~ givenyName ~ `%'`;
+
+	if( !patronName.empty )
+		filters ~= `patronymic ILIKE '` ~ patronName ~ `%'`;
+
+	string queryStr = `select count(1) from tourist`
+		~ ( filters.empty ? "" : ` where ` ~ filters.join(" and ") );
 	
 	return getCommonDB()
 		.query(queryStr)
