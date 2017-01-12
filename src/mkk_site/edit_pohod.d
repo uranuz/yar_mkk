@@ -67,7 +67,7 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	import std.stdio;
 	int perPage = 10;
 	
-	string addition_zapros = ` where family_name ILIKE '`;	
+	string addition_zapros = ` where family_name ILIKE '`;
 	addition_zapros ~= PGEscapeStr(фамилия) ~ `%' `;
 
 	if (имя.length > 0) 
@@ -100,10 +100,8 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	auto queryRes = dbase.query(zapros);
 	auto queryRes_count = dbase.query(zapros_count);
 	uint col_str = queryRes_count.get(0, 0, "0").to!uint;// количество строк 
-	
-	import std.math: ceil;
-	
-	string message = `Страниц ` ~ (ceil(cast(float) col_str/perPage)).to!string ~ `  Туристов ` ~ col_str.to!string;
+
+	string message = `Страниц ` ~ (col_str / perPage + 1).to!string ~ `  Туристов ` ~ col_str.to!string;
 	auto rs = queryRes.getRecordSet(shortTouristRecFormat);
 
 	JSONValue[string] tmp;
