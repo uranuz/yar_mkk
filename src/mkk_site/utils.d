@@ -1,11 +1,8 @@
 module mkk_site.utils;
 
-import std.file, std.algorithm : endsWith;
+import webtank.net.http.context;
 
-import webtank.db.database, webtank.net.http.context;
-
-import mkk_site.site_data;
-//import mkk_site;
+//import mkk_site.site_data;
 
 string buildNormalPath(T...)(T args)
 {
@@ -22,38 +19,6 @@ string buildNormalPath(T...)(T args)
 	}
 	
 	return result;
-}
-
-import webtank.db.database, webtank.db.postgresql;
-
-IDatabase _commonDatabase;
-IDatabase _authDatabase;
-
-static this()
-{
-	//Создаем объекты подключений при старте нити исполнения
-	_commonDatabase = new DBPostgreSQL(commonDBConnStr);
-	_authDatabase = new DBPostgreSQL(authDBConnStr);
-}
-
-IDatabase getCommonDB()
-{
-	if( !_commonDatabase.isConnected )
-	{
-		_commonDatabase.destroy();
-		_commonDatabase = new DBPostgreSQL(commonDBConnStr);
-	}
-	return _commonDatabase;
-}
-
-IDatabase getAuthDB()
-{
-	if( !_authDatabase.isConnected )
-	{
-		_authDatabase.destroy();
-		_authDatabase = new DBPostgreSQL(authDBConnStr);
-	}
-	return _authDatabase;
 }
 
 string[] parseExtraFileLink(string linkPair)
@@ -74,7 +39,6 @@ string[] parseExtraFileLink(string linkPair)
 }
 
 import std.datetime: Date;
-
 string rusFormat(Date date)
 {
 	import std.conv: text;

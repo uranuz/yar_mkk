@@ -12,6 +12,7 @@ shared static this()
 {	thisPagePath = dynamicPath ~ "show_pohod";
 	PageRouter.join!(netMain)(thisPagePath);
 	JSONRPCRouter.join!(participantsList);
+	JSONRPCRouter.join!(partyInfo);
 }
 
 
@@ -54,6 +55,60 @@ on tourist.num = tourist_nums.num
 	return result;
 }
 
+static immutable participantInfoRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "num",
+	string, "family_name",
+	string, "given_name",
+	string, "patronymic",
+	int, "birth_year"
+)();
+
+static immutable briefPohodInfoRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "num",
+	string, "mkk_code",
+	string, "book_num",
+	string, "pohod_region"
+)();
+
+import std.json: toJSON, JSONValue;
+
+JSONValue partyInfo(size_t pohodNum)
+{
+	import std.json: toJSON;
+	auto dbase = getCommonDB();
+
+	auto partyList = dbase.query(`
+with tourist_num as (
+	select unnest(unit_neim) as num
+	from pohod where pohod.num = ` ~ pohodNum.text ~ `
+)
+select
+	tourist.num,
+	tourist.family_name,
+	tourist.given_name,
+	tourist.patronymic,
+	tourist.birth_year
+from tourist_num
+left join tourist
+	on tourist.num = tourist_num.num
+	`).getRecordSet(participantInfoRecFormat);
+
+	auto pohodInfo = dbase.query(`
+select
+	pohod.num as num,
+	pohod.kod_mkk as mkk_code,
+	pohod.nomer_knigi as book_num,
+	pohod.region_pohod as pohod_region
+from pohod where pohod.num = ` ~ pohodNum.text ~ `
+	`).getRecordSet(briefPohodInfoRecFormat);
+
+	JSONValue jsonResult;
+	jsonResult["pohodInfo"] = pohodInfo.getStdJSON();
+	jsonResult["partyList"] = partyList.getStdJSON();
+
+	return jsonResult;
+}
+
 
 struct ФильтрПоходов
 {
@@ -85,9 +140,9 @@ struct ФильтрПоходов
 
 
 
-struct СоотвПолейСроков { 
-		string имяВФорме; 
-		string имяВБазе; 
+struct СоотвПолейСроков {
+		string имяВФорме;
+		string имяВБазе;
 		string опСравн;
 };
 	

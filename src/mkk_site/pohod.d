@@ -24,7 +24,7 @@ string netMain(HTTPContext context)
 	if( queryForm.get("key", null).empty )
 	{
 		static immutable errorMsg = `<h3>Невозможно отобразить данные похода. Номер похода не задан</h3>`;
-		SiteLogger.error( errorMsg );
+		SiteLoger.error( errorMsg );
 		return errorMsg;
 	}
 
@@ -35,7 +35,7 @@ string netMain(HTTPContext context)
 	catch( ConvException e )
 	{
 		static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
-		SiteLogger.error( errorMsg2 );
+		SiteLoger.error( errorMsg2 );
 		return errorMsg2;
 	}
 
@@ -191,7 +191,7 @@ string renderPohodPage(VM)( ref VM vm )
 	if( vm.pohodRec is null )
 	{
 		string errorMsg = `<h3>Невозможно отобразить данные похода с номером ` ~ vm.pohodKey.text ~ `. Поход не найден</h3>`;
-		SiteLogger.error( errorMsg );
+		SiteLoger.error( errorMsg );
 		return errorMsg;
 	}
 
@@ -283,7 +283,7 @@ string renderPohodParticipants(VM)( ref VM vm )
 	if( vm.touristsRS is null )
 	{
 		string errorMsg = `Не удалось получить список участников похода с номером ` ~ vm.pohodKey.text;
-		SiteLogger.error(errorMsg);
+		SiteLoger.error(errorMsg);
 		return errorMsg;
 	}
 

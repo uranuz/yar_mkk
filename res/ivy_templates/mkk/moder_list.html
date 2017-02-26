@@ -1,0 +1,48 @@
+expr {
+	import mkk.utils;
+
+	expr {*
+		<div class="e-block t-mkk-moderList">
+			<h2>Модераторы</h2>
+			<div class="e-block t-mkk_table">
+				<div class="e-scroll_wrapper t-mkk_table">
+					<table class="e-table t-mkk_table">
+						<thead class="e-header_body t-mkk_table">
+							<tr>
+							{%
+								repeat title in ["Имя", "E-mail", "Статус"] {*
+									<th>{{ title }}</th>
+								*}
+							}
+							</tr>
+						</thead>
+						<tbody class="e-content_body t-mkk_table">
+						{%
+							var i: 0;
+							repeat it in moder_list.d {*
+								<tr>
+									<td>
+									{=
+										var touristKey: {= mkk.utils.rsGet rs: moder_list row: i field: "tourist_num" };
+										if touristKey == null {=
+											mkk.utils.rsGet rs: moder_list row: i field: "name"
+										} else {*
+											<a href="{% expr "/dyn/show_pohod_for_tourist/?key="; expr touristKey }">
+												{= mkk.utils.rsGet rs: moder_list row: i field: "name" }
+											</a>
+										*}
+									}
+									</td>
+									<td>{= mkk.utils.rsGet rs: moder_list row: i field: "email" }</td>
+									<td>{= mkk.utils.rsGet rs: moder_list row: i field: "status" }</td>
+								</tr>
+								{= set i: i + 1 }
+							*};
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	*};
+}

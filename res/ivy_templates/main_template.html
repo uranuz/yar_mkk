@@ -1,11 +1,32 @@
 expr {*
+	{= def rsGet {=
+			def.kv rs, field, row;
+			def.body {=
+				var i: 0, fieldIndex: 0;
+				for format in rs.f {=
+					if format.n == field {=
+						set fieldIndex: i;
+					};
+					set i: i + 1;
+				};
+				at {= at rs.d row } fieldIndex;
+			}
+		}
+	}
 <html>
 	<head>
-		<title>{= site_title }</title>
+		<title>{{ site_title }}</title>
 		<meta charset="utf-8"/>
 	</head>
 	<body>
-		{= query_result }
+		{=
+			var j: 0;
+			repeat it in query_result.partyList.d {%
+				set j: j + 1;
+				rsGet rs: query_result.partyList field: "given_name" row: j-1;
+				rsGet rs: query_result.partyList field: "family_name" row: j-1;
+			}
+		}
 	</body>
 </html>
-*}
+*};

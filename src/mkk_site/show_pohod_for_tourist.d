@@ -29,7 +29,7 @@ string netMain(HTTPContext context)
 	if( touristKey.isNull )
 	{
 		static immutable errorMsg = "<h3>Не задан корректный идентификатор туриста</h3>";
-		SiteLogger.error( errorMsg );
+		SiteLoger.error( errorMsg );
 		return errorMsg;
 	}
 	

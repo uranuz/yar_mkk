@@ -1,12 +1,12 @@
 module mkk_site.logging;
 
-import webtank.common.logger;
+import webtank.common.loger;
 
-import mkk_site.site_data;
+import mkk_site.site_data_old;
 import mkk_site.logging_init;
 
 ///Основной объект для ведения журнала сайта
-__gshared Logger SiteLogger;
+__gshared Loger SiteLoger;
 
 ///Объект для приоритетных записей журнала сайта
-__gshared Logger PrioriteLogger;
+__gshared Loger PrioriteLoger;

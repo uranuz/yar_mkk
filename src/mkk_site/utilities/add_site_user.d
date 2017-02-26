@@ -8,7 +8,7 @@ import std.uuid : randomUUID;
 
 import webtank.db.postgresql;
 
-import mkk_site.access_control, mkk_site.site_data;
+import mkk_site.access_control, mkk_site.site_data_old;
 
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками

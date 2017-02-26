@@ -3,6 +3,9 @@ module mkk_site.view_service.uri_page_router;
 import webtank.net.http.context, webtank.common.event, webtank.net.http.handler, webtank.net.http.http;
 import webtank.net.uri_pattern;
 
+import mkk_site.view_service.service: Service;
+import ivy.interpreter_data;
+
 ///Маршрутизатор запросов к страницам сайта по URI
 class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 {	
@@ -15,6 +18,7 @@ class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 	}
 	
 	alias string delegate(HTTPContext) PageHandler;
+	alias TDataNode = DataNode!string;
 	
 	override HTTPHandlingResult customProcessRequest( HTTPContext context )
 	{	auto uriData = _uriPattern.match(context.request.uri.path);
@@ -40,7 +44,19 @@ class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 	void renderMessageBody(PageHandler handler, HTTPContext context)
 	{
 		context.response.tryClearBody();
-		context.response.write( handler(context) );
+
+		auto generalTpl = Service.templateCache.getByModuleName("mkk.general_template");
+		TDataNode payload;
+		payload["vpaths"] = TDataNode(Service.virtualPaths);
+		payload["content"] = handler(context);
+		payload["auth_state_cls"] = "";
+		payload["pohod_filter_menu_inputs"] = "";
+		payload["pohod_filter_menu_data"] = "";
+		payload["pohod_filter_menu_sections"] = "";
+		payload["auth_popdown_btn_title"] = "";
+		payload["auth_popdown_btn_text"] = "";
+
+		context.response.write( generalTpl.run(payload).str );
 	}
 
 	struct PageRoute

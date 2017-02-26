@@ -7,9 +7,9 @@ import
 	webtank.net.http.http;
 
 import 
-	mkk_site.site_data, 
-	mkk_site.access_control, 
-	mkk_site.utils, 
+	mkk_site.site_data_old,
+	mkk_site.access_control,
+	mkk_site.utils,
 	mkk_site.uri_page_router,
 	mkk_site.logging,
 	mkk_site.templating;
@@ -45,8 +45,8 @@ shared static this()
 		else
 			string msg = extendedMsg;
 		
-		PrioriteLogger.error(extendedMsg);
-		SiteLogger.error(extendedMsg);
+		PrioriteLoger.error(extendedMsg);
+		SiteLoger.error(extendedMsg);
 		//context.response ~= "<h2>500 Internal Server Error</h2>\r\n" ~ msg;
 		throw error;
 		return true; //Dummy error
@@ -60,7 +60,7 @@ shared static this()
 		else
 			string msg = extendedMsg;
 		
-		SiteLogger.error(extendedMsg);
+		SiteLoger.error(extendedMsg);
 		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>500 Internal Server Error</h2>\r\n" ~ msg );
 		context.response ~= tpl.getString();
@@ -68,12 +68,12 @@ shared static this()
 	} );
 
 	PageRouter.onPrePoll ~= (HTTPContext context) {
-		PrioriteLogger.info( "context.request.headers: \r\n" ~ context.request.headers.getString() );
+		PrioriteLoger.info( "context.request.headers: \r\n" ~ context.request.headers.getString() );
 	};
 	
 	//Обработка HTTP ошибок
 	PageRouter.onError.join( (HTTPException error, HTTPContext context) {
-		SiteLogger.warn("request.path: " ~ context.request.uri.path ~ "\r\n" ~ error.to!string);
+		SiteLoger.warn("request.path: " ~ context.request.uri.path ~ "\r\n" ~ error.to!string);
 		auto tpl = getGeneralTemplate(context);
 		tpl.set( "content", "<h2>" ~ error.HTTPStatusCode.to!string
 			~ " " ~ HTTPReasonPhrases.get(error.HTTPStatusCode, null) ~ "</h2>\r\n" ~ error.msg );
@@ -97,8 +97,8 @@ shared static this()
 		else
 			string msg = extendedMsg;
 		
-		PrioriteLogger.error(extendedMsg);
-		SiteLogger.error(extendedMsg);
+		PrioriteLoger.error(extendedMsg);
+		SiteLoger.error(extendedMsg);
 		//context.response ~= `{"jsonrpc":"2.0","error":{"msg":"` ~ msg ~ `"}}`;
 		throw error;
 		return true; //Dummy return

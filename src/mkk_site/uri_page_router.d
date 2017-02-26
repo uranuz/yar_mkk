@@ -5,7 +5,7 @@ import std.conv;
 import webtank.net.http.context, webtank.common.event, webtank.net.http.handler, webtank.net.http.http;
 import webtank.net.uri_pattern;
 
-import mkk_site.utils;
+import mkk_site.utils, mkk_site.db_utils;
 
 ///Маршрутизатор запросов к страницам сайта по URI
 class MKK_Site_URIPageRouter: EventBasedHTTPHandler
@@ -50,7 +50,7 @@ class MKK_Site_URIPageRouter: EventBasedHTTPHandler
 			context.response.write("<h3>Ошибка соединения с базой данных!!!</h3>");
 			
 		import webtank.templating.plain_templater: PlainTemplater;
-		import mkk_site.site_data;
+		import mkk_site.site_data_old;
 		import mkk_site.templating;
 		
 		PlainTemplater tpl;

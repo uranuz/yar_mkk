@@ -1,6 +1,6 @@
 ///Комплект модулей для разработки страниц сайта.
 ///Импортирует основные модули, которые могут быть полезны для созданиия страниц сайта
-module mkk_site.page_devkit;
+module mkk_site.main_service.devkit;
 
 //Импортируем модули библиотеки
 public import
@@ -17,15 +17,9 @@ public import
 	webtank.net.http.json_rpc_handler,
 	webtank.net.http.handler,
 	webtank.net.utils,
-	webtank.net.uri,
-	webtank.templating.plain_templater,
-	webtank.templating.plain_templater_datctrl;
+	webtank.net.uri;
 
 //Импорт модулей сайта
 public import
-	mkk_site.site_data_old,
-	mkk_site.logging,
-	mkk_site.routing,
-	mkk_site.templating,
-	mkk_site.utils,
-	mkk_site.db_utils;
+	mkk_site.main_service.service,
+	mkk_site.utils;

@@ -1,0 +1,33 @@
+expr {
+	import mkk.utils;
+
+	expr {*
+		<div class="e-block t-mkk-indexPage">
+			<h2>Добро пожаловать на сайт!</h2>
+			<table>
+				<thead>
+					<tr>
+					{%
+						repeat title in ["Имя", "E-mail", "Статус"] {*
+							<th>{{ title }}</th>
+						*}
+					}
+					</tr>
+				</thead>
+				<tbody>
+				{%
+					var i: 0;
+					repeat it in pohod_list.d {*
+						<tr>
+							<td>{= mkk.utils.rsGet rs: pohod_list row: i field: "name" }</td>
+							<td>{= mkk.utils.rsGet rs: pohod_list row: i field: "email" }</td>
+							<td>{= mkk.utils.rsGet rs: pohod_list row: i field: "status" }</td>
+						</tr>
+						{= set i: i + 1 }
+					*};
+				}
+				</tbody>
+			</table>
+		</div>
+	*};
+}

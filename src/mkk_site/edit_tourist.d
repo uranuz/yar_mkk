@@ -97,23 +97,23 @@ string создатьТаблицуПохожихТуристов(
 
 string netMain(HTTPContext context)
 {
-	SiteLogger.info("netMain debug 0");
+	SiteLoger.info("netMain debug 0");
 	auto rq = context.request;
 	
 	auto pVars = context.request.bodyForm;
 	auto qVars = context.request.queryForm;
-	SiteLogger.info("netMain debug 1");
+	SiteLoger.info("netMain debug 1");
 	
 	bool isAuthorized = 
 		context.user.isAuthenticated && 
 		( context.user.isInRole("moder") || context.user.isInRole("admin") );
 		
-	SiteLogger.info("netMain debug 2");
+	SiteLoger.info("netMain debug 2");
 	
 	if( isAuthorized )
 	{	//Пользователь авторизован делать бесчинства
 		//Создаем общий шаблон страницы
-		SiteLogger.info("netMain debug 3");
+		SiteLoger.info("netMain debug 3");
 		//Создаём подключение к БД
 		auto dbase = getCommonDB();
 		
@@ -127,7 +127,7 @@ string netMain(HTTPContext context)
 		}
 		catch(std.conv.ConvException e)
 		{	isTouristKeyAccepted = false; }
-		SiteLogger.info("netMain debug 4");
+		SiteLoger.info("netMain debug 4");
 		
 		string content;
 		
@@ -139,19 +139,19 @@ string netMain(HTTPContext context)
 		}
 		else
 		{	
-			SiteLogger.info("Готовимся к выводу формы туриста!");
+			SiteLoger.info("Готовимся к выводу формы туриста!");
 			auto touristRec = EditTourist.getTourist(touristKey);
 			
-			SiteLogger.info("Запрос данных о туристе завершен!");
+			SiteLoger.info("Запрос данных о туристе завершен!");
 			
 			if( touristRec )
-				SiteLogger.info("Данные о туристе получены!");
+				SiteLoger.info("Данные о туристе получены!");
 			
 			content = EditTouristView.renderEditForm(touristRec);
-			SiteLogger.info("Вывод формы туриста завершен!");
+			SiteLoger.info("Вывод формы туриста завершен!");
 		}
 		
-		SiteLogger.info("netMain debug 5");
+		SiteLoger.info("netMain debug 5");
 		
 		return content;
 	}
@@ -186,18 +186,18 @@ public:
 
 	static auto getTourist(size_t touristKey)
 	{
-		SiteLogger.info("getTourist 0");
+		SiteLoger.info("getTourist 0");
 		
 		string touristQuery = 
 `select num, family_name, given_name, patronymic, 
 	birth_date, birth_year, address, phone, show_phone, email, show_email, 
 	exp, comment, razr, sud from tourist where num=` ~ touristKey.text ~ `;`;
 	
-		SiteLogger.info("getTourist 1");
+		SiteLoger.info("getTourist 1");
 		
 		auto rs = getCommonDB().query(touristQuery).getRecordSet(touristRecFormat);
 		
-		SiteLogger.info("getTourist 2");
+		SiteLoger.info("getTourist 2");
 		
 		if( rs && rs.length == 1 )
 			return rs.front;
@@ -371,14 +371,14 @@ public:
 	{
 		import std.string;
 		
-		SiteLogger.info("Получаем шаблон формы редактировагия туриста");
+		SiteLoger.info("Получаем шаблон формы редактировагия туриста");
 		
 		auto touristForm = getPageTemplate( pageTemplatesDir ~ "edit_tourist_form.html" );
 		
 		if( touristForm )
-			SiteLogger.info("Шаблон формы получен");
+			SiteLoger.info("Шаблон формы получен");
 		
-		SiteLogger.info("Начало разбора данных о дате рождения туриста");
+		SiteLoger.info("Начало разбора данных о дате рождения туриста");
 
 		OptionalDate birthDate;
 		//Вывод даты рождения туриста из базы данных
@@ -403,12 +403,12 @@ public:
 		}
 
 
-		SiteLogger.info("Разбор данных о дате рождения завершен");
+		SiteLoger.info("Разбор данных о дате рождения завершен");
 		
 		import mkk_site.ui.list_control;
 		import mkk_site.ui.date_picker;
 		
-		SiteLogger.info("Создание компонентов вывода перечислимых типов");
+		SiteLoger.info("Создание компонентов вывода перечислимых типов");
 		//Генератор компонента выбора даты рождения
 		auto birthDatePicker = bsPlainDatePicker();
 		with( birthDatePicker )
@@ -439,13 +439,13 @@ public:
 			nullText = "не задано";
 		}
 		
-		SiteLogger.info("Компонентов вывода перечислимых типов созданы");
+		SiteLoger.info("Компонентов вывода перечислимых типов созданы");
 		
 		//Вывод данных о туристе в форму редакирования
 		if( touristRec )
 		{	
-			SiteLogger.info("Начало вывода данных о туристе");
-			SiteLogger.info("Начало вывода простых полей");
+			SiteLoger.info("Начало вывода данных о туристе");
+			SiteLoger.info("Начало вывода простых полей");
 			
 			/+touristForm.set( "num.value", touristRec.get!"ключ"(0).to!string );+/
 			touristForm.set(  "family_name", printHTMLAttr( `value`, touristRec.get!"фамилия"("") )  );
@@ -459,9 +459,9 @@ public:
 			touristForm.set(  "exp", printHTMLAttr( `value`, touristRec.get!"тур опыт"("") )  );
 			touristForm.set(  "comment", HTMLEscapeText( touristRec.get!"комент"("") )  ); //textarea
 			
-			SiteLogger.info("Вывод простых полей завершен");
+			SiteLoger.info("Вывод простых полей завершен");
 			
-			SiteLogger.info("Заполнение данными перечислимых полей");
+			SiteLoger.info("Заполнение данными перечислимых полей");
 			birthDatePicker.date = birthDate;
 			
 			if( !touristRec.isNull("спорт разряд") )
@@ -469,20 +469,20 @@ public:
 				
 			if( !touristRec.isNull("суд категория") )
 				judgeCatDropdown.selectedValue = touristRec.get!"суд категория"();
-			SiteLogger.info("...завершено");
+			SiteLoger.info("...завершено");
 		}
 		
-		SiteLogger.info("Начало вывода контролов перечислимых типов");
+		SiteLoger.info("Начало вывода контролов перечислимых типов");
 
 		touristForm.set( "birth_date_picker", birthDatePicker.print() );
 		touristForm.set( "razr", sportsGradeDropdown.print() );
 		touristForm.set( "sud", judgeCatDropdown.print() );
-		SiteLogger.info("...завершено");
+		SiteLoger.info("...завершено");
 		
 		touristForm.set( "action", ` value="write"` );
 		
 		
-		SiteLogger.info("Формирование формы редактирования туриста завершено");
+		SiteLoger.info("Формирование формы редактирования туриста завершено");
 		
 		return touristForm.getString();
 	}

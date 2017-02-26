@@ -9,7 +9,7 @@ import
 	webtank.ui.templating;
 
 import 
-	mkk_site.site_data,
+	mkk_site.site_data_old,
 	mkk_site.routing;
 
 import mkk_site.templating_init;
@@ -17,6 +17,17 @@ import mkk_site.templating_init;
 enum withTemplateCache = !isMKKSiteDevelTarget;
 
 __gshared PlainTemplateCache!(withTemplateCache) templateCache;
+
+
+shared static this()
+{
+	JSONRPCRouter.join!(pohodFilterMenuData);
+}
+
+/// API-метод, возвращающий конфигурацию меню фильтрации в главном шаблоне сайта
+JSONValue pohodFilterMenuData() {
+	return pohodFiltersJSON;
+}
 
 // Функция отрисовки списка фильтров походов в боковом меню сайта
 // на основе данных из pohodFiltersJSON.

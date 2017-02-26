@@ -1,8 +1,8 @@
 module mkk_site.logging_init;
 
-import webtank.common.logger;
+import webtank.common.loger;
 
-import mkk_site.site_data;
+import mkk_site.site_data_old;
 import mkk_site.logging;
 
 shared static this()
@@ -18,6 +18,6 @@ shared static this()
 		enum prioriteLogLevel = LogLevel.info;
 	}
 	
-	SiteLogger = new ThreadedLogger( cast(shared) new FileLogger(eventLogFileName, siteLogLevel) );
-	PrioriteLogger = new ThreadedLogger( cast(shared) new FileLogger(prioriteLogFileName, prioriteLogLevel) );
+	SiteLoger = new ThreadedLoger( cast(shared) new FileLoger(eventLogFileName, siteLogLevel) );
+	PrioriteLoger = new ThreadedLoger( cast(shared) new FileLoger(prioriteLogFileName, prioriteLogLevel) );
 } 

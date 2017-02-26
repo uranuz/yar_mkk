@@ -1,28 +1,30 @@
-module mkk_site.templating_init;
-// Этот модуль предназначен для импортирования только из mkk_site.templating
-// Иначе это может привести к проблеме циклических зависимостей конструкторов
+module mkk_site.main_service.pohod_filters;
 
-import
-	webtank.templating.plain_templater,
-	webtank.ui.templating;
-
-import mkk_site.site_data_old;
-import mkk_site.templating;
+import mkk_site.main_service.service;
 
 import std.json: JSONValue, JSON_TYPE;
 static immutable JSONValue pohodFiltersJSON;
 static immutable string[] pohodFilterFields;
 
+/// Публичный метод сервиса для получения списка избранных фильтров по походам.
+/// Данные используются для построения бокового меню сайта
+JSONValue getFavoritePohodFilters() {
+	return pohodFiltersJSON;
+}
+
 shared static this()
 {
-	templateCache = new PlainTemplateCache!(withTemplateCache)();
-	webtank.ui.templating.setTemplatesDir( webtankResDir ~ "templates" );
-
 	alias jv = JSONValue;
 
 	pohodFiltersJSON = jv([
 		[	"title": jv("По годам"),
 			"items": jv([
+				[	"text": jv("2017"),
+					"fields": jv([
+						"begin_date_range_head__year": 2017,
+						"end_date_range_tail__year": 2017
+					])
+				],
 				[	"text": jv("2016"),
 					"fields": jv([
 						"begin_date_range_head__year": 2016,
@@ -47,16 +49,10 @@ shared static this()
 						"end_date_range_tail__year": 2013
 					])
 				],
-				[	"text": jv("2012"),
-					"fields": jv([
-						"begin_date_range_head__year": 2012,
-						"end_date_range_tail__year": 2012
-					])
-				],
 				[	"text": jv("Последние 5 лет"),
 					"fields": jv([
-						"begin_date_range_head__year": 2012,
-						"end_date_range_tail__year": 2016
+						"begin_date_range_head__year": 2013,
+						"end_date_range_tail__year": 2017
 					])
 				]
 			])
@@ -104,4 +100,7 @@ shared static this()
 
 	import std.exception: assumeUnique;
 	pohodFilterFields = assumeUnique( filterFields );
+
+	// Регистрируем метод в сервисе
+	Service.JSON_RPCRouter.join!(getFavoritePohodFilters)(`pohod.favoriteFilters`)
 }

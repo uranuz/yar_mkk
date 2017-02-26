@@ -320,7 +320,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	string[] allStringFields = strFieldNames ~ [ "chef_coment", "MKK_coment" ];
 	
-	SiteLogger.info( "Формируем набор строковых полей и значений", "Изменение данных похода" );
+	SiteLoger.info( "Формируем набор строковых полей и значений", "Изменение данных похода" );
 	foreach( i, fieldName; allStringFields )
 	{
 		if( fieldName !in pVars )
@@ -332,7 +332,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValues ~= ( value.length == 0 ? "NULL" : "'" ~ PGEscapeStr(value) ~ "'" );
 	}
 	
-	SiteLogger.info( "Формируем часть запроса для вывода перечислимых полей", "Изменение данных похода" );
+	SiteLoger.info( "Формируем часть запроса для вывода перечислимых полей", "Изменение данных похода" );
 	foreach( fieldName; typeof(pohodRecFormat).filterNamesByTypes!(EnumFormat) )
 	{	if( fieldName !in pVars )
 			continue;
@@ -356,7 +356,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldValues ~= enumKey.isNull ? "NULL" : enumKey.value.to!string;
 	}
 	
-	SiteLogger.info( "Формируем часть запроса для вбивания начальной и конечной даты", "Изменение данных похода" );
+	SiteLoger.info( "Формируем часть запроса для вбивания начальной и конечной даты", "Изменение данных похода" );
 	import std.datetime;
 	import std.conv;
 	
@@ -423,7 +423,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 
 	size_t[] touristKeys;
 	
-	SiteLogger.info( "Разбор списка туристов", "Изменение данных похода" );
+	SiteLoger.info( "Разбор списка туристов", "Изменение данных похода" );
 	if( "unit_neim" in pVars )
 	{	import std.array;
 		
@@ -466,7 +466,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 
 	import std.algorithm : canFind;
 	
-	SiteLogger.info( "Создаем часть запроса для записи руководителя и его заместителя", "Изменение данных похода" );
+	SiteLoger.info( "Создаем часть запроса для записи руководителя и его заместителя", "Изменение данных похода" );
 	if( "chef_grupp" in pVars )
 	{	if( pVars["chef_grupp"] != "null" && pVars["chef_grupp"].length != 0 )
 		{	size_t chefGruppKey = pVars["chef_grupp"].to!size_t;
@@ -495,7 +495,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		fieldNames ~= "alt_chef";
 	}
 	
-	SiteLogger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
+	SiteLoger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
 
@@ -503,7 +503,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	import std.json, std.string;
 	import webtank.common.serialization;
 
-	SiteLogger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
+	SiteLoger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
 	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.getDLangValue!(string[][]);
 	string[] processedLinks;
 	URI uri;
@@ -530,13 +530,13 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	fieldNames ~= "links";
 	fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
 
-	SiteLogger.info( "Формирование и выполнение запроса к БД", "Изменение данных похода" );
+	SiteLoger.info( "Формирование и выполнение запроса к БД", "Изменение данных похода" );
 	string queryStr;
 
 	import std.array : join;
 	if( pohodKey.isNull )
 	{
-		SiteLogger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
+		SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
 
 		fieldNames ~= ["registrator_num", "reg_timestamp"];
 		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
@@ -548,7 +548,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	}
 	auto writeDBQueryRes = dbase.query(queryStr);
 	
-	SiteLogger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
+	SiteLoger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
 
 	string message;
 	
@@ -573,7 +573,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>\r\n";
 	}
 
-	SiteLogger.info( "Возврат сообщения о результате операции", "Изменение данных похода" );
+	SiteLoger.info( "Возврат сообщения о результате операции", "Изменение данных похода" );
 	
 	return message;
 }
@@ -605,7 +605,7 @@ string netMain(HTTPContext context)
 		if( !pohodKey.isNull )
 		{
 			auto dbase = getCommonDB();
-			SiteLogger.info( `Запрашиваем данные о походе с идентификатором ` ~ pohodKey.value.text );
+			SiteLoger.info( `Запрашиваем данные о походе с идентификатором ` ~ pohodKey.value.text );
 
 			auto pohodRS = dbase.query(
 				`select num, kod_mkk, nomer_knigi, region_pohod, organization, region_group, vid, elem, ks, marchrut, begin_date, finish_date, chef_grupp, alt_chef, unit, prepar, stat, chef_coment, "MKK_coment", unit_neim from pohod where num=` ~ pohodKey.value.text
@@ -613,12 +613,12 @@ string netMain(HTTPContext context)
 			if( ( pohodRS !is null ) && ( pohodRS.length == 1 ) ) //Если получили одну запись -> ключ верный
 			{
 				pohodRec = pohodRS.front;
-				SiteLogger.info( `Получены данные о походе с идентификатором ` ~ pohodKey.value.text );
+				SiteLoger.info( `Получены данные о походе с идентификатором ` ~ pohodKey.value.text );
 			}
 			else
 			{
 				string errorMsg = `<h3>Невозможно открыть редактирование похода. Не найден поход с номером ` ~ pohodKey.value.text ~ `</h3>`;
-				SiteLogger.info( errorMsg );
+				SiteLoger.info( errorMsg );
 				return errorMsg;
 			}
 		}

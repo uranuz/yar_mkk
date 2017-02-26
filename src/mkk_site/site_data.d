@@ -1,7 +1,5 @@
 module mkk_site.site_data;
 
-public import mkk_site.site_data_init; //Здесь находится часть констант
-
 ///Перечисление целей сборки сайта
 enum BuildTarget { release, test, devel };
 

@@ -1,17 +1,18 @@
-module mkk_site.view_service.main;
+module mkk_site.main_service.main;
 
 import webtank.net.web_server: WebServer2;
 
-import mkk_site.view_service.service;
+import mkk_site.main_service.service: Service;
 
-import mkk_site.view_service.moder;
-import mkk_site.view_service.auth;
+// Подключение разделов сервиса
+import mkk_site.main_service.moder;
+import mkk_site.main_service.pohod;
 
 void main(string[] progAgs)
 {
 	import std.getopt: getopt;
 
-	ushort port = 8082;
+	ushort port = 8083;
 	getopt( progAgs, "port", &port );
 
 	auto server = new WebServer2(port, Service.rootRouter, Service.loger, 5);

@@ -1,7 +1,7 @@
-module mkk_site.site_data_init;
+module mkk_site.site_data_old;
 
 import 
-	mkk_site.site_config,
+	mkk_site.config_parsing,
 	mkk_site.site_data;
 
 ///Общие данные для сайта
@@ -56,92 +56,22 @@ immutable(string[string]) siteFileSystemPaths;
 ///Ассоциативный массив с виртуальными путями сайта (те, что в адресной строке браузера)
 immutable(string[string]) siteVirtualPaths;
 
-///Массив со строками подключения к базам данных сервиса
+///Ассоциативный массив со строками подключения к базам данных сервиса
 immutable(string[string]) serviceDBConnStrings;
-	
+
 shared static this()
-{	import std.file, std.json;
+{
+	import std.file: readText;
+	import std.json;
+	import std.exception: assumeUnique;
 
 	string configFile = readText("mkk_site_config.json");
-
 	auto jsonConfig = parseJSON(configFile);
 
-	assert( jsonConfig.type == JSON_TYPE.OBJECT, `Config root JSON value must be object!!!` );
-
-	assert( "services" in jsonConfig.object, `Config must contain "services" object!!!` );
-	JSONValue jsonServices = jsonConfig["services"];
-	assert( jsonConfig.type == JSON_TYPE.OBJECT, `Config root JSON value must be object!!!` );
-
-	assert( "applications" in jsonConfig.object, `Config must contain "applications" object!!!` );
-	JSONValue jsonApps = jsonConfig["applications"];
-
-	assert( "MKK_site" in jsonApps.object, `Config section "applications" must contain "MKK_site" object!!!` );
-	JSONValue jsonMKK_site = jsonApps["MKK_site"];
-	assert( jsonMKK_site.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site" must be object!!!` );
-
-	assert( "fileSystemPaths" in jsonMKK_site.object, `Config section "applications.MKK_site" must contain "fileSystemPaths" object!!!` );
-	JSONValue jsonFSPaths = jsonMKK_site["fileSystemPaths"];
-	assert( jsonFSPaths.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site" must be object!!!` );
-
-	assert( "virtualPaths" in jsonMKK_site.object, `Config section "applications.MKK_site" must contain "virtualPaths" object!!!` );
-	JSONValue jsonVirtualPaths = jsonMKK_site["virtualPaths"];
-	assert( jsonVirtualPaths.type == JSON_TYPE.OBJECT, `Config section "applications.MKK_site.virtualPaths" must be object!!!` );
-
-	//Захардкодим пути в файловой ситеме, используемые по-умолчанию
-	string[string] defaultFileSystemPaths = [
-		"siteRoot": "~/sites/mkk_site/",
-		
-		"siteResources": "res/",
-		"sitePageTemplates": "res/templates/",
-		"siteGeneralTemplateFile": "res/templates/general_template.html",
-		
-		"siteLogs": "logs/",
-		"siteErrorLogFile": "logs/error.log",
-		"siteEventLogFile": "logs/event.log",
-		"webtankErrorLogFile": "logs/webtank_error.log",
-		"webtankEventLogFile": "logs/webtank_event.log",
-		"databaseQueryLogFile": "logs/db_query.log",
-		"sitePrioriteLogFile": "logs/priorite.log",
-		
-		"sitePublic": "pub/",
-		"siteCSS": "pub/css/",
-		"siteJS": "pub/js/",
-		"siteImg": "pub/img/",
-		
-		"webtankResources": "res/webtank/",
-		"webtankPublic": "pub/webtank/",
-		"webtankCSS": "pub/webtank/css/",
-		"webtankJS": "pub/webtank/js/",
-		"webtankImg": "pub/webtank/img/"
-	];
-	
-	//Захардкодим адреса сайта, используемые по-умолчанию
-	string[string] defaultVirtualPaths = [
-		"siteRoot": "/",
-		
-		"sitePublic": "pub/",
-		"siteDynamic": "dyn/",
-		"siteRestricted": "restricted/",
-		"siteJSON_RPC": "",
-		
-		"siteLogs": "logs/",
-		"siteResources": "res/",
-		
-		"siteCSS": "pub/css/",
-		"siteJS": "pub/js/",
-		"siteImg": "pub/img/",
-		
-		"webtankPublic": "pub/webtank/",
-		"webtankCSS": "pub/webtank/css/",
-		"webtankJS": "pub/webtank/js/",
-		"webtankImg": "pub/webtank/img/"
-	];
-	
-	import std.exception;
-	
-	auto fsPaths = resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot");
-	auto virtPaths = resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot");
-	
+	string currServiceName = "yarMKKMain";
+	auto jsonCurrService = getServiceConfig(jsonConfig, currServiceName);
+	auto fsPaths = getServiceFileSystemPaths(jsonCurrService);
+	auto virtPaths = getServiceVirtualPaths(jsonCurrService);
 	siteFileSystemPaths = assumeUnique(fsPaths);
 	siteVirtualPaths = assumeUnique(virtPaths);
 	
@@ -175,19 +105,9 @@ shared static this()
 	webtankEventLogFileName = siteFileSystemPaths["webtankEventLogFile"];
 	dbQueryLogFileName = siteFileSystemPaths["databaseQueryLogFile"];
 	prioriteLogFileName = siteFileSystemPaths["sitePrioriteLogFile"];
-	
-	//Вытаскиваем информацию об используемых базах данных
-	assert( "MKK" in jsonServices.object, `Config "services" section must contain "MKK" object!!!` );
-	JSONValue jsonMKKService = jsonServices["MKK"];
-	assert( jsonMKKService.type == JSON_TYPE.OBJECT, `Config section "services.MKK" value must be an object!!!` );
-	
-	//Вытаскиваем информацию об используемых базах данных
-	assert( "databases" in jsonMKKService.object, `Config "services.MKK" section must contain "databases" object!!!` );
-	JSONValue jsonDatabases = jsonMKKService["databases"];
-	assert( jsonDatabases.type == JSON_TYPE.OBJECT, `Config section "services.MKK.databases" value must be an object!!!` );
-	
+
 	//Получаем строки подключения к базам данных
-	auto dbConnStrings = resolveConfigDatabases(jsonDatabases);
+	auto dbConnStrings = getServiceDatabases(jsonCurrService);
 	serviceDBConnStrings = assumeUnique(dbConnStrings);
 	
 	commonDBConnStr = serviceDBConnStrings["commonDB"];

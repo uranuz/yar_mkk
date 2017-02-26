@@ -6,7 +6,7 @@ import std.stdio;
 import webtank.db, webtank.datctrl; 
 
 //Вспомогательные функции сайта/базы МКК
-import mkk_site.utils;
+import mkk_site.utils, mkk_site.db_utils;
 
 void main()
 {

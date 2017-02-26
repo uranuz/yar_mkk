@@ -4,7 +4,7 @@ import std.conv, std.datetime;
 
 import webtank.net.http.router, webtank.net.http.request, webtank.net.http.response;
 
-import mkk_site.site_data, mkk_site.access_control;
+import mkk_site.site_data_old, mkk_site.access_control;
 
 static this()
 {	Router.setPathHandler(dynamicPath ~ "adminka", &netMain);
