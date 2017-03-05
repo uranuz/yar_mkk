@@ -14,6 +14,7 @@ class MKKViewService
 
 	import mkk_site.view_service.uri_page_router;
 	import mkk_site.config_parsing;
+	import mkk_site.view_service.access_control;
 
 	static immutable string serviceName = "yarMKKView";
 
@@ -29,6 +30,8 @@ private:
 	JSONValue _jsonConfig;
 	string[string] _fileSystemPaths;
 	string[string] _virtualPaths;
+
+	MKKViewAccessController _accessController;
 
 public:
 	this()
@@ -47,6 +50,9 @@ public:
 		_rootRouter = new HTTPRouter;
 		_pageRouter = new MKK_ViewService_URIPageRouter( "/dyn/{remainder}" );
 		_rootRouter.join(_pageRouter);
+
+		_accessController = new MKKViewAccessController;
+		_subscribeRoutingEvents();
 	}
 
 	HTTPRouter rootRouter() @property {
@@ -100,6 +106,15 @@ public:
 		string logFileName = buildNormalizedPath( _fileSystemPaths["siteLogs"], "view_service.log" );
 
 		_loger = new ThreadedLoger( cast(shared) new FileLoger(logFileName, LogLevel.info) );
+	}
+
+	void _subscribeRoutingEvents()
+	{
+		_rootRouter.onPostPoll ~= (HTTPContext context, bool isMatched) {
+			if( isMatched )
+			{	context._setuser( _accessController.authenticate(context) );
+			}
+		};
 	}
 
 }

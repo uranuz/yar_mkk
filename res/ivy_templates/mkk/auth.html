@@ -2,7 +2,16 @@ expr {*
 	<div class="i-page_auth e-block t-page_auth">
 		<h2>Войти под пользователем</h2>
 		<div>
-			{{auth_msg}}
+			{=
+				if isAuthFailed {*
+					Не удалось выполнить аутентификацию на сайте. Проверьте, пожалуйста, правильность ввода учётных данных и попробуйте еще раз.
+					Если ошибка повторяется, свяжитесь с администратором системы для решения возникшей проблемы.
+				*} elif isAuthenticated {*
+					Вход уже выполнен. Но вы можете войти под другим пользователем
+				*} else {*
+					Введите логин и пароль для входа
+				*}
+			}
 		</div>
 		<hr/>
 		<form method="post" action="#" class="form">
@@ -11,7 +20,7 @@ expr {*
 					<label class="form-control-static" for="user_login_field">Логин</label>
 				</div>
 				<div class="col-md-5">
-					<input name="user_login" type="text" value="{{user_login}}" class="form-control" id="user_login_field" />
+					<input name="user_login" type="text" value="{{userLogin}}" class="form-control" id="user_login_field" />
 				</div>
 			</div>
 			<div class="form-group row">

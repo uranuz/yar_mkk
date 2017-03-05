@@ -23,7 +23,7 @@ string netMain(HTTPContext context)
 	// Адрес страницы для перенаправления после аутентификации
 	string redirectTo = rq.queryForm.get("redirectTo", null);
 
-	auto accessController = new MKK_SiteAccessController;
+	auto accessController = new MKKMainAccessController;
 
 	bool isAuthenticatedNow = false;
 	bool isAuthFailed = false;
@@ -33,7 +33,7 @@ string netMain(HTTPContext context)
 	if( "logout" in rq.queryForm )
 	{
 		// Получаем удостоверение пользователя
-		auto identity = cast(MKK_SiteUser) context.user;
+		auto identity = cast(MKKUserIdentity) context.user;
 		
 		if( identity )
 			identity.logout(); // Делаем "разаутентификацию""
@@ -48,7 +48,7 @@ string netMain(HTTPContext context)
 	
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("user_login" in rq.bodyForm) && ("user_password" in rq.bodyForm) )
-	{	auto newIdentity = cast(MKK_SiteUser) accessController.authenticateByPassword(
+	{	auto newIdentity = cast(MKKUserIdentity) accessController.authenticateByPassword(
 			rq.bodyForm["user_login"],
 			rq.bodyForm["user_password"],
 			rq.headers.get("x-real-ip", ""),

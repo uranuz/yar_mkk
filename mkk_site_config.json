@@ -46,7 +46,7 @@
 				"siteRestricted": "restricted/",
 				"sitePublic": "pub/",
 
-				"siteAuthPage": "dyn/auth/",
+				"siteAuthPage": "dyn/auth",
 
 				"siteCSS": "pub/css/",
 				"siteImg": "pub/img/",
@@ -71,7 +71,7 @@
 				"siteRestricted": "restricted/",
 				"sitePublic": "pub/",
 
-				"siteAuthPage": "dyn/auth/",
+				"siteAuthPage": "dyn/auth",
 
 				"siteCSS": "pub/css/",
 				"siteImg": "pub/img/",

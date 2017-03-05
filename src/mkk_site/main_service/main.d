@@ -5,6 +5,7 @@ import webtank.net.web_server: WebServer2;
 import mkk_site.main_service.service: Service;
 
 // Подключение разделов сервиса
+import mkk_site.main_service.auth;
 import mkk_site.main_service.moder;
 import mkk_site.main_service.pohod;
 

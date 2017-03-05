@@ -2,21 +2,21 @@ module mkk_site.access_control;
 
 import std.conv, std.digest.digest, std.datetime, std.utf, std.base64 : Base64URL;
 
-import 
-	webtank.db.postgresql, 
-	webtank.net.utils, 
-	webtank.security.access_control, 
-	webtank.net.http.context, 
-	webtank.common.conv, 
+import
+	webtank.db.database,
+	webtank.net.utils,
+	webtank.security.access_control,
+	webtank.net.http.context,
+	webtank.common.conv,
 	webtank.common.crypto_scrypt;
-
-import mkk_site.site_data_old;
 
 import deimos.openssl.sha;
 
 pragma(lib, "crypto");
 pragma(lib, "ssl");
 pragma(lib, "/usr/local/lib/libtarsnap.a");
+
+public import mkk_site.user_identity;
 
 //Класс исключения в аутентификации
 class AuthException : Exception {
@@ -25,10 +25,6 @@ class AuthException : Exception {
 		//message = msg ~ "  <" ~ file ~ ", " ~ line.to!string ~ ">";
 	}
 }
-
-enum uint sessionIdByteLength = 48; //Количество байт в ИД - сессии
-enum uint sessionIdStrLength = sessionIdByteLength * 8 / 6;  //Длина в символах в виде base64 - строки
-alias ubyte[sessionIdByteLength] SessionId; //Тип: ИД сессии
 
 enum uint minLoginLength = 3;  //Минимальная длина логина
 enum uint minPasswordLength = 8;  //Минимальная длина пароля
@@ -41,79 +37,14 @@ enum scryptN = 1024;
 enum scryptR = 8;
 enum scryptP = 1;
 
-class MKK_SiteUser: AnonymousUser
-{
-	this( 
-		string login, string name,
-		string group, string[string] data, 
-		ref const(SessionId) sid
-	)
-	{	_login = login;
-		_name = name;
-		_group = group;
-		_data = data;
-		_sessionId = sid;
-	}
-	
-	override {
-		///Строка для идентификации пользователя
-		string id() @property
-		{	return _login; }
-		
-		///Публикуемое имя пользователя
-		string name() @property
-		{	return _name; }
-		
-		///Дополнительные данные пользователя
-		string[string] data()
-		{	return _data; }
-		
-		///Возвращает true, если владелец успешно прошёл проверку подлинности. Иначе false
-		bool isAuthenticated() @property
-		{	return ( ( _sessionId != SessionId.init ) /+&& ( _userInfo != anonymousUI )+/  ); //TODO: Улучшить проверку
-		}
-		
-		///Функция возвращает true, если пользователь входит в группу
-		bool isInRole( string roleName )
-		{	return ( roleName == _group ); }
-	}
-	
-	///Идентификатор сессии
-	ref const(SessionId) sessionId() @property
-	{	return _sessionId; }
-	
-	bool logout()
-	{
-		if( !isAuthenticated )
-			return true;
-		
-		size_t user_num;
-		try {
-			user_num = _data.get(`user_num`, ``).to!size_t;
-		} catch( ConvException e ) { return false; }
-		
-		auto dbase = new DBPostgreSQL(authDBConnStr);
-		dbase.query(
-			`delete from session where "site_user_num" = ` ~ user_num.to!string ~ `;`
-		);
-		return true;
-	}
-	
-protected:
-	SessionId _sessionId; 
-	string _login;
-	string _group;
-	string _name;
-	string[string] _data;
-}
-
 ///Класс управляет выдачей билетов для доступа
-class MKK_SiteAccessController: IAccessController
+class MKKMainAccessController(alias getAuthDBMethod): IAccessController
 {
 protected:
 	static immutable(size_t) _sessionLifetime = 180; //Время жизни сессии в минутах
 
 public:
+
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{	auto httpCtx = cast(HTTPContext) context;
@@ -135,11 +66,8 @@ public:
 		if( SIDString.length != sessionIdStrLength )
 			return new AnonymousUser;
 			
-		auto dbase = new DBPostgreSQL(authDBConnStr);
-		
-		if( !dbase.isConnected )
-			return new AnonymousUser;
-		
+		IDatabase dbase = getAuthDBMethod();
+
 		Base64URL.decode(SIDString, sessionId[]);
 		
 		if( sessionId == SessionId.init )
@@ -172,15 +100,15 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 		if( (user_QRes.recordCount != 1) && (user_QRes.fieldCount != 5) )
 			return new AnonymousUser;
 		
-		string[string] userData = [ 
-			"user_num": user_QRes.get(0, 0, null), 
+		string[string] userData = [
+			"user_num": user_QRes.get(0, 0, null),
 			"email": user_QRes.get(1, 0, null)
 		];
 		
 		//Получаем информацию о пользователе из результата запроса
-		return new MKK_SiteUser(
+		return new MKKUserIdentity(
 			user_QRes.get(2, 0, null), //login
-			user_QRes.get(3, 0, null),  //name
+			user_QRes.get(3, 0, null), //name
 			user_QRes.get(4, 0, null), //group
 			userData,
 			sessionId
@@ -190,15 +118,14 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 	//Функция выполняет вход пользователя с логином и паролем, 
 	//происходит генерация Ид сессии, сохранение его в БД
 	IUserIdentity authenticateByPassword(
-		string login, 
+		string login,
 		string password,
 		string clientAddress,
 		string userAgent
 	)
-	{	auto dbase = new DBPostgreSQL(authDBConnStr);
-		if( !dbase.isConnected )
-			return new AnonymousUser;
-			
+	{
+		IDatabase dbase = getAuthDBMethod();
+
 		string group;
 		string name;
 		string email;
@@ -210,7 +137,7 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 		auto query_res = dbase.query(
 `select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email
 from site_user
-where login = '` ~ PGEscapeStr( login ) ~ `';`
+where login = '` ~ PGEscapeStr(login) ~ `';`
 		);
 		
 		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
@@ -221,7 +148,7 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 		string pwSalt = query_res.get(2, 0, null);
 		string regTimestampStr = query_res.get(3, 0, null);
 		
-		DateTime regDateTime = DateTimeFromPGTimestamp( regTimestampStr );
+		DateTime regDateTime = DateTimeFromPGTimestamp(regTimestampStr);
 		
 		group = query_res.get(4, 0, null);
 		name = query_res.get(5, 0, null);
@@ -235,7 +162,7 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 			auto newSIDStatusRes = dbase.query(
 				` insert into "session" ` 
 				~ ` ( "sid", "site_user_num", "expires", "client_address", "user_agent" ) ` 
-				~ ` values( '` ~ Base64URL.encode(sid) ~ `', ` ~ PGEscapeStr( userNum )
+				~ ` values( '` ~ Base64URL.encode(sid) ~ `', ` ~ PGEscapeStr(userNum)
 				~ `, ( current_timestamp + interval '` 
 				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' ), ` 
 				~ `'` ~ PGEscapeStr(clientAddress) ~ `', '` ~ PGEscapeStr(userAgent) ~ `' ) `
@@ -246,15 +173,50 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 				return new AnonymousUser;
 
 			if( newSIDStatusRes.get(0, 0, "") == "authenticated" )
-			{	string[string] userData = [ "user_num": userNum, "email": email ];
+			{
+				string[string] userData = [ "user_num": userNum, "email": email ];
 				//Аутентификация завершена успешно
-				return new MKK_SiteUser( 
-					login, name, group, userData, sid
-				);
+				return new MKKUserIdentity(login, name, group, userData, sid);
 			}
 		}
 		
 		return new AnonymousUser;
+	}
+
+	bool logout(IUserIdentity userIdentity)
+	{
+		debug import std.stdio: writeln;
+		MKKUserIdentity mkkUserIdentity = cast(MKKUserIdentity) userIdentity;
+		debug writeln(`auth.logout debug 1`);
+
+		if( !mkkUserIdentity ) {
+			debug writeln(`auth.logout debug 2`);
+			return false;
+		}
+
+		if( !mkkUserIdentity.isAuthenticated ) {
+			debug writeln(`auth.logout debug 3`);
+			return true;
+		}
+		
+		size_t user_num;
+		try {
+			user_num = mkkUserIdentity.data.get(`user_num`, null).to!size_t;
+		} catch( ConvException e ) {
+			debug writeln(`auth.logout debug 4`);
+			return false;
+		}
+		debug writeln(`auth.logout debug 5`);
+
+		// Сносим все сессии пользователя из базы
+		getAuthDBMethod().query(
+			`delete from session where "site_user_num" = ` ~ user_num.to!string ~ `;`
+		);
+
+		mkkUserIdentity.invalidate(); // Затираем текущий экземпляр удостоверения
+
+		debug writeln(`auth.logout debug 6`);
+		return true;
 	}
 }
 
@@ -324,7 +286,7 @@ bool changeUserPassword(bool doPwCheck = true)( string login, string oldPassword
 	}
 
 	SiteLoger.info( `Подключаемся к базе данных аутентификации`, `Смена пароля пользователя` );
-	auto dbase = new DBPostgreSQL(authDBConnStr);
+	IDatabase dbase = getAuthDBMethod();
 
 	SiteLoger.info( `Получаем данные о пользователе из БД`, `Смена пароля пользователя` );
 	auto userQueryRes = dbase.query(

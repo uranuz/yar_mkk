@@ -81,7 +81,7 @@ shared static this()
 		return true;
 	} );
 
-	auto accessController = new MKK_SiteAccessController;
+	auto accessController = new MKKMainAccessController;
 	
 	Router.onPostPoll ~= (HTTPContext context, bool isMatched) {
 		if( isMatched )

@@ -1,1 +1,1 @@
-rdmd --build-only --force -version=devel "-Isrc/" "-I../webtank/src/" "-I../openssl/" "-I../" -ofadd_site_user src/mkk_site/utilities/add_site_user.d
+rdmd -gc -g --build-only --force -version=devel "-L-l:libpq.so" "-L-l:libssl.so"  "-L/usr/local/lib/libtarsnap.a" "-L-l:libcrypto.so" "-Isrc/" "-I../webtank/src/" "-I../yar_mkk/" "-I../openssl/" "-I../" -ofadd_site_user src/mkk_site/utilities/add_site_user.d

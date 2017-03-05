@@ -43,6 +43,8 @@ class MKKMainService
 	import std.json: JSONValue;
 
 	static immutable string serviceName = "yarMKKMain";
+
+	alias ServiceAccessController = MKKMainAccessController!(getAuthDB);
 private:
 	JSONValue _jsonConfig;
 	string[string] _fileSystemPaths;
@@ -57,7 +59,7 @@ private:
 	/// Объект для приоритетных записей журнала сайта
 	Loger _prioriteLoger;
 
-	MKK_SiteAccessController _accessController;
+	ServiceAccessController _accessController;
 
 public:
 	this()
@@ -70,7 +72,7 @@ public:
 		_jsonRPCRouter = new JSON_RPC_Router( _virtualPaths["siteJSON_RPC"] ~ "{remainder}" );
 		_rootRouter.join(_jsonRPCRouter);
 
-		_accessController = new MKK_SiteAccessController;
+		_accessController = new ServiceAccessController;
 		_subscribeRoutingEvents();
 	}
 
@@ -155,6 +157,14 @@ public:
 			{	context._setuser( _accessController.authenticate(context) );
 			}
 		};
+
+		_jsonRPCRouter.onPostPoll ~= ( (HTTPContext context, bool isMatched) {
+			import std.conv: to;
+			string msg = "Received JSON-RPC request. Headers:\r\n" ~ context.request.headers.toAA().to!string;
+			debug msg ~=  "\r\nMessage body:\r\n" ~ context.request.messageBody;
+
+			_loger.info(msg);
+		});
 		
 		//Обработка ошибок в JSON-RPC вызовах
 		_jsonRPCRouter.onError.join( (Throwable error, HTTPContext context) {
@@ -180,6 +190,11 @@ public:
 	JSON_RPC_Router JSON_RPCRouter() @property {
 		assert( _jsonRPCRouter, `Main service JSON-RPC router is not initialized!` );
 		return _jsonRPCRouter;
+	}
+
+	ServiceAccessController accessController() @property {
+		assert( _accessController, `Main service access controller is not initialized!` );
+		return _accessController;
 	}
 
 }

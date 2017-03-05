@@ -49,12 +49,22 @@ class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 		TDataNode payload;
 		payload["vpaths"] = TDataNode(Service.virtualPaths);
 		payload["content"] = handler(context);
-		payload["auth_state_cls"] = "";
+
+		if( context.user.isAuthenticated )
+		{
+			payload["authStateCls"] = "m-with_auth";
+			payload["authPopdownBtnText"] = context.user.name;
+			payload["authPopdownBtnTitle"] = "Открыть список опций для учетной записи";
+		}
+		else
+		{
+			payload["authStateCls"] = "m-without_auth";
+			payload["authPopdownBtnText"] = "Вход не выполнен";
+			payload["authPopdownBtnTitle"] = "Вход на сайт не выполнен";
+		}
 		payload["pohod_filter_menu_inputs"] = "";
 		payload["pohod_filter_menu_data"] = "";
 		payload["pohod_filter_menu_sections"] = "";
-		payload["auth_popdown_btn_title"] = "";
-		payload["auth_popdown_btn_text"] = "";
 
 		context.response.write( generalTpl.run(payload).str );
 	}

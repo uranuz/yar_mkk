@@ -14,9 +14,14 @@ import webtank.net.http.context;
 
 string renderModerList(HTTPContext ctx)
 {
+	debug import std.stdio: writeln;
+
+	debug writeln(`moder request headers: `, ctx.request.headers.toAA());
+	
 	auto tpl = Service.templateCache.getByModuleName("mkk.moder_list");
 	TDataNode dataDict;
-	dataDict["moder_list"] = callMainServiceMethodAndWaitAsIvyNode("moder.list");
+
+	dataDict["moder_list"] = mainServiceCall("moder.list", ctx);
 
 	return tpl.run(dataDict).str;
 }
