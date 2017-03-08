@@ -4,7 +4,6 @@ import mkk_site.main_service.service;
 
 import std.json: JSONValue, JSON_TYPE;
 static immutable JSONValue pohodFiltersJSON;
-static immutable string[] pohodFilterFields;
 
 /// Публичный метод сервиса для получения списка избранных фильтров по походам.
 /// Данные используются для построения бокового меню сайта
@@ -16,9 +15,16 @@ shared static this()
 {
 	alias jv = JSONValue;
 
-	pohodFiltersJSON = jv([
+	JSONValue pohodFilters;
+	pohodFilters["sections"] = jv([
 		[	"title": jv("По годам"),
 			"items": jv([
+				[	"text": jv("2018"),
+					"fields": jv([
+						"begin_date_range_head__year": 2018,
+						"end_date_range_tail__year": 2018
+					])
+				],
 				[	"text": jv("2017"),
 					"fields": jv([
 						"begin_date_range_head__year": 2017,
@@ -43,16 +49,10 @@ shared static this()
 						"end_date_range_tail__year": 2014
 					])
 				],
-				[	"text": jv("2013"),
-					"fields": jv([
-						"begin_date_range_head__year": 2013,
-						"end_date_range_tail__year": 2013
-					])
-				],
 				[	"text": jv("Последние 5 лет"),
 					"fields": jv([
-						"begin_date_range_head__year": 2013,
-						"end_date_range_tail__year": 2017
+						"begin_date_range_head__year": 2014,
+						"end_date_range_tail__year": 2018
 					])
 				]
 			])
@@ -80,7 +80,7 @@ shared static this()
 	string[] filterFields;
 	import std.algorithm: canFind;
 
-	foreach( ref section; pohodFiltersJSON.array )
+	foreach( ref section; pohodFilters["sections"].array )
 	{
 		if( section.type != JSON_TYPE.OBJECT )
 			continue;
@@ -98,9 +98,9 @@ shared static this()
 		}
 	}
 
-	import std.exception: assumeUnique;
-	pohodFilterFields = assumeUnique( filterFields );
+	pohodFilters["allFields"] = JSONValue(filterFields);
+	pohodFiltersJSON = pohodFilters;
 
 	// Регистрируем метод в сервисе
-	Service.JSON_RPCRouter.join!(getFavoritePohodFilters)(`pohod.favoriteFilters`)
+	Service.JSON_RPCRouter.join!(getFavoritePohodFilters)(`pohod.favoriteFilters`);
 }

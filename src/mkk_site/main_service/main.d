@@ -8,6 +8,7 @@ import mkk_site.main_service.service: Service;
 import mkk_site.main_service.auth;
 import mkk_site.main_service.moder;
 import mkk_site.main_service.pohod;
+import mkk_site.main_service.pohod_filters;
 
 void main(string[] progAgs)
 {

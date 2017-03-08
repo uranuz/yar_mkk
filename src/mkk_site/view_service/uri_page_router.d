@@ -4,6 +4,7 @@ import webtank.net.http.context, webtank.common.event, webtank.net.http.handler,
 import webtank.net.uri_pattern;
 
 import mkk_site.view_service.service: Service;
+import mkk_site.view_service.utils;
 import ivy.interpreter_data;
 
 ///Маршрутизатор запросов к страницам сайта по URI
@@ -62,9 +63,14 @@ class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 			payload["authPopdownBtnText"] = "Вход не выполнен";
 			payload["authPopdownBtnTitle"] = "Вход на сайт не выполнен";
 		}
-		payload["pohod_filter_menu_inputs"] = "";
-		payload["pohod_filter_menu_data"] = "";
-		payload["pohod_filter_menu_sections"] = "";
+
+		auto favouriteFilters = mainServiceCall(`pohod.favoriteFilters`, context);
+		assert( "sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response` );
+		assert( "allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response` );
+
+		payload["pohodFilterFields"] = favouriteFilters["allFields"];
+		payload["pohodFilterSections"] = favouriteFilters["sections"];
+		payload["pohodFiltersJSON"] = favouriteFilters["sections"].toJSONString();
 
 		context.response.write( generalTpl.run(payload).str );
 	}
