@@ -6,6 +6,7 @@ import mkk_site.site_data;
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
+	Service.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
 }
 
 import std.datetime: Date;
@@ -64,9 +65,21 @@ order by pohod.reg_timestamp desc
 limit 10
 `;
 
-static auto recentPohodList()
+auto recentPohodList()
 {
 	return getCommonDB()
 		.query(recentPohodQuery)
 		.getRecordSet(recentPohodRecFormat);
+}
+
+import std.json: JSONValue;
+JSONValue getPohodEnumTypes()
+{
+	JSONValue jResult;
+	jResult[`vid`] = видТуризма.getStdJSON();
+	jResult[`ks`] = категорияСложности.getStdJSON();
+	jResult[`prepar`] = готовностьПохода.getStdJSON();
+	jResult[`stat`] = статусЗаявки.getStdJSON();
+
+	return jResult;
 }

@@ -6,6 +6,8 @@ import mkk_site.view_service.service;
 
 import mkk_site.view_service.moder;
 import mkk_site.view_service.auth;
+import mkk_site.view_service.controls_test;
+import mkk_site.view_service.pohod;
 
 void main(string[] progAgs)
 {

@@ -1,0 +1,75 @@
+expr {*
+	{= import wt.list_control }
+<div class="i-pohod_navigation e-block t-pohod_navigation">
+	<form id="main_form" method="post" class="i-pohod_navigation e-form t-pohod_navigation">
+		<div class="" style="text-align:right; position:absolute; top:0.5rem; right:0.5rem;">
+			<button type="button" class="i-pohod_navigation e-print_page_btn btn btn-secondary btn-sm ">
+				Версия для печати
+			</button>
+			<input type="hidden" name="for_print" class="i-pohod_navigation e-for_print_input" />
+		</div>
+		<div class="{ {pohod_filter_regular_cls} }">
+			<div class="i-pohod_navigation e-enum_filter_block t-pohod_navigation row">
+				<span class="t-pohod_navigation e-enum_filter col-md-3">
+					<h6>Вид туризма</h6>
+					{= wt.list_control.CheckBoxList
+						name: "vid"
+						items: {{pohodEnums.vid}}
+						keyField: "v"
+						titleField: "n"
+					}
+				</span>
+				<span class="t-pohod_navigation e-enum_filter col-md-3">
+					<h6>Категория сложности</h6>
+					{ {ks} }
+				</span>
+				<span class="t-pohod_navigation e-enum_filter col-md-3">
+					<h6>Статус подготовки</h6>
+					{ {prepar} }
+				</span>
+				<span class="t-pohod_navigation e-enum_filter col-md-3">
+					<h6>Статус заявки</h6>
+					{ {stat} }
+				</span>
+			</div>
+			<fieldset class="t-pohod_navigation e-date_range_area">
+				<legend>Сроки похода</legend>
+				<div class="t-pohod_navigation e-date_range_wrapper">
+					<div class="col-lg-6">
+						<span>с</span> { {begin_date_range_head} }
+					</div>
+					<div class="col-lg-6">
+						<span>по</span> { {end_date_range_tail} }
+					</div>
+				</div>
+			</fieldset>
+			<div class="form-inline">
+				<div class="row">
+					<label class="col-md-6">
+						<span class="font-control-label">Район похода содержит</span>
+						<input type="text" name="region_pohod" class="form-control" value="{ {region_pohod} }"/>
+					</label>
+					<label class="col-md-6">
+						<input type="checkbox" name="with_files"{ {with_files} } class="checkbox"/>
+						<span class="font-control-label">С доп. материалами</span>
+					</label>
+
+					<div { {none} }><label class="col-md-6">
+						<input type="checkbox" name="data_check"{ {data_check} }  class="checkbox"/>
+						<span class="font-control-label">Режим контроля данных</span>
+					</label></div>
+
+				</div>
+			</div>
+			<div>
+				<button type="submit" class="i-pohod_navigation e-search_btn t-pohod_navigation btn btn-primary btn-lg btn-block">
+					Найти
+				</button>
+			</div>
+		</div>
+		<div class="i-pohod_navigation e-pagination t-pohod_navigation">
+			{ {pohod_list_pagination} }
+		</div>
+	</form>
+</div>
+*}

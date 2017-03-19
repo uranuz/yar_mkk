@@ -1,0 +1,59 @@
+expr {%
+	def cls {=
+		def.pos el;
+		def.body noscope {
+			expr " e-"; expr el; expr " t-wt-"; expr controlTypeName;
+			if name != undef and name != null {% expr " i-"; expr name; } else {{""}};
+			expr " "
+		}
+	};
+	def CheckBoxList {=
+		def.kv
+			name: ""
+			items: []
+			hasMasterSwitch: true
+			masterSwitchText: ""
+			controlTypeName: "CheckBoxList"
+			keyField: "value"
+			titleField: "title"
+			selectedKey: undef
+			;
+		def.body {*
+			
+		<div>
+		{=	if hasMasterSwitch {*
+			<div class="{= cls "masterSwitch"}">
+				<label class="{= cls "masterSwitchLabel"}">
+					<input
+						type="checkbox"
+						class="{= cls "masterSwitchInput"}"
+					/>
+					<span class="{= cls "masterSwitchText"}">{{masterSwitchText}}</span>
+				</label>
+			</div>
+			*}
+		}
+
+			<div class="{= cls "listScroller"}">
+				<div class="{= cls "listContainer"}">{=
+					repeat item in items {*
+					<div class="{= cls "listItem"}">
+						<label class="{= cls "itemLabel"}">
+							<input
+								type="checkbox"
+								name="{{name}}"
+								class="{= cls "itemInput"}"
+								value="{= at item keyField }"
+								{= if selectedKey == {= at item keyField} "checked" else {{""}} }
+							/>
+							<span class="{= cls "itemText"}">{= at item titleField }</span>
+						</label>
+					</div>
+					*}
+				}
+				</div>
+			</div>
+		</div>
+		*}
+	};
+}

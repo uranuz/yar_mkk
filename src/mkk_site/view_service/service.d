@@ -26,6 +26,7 @@ private:
 	HTTPRouter _rootRouter;
 	MKK_ViewService_URIPageRouter _pageRouter;
 	Loger _loger;
+	Loger _ivyLoger;
 	ProgrammeCache!(useTemplatesCache) _templateCache;
 	JSONValue _jsonConfig;
 	string[string] _fileSystemPaths;
@@ -41,10 +42,15 @@ public:
 
 		// Стартуем шаблонизатор
 		assert( "siteIvyTemplates" in _fileSystemPaths, `Failed to get path to site Ivy templates!` );
-		string[] templatesPaths = [
-			_fileSystemPaths["siteIvyTemplates"]
-		];
-		_templateCache = new ProgrammeCache!(useTemplatesCache)(templatesPaths, ".html");
+		IvyConfig ivyConfig;
+		ivyConfig.importPaths = [ _fileSystemPaths["siteIvyTemplates"] ];
+		ivyConfig.fileExtension = ".html";
+		// Направляем логирование шаблонизатора в файл
+		ivyConfig.parserLoger = &_ivyLogerMethod;
+		ivyConfig.compilerLoger = &_ivyLogerMethod;
+		ivyConfig.interpreterLoger = &_ivyLogerMethod;
+
+		_templateCache = new ProgrammeCache!(useTemplatesCache)(ivyConfig);
 
 		// Организуем маршрутизацию на сервисе
 		_rootRouter = new HTTPRouter;
@@ -98,14 +104,24 @@ public:
 	{
 		import std.path: buildNormalizedPath;
 
-		if( _loger ) {
-			return; // Логирование уже должно работать :)
-		}
-		
 		assert( "siteLogs" in _fileSystemPaths, `Failed to get logs directory!` );
-		string logFileName = buildNormalizedPath( _fileSystemPaths["siteLogs"], "view_service.log" );
+		if( !_loger ) {
+			_loger = new ThreadedLoger(
+				cast(shared) new FileLoger(
+					buildNormalizedPath( _fileSystemPaths["siteLogs"], "view_service.log" ), 
+					LogLevel.info
+				)
+			);
+		}
 
-		_loger = new ThreadedLoger( cast(shared) new FileLoger(logFileName, LogLevel.info) );
+		if( !_ivyLoger ) {
+			_ivyLoger = new ThreadedLoger(
+				cast(shared) new FileLoger(
+					buildNormalizedPath( _fileSystemPaths["siteLogs"], "ivy.log" ), 
+					LogLevel.dbg
+				)
+			);
+		}
 	}
 
 	void _subscribeRoutingEvents()
@@ -117,6 +133,24 @@ public:
 		};
 	}
 
+	// Метод перенаправляющий логи шаблонизатора в файл
+	void _ivyLogerMethod(LogInfo logInfo) {
+		import std.datetime;
+		LogEvent wtLogEvent;
+		final switch(logInfo.type) {
+			case LogInfoType.info: wtLogEvent.type = LogEventType.dbg; break;
+			case LogInfoType.warn: wtLogEvent.type = LogEventType.warn; break;
+			case LogInfoType.error: wtLogEvent.type = LogEventType.error; break;
+			case LogInfoType.internalError: wtLogEvent.type = LogEventType.crit; break;
+		}
+		wtLogEvent.text = logInfo.msg;
+		wtLogEvent.prettyFuncName = logInfo.sourceFuncName;
+		wtLogEvent.file = logInfo.sourceFileName;
+		wtLogEvent.line = logInfo.sourceLine;
+		wtLogEvent.timestamp = std.datetime.Clock.currTime();
+
+		_ivyLoger.writeEvent(wtLogEvent);
+	}
 }
 
 private __gshared MKKViewService _mkk_view_service;
