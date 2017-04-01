@@ -13,21 +13,21 @@ import std.datetime: Date;
 import std.typecons: tuple;
 
 static immutable recentPohodRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "Ключ",
-	string, "Номер книги",
-	Date, "Дата начала",
-	Date, "Дата конца",
-	typeof(видТуризма), "Вид",
-	typeof(категорияСложности), "КС",
-	typeof(элементыКС), "Элем КС",
-	string, "Район",
-	size_t, "Ключ рук",
-	string, "Фамилия рук",
-	string, "Имя рук",
-	string, "Отчество рук",
-	string, "Организация",
-	string, "Маршрут",
-	string, "Коментарий рук",
+	PrimaryKey!(size_t), "num",
+	string, "bookNum",
+	Date, "beginDate",
+	Date, "finishDate",
+	typeof(видТуризма), "vid",
+	typeof(категорияСложности), "ks",
+	typeof(элементыКС), "ksElem",
+	string, "region",
+	size_t, "chiefNum",
+	string, "chiefFamilyName",
+	string, "chiefGivenName",
+	string, "chiefPatronymic",
+	string, "organization",
+	string, "route",
+	string, "comment",
 )(
 	null,
 	tuple(
@@ -39,29 +39,29 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	
 static immutable recentPohodQuery =
 `select
-	pohod.num as "Ключ",
+	pohod.num as "num",
 	(
 		coalesce(kod_mkk, '000-00') || ' ' ||
 		coalesce(nomer_knigi, '00-00')
-	) as "Номер книги",
-	begin_date as "Дата начала",
-	finish_date as "Дата конца",
-	vid as "Вид",
-	ks as "КС",
-	elem as "Элем КС",
-	region_pohod as "Район",
-	chef.num as "Ключ рук",
-	chef.family_name as "Фамилия рук",
-	chef.given_name as "Имя рук",
-	chef.patronymic as "Отчество рук",
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "Организация",
-	( coalesce(marchrut, '') ) as "Маршрут",
-	( coalesce(chef_coment, '') ) as "Коментарий рук"
-from pohod 
+	) as "bookNum",
+	begin_date as "beginDate",
+	finish_date as "finishDate",
+	vid as "vid",
+	ks as "ks",
+	elem as "ksElem",
+	region_pohod as "region",
+	chef.num as "chiefNum",
+	chef.family_name as "chiefFamilyName",
+	chef.given_name as "chiefGivenName",
+	chef.patronymic as "chiefPatronymic",
+	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "organization",
+	( coalesce(marchrut, '') ) as "route",
+	( coalesce(chef_coment, '') ) as "comment"
+from pohod
 left join tourist as chef
-on chef.num = pohod.chef_grupp
+	on chef.num = pohod.chef_grupp
 where pohod.reg_timestamp is not null
-order by pohod.reg_timestamp desc
+order by pohod.reg_timestamp desc nulls last
 limit 10
 `;
 

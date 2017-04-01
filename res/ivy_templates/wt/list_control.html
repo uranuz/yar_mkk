@@ -1,9 +1,9 @@
-expr {%
+expr {=
 	def cls {=
 		def.pos el;
 		def.body noscope {
 			expr " e-"; expr el; expr " t-wt-"; expr controlTypeName;
-			if name != undef and name != null {% expr " i-"; expr name; } else {{""}};
+			if name != undef and name != null {% expr " i-"; expr name; } else "";
 			expr " "
 		}
 	};
@@ -16,8 +16,7 @@ expr {%
 			controlTypeName: "CheckBoxList"
 			keyField: "value"
 			titleField: "title"
-			selectedKey: undef
-			;
+			selectedKey: undef;
 		def.body {*
 			
 		<div>
@@ -44,7 +43,7 @@ expr {%
 								name="{{name}}"
 								class="{= cls "itemInput"}"
 								value="{= at item keyField }"
-								{= if selectedKey == {= at item keyField} "checked" else {{""}} }
+								{= if selectedKey == {= at item keyField} "checked" else "" }
 							/>
 							<span class="{= cls "itemText"}">{= at item titleField }</span>
 						</label>
@@ -56,4 +55,6 @@ expr {%
 		</div>
 		*}
 	};
+
+	expr undef;
 }

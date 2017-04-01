@@ -4,6 +4,7 @@ import webtank.net.web_server: WebServer2;
 
 import mkk_site.view_service.service;
 
+import mkk_site.view_service.index;
 import mkk_site.view_service.moder;
 import mkk_site.view_service.auth;
 import mkk_site.view_service.controls_test;

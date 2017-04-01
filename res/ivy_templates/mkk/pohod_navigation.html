@@ -21,15 +21,30 @@ expr {*
 				</span>
 				<span class="t-pohod_navigation e-enum_filter col-md-3">
 					<h6>Категория сложности</h6>
-					{ {ks} }
+					{=	wt.list_control.CheckBoxList
+						name: "ks"
+						items: {{pohodEnums.ks}}
+						keyField: "v"
+						titleField: "n"
+					}
 				</span>
 				<span class="t-pohod_navigation e-enum_filter col-md-3">
 					<h6>Статус подготовки</h6>
-					{ {prepar} }
+					{=	wt.list_control.CheckBoxList
+						name: "ks"
+						items: {{pohodEnums.prepar}}
+						keyField: "v"
+						titleField: "n"
+					}
 				</span>
 				<span class="t-pohod_navigation e-enum_filter col-md-3">
 					<h6>Статус заявки</h6>
-					{ {stat} }
+					{=	wt.list_control.CheckBoxList
+						name: "ks"
+						items: {{pohodEnums.stat}}
+						keyField: "v"
+						titleField: "n"
+					}
 				</span>
 			</div>
 			<fieldset class="t-pohod_navigation e-date_range_area">

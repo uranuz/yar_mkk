@@ -13,5 +13,34 @@ expr {=
 		}
 	};
 
+	def recGet {=
+		def.pos record, fieldName;
+		def.body {= at record.d {=at record._mapping fieldName } }
+	};
+
+	def recGetStr {=
+		def.pos record, fieldName;
+		def.body {=
+			var
+				fmt: {= at record.f {=at record._mapping fieldName} },
+				value: {= recGet record fieldName },
+				result: undef;
+			if {= has fmt "enum" } {=
+				for enumPair in fmt.enum {=
+					if {=int enumPair.v} == {=int value} {=
+						if {=has enumPair "n"} {=
+							set result: enumPair.n;
+						} else {=
+							set result: enumPair.v;
+						}
+					}
+				}
+			} else {=
+				set result: value;
+			};
+			__render__ __result__: result;
+		}
+	};
+
 	expr undef;
 }

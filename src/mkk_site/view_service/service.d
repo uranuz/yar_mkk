@@ -11,6 +11,7 @@ class MKKViewService
 	import webtank.common.loger;
 
 	import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.lexer, ivy.parser;
+	import mkk_site.view_service.ivy_custom;
 
 	import mkk_site.view_service.uri_page_router;
 	import mkk_site.config_parsing;
@@ -21,7 +22,8 @@ class MKKViewService
 private:
 	import std.json: JSONValue;
 
-	enum bool useTemplatesCache = false;
+	debug enum bool useTemplatesCache = false;
+	else enum bool useTemplatesCache = true;
 	
 	HTTPRouter _rootRouter;
 	MKK_ViewService_URIPageRouter _pageRouter;
@@ -45,10 +47,14 @@ public:
 		IvyConfig ivyConfig;
 		ivyConfig.importPaths = [ _fileSystemPaths["siteIvyTemplates"] ];
 		ivyConfig.fileExtension = ".html";
+
 		// Направляем логирование шаблонизатора в файл
 		ivyConfig.parserLoger = &_ivyLogerMethod;
 		ivyConfig.compilerLoger = &_ivyLogerMethod;
 		ivyConfig.interpreterLoger = &_ivyLogerMethod;
+		ivyConfig.dirInterpreters = [
+			"rsRange": new RawRSRangeInterpreter
+		];
 
 		_templateCache = new ProgrammeCache!(useTemplatesCache)(ivyConfig);
 

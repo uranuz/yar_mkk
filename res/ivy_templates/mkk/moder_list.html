@@ -19,22 +19,22 @@ expr {
 						<tbody class="e-content_body t-mkk_table">
 						{%
 							var i: 0;
-							repeat it in moder_list.d {*
+							repeat moderRec in {= rsRange moder_list} {*
 								<tr>
 									<td>
 									{=
-										var touristKey: {= mkk.utils.rsGet rs: moder_list row: i field: "tourist_num" };
+										var touristKey: {= mkk.utils.recGet moderRec "tourist_num"};
 										if touristKey == null {=
-											mkk.utils.rsGet rs: moder_list row: i field: "name"
+											mkk.utils.recGet moderRec "name"
 										} else {*
 											<a href="{% expr "/dyn/show_pohod_for_tourist/?key="; expr touristKey }">
-												{= mkk.utils.rsGet rs: moder_list row: i field: "name" }
+												{= mkk.utils.recGet moderRec "name"}
 											</a>
 										*}
 									}
 									</td>
-									<td>{= mkk.utils.rsGet rs: moder_list row: i field: "email" }</td>
-									<td>{= mkk.utils.rsGet rs: moder_list row: i field: "status" }</td>
+									<td>{= mkk.utils.recGet moderRec "email" }</td>
+									<td>{= mkk.utils.recGet moderRec "status" }</td>
 								</tr>
 								{= set i: i + 1 }
 							*};
