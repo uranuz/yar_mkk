@@ -21,7 +21,10 @@ expr {
 						<tr>
 							<td>{= mkk.utils.recGet rec "bookNum" }</td>
 							<td>{= mkk.utils.recGet rec "route" }</td>
-							<td>{= mkk.utils.recGetStr rec "ks" }</td>
+							<td>
+								<div>{= mkk.utils.recGetStr rec "ks" }</div>
+								<div>{= mkk.utils.recGetStr rec "ksElem" }</div>
+							</td>
 						</tr>
 						{= set i: i + 1 }
 					*};

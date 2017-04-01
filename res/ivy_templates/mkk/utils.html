@@ -27,7 +27,7 @@ expr {=
 				result: undef;
 			if {= has fmt "enum" } {=
 				for enumPair in fmt.enum {=
-					if {=int enumPair.v} == {=int value} {=
+					if {=int enumPair.v} == value {=
 						if {=has enumPair "n"} {=
 							set result: enumPair.n;
 						} else {=
