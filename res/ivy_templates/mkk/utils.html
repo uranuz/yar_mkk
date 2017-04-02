@@ -42,5 +42,14 @@ expr {=
 		}
 	};
 
+	def cls {=
+		def.pos el;
+		def.body noscope {
+			expr " e-"; expr el; expr " t-"; expr controlTypeName;
+			if controlInstanceName != undef and controlInstanceName != null {% expr " i-"; expr controlInstanceName; } else "";
+			expr " "
+		}
+	};
+
 	expr undef;
 }

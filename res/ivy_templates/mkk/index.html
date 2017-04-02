@@ -1,36 +1,48 @@
-expr {
+expr {%
 	import mkk.utils;
+	var
+		controlTypeName: "IndexPage"
+		controlInstanceName: undef;
+
+	def recentPohodList {=
+		def.kv
+			controlTypeName: "RecentPohodList"
+			controlInstanceName: undef;
+		def.body {*
+			<div class="{=mkk.utils.cls "block"}">
+				<h4 class="{=mkk.utils.cls "blockTitle"}">Недавно добавленные походы</h4>
+				{= repeat pohod in {=rsRange pohodList} {*
+					<div class="{=mkk.utils.cls "itemBlock"}">
+						<a class="{=mkk.utils.cls "titleLink"}" href="{{vpaths.siteDynamic}}pohod?key=">
+							Текст ссылки
+						</a>
+					</div>
+					<div class="{=mkk.utils.cls "itemDetails"}">
+						<p class="{=mkk.utils.cls "routeRow"}">
+							<span class="{=mkk.utils.cls "routeLabel"}">По маршруту:</span>
+							<span class="{=mkk.utils.cls "route"}">{=mkk.utils.recGet pohod "route"}</span>
+						</p>
+						<div class="{=mkk.utils.cls "basicInfoRow"}">
+							<span class="{=mkk.utils.cls "chiefLabel"}">Руководитель:</span>
+							<a class="{=mkk.utils.cls "chiefLink"}" href="{{vpaths.siteDynamic}}show_pohod_for_tourist?key=">
+								{=mkk.utils.recGet pohod "chiefFamilyName"} {=mkk.utils.recGet pohod "chiefGivenName"} {=mkk.utils.recGet pohod "chiefPatronymic"}
+							</a>
+							<p class="{=mkk.utils.cls "dateInterval"}">Сроки похода: {=mkk.utils.recGet pohod "beginDate"}</p>
+						</div>
+					</div>
+					<div class="{=mkk.utils.cls "chiefCommentRow"}">
+						Описание: {=mkk.utils.recGet pohod "chiefComment"}
+					</div>
+					*}
+				}
+			</div>
+		*}
+	};
 
 	expr {*
-		<div class="e-block t-mkk-indexPage">
+		<div class="{=mkk.utils.cls "block"}">
 			<h2>Добро пожаловать на сайт!</h2>
-			<table>
-				<thead>
-					<tr>
-					{%
-						repeat title in ["Номер книги", "Маршрут", "Категория"] {*
-							<th>{{ title }}</th>
-						*}
-					}
-					</tr>
-				</thead>
-				<tbody>
-				{%
-					var i: 0;
-					repeat rec in {= rsRange pohodList} {*
-						<tr>
-							<td>{= mkk.utils.recGet rec "bookNum" }</td>
-							<td>{= mkk.utils.recGet rec "route" }</td>
-							<td>
-								<div>{= mkk.utils.recGetStr rec "ks" }</div>
-								<div>{= mkk.utils.recGetStr rec "ksElem" }</div>
-							</td>
-						</tr>
-						{= set i: i + 1 }
-					*};
-				}
-				</tbody>
-			</table>
+			{= recentPohodList}
 		</div>
 	*};
 }

@@ -27,7 +27,7 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	string, "chiefPatronymic",
 	string, "organization",
 	string, "route",
-	string, "comment",
+	string, "chiefComment",
 )(
 	null,
 	tuple(
@@ -56,7 +56,7 @@ static immutable recentPohodQuery =
 	chef.patronymic as "chiefPatronymic",
 	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "organization",
 	( coalesce(marchrut, '') ) as "route",
-	( coalesce(chef_coment, '') ) as "comment"
+	( coalesce(chef_coment, '') ) as "chiefComment"
 from pohod
 left join tourist as chef
 	on chef.num = pohod.chef_grupp
