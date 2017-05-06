@@ -1,0 +1,49 @@
+expr {
+	from fir.controls.utils import recGet;
+
+	expr {*
+		<script>window.mkkPageComponentName = 'mkk/ModerList/ModerList';</script>
+		<div class="e-block t-mkk-moderList">
+			<h2>Модераторы</h2>
+			<div class="e-block t-mkk_table">
+				<div class="e-scroll_wrapper t-mkk_table">
+					<table class="e-table t-mkk_table">
+						<thead class="e-header_body t-mkk_table">
+							<tr>
+							{%
+								repeat title in ["Имя", "E-mail", "Статус"] {*
+									<th>{{ title }}</th>
+								*}
+							}
+							</tr>
+						</thead>
+						<tbody class="e-content_body t-mkk_table">
+						{%
+							var i: 0;
+							repeat moderRec in {= rsRange moder_list} {*
+								<tr>
+									<td>
+									{=
+										var touristKey: {=recGet moderRec "tourist_num"};
+										if touristKey == null {=
+											recGet moderRec "name"
+										} else {*
+											<a href="{% expr "/dyn/show_pohod_for_tourist/?key="; expr touristKey }">
+												{=recGet moderRec "name"}
+											</a>
+										*}
+									}
+									</td>
+									<td>{=recGet moderRec "email" }</td>
+									<td>{=recGet moderRec "status" }</td>
+								</tr>
+								{= set i: i + 1 }
+							*};
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	*};
+}

@@ -46,7 +46,7 @@ class MKK_ViewService_URIPageRouter: EventBasedHTTPHandler
 	{
 		context.response.tryClearBody();
 
-		auto generalTpl = Service.templateCache.getByModuleName("mkk.general_template");
+		auto generalTpl = Service.templateCache.getByModuleName("mkk.GeneralTemplate");
 		TDataNode payload;
 		payload["vpaths"] = TDataNode(Service.virtualPaths);
 		payload["content"] = handler(context);

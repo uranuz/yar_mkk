@@ -46,7 +46,7 @@ public:
 		assert( "siteIvyTemplates" in _fileSystemPaths, `Failed to get path to site Ivy templates!` );
 		IvyConfig ivyConfig;
 		ivyConfig.importPaths = [ _fileSystemPaths["siteIvyTemplates"] ];
-		ivyConfig.fileExtension = ".html";
+		ivyConfig.fileExtension = ".ivy";
 
 		// Направляем логирование шаблонизатора в файл
 		ivyConfig.parserLoger = &_ivyLogerMethod;

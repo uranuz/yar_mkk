@@ -89,7 +89,7 @@ JSONValue getPohodsForTourist( HTTPContext context, size_t touristKey, size_t cu
 	vm["isAuthorized"] = user.isAuthenticated && ( user.isInRole("admin") || user.isInRole("moder") );
 	vm["pohodsRS"] = 
 		TouristInfo.getPohodsList( touristKey, curPageNum, pohodsPerPage )
-		.getStdJSON();
+		.toStdJSON();
 	vm["dynamicPath"] = dynamicPath;
 	vm["touristKey"] = touristKey;
 	

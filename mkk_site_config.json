@@ -21,46 +21,15 @@
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",
-				"siteResources": "res/",
-				"siteLogs": "logs/",
-				"sitePublic": "pub/",
-				"siteCSS": "pub/css/",
-				"siteJS": "pub/js/",
-				"siteImg": "pub/img/",
-
-				"webtankResources": "res/webtank/",
-				"webtankPublic": "pub/webtank/",
-				"webtankCSS": "pub/webtank/css/",
-				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/",
-
-				"bootstrapPublic": "pub/bootstrap/",
-				"bootstrapCSS": "pub/bootstrap/css/",
-				"bootstrapJS": "pub/bootstrap/js/",
-				"bootstrapImg": "pub/bootstrap/img/"
+				"siteLogs": "logs/"
 			},
 			"virtualPaths": {
 				"siteRoot": "/",
 				"siteJSON_RPC": "jsonrpc/",
 				"siteDynamic": "dyn/",
-				"siteRestricted": "restricted/",
 				"sitePublic": "pub/",
 
-				"siteAuthPage": "dyn/auth",
-
-				"siteCSS": "pub/css/",
-				"siteImg": "pub/img/",
-				"siteJS": "pub/js/",
-
-				"webtankPublic": "pub/webtank/",
-				"webtankCSS": "pub/webtank/css/",
-				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/",
-
-				"bootstrapPublic": "pub/bootstrap/",
-				"bootstrapCSS": "pub/bootstrap/css/",
-				"bootstrapJS": "pub/bootstrap/js/",
-				"bootstrapImg": "pub/bootstrap/img/"
+				"siteAuthPage": "dyn/auth"
 			}
 		},
 		"yarMKKView": {
@@ -68,19 +37,10 @@
 				"siteRoot": "/",
 				"siteJSON_RPC": "jsonrpc/",
 				"siteDynamic": "dyn/",
-				"siteRestricted": "restricted/",
 				"sitePublic": "pub/",
+				"siteImg": "pub/mkk/img/",
 
 				"siteAuthPage": "dyn/auth",
-
-				"siteCSS": "pub/css/",
-				"siteImg": "pub/img/",
-				"siteJS": "pub/js/",
-
-				"webtankPublic": "pub/webtank/",
-				"webtankCSS": "pub/webtank/css/",
-				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/",
 
 				"bootstrapPublic": "pub/bootstrap/",
 				"bootstrapCSS": "pub/bootstrap/css/",
@@ -89,23 +49,10 @@
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",
-				"siteResources": "res/",
 				"siteLogs": "logs/",
 				"sitePublic": "pub/",
-				"siteCSS": "pub/css/",
-				"siteJS": "pub/js/",
-				"siteImg": "pub/img/",
 
-				"webtankResources": "res/webtank/",
-				"webtankPublic": "pub/webtank/",
-				"webtankCSS": "pub/webtank/css/",
-				"webtankJS": "pub/webtank/js/",
-				"webtankImg": "pub/webtank/img/",
-
-				"bootstrapPublic": "pub/bootstrap/",
-				"bootstrapCSS": "pub/bootstrap/css/",
-				"bootstrapJS": "pub/bootstrap/js/",
-				"bootstrapImg": "pub/bootstrap/img/"
+				"siteIvyTemplates": "res/templates/"
 			}
 		}
 	}

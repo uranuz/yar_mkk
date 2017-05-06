@@ -107,7 +107,7 @@ auto getTouristList(HTTPContext context, string фамилия, string имя, s
 	JSONValue[string] tmp;
 	tmp[`perPage`] = perPage;
 	tmp[`recordCount`] = col_str;
-	tmp[`rs`] = rs.getStdJSON();
+	tmp[`rs`] = rs.toStdJSON();
 	result.object = tmp;
 	
 	return result;
@@ -283,7 +283,7 @@ void создатьФормуИзмененияПохода(
 				btnText = touristInfoArr.join(' ')
 					~ ( touristRec.isNull("birth_year") ? null : ", " ~ touristRec.getStr!"birth_year"() ~ " г.р." );
 
-				auto jsonRec = touristRec.getStdJSON();
+				auto jsonRec = touristRec.toStdJSON();
 				recordStr = toJSON(jsonRec);
 			}
 			else
@@ -504,7 +504,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	import webtank.common.serialization;
 
 	SiteLoger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
-	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.getDLangValue!(string[][]);
+	auto rawLinks = pVars.get("extra_file_links", "").parseJSON.fromStdJSON!(string[][]);
 	string[] processedLinks;
 	URI uri;
 	

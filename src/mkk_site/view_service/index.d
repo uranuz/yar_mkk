@@ -17,7 +17,7 @@ string renderIndex(HTTPContext ctx)
 	auto tpl = Service.templateCache.getByModuleName("mkk.index");
 	TDataNode dataDict;
 	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
-	dataDict["vpaths"] = TDataNode(Service.virtualPaths);
+	dataDict["vpaths"] = Service.virtualPaths;
 
 	return tpl.run(dataDict).str;
 }

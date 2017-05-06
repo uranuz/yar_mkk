@@ -187,10 +187,8 @@ string[string] getServiceFileSystemPaths(ref JSONValue jsonCurrService)
 	string[string] defaultFileSystemPaths = [
 		"siteRoot": "~/sites/mkk_site/",
 
-		"siteResources": "res/",
-		"sitePageTemplates": "res/templates/",
-		"siteIvyTemplates": "res/ivy_templates/",
-		"siteGeneralTemplateFile": "res/templates/general_template.html",
+		"sitePublic": "pub/",
+		"siteIvyTemplates": "res/templates/",
 
 		"siteLogs": "logs/",
 		"siteErrorLogFile": "logs/error.log",
@@ -198,18 +196,7 @@ string[string] getServiceFileSystemPaths(ref JSONValue jsonCurrService)
 		"webtankErrorLogFile": "logs/webtank_error.log",
 		"webtankEventLogFile": "logs/webtank_event.log",
 		"databaseQueryLogFile": "logs/db_query.log",
-		"sitePrioriteLogFile": "logs/priorite.log",
-
-		"sitePublic": "pub/",
-		"siteCSS": "pub/css/",
-		"siteJS": "pub/js/",
-		"siteImg": "pub/img/",
-
-		"webtankResources": "res/webtank/",
-		"webtankPublic": "pub/webtank/",
-		"webtankCSS": "pub/webtank/css/",
-		"webtankJS": "pub/webtank/js/",
-		"webtankImg": "pub/webtank/img/"
+		"sitePrioriteLogFile": "logs/priorite.log"
 	];
 
 	return resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot");
@@ -224,23 +211,10 @@ string[string] getServiceVirtualPaths(ref JSONValue jsonCurrService)
 	//Захардкодим адреса сайта, используемые по-умолчанию
 	string[string] defaultVirtualPaths = [
 		"siteRoot": "/",
-		
+
 		"sitePublic": "pub/",
 		"siteDynamic": "dyn/",
-		"siteRestricted": "restricted/",
-		"siteJSON_RPC": "dyn/jsonrpc/",
-		
-		"siteLogs": "logs/",
-		"siteResources": "res/",
-		
-		"siteCSS": "pub/css/",
-		"siteJS": "pub/js/",
-		"siteImg": "pub/img/",
-		
-		"webtankPublic": "pub/webtank/",
-		"webtankCSS": "pub/webtank/css/",
-		"webtankJS": "pub/webtank/js/",
-		"webtankImg": "pub/webtank/img/"
+		"siteJSON_RPC": "jsonrpc/"
 	];
 
 	return resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot");

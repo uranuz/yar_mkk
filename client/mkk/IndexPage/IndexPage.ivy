@@ -1,0 +1,57 @@
+expr {%
+	from mkk.utils import recGet, recGetStr, cls;
+	var
+		controlTypeName: "IndexPage"
+		controlInstanceName: undef;
+
+	def recentPohodList {=
+		def.kv
+			controlTypeName: "RecentPohodList"
+			controlInstanceName: undef;
+		def.body {*
+			<div class="{=cls "block"}">
+				<h4 class="{=cls "blockTitle"}">Недавно добавленные походы</h4>
+				{=repeat pohod in {=rsRange pohodList} {*
+					<div class="{=cls "itemBlock"}">
+						<a class="{=cls "titleLink"}" href="{{vpaths.siteDynamic}}pohod?key={=recGet pohod "num"}">
+							{=recGetStr pohod "vid"}
+							{=recGetStr pohod "ks"}
+							{=recGetStr pohod "ksElem"} к.с.
+							в районе {=recGet pohod "region"}
+						</a>
+						<div class="{=cls "itemDetails"}">
+							<p class="{=cls "routeRow"}">
+								<span class="{=cls "routeLabel"}">По маршруту:</span>
+								<span class="{=cls "route"}">{=recGet pohod "route"}</span>
+							</p>
+							<div class="{=cls "basicInfoRow"}">
+								<span class="{=cls "chiefLabel"}">Руководитель:</span>
+								<a class="{=cls "chiefLink"}"
+									href="{{vpaths.siteDynamic}}show_pohod_for_tourist?key={=recGet pohod "chiefNum"}">
+									{=recGet pohod "chiefFamilyName"}
+									{=recGet pohod "chiefGivenName"}
+									{=recGet pohod "chiefPatronymic"}
+								</a>
+								<p class="{=cls "dateInterval"}">Сроки похода: {=recGet pohod "beginDate"}</p>
+							</div>
+						</div>
+						<div class="{=cls "chiefCommentRow"}">
+							{=
+								var chiefComment: {=recGet pohod "chiefComment"};
+								if not {=empty chiefComment} "Описание: " ~ chiefComment
+							}
+						</div>
+					</div>
+					*}
+				}
+			</div>
+		*}
+	};
+
+	expr {*
+		<div class="{=cls "block"}">
+			<h2>Добро пожаловать на сайт!</h2>
+			{= recentPohodList}
+		</div>
+	*};
+}

@@ -18,7 +18,7 @@ string renderModerList(HTTPContext ctx)
 
 	debug writeln(`moder request headers: `, ctx.request.headers.toAA());
 	
-	auto tpl = Service.templateCache.getByModuleName("mkk.moder_list");
+	auto tpl = Service.templateCache.getByModuleName("mkk.ModerList");
 	TDataNode dataDict;
 
 	dataDict["moder_list"] = mainServiceCall("moder.list", ctx);
