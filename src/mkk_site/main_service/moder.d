@@ -1,5 +1,4 @@
 module mkk_site.main_service.moder;
-
 import mkk_site.main_service.devkit;
 
 shared static this()
