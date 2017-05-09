@@ -70,7 +70,7 @@ public:
 		_rootRouter = new HTTPRouter;
 		assert( "siteJSON_RPC" in _virtualPaths, `Failed to get JSON-RPC virtual path!` );
 		_jsonRPCRouter = new JSON_RPC_Router( _virtualPaths["siteJSON_RPC"] ~ "{remainder}" );
-		_rootRouter.join(_jsonRPCRouter);
+		_rootRouter.addHandler(_jsonRPCRouter);
 
 		_accessController = new ServiceAccessController;
 		_subscribeRoutingEvents();

@@ -5,6 +5,7 @@ import mkk_site.view_service.utils;
 
 shared static this() {
 	Service.pageRouter.join!(renderPohodList)("/dyn/pohod/list");
+	Service.pageRouter.join!(renderPartyInfo)("/dyn/pohod/partyInfo");
 }
 
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
@@ -80,7 +81,7 @@ string renderPohodList(HTTPContext ctx)
 	auto req = ctx.request;
 	bool isForPrint = req.bodyForm.get("for_print", null) == "on";
 	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
-	size_t pohodsPerPage = ( isForPrint? 10000: 10 );
+	size_t pohodsPerPage = isForPrint? 10000: 10;
 	size_t curPageNum = req.bodyForm.get("cur_page_num", "1").to!(size_t).ifThrown!ConvException(1);
 
 	//size_t pageCount = pohodCount / pohodsPerPage + 1; //Количество страниц
@@ -134,4 +135,16 @@ string renderPohodList(HTTPContext ctx)
 	dataDict["isForPrint"] = isForPrint;
 
 	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict).str;
+}
+
+void renderPartyInfo(HTTPContext ctx)
+{
+	import std.json: JSONValue;
+	import std.conv: to;
+	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
+	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["pohodNum": pohodNum]));
+
+	ctx.response.write(
+		Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict).str
+	);
 }
