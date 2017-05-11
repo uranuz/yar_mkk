@@ -1,5 +1,29 @@
 expr {*
+	{=from fir.controls.utils import rsGet, recGet}
 	<div>
-		Проверочка!
+		<div>
+			<span>Код МКК:</span>
+			<span>{=rsGet pohodInfo "mkkCode" 0}</div>
+		</div>
+		<div>
+			<span>Номер книги: </span>
+			<span>{=rsGet pohodInfo "bookNum" 0}</span>
+		</div>
+		<div>
+			<span>Район похода: </span>
+			<span>{=rsGet pohodInfo "pohodRegion" 0}</span>
+		</div>
+		<hr/>
+		<div>
+			{=repeat rec in {=rsRange partyList} {*
+				<div>
+					{=recGet rec "familyName"}
+					{=recGet rec "givenName"}
+					{=recGet rec "patronymic"}
+					{=recGet rec "birthYear"}
+				</div>
+				*}
+			}
+		</div>
 	</div>
 *}

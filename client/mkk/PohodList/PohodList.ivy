@@ -2,7 +2,9 @@ expr {=
 from fir.controls.utils import recGet, recGetStr;
 from mkk.PohodList.Navigation import PohodListNavigation;
 expr {*
-	<div class="i-show_pohod e-block t-show_pohod">
+	{=var controlName: "PohodList"}
+	<div class="i-show_pohod e-block t-show_pohod" data-fir-module='mkk/PohodList/PohodList'>
+		<input type="hidden" data-fir-opts="{=__dumpScope__}"/>
 		<h2>Походы</h2>
 		<div class="e-navigation t-show_pohod">
 			{=PohodListNavigation
@@ -22,7 +24,7 @@ expr {*
 			</div>
 		</div>
 		<div class="e-table_wrapper t-show_pohod">
-			<div class="i-show_pohod_table e-block t-mkk_table">
+			<div class="i-PohodList e-block t-mkk_table">
 				<div class="e-scroll_wrapper t-mkk_table">
 					<table class="e-table t-mkk_table">
 						<tbody>
@@ -46,7 +48,7 @@ expr {*
 						</tbody>
 						<tbody class="e-content_body t-mkk_table">
 							{=repeat rec in {=rsRange pohodSet} {*
-								<tr class="i-show_pohod_table e-row">
+								<tr class="i-PohodList e-row">
 									{=if isAuthenticated and not isForPrint {*
 										<td>{=recGet rec "num"}</td>
 									*}}
@@ -62,7 +64,7 @@ expr {*
 									</td>
 									<td width="8%">{=recGet rec "pohodRegion"}</td>
 									<td>{=recGet rec "chiefName"}</td>
-									<td class="i-show_pohod_table e-show_participants_btn t-show_pohod_table"
+									<td class="i-PohodList e-show_participants_btn t-show_pohod_table"
 										data-pohod-num="{=recGet rec "num"}" 
 										title="Щелкните для просмотра списка участников">
 										<img class="e-show_participants_btn_icon t-show_pohod_table { {auth_state_cls} }"
@@ -92,6 +94,5 @@ expr {*
 			</div>
 		</div>
 	</div>
-	<script src=""></script>
 	*}
 }

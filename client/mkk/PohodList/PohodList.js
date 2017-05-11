@@ -17,11 +17,8 @@ define('mkk/PohodList/PohodList', [
 			var
 				el = $(ev.currentTarget);
 
-			json_rpc.invoke({
-				uri: "/dyn/jsonrpc/", //Адрес для отправки 
-				method: "mkk_site.show_pohod.participantsList", //Название удалённого метода для вызова в виде строки
-				params: { "pohodNum": +el.data("pohodNum") }, //Параметры вызова удалённого метода
-				success: this.showParticipantsDialog.bind(this) //Обработчик успешного вызова удалённого метода
+			$.ajax('http://localhost/dyn/pohod/partyInfo?key=' + (+el.data("pohodNum")) , {
+				success: this.showParticipantsDialog.bind(this)
 			});
 		},
 		showParticipantsDialog: function(data) {
@@ -35,29 +32,4 @@ define('mkk/PohodList/PohodList', [
 				.dialog({ modal: true, width: 450 });
 		}
 	});
-});
-
-//Инициализация страницы
-$(window.document).ready(function() {
-	var
-		filterCtrlNames = [
-			'pohod_filter_vid',
-			'pohod_filter_ks',
-			'pohod_filter_prepar',
-			'pohod_filter_stat'
-		],
-		filterCtrlName;
-	mkk_site.show_pohod_table = new mkk_site.ShowPohodTable({
-		controlName: "show_pohod_table"
-	});
-	mkk_site.show_pohod = new mkk_site.PohodNavigation({
-		controlName: "pohod_navigation"
-	});
-
-	for (var i = 0; i < filterCtrlNames.length; ++i) {
-		filterCtrlName = filterCtrlNames[i];
-		mkk_site[filterCtrlName] = new webtank.ui.CheckBoxList({
-			controlName: filterCtrlName
-		});
-	}
 });
