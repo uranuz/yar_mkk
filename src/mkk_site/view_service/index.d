@@ -14,7 +14,7 @@ import webtank.net.http.context;
 
 string renderIndex(HTTPContext ctx)
 {
-	auto tpl = Service.templateCache.getByModuleName("mkk.index");
+	auto tpl = Service.templateCache.getByModuleName("mkk.IndexPage");
 	TDataNode dataDict;
 	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;

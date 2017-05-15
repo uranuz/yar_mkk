@@ -1,0 +1,55 @@
+.mkk-PohodList {
+	&.e-routeCell {
+		background-color:#8dc0de;
+	}
+}
+
+.show_participants_btn {}
+.show_participants_btn > img {
+	vertical-align: middle;
+}
+
+.mkk-PohodNavigation {
+	&.e-enumFilterBlock {
+		margin: 0 -0.2rem 1rem -0.2rem;
+	}
+	&.e-enumFilter {
+		padding: 0 0.2rem 0 0.2rem;
+	}
+	&.e-dateRangeArea {
+		margin-bottom: 0.5rem;
+	}
+	&.e-searchBtn {
+		margin: 1rem 0;
+	}
+	&.e-pagination {
+		margin-bottom: 0.5rem;
+	}
+}
+
+.mkk-PohodList {
+	&.e-pagination,
+	&.e-table_bar {
+		margin-bottom: 0.5rem
+	}
+	&.e-pohodCount {
+		padding: 0.375rem 0;
+		display: inline-block;
+	}
+	&.e-addPohodBtn.m-without_auth {
+		display: none;
+	}
+	&.e-headerNumCell.m-without_auth,
+	&.e-headerEditCell.m-without_auth {
+		display: none;
+	}
+	&.e-showPartyBtn {
+		cursor: pointer;
+	}
+	&.e-showPartyBtnIcon {
+		vertical-align: bottom;
+	}
+	&.e-showPartyBtnText {
+		vertical-align: middle;
+	}
+}

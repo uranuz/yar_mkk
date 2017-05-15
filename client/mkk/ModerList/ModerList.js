@@ -1,12 +1,11 @@
 define('mkk/ModerList/ModerList', [
-	'fir/controls/ITEMControl'
-], function (ITEMControl) {
-	__extends(ModerList, ITEMControl);
+	'fir/controls/FirControl'
+], function (FirControl) {
+	__extends(ModerList, FirControl);
 
 	function ModerList(opts) {
 		opts = opts || {};
-		ITEMControl.call(this, opts);
-
+		FirControl.call(this, opts);
 	}
 	return __mixinProto(ModerList, {});
 });
