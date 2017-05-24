@@ -9,7 +9,7 @@ define('mkk/PohodList/PohodList', [
 		opts = opts || {};
 		FirControl.call(this, opts);
 
-		this._elems("contentBody")
+		this._elems("tableContentBody")
 			.on("click", this.onShowPartyBtn_click.bind(this));
 	}
 	return __mixinProto(PohodList, {

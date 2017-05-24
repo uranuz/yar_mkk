@@ -1,21 +1,26 @@
-expr {*
-	{=from fir.controls.utils import rsGet, recGet}
-	<div>
+expr {=
+from fir.controls.utils import rsGet, recGet, cls;
+def PartyInfo {=
+	def.kv
+		cssBaseClass: "mkk-PartyInfo"
+		instanceName: "partyInfo";
+	def.body {*
+	<div class="{=cls 'block'}">
 		<div>
-			<span>Код МКК:</span>
+			<span class="{=cls 'codeLabel'}">Код МКК:</span>
 			<span>{=rsGet pohodInfo "mkkCode" 0}</div>
 		</div>
 		<div>
-			<span>Номер книги: </span>
+			<span class="{=cls 'bookNumLabel'}">Номер книги: </span>
 			<span>{=rsGet pohodInfo "bookNum" 0}</span>
 		</div>
 		<div>
-			<span>Район похода: </span>
+			<span class="{=cls 'regionLabel'}">Район похода: </span>
 			<span>{=rsGet pohodInfo "pohodRegion" 0}</span>
 		</div>
 		<hr/>
 		<div>
-			{=repeat rec in {=rsRange partyList} {*
+			{=repeat rec in partyList {*
 				<div>
 					{=recGet rec "familyName"}
 					{=recGet rec "givenName"}
@@ -26,4 +31,7 @@ expr {*
 			}
 		</div>
 	</div>
-*}
+	*}
+};
+PartyInfo;
+}

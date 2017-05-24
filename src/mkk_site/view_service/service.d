@@ -54,9 +54,6 @@ public:
 		ivyConfig.parserLoger = &_ivyLogerMethod;
 		ivyConfig.compilerLoger = &_ivyLogerMethod;
 		ivyConfig.interpreterLoger = &_ivyLogerMethod;
-		ivyConfig.dirInterpreters = [
-			"rsRange": new RawRSRangeInterpreter
-		];
 
 		_templateCache = new ProgrammeCache!(useTemplatesCache)(ivyConfig);
 

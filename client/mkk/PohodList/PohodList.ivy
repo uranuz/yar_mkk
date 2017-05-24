@@ -12,6 +12,7 @@ def PohodList {=
 		<div class="{=cls 'navigation'}">
 			{=PohodListNavigation
 				pohodEnums: pohodEnums
+				filter: filter
 			}
 		</div>
 		<div class="{=cls 'tableBar'} row">
@@ -29,8 +30,8 @@ def PohodList {=
 		<div class="{=cls 'tableBlock'} mkk-Table">
 			<div class="{=cls 'tableScroller'} mkk-Table">
 				<table class="{=cls 'table'} mkk-Table">
-					<tbody>
-						<tr class="{=cls 'headerRow'} mkk-Table">
+					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
 							{=if isAuthenticated and not isForPrint {*
 								<th class="{=cls 'headerNumCell'}">#</th>
 							*}}
@@ -47,9 +48,9 @@ def PohodList {=
 							*}}
 						</tr>
 					</tbody>
-					<tbody class="{=cls 'contentBody'} mkk-Table">
-						{=repeat rec in {=rsRange pohodSet} {*
-							<tr class="{=cls 'tableRow'}">
+					<tbody class="{=cls 'tableContentBody'} mkk-Table">
+						{=repeat rec in pohodSet {*
+							<tr>
 								{=if isAuthenticated and not isForPrint {*
 									<td>{=recGet rec "num"}</td>
 								*}}

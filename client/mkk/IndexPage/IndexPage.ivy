@@ -7,7 +7,7 @@ def RecentPohodList {=
 	def.body {*
 		<div class="{=cls "block"}">
 			<h4 class="{=cls "blockTitle"}">Недавно добавленные походы</h4>
-			{=repeat pohod in {=rsRange pohodList} {*
+			{=repeat pohod in pohodList {*
 				<div class="{=cls "itemBlock"}">
 					<a class="{=cls "titleLink"}" href="{{vpaths.siteDynamic}}pohod?key={=recGet pohod "num"}">
 						{=recGetStr pohod "tourismKind"}
@@ -28,7 +28,7 @@ def RecentPohodList {=
 								{=recGet pohod "chiefGivenName"}
 								{=recGet pohod "chiefPatronymic"}
 							</a>
-							<p class="{=cls "dateInterval"}">Сроки похода: {=recGet pohod "beginDate"}</p>
+							<p class="{=cls "dateInterval"}">Сроки похода: {=dtGet {=recGet pohod "beginDate"} "year" }</p>
 						</div>
 					</div>
 					<div class="{=cls "chiefCommentRow"}">

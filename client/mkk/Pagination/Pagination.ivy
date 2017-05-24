@@ -1,39 +1,56 @@
-<div class="i-pagination e-block t-pagination form-inline">
-	<h6>Переход по страницам</h6>
-	<div class="e-form_row t-pagination form-group">
-		<span class="e-prev_elem t-pagination">
-			<a class="i-pagination e-prev_btn t-pagination btn btn-secondary {{prev_btn_cls}}"
-				href="javascript:void(0)"
-				{{prev_btn_attr}}>
-				Предыдущая
-			</a>
-		</span>
-
-		<div class="input-group">
-			<span class="e-current_elem t-pagination">
-				<input type="text"
-					class="i-pagination e-page_num_input t-pagination form-control"
-					value="{{cur_page_num}}"
-					name="cur_page_num"/>
+expr {=
+from fir.controls.utils import cls;
+def Pagination {=
+	def.kv
+		moduleName: "mkk/Pagination/Pagination"
+		cssBaseClass: "mkk-Pagination"
+		instanceName: "pagination"
+		formField: undef
+		currentPage: undef
+		pageCount: undef;
+	def.body {*
+	<div class="{=cls 'block'} form-inline" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h6>Переход по страницам</h6>
+		<div class="{=cls 'formRow'} form-group">
+			<span class="{=cls 'prevElem'}">
+				<a class="{=cls 'prevBtn'} btn btn-secondary { {prev_btn_cls} }"
+					href="javascript:void(0)"
+					{ {prev_btn_attr} }>
+					Предыдущая
+				</a>
 			</span>
-			<span class="e-total_elem t-pagination input-group-addon">
-				из {{page_count}}
-			</span>
 
-			<span class="input-group-btn">
-				<button type="button"
-					class="i-pagination e-goto_page_btn t-pagination btn btn-secondary">
-					Перейти
-				</button>
+			<div class="input-group">
+				<span class="{=cls 'currentElem'}">
+					<input type="text"
+						class="{=cls 'currentPageField'} form-control"
+						value="{{currentPage}}"
+						name="{{formField}}"/>
+				</span>
+				<span class="{=cls 'totalElem'} input-group-addon">
+					из {{pageCount}}
+				</span>
+
+				<span class="input-group-btn">
+					<button type="button"
+						class="{=cls 'gotoPageBtn'} btn btn-secondary">
+						Перейти
+					</button>
+				</span>
+			</div>
+
+			<span class="{=cls 'nextElem'}">
+				<a class="{=cls 'nextBtn'} btn btn-secondary { {next_btn_cls} }"
+					href="javascript:void(0)"
+					{ {next_btn_attr} }>
+					Следующая
+				</a>
 			</span>
 		</div>
-
-		<span class="e-next_elem t-pagination">
-			<a class="i-pagination e-next_btn t-pagination btn btn-secondary {{next_btn_cls}}"
-				href="javascript:void(0)"
-				{{next_btn_attr}}>
-				Следующая
-			</a>
-		</span>
 	</div>
-</div>
+	*}
+};
+expr undef;
+}
+

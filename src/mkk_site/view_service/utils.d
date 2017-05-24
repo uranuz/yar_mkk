@@ -8,6 +8,29 @@ import ivy.interpreter_data;
 import webtank.net.http.context: HTTPContext;
 import webtank.net.http.input: HTTPInput;
 import webtank.net.http.client: sendJSON_RPCBlockingA = sendJSON_RPCBlocking;
+import mkk_site.view_service.ivy_custom;
+
+TDataNode tryExtractRecordSet(TDataNode srcNode)
+{
+	if( srcNode.type != DataNodeType.AssocArray )
+		return srcNode;
+	if( "t" !in srcNode || srcNode["t"].type != DataNodeType.String || srcNode["t"].str != "recordset" )
+		return srcNode;
+
+	return TDataNode(new RecordSetAdapter(srcNode));
+}
+
+TDataNode tryExtractLvlRecordSet(TDataNode srcNode)
+{
+	srcNode = srcNode.tryExtractRecordSet();
+	if( srcNode.type != DataNodeType.AssocArray )
+		return srcNode;
+
+	foreach( key, item; srcNode.assocArray ) {
+		srcNode.assocArray[key] = srcNode.assocArray[key].tryExtractRecordSet();
+	}
+	return srcNode;
+}
 
 /// Выполняет вызов метода rpcMethod по протоколу JSON-RPC с узла requestURI и параметрами jsonParams в формате JSON
 /// Возвращает результат выполнения метода, разобранный в формате данных шаблонизатора Ivy
@@ -20,7 +43,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, ref
 	assert( ivyJSON.type == DataNodeType.AssocArray, `Expected assoc array as JSON-RPC result` );
 	assert( "result" in ivyJSON.assocArray, `Expected "result" field in JSON-RPC result` );
 	
-	return ivyJSON["result"];
+	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
 // Перегрузка sendJSON_RPCBlocking, которая позволяет передать словарь с HTTP заголовками
@@ -29,11 +52,11 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 {
 	auto response = sendJSON_RPCBlockingA!(HTTPInput)(requestURI, rpcMethod, headers, jsonParams);
 
-	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
+	TDataNode ivyJSON = parseIvyJSON(response.messageBody).tryExtractRecordSet();
 	assert( ivyJSON.type == DataNodeType.AssocArray, `Expected assoc array as JSON-RPC result` );
 	assert( "result" in ivyJSON.assocArray, `Expected "result" field in JSON-RPC result` );
 	
-	return ivyJSON["result"];
+	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
 private static immutable _mainServiceEndpoint = `http://localhost/jsonrpc/`;

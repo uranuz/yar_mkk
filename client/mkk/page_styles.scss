@@ -14,11 +14,11 @@
 		width: 100%;
 		font-size: 0.95rem;
 	}
-	&.e-headerBody > tr > th {
+	&.e-tableHeaderBody > tr > th {
 		text-align: center;
 	}
-	&.e-headerBody > tr > th,
-	&.e-contentBody > tr > td {
+	&.e-tableHeaderBody > tr > th,
+	&.e-tableContentBody > tr > td {
 		border: 1px solid #666;
 		padding: 0.25rem;
 	}

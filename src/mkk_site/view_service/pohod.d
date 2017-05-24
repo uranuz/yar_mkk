@@ -87,7 +87,11 @@ string renderPohodList(HTTPContext ctx)
 	//size_t pageCount = pohodCount / pohodsPerPage + 1; //Количество страниц
 	//if( curPageNum > pageCount ) curPageNum = pageCount;
 
-	JSONValue filter;
+	JSONValue filter; // JSON с фильтрами по походам
+
+	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
+
+	// Выборка фильтров по перечислимым полям
 	foreach( name; ["tourismKinds", "complexities", "progresss", "claimStates"] ) {
 		if( name in req.bodyForm ) {
 			int[] data = req.bodyForm.array(name).to!(int[]).ifThrown!ConvException(null);
@@ -97,13 +101,16 @@ string renderPohodList(HTTPContext ctx)
 		}
 	}
 
-	filter["pohodRegion"] = req.bodyForm.get("pohodRegion", null);
+	filter["pohodRegion"] = req.bodyForm.get("pohodRegion", null); // Район похода
+
+	// Флаги "с доп. материамлами", "режим контроля данных"
 	foreach( name; ["withFiles", "withDataCheck"] ) {
 		if( name in req.bodyForm ) {
 			filter[name] = req.bodyForm[name] == "on";
 		}
 	}
 
+	// Вытаскиваем данные для поля dates с фильтром по датам
 	JSONValue datesFilter;
 	foreach( name; [
 		"beginDateRangeHead",
@@ -111,13 +118,22 @@ string renderPohodList(HTTPContext ctx)
 		"endDateRangeHead",
 		"endDateRangeTail"
 	]) {
-		if( name in req.bodyForm ) {
-			datesFilter[name] = req.bodyForm[name];
+		int[string] currDate;
+		foreach( partName; ["day", "month", "year"])
+		{
+			string formField = name ~ "__" ~ partName;
+			if( formField in req.bodyForm && req.bodyForm[formField].length > 0 ) {
+				try {
+					currDate[partName] = req.bodyForm[formField].to!int;
+				} catch(ConvException) {} // Игнорируем неверные значения
+			}
 		}
+		datesFilter[name] = JSONValue(currDate);
 	}
-	if( datesFilter.type != JSON_TYPE.NULL ) {
-		filter["dates"] = datesFilter;
-	}
+	filter["dates"] = datesFilter;
+
+	debug import std.stdio;
+	debug writeln("filter: ", filter);
 
 	TDataNode dataDict;
 	dataDict["pohodSet"] = mainServiceCall("pohod.list", ctx, JSONValue([
@@ -126,9 +142,8 @@ string renderPohodList(HTTPContext ctx)
 		"limit": JSONValue(pohodsPerPage)
 	]));
 
-	// Возвращаем поля фильтрации назад пользователю
 	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
-	dataDict["filter"] = filter.toIvyJSON();
+	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
 
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["isAuthenticated"] = isAuthorized;
