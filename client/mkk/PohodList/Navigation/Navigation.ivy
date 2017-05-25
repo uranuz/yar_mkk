@@ -9,7 +9,9 @@ def PohodListNavigation {=
 		cssBaseClass: "mkk-PohodListNavigation"
 		instanceName: 'pohodListNavigation'
 		pohodEnums: undef
-		filter: {};
+		filter: {}
+		currentPage: undef
+		pageCount;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -94,17 +96,19 @@ def PohodListNavigation {=
 						<div class="row">
 							<label class="col-md-6">
 								<span class="font-control-label">Район похода содержит</span>
-								<input type="text" name="region_pohod" class="form-control" value="{ {region_pohod} }"/>
+								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
 							</label>
 							<label class="col-md-6">
-								<input type="checkbox" name="with_files"{ {with_files} } class="checkbox"/>
+								<input type="checkbox" name="withFiles"{=if filter.withFiles == true 'checked'} class="checkbox"/>
 								<span class="font-control-label">С доп. материалами</span>
 							</label>
 
-							<div { {none} }><label class="col-md-6">
-								<input type="checkbox" name="data_check"{ {data_check} } class="checkbox"/>
-								<span class="font-control-label">Режим контроля данных</span>
-							</label></div>
+							<div>
+								<label class="col-md-6">
+									<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
+									<span class="font-control-label">Режим контроля данных</span>
+								</label>
+							</div>
 
 						</div>
 					</div>
@@ -115,7 +119,11 @@ def PohodListNavigation {=
 					</div>
 				</div>
 				<div class="{=cls 'pagination'}">
-					{=Pagination}
+					{=Pagination
+						formField: 'currentPage'
+						currentPage: currentPage
+						pageCount: pageCount
+					}
 				</div>
 			</form>
 		</div>

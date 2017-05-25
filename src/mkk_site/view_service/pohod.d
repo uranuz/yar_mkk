@@ -79,14 +79,8 @@ string renderPohodList(HTTPContext ctx)
 	import std.exception: ifThrown;
 
 	auto req = ctx.request;
-	bool isForPrint = req.bodyForm.get("for_print", null) == "on";
+	bool isForPrint = req.bodyForm.get("isForPrint", null) == "on";
 	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
-	size_t pohodsPerPage = isForPrint? 10000: 10;
-	size_t curPageNum = req.bodyForm.get("cur_page_num", "1").to!(size_t).ifThrown!ConvException(1);
-
-	//size_t pageCount = pohodCount / pohodsPerPage + 1; //Количество страниц
-	//if( curPageNum > pageCount ) curPageNum = pageCount;
-
 	JSONValue filter; // JSON с фильтрами по походам
 
 	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
@@ -132,16 +126,24 @@ string renderPohodList(HTTPContext ctx)
 	}
 	filter["dates"] = datesFilter;
 
-	debug import std.stdio;
-	debug writeln("filter: ", filter);
-
 	TDataNode dataDict;
+	size_t pohodCount = mainServiceCall("pohod.listSize", ctx, JSONValue(["filter": filter])).integer;
+	size_t pohodsPerPage = isForPrint? 10000: 10;
+	size_t currentPage = req.bodyForm.get("currentPage", "1").to!(size_t).ifThrown!ConvException(1);
+	size_t pageCount = pohodCount / pohodsPerPage + 1;
+	if( currentPage > pageCount ) {
+		currentPage = pageCount;
+	}
+
 	dataDict["pohodSet"] = mainServiceCall("pohod.list", ctx, JSONValue([
 		"filter": filter,
-		"offset": JSONValue( (curPageNum - 1) * pohodsPerPage ),
+		"offset": JSONValue( (currentPage - 1) * pohodsPerPage ),
 		"limit": JSONValue(pohodsPerPage)
 	]));
 
+	dataDict["pohodCount"] = pohodCount;
+	dataDict["currentPage"] = currentPage;
+	dataDict["pageCount"] = pageCount;
 	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
 	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
 

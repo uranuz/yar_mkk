@@ -8,6 +8,7 @@ shared static this()
 	Service.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
 	Service.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
 	Service.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
+	Service.JSON_RPCRouter.join!(getPohodCount)(`pohod.listSize`);
 	Service.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
 }
 
@@ -154,38 +155,41 @@ struct PohodFilter
 	string pohodRegion; /// Регион проведения похода
 	bool withFiles; /// Записи с доп. материалами
 	bool withDataCheck; /// Режим проверки данных
-		
+
+	/// Проверка, что есть какая-либо фильтрация
 	bool withFilter() @property
 	{
+		import std.algorithm: canFind;
+
 		if( tourismKinds.length > 0 || complexities.length > 0 || 
 			progress.length > 0 || claimStates.length > 0 ||
 			pohodRegion.length > 0 || withFiles || withDataCheck
 		) return true;
-			
-		foreach( date; this.dates )
+
+		foreach( fieldName, date; this.dates )
 		{
-			if( !date.isNull )
+			// Второе условие на проверку того, что переданное поле даты есть в наборе
+			if( !date.isNull && соотвПолейСроков.canFind!( (x, y)=> x.имяВФорме == y )(fieldName) )
 				return true;
 		}
-		
 		return false;
 	}
 }
 
 struct СоотвПолейСроков {
-		string имяВФорме;
-		string имяВБазе;
-		string опСравн;
+	string имяВФорме;
+	string имяВБазе;
+	string опСравн;
 };
 	
 //Вспомогательный массив структур для составления запроса
 //Устанавливает соответствие между полями в форме и в базе
 //и операциями сравнения, которые будут в запросе
 static immutable СоотвПолейСроков[] соотвПолейСроков = [
-	{ "begin_date_range_head", "begin_date", "<=" },
-	{ "begin_date_range_tail", "begin_date", ">=" },
-	{ "end_date_range_head", "finish_date", "<=" },
-	{ "end_date_range_tail", "finish_date", ">=" }
+	{ "beginDateRangeHead", "begin_date", "<=" },
+	{ "beginDateRangeTail", "begin_date", ">=" },
+	{ "endDateRangeHead", "finish_date", "<=" },
+	{ "endDateRangeTail", "finish_date", ">=" }
 ];
 
 import std.meta: AliasSeq;
@@ -349,10 +353,12 @@ private static immutable pohodListQueryPart_data_check =
 	(CASE WHEN begin_date < current_date and finish_date > current_date and prepar != 5
 		THEN 'Отметить, что группа на маршруте на маршруте. <br>'
 			ELSE '' END) ||
-	(CASE WHEN nullif(region_pohod, '') THEN  ''
-			ELSE 'Не указан район похода. <br>' END) ||
-	(CASE WHEN nullif(marchrut, '') THEN ''
-			ELSE 'Не указана нитка маршрута. <br>' END) ||
+	(CASE WHEN nullif(region_pohod, '') is null
+		THEN 'Не указан район похода. <br>'
+			ELSE '' END) ||
+	(CASE WHEN nullif(marchrut, '') is null
+		THEN 'Не указана нитка маршрута. <br>'
+			ELSE '' END) ||
 	(CASE WHEN vid is NULL
 		THEN 'Не указан вид туризма. <br>'
 			ELSE '' END) ||
