@@ -30,7 +30,7 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	string, "chiefPatronymic",
 	string, "organization",
 	string, "route",
-	string, "chiefComment",
+	string, "chiefComment"
 )(
 	null,
 	tuple(

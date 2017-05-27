@@ -11,6 +11,7 @@ import std.conv, std.string, std.utf;
 import mkk_site.main_service.auth;
 import mkk_site.main_service.moder;
 import mkk_site.main_service.pohod;
+import mkk_site.main_service.pohod_read;
 import mkk_site.main_service.pohod_filters;
 //import mkk_site.main_service.document;
 //import mkk_site.main_service.tourist_list;

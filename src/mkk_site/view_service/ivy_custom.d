@@ -67,14 +67,8 @@ public:
 				return i >= _rs._rawData.array.length;
 			}
 
-			TDataNode front()
-			{
-				TDataNode dataDict;
-				dataDict["d"] = _rs._rawData.array[i];
-				dataDict["f"] = _rs._rawFormat;
-				dataDict["_mapping"] = TDataNode(_rs._namesMapping);
-
-				return dataDict;
+			TDataNode front() {
+				return _rs._makeRecord(i);
 			}
 
 			void popFront() {
@@ -88,8 +82,26 @@ public:
 		}
 	}
 
+	private TDataNode _makeRecord(size_t index)
+	{
+		TDataNode dataDict;
+		dataDict["d"] = _rawData.array[index];
+		dataDict["f"] = _rawFormat;
+		dataDict["_mapping"] = TDataNode(_namesMapping);
+
+		return dataDict;
+	}
+
 	override IDataNodeRange opSlice() {
 		return new Range(this);
+	}
+
+	override TDataNode opIndex(size_t index) {
+		return _makeRecord(index);
+	}
+
+	override TDataNode opIndex(string key) {
+		assert(false, `Indexing by string key is not supported for RecordSetAdapter`);
 	}
 }
 
