@@ -1,26 +1,30 @@
 expr {
-	from fir.controls.utils import recGet;
-
-	expr {*
-		<script>window.mkkPageComponentName = 'mkk/ModerList/ModerList';</script>
-		<div class="e-block t-mkk-moderList">
+from fir.controls.utils import recGet, cls;
+def ModerList {=
+	def.kv
+		moduleName: "mkk/ModerList/ModerList"
+		cssBaseClass: "mkk-ModerList"
+		instanceName: "moderList";
+	def.body {*
+		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 			<h2>Модераторы</h2>
-			<div class="e-block t-mkk_table">
-				<div class="e-scroll_wrapper t-mkk_table">
-					<table class="e-table t-mkk_table">
-						<thead class="e-header_body t-mkk_table">
-							<tr>
-							{%
+			<div class="{=cls 'tableBlock'} mkk-Table">
+				<div class="{=cls 'tableScroller'} mkk-Table">
+					<table class="{=cls 'table'} mkk-Table">
+						<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+							<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+								{%
 								repeat title in ["Имя", "E-mail", "Статус"] {*
 									<th>{{ title }}</th>
 								*}
 							}
 							</tr>
-						</thead>
-						<tbody class="e-content_body t-mkk_table">
+						</tbody>
+						<tbody class="{=cls 'tableContentBody'} mkk-Table">
 						{%
 							var i: 0;
-							repeat moderRec in {= rsRange moder_list} {*
+							repeat moderRec in moderList {*
 								<tr>
 									<td>
 									{=
@@ -45,5 +49,7 @@ expr {
 				</div>
 			</div>
 		</div>
-	*};
+	*}
+};
+ModerList
 }

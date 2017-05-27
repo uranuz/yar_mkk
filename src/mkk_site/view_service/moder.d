@@ -21,7 +21,7 @@ string renderModerList(HTTPContext ctx)
 	auto tpl = Service.templateCache.getByModuleName("mkk.ModerList");
 	TDataNode dataDict;
 
-	dataDict["moder_list"] = mainServiceCall("moder.list", ctx);
+	dataDict["moderList"] = mainServiceCall("moder.list", ctx);
 
 	return tpl.run(dataDict).str;
 }

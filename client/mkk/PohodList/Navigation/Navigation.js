@@ -1,12 +1,11 @@
 define('mkk/PohodList/Navigation/Navigation', [
-	'fir/controls/ITEMControl'
-], function(ITEMControl) {
-	__extends(PohodListNavigation, ITEMControl);
+	'fir/controls/FirControl'
+], function(FirControl) {
+	__extends(PohodListNavigation, FirControl);
 
 	function PohodListNavigation(opts) {
 		opts = opts || {};
-		opts.controlTypeName = 'mkk_site.PohodListNavigation';
-		_super.call(this, opts);
+		FirControl.call(this, opts);
 
 		this._elems().filter(".e-print_page_btn")
 			.on("click", this.onPrintPageBtnClick.bind(this));

@@ -8,7 +8,6 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.index;
 import mkk_site.view_service.moder;
 import mkk_site.view_service.auth;
-import mkk_site.view_service.controls_test;
 import mkk_site.view_service.pohod;
 import mkk_site.view_service.document;
 import mkk_site.view_service.tourist_list;

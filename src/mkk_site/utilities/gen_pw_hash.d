@@ -7,8 +7,6 @@ import std.stdio, std.getopt, std.datetime;
 import mkk_site.access_control;
 
 void main(string[] progAgs) {
-	//Основной поток - поток управления потоками
-
 	string msg;
 	string password;
 	string salt;

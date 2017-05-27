@@ -1,7 +1,8 @@
 define('mkk/GeneralTemplate/GeneralTemplate', [
 	'fir/controls/FirControl',
 	'mkk/GeneralTemplate/FilterMenu',
-	'css!mkk/GeneralTemplate/GeneralTemplate'
+	'css!mkk/GeneralTemplate/GeneralTemplate',
+	'css!mkk/page_styles'
 ], function(FirControl, FilterMenu) {
 	__extends(GeneralTemplate, FirControl);
 

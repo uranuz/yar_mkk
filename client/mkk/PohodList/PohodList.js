@@ -1,30 +1,31 @@
 define('mkk/PohodList/PohodList', [
 	'fir/controls/FirControl',
-	'fir/network/json_rpc'
+	'fir/network/json_rpc',
+	'css!mkk/PohodList/PohodList'
 ], function(FirControl, json_rpc) {
 	__extends(PohodList, FirControl);
 
 	function PohodList(opts) {
 		opts = opts || {};
-		opts.controlTypeName = 'PohodList';
 		FirControl.call(this, opts);
 
-		this._elems("show_participants_btn")
-			.on("click", this.onParticipantsBtnClick.bind(this));
+		this._elems("tableContentBody")
+			.on("click", this.onShowPartyBtn_click.bind(this));
 	}
 	return __mixinProto(PohodList, {
-		onParticipantsBtnClick: function(ev) {
+		onShowPartyBtn_click: function(ev) {
 			var
-				el = $(ev.currentTarget);
+				el = $(ev.target).closest(this._elemClass('showPartyBtn')),
+				self = this;
+			if( !el && !el.length ) {
+				return;
+			}
 
-			json_rpc.invoke({
-				uri: "/dyn/jsonrpc/", //Адрес для отправки 
-				method: "mkk_site.show_pohod.participantsList", //Название удалённого метода для вызова в виде строки
-				params: { "pohodNum": +el.data("pohodNum") }, //Параметры вызова удалённого метода
-				success: this.showParticipantsDialog.bind(this) //Обработчик успешного вызова удалённого метода
+			$.ajax('/dyn/pohod/partyInfo?key=' + (+el.data("pohodNum")) , {
+				success: self.showPartyDialog.bind(self)
 			});
 		},
-		showParticipantsDialog: function(data) {
+		showPartyDialog: function(data) {
 			var
 				//Создаем контейнер для списка участников
 				touristList = $('<div id="gruppa" title="Участники похода"></div>');
@@ -32,32 +33,7 @@ define('mkk/PohodList/PohodList', [
 			//Вставка текста в слой списка участников
 			touristList.html(data)
 				.appendTo("body")
-				.dialog({ modal: true, width: 450 });
+				.dialog({ modal: true, width: 500 });
 		}
 	});
-});
-
-//Инициализация страницы
-$(window.document).ready(function() {
-	var
-		filterCtrlNames = [
-			'pohod_filter_vid',
-			'pohod_filter_ks',
-			'pohod_filter_prepar',
-			'pohod_filter_stat'
-		],
-		filterCtrlName;
-	mkk_site.show_pohod_table = new mkk_site.ShowPohodTable({
-		controlName: "show_pohod_table"
-	});
-	mkk_site.show_pohod = new mkk_site.PohodNavigation({
-		controlName: "pohod_navigation"
-	});
-
-	for (var i = 0; i < filterCtrlNames.length; ++i) {
-		filterCtrlName = filterCtrlNames[i];
-		mkk_site[filterCtrlName] = new webtank.ui.CheckBoxList({
-			controlName: filterCtrlName
-		});
-	}
 });

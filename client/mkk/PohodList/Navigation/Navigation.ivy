@@ -1,97 +1,132 @@
 expr {=
-	from fir.controls.CheckBoxList import CheckBoxList;
-	def PohodListNavigation {=
-		def.kv pohodEnums;
-		def.body {*
-<div class="i-PohodListNavigation e-block t-PohodListNavigation">
-	<form id="main_form" method="post" class="i-PohodListNavigation e-form t-PohodListNavigation">
-		<div class="" style="text-align:right; position:absolute; top:0.5rem; right:0.5rem;">
-			<button type="button" class="i-PohodListNavigation e-print_page_btn btn btn-secondary btn-sm ">
-				Версия для печати
-			</button>
-			<input type="hidden" name="for_print" class="i-PohodListNavigation e-for_print_input" />
-		</div>
-		<div class="{ {pohod_filter_regular_cls} }">
-			<div class="i-PohodListNavigation e-enum_filter_block t-PohodListNavigation row">
-				<span class="t-PohodListNavigation e-enum_filter col-md-3">
-					<h6>Вид туризма</h6>
-					{= CheckBoxList
-						controlName: "tourismKind"
-						items: {{pohodEnums.tourismKind}}
-						keyField: "v"
-						titleField: "n"
-					}
-				</span>
-				<span class="t-PohodListNavigation e-enum_filter col-md-3">
-					<h6>Категория сложности</h6>
-					{=	CheckBoxList
-						controlName: "complexity"
-						items: {{pohodEnums.complexity}}
-						keyField: "v"
-						titleField: "n"
-					}
-				</span>
-				<span class="t-PohodListNavigation e-enum_filter col-md-3">
-					<h6>Стадия прохождения</h6>
-					{=	CheckBoxList
-						controlName: "progress"
-						items: {{pohodEnums.progress}}
-						keyField: "v"
-						titleField: "n"
-					}
-				</span>
-				<span class="t-PohodListNavigation e-enum_filter col-md-3">
-					<h6>Статус заявки</h6>
-					{=	CheckBoxList
-						controlName: "claimState"
-						items: {{pohodEnums.claimState}}
-						keyField: "v"
-						titleField: "n"
-					}
-				</span>
-			</div>
-			<fieldset class="t-PohodListNavigation e-date_range_area">
-				<legend>Сроки похода</legend>
-				<div class="t-PohodListNavigation e-date_range_wrapper">
-					<div class="col-lg-6">
-						<span>с</span> { {begin_date_range_head} }
+from fir.controls.CheckBoxList import CheckBoxList;
+from fir.controls.PlainDatePicker import PlainDatePicker;
+from fir.controls.utils import cls;
+from mkk.Pagination import Pagination;
+def PohodListNavigation {=
+	def.kv
+		moduleName: "mkk/PohodList/Navigation/Navigation"
+		cssBaseClass: "mkk-PohodListNavigation"
+		instanceName: 'pohodListNavigation'
+		pohodEnums: undef
+		filter: {}
+		currentPage: undef
+		pageCount;
+	def.body {*
+		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+			<form id="main_form" method="post" class="{=cls 'form'}">
+				<div class="" style="text-align:right; position:absolute; top:0.5rem; right:0.5rem;">
+					<button type="button" class="{=cls 'printModeBtn'} btn btn-secondary btn-sm ">
+						Версия для печати
+					</button>
+					<input type="hidden" name="for_print" class="{=cls 'isForPrintField'}"/>
+				</div>
+				<div class="{ {pohod_filter_regular_cls} }">
+					<div class="{=cls 'enumFilterBlock'} row">
+						<span class="{=cls 'enumFilter'} col-md-3">
+							<h6>Вид туризма</h6>
+							{= CheckBoxList
+								instanceName: "tourismKind"
+								items: {{pohodEnums.tourismKind}}
+								keyField: "v"
+								captionField: "n"
+							}
+						</span>
+						<span class="{=cls 'enumFilter'} col-md-3">
+							<h6>Категория сложности</h6>
+							{=	CheckBoxList
+								instanceName: "complexity"
+								items: {{pohodEnums.complexity}}
+								keyField: "v"
+								captionField: "n"
+							}
+						</span>
+						<span class="{=cls 'enumFilter'} col-md-3">
+							<h6>Стадия прохождения</h6>
+							{=	CheckBoxList
+								instanceName: "progress"
+								items: {{pohodEnums.progress}}
+								keyField: "v"
+								captionField: "n"
+							}
+						</span>
+						<span class="{=cls 'enumFilter'} col-md-3">
+							<h6>Статус заявки</h6>
+							{=	CheckBoxList
+								instanceName: "claimState"
+								items: {{pohodEnums.claimState}}
+								keyField: "v"
+								captionField: "n"
+							}
+						</span>
 					</div>
-					<div class="col-lg-6">
-						<span>по</span> { {end_date_range_tail} }
+					<fieldset class="{=cls 'dateRangeArea'}">
+						<legend>Сроки похода</legend>
+						<div class="{=cls 'dateRangeWrapper'} row">
+							<div class="col-lg-6">
+								<span>с</span>
+								{=PlainDatePicker
+									instanceName: 'beginDateRangeHeadField'
+									formField: 'beginDateRangeHead'
+									day: filter.dates.beginDateRangeHead.day
+									month: filter.dates.beginDateRangeHead.month
+									year: filter.dates.beginDateRangeHead.year
+									dayPlaceholder: 'день'
+									monthPlaceholder: 'месяц не выбран'
+									yearPlaceholder: 'год'
+								}
+							</div>
+							<div class="col-lg-6">
+								<span>по</span>
+								{=PlainDatePicker
+									instanceName: 'endDateRangeHeadField'
+									formField: 'endDateRangeHead'
+									day: filter.dates.endDateRangeHead.day
+									month: filter.dates.endDateRangeHead.month
+									year: filter.dates.endDateRangeHead.year
+									dayPlaceholder: 'день'
+									monthPlaceholder: 'месяц не выбран'
+									yearPlaceholder: 'год'
+								}
+							</div>
+						</div>
+					</fieldset>
+					<div class="form-inline">
+						<div class="row">
+							<label class="col-md-6">
+								<span class="font-control-label">Район похода содержит</span>
+								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
+							</label>
+							<label class="col-md-6">
+								<input type="checkbox" name="withFiles"{=if filter.withFiles == true 'checked'} class="checkbox"/>
+								<span class="font-control-label">С доп. материалами</span>
+							</label>
+
+							<div>
+								<label class="col-md-6">
+									<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
+									<span class="font-control-label">Режим контроля данных</span>
+								</label>
+							</div>
+
+						</div>
+					</div>
+					<div>
+						<button type="submit" class="{=cls 'searchBtn'} btn btn-primary btn-lg btn-block">
+							Найти
+						</button>
 					</div>
 				</div>
-			</fieldset>
-			<div class="form-inline">
-				<div class="row">
-					<label class="col-md-6">
-						<span class="font-control-label">Район похода содержит</span>
-						<input type="text" name="region_pohod" class="form-control" value="{ {region_pohod} }"/>
-					</label>
-					<label class="col-md-6">
-						<input type="checkbox" name="with_files"{ {with_files} } class="checkbox"/>
-						<span class="font-control-label">С доп. материалами</span>
-					</label>
-
-					<div { {none} }><label class="col-md-6">
-						<input type="checkbox" name="data_check"{ {data_check} }  class="checkbox"/>
-						<span class="font-control-label">Режим контроля данных</span>
-					</label></div>
-
+				<div class="{=cls 'pagination'}">
+					{=Pagination
+						formField: 'currentPage'
+						currentPage: currentPage
+						pageCount: pageCount
+					}
 				</div>
-			</div>
-			<div>
-				<button type="submit" class="i-PohodListNavigation e-search_btn t-PohodListNavigation btn btn-primary btn-lg btn-block">
-					Найти
-				</button>
-			</div>
+			</form>
 		</div>
-		<div class="i-PohodListNavigation e-pagination t-PohodListNavigation">
-			{ {pohod_list_pagination} }
-		</div>
-	</form>
-</div>
-		*}
-	}
-
-
+	*}
+}
 }

@@ -1,5 +1,8 @@
 module mkk_site.view_service.service;
 
+public import mkk_site.view_service.uri_page_router;
+public import webtank.net.http.handler;
+
 MKKViewService Service() @property {
 	return _mkk_view_service;
 }
@@ -13,7 +16,6 @@ class MKKViewService
 	import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.lexer, ivy.parser;
 	import mkk_site.view_service.ivy_custom;
 
-	import mkk_site.view_service.uri_page_router;
 	import mkk_site.config_parsing;
 	import mkk_site.view_service.access_control;
 
@@ -26,7 +28,7 @@ private:
 	else enum bool useTemplatesCache = true;
 	
 	HTTPRouter _rootRouter;
-	MKK_ViewService_URIPageRouter _pageRouter;
+	URIPageRouter _pageRouter;
 	Loger _loger;
 	Loger _ivyLoger;
 	ProgrammeCache!(useTemplatesCache) _templateCache;
@@ -52,16 +54,13 @@ public:
 		ivyConfig.parserLoger = &_ivyLogerMethod;
 		ivyConfig.compilerLoger = &_ivyLogerMethod;
 		ivyConfig.interpreterLoger = &_ivyLogerMethod;
-		ivyConfig.dirInterpreters = [
-			"rsRange": new RawRSRangeInterpreter
-		];
 
 		_templateCache = new ProgrammeCache!(useTemplatesCache)(ivyConfig);
 
 		// Организуем маршрутизацию на сервисе
 		_rootRouter = new HTTPRouter;
-		_pageRouter = new MKK_ViewService_URIPageRouter( "/dyn/{remainder}" );
-		_rootRouter.join(_pageRouter);
+		_pageRouter = new URIPageRouter("/dyn/{remainder}");
+		_rootRouter.addHandler(_pageRouter);
 
 		_accessController = new MKKViewAccessController;
 		_subscribeRoutingEvents();
@@ -71,7 +70,7 @@ public:
 		return _rootRouter;
 	}
 
-	MKK_ViewService_URIPageRouter pageRouter() @property {
+	URIPageRouter pageRouter() @property {
 		return _pageRouter;
 	}
 

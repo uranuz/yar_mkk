@@ -2,7 +2,7 @@ module mkk_site.view_service.ivy_custom;
 
 import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.interpreter_data;
 
-class RecordSetRange: IDataNodeRange
+class RecordSetAdapter: IClassNode
 {
 	alias TDataNode = DataNode!string;
 private:
@@ -10,7 +10,6 @@ private:
 	TDataNode _rawFormat;
 	TDataNode _rawData;
 	size_t[string] _namesMapping;
-	size_t i = 0;
 
 public:
 	this(TDataNode rawRS)
@@ -27,35 +26,74 @@ public:
 		foreach( i, fmt; _rawFormat.array ) {
 			_namesMapping[ fmt["n"].str ] = i;
 		}
+
+		import std.algorithm: canFind;
+		import std.datetime: SysTime, Date;
+
+		foreach( i, recData; _rawData.array )
+		{
+			foreach( j, fieldData; recData.array )
+			{
+				switch(_rawFormat[j]["t"].str)
+				{
+					case "date":
+						recData[j] = TDataNode(SysTime(Date.fromISOExtString(fieldData.str)));
+						break;
+					case "dateTime":
+						recData[j] = TDataNode(SysTime.fromISOExtString(fieldData.str));
+						break;
+					default:
+						break;
+				}
+			}
+		}
 	}
 
-	override {
-		bool empty() @property
-		{
-			import std.range: empty;
-			return i >= _rawData.array.length;
+	static class Range: IDataNodeRange
+	{
+	private:
+		RecordSetAdapter _rs;
+		size_t i = 0;
+
+	public:
+		this(RecordSetAdapter recordSet) {
+			_rs = recordSet;
 		}
 
-		TDataNode front()
-		{
-			TDataNode dataDict;
-			dataDict["d"] = _rawData.array[i];
-			dataDict["f"] = _rawFormat;
-			dataDict["_mapping"] = TDataNode(_namesMapping);
+		override {
+			bool empty() @property
+			{
+				import std.range: empty;
+				return i >= _rs._rawData.array.length;
+			}
 
-			return dataDict;
-		}
+			TDataNode front()
+			{
+				TDataNode dataDict;
+				dataDict["d"] = _rs._rawData.array[i];
+				dataDict["f"] = _rs._rawFormat;
+				dataDict["_mapping"] = TDataNode(_rs._namesMapping);
 
-		void popFront() {
-			++i;
-		}
+				return dataDict;
+			}
 
-		DataNodeType aggrType() @property
-		{
-			return DataNodeType.Array;
+			void popFront() {
+				++i;
+			}
+
+			DataNodeType aggrType() @property
+			{
+				return DataNodeType.Array;
+			}
 		}
+	}
+
+	override IDataNodeRange opSlice() {
+		return new Range(this);
 	}
 }
+
+/+
 
 // Just creates RecordSetRange from raw record data passed in rawRS parameter
 class RawRSRangeInterpreter: INativeDirectiveInterpreter
@@ -95,3 +133,4 @@ class RawRSRangeInterpreter: INativeDirectiveInterpreter
 		return _symbol;
 	}
 }
++/

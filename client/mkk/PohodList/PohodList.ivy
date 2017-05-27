@@ -1,97 +1,102 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr;
+from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.PohodList.Navigation import PohodListNavigation;
-expr {*
-	<div class="i-show_pohod e-block t-show_pohod">
+def PohodList {=
+	def.kv
+		instanceName: undef
+		cssBaseClass: "mkk-PohodList";
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="mkk/PohodList/PohodList">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<h2>Походы</h2>
-		<div class="e-navigation t-show_pohod">
+		<div class="{=cls 'navigation'}">
 			{=PohodListNavigation
 				pohodEnums: pohodEnums
+				filter: filter
+				currentPage: currentPage
+				pageCount: pageCount
 			}
 		</div>
-		<div class="e-table_bar t-show_pohod row">
+		<div class="{=cls 'tableBar'} row">
 			<div class="col-md-6">
-				<span class="e-pohod_count t-show_pohod">Найдено походов: { {pohodCount} }</span>
+				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodCount}}</span>
 			</div>
 			<div class="col-md-6" style="text-align: right;">
 				{= if isAuthenticated and not isForPrint {*
-					<a href="{{vpaths.siteDynamic}}pohod/edit" class="e-add_pohod_btn t-show_pohod btn btn-primary">
+					<a href="{{vpaths.siteDynamic}}pohod/edit" class="{=cls 'addPohodBtn'} btn btn-primary">
 						Добавить поход
 					</a>
 				*}}
 			</div>
 		</div>
-		<div class="e-table_wrapper t-show_pohod">
-			<div class="i-show_pohod_table e-block t-mkk_table">
-				<div class="e-scroll_wrapper t-mkk_table">
-					<table class="e-table t-mkk_table">
-						<tbody>
-							<tr class="e-header_row t-mkk_table">
-								{=if isAuthenticated and not isForPrint {*
-									<th class="e-header_num_cell t-show_pohod_table">#</th>
-								*}}
-								<th>№ книги</th>
-								<th>Сроки похода</th>
-								<th>Вид, категория</th>
-								<th>Район</th>
-								<th>Руководитель</th>
-								<th>Участники</th>
-								<th>Город, организация</th>
-								<th>Статус похода</th>
-								{= if isAuthenticated and not isForPrint {*
-									<th class="e-header_edit_cell t-show_pohod_table">Изменить</th>
-								*}}
-								
-							</tr>
-						</tbody>
-						<tbody class="e-content_body t-mkk_table">
-							{=repeat rec in {=rsRange pohodSet} {*
-								<tr class="i-show_pohod_table e-row">
-									{=if isAuthenticated and not isForPrint {*
-										<td>{=recGet rec "num"}</td>
-									*}}
-									<td>
-										<a href="{{vpaths.siteDynamic}}pohod?key={=recGet rec "num"}">
-											{=recGet rec "bookNum"}
-										</a>
-									</td>
-									<td>{=recGet rec "dateRange" }</td>
-									<td>
-										<div>{=recGetStr rec "tourismKind"}</div>
-										<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
-									</td>
-									<td width="8%">{=recGet rec "pohodRegion"}</td>
-									<td>{=recGet rec "chiefName"}</td>
-									<td class="i-show_pohod_table e-show_participants_btn t-show_pohod_table"
-										data-pohod-num="{=recGet rec "num"}" 
-										title="Щелкните для просмотра списка участников">
-										<img class="e-show_participants_btn_icon t-show_pohod_table { {auth_state_cls} }"
-											src="{{vpaths.siteImg}}icons/list_icon.png"
-										/>
-										<span class="e-show_participants_btn_text t-show_pohod_table"
-											title="Количество участников">
-											{=recGet rec "partySize"}
-										</span>
-									</td>
-									<td>{=recGet rec "organization"}</td>
-									<td>
-										<div>{=recGetStr rec "progress"}</div>
-										<div>{=recGetStr rec "claimState"}</div>
-									</td>
-									{=if isAuthenticated and not isForPrint {*
-										<td><a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec "num"}">Изменить</a></td>
-									*}}
-								</tr>
-								<tr>
-									<td style="background-color:#8dc0de;" colspan="100">{=recGet rec "route"}</td>
-								</tr>
+		<div class="{=cls 'tableBlock'} mkk-Table">
+			<div class="{=cls 'tableScroller'} mkk-Table">
+				<table class="{=cls 'table'} mkk-Table">
+					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+							{=if isAuthenticated and not isForPrint {*
+								<th class="{=cls 'headerNumCell'}">#</th>
 							*}}
-						</tbody>
-					</table>
-				</div>
+							<th>№ книги</th>
+							<th>Сроки похода</th>
+							<th>Вид, категория</th>
+							<th>Район</th>
+							<th>Руководитель</th>
+							<th>Участники</th>
+							<th>Город, организация</th>
+							<th>Статус похода</th>
+							{= if isAuthenticated and not isForPrint {*
+								<th class="{=cls 'headerEditCell'}">Изменить</th>
+							*}}
+						</tr>
+					</tbody>
+					<tbody class="{=cls 'tableContentBody'} mkk-Table">
+						{=repeat rec in pohodSet {*
+							<tr>
+								{=if isAuthenticated and not isForPrint {*
+									<td>{=recGet rec "num"}</td>
+								*}}
+								<td>
+									<a href="{{vpaths.siteDynamic}}pohod?key={=recGet rec "num"}">
+										{=recGet rec "bookNum"}
+									</a>
+								</td>
+								<td>{=recGet rec "dateRange" }</td>
+								<td>
+									<div>{=recGetStr rec "tourismKind"}</div>
+									<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
+								</td>
+								<td width="8%">{=recGet rec "pohodRegion"}</td>
+								<td>{=recGet rec "chiefName"}</td>
+								<td class="{=cls 'showPartyBtn'}"
+									data-pohod-num="{=recGet rec 'num'}" 
+									title="Щелкните для просмотра списка участников">
+									<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
+										src="{{vpaths.siteImg}}icons/list_icon.png"
+									/>
+									<span class="{=cls 'showPartyBtnText'}" title="Количество участников">
+										{=recGet rec "partySize"}
+									</span>
+								</td>
+								<td>{=recGet rec "organization"}</td>
+								<td>
+									<div>{=recGetStr rec "progress"}</div>
+									<div>{=recGetStr rec "claimState"}</div>
+								</td>
+								{=if isAuthenticated and not isForPrint {*
+									<td><a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}">Изменить</a></td>
+								*}}
+							</tr>
+							<tr>
+								<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+							</tr>
+						*}}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
-	<script src=""></script>
 	*}
+};
+PohodList instanceName: "pohodList";
 }
