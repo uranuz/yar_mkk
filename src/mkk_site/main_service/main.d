@@ -13,8 +13,8 @@ import mkk_site.main_service.moder;
 import mkk_site.main_service.pohod;
 import mkk_site.main_service.pohod_filters;
 //import mkk_site.main_service.document;
-//import mkk_site.main_service.tourist_list;
-//import mkk_site.main_service.experience;
+import mkk_site.main_service.tourist_list;
+import mkk_site.main_service.experience;
 
 void main(string[] progAgs)
 {

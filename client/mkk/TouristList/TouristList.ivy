@@ -1,0 +1,138 @@
+expr {
+	from fir.controls.utils import recGet, recGetStr;
+
+	expr {*
+		<div class="e-block t-mkk-touristList">
+			<h2>Туристы</h2>
+			
+			
+		<form id="main_form" method="post">
+			<div class="e-filter t-show_tourist form-inline">
+			<label>
+				<span>Фамилия И О</span>
+				<input name="family_name" type="text" class="form-control"
+				value="{= expr familyName}" placeholder="Смирнов">
+				<input name="given_name" type="text" maxlength="1" size="1"  class="form-control" 
+				value="{= expr givenName}" placeholder="И">
+				<input name="patronymic" type="text" maxlength="1" size="1" class="form-control"
+				value="{= expr patronymic}" placeholder="П">
+				
+			</label>
+			<button type="submit" name="act" class="btn btn-primary">Найти</button>
+		</div>
+	<!-- Переход по страницам ------------------------------>
+<div class="i-pagination e-block t-pagination form-inline">
+	<h6>Переход по страницам{{ isAuthorized }}</h6>		
+		<div class="e-form_row t-pagination form-group">
+	
+			<div class="e-pagination t-show_tourist">
+				<span class="input-group-btn">
+						<button type="submit" name="previous" class="btn btn-primary">Предыдущая</button>
+						
+						
+						<input type="text"
+							class="i-pagination e-page_num_input t-pagination form-control"
+							maxlength="3" size="3"
+							value="{= expr curPageNum }"
+							name="cur_page_num">
+													 
+						<button type="submit" name="next" class="btn btn-primary">Следущая</button>
+						<button type="button"
+							class="i-pagination e-goto_page_btn t-pagination btn btn-secondary">
+							Перейти
+						</button>
+			</span>
+			
+			</div>
+		</div>
+	<!-- Переход по страницам конец------------------------------>		
+		
+</div>
+		
+	</form>
+	
+		<div class="e-table_bar t-show_tourist row">
+					<div class="col-md-6">
+									<div class="form-control-static">
+										Найдено туристов:					
+										{= expr touristCount } страниц {= expr pageCount }
+										
+									</div>
+					</div>
+					
+				<div class="col-md-6" style="text-align: right;">
+					<a href="*dynamic path}}edit_tourist"
+						class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
+						Добавить нового туриста
+					</a>
+				</div>
+		</div>
+	
+
+	
+
+			<div class="e-block t-mkk_table">
+				<div class="e-scroll_wrapper t-mkk_table">
+					<table class="e-table t-mkk_table">
+						<thead class="e-header_body t-mkk_table">
+							<tr>
+							{%
+								
+								if isAuthorized
+								{=
+									repeat title in
+									["№","Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий","Изм."] {*
+										<th>{{title}}</th>
+									*}
+								}
+								else 
+								{=
+									repeat title in
+									["Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий"] {*
+										<th>{{title}}</th>
+									*}
+								}
+								
+							}
+							</tr>
+						</thead>
+						<tbody class="e-content_body t-mkk_table">
+						
+						{%
+							var i: 0;
+							repeat it in {=rsRange touristTabl} {*
+								<tr>
+								
+								{= if isAuthorized {*
+									<td>{= recGet it "Ключ" }</td>
+									*} 
+								}
+
+									<td>{= recGet it "Имя и год рожд" }</td>
+									<td>
+										<a href="/dyn/tourist/experience?key={= recGet it "Ключ" }">	
+											{=recGet it "Опыт" }
+										</a>
+									</td>
+									<td>{= recGet it "Контакты" }</td>
+									<td>{= recGetStr it "Разряд" }</br>
+									    {= recGetStr it "Категория" }</td>
+									<td>{= recGet it "Комментарий" }</td>
+								{= if isAuthorized {*
+									<td>
+										<a href="/dyn/tourist/edit?key={= recGet it "Ключ" }" >Изм.</a>
+									</td>
+									*} 
+								}
+									
+								</tr>
+								{= set i: i + 1 }
+							*};
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	*};
+}
