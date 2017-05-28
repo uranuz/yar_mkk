@@ -1,5 +1,6 @@
 define('mkk/PohodRead/PohodRead', [
-	'fir/controls/FirControl'
+	'fir/controls/FirControl',
+	'css!mkk/PohodRead/PohodRead'
 ], function (FirControl) {
 	__extends(PohodRead, FirControl);
 

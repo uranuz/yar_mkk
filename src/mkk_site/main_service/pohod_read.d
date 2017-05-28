@@ -98,11 +98,11 @@ static immutable pohodRecFormat = RecordFormat!(
 	)
 );
 
-auto readPohod(size_t pohodKey)
+auto readPohod(size_t pohodNum)
 {
 	import std.conv: to;
 
-	string queryStr = pohodInfoQueryBase ~ ` where pohod.num = ` ~ pohodKey.to!string ~ `;`;
+	string queryStr = pohodInfoQueryBase ~ ` where pohod.num = ` ~ pohodNum.to!string ~ `;`;
 	auto rs = getCommonDB().query(queryStr).getRecordSet(pohodRecFormat);
 	
 	if( rs && rs.length == 1 ) {
@@ -119,10 +119,10 @@ import std.typecons: Tuple;
 
 alias ExtraFileLink = Tuple!( string, "uri", string, "descr" );
 
-auto getExtraFileLinks(size_t pohodKey)
+auto getExtraFileLinks(size_t pohodNum)
 {
 	import std.conv: to;
-	string queryStr = `select unnest(links) as num from pohod where pohod.num = ` ~ pohodKey.to!string;
+	string queryStr = `select unnest(links) as num from pohod where pohod.num = ` ~ pohodNum.to!string;
 	
 	auto rs = getCommonDB()
 		.query(queryStr)

@@ -21,7 +21,7 @@ string renderPohodRead(HTTPContext ctx)
 	auto queryForm = req.queryForm;
 	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	
-	size_t pohodKey;
+	size_t pohodNum;
 
 	if( queryForm.get("key", null).length == 0 )
 	{
@@ -31,7 +31,7 @@ string renderPohodRead(HTTPContext ctx)
 	}
 
 	try {
-		pohodKey = queryForm.get("key", null).to!size_t;
+		pohodNum = queryForm.get("key", null).to!size_t;
 	}
 	catch( ConvException e )
 	{
@@ -41,11 +41,12 @@ string renderPohodRead(HTTPContext ctx)
 	}
 
 	TDataNode dataDict;
-	dataDict["pohodKey"] = pohodKey;
+	dataDict["pohodNum"] = pohodNum;
 	dataDict["isAuthorized"] = isAuthorized;
-	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodKey`: pohodKey]));
-	dataDict["extraFileLinks"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodKey`: pohodKey]));
-	//auto touristList = getPohodParticipants(pohodKey);
+	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum]));
+	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`pohodNum`: pohodNum]));
+	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`pohodNum`: pohodNum]));
+	dataDict["vpaths"] = Service.virtualPaths;
 
 	return Service.templateCache.getByModuleName("mkk.PohodRead").run(dataDict).str;
 }

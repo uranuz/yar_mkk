@@ -9,6 +9,7 @@ shared static this()
 	Service.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
 	Service.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
 	Service.JSON_RPCRouter.join!(getPohodCount)(`pohod.listSize`);
+	Service.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
 	Service.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
 }
 
@@ -99,20 +100,10 @@ static immutable participantInfoRecFormat = RecordFormat!(
 	int, "birthYear"
 )();
 
-static immutable briefPohodInfoRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
-	string, "mkkCode",
-	string, "bookNum",
-	string, "pohodRegion"
-)();
-
-JSONValue partyInfo(size_t pohodNum)
+auto getPartyList(size_t pohodNum)
 {
-	import std.json: toJSON;
 	import std.conv: text;
-	auto dbase = getCommonDB();
-
-	auto partyList = dbase.query(`
+	return getCommonDB().query(`
 with tourist_num as (
 	select unnest(unit_neim) as num
 	from pohod where pohod.num = ` ~ pohodNum.text ~ `
@@ -127,19 +118,30 @@ from tourist_num
 left join tourist
 	on tourist.num = tourist_num.num
 	`).getRecordSet(participantInfoRecFormat);
+}
 
-	auto pohodInfo = dbase.query(`
+static immutable briefPohodInfoRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "num",
+	string, "mkkCode",
+	string, "bookNum",
+	string, "pohodRegion"
+)();
+
+JSONValue partyInfo(size_t pohodNum)
+{
+	import std.conv: text;
+	auto pohodInfo = getCommonDB().query(`
 select
 	pohod.num as num,
-	pohod.kod_mkk as mkk_code,
-	pohod.nomer_knigi as book_num,
-	pohod.region_pohod as pohod_region
+	pohod.kod_mkk as "mkkCode",
+	pohod.nomer_knigi as "bookNum",
+	pohod.region_pohod as "pohodRegion"
 from pohod where pohod.num = ` ~ pohodNum.text ~ `
 	`).getRecordSet(briefPohodInfoRecFormat);
 
 	JSONValue jsonResult;
 	jsonResult["pohodInfo"] = pohodInfo.toStdJSON();
-	jsonResult["partyList"] = partyList.toStdJSON();
+	jsonResult["partyList"] = getPartyList(pohodNum).toStdJSON();
 
 	return jsonResult;
 }

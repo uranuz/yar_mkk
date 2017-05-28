@@ -2,13 +2,15 @@ expr {=
 from fir.controls.utils import recGet, recGetStr cls;
 def PohodRead {=
 	def.kv
+		moduleName: "mkk/PohodRead/PohodRead"
 		instanceName: 'pohodRead'
 		cssBaseClass: 'mkk-PohodRead';
 	def.body {*
-	<div class="{=cls 'block'}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts=""/>
 		<h2>Данные похода</h2>
-		<a href="{ {edit_btn_href} }"
-			class="btn btn-sm btn-secondary { {edit_btn_cls} }"
+		<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
+			class="btn btn-sm btn-secondary"
 			style="position: absolute; top: 0.5rem; right: 0.5rem;">
 			Редактировать
 		</a>
@@ -39,7 +41,7 @@ def PohodRead {=
 		<div class="{=cls 'prop'} row">
 			<label class="{=cls 'prop_caption'} col-md-4">Вид туризма</label>
 			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'tourismKind'}</span>
+				<span class="{=cls 'prop_value_text'}">{=recGetStr pohod 'tourismKind'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
@@ -81,7 +83,14 @@ def PohodRead {=
 		<div class="{=cls 'wide_prop'} row">
 			<label class="{=cls 'wide_prop_caption'} col-md-12">Состав группы</label>
 			<div class="{=cls 'prop_value'} col-md-12">
-				{ {tourist_list} }
+				{=repeat tourist in partyList {*
+					<div>
+						{=recGet tourist 'familyName'}
+						{=recGet tourist 'givenName'}
+						{=recGet tourist 'patronymic'},
+						{=recGet tourist 'birthYear'}
+					</div>
+				*}}
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
@@ -111,7 +120,9 @@ def PohodRead {=
 		<div class="{=cls 'wide_prop'} row">
 			<label class="{=cls 'wide_prop_caption'} col-md-12">Дополнительные материалы</label>
 			<div class="{=cls 'wide_prop_value_text'} col-md-12">
-				{ {file_link_list} }
+				{=repeat linkData in extraFileLinks {*
+					<a href="{=at linkData 0}">{=at linkData 1}</a>
+				*}}
 			</div>
 		</div>
 	</div>
