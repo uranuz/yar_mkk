@@ -8,9 +8,9 @@ def PohodListNavigation {=
 		moduleName: "mkk/PohodList/Navigation/Navigation"
 		cssBaseClass: "mkk-PohodListNavigation"
 		instanceName: 'pohodListNavigation'
-		pohodEnums: undef
+		pohodEnums: null
 		filter: {}
-		currentPage: undef
+		currentPage: null
 		pageCount;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
@@ -95,18 +95,18 @@ def PohodListNavigation {=
 					<div class="form-inline">
 						<div class="row">
 							<label class="col-md-6">
-								<span class="font-control-label">Район похода содержит</span>
+								<span class="form-control-label">Район похода содержит</span>
 								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
 							</label>
 							<label class="col-md-6">
 								<input type="checkbox" name="withFiles"{=if filter.withFiles == true 'checked'} class="checkbox"/>
-								<span class="font-control-label">С доп. материалами</span>
+								<span class="form-control-label">С доп. материалами</span>
 							</label>
 
 							<div>
 								<label class="col-md-6">
 									<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
-									<span class="font-control-label">Режим контроля данных</span>
+									<span class="form-control-label">Режим контроля данных</span>
 								</label>
 							</div>
 

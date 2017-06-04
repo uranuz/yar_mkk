@@ -5,9 +5,9 @@ def Pagination {=
 		moduleName: "mkk/Pagination/Pagination"
 		cssBaseClass: "mkk-Pagination"
 		instanceName: "pagination"
-		formField: undef
-		currentPage: undef
-		pageCount: undef;
+		formField: null
+		currentPage: null
+		pageCount: null;
 	def.body {*
 	<div class="{=cls 'block'} form-inline" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -43,6 +43,6 @@ def Pagination {=
 	</div>
 	*}
 };
-expr undef;
+expr null;
 }
 

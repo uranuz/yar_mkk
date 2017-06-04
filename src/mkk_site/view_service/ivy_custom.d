@@ -2,51 +2,64 @@ module mkk_site.view_service.ivy_custom;
 
 import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.interpreter_data;
 
+private void _deserializeFieldInplace(ref TDataNode fieldData, ref TDataNode format)
+{
+	import std.datetime: SysTime, Date;
+	
+	switch(format["t"].str)
+	{
+		case "date":
+			fieldData = TDataNode(SysTime(Date.fromISOExtString(fieldData.str)));
+			break;
+		case "dateTime":
+			fieldData = TDataNode(SysTime.fromISOExtString(fieldData.str));
+			break;
+		default:
+			break;
+	}
+}
+
 class RecordSetAdapter: IClassNode
 {
 	alias TDataNode = DataNode!string;
 private:
 	TDataNode _rawRS;
-	TDataNode _rawFormat;
-	TDataNode _rawData;
 	size_t[string] _namesMapping;
 
 public:
 	this(TDataNode rawRS)
 	{
 		_rawRS = rawRS;
-		assert( "t" in rawRS, `Expected type field "t" in recordset raw data!` );
-		assert( "d" in rawRS, `Expected data field "d" in recordset raw data!` );
-		assert( "f" in rawRS, `Expected format field "f" in recordset raw data!` );
+		_ensureRecordSet();
 
-		assert( rawRS["t"].type == DataNodeType.String && rawRS["t"].str == "recordset", `Expected "recordset" value in "t" field` );
-		_rawFormat = _rawRS["f"];
-		_rawData = _rawRS["d"];
-
-		foreach( i, fmt; _rawFormat.array ) {
+		foreach( i, fmt; _rawFormat.array )
+		{
+			assert( "n" in fmt, `Expected name field "n" in record raw format` );
 			_namesMapping[ fmt["n"].str ] = i;
 		}
 
-		import std.algorithm: canFind;
-		import std.datetime: SysTime, Date;
-
-		foreach( i, recData; _rawData.array )
+		foreach( i, ref recData; _rawData.array )
 		{
-			foreach( j, fieldData; recData.array )
-			{
-				switch(_rawFormat[j]["t"].str)
-				{
-					case "date":
-						recData[j] = TDataNode(SysTime(Date.fromISOExtString(fieldData.str)));
-						break;
-					case "dateTime":
-						recData[j] = TDataNode(SysTime.fromISOExtString(fieldData.str));
-						break;
-					default:
-						break;
-				}
+			foreach( j, ref fieldData; recData.array ) {
+				_deserializeFieldInplace(fieldData, _rawFormat[j]);
 			}
 		}
+	}
+
+	void _ensureRecordSet()
+	{
+		assert( "t" in _rawRS, `Expected type field "t" in recordset raw data!` );
+		assert( "d" in _rawRS, `Expected data field "d" in recordset raw data!` );
+		assert( "f" in _rawRS, `Expected format field "f" in recordset raw data!` );
+		assert( _rawRS["t"].type == DataNodeType.String && _rawRS["t"].str == "recordset", `Expected "recordset" value in "t" field` );
+	}
+
+	TDataNode _rawData() @property {
+		return _rawRS["d"];
+	}
+
+	TDataNode _rawFormat() @property {
+		return _rawRS["f"];
 	}
 
 	static class Range: IDataNodeRange
@@ -84,12 +97,14 @@ public:
 
 	private TDataNode _makeRecord(size_t index)
 	{
-		TDataNode dataDict;
-		dataDict["d"] = _rawData.array[index];
-		dataDict["f"] = _rawFormat;
-		dataDict["_mapping"] = TDataNode(_namesMapping);
-
-		return dataDict;
+		return TDataNode(new RecordAdapter(
+			TDataNode([
+				"d": _rawData.array[index],
+				"f": _rawFormat,
+				"t": TDataNode("record")
+			]),
+			_namesMapping
+		));
 	}
 
 	override IDataNodeRange opSlice() {
@@ -102,6 +117,134 @@ public:
 
 	override TDataNode opIndex(string key) {
 		assert(false, `Indexing by string key is not supported for RecordSetAdapter`);
+	}
+
+	override TDataNode __getAttr__(string attrName)
+	{
+		switch(attrName)
+		{
+			case "format": return _rawFormat;
+			case "namesMapping": return TDataNode(_namesMapping);
+			default: break;
+		}
+		return TDataNode();
+	}
+
+	override void __setAttr__(TDataNode node, string attrName) {
+		assert(false, `Not attributes setting is yet supported by RecordSetAdapter`);
+	}
+}
+
+class RecordAdapter: IClassNode
+{
+	alias TDataNode = DataNode!string;
+private:
+	TDataNode _rawRec;
+	size_t[string] _namesMapping;
+
+public:
+	this(TDataNode rawRec, size_t[string] namesMapping)
+	{
+		_rawRec = rawRec;
+		_ensureRecord();
+		_namesMapping = namesMapping;
+		_deserializeInplace();
+	}
+
+	this(TDataNode rawRec)
+	{
+		_rawRec = rawRec;
+		_ensureRecord();
+
+		foreach( i, fmt; _rawFormat.array )
+		{
+			assert( "n" in fmt, `Expected name field "n" in record raw format` );
+			_namesMapping[ fmt["n"].str ] = i;
+		}
+		_deserializeInplace();
+	}
+
+	void _ensureRecord()
+	{
+		assert( "t" in _rawRec, `Expected type field "t" in record raw data!` );
+		assert( "d" in _rawRec, `Expected data field "d" in record raw data!` );
+		assert( "f" in _rawRec, `Expected format field "f" in record raw data!` );
+		assert( _rawRec["t"].type == DataNodeType.String && _rawRec["t"].str == "record", `Expected "record" value in "t" field` );
+	}
+
+	void _deserializeInplace()
+	{
+		foreach( i, ref fieldData; _rawData.array ) {
+			_deserializeFieldInplace(fieldData, _rawFormat[i]);
+		}
+	}
+
+	TDataNode _rawData() @property {
+		return _rawRec["d"];
+	}
+
+	TDataNode _rawFormat() @property {
+		return _rawRec["f"];
+	}
+
+	static class Range: IDataNodeRange
+	{
+	private:
+		RecordAdapter _rec;
+		size_t i = 0;
+
+	public:
+		this(RecordAdapter record) {
+			_rec = record;
+		}
+
+		override {
+			bool empty() @property
+			{
+				import std.range: empty;
+				return i >= _rec._rawData.array.length;
+			}
+
+			TDataNode front() {
+				return _rec._rawData[i];
+			}
+
+			void popFront() {
+				++i;
+			}
+
+			DataNodeType aggrType() @property
+			{
+				return DataNodeType.Array;
+			}
+		}
+	}
+
+	override IDataNodeRange opSlice() {
+		return new Range(this);
+	}
+
+	override TDataNode opIndex(size_t index) {
+		return _rawData[index];
+	}
+
+	override TDataNode opIndex(string key) {
+		return _rawData[ _namesMapping[key] ];
+	}
+
+	override TDataNode __getAttr__(string attrName)
+	{
+		switch(attrName)
+		{
+			case "format": return _rawFormat;
+			case "namesMapping": return TDataNode(_namesMapping);
+			default: break;
+		}
+		return TDataNode();
+	}
+
+	override void __setAttr__(TDataNode value, string attrName) {
+		assert(false, `Not attributes setting is yet supported by RecordAdapter`);
 	}
 }
 
