@@ -5,15 +5,22 @@ import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.interpreter_data;
 private void _deserializeFieldInplace(ref TDataNode fieldData, ref TDataNode format)
 {
 	import std.datetime: SysTime, Date;
-	
+	if( fieldData.type == DataNodeType.Undef || fieldData.type == DataNodeType.Null ) {
+		return; // Dont try to deserialize Null or Undef and return as is
+	}
+
 	switch(format["t"].str)
 	{
-		case "date":
-			fieldData = TDataNode(SysTime(Date.fromISOExtString(fieldData.str)));
-			break;
-		case "dateTime":
-			fieldData = TDataNode(SysTime.fromISOExtString(fieldData.str));
-			break;
+		case "date", "dateTime":
+			if( fieldData.type == DataNodeType.String ) {
+				fieldData = TDataNode(
+					format["t"].str == "date"?
+					SysTime(Date.fromISOExtString(fieldData.str)):
+					SysTime.fromISOExtString(fieldData.str)
+				);
+			} else {
+				assert(fieldData.type == DataNodeType.DateTime, `Node is node convertible to dateTime`);
+			}
 		default:
 			break;
 	}
