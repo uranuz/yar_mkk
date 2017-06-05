@@ -4,6 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
+	//Service.pageRouter.join!(renderPohodView)("/dyn/pohod/view");
 	Service.pageRouter.join!(renderPohodList)("/dyn/pohod/list");
 	Service.pageRouter.join!(renderPartyInfo)("/dyn/pohod/partyInfo");
 }
@@ -12,6 +13,8 @@ import ivy.interpreter_data, ivy.json, ivy.interpreter;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
+
+
 
 /+
 string отрисоватьБлокНавигацииДляПечати(VM)( ref VM vm )

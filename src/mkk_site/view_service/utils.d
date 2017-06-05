@@ -12,12 +12,22 @@ import mkk_site.view_service.ivy_custom;
 
 TDataNode tryExtractRecordSet(TDataNode srcNode)
 {
-	if( srcNode.type != DataNodeType.AssocArray )
+	if( srcNode.type != DataNodeType.AssocArray 
+		|| "t" !in srcNode 
+		|| srcNode["t"].type != DataNodeType.String
+	) {
 		return srcNode;
-	if( "t" !in srcNode || srcNode["t"].type != DataNodeType.String || srcNode["t"].str != "recordset" )
-		return srcNode;
+	}
 
-	return TDataNode(new RecordSetAdapter(srcNode));
+	switch( srcNode["t"].str )
+	{
+		case "recordset":
+			return TDataNode(new RecordSetAdapter(srcNode));
+		case "record":
+			return TDataNode(new RecordAdapter(srcNode));
+		default: break;
+	}
+	return srcNode;
 }
 
 TDataNode tryExtractLvlRecordSet(TDataNode srcNode)

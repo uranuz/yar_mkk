@@ -5,29 +5,24 @@ def Pagination {=
 		moduleName: "mkk/Pagination/Pagination"
 		cssBaseClass: "mkk-Pagination"
 		instanceName: "pagination"
-		formField: undef
-		currentPage: undef
-		pageCount: undef;
+		formField: null
+		currentPage: null
+		pageCount: null;
 	def.body {*
 	<div class="{=cls 'block'} form-inline" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<h6>Переход по страницам</h6>
 		<div class="{=cls 'formRow'} form-group">
-			<span class="{=cls 'prevElem'}">
-				<a class="{=cls 'prevBtn'} btn btn-secondary { {prev_btn_cls} }"
-					href="javascript:void(0)"
-					{ {prev_btn_attr} }>
-					Предыдущая
-				</a>
-			</span>
+			<a class="{=cls 'prevBtn'} btn btn-secondary"
+				href="javascript:void(0)">
+				Предыдущая
+			</a>
 
 			<div class="input-group">
-				<span class="{=cls 'currentElem'}">
-					<input type="text"
-						class="{=cls 'currentPageField'} form-control"
-						value="{{currentPage}}"
-						name="{{formField}}"/>
-				</span>
+				<input type="text"
+					class="{=cls 'currentPageField'} form-control"
+					value="{{currentPage}}"
+					name="{{formField}}"/>
 				<span class="{=cls 'totalElem'} input-group-addon">
 					из {{pageCount}}
 				</span>
@@ -40,17 +35,14 @@ def Pagination {=
 				</span>
 			</div>
 
-			<span class="{=cls 'nextElem'}">
-				<a class="{=cls 'nextBtn'} btn btn-secondary { {next_btn_cls} }"
-					href="javascript:void(0)"
-					{ {next_btn_attr} }>
-					Следующая
-				</a>
-			</span>
+			<a class="{=cls 'nextBtn'} btn btn-secondary"
+				href="javascript:void(0)">
+				Следующая
+			</a>
 		</div>
 	</div>
 	*}
 };
-expr undef;
+expr null;
 }
 

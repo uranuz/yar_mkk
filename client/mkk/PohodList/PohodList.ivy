@@ -3,7 +3,7 @@ from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.PohodList.Navigation import PohodListNavigation;
 def PohodList {=
 	def.kv
-		instanceName: undef
+		instanceName: 'pohodList'
 		cssBaseClass: "mkk-PohodList";
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="mkk/PohodList/PohodList">
@@ -57,7 +57,7 @@ def PohodList {=
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
-									<a href="{{vpaths.siteDynamic}}pohod?key={=recGet rec "num"}">
+									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">
 										{=recGet rec "bookNum"}
 									</a>
 								</td>
@@ -98,5 +98,5 @@ def PohodList {=
 	</div>
 	*}
 };
-PohodList instanceName: "pohodList";
+PohodList
 }
