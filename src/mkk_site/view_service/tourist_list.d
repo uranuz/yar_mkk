@@ -14,8 +14,8 @@ import webtank.net.http.context;
 string renderTouristList(HTTPContext ctx)
 {
 	debug import std.stdio: writeln;
-
 	debug writeln(`tourist request headers: `, ctx.request.headers.toAA());
+	
 	import std.json;
 	import std.conv: to;
 //*************************************************************

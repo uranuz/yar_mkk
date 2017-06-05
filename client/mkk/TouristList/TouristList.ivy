@@ -100,7 +100,7 @@ expr {
 						
 						{%
 							var i: 0;
-							repeat it in {=rsRange touristTabl} {*
+							repeat it in  touristTabl {*
 								<tr>
 								
 								{= if isAuthorized {*
