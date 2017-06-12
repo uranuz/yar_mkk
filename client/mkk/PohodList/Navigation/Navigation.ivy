@@ -98,17 +98,14 @@ def PohodListNavigation {=
 								<span class="form-control-label">Район похода содержит</span>
 								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
 							</label>
-							<label class="col-md-6">
+							<label class="col-md-3">
 								<input type="checkbox" name="withFiles"{=if filter.withFiles == true 'checked'} class="checkbox"/>
 								<span class="form-control-label">С доп. материалами</span>
 							</label>
-
-							<div>
-								<label class="col-md-6">
-									<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
-									<span class="form-control-label">Режим контроля данных</span>
-								</label>
-							</div>
+							<label class="col-md-3">
+								<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
+								<span class="form-control-label">Режим контроля данных</span>
+							</label>
 
 						</div>
 					</div>
