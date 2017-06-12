@@ -141,6 +141,7 @@ public:
 	// Метод перенаправляющий логи шаблонизатора в файл
 	void _ivyLogerMethod(LogInfo logInfo) {
 		import std.datetime;
+		import std.conv: text;
 		LogEvent wtLogEvent;
 		final switch(logInfo.type) {
 			case LogInfoType.info: wtLogEvent.type = LogEventType.dbg; break;
@@ -148,7 +149,11 @@ public:
 			case LogInfoType.error: wtLogEvent.type = LogEventType.error; break;
 			case LogInfoType.internalError: wtLogEvent.type = LogEventType.crit; break;
 		}
-		wtLogEvent.text = logInfo.msg;
+
+		if( logInfo.type == LogInfoType.error || logInfo.type == LogInfoType.internalError ) {
+			wtLogEvent.text = `Ivy error at: ` ~ logInfo.processedFile ~ `:` ~ logInfo.processedLine.text ~ "\n";
+		}
+		wtLogEvent.text ~= logInfo.msg;
 		wtLogEvent.prettyFuncName = logInfo.sourceFuncName;
 		wtLogEvent.file = logInfo.sourceFileName;
 		wtLogEvent.line = logInfo.sourceLine;
