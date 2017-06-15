@@ -6,7 +6,6 @@ define('mkk/PohodList/PohodList', [
 	__extends(PohodList, FirControl);
 
 	function PohodList(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 
 		this._elems("tableContentBody")

@@ -1,0 +1,58 @@
+expr {=
+from fir.controls.utils import cls;
+def TouristSearchArea {=
+	def.kv
+		moduleName: 'mkk/TouristSearchArea/TouristSearchArea'
+		instanceName: 'touristSearchArea'
+		cssBaseClass: 'mkk-TouristSearchArea';
+	def.body {*
+	<!-- Диалог поиска туристов -->
+	<div class="{=cls 'block'}" title="Поиск туристов" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<div class="{=cls 'filterItem'}">
+			<label>Имя
+				<input type="text" placeholder="Петечкин" class="{=cls 'familyFilter'}">
+			</label>
+			<input type="text" placeholder="В"  size="1"  maxlength="1" class="{=cls 'nameFilter'}">
+			<input type="text" placeholder="И"  size="1"  maxlength="1" class="{=cls 'patronymicFilter'}">
+		</div>
+		<div class="{=cls 'filterItem'}">
+			<label>Год рожд.
+				<input type="text" placeholder="1812"  size="4"  maxlength="4" class="{=cls 'yearFilter'}">
+			</label>
+		</div>
+
+		<fieldset class="{=cls 'addrFilterPanel'}">
+			<legend>Адрес</legend>
+			<div class="{=cls 'addrElementItem'}">
+				<label class="{=cls 'addrElementLabel'}">Область</label>
+				<input type="text" placeholder="Ярославская" size="15" maxlength="15" class="{=cls 'regionFilter e-addrElementFilter'}">
+			</div>
+			<div class="{=cls 'addrElementItem'}">
+				<label class="{=cls 'addrElementLabel'}">Нас. пункт</label>
+				<input type="text" placeholder="Рыбинск" size="15" maxlength="15" class="{=cls 'cityFilter e-addrElementFilter'}">
+			</div>
+			<div class="{=cls 'addrElementItem'}">
+				<label class="{=cls 'addrElementLabel'}">Улица</label>
+				<input type="text" placeholder="Строителей" size="15" maxlength="15" class="{=cls 'streetFilter e-addrElementFilter'}">
+			</div>
+		</fieldset>
+		<div style='clear: both;'></div>
+		<button type="button" class="{=cls 'searchBtn'} btn btn-primary">Искать!</button>
+		<div class="{=cls 'searchResultsPanel'}">
+			<h5>Найденные туристы</h5>
+			<div class="{=cls 'touristsFoundSummary'}"></div>
+			<div class="{=cls 'pageNavigationBar'}">
+				<button class="{=cls 'goPrevBtn'}">Пред.</button>
+				Страница <input name="currentPage" type="text" value="1" size="3" maxlength="3" class="{=cls 'pageSelected'}">
+				из <span class="{=cls 'pageCount'}">0</span>
+				<button class="{=cls 'goSelectedBtn'}">Перейти</button>
+				<button class="{=cls 'goNextBtn'}">След.</button>
+			</div>
+			<div class="{=cls 'foundTourists'}"></div>
+		</div>
+	</div>
+	*}
+};
+expr null;
+}

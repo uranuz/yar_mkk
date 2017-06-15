@@ -1,0 +1,32 @@
+expr {=
+from fir.controls.utils import cls;
+def ChiefAddToParty {=
+	def.kv
+		moduleName: 'mkk/PohodEdit/ChiefAddToParty/ChiefAddToParty'
+		instanceName: 'chiefAddToParty'
+		cssBaseClass: 'mkk-ChiefAddToParty';
+	def.body {*
+	<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
+	<div class="{=cls 'block'}" title="Подтвердите операцию" style="display: none;" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<div class="{=cls 'msg'}">
+			Обнаружено, что руководитель или заместитель отсутствует в списке участников похода.
+			Нажмите "Продолжить", чтобы добавить их автоматически. Число участников составит
+			<span class="{=cls 'touristCount'}"></span>
+		</div>
+		<div class="{=cls 'msg'}">
+			Нажмите "Отмена", чтобы прервать операцию и вернуться к редактированию похода.
+		</div>
+		<button type="button"
+			class="{=cls 'acceptBtn'} btn btn-primary">
+			Продолжить
+		</button>
+		<button type="button"
+			class="{=cls 'cancelBtn'} btn btn-secondary">
+			Отмена
+		</button>
+	</div>
+	*}
+};
+expr undef
+}
