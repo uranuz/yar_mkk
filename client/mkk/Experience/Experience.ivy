@@ -1,0 +1,43 @@
+expr {
+	from fir.controls.utils import recGet, recGetStr,cls;
+
+	expr {*
+		<div class="e-block t-mkk-experience>
+
+
+			<div class="e-filter t-show_tourist form-inline">
+			<label>
+				
+			<h2>{= recGet expPerson "familyName"}  
+			{= recGet expPerson "givenName"}  
+			{= recGet expPerson "patronymic"}  
+			{= recGet expPerson "yearBirth"} г.р. </h2>
+
+			<h4>
+			
+
+			{= if not{=empty {= recGet expPerson "experiencePerson"} }   
+								{* Туристский опыт: {= recGet expPerson "experiencePerson"}</br> *} }
+			{= if not{=empty {= recGetStr expPerson "sportsCategory"} }   
+							 	{* Спортивный разряд: {= recGetStr expPerson "sportsCategory"}</br> *} }			
+			{= if not{=empty {= recGetStr expPerson "refereeCategory"} }   
+								{* Судейская категория: {= recGetStr expPerson "refereeCategory"}</br> *} }
+			{= if {=recGet expPerson "showPhone"}   {* Телефон: {= recGet expPerson "phone"}  </br>*} }
+			{= if {=recGet expPerson "showMail"}    {* Телефон: {= recGet expPerson "mail"}   </br>*} }
+			{= if not{=empty {= recGet expPerson "coment"} }     {* Коментарий: {= recGet expPerson "coment"} *} }
+				
+			
+			</h4>
+					
+			</label>
+			</div>
+			
+		</div>
+			
+		
+
+	
+
+			
+	*};
+}
