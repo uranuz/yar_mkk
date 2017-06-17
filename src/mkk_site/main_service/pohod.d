@@ -265,7 +265,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 			{
 				if( !частьДаты.isNull )
 				{
-					dateFilters ~= частьДаты.conv!string ~ ` `
+					dateFilters ~= частьДаты.value.conv!string ~ ` `
 						~ соотвПоля.опСравн ~ ` date_part('` ~ datePartNames[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
 				}
 			}
