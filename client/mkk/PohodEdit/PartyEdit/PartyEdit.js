@@ -12,17 +12,17 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
 		this.page = 0;
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
-		this.panelsArea = self._elems("panelsArea");
-		this.searchPanel = self._elems("searchPanel");
-		this.selectedTouristsPanel = self._elems("selectedTouristsPanel");
+		this._panelsArea = self._elems("panelsArea");
+		this._searchPanel = self._elems("searchPanel");
+		this._selectedTouristsPanel = self._elems("selectedTouristsPanel");
 
 		this._elems("acceptBtn").on("click", function() {
 			self.trigger('saveData', [self, self.selTouristsRS]);
 			self.closeDialog();
 		});
 		
-		this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTourist_BtnClick);
-		this._container.on('dialogclose', this.onDialogClose.bind(this));
+		this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTouristBtn_click);
+		this._container.on('dialogclose', this.onDialog_close.bind(this));
 	}
 	
 	return __mixinProto(PartyEdit, {
@@ -33,67 +33,67 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 				
 			this.selTouristsRS = recordSet;
 			this.renderSelectedTourists();
-			this.searchBlock.activate(this.$el(".e-search_block"));
-			this.searchBlock.$on('itemSelect', this.onSelectTourist.bind(this));
-			this.dialog.dialog({
+			this._searchBlock.activate(this._elems("searchBlock"));
+			this._searchBlock.subscribe('itemSelect', this.onSelectTourist.bind(this));
+			this._container.dialog({
 				modal: true, minWidth: 500,
 				resize: function() {
-					setTimeout( self.onDialogResize.bind(self), 100 );
+					setTimeout( self.onDialog_resize.bind(self), 100 );
 				}
 			});
 			
-			this.onDialogResize();
+			this.onDialog_resize();
 		},
 		
-		onDialogResize: function() {
+		onDialog_resize: function() {
 			if( this.selTouristsRS && this.selTouristsRS.getLength() ) {
-				if( this.dialog.innerWidth() < 700 ) {
-					this.panelsArea.css("display", "block");
-					this.searchPanel.css("display", "block");
-					this.searchPanel.css("width", "100%");
-					this.selectedTouristsPanel.css("display", "block");
-					this.selectedTouristsPanel.css("width", "100%");
+				if( this._container.innerWidth() < 700 ) {
+					this._panelsArea.css("display", "block");
+					this._searchPanel.css("display", "block");
+					this._searchPanel.css("width", "100%");
+					this._selectedTouristsPanel.css("display", "block");
+					this._selectedTouristsPanel.css("width", "100%");
 				} else {
-					this.panelsArea.css("display", "table");
-					this.searchPanel.css("display", "table-cell");
-					this.searchPanel.css("width", "50%");
-					this.selectedTouristsPanel.css("display", "table-cell");
-					this.selectedTouristsPanel.css("width", "50%");
+					this._panelsArea.css("display", "table");
+					this._searchPanel.css("display", "table-cell");
+					this._searchPanel.css("width", "50%");
+					this._selectedTouristsPanel.css("display", "table-cell");
+					this._selectedTouristsPanel.css("width", "50%");
 				}
 			}
 			else
 			{
-				this.panelsArea.css("display", "block");
-				this.searchPanel.css("display", "block");
-				this.searchPanel.css("width", "100%");
-				this.selectedTouristsPanel.css("display", "none");
+				this._panelsArea.css("display", "block");
+				this._searchPanel.css("display", "block");
+				this._searchPanel.css("width", "100%");
+				this._selectedTouristsPanel.css("display", "none");
 			}
 		},
 		
 		closeDialog: function() {
-			this.dialog.dialog('close');
+			this._container.dialog('close');
 		},
 		
-		onDialogClose: function() {
-			this.searchBlock.deactivate();
-			this.searchBlock.$off('itemSelect');
+		onDialog_close: function() {
+			this._searchBlock.deactivate();
+			this._searchBlock.unsubscribe('itemSelect');
 		},
 
 		//Метод образует разметку с информацией о выбранном туристе
 		renderSelectedTourist: function(rec)
 		{	var
 				recordDiv = $("<div>", {
-					class: "b-pohod_party_edit e-tourist_deselect_btn"
+					class: this._elemFullClass("touristDeselectBtn")
 				})
-				.data( 'num', rec.get('num') ),
+				.data('num', rec.get('num')),
 				iconWrp = $("<span>", {
-					class: "b-pohod_party_edit e-icon_wrapper"
+					class: this._elemFullClass("iconWrapper")
 				}).appendTo(recordDiv),
 				deselectBtn = $("<div>", {
 					class: "icon-small icon-remove_item"
 				}).appendTo(iconWrp),
 				recordLink = $("<a>", {
-					class: "b-pohod_party_edit e-tourist_link",
+					class: this._elemFullClass("touristLink"),
 					href: "#!",
 					text: mkk_site.utils.getTouristInfoString(rec)
 				})
@@ -115,7 +115,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			}
 			
 			if( this.selTouristsRS.hasKey( rec.getKey() ) )
-			{	this.$el(".e-select_message").html(
+			{	this._elems("selectMessage").html(
 					"Турист <b>" + mkk_site.utils.getTouristInfoString(rec)
 					+ "</b> уже находится в списке выбранных туристов"
 				);
@@ -123,20 +123,20 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			else
 			{	this.selTouristsRS.append(rec);
 				this.renderSelectedTourist(rec)
-				.appendTo( this.$el(".e-selected_tourists") );
+				.appendTo( this._elems("selectedTourists") );
 			}
 			
-			this.onDialogResize(); //Перестройка диалога
+			this.onDialog_resize(); //Перестройка диалога
 		},
 		
 		//Обработчик отмены выбора записи
-		onDeselectTourist_BtnClick: function(ev, el) {
+		onDeselectTouristBtn_click: function(ev, el) {
 			var 
 				recId = el.data('num'),
 				recordDiv = el,
-				touristSelectDiv = this.$el(".e-selected_tourists");
+				touristSelectDiv = this._elems("selectedTourists");
 			
-			this.selTouristsRS.remove( recId );
+			this.selTouristsRS.remove(recId);
 			recordDiv.remove();
 		},
 		
@@ -144,7 +144,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		renderSelectedTourists: function() {
 			var 
 				self = this,
-				selectedTouristsDiv = this.$el(".e-selected_tourists"),
+				selectedTouristsDiv = this._elems("selectedTourists"),
 				rec;
 				
 			//Очистка окна списка туристов перед заполнением
@@ -154,7 +154,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			while( rec = this.selTouristsRS.next() )
 			{	this.renderSelectedTourist(rec)
 				.data('num', rec.get('num'))
-				.appendTo( selectedTouristsDiv );
+				.appendTo(selectedTouristsDiv);
 			}
 		}
 	});

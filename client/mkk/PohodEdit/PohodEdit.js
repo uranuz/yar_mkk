@@ -21,19 +21,19 @@ define('mkk/PohodEdit/PohodEdit', [
 		FirControl.call(this, opts);
 		var self = this;
 
-		this.partyRS = null; //RecordSet с участниками похода
-		this.chefRec = opts.chefRecord;
-		this.altChefRec = opts.altChefRecord;
-		this._addChefToPartyDlg = opts.addChefToPartyDlg;
+		this._partyRS = null; //RecordSet с участниками похода
+		this._chiefRec = opts.chiefRecord;
+		this._altChiefRec = opts.altChiefRecord;
+		this._addChiefToPartyDlg = opts.addChiefToPartyDlg;
 
-		this._chefEditBlock = this.getChildInstanceByName('pohodChiefEdit');
+		this._chiefEditBlock = this.getChildInstanceByName('pohodChiefEdit');
 		this._partyEditBlock = this.getChildInstanceByName('partyEdit');
 		this._beginDatePicker = this.getChildInstanceByName('beginDateField');
 		this._finishDatePicker = this.getChildInstanceByName('finishDateField');
 
 		///Работа со списком ссылок на дополнительные ресурсы
 		//Размер одной "порции" полей ввода ссылок на доп. материалы
-		this.extraFileLinksInputPortion = 5;
+		this._extraFileLinksInputPortion = 5;
 
 		this._elems("deleteDialogBtn").on("click", function() {
 			self.getChildInstanceByName('pohodDeleteArea').showDialog();
@@ -45,25 +45,25 @@ define('mkk/PohodEdit/PohodEdit', [
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
 		this._elems("partyEditBtn").on("click", function() {
 			//Отдаем копию списка участников!
-			var rs = self.partyRS ? self.partyRS.copy() : new RecordSet();
-			self.partyEditBlock.openDialog(rs); 
+			var rs = self._partyRS ? self._partyRS.copy() : new RecordSet();
+			self._partyEditBlock.openDialog(rs); 
 		});
 		
-		//this.partyEditBlock.$on('saveData', this.onSaveSelectedParty.bind(this));
+		this._partyEditBlock.subscribe('saveData', this.onSaveSelectedParty.bind(this));
 		
 		//Загрузка списка участников похода с сервера
 		//this.loadPartyFromServer();
 		
 		this._elems("chiefEditBtn").on('click', function() {
-			self._chefEditBlock.openDialog(self.chefRec, false);
+			self._chiefEditBlock.openDialog(self._chiefRec, false);
 		});
 		
-		this._elems("chiefEditBtn").on('click', function() {
-			self._chefEditBlock.openDialog(self.altChefRec, true);
+		this._elems("altChiefEditBtn").on('click', function() {
+			self._chiefEditBlock.openDialog(self._altChiefRec, true);
 		});
 		
-		this._chefEditBlock.subscribe("selectChef", this.onSelectChef.bind(this));
-		this._chefEditBlock.subscribe("deleteChef", this.onDeleteChef.bind(this));
+		this._chiefEditBlock.subscribe("selectChief", this.onSelectChief.bind(this));
+		this._chiefEditBlock.subscribe("deleteChief", this.onDeleteChief.bind(this));
 
 		//self.loadFileLinksFromServer();
 	}
@@ -74,52 +74,51 @@ define('mkk/PohodEdit/PohodEdit', [
 			this.saveParty(selTouristsRS);
 		},
 		
-		onSelectChef: function(ev, sender, rec) {
-			var 
-				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
-				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
-			
-			if( sender.isAltChef ) {
-				this.altChefRec = rec;
+		onSelectChief: function(ev, sender, rec) {
+			var
+				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
+				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
+
+			if( sender.isAltChief ) {
+				this._altChiefRec = rec;
 			} else {
-				this.chefRec = rec;
+				this._chiefRec = rec;
 			}
 
 			keyInp.val( rec.get("num") );
-			chefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
+			chiefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
 		},
 		
-		onDeleteChef: function(ev, sender) {
-			var 
-				keyInp = this.$el(sender.isAltChef ? '.e-alt_chef_key_inp' : '.e-chef_key_inp' ),
-				chefBtn = this.$el(sender.isAltChef ? '.e-open_alt_chef_edit_btn' : '.e-open_chef_edit_btn' );
-			
-			if( sender.isAltChef ) {
-				this.altChefRec = null;
+		onDeleteChief: function(ev, sender) {
+			var
+				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
+				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
+
+			if( sender.isAltChief ) {
+				this._altChiefRec = null;
 			} else {
-				this.chefRec = null;
+				this._chiefRec = null;
 			}
 
 			keyInp.val("null");
-			chefBtn.text("Редактировать");
+			chiefBtn.text("Редактировать");
 		},
 		
 		//Сохраняет список участников группы и выводит его в главное окно
 		saveParty: function( rs ) {
 			var
-				touristsList = this.$el(".e-tourists_list"),
+				partyList = this._elems("partyList"),
 				rec;
 
-			this.partyRS = rs;
+			this._partyRS = rs;
 
-			touristsList.empty();
-			
-			this.partyRS.rewind();
-			while( rec = this.partyRS.next() ) {
+			partyList.empty();
+			this._partyRS.rewind();
+			while( rec = this._partyRS.next() ) {
 				$("<div>", {
 					text: mkk_site.utils.getTouristInfoString(rec)
 				})
-				.appendTo(touristsList);
+				.appendTo(partyList);
 			}
 		},
 
@@ -146,9 +145,9 @@ define('mkk/PohodEdit/PohodEdit', [
 		onMoreExtraFileLinksBtn_click: function()
 		{	var
 				i = 0,
-				tableBody = this.$el(".e-link_list_tbody");
+				tableBody = this._elems("extraFileLinksTableBody");
 
-			for( ; i < this.extraFileLinksInputPortion; i++ )
+			for( ; i < this._extraFileLinksInputPortion; i++ )
 				this.renderFileLinkInput([]).appendTo( tableBody );
 		},
 
@@ -172,9 +171,9 @@ define('mkk/PohodEdit/PohodEdit', [
 		//Отображает список ссылок на доп. материалы
 		renderFileLinkInputs: function(linkList)
 		{	var
-				tableBody = $(".e-link_list_tbody"),
-				inputPortion = this.extraFileLinksInputPortion,
-				linkList = linkList ? linkList : [],
+				tableBody = this._elems("extraFileLinksTableBody"),
+				inputPortion = this._extraFileLinksInputPortion,
+				linkList = linkList? linkList: [],
 				inputCount = inputPortion,
 				i = 0;
 
@@ -209,7 +208,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		saveFileLinksToForm: function()
 		{	var
 				self = this,
-				tableRows = this.$el(".e-link_list_tbody").children("tr"),
+				tableRows = this._elems("extraFileLinksTableBody").children("tr"),
 				currInputs,
 				link,
 				comment,
@@ -227,7 +226,7 @@ define('mkk/PohodEdit/PohodEdit', [
 					data.push( [ link, comment ] );
 			}
 
-			this.$el(".e-extra_file_links_inp").val( JSON.stringify(data) );
+			this._elems("extraFileLinksDataField").val( JSON.stringify(data) );
 		},
 
 		showErrorDialog: function( errorMsg ) {
@@ -246,9 +245,9 @@ define('mkk/PohodEdit/PohodEdit', [
 				finishYear = self._finishDatePicker.rawYear(),
 				beginDateEmpty = !beginDay.length && !beginMonth.length && !beginYear.length,
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
-				countInput = self.$el(".e-tourist_count_input")
-				inputCount = parseInt( countInput.val() ),
-				listItems = self.$el(".e-tourists_list").children(),
+				countInput = self._elems("partySizeField")
+				inputCount = parseInt(countInput.val()),
+				listItems = self._elems("partyList").children(),
 				listCount = listItems.length;
 
 			if( !beginDateEmpty && ( !beginDay.length || !beginMonth.length || !beginYear.length ) ) {
@@ -317,65 +316,65 @@ define('mkk/PohodEdit/PohodEdit', [
 		// Заполняет поля формы из объекта класса
 		fillFormFields: function() {
 			var
-				chefKeyField = this.$el('.e-chef_key_inp'),
-				altChefKeyField = this.$el('.e-alt_chef_key_inp'),
-				partyKeysField = this.$el('.e-tourist_keys_inp'),
+				chiefKeyField = this._elems('chiefNumField'),
+				altChiefKeyField = this._elems('altChiefNumField'),
+				partyKeysField = this._elems('partyNumsField'),
 				touristKeys = '';
 
-			if( this.chefRec ) {
-				chefKeyField.val( this.chefRec.get('num') );
+			if( this._chiefRec ) {
+				chiefKeyField.val(this._chiefRec.get('num'));
 			} else {
-				chefKeyField.val( 'null' )
+				chiefKeyField.val('null')
 			}
 
-			if( this.altChefRec ) {
-				altChefKeyField.val( this.altChefRec.get('num') );
+			if( this._altChiefRec ) {
+				altChiefKeyField.val(this._altChiefRec.get('num'));
 			} else {
-				altChefKeyField.val( 'null' );
+				altChiefKeyField.val('null');
 			}
 
-			if( this.partyRS ) {
-				this.partyRS.rewind();
-				while( rec = this.partyRS.next() ) {
+			if( this._partyRS ) {
+				this._partyRS.rewind();
+				while( rec = this._partyRS.next() ) {
 					touristKeys += ( touristKeys.length ? "," : "" ) + rec.getKey();
 				}
 
 				partyKeysField.val(touristKeys);
 			} else {
-				partyKeysField.val( 'null' );
+				partyKeysField.val('null');
 			}
 
 			this.saveFileLinksToForm();
 		},
 
 		// Возвражает true, если нужно добавить руководителя в список участников
-		shouldAddChefToParty: function() {
-			return !!this.chefRec && !this.partyRS.hasKey( this.chefRec.get('num') );
+		shouldAddChiefToParty: function() {
+			return !!this._chiefRec && !this._partyRS.hasKey( this._chiefRec.get('num') );
 		},
 
 		// Возвражает true, если нужно добавить зама в список участников
-		shouldAddAltChefToParty: function() {
-			return !!this.altChefRec && !this.partyRS.hasKey( this.altChefRec.get('num') );
+		shouldAddAltChiefToParty: function() {
+			return !!this._altChiefRec && !this._partyRS.hasKey( this._altChiefRec.get('num') );
 		},
 
 		getPartySizeFromInput: function() {
-			return parseInt( this.$el('.e-tourist_count_input').val() ) || null;
+			return parseInt( this._elems('partySize').val() ) || null;
 		},
 
 		// Функция корректировки значения количества участников для поля ввода
 		getNewPartySizeForInput: function() {
 			var
-				rsCount = this.partyRS ? this.partyRS.getLength() : 0,
+				rsCount = this._partyRS ? this._partyRS.getLength() : 0,
 				inpCount = this.getPartySizeFromInput();
 				newRSCount = rsCount,
 				newInpCount = inpCount;
 
 			if( inpCount != null ) {
-				if( this.shouldAddChefToParty() ) {
+				if( this.shouldAddChiefToParty() ) {
 					++newRSCount;
 				}
 
-				if( this.shouldAddAltChefToParty() ) {
+				if( this.shouldAddAltChiefToParty() ) {
 					++newRSCount;
 				}
 
@@ -390,20 +389,20 @@ define('mkk/PohodEdit/PohodEdit', [
 		// Отправляет данные на сервер после проверки
 		onSavePohod: function() {
 			// Добавляем к списку участников руководителя и зама
-			if( this.shouldAddChefToParty() ) {
-				this.partyRS.append( this.chefRec );
+			if( this.shouldAddChiefToParty() ) {
+				this._partyRS.append( this._chiefRec );
 			}
 
-			if( this.shouldAddAltChefToParty() ) {
-				this.partyRS.append( this.altChefRec );
+			if( this.shouldAddAltChiefToParty() ) {
+				this._partyRS.append( this._altChiefRec );
 			}
 
 			// Устанавливаем новое количество участников, если оно было не пустым
-			this.$el( '.e-tourist_count_input' ).val( this.getNewPartySizeForInput() );
+			this._elems('partySize').val( this.getNewPartySizeForInput() );
 
 			if( this.validateFormData() ) {
 				this.fillFormFields(); // Пишем данные в поля формы
-				this.$el(".e-edit_pohod_form").submit();
+				this._elems("mainForm").submit();
 			}
 		},
 
@@ -412,8 +411,8 @@ define('mkk/PohodEdit/PohodEdit', [
 			var
 				self = this,
 				newTouristsCount = this.getNewPartySizeForInput(),
-				shouldAddChef = this.shouldAddChefToParty(),
-				shouldAddAltChef = this.shouldAddAltChefToParty(),
+				shouldAddChief = this.shouldAddChiefToParty(),
+				shouldAddAltChief = this.shouldAddAltChiefToParty(),
 				cancelHandler = function() {
 					ev.preventDefault();
 				};
@@ -421,25 +420,25 @@ define('mkk/PohodEdit/PohodEdit', [
 			// Сами отправим форму, когда нужно сами
 			ev.preventDefault();
 
-			if( self.chefRec == null ) {
-				self.showErrorDialog( 'Необходимо выбрать руководителя похода!' );
+			if( self._chiefRec == null ) {
+				self.showErrorDialog('Необходимо выбрать руководителя похода!');
 				ev.preventDefault();
 				return;
 			}
 
-			if( self.partyRS == null ) {
-				self.partyRS = new dctl.RecordSet({
-					format: self.chefRec.copyFormat()
+			if( self._partyRS == null ) {
+				self._partyRS = new dctl.RecordSet({
+					format: self._chiefRec.copyFormat()
 				});
 			}
 
-			if( shouldAddChef || shouldAddAltChef ) {
+			if( shouldAddChief || shouldAddAltChief ) {
 				// Если есть записи руководителя и зама, но их нет в списке
 				// участников, то открываем диалог подтверждения их добавления
-				$(this._addChefToPartyDlg).one( 'ok', this.onSavePohod.bind(this) );
-				$(this._addChefToPartyDlg).one( 'cancel', cancelHandler );
+				$(this._addChiefToPartyDlg).one('ok', this.onSavePohod.bind(this));
+				$(this._addChiefToPartyDlg).one('cancel', cancelHandler);
 
-				this._addChefToPartyDlg.open( newTouristsCount );
+				this._addChiefToPartyDlg.open(newTouristsCount);
 
 			} else {
 				// Если руководитель и зам есть, то сразу продолжаем
