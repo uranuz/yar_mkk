@@ -18,20 +18,24 @@ string renderExperience(HTTPContext ctx)
 
 debug import std.stdio: writeln;
 
-	debug writeln(`tourist request headers: `, ctx.request.headers.toAA());
+	//debug writeln(`tourist request headers: `, ctx.request.headers.toAA());
 
 import std.json;
 import std.conv: to;
 //*************************************************************
 JSONValue callParams;
 
- callParams["curPageNum"] = ctx.request.bodyForm.get("cur_page_num", "1").to!size_t;
+ callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "1").to!size_t;
  callParams["touristKey"] = ctx.request.queryForm.get("key", null).to!size_t;
 
 //*************************************************************
 
+//dataDict["vpaths"] = Service.virtualPaths;
+
+
 	auto tpl = Service.templateCache.getByModuleName("mkk.Experience");	
 	TDataNode dataDict = mainServiceCall("tourist.experience", ctx, callParams);
+	dataDict["vpaths"] = Service.virtualPaths;
 	
 	return tpl.run(dataDict).str;
 

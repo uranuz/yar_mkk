@@ -1,43 +1,106 @@
-expr {
-	from fir.controls.utils import recGet, recGetStr,cls;
+expr 
+{=
+from fir.controls.utils import recGet, recGetStr,cls;
+from mkk.Pagination import Pagination;
 
-	expr {*
-		<div class="e-block t-mkk-experience>
+	def Experience{=
+	def.kv
+		instanceName: 'experience'
+		cssBaseClass: "mkk-experience";
 
 
-			<div class="e-filter t-show_tourist form-inline">
-			<label>
-				
-			<h2>{= recGet expPerson "familyName"}  
-			{= recGet expPerson "givenName"}  
-			{= recGet expPerson "patronymic"}  
-			{= recGet expPerson "yearBirth"} г.р. </h2>
+		def.body {*
+			<div class="e-block t-mkk-experience>
+			<!-- Раздел  данные о туристе-->
+				<div class="e-filter t-show_tourist form-inline">
+				<label>					
+				<h2>{= recGet expPerson "familyName"}  
+				{= recGet expPerson "givenName"}  
+				{= recGet expPerson "patronymic"}  
+				{= recGet expPerson "yearBirth"} г.р. </h2>
 
-			<h4>
-			
-
-			{= if not{=empty {= recGet expPerson "experiencePerson"} }   
-								{* Туристский опыт: {= recGet expPerson "experiencePerson"}</br> *} }
-			{= if not{=empty {= recGetStr expPerson "sportsCategory"} }   
-							 	{* Спортивный разряд: {= recGetStr expPerson "sportsCategory"}</br> *} }			
-			{= if not{=empty {= recGetStr expPerson "refereeCategory"} }   
-								{* Судейская категория: {= recGetStr expPerson "refereeCategory"}</br> *} }
-			{= if {=recGet expPerson "showPhone"}   {* Телефон: {= recGet expPerson "phone"}  </br>*} }
-			{= if {=recGet expPerson "showMail"}    {* Телефон: {= recGet expPerson "mail"}   </br>*} }
-			{= if not{=empty {= recGet expPerson "coment"} }     {* Коментарий: {= recGet expPerson "coment"} *} }
-				
-			
-			</h4>
+				<h5>
+				{= if not{=empty {= recGet expPerson "experiencePerson"} }   
+									{* Туристский опыт: {= recGet expPerson "experiencePerson"}</br> *} }
+				{= if not{=empty {= recGetStr expPerson "sportsCategory"} }   
+									{* Спортивный разряд: {= recGetStr expPerson "sportsCategory"}</br> *} }			
+				{= if not{=empty {= recGetStr expPerson "refereeCategory"} }   
+									{* Судейская категория: {= recGetStr expPerson "refereeCategory"}</br> *} }
+				{= if {=recGet expPerson "showPhone"}   {* Телефон: {= recGet expPerson "phone"}  </br>*} }
+				{= if {=recGet expPerson "showMail"}    {* Телефон: {= recGet expPerson "mail"}   </br>*} }
+				{= if not{=empty {= recGet expPerson "coment"} }     {* Коментарий: {= recGet expPerson "coment"} *} }
+				</h5>						
+				</label>
+				</div>
+				<!-- конец Раздела  данные о туристе-->
+				<div>
+					<!-- Раздел  переход по страницам-->
+					<form method="post"  >
 					
-			</label>
+					<div class="{=cls 'pagination'}">
+					{=Pagination
+						formField: 'currentPage'
+						currentPage: currentPage
+						pageCount: pageCount
+					}
+
+					</div>
+					</form>
+					<!-- конец Раздела  переход по страницам-->
+				</div>
+
+				<!-- Раздел  таблица-->
+				<div class="{=cls 'tableBlock'} mkk-Table">
+					<div class="{=cls 'tableScroller'} mkk-Table">
+						
+						<table class="{=cls 'table'} mkk-Table">
+							<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+								<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+										Раздел  таблица
+										<th>№ книги</th>
+							<th>Сроки похода</th>
+							<th>Вид, категория</th>
+							<th>Район</th>
+							<th>Должность</th>
+							<th>Город, организация</th>
+							<th>Статус похода</th>
+							</tr>
+							</tbody>	
+						<!-- Основное   тело  таблицы-->
+							<tbody class="{=cls 'tableContentBody'} mkk-Table">
+							{=repeat rec in expTabl {*
+							<tr>
+								<td>
+									<a  href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}" >
+									{=recGet rec "keyBook" }
+									</a>
+									</td>
+								<td>{=recGet rec "beginDate" }</br>
+										{=recGet rec "finishDate" }</td>
+								<td>{=recGetStr rec "tourismKind" }</br>
+										{=recGet rec "complexity" } 
+										c эл.{=recGet rec "complexityElems" }</td>
+								<td>{=recGet rec "pohodRegion" }</td>
+								<td>{=recGet rec "chiefNum" }</td>
+								<td>{=recGet rec "organization" }</td>
+								<td>{=recGetStr rec "readiness" }</br>
+										{=recGetStr rec "status" }</td>							
+							</tr>
+							<tr>
+								<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+							</tr>
+
+							*}}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- конец Раздела  таблица-->
+				
 			</div>
-			
-		</div>
-			
-		
 
-	
 
-			
-	*};
+		*};
+	};
+Experience
 }

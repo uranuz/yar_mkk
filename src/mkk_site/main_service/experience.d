@@ -42,16 +42,16 @@ import std.typecons: tuple;
 	
 	// данные о походах
 	static immutable pohodRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "keyBook",
-		string, "numberBook",
-		Date, "startLDate", 
+		PrimaryKey!(size_t), "num",
+		string, "keyBook",
+		Date, "beginDate", 
 		Date, "finishDate",
-		typeof(видТуризма), "vid",
-		typeof(категорияСложности), "KC",
-		typeof(элементыКС), "elementKC",
-		size_t, "keyChief",
-		string, "org",
-		string, "area",  //район похода 
+		typeof(видТуризма), "tourismKind",
+		typeof(категорияСложности), "complexity",
+		typeof(элементыКС), "complexityElems",
+		size_t, "chiefNum",
+		string, "organization",
+		string, "pohodRegion",  //район похода 
 		string, "route",// нитка маршрута
 		typeof(готовностьПохода), "readiness",
 		typeof(статусЗаявки), "status"
@@ -78,7 +78,7 @@ import std.json;
 	(
 		HTTPContext context,
 		Optional!size_t touristKey, //????????????
-		size_t curPageNum  //текущая страница
+		size_t currentPage  //текущая страница
 	)	
 {
 
@@ -86,7 +86,9 @@ import std.json;
 size_t limit = 10; // Число строк на странице	
 	
 bool isAuthorized 
-			= context.user.isAuthenticated && ( context.user.isInRole("admin") || context.user.isInRole("moder") );
+			= context.user.isAuthenticated 
+			&& ( context.user.isInRole("admin")
+			 || context.user.isInRole("moder") );
 
 	auto req = context.request;	
 	
@@ -138,10 +140,10 @@ bool isAuthorized
    
    size_t pageCount = expCount/ limit + 1; //Количество страниц
 		
-		if(curPageNum>pageCount) curPageNum=pageCount; //текущая страница
+		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
 		//если номер страницы больше числа страниц переходим на последнюю 
    
-   size_t offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
+   size_t offset = (currentPage - 1) * limit ; //Сдвиг по числу записей
    
    immutable experienceTabl =	
 		`select
@@ -168,7 +170,7 @@ bool isAuthorized
 		
 				auto expTabl = getCommonDB()
 							.query(experienceTabl)
-							.getRecordSet(pohodRecFormat).front;
+							.getRecordSet(pohodRecFormat);
 			
 			
 		
@@ -177,7 +179,7 @@ bool isAuthorized
 	
 			ExperienceSet["expCount"]    = expCount ;
 			ExperienceSet["pageCount"]   = pageCount;
-			ExperienceSet["curPageNum"]  = curPageNum;
+			ExperienceSet["currentPage"]  = currentPage;
 			ExperienceSet["expPerson"]   = expPerson.toStdJSON();
 			ExperienceSet["expTabl"]     = expTabl.toStdJSON();
 
