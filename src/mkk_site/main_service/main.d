@@ -13,6 +13,7 @@ import mkk_site.main_service.moder;
 import mkk_site.main_service.pohod;
 import mkk_site.main_service.pohod_read;
 import mkk_site.main_service.pohod_filters;
+import mkk_site.main_service.pohod_edit;
 //import mkk_site.main_service.document;
 //import mkk_site.main_service.tourist_list;
 //import mkk_site.main_service.experience;
