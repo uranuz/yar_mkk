@@ -83,6 +83,7 @@ def PohodRead {=
 		<div class="{=cls 'wide_prop'} row">
 			<label class="{=cls 'wide_prop_caption'} col-md-12">Состав группы</label>
 			<div class="{=cls 'prop_value'} col-md-12">
+				{=if partyList != null
 				{=repeat tourist in partyList {*
 					<div>
 						{=recGet tourist 'familyName'}
@@ -91,6 +92,7 @@ def PohodRead {=
 						{=recGet tourist 'birthYear'}
 					</div>
 				*}}
+				}
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
@@ -120,9 +122,11 @@ def PohodRead {=
 		<div class="{=cls 'wide_prop'} row">
 			<label class="{=cls 'wide_prop_caption'} col-md-12">Дополнительные материалы</label>
 			<div class="{=cls 'wide_prop_value_text'} col-md-12">
+				{=if extraFileLinks != null
 				{=repeat linkData in extraFileLinks {*
 					<a href="{=at linkData 0}">{=at linkData 1}</a>
 				*}}
+				}
 			</div>
 		</div>
 	</div>
