@@ -78,5 +78,5 @@ string renderAuth(HTTPContext context)
 	dataDict[`isAuthFailed`] = isAuthFailed;
 	dataDict[`isAuthenticated`] = !isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies );
 
-	return Service.templateCache.getByModuleName("mkk.auth").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict).str;
 }

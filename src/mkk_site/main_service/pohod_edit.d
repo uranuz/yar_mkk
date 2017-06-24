@@ -3,7 +3,7 @@ import mkk_site.main_service.devkit;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(testMethod)(`test.testMethod`);
+	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 }
 
 struct DBName { string dbName; }
@@ -43,7 +43,7 @@ struct PohodDataToWrite
 	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
 }
 
-auto testMethod(HTTPContext ctx, PohodDataToWrite record)
+auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 {
 	import std.meta: AliasSeq, Filter, staticMap;
 	import std.traits: isSomeString, getUDAs;
@@ -215,9 +215,7 @@ auto testMethod(HTTPContext ctx, PohodDataToWrite record)
 			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 		}
 
-		debug import std.stdio;
-		debug writeln(`pohod write query: `, queryStr);
-		auto writeDBQueryRes = getCommonDB().query(queryStr);
+		auto writeDBQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
 		dbErrorMsg = getCommonDB().lastErrorMessage;
 	}
 
