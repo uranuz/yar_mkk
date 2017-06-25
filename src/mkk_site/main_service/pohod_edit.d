@@ -3,46 +3,256 @@ import mkk_site.main_service.devkit;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(moderList)(`moder.list`);
-	Service.JSON_RPCRouter.join!(testMethod)(`test.testMethod`);
+	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 }
+
+struct DBName { string dbName; }
 
 struct PohodDataToWrite
 {
-	size_t pohodNum; // Номер походе в базе
+	import webtank.common.optional: Undefable;
+	import std.datetime: Date;
+	Optional!size_t num; // Номер походе в базе
 
 	// Секция "Маршрутная книжка"
-	string mkkCode;
-	string bookNum;
-	Optional!int claimState;
-	string mkkComment;
+	@DBName("kod_mkk") Undefable!string mkkCode; // Код МКК
+	@DBName("nomer_knigi") Undefable!string bookNum; // Номер книги
+	@DBName("stat") Undefable!int claimState; // Статус заявки
+	@DBName("MKK_coment") Undefable!string mkkComment; // Коментарий МКК
 
 	// Секция "Поход"
-	string pohodRegion;
-	Optional!int tourismKind;
-	string route;
-	Optional!int complexity;
-	Optional!int complexityElems;
-	Optional!Date beginDate;
-	Optional!Date finishDate;
-	Optional!int progress;
-	string chiefComment;
+	@DBName("region_pohod") Undefable!string pohodRegion; // Регион, где проходит поход
+	@DBName("vid") Undefable!int tourismKind; // Вид туризма
+	@DBName("marchrut") Undefable!string route; // Нитка маршрута
+	@DBName("ks") Undefable!int complexity; // Категория сложности маршрута
+	@DBName("elem") Undefable!int complexityElems; // Элементы категори сложности
+	@DBName("begin_date") Undefable!Date beginDate; // Дата начала похода
+	@DBName("finish_date") Undefable!Date finishDate; // Дата завершения похода
+	@DBName("prepar") Undefable!int progress; // Состояние прохождения маршрута
+	@DBName("chef_coment") Undefable!string chiefComment; // Коментарий руководителя группы
 
 	// Секция "Группа"
-	string organization;
-	string partyRegion;
-	Optional!size_t chiefNum;
-	Optional!size_t altChiefNum;
-	size_t[] partyNums;
-	Optional!size_t partySize;
+	@DBName("organization") Undefable!string organization; // Турклуб, организация, наименование коллектива, от имени которого организован поход
+	@DBName("region_group") Undefable!string partyRegion; // Город, посёлок, район, область, где постояннно проживает основная часть участников похода
+	@DBName("chef_grupp") Undefable!size_t chiefNum; // Идентификатор руководителя похода в БД МКК
+	@DBName("alt_chef") Undefable!size_t altChiefNum; // Идентификатор заместителя  руководителя в БД МКК (при наличии заместителя)
+	@DBName("unit_neim") Undefable!(size_t[]) partyNums;  // Идентификаторы участников группы в БД МКК
+	@DBName("unit") Undefable!size_t partySize; // Общее число участников похода/ размер группы
 
 	// Секция "Ссылки на доп. материалы"
-	string[][] extraFileLinks;
-
-	// Список имен полей, которые были изменены при редактировании
-	string[] _changedFields;
+	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
 }
 
+auto editPohod(HTTPContext ctx, PohodDataToWrite record)
+{
+	import std.meta: AliasSeq, Filter, staticMap;
+	import std.traits: isSomeString, getUDAs;
+	import std.algorithm: canFind, countUntil;
+	import std.conv: to, text, ConvException;
+	import std.datetime: Date;
+	import std.typecons: tuple;
+	import std.string: strip, join;
+	import mkk_site.site_data;
+	import webtank.net.utils: PGEscapeStr;
+
+	bool isAuthorized = ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
+	if( !isAuthorized ) {
+		//throw new Exception(`Недостаточно прав для изменения похода!!!`);
+	}
+	
+	string[] fieldNames;
+	string[] fieldValues;
+
+	alias PohodEnums = AliasSeq!(
+		tuple("claimState", статусЗаявки),
+		tuple("tourismKind", видТуризма),
+		tuple("complexity", категорияСложности),
+		tuple("complexityElems", элементыКС),
+		tuple("progress", готовностьПохода)
+	);
+	enum string GetFieldName(alias E) = E[0];
+	enum enumFieldNames = [staticMap!(GetFieldName, PohodEnums)];
+
+	if( record.beginDate.isSet 
+		&& record.finishDate.isSet
+		&& record.finishDate.value < record.beginDate.value
+	) {
+		throw new Exception("Дата начала похода должна быть раньше даты окончания!!!");
+	}
+
+	//SiteLoger.info( "Формируем набор строковых полей и значений", "Изменение данных похода" );
+	foreach( fieldName; AliasSeq!(__traits(allMembers, PohodDataToWrite)) )
+	{
+		alias FieldType = typeof(__traits(getMember, record, fieldName));
+		static if( isOptional!FieldType && OptionalIsUndefable!FieldType ) {
+			auto field = __traits(getMember, record, fieldName);
+			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
+			if( field.isUndef )
+				continue; // Поля, которые undef с нашей т.зрения не изменились
+			fieldNames ~= `"` ~ dbFieldName ~ `"`;
+			static if( isSomeString!( OptionalValueType!FieldType ) )
+			{
+				// Для строковых полей обрамляем в кавычки и экранируем для вставки в запрос к БД
+				fieldValues ~= ( (field.isSet && field.length > 0)? "'" ~ PGEscapeStr(field.value) ~ "'": "NULL" );
+			}
+			else static if( enumFieldNames.canFind(fieldName) )
+			{
+				auto enumFormat = PohodEnums[enumFieldNames.countUntil(fieldName)][1];
+				if( field.isSet && field.value !in enumFormat ) {
+					throw new ConvException(`Выражение "` ~ field.value.text ~ `" не является значением типа "` ~ fieldName ~ `"!!!`);
+				}
+				fieldValues ~= field.isSet? field.text: "NULL";
+			}
+			else static if( is(OptionalValueType!FieldType == Date) )
+			{
+				fieldValues ~= field.isSet? field.toISOExtString(): "NULL";
+			}
+			else static if( fieldName == "extraFileLinks" )
+			{
+				if( field.isNull )
+				{
+					fieldValues ~= "NULL";
+					continue;
+				}
+
+				//SiteLoger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
+				string[] processedLinks;
+				
+				foreach( ref linkPair; field.value )
+				{
+					string uriStr = strip(linkPair[0]);
+					if( !uriStr.length )
+						continue;
+
+					URI uri;
+					try {
+						uri = URI( uriStr );
+					} catch(Exception ex) {
+						throw new Exception("Некорректная ссылка на доп. материалы!!!");
+					}
+
+					if( uri.scheme.length == 0 )
+						uri.scheme = "http";
+					processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
+				}
+				fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
+			}
+			else static if( ["chiefNum", "altChiefNum"].canFind(fieldName) )
+			{
+				if( record.partyNums.isSet && field.isSet && !record.partyNums.value.canFind(field) ) {
+					throw new Exception(
+						(fieldName == "chiefNum"? "Руководитель": "Заместитель руководителя") 
+						~ " похода должен быть в списке участников!!!"
+					);
+				}
+				fieldValues ~= field.isSet? field.text: "NULL";
+			}
+			else static if( fieldName == "partyNums" )
+			{
+				if( field.isNull )
+				{
+					fieldValues ~= "NULL";
+					continue;
+				}
+				if( record.partySize.isSet && field.isSet && record.partySize < field.length ) {
+					throw new Exception("Указанное количество участников похода меньше количества добавленных в список!!!");
+				}
+
+				string keysQueryPart = field.value.to!(string[]).join(", ");
+				if( field.length )
+				{
+					// Если переданы номера туристов - то проверяем, что они есть в базе
+					auto nonExistingNumsResult = getCommonDB().query (
+						`with nums as(
+							select distinct unnest(ARRAY[` ~ keysQueryPart ~ `]::integer[]) as n
+						) select n from nums
+						where n not in(select num from tourist)`
+					);
+					if( nonExistingNumsResult.fieldCount != 1 )
+						throw new Exception("Ошибка при запросе существущих в БД туристах!!!");
+
+					size_t[] nonExistentNums;
+					nonExistentNums.length = nonExistingNumsResult.recordCount;
+					foreach( i; 0..nonExistingNumsResult.recordCount ) {
+						nonExistentNums[i] = nonExistingNumsResult.get(0, i).to!size_t;
+					}
+					if( nonExistentNums.length > 0 ) {
+						throw new Exception("Туристы с номерами: " ~ nonExistentNums.to!string ~ " не найдены в базе данных");
+					}
+				}
+
+				fieldValues ~= "ARRAY[" ~ keysQueryPart ~ "]";
+			} else static if( fieldName == "partySize" ) {
+				fieldValues ~= field.isSet? field.text: "NULL";
+			} else {
+				static assert(false, `Unprocessed Undefable field: ` ~ fieldName); // Не написан код для обработки поля Undefable
+			}
+		}
+	}
+
+	string dbErrorMsg;
+	if( fieldNames.length > 0 )
+	{
+		//SiteLoger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
+		if( "user_num" !in ctx.user.data ) {
+			//throw new Exception("Не удаётся определить идентификатор пользователя");
+		}
+		//fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+		//fieldValues ~= [ctx.user.data["user_num"], "current_timestamp"];
+		//SiteLoger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
+		string queryStr;
+
+		import std.array: join;
+		if( record.num.isSet )	{
+			queryStr = "update pohod set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num='" ~ record.num.value.to!string ~ "';";
+		}
+		else
+		{
+			//SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
+
+			//fieldNames ~= ["registrator_num", "reg_timestamp"];
+			//fieldValues ~= [ctx.user.data["user_num"], "current_timestamp"];
+			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
+		}
+
+		auto writeDBQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
+		dbErrorMsg = getCommonDB().lastErrorMessage;
+	}
+
+	//SiteLoger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
+/+
+	string message;
+	
+	if( pohodKey.isNull  )
+	{	if( dbErrorMsg is null )
+			message = "<h3>Данные о походе успешно добавлены в базу данных!!!</h3>"
+			~ "<a href=\"" ~ thisPagePath ~ "\">Добавить ещё...</a>";
+		else
+			message = "<h3>Произошла ошибка при добавлении данных в базу данных!!!</h3>"
+			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "\">попробовать ещё раз...</a>\r\n";
+	}
+	else
+	{	if( dbErrorMsg is null )
+			message = "<h3>Данные о походе успешно обновлены!!!</h3>"
+			~ "Вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>";
+		else
+			message = "<h3>Произошла ошибка при обновлении данных!!!</h3>"
+			~ "Если эта ошибка повторяется, обратитесь к администратору сайта.<br>\r\n"
+			~ "Однако вы можете <a href=\"" ~ thisPagePath ~ "?key=" ~ pohodKey.to!string ~ "\">продолжить редактирование</a> этой же записи<br>\r\n"
+			~ "или перейти <a href=\"" ~ dynamicPath ~ "show_tourist\">к списку туристов</a>\r\n";
+	}
++/
+	//SiteLoger.info( "Возврат сообщения о результате операции", "Изменение данных похода" );
+
+
+	return record.num;
+}
+
+
+
+/+
 string изменитьДанныеПохода(HTTPContext context, Optional!size_t pohodKey)
 {	
 	auto rq = context.request;
@@ -314,3 +524,4 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	return message;
 }
++/

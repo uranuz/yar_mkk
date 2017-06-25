@@ -42,6 +42,43 @@ TDataNode tryExtractLvlRecordSet(TDataNode srcNode)
 	return srcNode;
 }
 
+// Код проверки результата запроса по протоколу JSON-RPC
+// По сути этот код дублирует webtank.net.http.client, но с другим типом данных
+private void _checkJSON_RPCErrors(ref TDataNode response)
+{
+	if( response.type != DataNodeType.AssocArray )
+		throw new Exception(`Expected assoc array as JSON-RPC response`);
+	
+	if( "error" in response )
+	{
+		if( response["error"].type != DataNodeType.AssocArray ) {
+			throw new Exception(`"error" field in JSON-RPC response must be an object`);
+		}
+		string errorMsg;
+		if( "message" in response["error"] ) {
+			errorMsg = response["error"]["message"].type == DataNodeType.String? response["error"]["message"].str: null;
+		}
+
+		if( "data" in response["error"] )
+		{
+			TDataNode errorData = response["error"]["data"];
+			if(
+				"file" in errorData &&
+				"line" in errorData &&
+				errorData["file"].type == DataNodeType.String &&
+				errorData["line"].type == DataNodeType.Integer
+			) {
+				throw new Exception(errorMsg, errorData["file"].str, errorData["line"].integer);
+			}
+		}
+
+		throw new Exception(errorMsg);
+	}
+
+	if( "result" !in response )
+		throw new Exception(`Expected "result" field in JSON-RPC response`);
+}
+
 /// Выполняет вызов метода rpcMethod по протоколу JSON-RPC с узла requestURI и параметрами jsonParams в формате JSON
 /// Возвращает результат выполнения метода, разобранный в формате данных шаблонизатора Ivy
 TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, ref JSONValue jsonParams )
@@ -50,10 +87,9 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, ref
 	auto response = sendJSON_RPCBlockingA!(HTTPInput)(requestURI, rpcMethod, jsonParams);
 
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
-	assert( ivyJSON.type == DataNodeType.AssocArray, `Expected assoc array as JSON-RPC result` );
-	assert( "result" in ivyJSON.assocArray, `Expected "result" field in JSON-RPC result` );
-	
-	return ivyJSON["result"].tryExtractLvlRecordSet();
+	_checkJSON_RPCErrors(ivyJSON);
+
+	return ivyJSON["result"].tryExtractRecordSet();
 }
 
 // Перегрузка sendJSON_RPCBlocking, которая позволяет передать словарь с HTTP заголовками
@@ -62,11 +98,10 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 {
 	auto response = sendJSON_RPCBlockingA!(HTTPInput)(requestURI, rpcMethod, headers, jsonParams);
 
-	TDataNode ivyJSON = parseIvyJSON(response.messageBody).tryExtractRecordSet();
-	assert( ivyJSON.type == DataNodeType.AssocArray, `Expected assoc array as JSON-RPC result` );
-	assert( "result" in ivyJSON.assocArray, `Expected "result" field in JSON-RPC result` );
+	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
+	_checkJSON_RPCErrors(ivyJSON);
 	
-	return ivyJSON["result"].tryExtractLvlRecordSet();
+	return ivyJSON["result"].tryExtractRecordSet();
 }
 
 private static immutable _mainServiceEndpoint = `http://localhost/jsonrpc/`;

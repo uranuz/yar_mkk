@@ -30,7 +30,7 @@ public:
 
 		assert(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
 
-		if( `user_num` !in jUserInfo || jUserInfo[`user_num`].type != JSON_TYPE.INTEGER ) {
+		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSON_TYPE.INTEGER ) {
 			return new AnonymousUser();
 		}
 
@@ -41,7 +41,7 @@ public:
 		return new MKKUserIdentity(
 			( `login` in jUserInfo && jUserInfo[`login`].type == JSON_TYPE.STRING? jUserInfo[`login`].str: null ),
 			( `name` in jUserInfo && jUserInfo[`name`].type == JSON_TYPE.STRING? jUserInfo[`name`].str: null ),
-			null,
+			( `group` in jUserInfo && jUserInfo[`group`].type == JSON_TYPE.STRING? jUserInfo[`group`].str: null ),
 			null,
 			sid
 		);

@@ -18,7 +18,7 @@ public:
 	this(string[string] connStrings)
 	{
 		assert( "commonDB" in connStrings, "Expected connection string for common MKK database!" );
-		assert( "authDB" in connStrings, "Expected connection string for common MKK database!" );
+		assert( "authDB" in connStrings, "Expected connection string for auth MKK database!" );
 
 		_commonDBConnStr = connStrings["commonDB"];
 		_authDBConnStr = connStrings["authDB"];

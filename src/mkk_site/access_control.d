@@ -101,7 +101,7 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 			return new AnonymousUser;
 		
 		string[string] userData = [
-			"user_num": user_QRes.get(0, 0, null),
+			"userNum": user_QRes.get(0, 0, null),
 			"email": user_QRes.get(1, 0, null)
 		];
 		
@@ -174,7 +174,7 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 
 			if( newSIDStatusRes.get(0, 0, "") == "authenticated" )
 			{
-				string[string] userData = [ "user_num": userNum, "email": email ];
+				string[string] userData = [ "userNum": userNum, "email": email ];
 				//Аутентификация завершена успешно
 				return new MKKUserIdentity(login, name, group, userData, sid);
 			}
@@ -199,9 +199,9 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 			return true;
 		}
 		
-		size_t user_num;
+		size_t userNum;
 		try {
-			user_num = mkkUserIdentity.data.get(`user_num`, null).to!size_t;
+			userNum = mkkUserIdentity.data.get(`userNum`, null).to!size_t;
 		} catch( ConvException e ) {
 			debug writeln(`auth.logout debug 4`);
 			return false;
@@ -210,7 +210,7 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 
 		// Сносим все сессии пользователя из базы
 		getAuthDBMethod().query(
-			`delete from session where "site_user_num" = ` ~ user_num.to!string ~ `;`
+			`delete from session where "site_user_num" = ` ~ userNum.to!string ~ `;`
 		);
 
 		mkkUserIdentity.invalidate(); // Затираем текущий экземпляр удостоверения

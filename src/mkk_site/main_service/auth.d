@@ -25,16 +25,16 @@ auto baseUserInfo(HTTPContext context)
 	result[`login`] = userIdentity.id;
 	result[`name`] = userIdentity.name;
 
-	result[`user_num`] = null;
-	if( userIdentity.data.get(`user_num`, null).length > 0 )
+	result[`userNum`] = null;
+	if( userIdentity.data.get(`userNum`, null).length > 0 )
 	{
 		try {
-			result[`user_num`] = userIdentity.data[`user_num`].to!size_t;
+			result[`userNum`] = userIdentity.data[`userNum`].to!size_t;
 		} catch(ConvException ex) {}
 	}
 
-	result[`roles`] = null; // TODO: Добавить получение ролей пользователя
-	result[`tourist_num`] = null; // TODO: Добавить получение идентификатора туриста для пользователя
+	result[`group`] = userIdentity.data.get(`group`, null);
+	result[`touristNum`] = null; // TODO: Добавить получение идентификатора туриста для пользователя
 
 	return result;
 }
