@@ -18,6 +18,7 @@ class MKKUserIdentity: AnonymousUser
 		_group = group;
 		_data = data;
 		_sessionId = sid;
+		_data["group"] = group; // Добавим название группы и в словарь с доп. данными, чтобы можно было узнать его извне
 	}
 	
 	override {
