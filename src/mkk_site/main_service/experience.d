@@ -142,6 +142,9 @@ bool isAuthorized
 		
 		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
 		//если номер страницы больше числа страниц переходим на последнюю 
+
+		if(currentPage<1) currentPage=1; //текущая страница
+		//если номер страницы меньше 1 переходим на первую 
    
    size_t offset = (currentPage - 1) * limit ; //Сдвиг по числу записей
    

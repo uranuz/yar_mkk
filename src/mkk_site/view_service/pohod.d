@@ -151,7 +151,10 @@ string renderPohodList(HTTPContext ctx)
 	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
 
 	dataDict["vpaths"] = Service.virtualPaths;
-	dataDict["isAuthenticated"] = isAuthorized;
+	//dataDict["isAuthenticated"] = isAuthorized;
+	//dataDict["isAuthenticated"] = true;
+	dataDict["isAuthenticated"] = false;
+	
 	dataDict["isForPrint"] = isForPrint;
 
 	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict).str;

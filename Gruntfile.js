@@ -119,6 +119,15 @@
 				options: { force: true },
 				files: { src: '<%= deployPath %>/pub/bootstrap/**/*' }
 			}
+		},
+		watch: {
+			sass: {
+				files: ['client/mkk/**/*.scss'],
+				tasks: ['sass:mkk'],
+				options: {
+					spawn: false,
+				},
+			},
 		}
 	});
 
@@ -126,6 +135,7 @@
 	require('load-grunt-tasks')(grunt);
 	require('time-grunt')(grunt);
 
+	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-symlink');
 	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-contrib-clean');

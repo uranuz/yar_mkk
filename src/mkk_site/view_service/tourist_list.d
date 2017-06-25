@@ -21,18 +21,21 @@ string renderTouristList(HTTPContext ctx)
 //*************************************************************
 	JSONValue callParams;
 	
-	callParams["curPageNum"] = ctx.request.bodyForm.get("cur_page_num", "1").to!size_t;
+	callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "1").to!size_t;
 	callParams["familyName"] = ctx.request.bodyForm.get("family_name", null);
 	callParams["givenName"]  = ctx.request.bodyForm.get("given_name", null);
 	callParams["patronymic"] = ctx.request.bodyForm.get("patronymic", null);
 //**************************************************************
-	
 	auto tpl = Service.templateCache.getByModuleName("mkk.TouristList");
 	//TDataNode dataDict;
 	//dataDict["tourist_list"] = mainServiceCall("tourist.Set", ctx, callParams);
 	
 	TDataNode dataDict = mainServiceCall("tourist.Set", ctx, callParams);
 	//dataDict["familyName"] =  ctx.request.bodyForm.get("family_name", null);
+//***авторизацыя***********************************************************
+	//dataDict["isAuthenticated"] = isAuthorized;
+	//dataDict["isAuthenticated"] = true;
+	dataDict["isAuthenticated"] = false;
 
 	return tpl.run(dataDict).str;
 }
