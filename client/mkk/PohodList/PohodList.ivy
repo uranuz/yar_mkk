@@ -20,7 +20,7 @@ def PohodList {=
 		
 		<div class="{=cls 'tableBar'} row">
 			<div class="col-md-6">
-				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodCount}}{{ isAuthenticated}}</span>
+				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodCount}}</span>
 			</div>
 			<div class="col-md-6" style="text-align: right;">
 				{= if isAuthenticated and not isForPrint {*
