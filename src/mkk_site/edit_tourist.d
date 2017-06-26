@@ -336,7 +336,7 @@ public:
 		
 		//Запись автора последних изменений и даты этих изменений
 		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+		fieldValues ~= [context.user.data["userNum"], "current_timestamp"];
 		string fieldNamesList = `"` ~ fieldNames.join(`", "`) ~ `"`;
 		string fieldValuesList = fieldValues.join(", ");
 
@@ -349,7 +349,7 @@ public:
 			}
 			else
 			{	fieldNames ~= ["registrator_num", "reg_timestamp"] ;
-				fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+				fieldValues ~= [context.user.data["userNum"], "current_timestamp"];
 				queryStr = "insert into tourist ( " ~ fieldNamesList ~ " ) values( " ~ fieldValuesList ~ " );";
 			}
 		}

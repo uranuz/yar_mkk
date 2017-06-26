@@ -89,7 +89,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, ref
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
 
-	return ivyJSON["result"].tryExtractRecordSet();
+	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
 // Перегрузка sendJSON_RPCBlocking, которая позволяет передать словарь с HTTP заголовками
@@ -101,7 +101,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
 	
-	return ivyJSON["result"].tryExtractRecordSet();
+	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
 private static immutable _mainServiceEndpoint = `http://localhost/jsonrpc/`;

@@ -497,7 +497,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 	
 	SiteLoger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 	fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-	fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+	fieldValues ~= [context.user.data["userNum"], "current_timestamp"];
 
 	import std.array, webtank.net.utils : PGEscapeStr;
 	import std.json, std.string;
@@ -539,7 +539,7 @@ string изменитьДанныеПохода(HTTPContext context, Optional!si
 		SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
 
 		fieldNames ~= ["registrator_num", "reg_timestamp"];
-		fieldValues ~= [context.user.data["user_num"], "current_timestamp"];
+		fieldValues ~= [context.user.data["userNum"], "current_timestamp"];
 		queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 	}
 	else
