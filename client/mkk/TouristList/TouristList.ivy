@@ -1,7 +1,16 @@
-expr {
-	from fir.controls.utils import recGet, recGetStr;
+expr 
+{=
+from fir.controls.utils import recGet, recGetStr,cls;
+from mkk.Pagination import Pagination;
 
-	expr {*
+	def TouristList{=
+
+def.kv
+		instanceName: 'touristList'
+		cssBaseClass: "mkk-touristList";
+
+def.body {*
+
 		<div class="e-block t-mkk-touristList">
 			<h2>Туристы</h2>
 			
@@ -21,34 +30,20 @@ expr {
 			<button type="submit" name="act" class="btn btn-primary">Найти</button>
 		</div>
 	<!-- Переход по страницам ------------------------------>
-<div class="i-pagination e-block t-pagination form-inline">
-	<h6>Переход по страницам{{ isAuthorized }}</h6>		
-		<div class="e-form_row t-pagination form-group">
+
 	
-			<div class="e-pagination t-show_tourist">
-				<span class="input-group-btn">
-						<button type="submit" name="previous" class="btn btn-primary">Предыдущая</button>
-						
-						
-						<input type="text"
-							class="i-pagination e-page_num_input t-pagination form-control"
-							maxlength="3" size="3"
-							value="{= expr curPageNum }"
-							name="cur_page_num">
-													 
-						<button type="submit" name="next" class="btn btn-primary">Следущая</button>
-						<button type="button"
-							class="i-pagination e-goto_page_btn t-pagination btn btn-secondary">
-							Перейти
-						</button>
-			</span>
-			
-			</div>
-		</div>
+
+	
+	<div class="{=cls 'pagination'}">
+					{=Pagination
+						formField: 'currentPage'
+						currentPage: currentPage
+						pageCount: pageCount
+					}
+
+					</div>
+
 	<!-- Переход по страницам конец------------------------------>		
-		
-</div>
-		
 	</form>
 	
 		<div class="e-table_bar t-show_tourist row">
@@ -59,23 +54,24 @@ expr {
 										
 									</div>
 					</div>
-					
+				{=if isAuthenticated and not isForPrint {*	
 				<div class="col-md-6" style="text-align: right;">
 					<a href="*dynamic path}}edit_tourist"
 						class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
 						Добавить нового туриста
 					</a>
 				</div>
+				*}}
 		</div>
 	
 
-	
+	<!-- Раздел  таблица-------------------->
 
-			<div class="e-block t-mkk_table">
-				<div class="e-scroll_wrapper t-mkk_table">
-					<table class="e-table t-mkk_table">
-						<thead class="e-header_body t-mkk_table">
-							<tr>
+			<div class="{=cls 'tableBlock'} mkk-Table">
+				<div class="{=cls 'tableScroller'} mkk-Table">
+					<table class="{=cls 'table'} mkk-Table">
+						<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+							<tr class="{=cls 'tableHeaderRow'} mkk-Table">
 							{%
 								
 								if isAuthorized
@@ -96,10 +92,11 @@ expr {
 							}
 							</tr>
 						</thead>
-						<tbody class="e-content_body t-mkk_table">
+						<!-- Основное   тело  таблицы-->
+						<tbody class="{=cls 'tableContentBody'} mkk-Table">
 						
 						{%
-							var i: 0;
+							
 							repeat it in  touristTabl {*
 								<tr>
 								
@@ -126,7 +123,7 @@ expr {
 								}
 									
 								</tr>
-								{= set i: i + 1 }
+								
 							*};
 						}
 						</tbody>
@@ -135,4 +132,6 @@ expr {
 			</div>
 		</div>
 	*};
+	};
+TouristList	
 }

@@ -5,12 +5,13 @@ from mkk.Pagination import Pagination;
 
 	def Experience{=
 	def.kv
+		moduleName: 'mkk/Experience/Experience'
 		instanceName: 'experience'
-		cssBaseClass: "mkk-experience";
+		cssBaseClass: "mkk-Experience";
 
 
 		def.body {*
-			<div class="e-block t-mkk-experience>
+			<div class="e-block t-mkk-experience" data-fir-module="{{moduleName}}">
 			<!-- Раздел  данные о туристе-->
 				<div class="e-filter t-show_tourist form-inline">
 				<label>					
@@ -52,11 +53,10 @@ from mkk.Pagination import Pagination;
 				<!-- Раздел  таблица-->
 				<div class="{=cls 'tableBlock'} mkk-Table">
 					<div class="{=cls 'tableScroller'} mkk-Table">
-						
 						<table class="{=cls 'table'} mkk-Table">
 							<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
 								<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-										Раздел  таблица
+										
 										<th>№ книги</th>
 							<th>Сроки похода</th>
 							<th>Вид, категория</th>

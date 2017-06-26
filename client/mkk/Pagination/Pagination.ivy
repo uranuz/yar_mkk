@@ -13,10 +13,14 @@ def Pagination {=
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<h6>Переход по страницам</h6>
 		<div class="{=cls 'formRow'} form-group">
-			<a class="{=cls 'prevBtn'} btn btn-secondary"
-				href="javascript:void(0)">
-				Предыдущая
-			</a>
+			{%							
+				if currentPage>1
+					{*	<a class="{=cls 'prevBtn'} btn btn-secondary"
+						href="javascript:void(0)">
+						Предыдущая
+						</a>
+					*}
+			}
 
 			<div class="input-group">
 				<input type="text"

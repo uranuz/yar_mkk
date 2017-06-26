@@ -48,7 +48,7 @@ import std.json;
 		string patronymic,	
 		//size_t TouristCount,//число строк
 		//size_t pageCount,   // число страниц
-		size_t curPageNum  //текущая страница
+		size_t currentPage  //текущая страница
 	)
 	{	
 	
@@ -134,9 +134,11 @@ size_t limit = 10; // Число строк на странице
 		
 		size_t pageCount = TouristCount/ limit + 1; //Количество страниц
 		
-		if(curPageNum>pageCount) curPageNum=pageCount; //текущая страница
+		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
 		//если номер страницы больше числа страниц переходим на последнюю 
 			
+		if(currentPage<1) currentPage=1; //текущая страница
+		//если номер страницы меньше 1 переходим на первую 
 			
 			
 		
@@ -144,7 +146,7 @@ size_t limit = 10; // Число строк на странице
 
 	
 		
-	 size_t offset = (curPageNum - 1) * limit ; //Сдвиг по числу записей
+	 size_t offset = (currentPage - 1) * limit ; //Сдвиг по числу записей
 		
 	string touristListQuery //запрос содержание таблицы
 			=touristListQ
@@ -154,7 +156,7 @@ size_t limit = 10; // Число строк на странице
 			;
 	
 	
-		//writeln(CurPageNum());
+		//writeln(currentPage());
 		//writeln(offset.to!string);
 
 	auto touristTabl = getCommonDB()
@@ -166,7 +168,7 @@ size_t limit = 10; // Число строк на странице
 		  
 			TourristSet["touristCount"]= TouristCount ;
 			TourristSet["pageCount"]   = pageCount;
-			TourristSet["curPageNum"]  = curPageNum;
+			TourristSet["currentPage"]  = currentPage;
 			TourristSet["familyName"]  = familyName;
 			TourristSet["givenName" ]  = givenName;
 			TourristSet["patronymic"]  = patronymic;
