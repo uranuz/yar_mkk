@@ -34,8 +34,8 @@ string renderTouristList(HTTPContext ctx)
 	//dataDict["familyName"] =  ctx.request.bodyForm.get("family_name", null);
 //***авторизацыя***********************************************************
 	//dataDict["isAuthenticated"] = isAuthorized;
-	//dataDict["isAuthenticated"] = true;
-	dataDict["isAuthenticated"] = false;
+	dataDict["isAuthenticated"] = true;
+	//dataDict["isAuthenticated"] = false;
 
 	return tpl.run(dataDict).str;
 }
