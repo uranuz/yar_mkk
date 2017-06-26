@@ -54,7 +54,7 @@ def.body {*
 										
 									</div>
 					</div>
-				{=if isAuthenticated and not isForPrint {*	
+				{=if isAuthenticated {*	
 				<div class="col-md-6" style="text-align: right;">
 					<a href="*dynamic path}}edit_tourist"
 						class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
