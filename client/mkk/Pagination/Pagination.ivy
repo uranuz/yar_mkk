@@ -7,20 +7,19 @@ def Pagination {=
 		instanceName: "pagination"
 		formField: null
 		currentPage: null
-		pageCount: null;
+		pageCount: null
+		recordCount: null
+		notFoundMessage: 'По заданному критерию не найдено ни одной записи';
 	def.body {*
 	<div class="{=cls 'block'} form-inline" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<h6>Переход по страницам</h6>
+		<h6>Переход по страницам/ Количество записей: <span class="{=cls 'recordCount'}">{{recordCount}}</span></h6>
 		<div class="{=cls 'formRow'} form-group">
-			{%							
-				if currentPage>1
-					{*	<a class="{=cls 'prevBtn'} btn btn-secondary"
-						href="javascript:void(0)">
-						Предыдущая
-						</a>
-					*}
-			}
+			<span class="{=cls 'nearPageBtnWrapper'}">
+				<a class="{=cls 'prevBtn'} btn btn-secondary"
+					href="javascript:void(0)"
+					>Предыдущая</a>
+			</span>
 
 			<div class="input-group">
 				<input type="text"
@@ -29,23 +28,24 @@ def Pagination {=
 					maxlength="2"
 					value="{{currentPage}}"
 					name="{{formField}}"/>
-				<span class="{=cls 'totalElem'} input-group-addon">
-					из {{pageCount}}
+				<span class="{=cls 'pageCountBlock'} input-group-addon">
+					из <span class="{=cls 'pageCount'}">{{pageCount}}</span>
 				</span>
 
-				<span class="input-group-btn">
+				<span class="{=cls 'gotoPageBtnWrapper'} input-group-btn">
 					<button type="button"
-						class="{=cls 'gotoPageBtn'} btn btn-secondary">
-						Перейти
-					</button>
+						class="{=cls 'gotoPageBtn'} btn btn-secondary"
+						>Перейти</button>
 				</span>
 			</div>
 
-			<a class="{=cls 'nextBtn'} btn btn-secondary"
-				href="javascript:void(0)">
-				Следующая
-			</a>
+			<span class="{=cls 'gotoBtnWrapper'}">
+				<a class="{=cls 'nextBtn'} btn btn-secondary"
+					href="javascript:void(0)"
+					>Следующая</a>
+			</span>
 		</div>
+		<div class="{=cls 'notFoundMessage'}" style="display: hidden;">{{notFoundMessage}}</div>
 	</div>
 	*}
 };

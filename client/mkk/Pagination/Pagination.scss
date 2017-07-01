@@ -1,0 +1,13 @@
+.mkk-Pagination {
+	&.e-pageCountBlock {
+		display: inline-block;
+	}
+	&.e-nearPageBtnWrapper {
+		display: inline-block;
+		background: #eec;
+		border-radius: 4px;
+	}
+	&.e-gotoPageBtnWrapper {
+		display: inline-block;
+	}
+}

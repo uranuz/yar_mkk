@@ -9,7 +9,7 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 		FirControl.call(this, opts);
 		var self = this;
 
-		this._searchBlock = this.getChildInstanceByName('chiefSearchArea');
+		this._searchBlock = this.getChildInstanceByName(this.instanceName() + 'SearchArea');
 		this._controlBar = this._elems('controlBar');
 		this.isAltChef = opts.isAltChief;
 		this.chefRec = null;

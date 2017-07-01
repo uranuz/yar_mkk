@@ -306,8 +306,10 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.limit.text;
 
 	JSONValue result;
-	result[`pageSize`] = nav.limit;
-	result[`recordCount`] = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
+	result[`nav`] = JSONValue([
+		`pageSize`: JSONValue(nav.limit),
+		`recordCount`: JSONValue(getCommonDB().query(countQuery).get(0, 0, "0").to!size_t)
+	]);
 	result[`rs`] = getCommonDB().query(query).getRecordSet(shortTouristRecFormat).toStdJSON();
 
 	return result;

@@ -4,14 +4,17 @@ define('mkk/PohodEdit/PohodEdit', [
 	'fir/network/json_rpc',
 	'fir/datctrl/Record',
 	'fir/datctrl/RecordSet',
-	'fir/datctrl/helpers'
+	'fir/datctrl/helpers',
+	'mkk/helpers',
+	'css!mkk/PohodEdit/PohodEdit'
 ], function (
 	FirControl,
 	CommonHelpers,
 	json_rpc,
 	Record,
 	RecordSet,
-	DatctrlHelpers
+	DatctrlHelpers,
+	MKKHelpers
 ) {
 	__extends(PohodEdit, FirControl);
 
@@ -86,7 +89,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			}
 
 			keyInp.val( rec.get("num") );
-			chiefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
+			chiefBtn.text( MKKHelpers.getTouristInfoString(rec) );
 		},
 		
 		onDeleteChief: function(ev, sender) {
@@ -116,7 +119,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			this._partyRS.rewind();
 			while( rec = this._partyRS.next() ) {
 				$("<div>", {
-					text: mkk_site.utils.getTouristInfoString(rec)
+					text: MKKHelpers.getTouristInfoString(rec)
 				})
 				.appendTo(partyList);
 			}

@@ -1,6 +1,10 @@
 define('mkk/PohodEdit/PartyEdit/PartyEdit', [
-	'fir/controls/FirControl'
-], function (FirControl) {
+	'fir/controls/FirControl',
+	'mkk/helpers'
+], function (
+	FirControl,
+	MKKHelpers
+) {
 	__extends(PartyEdit, FirControl);
 
 	//Инциализация блока редактирования списка участников
@@ -90,20 +94,20 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 					class: this._elemFullClass("iconWrapper")
 				}).appendTo(recordDiv),
 				deselectBtn = $("<div>", {
-					class: "icon-small icon-remove_item"
+					class: "icon-small icon-removeItem"
 				}).appendTo(iconWrp),
 				recordLink = $("<a>", {
 					class: this._elemFullClass("touristLink"),
 					href: "#!",
-					text: mkk_site.utils.getTouristInfoString(rec)
+					text: MKKHelpers.getTouristInfoString(rec)
 				})
 				.appendTo(recordDiv);
-			
+
 			return recordDiv;
 		},
 		
 		//Обработчик добавления найденной записи о туристе
-		onSelectTourist: function(ev, el, rec) {
+		onSelectTourist: function(ev, rec) {
 			var 
 				recordDiv,
 				deselectBtn;
@@ -116,7 +120,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			
 			if( this.selTouristsRS.hasKey( rec.getKey() ) )
 			{	this._elems("selectMessage").html(
-					"Турист <b>" + mkk_site.utils.getTouristInfoString(rec)
+					"Турист <b>" + MKKHelpers.getTouristInfoString(rec)
 					+ "</b> уже находится в списке выбранных туристов"
 				);
 			}
@@ -125,34 +129,32 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 				this.renderSelectedTourist(rec)
 				.appendTo( this._elems("selectedTourists") );
 			}
-			
-			this.onDialog_resize(); //Перестройка диалога
+
+			this.onDialog_resize(); // Перестройка диалога
 		},
 		
 		//Обработчик отмены выбора записи
-		onDeselectTouristBtn_click: function(ev, el) {
-			var 
-				recId = el.data('num'),
-				recordDiv = el,
-				touristSelectDiv = this._elems("selectedTourists");
-			
-			this.selTouristsRS.remove(recId);
+		onDeselectTouristBtn_click: function(ev) {
+			var recordDiv = $(ev.currentTarget);
+
+			this.selTouristsRS.remove(recordDiv.data('num'));
 			recordDiv.remove();
+			this.onDialog_resize(); // Перестройка диалога
 		},
 		
-		//Тык по кнопке открытия окна редактирования списка участников
+		// Тык по кнопке открытия окна редактирования списка участников
 		renderSelectedTourists: function() {
 			var 
 				self = this,
 				selectedTouristsDiv = this._elems("selectedTourists"),
 				rec;
-				
-			//Очистка окна списка туристов перед заполнением
+
+			// Очистка окна списка туристов перед заполнением
 			selectedTouristsDiv.empty();
-				
+
 			this.selTouristsRS.rewind();
-			while( rec = this.selTouristsRS.next() )
-			{	this.renderSelectedTourist(rec)
+			while( rec = this.selTouristsRS.next() ) {
+				this.renderSelectedTourist(rec)
 				.data('num', rec.get('num'))
 				.appendTo(selectedTouristsDiv);
 			}

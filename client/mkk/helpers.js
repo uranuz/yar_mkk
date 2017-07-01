@@ -1,7 +1,7 @@
 define('mkk/helpers', [], function () {
 	return {
 		/**
-		 * @description Проверяет, что value - число. Если заданы low и/или high,
+		 * Проверяет, что value - число. Если заданы low и/или high,
 		 * то проверяет, что проверяет, что low <= value <= high
 		 */
 		checkInt: function(value, low, high) {
@@ -20,7 +20,7 @@ define('mkk/helpers', [], function () {
 		},
 
 		/**
-		 * @description Скажет true, если год високосный и false, если нет
+		 * Скажет true, если год високосный и false, если нет
 		 */
 		isLeapYear: function(year) {
 			if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) return true;
@@ -42,7 +42,7 @@ define('mkk/helpers', [], function () {
 		},
 			
 		/**
-		 * @description Функции проверки даты на правильность
+		 * Функции проверки даты на правильность
 		 */
 		isValidDate: function(day, month, year) {
 			if ((month > 0) && (month <= 12)) {
@@ -53,6 +53,26 @@ define('mkk/helpers', [], function () {
 			}
 			else return ('Ошибка ввода! Номер месяца должен быть целым числом в диапазоне от 1 до 20, однако "' +
 				+'" указано.');
+		},
+
+		//Возвращает строку описания туриста по записи
+		getTouristInfoString: function(rec) {
+			var 
+				output = "",
+				familyName = rec.get("familyName", ""),
+				givenName = rec.get("givenName", ""),
+				patronymic = rec.get("patronymic", ""),
+				birthYear = "" + rec.get("birthYear", "");
+			
+			if( familyName.length )
+				output += familyName;
+			if( givenName.length )
+				output += " " + givenName;
+			if( patronymic.length )
+				output += " " + patronymic;
+			if( birthYear.length )
+				output += ", " + birthYear + " г.р";
+			return output;
 		}
 	}
 });

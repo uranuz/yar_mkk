@@ -1,5 +1,6 @@
 expr {=
 from fir.controls.utils import cls;
+from mkk.Pagination import Pagination;
 def TouristSearchArea {=
 	def.kv
 		moduleName: 'mkk/TouristSearchArea/TouristSearchArea'
@@ -43,11 +44,9 @@ def TouristSearchArea {=
 			<h5>Найденные туристы</h5>
 			<div class="{=cls 'touristsFoundSummary'}"></div>
 			<div class="{=cls 'pageNavigationBar'}">
-				<button class="{=cls 'goPrevBtn'}">Пред.</button>
-				Страница <input name="currentPage" type="text" value="1" size="3" maxlength="3" class="{=cls 'pageSelected'}">
-				из <span class="{=cls 'pageCount'}">0</span>
-				<button class="{=cls 'goSelectedBtn'}">Перейти</button>
-				<button class="{=cls 'goNextBtn'}">След.</button>
+				{=Pagination
+					instanceName: instanceName ~ 'Pagination'
+				}
 			</div>
 			<div class="{=cls 'foundTourists'}"></div>
 		</div>
