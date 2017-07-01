@@ -25,7 +25,7 @@ def Pagination {=
 				<input type="text"
 					class="{=cls 'currentPageField'} form-control"
 					size="1"
-					maxlength="2"
+					maxlength="3"
 					value="{{currentPage}}"
 					name="{{formField}}"/>
 				<span class="{=cls 'pageCountBlock'} input-group-addon">
