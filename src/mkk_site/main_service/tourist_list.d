@@ -12,7 +12,7 @@ import std.stdio;
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(touristSet)(`tourist.Set`);
-	
+	Service.JSON_RPCRouter.join!(touristSelected)(`tourist.Selected`);
 }
 //**********************************************************
 
@@ -179,9 +179,9 @@ size_t limit = 10; // Число строк на странице
 			TourristSet["touristCount"]= TouristCount ;
 			TourristSet["pageCount"]   = pageCount;
 			TourristSet["currentPage"]  = currentPage;
-			TourristSet["familyName"]  = familyName;
-			TourristSet["givenName" ]  = givenName;
-			TourristSet["patronymic"]  = patronymic;
+			//TourristSet["familyName"]  = familyName;
+			//TourristSet["givenName" ]  = givenName;
+			//TourristSet["patronymic"]  = patronymic;
 			TourristSet["isAuthorized"]  = isAuthorized;
 			TourristSet["touristTabl"] =touristTabl.toStdJSON();
 			
@@ -192,8 +192,81 @@ size_t limit = 10; // Число строк на странице
 		  
 		return TourristSet;
 	}
+
+
+struct TouristFilter
+{
+	import webtank.common.optional: Optional;
+
+	@DBName("family_name") string familyName;
+	@DBName("given_name") string givenName;
+	@DBName("patronymic") string patronymic;
+	@DBName("birth_year") Optional!int birthYear;
+	@DBName("address") string region;
+	@DBName("address") string city;
+	@DBName("address") string street;
+}
+
+struct Navigation
+{
+	size_t offset = 0;
+	size_t limit = 10;
+} 
+
 	
-	
-	
-	
-	
+	//RPC метод для вывода списка туристов (с краткой информацией) по фильтру
+auto touristSelected(TouristFilter filter, Navigation nav)
+{
+	import std.json: JSONValue;
+	import std.traits: getUDAs;
+	import webtank.common.optional: Optional, isOptional, OptionalValueType;
+	import std.conv: text, to;
+	import std.meta: AliasSeq, Alias;
+	import std.string: join;
+	auto dbase = getCommonDB();
+
+	static immutable size_t maxPageSize = 50;
+	string[] filters;
+	if( nav.limit > maxPageSize ) {
+		nav.limit = maxPageSize;
+	}
+
+	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristFilter)) )
+	{
+		alias FieldType = typeof(__traits(getMember, filter, fieldName));
+		alias Field = Alias!(__traits(getMember, filter, fieldName));
+		static if( is( FieldType == string ) )
+		{
+			auto field = __traits(getMember, filter, fieldName);
+			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
+			if( field.length > 0 ) {
+				filters ~= dbFieldName ~ ` ilike '%` ~ PGEscapeStr(field) ~ `%'`;
+			}
+		}
+		else static if( isOptional!FieldType && is( OptionalValueType!(FieldType) == int ) )
+		{
+			auto field = __traits(getMember, filter, fieldName);
+			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
+			if( field.isSet ) {
+				filters ~= dbFieldName ~ ` = ` ~ field.text;
+			}
+		}
+	}
+
+	string query = `select num, family_name, given_name, patronymic, birth_year from tourist `;
+	string countQuery = `select count(1) from tourist `;
+	if( filters.length > 0 )
+	{
+		string filtersPart = "where (" ~ filters.join(") and (") ~ ")";
+		query ~= filtersPart;
+		countQuery ~= filtersPart;
+	}
+	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.limit.text;
+
+	JSONValue result;
+	result[`pageSize`] = nav.limit;
+	result[`recordCount`] = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
+	result[`rs`] = getCommonDB().query(query).getRecordSet(shortTouristRecFormat).toStdJSON();
+
+	return result;
+}
