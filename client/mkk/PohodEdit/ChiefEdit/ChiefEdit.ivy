@@ -18,7 +18,7 @@ def ChiefEdit {=
 			</button>
 		</div>
 		<div class="{=cls 'searchBlock'}">
-			{=TouristSearchArea instanceName: 'chiefSearchArea'}
+			{=TouristSearchArea instanceName: instanceName ~ 'SearchArea'}
 		</div>
 	</div>
 	*}

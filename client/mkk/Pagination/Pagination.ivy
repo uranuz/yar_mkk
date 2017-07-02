@@ -6,46 +6,81 @@ def Pagination {=
 		cssBaseClass: "mkk-Pagination"
 		instanceName: "pagination"
 		formField: null
+		pageSizeFormField: null
+		pageSize: 10
 		currentPage: null
-		pageCount: null;
+		offset: null
+		pageCount: null
+		recordCount: null
+		title: 'Переход по страницам'
+		notFoundMsg: 'По заданному критерию не найдено ни одной записи'
+		recordCountTitle: 'Найдено записей';
 	def.body {*
-	<div class="{=cls 'block'} form-inline" data-fir-module="{{moduleName}}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<h6>Переход по страницам</h6>
-		<div class="{=cls 'formRow'} form-group">
-			{%							
-				if currentPage>1
-					{*	<a class="{=cls 'prevBtn'} btn btn-secondary"
-						href="javascript:void(0)">
-						Предыдущая
-						</a>
-					*}
-			}
-
-			<div class="input-group">
-				<input type="text"
-					class="{=cls 'currentPageField'} form-control"
-					size="1"
-					maxlength="3"
-					value="{{currentPage}}"
-					name="{{formField}}"/>
-				<span class="{=cls 'totalElem'} input-group-addon">
-					из {{pageCount}}
+		<h6 class="{=cls 'titleRow'}">{{title}}</h6>
+		<div class="form-inline">
+			<div class="{=cls 'formRow'} form-group">
+				<span class="{=cls 'nearPageBtnWrapper'}">
+					<a class="{=cls 'prevBtn'} btn btn-secondary"
+						href="javascript:void(0)"
+						>Пред. стр</a>
 				</span>
 
-				<span class="input-group-btn">
-					<button type="button"
-						class="{=cls 'gotoPageBtn'} btn btn-secondary">
-						Перейти
-					</button>
+				<div class="input-group">
+					<input type="text"
+						class="{=cls 'currentPageField'} form-control"
+						size="1"
+						maxlength="3"
+						value="{=if not{=empty currentPage}	currentPage + 1
+							elif not{=empty offset} and not{=empty pageSize} offset / pageSize + 1
+							else 1
+						}"
+						/>
+					<span class="{=cls 'pageCountBlock'} input-group-addon">из
+						<span class="{=cls 'pageCount'}">
+							{=if not{=empty pageCount} pageCount
+								elif not{=empty recordCount} and not{=empty pageSize} recordCount / pageSize + 1
+							}
+						</span>
+					</span>
+
+					<span class="{=cls 'gotoPageBtnWrapper'} input-group-btn">
+						<button type="button"
+							class="{=cls 'gotoPageBtn'} btn btn-secondary"
+							>Перейти</button>
+					</span>
+				</div>
+
+				<span class="{=cls 'gotoBtnWrapper'}">
+					<a class="{=cls 'nextBtn'} btn btn-secondary"
+						href="javascript:void(0)"
+						>След. стр</a>
 				</span>
 			</div>
-
-			<a class="{=cls 'nextBtn'} btn btn-secondary"
-				href="javascript:void(0)">
-				Следующая
-			</a>
 		</div>
+		<div class="{=cls 'notFoundMsg'}" style="display: hidden;">{{notFoundMsg}}</div>
+		<div class="{=cls 'recordCountMsg'}" style="display: nidden;">
+			{{recordCountTitle}}: <span class="{=cls 'recordCount'}">{{recordCount}}</span>
+		</div>
+		<input type="hidden"
+			class="{=cls 'pageHiddenField'}"
+			value="{{currentPage or 0}}"
+			{=if not{=empty currentPage} and {=empty offset} and not{=empty formField}
+				{*name="{{formField}}"*}
+			}/>
+		<input type="hidden"
+			class="{=cls 'offsetField'}"
+			value="{{offset or 0}}"
+			{=if not{=empty offset} and not{=empty formField}
+				{*name="{{formField}}"*}
+			}/>
+		<input type="hidden"
+			class="{=cls 'pageSizeField'}"
+			value="{{pageSize}}"
+			{=if not{=empty pageSizeFormField}
+				{*name="{{pageSizeFormField}}"*}
+			}/>
 	</div>
 	*}
 };

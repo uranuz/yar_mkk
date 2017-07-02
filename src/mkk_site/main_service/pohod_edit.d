@@ -244,7 +244,7 @@ struct TouristFilter
 struct Navigation
 {
 	size_t offset = 0;
-	size_t limit = 10;
+	size_t pageSize = 10;
 }
 
 static immutable shortTouristRecFormat = RecordFormat!(
@@ -269,8 +269,8 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 
 	static immutable size_t maxPageSize = 50;
 	string[] filters;
-	if( nav.limit > maxPageSize ) {
-		nav.limit = maxPageSize;
+	if( nav.pageSize > maxPageSize ) {
+		nav.pageSize = maxPageSize;
 	}
 
 	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristFilter)) )
@@ -303,11 +303,20 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 		query ~= filtersPart;
 		countQuery ~= filtersPart;
 	}
-	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.limit.text;
+	size_t recordCount = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
+	if( recordCount < nav.offset ) {
+		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
+		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
+	}
+
+	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
 
 	JSONValue result;
-	result[`pageSize`] = nav.limit;
-	result[`recordCount`] = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
+	result[`nav`] = JSONValue([
+		`offset`: JSONValue(nav.offset),
+		`pageSize`: JSONValue(nav.pageSize),
+		`recordCount`: JSONValue(recordCount)
+	]);
 	result[`rs`] = getCommonDB().query(query).getRecordSet(shortTouristRecFormat).toStdJSON();
 
 	return result;

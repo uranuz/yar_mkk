@@ -18,12 +18,13 @@ def PartyEdit {=
 			<div class="{=cls 'panelsArea'}">
 				<div class="{=cls 'searchPanel'}">
 					<h5>Поиск туристов</h5>
-					<div class="{=cls 'searchBlock'}"></div>
+					<div class="{=cls 'searchBlock'}">
+						{=TouristSearchArea instanceName: 'touristSearchArea'}
+					</div>
 				</div>
 				<div class="{=cls 'selectedTouristsPanel'}">
 					<h5>Участники похода</h5>
 					<div class="{=cls 'selectedTourists'}">
-						{=TouristSearchArea instanceName: 'touristSearchArea'}
 					</div>
 				</div>
 			</div>

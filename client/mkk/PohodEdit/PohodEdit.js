@@ -4,14 +4,17 @@ define('mkk/PohodEdit/PohodEdit', [
 	'fir/network/json_rpc',
 	'fir/datctrl/Record',
 	'fir/datctrl/RecordSet',
-	'fir/datctrl/helpers'
+	'fir/datctrl/helpers',
+	'mkk/helpers',
+	'css!mkk/PohodEdit/PohodEdit'
 ], function (
 	FirControl,
 	CommonHelpers,
 	json_rpc,
 	Record,
 	RecordSet,
-	DatctrlHelpers
+	DatctrlHelpers,
+	MKKHelpers
 ) {
 	__extends(PohodEdit, FirControl);
 
@@ -74,8 +77,9 @@ define('mkk/PohodEdit/PohodEdit', [
 			this.saveParty(selTouristsRS);
 		},
 		
-		onSelectChief: function(ev, sender, rec) {
+		onSelectChief: function(ev, rec) {
 			var
+				sender = ev.target,
 				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
 				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
@@ -86,11 +90,12 @@ define('mkk/PohodEdit/PohodEdit', [
 			}
 
 			keyInp.val( rec.get("num") );
-			chiefBtn.text( mkk_site.utils.getTouristInfoString(rec) );
+			chiefBtn.text( MKKHelpers.getTouristInfoString(rec) );
 		},
 		
-		onDeleteChief: function(ev, sender) {
+		onDeleteChief: function(ev) {
 			var
+				sender = ev.target,
 				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
 				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
@@ -105,7 +110,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		},
 		
 		//Сохраняет список участников группы и выводит его в главное окно
-		saveParty: function( rs ) {
+		saveParty: function(rs) {
 			var
 				partyList = this._elems("partyList"),
 				rec;
@@ -116,7 +121,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			this._partyRS.rewind();
 			while( rec = this._partyRS.next() ) {
 				$("<div>", {
-					text: mkk_site.utils.getTouristInfoString(rec)
+					text: MKKHelpers.getTouristInfoString(rec)
 				})
 				.appendTo(partyList);
 			}
@@ -229,7 +234,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			this._elems("extraFileLinksDataField").val( JSON.stringify(data) );
 		},
 
-		showErrorDialog: function( errorMsg ) {
+		showErrorDialog: function(errorMsg) {
 			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
 		},
 

@@ -192,7 +192,7 @@ def PohodEdit {=
 						value="{=recGet pohod 'chiefNum'}"/>
 					<a href="#_NOLink"
 						class="{=cls 'chiefEditBtn'}"
-						>{ {chef_grupp_text} }</a>
+						>{=recGet pohod 'chiefName'}</a>
 				</td>
 			</tr>
 			<tr>
@@ -204,7 +204,7 @@ def PohodEdit {=
 						value="{=recGet pohod 'altChiefNum'}"/>
 					<a href="#_NOLink"
 						class="{=cls 'altChiefEditBtn'}"
-						>{ {alt_chef_text} }</a>
+						>{=recGet pohod 'altChiefName'}</a>
 				</td>
 			</tr>
 			<tr>

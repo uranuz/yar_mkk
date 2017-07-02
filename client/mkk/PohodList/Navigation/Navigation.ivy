@@ -10,8 +10,7 @@ def PohodListNavigation {=
 		instanceName: 'pohodListNavigation'
 		pohodEnums: null
 		filter: {}
-		currentPage: null
-		pageCount;
+		nav: {};
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -117,9 +116,10 @@ def PohodListNavigation {=
 				</div>
 				<div class="{=cls 'pagination'}">
 					{=Pagination
-						formField: 'currentPage'
-						currentPage: currentPage
-						pageCount: pageCount
+						formField: 'offset'
+						offset: nav.offset
+						pageSize: nav.pageSize or 10
+						recordCount: nav.recordCount
 					}
 				</div>
 			</form>

@@ -1,166 +1,116 @@
 define('mkk/TouristSearchArea/TouristSearchArea', [
-	'fir/controls/FirControl'
-], function (FirControl) {
+	'fir/controls/FirControl',
+	'fir/network/json_rpc',
+	'fir/datctrl/helpers',
+	'mkk/helpers'
+], function(
+	FirControl,
+	json_rpc,
+	datctrl,
+	MKKHelpers
+) {
 	__extends(TouristSearchArea, FirControl);
 
 	function TouristSearchArea(opts)
 	{
 		FirControl.call(this, opts);
-		
 		var self = this;
 
-		this.resultsPanel = this._elems('searchResultsPanel');
+		this._resultsPanel = this._elems('searchResultsPanel');
+		this._pagination = this.findInstanceByName(this.instanceName() + 'Pagination');
 
-		this._elems("searchBtn").on("click", self.onSearchTourists_BtnClick);
-		this._elems("goSelectedBtn").on("click", self.onGoSelected_BtnClick);
-		this._elems("goNextBtn").on("click", self.onGoNext_BtnClick);
-		this._elems("goPrevBtn").on("click", self.onGoPrev_BtnClick);
-		
-		this._elems("foundTourists").on("click", ".e-tourist_select_btn", function(ev, el) {
-			var record = self.recordSet.getRecord($(el).data('id'))
-			self.$trigger('itemSelect', [self, record]);
-		});
+		this._elems('searchBtn').on('click', self.onSearchTourists_BtnClick.bind(this));
+
+		this._elems("foundTourists").on("click", ".e-touristSelectBtn", function(ev) {
+			var record = this.recordSet.getRecord($(ev.currentTarget).data('id'))
+			this._notify('itemSelect', record);
+		}.bind(this));
+		this._pagination.subscribe('onSetCurrentPage', this.onSearchTourists.bind(this));
 		
 		this._elems('block').hide();
 	}
 
 	return __mixinProto(TouristSearchArea, {
-		// Тык по кнопке поиска туристов 
+		/** Тык по кнопке поиска туристов  */
 		onSearchTourists_BtnClick: function() {
-			this.$el(".e-page_selected").val(1);
+			this._pagination.setCurrentPage(0);
 			this.onSearchTourists(); //Переход к действию по кнопке Искать
 		},
-		
-		// Тык по кнопке Перехода на нужную страницу 
-		onGoSelected_BtnClick: function(ev, el) {
+
+		/** Поиск туристов и отображение результата в диалоге */
+		onSearchTourists: function() {
 			var
 				self = this,
-				selected_page_value = this.$el(".e-page_selected").val(),
-				selected_page_obg = this.$el(".e-page_selected");
-			
-			// ограничения значений страницы в окошечке	
-			if( selected_page_value < 1 )
-				this.$el(".e-page_selected").val(1); 
-			if( selected_page_value > self.page ) 
-				this.$el(".e-page_selected").val(self.page);
-			
-			this.onSearchTourists();//Переход к действию 
-		},
-		
-		//Тык по кнопке Предыдущая страница
-		onGoPrev_BtnClick: function(ev, el) {
-			var
-				selected_page_value = this.$el(".e-page_selected").val();
+				messageDiv = this._elems("selectMessage"),
+				currentPage = this._pagination.getCurrentPage(),
+				pageSize = 10;
 
-			this.$el(".e-page_selected").val( +selected_page_value - 1 );
-			this.onGoSelected_BtnClick(el, ev);//Переход к действию 
-		},
-		
-		//Тык по кнопке Следующая страница
-		onGoNext_BtnClick: function(ev, el) {
-			var
-				selected_page_value = this.$el(".e-page_selected").val();
-			this.$el(".e-page_selected").val( +selected_page_value + 1 );
-			this.onGoSelected_BtnClick(el, ev);//Переход к действию 
-		},
-
-		// переход от Тыка по  любой из  выше описанных кнопок  
-		onSearchTourists: function(event) {
-			var
-				self = this,
-				messageDiv = this.$el(".e-select_message"),
-				selected_page_value = this.$el(".e-page_selected").val();
-
-			webtank.json_rpc.invoke({
-				uri: "/jsonrpc/",
-				method: "mkk_site.edit_pohod.getTouristList",
+			json_rpc.invoke({
+				uri: '/jsonrpc/',
+				method: 'tourist.plainSearch',
 				params: { 
-					"фамилия": this.$el(".e-family_filter").val(), 
-					"имя": this.$el(".e-name_filter").val(),
-					"отчество": this.$el(".e-patronymic_filter").val(),
-					"год_рождения": this.$el(".e-year_filter").val(),
-					"регион": this.$el(".e-region_filter").val() ,  
-					"город": this.$el(".e-city_filter").val(),  
-					"улица": this.$el(".e-street_filter").val(),
-					"страница": this.$el(".e-page_selected").val()
+					filter: {
+						familyName: this._elems("familyFilter").val() || undefined, 
+						givenName: this._elems("nameFilter").val() || undefined,
+						patronymic: this._elems("patronymicFilter").val() || undefined,
+						birthYear: parseInt(this._elems("yearFilter").val(), 10) || undefined,
+						region: this._elems("regionFilter").val() || undefined,
+						city: this._elems("cityFilter").val() || undefined,
+						street: this._elems("streetFilter").val() || undefined
+					},
+					nav: {
+						offset: currentPage * pageSize,
+						limit: pageSize
+					}
 				},
-				success: function(json)// исполняется по приходу результата
-				{
+				success: function(json) {
 					var
 						rec,
-						searchResultsDiv = self.$el(".e-found_tourists"),
-						summaryDiv = self.$el(".e-tourists_found_summary"),
-						selected_submit = self.$el(".e-go_selected_btn"),
-						prev_submit = self.$el(".e-go_prev_btn"),
-						next_submit = self.$el(".e-go_next_btn"),
-						navigBar = self.$el(".e-page_navigation_bar"),
-						pageCountDiv = self.$el(".e-page_count"),
-						col_str = json.recordCount;// Количество строк
-						perPage = json.perPage || 10;
+						searchResultsDiv = self._elems("foundTourists"),
+						summaryDiv = self._elems("touristsFoundSummary"),
+						navigBar = self._elems("pageNavigationBar"),
+						pageCountDiv = self._elems("pageCount"),
+						recordCount = json.recordCount; // Количество записей, удовлетворяющих фильтру
+						pageSize = json.pageSize || 10;
 					
-					self.recordSet = webtank.datctrl.fromJSON(json.rs);
+					self.recordSet = datctrl.fromJSON(json.rs);
 					self.recordSet.rewind();
-					
+
 					searchResultsDiv.empty();
 					while( rec = self.recordSet.next() )
 						self.renderFoundTourist(rec).appendTo(searchResultsDiv);
-					
-					self.resultsPanel.show();
 
-					if( col_str > 0 )
-						self.page = Math.ceil(col_str/perPage);
-					else
-						self.page = 0;
-					// ограничения кнопки перейти при наличи одой и менее страниц кнопка не видима
-					if( self.page <= 1 ) 
-						selected_submit.css('visibility', 'hidden');
-					else 
-						selected_submit.css('visibility', 'visible');
-					
-					//  состояние кнопки предыдущая 
-					if( selected_page_value < 2 || self.page <= 1 )
-						prev_submit.css('visibility', 'hidden');
-					else 
-						prev_submit.css('visibility', 'visible');
+					self._resultsPanel.show();
+					self._pagination.setNavigation(json.nav);
 
-					// состояние кнопки далее
-					if( selected_page_value >= self.page || self.page <= 1 ) 
-						next_submit.css('visibility', 'hidden');
-					else 
-						next_submit.css('visibility', 'visible');
-
-					if( col_str < 1 )
-					{	summaryDiv.text("По данному запросу не найдено туристов");
+					if( recordCount < 1 ) {
+						summaryDiv.text("По данному запросу туристов не найдено");
 						navigBar.hide();
-					}
-					else
-					{
-						summaryDiv.text("Найдено " + col_str + " туристов");
-						pageCountDiv.text(self.page);
+					} else {
+						summaryDiv.text("Найдено " + recordCount + " туристов");
 						navigBar.show();
 					}
 				}
-			});// конец webtank.json_rpc.invoke
+			});
 		},
 		
 		renderFoundTourist: function(record) {
 			var
 				recordDiv = $("<div>", {
-					class: "b-tourist_search e-tourist_select_btn",
+					class: this._elemFullClass('touristSelectBtn'),
 				})
 				.data("id", record.getKey()),
 				iconWrp = $("<span>", {
-					class: "b-tourist_search e-icon_wrapper"
+					class: this._elemFullClass('iconWrapper')
 				}).appendTo(recordDiv),
 				button = $("<div>", {
-					class: "icon-small icon-append_item"
+					class: 'icon-small icon-appendItem'
 				}).appendTo(iconWrp),
 				recordLink = $("<a>", {
-					class: "b-tourist_search e-tourist_link",
+					class: this._elemFullClass('touristLink'),
 					href: "#!",
-					text: mkk_site.utils.getTouristInfoString(record)
+					text: MKKHelpers.getTouristInfoString(record)
 				}).appendTo(recordDiv);
-			
 			return recordDiv;
 		},
 		
@@ -168,9 +118,9 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 		{
 			this._container.detach().appendTo(place).show();
 			if( this.recordSet && this.recordSet.getLength() )
-				this.resultsPanel.show();
+				this._resultsPanel.show();
 			else
-				this.resultsPanel.hide()
+				this._resultsPanel.hide()
 		},
 		
 		deactivate: function(place)

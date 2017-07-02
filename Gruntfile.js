@@ -3,10 +3,18 @@
 
 	// Force use of Unix newlines
 	grunt.util.linefeed = '\n';
+	var expandTilde = require('expand-tilde');
 
 	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
-		deployPath: grunt.option('deployPath') || '.', // Параметр для пути, куда развернуть сайт
+		deployPath: (function() {
+			// Используем путь к для разворота, указанный у сервиса представления,
+			// чтобы каждый раз явно не указывать его в консоли
+			var config = {};
+			if( grunt.file.exists('mkk_site_config.json') ) {
+				config = grunt.file.readJSON('mkk_site_config.json');
+			}
+			return expandTilde(config.services.yarMKKView.fileSystemPaths.siteRoot);
+		})(),
 
 		symlink: {
 			templates: {
@@ -50,6 +58,14 @@
 				cwd: 'node_modules/bootstrap/dist/',
 				src: './**/*.js',
 				dest: '<%= deployPath %>/pub/bootstrap/',
+				filter: 'isFile',
+				overwrite: true
+			},
+			jqueryui: {
+				expand: true,
+				cwd: 'client/jquery-ui-1.12.1.custom/',
+				src: './**/*.*',
+				dest: '<%= deployPath %>/pub/jquery-ui-1.12.1.custom/',
 				filter: 'isFile',
 				overwrite: true
 			}
@@ -118,6 +134,10 @@
 			bootstrap: {
 				options: { force: true },
 				files: { src: '<%= deployPath %>/pub/bootstrap/**/*' }
+			},
+			jqueryui: {
+				options: { force: true },
+				files: { src: '<%= deployPath %>/pub/jquery-ui-1.12.1.custom/**/*' }
 			}
 		},
 		watch: {

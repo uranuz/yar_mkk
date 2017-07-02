@@ -130,26 +130,23 @@ string renderPohodList(HTTPContext ctx)
 	filter["dates"] = datesFilter;
 
 	TDataNode dataDict;
-	size_t pohodCount = mainServiceCall("pohod.listSize", ctx, JSONValue(["filter": filter])).integer;
-	size_t pohodsPerPage = isForPrint? 10000: 10;
-	size_t currentPage = req.bodyForm.get("currentPage", "1").to!(size_t).ifThrown!ConvException(1);
-	size_t pageCount = pohodCount / pohodsPerPage + 1;
-	if( currentPage > pageCount ) {
-		currentPage = pageCount;
-	}
+	size_t recordCount = mainServiceCall("pohod.listSize", ctx, JSONValue(["filter": filter])).integer;
+	size_t pageSize = isForPrint? 10000: 10;
+	size_t offset = req.bodyForm.get("offset", "0").to!(size_t).ifThrown!ConvException(0);
+
+	JSONValue nav = [
+		"pageSize": JSONValue(pageSize),
+		"offset": JSONValue(offset)
+	];
 
 	dataDict["pohodSet"] = mainServiceCall("pohod.list", ctx, JSONValue([
 		"filter": filter,
-		"offset": JSONValue( (currentPage - 1) * pohodsPerPage ),
-		"limit": JSONValue(pohodsPerPage)
+		"nav": nav
 	]));
-
-	dataDict["pohodCount"] = pohodCount;
-	dataDict["currentPage"] = currentPage;
-	dataDict["pageCount"] = pageCount;
-	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
+	nav["recordCount"] = recordCount;
+	dataDict["pohodNav"] = nav.toIvyJSON();
 	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
-
+	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["isAuthenticated"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
