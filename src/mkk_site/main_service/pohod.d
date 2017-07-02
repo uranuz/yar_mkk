@@ -393,7 +393,13 @@ size_t getPohodCount(PohodFilter filter)
 		.get(0, 0, "0").to!size_t;
 }
 
-auto getPohodList(PohodFilter filter, size_t offset, size_t limit)
+struct Navigation
+{
+	size_t offset = 0;
+	size_t pageSize = 20;
+}
+
+auto getPohodList(PohodFilter filter, Navigation nav)
 {
 	import std.conv: to;
 
@@ -408,8 +414,8 @@ auto getPohodList(PohodFilter filter, size_t offset, size_t limit)
 
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
-		
-	query ~= ` order by pohod.begin_date desc offset ` ~ offset.to!string ~ ` limit ` ~ limit.to!string;
+
+	query ~= ` order by pohod.begin_date desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
 
 	return getCommonDB()
 		.query(query)

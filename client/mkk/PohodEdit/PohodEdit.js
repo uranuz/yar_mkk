@@ -77,8 +77,9 @@ define('mkk/PohodEdit/PohodEdit', [
 			this.saveParty(selTouristsRS);
 		},
 		
-		onSelectChief: function(ev, sender, rec) {
+		onSelectChief: function(ev, rec) {
 			var
+				sender = ev.target,
 				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
 				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
@@ -92,8 +93,9 @@ define('mkk/PohodEdit/PohodEdit', [
 			chiefBtn.text( MKKHelpers.getTouristInfoString(rec) );
 		},
 		
-		onDeleteChief: function(ev, sender) {
+		onDeleteChief: function(ev) {
 			var
+				sender = ev.target,
 				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
 				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
@@ -108,7 +110,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		},
 		
 		//Сохраняет список участников группы и выводит его в главное окно
-		saveParty: function( rs ) {
+		saveParty: function(rs) {
 			var
 				partyList = this._elems("partyList"),
 				rec;
@@ -232,7 +234,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			this._elems("extraFileLinksDataField").val( JSON.stringify(data) );
 		},
 
-		showErrorDialog: function( errorMsg ) {
+		showErrorDialog: function(errorMsg) {
 			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
 		},
 

@@ -14,18 +14,17 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		var self = this;
 
 		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
-		this.page = 0;
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
 		this._panelsArea = self._elems("panelsArea");
 		this._searchPanel = self._elems("searchPanel");
 		this._selectedTouristsPanel = self._elems("selectedTouristsPanel");
 
 		this._elems("acceptBtn").on("click", function() {
-			self.trigger('saveData', [self, self.selTouristsRS]);
+			self._notify('saveData', self.selTouristsRS);
 			self.closeDialog();
 		});
 		
-		this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTouristBtn_click);
+		this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTouristBtn_click.bind(this));
 		this._container.on('dialogclose', this.onDialog_close.bind(this));
 	}
 	
@@ -84,8 +83,8 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		},
 
 		//Метод образует разметку с информацией о выбранном туристе
-		renderSelectedTourist: function(rec)
-		{	var
+		renderSelectedTourist: function(rec) {
+			var
 				recordDiv = $("<div>", {
 					class: this._elemFullClass("touristDeselectBtn")
 				})
@@ -112,20 +111,19 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 				recordDiv,
 				deselectBtn;
 			
-			if( !this.selTouristsRS )
-			{	this.selTouristsRS = new webtank.datctrl.RecordSet({
+			if( !this.selTouristsRS ) {
+				this.selTouristsRS = new webtank.datctrl.RecordSet({
 					format: rec.copyFormat()
 				});
 			}
 			
-			if( this.selTouristsRS.hasKey( rec.getKey() ) )
-			{	this._elems("selectMessage").html(
+			if( this.selTouristsRS.hasKey( rec.getKey() ) ) {
+				this._elems("selectMessage").html(
 					"Турист <b>" + MKKHelpers.getTouristInfoString(rec)
 					+ "</b> уже находится в списке выбранных туристов"
 				);
-			}
-			else
-			{	this.selTouristsRS.append(rec);
+			} else {
+				this.selTouristsRS.append(rec);
 				this.renderSelectedTourist(rec)
 				.appendTo( this._elems("selectedTourists") );
 			}
