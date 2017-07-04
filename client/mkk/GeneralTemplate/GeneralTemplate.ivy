@@ -1,4 +1,8 @@
 expr {*
+{=
+	from mkk.GeneralTemplate.MainMenuAuth import MainMenuAuth;
+	from fir.controls.utils import cls;
+}
 <!doctype html>
 <html>
 
@@ -60,33 +64,12 @@ expr {*
 						<li><a href="{{vpaths.siteDynamic}}stati" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 						<li class="e-auth_item t-main_menu">
-							<span class="i-main_menu_auth e-block t-main_menu_auth">
-							<a
-								href="javascript:void(0)"
-								class="i-main_menu_auth e-popdown_btn t-main_menu_auth"
-								title="{{authPopdownBtnTitle}}">
-								<span>{{authPopdownBtnText}}</span>
-							<span>&#x25BC;</span>
-							</a>
-							<ul class="i-main_menu_auth e-popdown_menu t-main_menu_auth {{authStateCls}}">
-								<li>
-									<a href="{{vpaths.siteAuthPage}}" class="t-main_menu_auth e-login_btn {{authStateCls}}" title="Перейти на страницу аутентификации">
-										Войти
-									</a>
-								</li>
-								<li>
-									<a href="{{vpaths.siteAuthPage}}?logout=true" class="t-main_menu_auth e-logout_btn {{authStateCls}}" title="Завершить сеанс работы под пользователем">
-										Выйти
-									</a>
-								</li>
-								<div class="t-main_menu_auth e-buttons_separator {{authStateCls}}"></div>
-								<li>
-									<a href="{{vpaths.siteDynamic}}user_settings" class="t-main_menu_auth e-user_settings_btn {{authStateCls}}" title="Открыть страницу персональных настроек">
-										Настройки
-									</a>
-								</li>
-							</ul>
-							</span>
+							{=MainMenuAuth
+								popdownBtnTitle: authPopdownBtnTitle
+								popdownBtnText: authPopdownBtnText
+								authStateCls: authStateCls
+								vpaths: vpaths
+							}
 						</li>
 					</ul>
 				</div>

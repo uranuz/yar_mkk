@@ -52,7 +52,7 @@ def Pagination {=
 					</span>
 				</div>
 
-				<span class="{=cls 'gotoBtnWrapper'}">
+				<span class="{=cls 'nearPageBtnWrapper'}">
 					<a class="{=cls 'nextBtn'} btn btn-secondary"
 						href="javascript:void(0)"
 						>След. стр</a>

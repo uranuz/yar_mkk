@@ -1,0 +1,46 @@
+expr {=
+from fir.controls.utils import cls;
+def MainMenuAuth {=
+	def.kv
+		moduleName: 'mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
+		instanceName: 'mainMenuAuth'
+		cssBaseClass: 'mkk-MainMenuAuth'
+		popdownBtnTitle: null
+		popdownBtnText: 'Аутентификация'
+		authStateCls: null
+		vpaths: undef;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<a
+			href="javascript:void(0)"
+			class="{=cls 'popdownBtn'}"
+			title="{{popdownBtnTitle}}">
+			<span>{{popdownBtnText}}</span>
+		<span>&#x25BC;</span>
+		</a>
+		<ul class="{=cls 'popdownMenu'} {{authStateCls}}">
+			<li>
+				<a href="{{vpaths.siteAuthPage}}"
+					class="{=cls 'loginBtn'} {{authStateCls}}"
+					title="Перейти на страницу аутентификации"
+					>Войти</a>
+			</li>
+			<li>
+				<a href="{{vpaths.siteAuthPage}}?logout=true"
+					class="{=cls 'logoutBtn'} {{authStateCls}}"
+					title="Завершить сеанс работы под пользователем"
+					>Выйти</a>
+			</li>
+			<div class="{=cls 'buttonsSeparator'} {{authStateCls}}"></div>
+			<li>
+				<a href="{{vpaths.siteDynamic}}user_settings"
+					class="{=cls 'userSettingsBtn'} {{authStateCls}}"
+					title="Открыть страницу персональных настроек"
+					>Настройки</a>
+			</li>
+		</ul>
+	</div>
+	*}
+}
+}
