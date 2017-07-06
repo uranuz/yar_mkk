@@ -5,6 +5,7 @@ shared static this()
 {
 	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 	Service.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
+	Service.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
 }
 
 struct DBName { string dbName; }
@@ -320,4 +321,14 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 	result[`rs`] = getCommonDB().query(query).getRecordSet(shortTouristRecFormat).toStdJSON();
 
 	return result;
+}
+
+/++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/
+void pohodDelete(HTTPContext context, size_t num)
+{
+	import std.conv: text;
+	if( !context.user.isAuthenticated || !context.user.isInRole("admin") )
+		throw new Exception("Недостаточно прав для удаления похода!");
+
+	getCommonDB().query(`delete from pohod where num = ` ~ num.text);
 }
