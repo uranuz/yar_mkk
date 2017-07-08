@@ -132,6 +132,7 @@ public:
 		{
 			case "format": return _rawFormat;
 			case "namesMapping": return TDataNode(_namesMapping);
+			
 			default: break;
 		}
 		return TDataNode();
@@ -139,6 +140,12 @@ public:
 
 	override void __setAttr__(TDataNode node, string attrName) {
 		assert(false, `Not attributes setting is yet supported by RecordSetAdapter`);
+	}
+
+	override TDataNode __serialize__() {
+		// Maybe we should make deep copy of it there, but because of productivity
+		// we shall not do it now. Just say for now that nobody should modifiy serialized data
+		return _rawRS;
 	}
 }
 
@@ -252,6 +259,12 @@ public:
 
 	override void __setAttr__(TDataNode value, string attrName) {
 		assert(false, `Not attributes setting is yet supported by RecordAdapter`);
+	}
+
+	override TDataNode __serialize__() {
+		// Maybe we should make deep copy of it there, but because of productivity
+		// we shall not do it now. Just say for now that nobody should modifiy serialized data
+		return _rawRec;
 	}
 }
 
