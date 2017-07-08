@@ -21,7 +21,7 @@ string renderTouristList(HTTPContext ctx)
 //*************************************************************
 	JSONValue callParams;
 	
-	callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "1").to!size_t;
+	callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "0").to!size_t;
 	callParams["familyName"] = ctx.request.bodyForm.get("family_name", null);
 	callParams["givenName"]  = ctx.request.bodyForm.get("given_name", null);
 	callParams["patronymic"] = ctx.request.bodyForm.get("patronymic", null);
