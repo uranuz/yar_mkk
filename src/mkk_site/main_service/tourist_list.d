@@ -1,9 +1,6 @@
 module mkk_site.main_service.tourist_list;
-
 import std.conv, std.string, std.utf;
-
 import mkk_site.main_service.devkit;
-
 import mkk_site.site_data;
 
 import std.stdio;
@@ -16,7 +13,29 @@ shared static this()
 }
 //**********************************************************
 
-	
+struct DBName { string dbName; }
+
+struct touristDataToWrite
+{
+	import webtank.common.optional: Undefable;
+	import std.datetime: Date;
+	Optional!size_t num; // туриста походе в базе
+
+	// Секция "Маршрутная книжка"
+	@DBName("family_name") Undefable!string familyName; // фамилия
+	@DBName("given_name") Undefable!string givenName; // имя
+	@DBName("patronymic") Undefable!string patronymic; // отчестао
+	@DBName("brith_year") Undefable!int brithYear; // Статус заявки
+	@DBName("adress") Undefable!string fdress; // отчестао
+	@DBName("phone") Undefable!string phone; // телефон
+	@DBName("show_phon") Undefable!bool showPhon; // отображать телефон
+	@DBName("email") Undefable!string email; // email
+	@DBName("show_email") Undefable!bool showEmail; // отображать email
+	@DBName("exp") Undefable!string expirenc; // туристский опыт
+	@DBName("comment") Undefable!string comment; // коментарий
+	@DBName("razr") Undefable!int sportDischarge; // спортивный разряд
+	@DBName("sud") Undefable!int refereeСategory; // судейская категория
+}	
 
 
 
@@ -147,7 +166,7 @@ size_t limit = 10; // Число строк на странице
 		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
 		//если номер страницы больше числа страниц переходим на последнюю 
 			
-		if(currentPage<1) currentPage=1; //текущая страница
+		if(currentPage<0) currentPage=0; //текущая страница
 		//если номер страницы меньше 1 переходим на первую 
 			
 			
@@ -156,7 +175,7 @@ size_t limit = 10; // Число строк на странице
 
 	
 		
-	 size_t offset = (currentPage - 1) * limit ; //Сдвиг по числу записей
+	 size_t offset = (currentPage ) * limit ; //Сдвиг по числу записей
 		
 	string touristListQuery //запрос содержание таблицы
 			=touristListQ
@@ -166,7 +185,7 @@ size_t limit = 10; // Число строк на странице
 			;
 	
 	
-		//writeln(currentPage());
+		writeln(currentPage);
 		//writeln(offset.to!string);
 
 	auto touristTabl = getCommonDB()
@@ -179,9 +198,9 @@ size_t limit = 10; // Число строк на странице
 			TourristSet["touristCount"]= TouristCount ;
 			TourristSet["pageCount"]   = pageCount;
 			TourristSet["currentPage"]  = currentPage;
-			//TourristSet["familyName"]  = familyName;
-			//TourristSet["givenName" ]  = givenName;
-			//TourristSet["patronymic"]  = patronymic;
+			TourristSet["familyName"]  = familyName;
+			TourristSet["givenName" ]  = givenName;
+			TourristSet["patronymic"]  = patronymic;
 			TourristSet["isAuthorized"]  = isAuthorized;
 			TourristSet["touristTabl"] =touristTabl.toStdJSON();
 			
@@ -212,6 +231,14 @@ struct Navigation
 	size_t offset = 0;
 	size_t limit = 10;
 } 
+
+static immutable shortTouristRecFormat = RecordFormat!(
+	PrimaryKey!(int), "num",
+	string, "familyName",
+	string, "givenName",
+	string, "patronymic",
+	int, "birthYear"
+)();
 
 	
 	//RPC метод для вывода списка туристов (с краткой информацией) по фильтру
