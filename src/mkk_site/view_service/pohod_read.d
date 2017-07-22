@@ -44,8 +44,8 @@ string renderPohodRead(HTTPContext ctx)
 	dataDict["pohodNum"] = pohodNum;
 	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum]));
-	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`pohodNum`: pohodNum]));
-	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`pohodNum`: pohodNum]));
+	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
+	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
 	return Service.templateCache.getByModuleName("mkk.PohodRead").run(dataDict).str;

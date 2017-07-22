@@ -5,6 +5,7 @@ import mkk_site.view_service.utils;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
+	Service.pageRouter.join!(tousristPlainList)("/dyn/tourist/plainList");
 }
 
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
@@ -50,8 +51,8 @@ string renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthori
 	{
 		dataDict["isAuthorized"] = isAuthorized;
 		dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.value]));
-		//dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`pohodNum`: pohodNum]));
-		//dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`pohodNum`: pohodNum]));
+		//dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
+		dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 		dataDict["vpaths"] = Service.virtualPaths;
 	}
 
@@ -154,4 +155,67 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 	}
 
 	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict).str;
+}
+
+void tousristPlainList(HTTPContext ctx)
+{
+	import std.json: JSONValue;
+	import std.algorithm: map, splitter, canFind;
+	import std.conv: to;
+	import std.array: array;
+	auto queryForm = ctx.request.queryForm;
+	JSONValue filter;
+	static immutable string[] strFieldNames = [
+		"familyName", "givenName", "patronymic", "region", "city", "street"
+	];
+	
+	if( "keys" in queryForm )
+	{
+		if( queryForm["keys"] != "null" && queryForm["keys"].length > 0 ) {
+			filter["nums"] = queryForm["keys"].splitter(",").map!( (a) => a.to!size_t ).array;
+		} else {
+			filter["nums"] = null;
+		}
+	}
+	foreach( fieldName; strFieldNames )
+	{
+		if( fieldName in queryForm )
+		{
+			if( queryForm[fieldName].length > 0 ) {
+				filter[fieldName] = queryForm[fieldName];
+			} else {
+				filter[fieldName] = null;
+			}
+		}
+	}
+	if( "birthYear" in queryForm )
+	{
+		if( queryForm["birthYear"] != "null" && queryForm["birthYear"].length > 0 ) {
+			filter["birthYear"] = queryForm["birthYear"].to!size_t;
+		} else {
+			filter["birthYear"] = null;
+		}
+	}
+	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
+		"filter": filter, "nav": JSONValue([
+			"offset": 0,
+			"pageSize": 10
+		])
+	]));
+	TDataNode dataDict = [
+		"touristList": callResult["rs"],
+		"nav": callResult["nav"]
+	];
+
+	if( "mode" in queryForm ) {
+		if( ["add", "remove"].canFind(queryForm["mode"]) ) {
+			dataDict["mode"] = queryForm["mode"];
+		}
+	}
+	if( "instanceName" in queryForm ) {
+		dataDict["instanceName"] = queryForm["instanceName"];
+	}
+	ctx.response.write(
+		Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict).str
+	);
 }

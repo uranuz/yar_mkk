@@ -39,45 +39,6 @@
 	min-width: 350px;
 }
 
-.icon-small {
-	background-repeat: no-repeat;
-	background-size: 18px 18px;
-	display: inline-block;
-	width: 18px;
-	height: 18px;
-	margin: 0;
-	padding: 0;
-}
-
-.icon-removeItem {
-	background-image: url("../img/icons/remove_icon.png");
-}
-
-.icon-appendItem {
-	background-image: url("../img/icons/append_icon.png");
-}
-
-.mkk-PartyEdit.e-iconWrapper,
-.mkk-TouristSearchArea.e-iconWrapper {
-	display: block;
-	float: left;
-	margin-right: 5px;
-}
-
-.mkk-PartyEdit.e-touristLink,
-.mkk-TouristSearchArea.e-touristLink {
-	display: block;
-	text-decoration: none;
-}
-
-.mkk-PartyEdit.e-touristDeselectBtn,
-.mkk-TouristSearchArea.e-touristSelectBtn
-{
-	clear: both;
-	padding: 4px 0 2px 0;
-	border-top: 1px solid #778877;
-}
-
 .mkk-TouristSearchArea.e-filterItem { padding: 2px 0 6px 0;  }
 
 .mkk-TouristSearchArea.e-addrFilterPanel {

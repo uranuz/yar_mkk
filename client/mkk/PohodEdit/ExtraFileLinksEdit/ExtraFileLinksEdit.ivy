@@ -1,0 +1,37 @@
+expr {=
+from fir.controls.utils import cls;
+from mkk.PohodEdit.ExtraFileLinksEdit.LinkItems import LinkItems;
+def ExtraFileLinksEdit {=
+	def.kv
+		moduleName: 'mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit'
+		instanceName: 'extraFileLinksEdit'
+		cssBaseClass: 'mkk-ExtraFileLinksEdit'
+		linkList: null;
+	def.body {*
+	<div class="{=cls 'block'}">
+		<h4>Ссылки на доп. материалы</h4>
+		<div class="{=cls 'extraFileLinks'}">
+			<table class="{=cls 'extraFileLinksTable'}">
+				<thead>
+					<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
+				</thead>
+				<tbody class="{=cls 'extraFileLinksTableBody'}">
+					{=LinkItems linkList: linkList}
+				</tbody>
+				<tbody>
+					<tr><td>
+						<input type="hidden" class="{=cls 'extraFileLinksDataField'}" name="extraFileLinks">
+						<button type="button" class="{=cls 'moreExtraFileLinksBtn'} btn btn-primary btn-block">
+							Добавить ещё
+						</button>
+					</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	*}
+};
+if __scopeName__ == '__main__' {=
+	ExtraFileLinksEdit
+}
+}

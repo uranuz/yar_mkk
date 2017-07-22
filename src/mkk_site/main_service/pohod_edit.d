@@ -240,6 +240,7 @@ struct TouristFilter
 	@DBName("address") string region;
 	@DBName("address") string city;
 	@DBName("address") string street;
+	@DBName("num") size_t[] nums;
 }
 
 struct Navigation
@@ -292,6 +293,14 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
 			if( field.isSet ) {
 				filters ~= dbFieldName ~ ` = ` ~ field.text;
+			}
+		}
+		else static if( fieldName == "nums" )
+		{
+			auto field = __traits(getMember, filter, fieldName);
+			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
+			if( field.length > 0 ) {
+				filters ~= dbFieldName ~ ` in(` ~ field.to!(string[]).join(",") ~ `)`;
 			}
 		}
 	}

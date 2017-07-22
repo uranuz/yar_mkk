@@ -100,13 +100,13 @@ static immutable participantInfoRecFormat = RecordFormat!(
 	int, "birthYear"
 )();
 
-auto getPartyList(size_t pohodNum)
+auto getPartyList(size_t num)
 {
 	import std.conv: text;
 	return getCommonDB().query(`
 with tourist_num as (
 	select unnest(unit_neim) as num
-	from pohod where pohod.num = ` ~ pohodNum.text ~ `
+	from pohod where pohod.num = ` ~ num.text ~ `
 )
 select
 	tourist.num,
@@ -127,7 +127,7 @@ static immutable briefPohodInfoRecFormat = RecordFormat!(
 	string, "pohodRegion"
 )();
 
-JSONValue partyInfo(size_t pohodNum)
+JSONValue partyInfo(size_t num)
 {
 	import std.conv: text;
 	auto pohodInfo = getCommonDB().query(`
@@ -136,12 +136,12 @@ select
 	pohod.kod_mkk as "mkkCode",
 	pohod.nomer_knigi as "bookNum",
 	pohod.region_pohod as "pohodRegion"
-from pohod where pohod.num = ` ~ pohodNum.text ~ `
+from pohod where pohod.num = ` ~ num.text ~ `
 	`).getRecordSet(briefPohodInfoRecFormat);
 
 	JSONValue jsonResult;
 	jsonResult["pohodInfo"] = pohodInfo.toStdJSON();
-	jsonResult["partyList"] = getPartyList(pohodNum).toStdJSON();
+	jsonResult["partyList"] = getPartyList(num).toStdJSON();
 
 	return jsonResult;
 }

@@ -1,0 +1,25 @@
+expr {=
+	def LinkItems {=
+		def.kv
+			instanceName: null
+			cssBaseClass: 'mkk-ExtraFileLinksEdit'
+			linkList: null
+			portionSize: 5
+			minBlockCount: 1;
+		def.body {=
+			repeat i in {=range 0 10} {*
+				<tr>
+					<td>
+						<input type="text" class="form-control" value="{{i}}"/>
+					</td>
+					<td>
+						<input type="text" class="form-control" value="{{i}}"/>
+					</td>
+				</tr>
+			*}
+		}
+	};
+	if __scopeName__ == '__main__' {=
+		LinkItems ;
+	}
+}

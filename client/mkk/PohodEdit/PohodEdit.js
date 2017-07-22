@@ -24,7 +24,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		FirControl.call(this, opts);
 		var self = this;
 
-		this._partyRS = null; //RecordSet с участниками похода
+		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с участниками похода
 		this._chiefRec = opts.chiefRecord;
 		this._altChiefRec = opts.altChiefRecord;
 		this._addChiefToPartyDlg = opts.addChiefToPartyDlg;
@@ -33,16 +33,18 @@ define('mkk/PohodEdit/PohodEdit', [
 		this._partyEditBlock = this.getChildInstanceByName('partyEdit');
 		this._beginDatePicker = this.getChildInstanceByName('beginDateField');
 		this._finishDatePicker = this.getChildInstanceByName('finishDateField');
+		this._pohodDeleteArea = this.getChildInstanceByName('pohodDeleteArea');
+		this._partyList = this.getChildInstanceByName('partyList');
 
 		///Работа со списком ссылок на дополнительные ресурсы
 		//Размер одной "порции" полей ввода ссылок на доп. материалы
 		this._extraFileLinksInputPortion = 5;
 
 		this._elems("deleteDialogBtn").on("click", function() {
-			self.getChildInstanceByName('pohodDeleteArea').showDialog();
+			self._pohodDeleteArea.showDialog();
 		});
 
-		this._elems("deleteConfirmBtn").on("click", self.onDeleteConfirmBtn_click);
+		this._pohodDeleteArea.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
 		this._elems("moreExtraFileLinksBtn").on("click", self.onMoreExtraFileLinksBtn_click);
 
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
@@ -53,10 +55,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		});
 		
 		this._partyEditBlock.subscribe('saveData', this.onSaveSelectedParty.bind(this));
-		
-		//Загрузка списка участников похода с сервера
-		//this.loadPartyFromServer();
-		
+
 		this._elems("chiefEditBtn").on('click', function() {
 			self._chiefEditBlock.openDialog(self._chiefRec, false);
 		});
@@ -73,7 +72,7 @@ define('mkk/PohodEdit/PohodEdit', [
 	
 	return __mixinProto(PohodEdit, {
 		//Обработчик тыка по кнопке сохранения списка выбранных участников
-		onSaveSelectedParty: function(ev, sender, selTouristsRS) {
+		onSaveSelectedParty: function(ev, selTouristsRS) {
 			this.saveParty(selTouristsRS);
 		},
 		
@@ -111,39 +110,20 @@ define('mkk/PohodEdit/PohodEdit', [
 		
 		//Сохраняет список участников группы и выводит его в главное окно
 		saveParty: function(rs) {
-			var
-				partyList = this._elems("partyList"),
-				rec;
+			var rec, selectedKeys = [];
 
 			this._partyRS = rs;
-
-			partyList.empty();
 			this._partyRS.rewind();
 			while( rec = this._partyRS.next() ) {
-				$("<div>", {
-					text: MKKHelpers.getTouristInfoString(rec)
-				})
-				.appendTo(partyList);
+				selectedKeys.push( rec.getKey() );
 			}
-		},
 
-		//Загрузка списка участников похода
-		loadPartyFromServer: function() {
-			var
-				self = this,
-				pohodKey = parseInt(CommonHelpers.parseGetParams()["key"], 10);
-			
-			if( isNaN(pohodKey) )
-				return;
-				
-			json_rpc.invoke({
-				uri: "/jsonrpc/",
-				method: "mkk_site.edit_pohod.списокУчастниковПохода",
-				params: { "pohodKey": pohodKey },
-				success: function(json) {
-					self.saveParty( DatctrlHelpers.fromJSON(json) );
-				}
+			// Передаём список идентификаторов туристов в фильтр компонента отображения списка туристов...
+			this._partyList.setFilter({
+				selectedKeys: selectedKeys
 			});
+			// ...и обновляем компонент
+			this._partyList._reloadControl();
 		},
 
 		//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
@@ -422,7 +402,7 @@ define('mkk/PohodEdit/PohodEdit', [
 					ev.preventDefault();
 				};
 
-			// Сами отправим форму, когда нужно сами
+			// Сами отправим форму, когда нужно
 			ev.preventDefault();
 
 			if( self._chiefRec == null ) {
@@ -453,19 +433,17 @@ define('mkk/PohodEdit/PohodEdit', [
 
 		//Обработчик тыка по кнопке подтверждения удаления похода
 		onDeleteConfirm: function() {
-			var pohodKey = parseInt(CommonHelpers.parseGetParams()["key"], 10);
-
-			if( this.$el(".e-delete_confirm_inp").val() === "удалить" ) {
-				json_rpc.invoke({
-					uri: "/jsonrpc/",
-					method: "mkk_site.edit_pohod.удалитьПоход",
-					params: { "pohodKey": pohodKey }
-				});
-				document.location.replace("/dyn/show_pohod");
-			}
-			else {
-				this.$el(".e-delete_confirm_inp").val("Не подтверждено!!!")
-			}
+			json_rpc.invoke({
+				uri: "/jsonrpc/",
+				method: "pohod.delete",
+				params: { "num": parseInt(CommonHelpers.parseGetParams()["key"], 10) },
+				success: function() {
+					document.location.replace("/dyn/pohod/list");
+				},
+				error: function(res) {
+					$('<div title="Ошибка операции">' + res.message + '</div>').dialog({modal: true});
+				}
+			});
 		}
 	});
 });

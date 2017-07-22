@@ -159,7 +159,7 @@ void renderPartyInfo(HTTPContext ctx)
 	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
-	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["pohodNum": pohodNum]));
+	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 
 	ctx.response.write(
 		Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict).str

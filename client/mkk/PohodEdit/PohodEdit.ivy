@@ -6,11 +6,14 @@ from mkk.PohodEdit.DeleteArea import DeleteArea;
 from mkk.PohodEdit.PartyEdit import PartyEdit;
 from mkk.PohodEdit.ChiefEdit import ChiefEdit;
 from mkk.PohodEdit.ChiefAddToParty import ChiefAddToParty;
+from mkk.TouristPlainList import TouristPlainList;
+from mkk.PohodEdit.ExtraFileLinksEdit import ExtraFileLinksEdit;
 def PohodEdit {=
 	def.kv
 		moduleName: 'mkk/PohodEdit/PohodEdit'
 		instanceName: 'pohodEdit'
-		cssBaseClass: 'mkk-PohodEdit';
+		cssBaseClass: 'mkk-PohodEdit'
+		partyList: partyList;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -231,30 +234,19 @@ def PohodEdit {=
 			</tr>
 			<tr>
 				<td colspan="999">
-					<div class="{=cls 'partyList'}">{ {unit} }</div>
+					<div class="{=cls 'partyList'}">
+						{=TouristPlainList
+							instanceName: 'partyList'
+							touristList: partyList
+						}
+					</div>
 				</td>
 			</tr>
 			</table>
 		</div>
 
 		<hr>
-		<h4>Ссылки на доп. материалы</h4>
-		<div class="{=cls 'extraFileLinks'}">
-			<table class="{=cls 'extraFileLinksTable'}">
-				<thead>
-					<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
-				</thead>
-				<tbody class="{=cls 'extraFileLinksTableBody'}"></tbody>
-				<tbody>
-					<tr><td>
-						<input type="hidden" class="{=cls 'extraFileLinksDataField'}" name="extraFileLinks">
-						<button type="button" class="{=cls 'moreExtraFileLinksBtn'} btn btn-primary btn-block">
-							Добавить ещё
-						</button>
-					</td></tr>
-				</tbody>
-			</table>
-		</div>
+		{=ExtraFileLinksEdit}
 
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr>
