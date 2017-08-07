@@ -6,22 +6,26 @@ def ExtraFileLinksEdit {=
 		moduleName: 'mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit'
 		instanceName: 'extraFileLinksEdit'
 		cssBaseClass: 'mkk-ExtraFileLinksEdit'
-		linkList: null;
+		linkList: null,
+		portionSize: 5;
 	def.body {*
-	<div class="{=cls 'block'}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<h4>Ссылки на доп. материалы</h4>
-		<div class="{=cls 'extraFileLinks'}">
-			<table class="{=cls 'extraFileLinksTable'}">
+		<div class="{=cls 'linksTableWrapper'}">
+			<table class="{=cls 'linksTable'}">
 				<thead>
 					<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
 				</thead>
-				<tbody class="{=cls 'extraFileLinksTableBody'}">
-					{=LinkItems linkList: linkList}
-				</tbody>
+				{=LinkItems
+					instanceName: instanceName
+					linkList: linkList
+					portionSize: portionSize
+				}
 				<tbody>
 					<tr><td>
-						<input type="hidden" class="{=cls 'extraFileLinksDataField'}" name="extraFileLinks">
-						<button type="button" class="{=cls 'moreExtraFileLinksBtn'} btn btn-primary btn-block">
+						<input type="hidden" class="{=cls 'linksDataField'}" name="extraFileLinks">
+						<button type="button" class="{=cls 'moreLinksBtn'} btn btn-primary btn-block">
 							Добавить ещё
 						</button>
 					</td></tr>

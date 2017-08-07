@@ -11,8 +11,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 ) {
 	__extends(TouristSearchArea, FirControl);
 
-	function TouristSearchArea(opts)
-	{
+	function TouristSearchArea(opts) {
 		FirControl.call(this, opts);
 		var self = this;
 
@@ -93,8 +92,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 			*/
 		},
 
-		activate: function(place)
-		{
+		activate: function(place) {
 			this._container.detach().appendTo(place).show();
 			if( this.recordSet && this.recordSet.getLength() )
 				this._resultsPanel.show();
@@ -102,8 +100,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 				this._resultsPanel.hide()
 		},
 		
-		deactivate: function(place)
-		{
+		deactivate: function(place) {
 			this._container.detach().appendTo('body').hide();
 		}
 	});

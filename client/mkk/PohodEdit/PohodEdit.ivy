@@ -13,11 +13,12 @@ def PohodEdit {=
 		moduleName: 'mkk/PohodEdit/PohodEdit'
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
-		partyList: partyList;
+		pohod: null
+		partyList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<form class="{=cls 'mainForm'}" method="post"{ {edit_pohod_form} }>
+		<form class="{=cls 'mainForm'}" method="post">
 		<h2>Редактирование данных похода</h2>
 		<hr>
 		<h4>Маршрутная книжка</h4>
@@ -246,7 +247,7 @@ def PohodEdit {=
 		</div>
 
 		<hr>
-		{=ExtraFileLinksEdit}
+		{=ExtraFileLinksEdit linkList: extraFileLinks }
 
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr>
@@ -265,5 +266,9 @@ def PohodEdit {=
 	</div>
 	*}
 };
-PohodEdit;
+if __scopeName__ == '__main__' {=
+	PohodEdit
+		pohod: pohod
+		partyList: partyList
+};
 }

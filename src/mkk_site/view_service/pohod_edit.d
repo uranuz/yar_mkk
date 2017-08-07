@@ -51,7 +51,7 @@ string renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthori
 	{
 		dataDict["isAuthorized"] = isAuthorized;
 		dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.value]));
-		//dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
+		dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
 		dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 		dataDict["vpaths"] = Service.virtualPaths;
 	}

@@ -4,7 +4,6 @@ define('mkk/PohodList/Navigation/Navigation', [
 	__extends(PohodListNavigation, FirControl);
 
 	function PohodListNavigation(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 
 		this._elems().filter(".e-print_page_btn")

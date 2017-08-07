@@ -8,8 +8,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 	__extends(PartyEdit, FirControl);
 
 	//Инциализация блока редактирования списка участников
-	function PartyEdit(opts)
-	{
+	function PartyEdit(opts) {
 		FirControl.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
@@ -42,8 +41,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			this._container.on('dialogclose').off();
 		},
 
-		openDialog: function(recordSet)
-		{
+		openDialog: function(recordSet) {
 			var self = this;
 			this._selectedTouristRS = recordSet;
 			this._selectedTouristsCtrl._reloadControl();

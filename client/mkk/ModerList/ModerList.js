@@ -4,7 +4,6 @@ define('mkk/ModerList/ModerList', [
 	__extends(ModerList, FirControl);
 
 	function ModerList(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 	}
 	return __mixinProto(ModerList, {});

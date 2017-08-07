@@ -24,10 +24,10 @@ define('mkk/PohodEdit/PohodEdit', [
 		FirControl.call(this, opts);
 		var self = this;
 
-		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с участниками похода
-		this._chiefRec = opts.chiefRecord;
-		this._altChiefRec = opts.altChiefRecord;
-		this._addChiefToPartyDlg = opts.addChiefToPartyDlg;
+		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); // RecordSet с участниками похода
+		this._origPohodRec = DatctrlHelpers.fromJSON(opts.pohod); // Запись похода при загрузке компонента
+		this._chiefRec = this._partyRS.getRecord(this._origPohodRec.get('chiefNum'));
+		this._altChiefRec = this._partyRS.getRecord(this._origPohodRec.get('altChiefNum'));
 
 		this._chiefEditBlock = this.getChildInstanceByName('pohodChiefEdit');
 		this._partyEditBlock = this.getChildInstanceByName('partyEdit');
@@ -35,17 +35,14 @@ define('mkk/PohodEdit/PohodEdit', [
 		this._finishDatePicker = this.getChildInstanceByName('finishDateField');
 		this._pohodDeleteArea = this.getChildInstanceByName('pohodDeleteArea');
 		this._partyList = this.getChildInstanceByName('partyList');
-
-		///Работа со списком ссылок на дополнительные ресурсы
-		//Размер одной "порции" полей ввода ссылок на доп. материалы
-		this._extraFileLinksInputPortion = 5;
+		this._extraFileLinks = this.getChildInstanceByName('extraFileLinksEdit');
+		this._chiefAddToParty = this.getChildInstanceByName('chiefAddToParty');
 
 		this._elems("deleteDialogBtn").on("click", function() {
 			self._pohodDeleteArea.showDialog();
 		});
 
 		this._pohodDeleteArea.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
-		this._elems("moreExtraFileLinksBtn").on("click", self.onMoreExtraFileLinksBtn_click);
 
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
 		this._elems("partyEditBtn").on("click", function() {
@@ -66,8 +63,6 @@ define('mkk/PohodEdit/PohodEdit', [
 		
 		this._chiefEditBlock.subscribe("selectChief", this.onSelectChief.bind(this));
 		this._chiefEditBlock.subscribe("deleteChief", this.onDeleteChief.bind(this));
-
-		//self.loadFileLinksFromServer();
 	}
 	
 	return __mixinProto(PohodEdit, {
@@ -126,94 +121,6 @@ define('mkk/PohodEdit/PohodEdit', [
 			this._partyList._reloadControl();
 		},
 
-		//"Тык" по кнопке "Добавить ещё" (имеется в виду ссылок)
-		onMoreExtraFileLinksBtn_click: function()
-		{	var
-				i = 0,
-				tableBody = this._elems("extraFileLinksTableBody");
-
-			for( ; i < this._extraFileLinksInputPortion; i++ )
-				this.renderFileLinkInput([]).appendTo( tableBody );
-		},
-
-		//Создает элементы для ввода ссылки с описанием на доп. материалы
-		renderFileLinkInput: function(data)
-		{	var
-				newTr = $("<tr>"),
-				leftTd = $("<td>").appendTo(newTr),
-				rightTd = $("<td>").appendTo(newTr),
-				linkInput = $( "<input>", { type: "text", class: "form-control" } ).appendTo(leftTd),
-				commentInput = $( "<input>", { type: "text", class: "form-control" } ).appendTo(rightTd);
-
-			if( data )
-			{	linkInput.val( data[0] || "" );
-				commentInput.val( data[1] || "" );
-			}
-
-			return newTr;
-		},
-
-		//Отображает список ссылок на доп. материалы
-		renderFileLinkInputs: function(linkList)
-		{	var
-				tableBody = this._elems("extraFileLinksTableBody"),
-				inputPortion = this._extraFileLinksInputPortion,
-				linkList = linkList? linkList: [],
-				inputCount = inputPortion,
-				i = 0;
-
-			if( linkList.length )
-				inputCount = inputPortion - ( linkList.length - 1 ) % inputPortion;
-			
-			for( ; i < inputCount; i++ )
-				this.renderFileLinkInput( linkList[i] ).appendTo(tableBody);
-		},
-
-		//Загрузка списка ссылок на доп. материалы с сервера
-		loadFileLinksFromServer: function()
-		{	var
-				self = this,
-				getParams = CommonHelpers.parseGetParams(),
-				pohodKey = parseInt(getParams["key"], 10);
-			
-			if( isNaN(pohodKey) ) {
-				this.renderFileLinkInputs();
-				return;
-			}
-			
-			json_rpc.invoke({
-				uri: "/jsonrpc/",
-				method: "mkk_site.edit_pohod.списокСсылокНаДопМатериалы",
-				params: { "pohodKey": pohodKey },
-				success: function(data) { self.renderFileLinkInputs(data) }
-			});
-		},
-
-		//Сохранение списка ссылок на доп. материалы
-		saveFileLinksToForm: function()
-		{	var
-				self = this,
-				tableRows = this._elems("extraFileLinksTableBody").children("tr"),
-				currInputs,
-				link,
-				comment,
-				data = [],
-				i = 0;
-
-			for( ; i < tableRows.length; i++ )
-			{
-				currInputs = $(tableRows[i]).children("td").children("input");
-				
-				link = $(currInputs[0]).val();
-				comment = $(currInputs[1]).val();
-
-				if( $.trim(link).length && $.trim(link).length )
-					data.push( [ link, comment ] );
-			}
-
-			this._elems("extraFileLinksDataField").val( JSON.stringify(data) );
-		},
-
 		showErrorDialog: function(errorMsg) {
 			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
 		},
@@ -235,63 +142,63 @@ define('mkk/PohodEdit/PohodEdit', [
 				listItems = self._elems("partyList").children(),
 				listCount = listItems.length;
 
-			if( !beginDateEmpty && ( !beginDay.length || !beginMonth.length || !beginYear.length ) ) {
-				self.showErrorDialog( 'Нужно заполнить все поля даты начала, либо оставить их все пустыми' );
+			if( !beginDateEmpty && (!beginDay.length || !beginMonth.length || !beginYear.length) ) {
+				self.showErrorDialog('Нужно заполнить все поля даты начала, либо оставить их все пустыми');
 				return false;
 			}
 
-			if( !finishDateEmpty && ( !finishDay.length || !finishMonth.length || !finishYear.length ) ) {
-				self.showErrorDialog( 'Нужно заполнить все поля даты завершения, либо оставить их все пустыми' );
+			if( !finishDateEmpty && (!finishDay.length || !finishMonth.length || !finishYear.length) ) {
+				self.showErrorDialog('Нужно заполнить все поля даты завершения, либо оставить их все пустыми');
 				return false;
 			}
 
 			if( beginDay.length > 0 ) {
-				if( !mkk_site.checkInt( beginDay, 1, 31 ) ) {
-					self.showErrorDialog( 'День начала похода должен быть целым числом в диапазоне [1, 31]' );
+				if( !MKKHelpers.checkInt(beginDay, 1, 31) ) {
+					self.showErrorDialog('День начала похода должен быть целым числом в диапазоне [1, 31]');
 					return false;
 				}
 			}
 
 			if( finishDay.length > 0 ) {
-				if( !mkk_site.checkInt( finishDay, 1, 31 ) ) {
-					self.showErrorDialog( 'День завершения похода должен быть целым числом в диапазоне [1, 31]' );
+				if( !MKKHelpers.checkInt(finishDay, 1, 31) ) {
+					self.showErrorDialog('День завершения похода должен быть целым числом в диапазоне [1, 31]');
 					return false;
 				}
 			}
 
 			if( beginYear.length > 0 ) {
-				if( !mkk_site.checkInt( beginYear, 1000, 9999 ) ) {
-					self.showErrorDialog( 'Год начала похода должен быть четырехзначным целым числом' );
+				if( !MKKHelpers.checkInt(beginYear, 1000, 9999) ) {
+					self.showErrorDialog('Год начала похода должен быть четырехзначным целым числом');
 					return false;
 				}
 			}
 
 			if( finishYear.length > 0 ) {
-				if( !mkk_site.checkInt( finishYear, 1000, 9999 ) ) {
-					self.showErrorDialog( 'Год завершения похода должен быть четырехзначным целым числом' );
+				if( !MKKHelpers.checkInt(finishYear, 1000, 9999) ) {
+					self.showErrorDialog('Год завершения похода должен быть четырехзначным целым числом');
 					return false;
 				}
 			}
 
 			if( !beginDateEmpty && !finishDateEmpty &&
-				(  new Date( +beginYear, +beginMonth, +beginDay ) > new Date( +finishYear, +finishMonth, +finishDay )  ) ) {
-				self.showErrorDialog( 'Дата начала похода не может быть позже даты его завершения' );
+				(new Date(+beginYear, +beginMonth, +beginDay) > new Date(+finishYear, +finishMonth, +finishDay)) ) {
+				self.showErrorDialog('Дата начала похода не может быть позже даты его завершения');
 				return false;
 			}
 
-			if( countInput.val().length && !mkk_site.checkInt( inputCount, 0 ) ) {
-				self.showErrorDialog( 'Требуется ввести неотрицательное целое число в поле количества участников' );
+			if( countInput.val().length && !MKKHelpers.checkInt(inputCount, 0) ) {
+				self.showErrorDialog('Требуется ввести неотрицательное целое число в поле количества участников');
 				return false;
 			}
 
-			if( mkk_site.checkInt( inputCount, 9000 ) ) {
-				self.showErrorDialog( 'Вы должно быть шутите?! В вашем походе более 9000 участников?!?!' );
+			if( MKKHelpers.checkInt(inputCount, 9000) ) {
+				self.showErrorDialog('Вы должно быть шутите?! В вашем походе более 9000 участников?!?!');
 				return false;
 			}
 
 			if( listCount > inputCount ) {
-				self.showErrorDialog( 'Количество участников в списке '  + listCount + ' больше числа в поле ввода '
-					+ inputCount + '. Пожалуйста, исправьте введенное значение' );
+				self.showErrorDialog('Количество участников в списке '  + listCount + ' больше числа в поле ввода '
+					+ inputCount + '. Пожалуйста, исправьте введенное значение');
 				return false;
 			}
 
@@ -329,15 +236,15 @@ define('mkk/PohodEdit/PohodEdit', [
 				partyKeysField.val('null');
 			}
 
-			this.saveFileLinksToForm();
+			this._extraFileLinks.saveFileLinksToForm();
 		},
 
-		// Возвражает true, если нужно добавить руководителя в список участников
+		// Вернёт true, если нужно добавить руководителя в список участников
 		shouldAddChiefToParty: function() {
 			return !!this._chiefRec && !this._partyRS.hasKey( this._chiefRec.get('num') );
 		},
 
-		// Возвражает true, если нужно добавить зама в список участников
+		// Вернёт true, если нужно добавить зама в список участников
 		shouldAddAltChiefToParty: function() {
 			return !!this._altChiefRec && !this._partyRS.hasKey( this._altChiefRec.get('num') );
 		},
@@ -420,11 +327,9 @@ define('mkk/PohodEdit/PohodEdit', [
 			if( shouldAddChief || shouldAddAltChief ) {
 				// Если есть записи руководителя и зама, но их нет в списке
 				// участников, то открываем диалог подтверждения их добавления
-				$(this._addChiefToPartyDlg).one('ok', this.onSavePohod.bind(this));
-				$(this._addChiefToPartyDlg).one('cancel', cancelHandler);
-
-				this._addChiefToPartyDlg.open(newTouristsCount);
-
+				this._chiefAddToParty.once('ok', this.onSavePohod.bind(this));
+				this._chiefAddToParty.once('ok', cancelHandler);
+				this._chiefAddToParty.open(newTouristsCount);
 			} else {
 				// Если руководитель и зам есть, то сразу продолжаем
 				this.onSavePohod();

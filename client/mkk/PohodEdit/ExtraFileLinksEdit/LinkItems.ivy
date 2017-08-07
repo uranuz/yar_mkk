@@ -1,25 +1,39 @@
 expr {=
-	def LinkItems {=
-		def.kv
-			instanceName: null
-			cssBaseClass: 'mkk-ExtraFileLinksEdit'
-			linkList: null
-			portionSize: 5
-			minBlockCount: 1;
-		def.body {=
-			repeat i in {=range 0 10} {*
-				<tr>
-					<td>
-						<input type="text" class="form-control" value="{{i}}"/>
-					</td>
-					<td>
-						<input type="text" class="form-control" value="{{i}}"/>
-					</td>
-				</tr>
-			*}
+from fir.controls.utils import cls;
+def LinkItems {=
+	def.kv
+		instanceName: null
+		cssBaseClass: 'mkk-ExtraFileLinksEdit'
+		linkList: null
+		portionSize: 5
+		minBlockCount: 1;
+	def.body {*
+		{=var
+				linkCount: {=if not{=empty linkList} {=len linkList} else 0}
+				remainder: linkCount % portionSize
+				inputCount: linkCount + portionSize - remainder;
+			if inputCount < minBlockCount * portionSize {=
+				set inputCount: minBlockCount * portionSize;
+			};
 		}
-	};
-	if __scopeName__ == '__main__' {=
-		LinkItems ;
-	}
+		<tbody class="{=cls 'linksTableBody'}">
+		<!--<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }">-->
+		{=repeat i in {=range 0 inputCount} {*
+			<tr>
+				<td>
+					<input type="text" class="form-control" value="{=if i < linkCount {=at {=at linkList i} 0} }"/>
+				</td>
+				<td>
+					<input type="text" class="form-control" value="{=if i < linkCount {=at {=at linkList i} 1} }"/>
+				</td>
+			</tr>
+		*}}
+		</tbody>
+	*}
+};
+if __scopeName__ == '__main__' {=
+	LinkItems
+		instanceName: instanceName
+		linkList: {=if {=has {=scope} 'linkList'} linkList else null};
+}
 }
