@@ -7,7 +7,6 @@ define('mkk/GeneralTemplate/GeneralTemplate', [
 	__extends(GeneralTemplate, FirControl);
 
 	function GeneralTemplate(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 	}
 	return __mixinProto(GeneralTemplate, {});

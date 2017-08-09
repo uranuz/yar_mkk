@@ -47,7 +47,7 @@ define('mkk/PohodEdit/PohodEdit', [
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
 		this._elems("partyEditBtn").on("click", function() {
 			//Отдаем копию списка участников!
-			var rs = self._partyRS ? self._partyRS.copy() : new RecordSet();
+			var rs = self._partyRS? self._partyRS.copy() : new RecordSet();
 			self._partyEditBlock.openDialog(rs); 
 		});
 		
@@ -71,13 +71,12 @@ define('mkk/PohodEdit/PohodEdit', [
 			this.saveParty(selTouristsRS);
 		},
 		
-		onSelectChief: function(ev, rec) {
+		onSelectChief: function(ev, rec, isAltChief) {
 			var
-				sender = ev.target,
-				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
-				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
+				keyInp = this._elems(isAltChief? 'altChiefNumField': 'chiefNumField'),
+				chiefBtn = this._elems(isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
-			if( sender.isAltChief ) {
+			if( isAltChief ) {
 				this._altChiefRec = rec;
 			} else {
 				this._chiefRec = rec;

@@ -196,11 +196,23 @@ void tousristPlainList(HTTPContext ctx)
 			filter["birthYear"] = null;
 		}
 	}
+	JSONValue nav;
+	if( "pageNum" in queryForm ) {
+		if( queryForm["offset"] != "null" && queryForm["offset"].length > 0 ) {
+			nav["offset"] = queryForm["offset"].to!size_t;
+		} else {
+			nav["offset"] = 0;
+		}
+	}
+	if( "pageSize" in queryForm ) {
+		if( queryForm["pageSize"] != "null" && queryForm["pageSize"].length > 0 ) {
+			nav["pageSize"] = queryForm["pageSize"].to!size_t;
+		} else {
+			nav["pageSize"] = 10;
+		}
+	}
 	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
-		"filter": filter, "nav": JSONValue([
-			"offset": 0,
-			"pageSize": 10
-		])
+		"filter": filter, "nav": nav
 	]));
 	TDataNode dataDict = [
 		"touristList": callResult["rs"],

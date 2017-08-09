@@ -13,7 +13,7 @@ def ChiefEdit {=
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<div class="{=cls 'controlBar'}">
 			<button type="button" class="{=cls 'deleteBtn'} btn btn-secondary">
-				<div class="icon-small icon-remove_item"></div>
+				<div class="icon-small icon-removeItem"></div>
 				Без заместителя
 			</button>
 		</div>

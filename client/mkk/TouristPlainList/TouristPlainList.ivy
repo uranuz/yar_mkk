@@ -6,6 +6,7 @@ def TouristPlainList {=
 		instanceName: 'touristPlainList'
 		cssBaseClass: 'mkk-TouristPlainList'
 		touristList: null
+		nav: null
 		itemTextTag: 'div'
 		itemIcon: null
 		mode: null;
@@ -48,6 +49,7 @@ def TouristPlainList {=
 if __scopeName__ == '__main__' {=
 	TouristPlainList
 		touristList: touristList
+		nav: nav
 		mode: {=if {=has {=scope} 'mode'} mode}
 		instanceName: {=if {=has {=scope} 'instanceName'} instanceName};
 }

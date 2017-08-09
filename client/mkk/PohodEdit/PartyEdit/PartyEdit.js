@@ -1,8 +1,10 @@
 define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 	'fir/controls/FirControl',
+	'fir/datctrl/helpers',
 	'mkk/helpers'
 ], function (
 	FirControl,
+	DatctrlHelpers,
 	MKKHelpers
 ) {
 	__extends(PartyEdit, FirControl);
@@ -12,27 +14,26 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		FirControl.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
-		this._searchBlock.subscribe('itemSelect', this.onSelectTourist.bind(this));
+		this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
 
-		this._selectedTouristRS = opts._selectedTouristRS; //RecordSet с выбранными в поиске туристами
-		this._updateControlState();
-		this._subscribeInternal();
+		this._updateControlState(opts);
 	}
 	
 	return __mixinProto(PartyEdit, {
-		_updateControlState: function() {
+		_updateControlState: function(opts) {
 			this._panelsArea = this._elems("panelsArea");
 			this._searchPanel = this._elems("searchPanel");
 			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
+			this._partyList = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с выбранными в поиске туристами
 		},
 		_subscribeInternal: function() {
 			var self = this;
 			this._elems("acceptBtn").on("click", function() {
-				self._notify('saveData', self._selectedTouristRS);
+				self._notify('saveData', self._partyList);
 				self.closeDialog();
 			});
 
-			this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTouristBtn_click.bind(this));
+			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
 			this._container.on('dialogclose', this.onDialog_close.bind(this));
 		},
 		_unsubscribeInternal: function() {
@@ -41,23 +42,25 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			this._container.on('dialogclose').off();
 		},
 
-		openDialog: function(recordSet) {
+		openDialog: function(rs) {
 			var self = this;
-			this._selectedTouristRS = recordSet;
-			this._selectedTouristsCtrl._reloadControl();
+			this._partyList = rs;
+			this._reloadPartyList();
 			this._searchBlock.activate(this._elems("searchBlock"));
 			this._container.dialog({
-				modal: true, minWidth: 500,
+				modal: true,
+				minWidth: 500,
+				width: 850,
 				resize: function() {
-					setTimeout( self.onDialog_resize.bind(self), 100 );
+					setTimeout(self._onDialog_resize.bind(self), 100);
 				}
 			});
-			
-			this.onDialog_resize();
+
+			this._onDialog_resize();
 		},
 
-		onDialog_resize: function() {
-			if( this._selectedTouristRS && this._selectedTouristRS.getLength() ) {
+		_onDialog_resize: function() {
+			if( this._partyList && this._partyList.getLength() ) {
 				if( this._container.innerWidth() < 700 ) {
 					this._panelsArea.css("display", "block");
 					this._searchPanel.css("display", "block");
@@ -90,38 +93,47 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			this._searchBlock.unsubscribe('itemSelect');
 		},
 
+		_reloadPartyList: function() {
+			var
+				selectedKeys = [],
+				rec
+			this._partyList.rewind();
+			while( rec = this._partyList.next() ) {
+				selectedKeys.push(rec.getKey());
+			}
+			this._selectedTouristsCtrl.setFilter({
+				selectedKeys: selectedKeys
+			});
+			this._selectedTouristsCtrl._reloadControl();
+		},
 		//Обработчик добавления найденной записи о туристе
-		onSelectTourist: function(ev, rec) {
+		_onSelectTourist: function(ev, rec) {
 			var 
 				recordDiv,
 				deselectBtn;
 			
-			if( !this._selectedTouristRS ) {
-				this._selectedTouristRS = new webtank.datctrl.RecordSet({
+			if( !this._partyList ) {
+				this._partyList = new webtank.datctrl.RecordSet({
 					format: rec.copyFormat()
 				});
 			}
 			
-			if( this._selectedTouristRS.hasKey( rec.getKey() ) ) {
+			if( this._partyList.hasKey( rec.getKey() ) ) {
 				this._elems("selectMessage").html(
 					"Турист <b>" + MKKHelpers.getTouristInfoString(rec)
 					+ "</b> уже находится в списке выбранных туристов"
 				);
 			} else {
 				// Добавляем туриста в набор данных и обновляем список
-				this._selectedTouristRS.append(rec);
-				//this.reloadSelectedTourists();
-				this._selectedTouristsCtrl._reloadControl();
+				this._partyList.append(rec);
+				this._reloadPartyList();
 			}
 		},
 		
 		//Обработчик отмены выбора записи
-		onDeselectTouristBtn_click: function(ev) {
-			var recordDiv = $(ev.currentTarget);
-
-			this._selectedTouristRS.remove(recordDiv.data('num'));
-			recordDiv.remove();
-			this.onDialog_resize(); // Перестройка диалога
+		_onTouristDeselect: function(ev, rec) {
+			this._partyList.remove(rec.getKey());
+			this._onDialog_resize(); // Перестройка диалога
 		}
 	});
 });

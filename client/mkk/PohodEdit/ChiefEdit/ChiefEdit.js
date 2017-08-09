@@ -22,7 +22,7 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 		//"Тык" по кнопке выбора руководителя или зама похода
 		_onSelectChief: function(ev, rec) {
 			this._chiefRec = rec;
-			this._notify("selectChief", rec);
+			this._notify("selectChief", rec, this._isAltChief);
 			this.closeDialog();
 		},
 		

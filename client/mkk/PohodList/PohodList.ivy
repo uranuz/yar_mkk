@@ -57,9 +57,7 @@ def PohodList {=
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
-									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">
-												{=recGet rec "bookNum"}
-									</a>
+									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">{=recGet rec "bookNum"}</a>
 								</td>
 								<td>{=recGet rec "dateRange" }</td>
 								<td>

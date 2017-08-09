@@ -2,7 +2,8 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 	'fir/controls/FirControl',
 	'fir/network/json_rpc',
 	'fir/datctrl/helpers',
-	'mkk/helpers'
+	'mkk/helpers',
+	'css!mkk/TouristSearchArea/TouristSearchArea'
 ], function(
 	FirControl,
 	json_rpc,
@@ -22,7 +23,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 		this._elems('searchBtn').on('click', self.onSearchTourists_BtnClick.bind(this));
 
 		this._pagination.subscribe('onSetCurrentPage', this.onSearchTourists.bind(this));
-		this._touristList.subscribe('onAfterLoad', this.onTouristLoaded.bind(this));
+		this._touristList.subscribe('onTouristListLoaded', this.onTouristLoaded.bind(this));
 		this._touristList.subscribe('itemActivated', function(ev, rec) {
 			self._notify('itemSelect', rec);
 		});
@@ -34,7 +35,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 		/** Тык по кнопке поиска туристов  */
 		onSearchTourists_BtnClick: function() {
 			this._pagination.setCurrentPage(0);
-			this.onSearchTourists(); //Переход к действию по кнопке Искать
+			//this.onSearchTourists(); //Переход к действию по кнопке Искать
 		},
 
 		/** Поиск туристов и отображение результата в диалоге */
@@ -58,7 +59,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 			this._touristList._reloadControl();
 		},
 
-		onTouristLoaded: function(ev) {
+		onTouristLoaded: function(ev, rs, nav) {
 			var
 				self = this,
 				rec,
@@ -68,20 +69,13 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 				pageCountDiv = self._elems("pageCount");
 				//recordCount = json.recordCount; // Количество записей, удовлетворяющих фильтру
 				//pageSize = json.pageSize || 10;
-			
-			/*
-			self.recordSet = datctrl.fromJSON(json.rs);
-			self.recordSet.rewind();
 
-			searchResultsDiv.empty();
-			while( rec = self.recordSet.next() )
-				self.renderFoundTourist(rec).appendTo(searchResultsDiv);
-			*/
+			//self.recordSet = datctrl.fromJSON(json.rs);
 
 			self._resultsPanel.show();
+			
+			self._pagination.setNavigation(nav);
 			/*
-			self._pagination.setNavigation(json.nav);
-
 			if( recordCount < 1 ) {
 				summaryDiv.text("По данному запросу туристов не найдено");
 				navigBar.hide();
