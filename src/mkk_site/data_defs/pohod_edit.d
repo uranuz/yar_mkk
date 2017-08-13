@@ -36,3 +36,23 @@ struct PohodDataToWrite
 	// Секция "Ссылки на доп. материалы"
 	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
 }
+
+struct TouristListFilter
+{
+	import webtank.common.optional: Optional;
+
+	@DBName("family_name") string familyName;
+	@DBName("given_name") string givenName;
+	@DBName("patronymic") string patronymic;
+	@DBName("birth_year") Optional!int birthYear;
+	@DBName("address") string region;
+	@DBName("address") string city;
+	@DBName("address") string street;
+	@DBName("num") size_t[] nums;
+}
+
+struct Navigation
+{
+	size_t offset = 0;
+	size_t pageSize = 10;
+}

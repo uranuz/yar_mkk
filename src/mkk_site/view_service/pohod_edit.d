@@ -2,7 +2,7 @@ module mkk_site.view_service.pohod_edit;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
-import mkk_site.data_defs.pohod_edit;
+import mkk_site.data_defs.pohod_edit: PohodDataToWrite, TouristListFilter, Navigation;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
@@ -92,25 +92,6 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 	}
 
 	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict).str;
-}
-
-struct TouristListFilter
-{
-	Undefable!string familyName;
-	Undefable!string givenName;
-	Undefable!string patronymic;
-	Undefable!string region;
-	Undefable!string city;
-	Undefable!string street;
-
-	size_t[] nums;
-	Undefable!int birthYear;
-}
-
-struct Navigation
-{
-	size_t offest = 0;
-	size_t pageSize = 10;
 }
 
 void tousristPlainList(HTTPContext ctx)

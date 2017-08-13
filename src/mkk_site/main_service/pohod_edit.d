@@ -1,6 +1,6 @@
 module mkk_site.main_service.pohod_edit;
 import mkk_site.main_service.devkit;
-import mkk_site.data_defs.pohod_edit: PohodDataToWrite;
+import mkk_site.data_defs.pohod_edit: PohodDataToWrite, TouristListFilter, Navigation, DBName;
 
 shared static this()
 {
@@ -193,26 +193,6 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	return record.num;
 }
 
-struct TouristFilter
-{
-	import webtank.common.optional: Optional;
-
-	@DBName("family_name") string familyName;
-	@DBName("given_name") string givenName;
-	@DBName("patronymic") string patronymic;
-	@DBName("birth_year") Optional!int birthYear;
-	@DBName("address") string region;
-	@DBName("address") string city;
-	@DBName("address") string street;
-	@DBName("num") size_t[] nums;
-}
-
-struct Navigation
-{
-	size_t offset = 0;
-	size_t pageSize = 10;
-}
-
 static immutable shortTouristRecFormat = RecordFormat!(
 	PrimaryKey!(int), "num",
 	string, "familyName",
@@ -223,7 +203,7 @@ static immutable shortTouristRecFormat = RecordFormat!(
 
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto touristPlainSearch(TouristFilter filter, Navigation nav)
+auto touristPlainSearch(TouristListFilter filter, Navigation nav)
 {
 	import std.json: JSONValue;
 	import std.traits: getUDAs;
@@ -239,7 +219,7 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 		nav.pageSize = maxPageSize;
 	}
 
-	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristFilter)) )
+	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristListFilter)) )
 	{
 		alias FieldType = typeof(__traits(getMember, filter, fieldName));
 		static if( __traits(compiles, {
