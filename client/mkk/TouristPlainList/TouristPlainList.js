@@ -47,7 +47,7 @@ define('mkk/TouristPlainList/TouristPlainList', [
 					}
 				}
 				if( this._filter.selectedKeys ) {
-					params.push('keys=' + this._filter.selectedKeys.join(','));
+					params.push('nums=' + this._filter.selectedKeys.join(','));
 				}
 			}
 			if( ['add', 'remove'].indexOf(this._mode) !== -1 ) {

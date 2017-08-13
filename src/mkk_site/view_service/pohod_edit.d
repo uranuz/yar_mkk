@@ -2,6 +2,7 @@ module mkk_site.view_service.pohod_edit;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
+import mkk_site.data_defs.pohod_edit;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
@@ -12,7 +13,9 @@ import ivy.interpreter_data, ivy.json, ivy.interpreter;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
-import webtank.common.optional: Optional;
+import webtank.common.optional: Optional, Undefable;
+import webtank.net.deserialize_web_form: formDataToStruct;
+import webtank.common.std_json.to: toStdJSON;
 
 string pohodEditController(HTTPContext ctx)
 {
@@ -69,75 +72,9 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 	import std.string: toLower;
 
 	auto bodyForm = ctx.request.bodyForm;
-	
-	static immutable allStringFields = [
-		"mkkCode", "bookNum", "mkkComment", "pohodRegion", "route", "chiefComment", "organization", "partyRegion"
-	];
-	JSONValue newPohod;
-	foreach( fieldName; allStringFields )
-	{
-		if( fieldName in bodyForm ) {
-			newPohod[fieldName] = bodyForm[fieldName];
-		}
-	}
-
-	foreach( fieldName; ["claimState", "tourismKind", "complexity", "complexityElems", "progress"] )
-	{
-		if( fieldName !in bodyForm )
-			continue;
-
-		string strKey = bodyForm[fieldName];
-		if( strKey.length != 0 && toLower(strKey) != "null" )
-		{
-			try {
-				newPohod[fieldName] = strKey.to!int;
-			} catch (std.conv.ConvException e) {
-				throw new std.conv.ConvException("Выражение \"" ~ strKey ~ "\" не является значением типа \"" ~ fieldName ~ "\"!!!");
-			}
-		} else {
-			newPohod[fieldName] = null;
-		}
-	}
-
-	foreach( fieldPrefix; ["begin", "finish"] )
-	{
-		string[] dateFields = ["day", "month", "year"].map!((b) => fieldPrefix ~ "__" ~ b).array;
-		if( !all!( (a) => cast(bool)(a in bodyForm) )(dateFields) ) {
-			continue;
-		}
-
-		if( !all!(
-				(a) => (bodyForm[a].length == 0 || bodyForm[a].toLower() == "null")
-			)(dateFields)
-		) {
-			Date pohodDate;
-			try {
-				pohodDate = Date(
-					bodyForm[fieldPrefix ~ "__year"].to!int,
-					bodyForm[fieldPrefix ~ "__month"].to!int,
-					bodyForm[fieldPrefix ~ "__day"].to!int,
-				);
-			} catch(ConvException) {
-				throw new Exception("Неправильный формат даты похода");
-			}
-			newPohod[fieldPrefix ~ "__date"] = pohodDate.toISOExtString();
-		} else {
-			newPohod[fieldPrefix ~ "__date"] = null;
-		}
-	}
-
-	if( "partyNums" in bodyForm )
-	{
-		if( bodyForm["partyNums"] != "null" && bodyForm["partyNums"].length != 0 ) {
-			try {
-				newPohod["partyNum"] = bodyForm["partyNums"].splitter(",").map!( (a) => a.to!size_t ).array;
-			} catch(ConvException) {
-				throw new Exception("Передан некорректный список идентификаторов туристов");
-			}
-		} else {
-			newPohod["partyNum"] = null;
-		}
-	}
+	PohodDataToWrite inputPohodData;
+	formDataToStruct(bodyForm, inputPohodData);
+	JSONValue newPohod = inputPohodData.toStdJSON();
 
 	// Если идентификатор похода не передаётся, то создаётся новый вместо обновления
 	if( pohodNum.isSet ) {
@@ -157,62 +94,41 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict).str;
 }
 
+struct TouristListFilter
+{
+	Undefable!string familyName;
+	Undefable!string givenName;
+	Undefable!string patronymic;
+	Undefable!string region;
+	Undefable!string city;
+	Undefable!string street;
+
+	size_t[] nums;
+	Undefable!int birthYear;
+}
+
+struct Navigation
+{
+	size_t offest = 0;
+	size_t pageSize = 10;
+}
+
 void tousristPlainList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.algorithm: map, splitter, canFind;
 	import std.conv: to;
 	import std.array: array;
+
 	auto queryForm = ctx.request.queryForm;
-	JSONValue filter;
-	static immutable string[] strFieldNames = [
-		"familyName", "givenName", "patronymic", "region", "city", "street"
-	];
-	
-	if( "keys" in queryForm )
-	{
-		if( queryForm["keys"] != "null" && queryForm["keys"].length > 0 ) {
-			filter["nums"] = queryForm["keys"].splitter(",").map!( (a) => a.to!size_t ).array;
-		} else {
-			filter["nums"] = null;
-		}
-	}
-	foreach( fieldName; strFieldNames )
-	{
-		if( fieldName in queryForm )
-		{
-			if( queryForm[fieldName].length > 0 ) {
-				filter[fieldName] = queryForm[fieldName];
-			} else {
-				filter[fieldName] = null;
-			}
-		}
-	}
-	if( "birthYear" in queryForm )
-	{
-		if( queryForm["birthYear"] != "null" && queryForm["birthYear"].length > 0 ) {
-			filter["birthYear"] = queryForm["birthYear"].to!size_t;
-		} else {
-			filter["birthYear"] = null;
-		}
-	}
-	JSONValue nav;
-	if( "pageNum" in queryForm ) {
-		if( queryForm["offset"] != "null" && queryForm["offset"].length > 0 ) {
-			nav["offset"] = queryForm["offset"].to!size_t;
-		} else {
-			nav["offset"] = 0;
-		}
-	}
-	if( "pageSize" in queryForm ) {
-		if( queryForm["pageSize"] != "null" && queryForm["pageSize"].length > 0 ) {
-			nav["pageSize"] = queryForm["pageSize"].to!size_t;
-		} else {
-			nav["pageSize"] = 10;
-		}
-	}
+	TouristListFilter filter;
+	formDataToStruct(queryForm, filter);
+	Navigation nav;
+	formDataToStruct(queryForm, nav);
+
 	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
-		"filter": filter, "nav": nav
+		"filter": filter.toStdJSON(),
+		"nav": nav.toStdJSON()
 	]));
 	TDataNode dataDict = [
 		"touristList": callResult["rs"],
