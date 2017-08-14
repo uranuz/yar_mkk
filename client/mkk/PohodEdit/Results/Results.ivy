@@ -1,6 +1,6 @@
 expr {%
 	if {=empty pohodNum} {=
-			if {=empty error} {*
+			if {=empty errorMsg} {*
 				<h3>Данные о походе успешно добавлены в базу данных!!!</h3>
 				<div>Вы можете <a href="/dyn/pohod/edit">добавить ещё...</a></div>
 			*} else {*
@@ -9,8 +9,8 @@ expr {%
 				<div>Однако вы можете <a href="/dyn/pohod/edit">попробовать ещё раз...</a></div>
 			*}
 		} else {=
-			if {=empty error} {*
-				<h3>Данные о походе успешно обновлены!!!</h3>"
+			if {=empty errorMsg} {*
+				<h3>Данные о походе успешно обновлены!!!</h3>
 				<div>Вы можете <a href="/dyn/pohod/edit?key={{pohodNum}}">продолжить редактирование</a> этой же записи</div>
 				<div>или перейти <a href="/dyn/pohod/list">к списку походов</a></div>
 			*} else {*
@@ -21,8 +21,8 @@ expr {%
 			*}
 		}
 	};
-	if not{=empty error} {*
+	if not{=empty errorMsg} {*
 		<div>Сообщение ошибки:</div>
-		<div>{{error}}</div>
+		<div>{{errorMsg}}</div>
 	*};
 *}

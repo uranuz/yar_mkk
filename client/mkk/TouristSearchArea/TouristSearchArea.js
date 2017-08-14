@@ -20,14 +20,14 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 		this._pagination = this.findInstanceByName(this.instanceName() + 'Pagination');
 		this._touristList = this.findInstanceByName(this.instanceName() + 'List');
 
-		this._elems('searchBtn').on('click', self.onSearchTourists_BtnClick.bind(this));
+		this._elems('searchBtn').on('click', this.onSearchTourists_BtnClick.bind(this));
 
 		this._pagination.subscribe('onSetCurrentPage', this.onSearchTourists.bind(this));
 		this._touristList.subscribe('onTouristListLoaded', this.onTouristLoaded.bind(this));
 		this._touristList.subscribe('itemActivated', function(ev, rec) {
 			self._notify('itemSelect', rec);
 		});
-		
+
 		this._elems('block').hide();
 	}
 
@@ -40,12 +40,6 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 
 		/** Поиск туристов и отображение результата в диалоге */
 		onSearchTourists: function() {
-			var
-				self = this,
-				messageDiv = this._elems("selectMessage"),
-				currentPage = this._pagination.getCurrentPage(),
-				pageSize = 10;
-			
 			this._touristList.setFilter({
 				familyName: this._elems("familyFilter").val() || undefined, 
 				givenName: this._elems("nameFilter").val() || undefined,
@@ -55,7 +49,10 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 				city: this._elems("cityFilter").val() || undefined,
 				street: this._elems("streetFilter").val() || undefined
 			});
-
+			this._touristList.setNavigation({
+				offset: this._pagination.getOffset(),
+				pageSize: this._pagination.getPageSize() || 10
+			});
 			this._touristList._reloadControl();
 		},
 

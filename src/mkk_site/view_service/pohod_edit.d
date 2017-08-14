@@ -86,7 +86,7 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 		"pohodNum": pohodNum.isSet? TDataNode(pohodNum.value): TDataNode(null)
 	];
 	try {
-		TDataNode pohodData = mainServiceCall(`pohod.edit`, ctx, newPohod);
+		TDataNode pohodData = mainServiceCall(`pohod.edit`, ctx, JSONValue([`record`: newPohod]));
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

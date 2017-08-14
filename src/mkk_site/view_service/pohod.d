@@ -171,15 +171,13 @@ void renderExtraFileLinks(HTTPContext ctx)
 	import std.json: JSONValue, JSON_TYPE, parseJSON;
 	import std.conv: to;
 	import std.base64: Base64;
-	debug import std.stdio;
+
 	TDataNode dataDict;
 	if( "key" in ctx.request.queryForm ) {
-		debug writeln(`Getting link list from MKK service`);
 		// Если есть ключ похода, то берем ссылки из похода
 		size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
 		dataDict["linkList"] = mainServiceCall("pohod.extraFileLinks", ctx, JSONValue(["num": pohodNum]));
 	} else {
-		debug writeln(`Rendering passed link list`);
 		// Иначе отрисуем список ссылок, который нам передали
 		string rawExtraFileLinks = ctx.request.queryForm.get("extraFileLinks", null);
 		string decodedExtraFileLinks = cast(string) Base64.decode(rawExtraFileLinks);
@@ -210,7 +208,6 @@ void renderExtraFileLinks(HTTPContext ctx)
 		dataDict["linkList"] = linkList;
 	}
 	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
-	debug writeln(dataDict);
 
 	ctx.response.write(
 		Service.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict).str

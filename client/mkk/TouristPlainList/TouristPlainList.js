@@ -53,6 +53,14 @@ define('mkk/TouristPlainList/TouristPlainList', [
 			if( ['add', 'remove'].indexOf(this._mode) !== -1 ) {
 				params.push('mode=' + this._mode);
 			}
+			if( this._nav ) {
+				if( this._nav.offset != null ) {
+					params.push('offset=' + this._nav.offset);
+				}
+				if( this._nav.pageSize != null ) {
+					params.push('pageSize=' + this._nav.pageSize);
+				}
+			}
 			params.push('instanceName=' + this.instanceName());
 			return params.join('&');
 		},
@@ -72,6 +80,9 @@ define('mkk/TouristPlainList/TouristPlainList', [
 		},
 		setFilter: function(filter) {
 			this._filter = filter;
+		},
+		setNavigation: function(nav) {
+			this._nav = nav;
 		},
 		getTouristList: function() {
 			return this._touristList;
