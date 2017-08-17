@@ -71,7 +71,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 			}
 			else static if( is(OptionalValueType!FieldType == Date) )
 			{
-				fieldValues ~= field.isSet? field.toISOExtString(): "NULL";
+				fieldValues ~= field.isSet? "'" ~ field.toISOExtString() ~ "'": "NULL";
 			}
 			else static if( fieldName == "extraFileLinks" )
 			{

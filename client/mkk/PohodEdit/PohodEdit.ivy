@@ -48,6 +48,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'claimState'} 'enum'}
+					selectedId: {=recGet pohod 'claimState'}
 				}
 			</td>
 		</tr>
@@ -81,6 +82,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'tourismKind'} 'enum'}
+					selectedId: {=recGet pohod 'tourismKind'}
 				}
 			</td>
 		</tr>
@@ -109,6 +111,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'complexity'} 'enum'}
+					selectedId: {=recGet pohod 'complexity'}
 				}
 				{=PlainListBox
 					instanceName: 'complexityElemsField'
@@ -116,6 +119,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'complexityElems'} 'enum'}
+					selectedId: {=recGet pohod 'complexityElems'}
 				}
 			</td>
 		</tr>
@@ -150,6 +154,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'progress'} 'enum'}
+					selectedId: {=recGet pohod 'progress'}
 				}
 			</td>
 		</tr>
