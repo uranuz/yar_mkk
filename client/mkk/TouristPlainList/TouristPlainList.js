@@ -66,7 +66,7 @@ define('mkk/TouristPlainList/TouristPlainList', [
 		},
 		_onAfterLoad: function() {
 			FirControl.prototype._onAfterLoad.call(this, arguments);
-			this._notify('onTouristListLoaded', [this._touristList, this._nav]);
+			this._notify('onTouristListLoaded', this._touristList, this._nav);
 		},
 		_onItemActivated: function(ev) {
 			var

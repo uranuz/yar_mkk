@@ -70,7 +70,7 @@ def PohodEdit {=
 					class="{=cls 'pohodRegionField'} form-control"
 					id="pohodRegionField"
 					name="pohodRegion"
-					value="{=recGet pohod 'pohodRegion'}">
+					value="{=recGet pohod 'pohodRegion'}"/>
 			</td>
 		</tr>
 		<tr>
@@ -235,7 +235,7 @@ def PohodEdit {=
 						name="unit"
 						class="{=cls 'partySizeField'} form-control"
 						style="width: 5em;"
-						value="{=recGet pohod 'partySize'}">
+						value="{=recGet pohod 'partySize'}"/>
 				</td>
 			</tr>
 			<tr>

@@ -12,26 +12,34 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 		this._controlBar = this._elems('controlBar');
 		this._isAltChief = opts.isAltChief;
 		this._chiefRec = null;
-
-		//Тык по кнопке удаления зам. руководителя похода
-		this._elems("deleteBtn").on("click", this._onDeleteChief.bind(this));
-		this._container.on("dialogclose", this._onDialogClose.bind(this));
 	}
 	
 	return __mixinProto(ChiefEdit, {
+		_subscribeInternal: function() {
+			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
+
+			this._elems("deleteBtn").on("click", this._onDeleteChief.bind(this));
+			this._container.on("dialogclose", this._onDialogClose.bind(this));
+		},
+		_unsubscribeInternal: function() {
+			this._searchBlock.unsubscribe('itemSelect');
+			this._elems("deleteBtn").off('click');
+			this._container.off('dialogclose');
+		},
 		//"Тык" по кнопке выбора руководителя или зама похода
 		_onSelectChief: function(ev, rec) {
 			this._chiefRec = rec;
 			this._notify("selectChief", rec, this._isAltChief);
 			this.closeDialog();
 		},
-		
+
+		//Тык по кнопке удаления зам. руководителя похода
 		_onDeleteChief: function(ev) {
 			this._chiefRec = null;
 			this._notify("deleteChief");
 			this.closeDialog();
 		},
-		
+
 		openDialog: function(record, isAltChief) {
 			var dlgTitle = "";
 			this.chiefRec = record;
@@ -46,16 +54,14 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 				dlgTitle = 'Выбор руководителя';
 			}
 			this._searchBlock.activate(this._elems("searchBlock"));
-			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
 			this._container.dialog({modal: true, minWidth: 400, title: dlgTitle});
 		},
-		
+
 		closeDialog: function() {
 			this._container.dialog('close');
 		},
-		
+
 		_onDialogClose: function() {
-			this._searchBlock.unsubscribe('itemSelect');
 			this._searchBlock.deactivate();
 		}
 	});
