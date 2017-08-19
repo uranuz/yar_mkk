@@ -22,7 +22,7 @@ def PohodList {=
 				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodNav.recordCount}}</span>
 			</div>
 			<div class="col-md-6" style="text-align: right;">
-				{= if isAuthenticated and not isForPrint {*
+				{= if isAuthorized and not isForPrint {*
 					<a href="{{vpaths.siteDynamic}}pohod/edit" class="{=cls 'addPohodBtn'} btn btn-primary">
 						Добавить поход
 					</a>
@@ -34,7 +34,7 @@ def PohodList {=
 				<table class="{=cls 'table'} mkk-Table">
 					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
 						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-							{=if isAuthenticated and not isForPrint {*
+							{=if isAuthorized and not isForPrint {*
 								<th class="{=cls 'headerNumCell'}">#</th>
 							*}}
 							<th>№ книги</th>
@@ -45,7 +45,7 @@ def PohodList {=
 							<th>Участники</th>
 							<th>Город, организация</th>
 							<th>Статус похода</th>
-							{= if isAuthenticated and not isForPrint {*
+							{= if isAuthorized and not isForPrint {*
 								<th class="{=cls 'headerEditCell'}">Изменить</th>
 							*}}
 						</tr>
@@ -53,7 +53,7 @@ def PohodList {=
 					<tbody class="{=cls 'tableContentBody'} mkk-Table">
 						{=repeat rec in pohodSet {*
 							<tr>
-								{=if isAuthenticated and not isForPrint {*
+								{=if isAuthorized and not isForPrint {*
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
@@ -81,7 +81,7 @@ def PohodList {=
 									<div>{=recGetStr rec "progress"}</div>
 									<div>{=recGetStr rec "claimState"}</div>
 								</td>
-								{=if isAuthenticated and not isForPrint {*
+								{=if isAuthorized and not isForPrint {*
 									<td><a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}">Изменить</a></td>
 								*}}
 							</tr>

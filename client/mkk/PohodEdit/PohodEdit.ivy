@@ -208,7 +208,7 @@ def PohodEdit {=
 				<td>Заместитель руководителя</td>
 				<td colspan="999">
 					<input type="hidden"
-						name="alt_chef"
+						name="altChiefNum"
 						class="{=cls 'altChiefNumField'}"
 						value="{=recGet pohod 'altChiefNum'}"/>
 					<a href="#_NOLink"
@@ -220,7 +220,7 @@ def PohodEdit {=
 				<td>Участники</td>
 				<td>
 					<input type="hidden"
-						name="unit_neim"
+						name="partyNums"
 						class="{=cls 'partyNumsField'}"/>
 					<a href="#_NOLink"
 						class="{=cls 'partyEditBtn'}"
@@ -232,7 +232,7 @@ def PohodEdit {=
 				<td>
 					<input type="text"
 						size="4"
-						name="unit"
+						name="partySize"
 						class="{=cls 'partySizeField'} form-control"
 						style="width: 5em;"
 						value="{=recGet pohod 'partySize'}"/>

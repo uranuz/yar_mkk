@@ -23,7 +23,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	bool isAuthorized = ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
 	if( !isAuthorized ) {
-		//throw new Exception(`Недостаточно прав для изменения похода!!!`);
+		throw new Exception(`Недостаточно прав для изменения похода!!!`);
 	}
 	
 	string[] fieldNames;
@@ -162,8 +162,8 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		if( "userNum" !in ctx.user.data ) {
 			//throw new Exception("Не удаётся определить идентификатор пользователя");
 		}
-		//fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-		//fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
+		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+		fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
 		//SiteLoger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
 		string queryStr;
 
@@ -175,8 +175,8 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		{
 			//SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
 
-			//fieldNames ~= ["registrator_num", "reg_timestamp"];
-			//fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
+			fieldNames ~= ["registrator_num", "reg_timestamp"];
+			fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
 			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 		}
 

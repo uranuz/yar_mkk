@@ -138,8 +138,7 @@ define('mkk/PohodEdit/PohodEdit', [
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
 				countInput = self._elems("partySizeField")
 				inputCount = parseInt(countInput.val()),
-				listItems = self._elems("partyList").children(),
-				listCount = listItems.length;
+				listCount = this._partyRS.getLength();
 
 			if( !beginDateEmpty && (!beginDay.length || !beginMonth.length || !beginYear.length) ) {
 				self.showErrorDialog('Нужно заполнить все поля даты начала, либо оставить их все пустыми');
@@ -196,7 +195,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			}
 
 			if( listCount > inputCount ) {
-				self.showErrorDialog('Количество участников в списке '  + listCount + ' больше числа в поле ввода '
+				self.showErrorDialog('Количество участников в списке '  + listCount + ' больше заявленного числа '
 					+ inputCount + '. Пожалуйста, исправьте введенное значение');
 				return false;
 			}

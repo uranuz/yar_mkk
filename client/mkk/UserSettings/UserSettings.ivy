@@ -20,9 +20,10 @@ def UserSettings {=
 			</div>
 		</div>
 
-		<!-- <h4>{{pwChangeMessage}}</h4> -->
+		
 		<form method="post">
 			<h3>Сменить пароль</h3>
+			<h5>{{pwChangeMessage}}</h5>
 			<div class="form-group row">
 				<label for="old_password_field" class="form-control-static col-md-3">Старый пароль</label>
 				<div class="col-md-7">

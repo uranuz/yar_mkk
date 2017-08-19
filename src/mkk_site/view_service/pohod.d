@@ -148,7 +148,7 @@ string renderPohodList(HTTPContext ctx)
 	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
 	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
-	dataDict["isAuthenticated"] = isAuthorized;
+	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
 	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict).str;

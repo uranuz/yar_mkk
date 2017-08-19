@@ -14,7 +14,6 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		FirControl.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
-		this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
 
 		this._updateControlState(opts);
 	}
@@ -35,11 +34,13 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 
 			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
 			this._container.on('dialogclose', this.onDialog_close.bind(this));
+			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
 		},
 		_unsubscribeInternal: function() {
 			this._elems("acceptBtn").off();
 			this._elems("selectedTourists").off();
-			this._container.on('dialogclose').off();
+			this._container.off('dialogclose');
+			this._searchBlock.unsubscribe('itemSelect');
 		},
 
 		openDialog: function(rs) {
@@ -90,13 +91,12 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		
 		onDialog_close: function() {
 			this._searchBlock.deactivate();
-			this._searchBlock.unsubscribe('itemSelect');
 		},
 
 		_reloadPartyList: function() {
 			var
 				selectedKeys = [],
-				rec
+				rec;
 			this._partyList.rewind();
 			while( rec = this._partyList.next() ) {
 				selectedKeys.push(rec.getKey());
@@ -111,13 +111,13 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			var 
 				recordDiv,
 				deselectBtn;
-			
+
 			if( !this._partyList ) {
 				this._partyList = new webtank.datctrl.RecordSet({
 					format: rec.copyFormat()
 				});
 			}
-			
+
 			if( this._partyList.hasKey( rec.getKey() ) ) {
 				this._elems("selectMessage").html(
 					"Турист <b>" + MKKHelpers.getTouristInfoString(rec)
