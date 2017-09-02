@@ -1,11 +1,15 @@
 expr {=
 from fir.controls.utils import rsGet, recGet, cls;
+from mkk.TouristPlainList import TouristPlainList;
 def PartyInfo {=
 	def.kv
 		cssBaseClass: "mkk-PartyInfo"
-		instanceName: "partyInfo";
+		instanceName: "partyInfo"
+		pohodInfo: null
+		partyList: null;
 	def.body {*
 	<div class="{=cls 'block'}">
+		{=if not{=empty pohodInfo} {*
 		<div>
 			<span class="{=cls 'codeLabel'}">Код МКК:</span>
 			<span>{=rsGet pohodInfo "mkkCode" 0}</div>
@@ -19,19 +23,18 @@ def PartyInfo {=
 			<span>{=rsGet pohodInfo "pohodRegion" 0}</span>
 		</div>
 		<hr/>
+		*}}
 		<div>
-			{=repeat rec in partyList {*
-				<div>
-					{=recGet rec "familyName"}
-					{=recGet rec "givenName"}
-					{=recGet rec "patronymic"}
-					{=recGet rec "birthYear"}
-				</div>
-				*}
+			{=TouristPlainList
+				touristList: partyList
 			}
 		</div>
 	</div>
 	*}
 };
-PartyInfo;
+if __scopeName__ == '__main__' {=
+	PartyInfo
+		pohodInfo: {=if {=has {=scope} 'pohodInfo'} pohodInfo}
+		partyList: partyList
+}
 }

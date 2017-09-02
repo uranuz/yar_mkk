@@ -6,15 +6,19 @@ from mkk.PohodEdit.DeleteArea import DeleteArea;
 from mkk.PohodEdit.PartyEdit import PartyEdit;
 from mkk.PohodEdit.ChiefEdit import ChiefEdit;
 from mkk.PohodEdit.ChiefAddToParty import ChiefAddToParty;
+from mkk.TouristPlainList import TouristPlainList;
+from mkk.PohodEdit.ExtraFileLinksEdit import ExtraFileLinksEdit;
 def PohodEdit {=
 	def.kv
 		moduleName: 'mkk/PohodEdit/PohodEdit'
 		instanceName: 'pohodEdit'
-		cssBaseClass: 'mkk-PohodEdit';
+		cssBaseClass: 'mkk-PohodEdit'
+		pohod: null
+		partyList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<form class="{=cls 'mainForm'}" method="post"{ {edit_pohod_form} }>
+		<form class="{=cls 'mainForm'}" method="post">
 		<h2>Редактирование данных похода</h2>
 		<hr>
 		<h4>Маршрутная книжка</h4>
@@ -44,6 +48,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'claimState'} 'enum'}
+					selectedId: {=recGet pohod 'claimState'}
 				}
 			</td>
 		</tr>
@@ -65,7 +70,7 @@ def PohodEdit {=
 					class="{=cls 'pohodRegionField'} form-control"
 					id="pohodRegionField"
 					name="pohodRegion"
-					value="{=recGet pohod 'pohodRegion'}">
+					value="{=recGet pohod 'pohodRegion'}"/>
 			</td>
 		</tr>
 		<tr>
@@ -77,6 +82,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'tourismKind'} 'enum'}
+					selectedId: {=recGet pohod 'tourismKind'}
 				}
 			</td>
 		</tr>
@@ -105,6 +111,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'complexity'} 'enum'}
+					selectedId: {=recGet pohod 'complexity'}
 				}
 				{=PlainListBox
 					instanceName: 'complexityElemsField'
@@ -112,6 +119,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'complexityElems'} 'enum'}
+					selectedId: {=recGet pohod 'complexityElems'}
 				}
 			</td>
 		</tr>
@@ -146,6 +154,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=at {=rsFieldFormat pohod 'progress'} 'enum'}
+					selectedId: {=recGet pohod 'progress'}
 				}
 			</td>
 		</tr>
@@ -199,7 +208,7 @@ def PohodEdit {=
 				<td>Заместитель руководителя</td>
 				<td colspan="999">
 					<input type="hidden"
-						name="alt_chef"
+						name="altChiefNum"
 						class="{=cls 'altChiefNumField'}"
 						value="{=recGet pohod 'altChiefNum'}"/>
 					<a href="#_NOLink"
@@ -211,7 +220,7 @@ def PohodEdit {=
 				<td>Участники</td>
 				<td>
 					<input type="hidden"
-						name="unit_neim"
+						name="partyNums"
 						class="{=cls 'partyNumsField'}"/>
 					<a href="#_NOLink"
 						class="{=cls 'partyEditBtn'}"
@@ -223,44 +232,32 @@ def PohodEdit {=
 				<td>
 					<input type="text"
 						size="4"
-						name="unit"
+						name="partySize"
 						class="{=cls 'partySizeField'} form-control"
 						style="width: 5em;"
-						value="{=recGet pohod 'partySize'}">
+						value="{=recGet pohod 'partySize'}"/>
 				</td>
 			</tr>
 			<tr>
 				<td colspan="999">
-					<div class="{=cls 'partyList'}">{ {unit} }</div>
+					<div class="{=cls 'partyList'}">
+						{=TouristPlainList
+							instanceName: 'partyList'
+							touristList: partyList
+						}
+					</div>
 				</td>
 			</tr>
 			</table>
 		</div>
 
 		<hr>
-		<h4>Ссылки на доп. материалы</h4>
-		<div class="{=cls 'extraFileLinks'}">
-			<table class="{=cls 'extraFileLinksTable'}">
-				<thead>
-					<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
-				</thead>
-				<tbody class="{=cls 'extraFileLinksTableBody'}"></tbody>
-				<tbody>
-					<tr><td>
-						<input type="hidden" class="{=cls 'extraFileLinksDataField'}" name="extraFileLinks">
-						<button type="button" class="{=cls 'moreExtraFileLinksBtn'} btn btn-primary btn-block">
-							Добавить ещё
-						</button>
-					</td></tr>
-				</tbody>
-			</table>
-		</div>
+		{=ExtraFileLinksEdit linkList: extraFileLinks }
 
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr>
 
-		<input type="hidden" name="action"{ {form_input_action} }>
-
+		<input type="hidden" name="action" value="write"><!-- Значение-команда на запись данных в БД -->
 		<span><input type="submit" class="{=cls 'submitBtn'} btn btn-primary" value="Сохранить"/></span>
 		<span style="float: right;"><input type="button" class="{=cls 'deleteDialogBtn'} btn btn-secondary" value="Удалить поход"></span>
 		<div style="clear: both"></div>
@@ -273,5 +270,9 @@ def PohodEdit {=
 	</div>
 	*}
 };
-PohodEdit;
+if __scopeName__ == '__main__' {=
+	PohodEdit
+		pohod: pohod
+		partyList: partyList
+};
 }

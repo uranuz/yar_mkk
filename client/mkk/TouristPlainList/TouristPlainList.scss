@@ -1,0 +1,31 @@
+.mkk-TouristPlainList {
+	&.e-touristItem {
+		padding: 4px 0 2px 0;
+		border-top: 1px solid #778877;
+	}
+	&.e-iconWrapper {
+		display: inline-block;
+		margin-right: 5px;
+	}
+	&.e-touristLink {
+		display: block;
+		text-decoration: none;
+	}
+}
+.icon-small {
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	padding: 0;
+}
+.icon-addItem {
+	background-image: url("/pub/mkk/img/icons/add_icon.png");
+}
+.icon-removeItem {
+	background-image: url("/pub/mkk/img/icons/remove_icon.png");
+}
+
+

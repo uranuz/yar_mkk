@@ -4,9 +4,9 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	//Service.pageRouter.join!(renderPohodView)("/dyn/pohod/view");
 	Service.pageRouter.join!(renderPohodList)("/dyn/pohod/list");
 	Service.pageRouter.join!(renderPartyInfo)("/dyn/pohod/partyInfo");
+	Service.pageRouter.join!(renderExtraFileLinks)("/dyn/pohod/extraFileLinks");
 }
 
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
@@ -148,7 +148,7 @@ string renderPohodList(HTTPContext ctx)
 	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
 	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
-	dataDict["isAuthenticated"] = isAuthorized;
+	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
 	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict).str;
@@ -159,9 +159,57 @@ void renderPartyInfo(HTTPContext ctx)
 	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
-	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["pohodNum": pohodNum]));
+	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 
 	ctx.response.write(
 		Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict).str
+	);
+}
+
+void renderExtraFileLinks(HTTPContext ctx)
+{
+	import std.json: JSONValue, JSON_TYPE, parseJSON;
+	import std.conv: to;
+	import std.base64: Base64;
+
+	TDataNode dataDict;
+	if( "key" in ctx.request.queryForm ) {
+		// Если есть ключ похода, то берем ссылки из похода
+		size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
+		dataDict["linkList"] = mainServiceCall("pohod.extraFileLinks", ctx, JSONValue(["num": pohodNum]));
+	} else {
+		// Иначе отрисуем список ссылок, который нам передали
+		string rawExtraFileLinks = ctx.request.queryForm.get("extraFileLinks", null);
+		string decodedExtraFileLinks = cast(string) Base64.decode(rawExtraFileLinks);
+		JSONValue extraFileLinks = parseJSON(decodedExtraFileLinks);
+		if( extraFileLinks.type != JSON_TYPE.ARRAY && extraFileLinks.type != JSON_TYPE.NULL  ) {
+			throw new Exception(`Некорректный формат списка ссылок на доп. материалы`);
+		}
+
+		TDataNode[] linkList;
+		if( extraFileLinks.type == JSON_TYPE.ARRAY ) {
+			linkList.length = extraFileLinks.array.length;
+			foreach( size_t i, ref JSONValue entry; extraFileLinks ) {
+				if( entry.type != JSON_TYPE.ARRAY || entry.array.length < 2) {
+					throw new Exception(`Некорректный формат элемента списка ссылок на доп. материалы`);
+				}
+				if( entry[0].type != JSON_TYPE.STRING && entry[0].type != JSON_TYPE.NULL ) {
+					throw new Exception(`Некорректный формат описания ссылки на доп. материалы`);
+				}
+				if( entry[1].type != JSON_TYPE.STRING && entry[1].type != JSON_TYPE.NULL ) {
+					throw new Exception(`Некорректный формат ссылки на доп. материалы`);
+				}
+				linkList[i] = [
+					(entry[0].type == JSON_TYPE.STRING? entry[0].str : null),
+					(entry[1].type == JSON_TYPE.STRING? entry[1].str : null)
+				];
+			}
+		}
+		dataDict["linkList"] = linkList;
+	}
+	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
+
+	ctx.response.write(
+		Service.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict).str
 	);
 }

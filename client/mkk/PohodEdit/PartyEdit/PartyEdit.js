@@ -1,55 +1,67 @@
 define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 	'fir/controls/FirControl',
+	'fir/datctrl/helpers',
 	'mkk/helpers'
 ], function (
 	FirControl,
+	DatctrlHelpers,
 	MKKHelpers
 ) {
 	__extends(PartyEdit, FirControl);
 
 	//Инциализация блока редактирования списка участников
-	function PartyEdit(opts)
-	{
+	function PartyEdit(opts) {
 		FirControl.call(this, opts);
-		var self = this;
-
-		this.selTouristsRS = null; //RecordSet с выбранными в поиске туристами
+		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
-		this._panelsArea = self._elems("panelsArea");
-		this._searchPanel = self._elems("searchPanel");
-		this._selectedTouristsPanel = self._elems("selectedTouristsPanel");
 
-		this._elems("acceptBtn").on("click", function() {
-			self._notify('saveData', self.selTouristsRS);
-			self.closeDialog();
-		});
-		
-		this._elems("selectedTourists").on("click", ".e-touristDeselectBtn", this.onDeselectTouristBtn_click.bind(this));
-		this._container.on('dialogclose', this.onDialog_close.bind(this));
+		this._updateControlState(opts);
 	}
 	
 	return __mixinProto(PartyEdit, {
-		openDialog: function(recordSet)
-		{
-			var 
-				self = this;
-				
-			this.selTouristsRS = recordSet;
-			this.renderSelectedTourists();
+		_updateControlState: function(opts) {
+			this._panelsArea = this._elems("panelsArea");
+			this._searchPanel = this._elems("searchPanel");
+			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
+			this._partyList = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с выбранными в поиске туристами
+		},
+		_subscribeInternal: function() {
+			var self = this;
+			this._elems("acceptBtn").on("click", function() {
+				self._notify('saveData', self._partyList);
+				self.closeDialog();
+			});
+
+			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
+			this._container.on('dialogclose', this.onDialog_close.bind(this));
+			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
+		},
+		_unsubscribeInternal: function() {
+			this._elems("acceptBtn").off();
+			this._elems("selectedTourists").off();
+			this._container.off('dialogclose');
+			this._searchBlock.unsubscribe('itemSelect');
+		},
+
+		openDialog: function(rs) {
+			var self = this;
+			this._partyList = rs;
+			this._reloadPartyList();
 			this._searchBlock.activate(this._elems("searchBlock"));
-			this._searchBlock.subscribe('itemSelect', this.onSelectTourist.bind(this));
 			this._container.dialog({
-				modal: true, minWidth: 500,
+				modal: true,
+				minWidth: 500,
+				width: 850,
 				resize: function() {
-					setTimeout( self.onDialog_resize.bind(self), 100 );
+					setTimeout(self._onDialog_resize.bind(self), 100);
 				}
 			});
-			
-			this.onDialog_resize();
+
+			this._onDialog_resize();
 		},
-		
-		onDialog_resize: function() {
-			if( this.selTouristsRS && this.selTouristsRS.getLength() ) {
+
+		_onDialog_resize: function() {
+			if( this._partyList && this._partyList.getLength() ) {
 				if( this._container.innerWidth() < 700 ) {
 					this._panelsArea.css("display", "block");
 					this._searchPanel.css("display", "block");
@@ -79,83 +91,49 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 		
 		onDialog_close: function() {
 			this._searchBlock.deactivate();
-			this._searchBlock.unsubscribe('itemSelect');
 		},
 
-		//Метод образует разметку с информацией о выбранном туристе
-		renderSelectedTourist: function(rec) {
+		_reloadPartyList: function() {
 			var
-				recordDiv = $("<div>", {
-					class: this._elemFullClass("touristDeselectBtn")
-				})
-				.data('num', rec.get('num')),
-				iconWrp = $("<span>", {
-					class: this._elemFullClass("iconWrapper")
-				}).appendTo(recordDiv),
-				deselectBtn = $("<div>", {
-					class: "icon-small icon-removeItem"
-				}).appendTo(iconWrp),
-				recordLink = $("<a>", {
-					class: this._elemFullClass("touristLink"),
-					href: "#!",
-					text: MKKHelpers.getTouristInfoString(rec)
-				})
-				.appendTo(recordDiv);
-
-			return recordDiv;
+				selectedKeys = [],
+				rec;
+			this._partyList.rewind();
+			while( rec = this._partyList.next() ) {
+				selectedKeys.push(rec.getKey());
+			}
+			this._selectedTouristsCtrl.setFilter({
+				selectedKeys: selectedKeys
+			});
+			this._selectedTouristsCtrl._reloadControl();
 		},
-		
 		//Обработчик добавления найденной записи о туристе
-		onSelectTourist: function(ev, rec) {
+		_onSelectTourist: function(ev, rec) {
 			var 
 				recordDiv,
 				deselectBtn;
-			
-			if( !this.selTouristsRS ) {
-				this.selTouristsRS = new webtank.datctrl.RecordSet({
+
+			if( !this._partyList ) {
+				this._partyList = new webtank.datctrl.RecordSet({
 					format: rec.copyFormat()
 				});
 			}
-			
-			if( this.selTouristsRS.hasKey( rec.getKey() ) ) {
+
+			if( this._partyList.hasKey( rec.getKey() ) ) {
 				this._elems("selectMessage").html(
 					"Турист <b>" + MKKHelpers.getTouristInfoString(rec)
 					+ "</b> уже находится в списке выбранных туристов"
 				);
 			} else {
-				this.selTouristsRS.append(rec);
-				this.renderSelectedTourist(rec)
-				.appendTo( this._elems("selectedTourists") );
+				// Добавляем туриста в набор данных и обновляем список
+				this._partyList.append(rec);
+				this._reloadPartyList();
 			}
-
-			this.onDialog_resize(); // Перестройка диалога
 		},
 		
 		//Обработчик отмены выбора записи
-		onDeselectTouristBtn_click: function(ev) {
-			var recordDiv = $(ev.currentTarget);
-
-			this.selTouristsRS.remove(recordDiv.data('num'));
-			recordDiv.remove();
-			this.onDialog_resize(); // Перестройка диалога
-		},
-		
-		// Тык по кнопке открытия окна редактирования списка участников
-		renderSelectedTourists: function() {
-			var 
-				self = this,
-				selectedTouristsDiv = this._elems("selectedTourists"),
-				rec;
-
-			// Очистка окна списка туристов перед заполнением
-			selectedTouristsDiv.empty();
-
-			this.selTouristsRS.rewind();
-			while( rec = this.selTouristsRS.next() ) {
-				this.renderSelectedTourist(rec)
-				.data('num', rec.get('num'))
-				.appendTo(selectedTouristsDiv);
-			}
+		_onTouristDeselect: function(ev, rec) {
+			this._partyList.remove(rec.getKey());
+			this._onDialog_resize(); // Перестройка диалога
 		}
 	});
 });

@@ -145,8 +145,8 @@ public:
 			else
 				string msg = extendedMsg;
 
-			_prioriteLoger.error(extendedMsg);
-			_loger.error(extendedMsg);
+			prioriteLoger.error(extendedMsg);
+			loger.error(extendedMsg);
 
 			throw error;
 			return true; //Dummy error
@@ -174,8 +174,8 @@ public:
 			else
 				string msg = extendedMsg;
 
-			_prioriteLoger.error(extendedMsg);
-			_loger.error(extendedMsg);
+			prioriteLoger.error(extendedMsg);
+			loger.error(extendedMsg);
 
 			throw error;
 			return true; //Dummy return

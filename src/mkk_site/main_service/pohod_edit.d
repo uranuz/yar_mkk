@@ -1,48 +1,12 @@
 module mkk_site.main_service.pohod_edit;
 import mkk_site.main_service.devkit;
+import mkk_site.data_defs.pohod_edit: PohodDataToWrite, TouristListFilter, Navigation, DBName;
 
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 	Service.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
 	Service.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
-}
-
-struct DBName { string dbName; }
-
-struct PohodDataToWrite
-{
-	import webtank.common.optional: Undefable;
-	import std.datetime: Date;
-	Optional!size_t num; // Номер походе в базе
-
-	// Секция "Маршрутная книжка"
-	@DBName("kod_mkk") Undefable!string mkkCode; // Код МКК
-	@DBName("nomer_knigi") Undefable!string bookNum; // Номер книги
-	@DBName("stat") Undefable!int claimState; // Статус заявки
-	@DBName("MKK_coment") Undefable!string mkkComment; // Коментарий МКК
-
-	// Секция "Поход"
-	@DBName("region_pohod") Undefable!string pohodRegion; // Регион, где проходит поход
-	@DBName("vid") Undefable!int tourismKind; // Вид туризма
-	@DBName("marchrut") Undefable!string route; // Нитка маршрута
-	@DBName("ks") Undefable!int complexity; // Категория сложности маршрута
-	@DBName("elem") Undefable!int complexityElems; // Элементы категори сложности
-	@DBName("begin_date") Undefable!Date beginDate; // Дата начала похода
-	@DBName("finish_date") Undefable!Date finishDate; // Дата завершения похода
-	@DBName("prepar") Undefable!int progress; // Состояние прохождения маршрута
-	@DBName("chef_coment") Undefable!string chiefComment; // Коментарий руководителя группы
-
-	// Секция "Группа"
-	@DBName("organization") Undefable!string organization; // Турклуб, организация, наименование коллектива, от имени которого организован поход
-	@DBName("region_group") Undefable!string partyRegion; // Город, посёлок, район, область, где постояннно проживает основная часть участников похода
-	@DBName("chef_grupp") Undefable!size_t chiefNum; // Идентификатор руководителя похода в БД МКК
-	@DBName("alt_chef") Undefable!size_t altChiefNum; // Идентификатор заместителя  руководителя в БД МКК (при наличии заместителя)
-	@DBName("unit_neim") Undefable!(size_t[]) partyNums;  // Идентификаторы участников группы в БД МКК
-	@DBName("unit") Undefable!size_t partySize; // Общее число участников похода/ размер группы
-
-	// Секция "Ссылки на доп. материалы"
-	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
 }
 
 auto editPohod(HTTPContext ctx, PohodDataToWrite record)
@@ -59,7 +23,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	bool isAuthorized = ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
 	if( !isAuthorized ) {
-		//throw new Exception(`Недостаточно прав для изменения похода!!!`);
+		throw new Exception(`Недостаточно прав для изменения похода!!!`);
 	}
 	
 	string[] fieldNames;
@@ -107,7 +71,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 			}
 			else static if( is(OptionalValueType!FieldType == Date) )
 			{
-				fieldValues ~= field.isSet? field.toISOExtString(): "NULL";
+				fieldValues ~= field.isSet? "'" ~ field.toISOExtString() ~ "'": "NULL";
 			}
 			else static if( fieldName == "extraFileLinks" )
 			{
@@ -198,8 +162,8 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		if( "userNum" !in ctx.user.data ) {
 			//throw new Exception("Не удаётся определить идентификатор пользователя");
 		}
-		//fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-		//fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
+		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
+		fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
 		//SiteLoger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
 		string queryStr;
 
@@ -211,8 +175,8 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		{
 			//SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
 
-			//fieldNames ~= ["registrator_num", "reg_timestamp"];
-			//fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
+			fieldNames ~= ["registrator_num", "reg_timestamp"];
+			fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
 			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
 		}
 
@@ -229,25 +193,6 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	return record.num;
 }
 
-struct TouristFilter
-{
-	import webtank.common.optional: Optional;
-
-	@DBName("family_name") string familyName;
-	@DBName("given_name") string givenName;
-	@DBName("patronymic") string patronymic;
-	@DBName("birth_year") Optional!int birthYear;
-	@DBName("address") string region;
-	@DBName("address") string city;
-	@DBName("address") string street;
-}
-
-struct Navigation
-{
-	size_t offset = 0;
-	size_t pageSize = 10;
-}
-
 static immutable shortTouristRecFormat = RecordFormat!(
 	PrimaryKey!(int), "num",
 	string, "familyName",
@@ -258,7 +203,7 @@ static immutable shortTouristRecFormat = RecordFormat!(
 
 
 //RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto touristPlainSearch(TouristFilter filter, Navigation nav)
+auto touristPlainSearch(TouristListFilter filter, Navigation nav)
 {
 	import std.json: JSONValue;
 	import std.traits: getUDAs;
@@ -274,24 +219,32 @@ auto touristPlainSearch(TouristFilter filter, Navigation nav)
 		nav.pageSize = maxPageSize;
 	}
 
-	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristFilter)) )
+	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristListFilter)) )
 	{
 		alias FieldType = typeof(__traits(getMember, filter, fieldName));
-		alias Field = Alias!(__traits(getMember, filter, fieldName));
-		static if( is( FieldType == string ) )
-		{
+		static if( __traits(compiles, {
+			FieldType test = FieldType.init;
+		})) {
+			pragma(msg, "fieldName: " ~ fieldName)
+			enum string dbFieldName = getUDAs!(__traits(getMember, filter, fieldName), DBName)[0].dbName;
 			auto field = __traits(getMember, filter, fieldName);
-			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
-			if( field.length > 0 ) {
-				filters ~= dbFieldName ~ ` ilike '%` ~ PGEscapeStr(field) ~ `%'`;
+			static if( is( FieldType == string ) )
+			{
+				if( field.length > 0 ) {
+					filters ~= dbFieldName ~ ` ilike '%` ~ PGEscapeStr(field) ~ `%'`;
+				}
 			}
-		}
-		else static if( isOptional!FieldType && is( OptionalValueType!(FieldType) == int ) )
-		{
-			auto field = __traits(getMember, filter, fieldName);
-			enum string dbFieldName = getUDAs!(Field, DBName)[0].dbName;
-			if( field.isSet ) {
-				filters ~= dbFieldName ~ ` = ` ~ field.text;
+			else static if( isOptional!FieldType && is( OptionalValueType!(FieldType) == int ) )
+			{
+				if( field.isSet ) {
+					filters ~= dbFieldName ~ ` = ` ~ field.text;
+				}
+			}
+			else static if( fieldName == "nums" )
+			{
+				if( field.length > 0 ) {
+					filters ~= dbFieldName ~ ` in(` ~ field.to!(string[]).join(",") ~ `)`;
+				}
 			}
 		}
 	}

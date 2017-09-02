@@ -119,10 +119,10 @@ import std.typecons: Tuple;
 
 alias ExtraFileLink = Tuple!( string, "uri", string, "descr" );
 
-auto getExtraFileLinks(size_t pohodNum)
+auto getExtraFileLinks(size_t num)
 {
 	import std.conv: to;
-	string queryStr = `select unnest(links) as num from pohod where pohod.num = ` ~ pohodNum.to!string;
+	string queryStr = `select unnest(links) as num from pohod where pohod.num = ` ~ num.to!string;
 	
 	auto rs = getCommonDB()
 		.query(queryStr)

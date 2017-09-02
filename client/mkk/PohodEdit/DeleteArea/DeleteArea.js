@@ -8,7 +8,10 @@ define('mkk/PohodEdit/DeleteArea/DeleteArea', [
 		var self = this;
 		this._elems('deleteConfirmBtn').on('click', function() {
 			if( self._elems('deleteConfirmField').val() === 'удалить' ) {
-				self.trigger('onDeleteConfirm');
+				self._container.dialog('close');
+				self._notify('onDeleteConfirm');
+			} else {
+				$('<div title="Ошибка ввода">Удаление похода не подтверждено!</div>').dialog({modal: true});
 			}
 		});
 	}

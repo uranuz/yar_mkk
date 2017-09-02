@@ -1,11 +1,13 @@
 expr {=
 from fir.controls.utils import cls;
 from mkk.TouristSearchArea import TouristSearchArea;
+from mkk.TouristPlainList import TouristPlainList;
 def PartyEdit {=
 	def.kv
 		moduleName: 'mkk/PohodEdit/PartyEdit/PartyEdit'
 		instanceName: 'partyEdit'
-		cssBaseClass: 'mkk-PartyEdit';
+		cssBaseClass: 'mkk-PartyEdit'
+		partyList: null;
 	def.body {*
 	<!--Диалог редактирования участников похода-->
 	<div class="{=cls 'block'}" style="display: none;" title="Список участников" data-fir-module="{{moduleName}}">
@@ -25,6 +27,11 @@ def PartyEdit {=
 				<div class="{=cls 'selectedTouristsPanel'}">
 					<h5>Участники похода</h5>
 					<div class="{=cls 'selectedTourists'}">
+						{=TouristPlainList
+							instanceName: 'selectedTourists'
+							touristList: partyList
+							mode: 'remove'
+						}
 					</div>
 				</div>
 			</div>

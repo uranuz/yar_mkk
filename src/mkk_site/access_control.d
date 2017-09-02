@@ -274,27 +274,27 @@ bool checkPassword( const(char)[] encodedPwHash, const(char)[] password, const(c
 	return makePasswordHash( password, salt, pepper, params[2].to!size_t, params[3].to!ulong, params[4].to!uint, params[5].to!uint ) == pwHash;
 }
 
-bool changeUserPassword(bool doPwCheck = true)( string login, string oldPassword, string newPassword )
+bool changeUserPassword(bool doPwCheck = true, alias getAuthDBMethod)( string login, string oldPassword, string newPassword )
 {
-	import mkk_site.logging: SiteLoger;
+	// import mkk_site.logging: SiteLoger; TODO: Устаревшая вещь - нужно переделать
 
-	SiteLoger.info( `Проверка длины нового пароля`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Проверка длины нового пароля`, `Смена пароля пользователя` );
 	if( newPassword.length < minPasswordLength )
 	{
-		SiteLoger.info( `Новый пароль слишком короткий`, `Смена пароля пользователя` );
+		// SiteLoger.info( `Новый пароль слишком короткий`, `Смена пароля пользователя` );
 		return false;
 	}
 
-	SiteLoger.info( `Подключаемся к базе данных аутентификации`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Подключаемся к базе данных аутентификации`, `Смена пароля пользователя` );
 	IDatabase dbase = getAuthDBMethod();
 
-	SiteLoger.info( `Получаем данные о пользователе из БД`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Получаем данные о пользователе из БД`, `Смена пароля пользователя` );
 	auto userQueryRes = dbase.query(
 `select num, pw_hash, pw_salt, reg_timestamp
 from site_user
 where login = '` ~ PGEscapeStr( login ) ~ `';`
 	);
-	SiteLoger.info( `Запрос данных о пользователе успешно завершен`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Запрос данных о пользователе успешно завершен`, `Смена пароля пользователя` );
 
 	import webtank.common.conv: DateTimeFromPGTimestamp;
 	DateTime regDateTime = DateTimeFromPGTimestamp( userQueryRes.get( 3, 0, null ) );
@@ -305,13 +305,13 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 		string oldPwHashStr = userQueryRes.get( 1, 0, null );
 		string oldPwSaltStr = userQueryRes.get( 2, 0, null );
 
-		SiteLoger.info( `Проверка старого пароля пользователя`, `Смена пароля пользователя` );
+		// SiteLoger.info( `Проверка старого пароля пользователя`, `Смена пароля пользователя` );
 		if( !checkPassword( oldPwHashStr, oldPassword, oldPwSaltStr, regTimestampStr ) )
 		{
-			SiteLoger.info( `Неверный старый пароль`, `Смена пароля пользователя` );
+			// SiteLoger.info( `Неверный старый пароль`, `Смена пароля пользователя` );
 			return false;
 		}
-		SiteLoger.info( `Проверка старого пароля успешно завершилась`, `Смена пароля пользователя` );
+		// SiteLoger.info( `Проверка старого пароля успешно завершилась`, `Смена пароля пользователя` );
 	}
 
 	import std.uuid : randomUUID;
@@ -320,20 +320,20 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 	ubyte[] pwHash = makePasswordHash( newPassword, pwSaltStr, regTimestampStr );
 	string pwHashStr = encodePasswordHash( pwHash );
 
-	SiteLoger.info( `Выполняем запрос на смену пароля`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Выполняем запрос на смену пароля`, `Смена пароля пользователя` );
 	auto changePwQueryRes = dbase.query(
 `update site_user set pw_hash = '` ~ PGEscapeStr( pwHashStr ) ~ `', pw_salt = '` ~ PGEscapeStr( pwSaltStr ) ~ `'
 where login = '` ~ PGEscapeStr( login ) ~ `'
 returning 'pw_changed';`
 	);
 
-	SiteLoger.info( `Проверка успешности выполнения запроса смены пароля`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Проверка успешности выполнения запроса смены пароля`, `Смена пароля пользователя` );
 	if( changePwQueryRes.get(0, 0, "") == "pw_changed" )
 	{
-		SiteLoger.info( `Успешно задан новый пароль`, `Смена пароля пользователя` );
+		// SiteLoger.info( `Успешно задан новый пароль`, `Смена пароля пользователя` );
 		return true;
 	}
-	SiteLoger.info( `Запрос смены пароля завершился с неверным результатом`, `Смена пароля пользователя` );
+	// SiteLoger.info( `Запрос смены пароля завершился с неверным результатом`, `Смена пароля пользователя` );
 
 	return false;
 }
