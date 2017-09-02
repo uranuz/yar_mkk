@@ -19,7 +19,8 @@ from mkk.Pagination import Pagination;
 				{= recGet expPerson "givenName"}  
 				{= recGet expPerson "patronymic"}  
 				{= recGet expPerson "yearBirth"} г.р. </h2>
-
+				</label>
+				<label>
 				<h5>
 				{= if not{=empty {= recGet expPerson "experiencePerson"} }   
 									{* Туристский опыт: {= recGet expPerson "experiencePerson"}</br> *} }
@@ -75,8 +76,16 @@ from mkk.Pagination import Pagination;
 									{=recGet rec "keyBook" }
 									</a>
 									</td>
-								<td>{=recGet rec "beginDate" }</br>
-										{=recGet rec "finishDate" }</td>
+								<td>
+									{=dtGet  {=recGet rec "beginDate" }"day" }.
+									{=dtGet  {=recGet rec "beginDate" }"month" }.
+									{=dtGet  {=recGet rec "beginDate" }"year" }
+
+									</br>
+									{=dtGet  {=recGet rec "finishDate" }"day" }.
+									{=dtGet  {=recGet rec "finishDate" }"month" }.
+									{=dtGet  {=recGet rec "finishDate" }"year" }
+								</td>
 								<td>{=recGetStr rec "tourismKind" }</br>
 										{=recGet rec "complexity" } 
 										c эл.{=recGet rec "complexityElems" }</td>

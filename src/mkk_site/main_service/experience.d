@@ -143,10 +143,10 @@ bool isAuthorized
 		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
 		//если номер страницы больше числа страниц переходим на последнюю 
 
-		if(currentPage<1) currentPage=1; //текущая страница
+		if(currentPage<0) currentPage=0; //текущая страница
 		//если номер страницы меньше 1 переходим на первую 
    
-   size_t offset = (currentPage - 1) * limit ; //Сдвиг по числу записей
+   size_t offset = (currentPage) * limit ; //Сдвиг по числу записей
    
    immutable experienceTabl =	
 		`select
@@ -156,7 +156,7 @@ bool isAuthorized
 				coalesce(nomer_knigi,'00-00')
 			) as "Номер книги", 
 			begin_date as "Дата начала",
-			begin_date as "Дата конца",
+			finish_date as "Дата конца",
 			vid as "Вид",
 			ks as "КС",
 			elem as "Элем КС",
