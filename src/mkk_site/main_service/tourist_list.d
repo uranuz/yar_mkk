@@ -56,14 +56,7 @@ static immutable touristListRecFormat = RecordFormat!(
 	
 );
 
-/*struct TouristFilter
-{
-	Optional!string familyName;
-	Optional!string givenName;
-	Optional!string patronymic;
-	Optional!int birthYear;
 
-}*/
 
 //--------------------------------------------------------
 import std.json;
