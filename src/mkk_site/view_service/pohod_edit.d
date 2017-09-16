@@ -50,14 +50,12 @@ string renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthori
 {
 	import std.json: JSONValue;
 	TDataNode dataDict;
-	if( pohodNum.isSet )
-	{
-		dataDict["isAuthorized"] = isAuthorized;
-		dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.value]));
-		dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
-		dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
-		dataDict["vpaths"] = Service.virtualPaths;
-	}
+
+	dataDict["isAuthorized"] = isAuthorized;
+	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.toStdJSON()]));
+	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
+	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
+	dataDict["vpaths"] = Service.virtualPaths;
 
 	return Service.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict).str;
 }

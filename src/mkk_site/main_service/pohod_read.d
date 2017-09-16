@@ -40,7 +40,7 @@ static immutable pohodInfoQueryBase =
 			|| coalesce(' ' || chief_rec.birth_year::text,'')
 	end "chiefName",
 	case
-		when 
+		when
 			alt_chief_rec.family_name is null
 			and alt_chief_rec.given_name is null
 			and alt_chief_rec.patronymic is null
@@ -56,7 +56,7 @@ static immutable pohodInfoQueryBase =
 	stat "claimState",
 	chef_coment "chiefComment",
 	"MKK_coment" "mkkComment"
-from pohod 
+from pohod
 left outer join tourist chief_rec
 	on pohod.chef_grupp = chief_rec.num
 left outer join tourist alt_chief_rec
@@ -98,48 +98,54 @@ static immutable pohodRecFormat = RecordFormat!(
 	)
 );
 
-auto readPohod(size_t pohodNum)
+IBaseRecord readPohod(Optional!size_t pohodNum)
 {
-	import std.conv: to;
+	import webtank.datctrl.detatched_record;
+	import std.conv: text;
+	if( pohodNum.isNull ) {
+		return makeMemoryRecord(pohodRecFormat);
+	}
 
-	string queryStr = pohodInfoQueryBase ~ ` where pohod.num = ` ~ pohodNum.to!string ~ `;`;
-	auto rs = getCommonDB().query(queryStr).getRecordSet(pohodRecFormat);
-	
+	auto rs = getCommonDB().query(
+		pohodInfoQueryBase ~ ` where pohod.num = ` ~ pohodNum.text
+	).getRecordSet(pohodRecFormat);
+
 	if( rs && rs.length == 1 ) {
-		return rs.front;
+		return rs[0];
 	}
 	return null;
 }
 
 static immutable extraFileLinkRecordFormat = RecordFormat!(
-	string, "linkData"
+	PrimaryKey!string, "linkData"
 )();
 
 import std.typecons: Tuple;
 
 alias ExtraFileLink = Tuple!( string, "uri", string, "descr" );
 
-auto getExtraFileLinks(size_t num)
+auto getExtraFileLinks(Optional!size_t num)
 {
-	import std.conv: to;
-	string queryStr = `select unnest(links) as num from pohod where pohod.num = ` ~ num.to!string;
-	
-	auto rs = getCommonDB()
-		.query(queryStr)
-		.getRecordSet(extraFileLinkRecordFormat);
-	
+	import std.conv: text;
 	ExtraFileLink[] links;
+	if( num.isNull ) {
+		return links;
+	}
+
+	auto rs = getCommonDB().query(
+		`select unnest(links) as num from pohod where pohod.num = ` ~ num.text
+	).getRecordSet(extraFileLinkRecordFormat);
+
 	links.length = rs.length;
-	
 	size_t i = 0;
 	foreach( rec; rs )
 	{
-		string[] linkPair = parseExtraFileLink( rec.get!"linkData"(null) );
+		string[] linkPair = parseExtraFileLink(rec.get!"linkData"());
 		links[i].uri = linkPair[0];
 		links[i].descr = linkPair[1];
-		
+
 		++i;
 	}
-	
+
 	return links;
 }
