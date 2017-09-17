@@ -40,7 +40,7 @@ static immutable recentPohodRecFormat = RecordFormat!(
 		элементыКС
 	)
 );
-	
+
 static immutable recentPohodQuery =
 `select
 	pohod.num as "num",
@@ -100,11 +100,16 @@ static immutable participantInfoRecFormat = RecordFormat!(
 	int, "birthYear"
 )();
 
-auto getPartyList(size_t num)
+IBaseRecordSet getPartyList(Optional!size_t num)
 {
+	import webtank.datctrl.record_set;
 	import std.conv: text;
-	return getCommonDB().query(`
-with tourist_num as (
+	if( num.isNull ) {
+		return makeMemoryRecordSet(participantInfoRecFormat);
+	}
+
+	return getCommonDB().query(
+`with tourist_num as(
 	select unnest(unit_neim) as num
 	from pohod where pohod.num = ` ~ num.text ~ `
 )
@@ -116,8 +121,8 @@ select
 	tourist.birth_year
 from tourist_num
 left join tourist
-	on tourist.num = tourist_num.num
-	`).getRecordSet(participantInfoRecFormat);
+	on tourist.num = tourist_num.num`
+	).getRecordSet(participantInfoRecFormat);
 }
 
 static immutable briefPohodInfoRecFormat = RecordFormat!(
@@ -141,7 +146,7 @@ from pohod where pohod.num = ` ~ num.text ~ `
 
 	JSONValue jsonResult;
 	jsonResult["pohodInfo"] = pohodInfo.toStdJSON();
-	jsonResult["partyList"] = getPartyList(num).toStdJSON();
+	jsonResult["partyList"] = getPartyList(Optional!size_t(num)).toStdJSON();
 
 	return jsonResult;
 }
@@ -163,7 +168,7 @@ struct PohodFilter
 	{
 		import std.algorithm: canFind;
 
-		if( tourismKinds.length > 0 || complexities.length > 0 || 
+		if( tourismKinds.length > 0 || complexities.length > 0 ||
 			progress.length > 0 || claimStates.length > 0 ||
 			pohodRegion.length > 0 || withFiles || withDataCheck
 		) return true;
@@ -183,7 +188,7 @@ struct СоотвПолейСроков {
 	string имяВБазе;
 	string опСравн;
 };
-	
+
 //Вспомогательный массив структур для составления запроса
 //Устанавливает соответствие между полями в форме и в базе
 //и операциями сравнения, которые будут в запросе
@@ -243,7 +248,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	OR vid is NULL /*Не указан вид туризма*/
 	OR ks is NULL /*Не указана категория сложности*/
 )`;
-	
+
 	if( filter.withFiles ) {
 		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
 	}
@@ -253,10 +258,10 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	foreach( соотвПоля; соотвПолейСроков )
 	{
 		OptionalDate dateFilter = filter.dates.get(соотвПоля.имяВФорме, OptionalDate());
-		
+
 		if( dateFilter.isDefined )
 		{
-			dateFilters ~= ` ('` ~ Date( dateFilter.tupleof ).conv!string ~ `'::date ` 
+			dateFilters ~= ` ('` ~ Date( dateFilter.tupleof ).conv!string ~ `'::date `
 				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
 		}
 		else
@@ -275,7 +280,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 
 	if( filter.pohodRegion.length > 0 )
 		filters ~= `region_pohod ILIKE '%` ~ filter.pohodRegion ~ `%'`;
-	
+
 	return ( filters.length > 0 ?	" ( " ~ filters.join(" ) and ( ") ~ " ) " : null );
 }
 
@@ -309,7 +314,7 @@ static immutable pohodRecFormat = RecordFormat!(
 private static immutable pohodListQueryPart =
 `with
 t_chef as (
-	select 
+	select
 		pohod.num,
 		(
 			coalesce(T.family_name,'нет данных')||'<br> '
@@ -329,7 +334,7 @@ select
 	(
 		date_part('day', begin_date) || '.' ||
 		date_part('month', begin_date) || '.' ||
-		date_part('YEAR', begin_date) 
+		date_part('YEAR', begin_date)
 		||' <br> '||
 		date_part('day', finish_date) || '.' ||
 		date_part('month', finish_date) || '.' ||
@@ -343,7 +348,7 @@ select
 	( coalesce(pohod.unit, '') ) as kol_tur,
 	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz,
 `;
-	
+
 private static immutable pohodListQueryPart_data_check =
 `(
 	(CASE WHEN finish_date < current_date and prepar < 6
@@ -369,8 +374,8 @@ private static immutable pohodListQueryPart_data_check =
 			ELSE '' END)
 ) as marchrut,
 `;
-	
-	
+
+
 private static immutable pohodListQueryPart_marchrut = "('Нитка маршрута: ' || coalesce(marchrut::text, '') ) as marchrut,";
 
 private static immutable pohodListQueryPart2 =
@@ -384,10 +389,10 @@ size_t getPohodCount(PohodFilter filter)
 {
 	import std.conv: to;
 	string query = `select count(1) from pohod`;
-	
+
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
-	
+
 	 return getCommonDB()
 		.query(query)
 		.get(0, 0, "0").to!size_t;

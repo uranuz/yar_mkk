@@ -1,11 +1,11 @@
 module mkk_site.main_service.pohod_edit;
+
 import mkk_site.main_service.devkit;
-import mkk_site.data_defs.pohod_edit: PohodDataToWrite, TouristListFilter, Navigation, DBName;
+import mkk_site.data_defs.pohod_edit: PohodDataToWrite, DBName;
 
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
-	Service.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
 	Service.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
 }
 
@@ -25,7 +25,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	if( !isAuthorized ) {
 		throw new Exception(`Недостаточно прав для изменения похода!!!`);
 	}
-	
+
 	string[] fieldNames;
 	string[] fieldValues;
 
@@ -39,7 +39,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	enum string GetFieldName(alias E) = E[0];
 	enum enumFieldNames = [staticMap!(GetFieldName, PohodEnums)];
 
-	if( record.beginDate.isSet 
+	if( record.beginDate.isSet
 		&& record.finishDate.isSet
 		&& record.finishDate.value < record.beginDate.value
 	) {
@@ -83,7 +83,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 				//SiteLoger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
 				string[] processedLinks;
-				
+
 				foreach( ref linkPair; field.value )
 				{
 					string uriStr = strip(linkPair[0]);
@@ -107,7 +107,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 			{
 				if( record.partyNums.isSet && field.isSet && !record.partyNums.value.canFind(field) ) {
 					throw new Exception(
-						(fieldName == "chiefNum"? "Руководитель": "Заместитель руководителя") 
+						(fieldName == "chiefNum"? "Руководитель": "Заместитель руководителя")
 						~ " похода должен быть в списке участников!!!"
 					);
 				}
@@ -191,89 +191,6 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	//SiteLoger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
 
 	return record.num;
-}
-
-static immutable shortTouristRecFormat = RecordFormat!(
-	PrimaryKey!(int), "num",
-	string, "familyName",
-	string, "givenName",
-	string, "patronymic",
-	int, "birthYear"
-)();
-
-
-//RPC метод для вывода списка туристов (с краткой информацией) по фильтру
-auto touristPlainSearch(TouristListFilter filter, Navigation nav)
-{
-	import std.json: JSONValue;
-	import std.traits: getUDAs;
-	import webtank.common.optional: Optional, isOptional, OptionalValueType;
-	import std.conv: text, to;
-	import std.meta: AliasSeq, Alias;
-	import std.string: join;
-	auto dbase = getCommonDB();
-
-	static immutable size_t maxPageSize = 50;
-	string[] filters;
-	if( nav.pageSize > maxPageSize ) {
-		nav.pageSize = maxPageSize;
-	}
-
-	foreach( fieldName; AliasSeq!(__traits(allMembers, TouristListFilter)) )
-	{
-		alias FieldType = typeof(__traits(getMember, filter, fieldName));
-		static if( __traits(compiles, {
-			FieldType test = FieldType.init;
-		})) {
-			pragma(msg, "fieldName: " ~ fieldName)
-			enum string dbFieldName = getUDAs!(__traits(getMember, filter, fieldName), DBName)[0].dbName;
-			auto field = __traits(getMember, filter, fieldName);
-			static if( is( FieldType == string ) )
-			{
-				if( field.length > 0 ) {
-					filters ~= dbFieldName ~ ` ilike '%` ~ PGEscapeStr(field) ~ `%'`;
-				}
-			}
-			else static if( isOptional!FieldType && is( OptionalValueType!(FieldType) == int ) )
-			{
-				if( field.isSet ) {
-					filters ~= dbFieldName ~ ` = ` ~ field.text;
-				}
-			}
-			else static if( fieldName == "nums" )
-			{
-				if( field.length > 0 ) {
-					filters ~= dbFieldName ~ ` in(` ~ field.to!(string[]).join(",") ~ `)`;
-				}
-			}
-		}
-	}
-
-	string query = `select num, family_name, given_name, patronymic, birth_year from tourist `;
-	string countQuery = `select count(1) from tourist `;
-	if( filters.length > 0 )
-	{
-		string filtersPart = "where (" ~ filters.join(") and (") ~ ")";
-		query ~= filtersPart;
-		countQuery ~= filtersPart;
-	}
-	size_t recordCount = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
-	if( recordCount < nav.offset ) {
-		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
-		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
-	}
-
-	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
-
-	JSONValue result;
-	result[`nav`] = JSONValue([
-		`offset`: JSONValue(nav.offset),
-		`pageSize`: JSONValue(nav.pageSize),
-		`recordCount`: JSONValue(recordCount)
-	]);
-	result[`rs`] = getCommonDB().query(query).getRecordSet(shortTouristRecFormat).toStdJSON();
-
-	return result;
 }
 
 /++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/

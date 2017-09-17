@@ -1,9 +1,11 @@
 module mkk_site.view_service.tourist_list;
+
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
 	Service.pageRouter.join!(renderTouristList)("/dyn/tourist/list");
+	Service.pageRouter.join!(touristPlainList)("/dyn/tourist/plainList");
 }
 
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
@@ -11,32 +13,71 @@ import ivy.interpreter_data, ivy.json, ivy.interpreter;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
+import webtank.common.optional: Optional, Undefable;
+import webtank.net.deserialize_web_form: formDataToStruct;
+import webtank.common.std_json.to: toStdJSON;
+
+import mkk_site.data_defs.tourist_list;
+
 string renderTouristList(HTTPContext ctx)
 {
-	debug import std.stdio: writeln;
-	debug writeln(`tourist request headers: `, ctx.request.headers.toAA());
-	
-	import std.json;
-	import std.conv: to;
-//*************************************************************
-	JSONValue callParams;
-	
-	callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "0").to!size_t;
-	callParams["familyName"] = ctx.request.bodyForm.get("family_name", null);
-	callParams["givenName"]  = ctx.request.bodyForm.get("given_name", null);
-	callParams["patronymic"] = ctx.request.bodyForm.get("patronymic", null);
-//**************************************************************
-	auto tpl = Service.templateCache.getByModuleName("mkk.TouristList");
-	//TDataNode dataDict;
-	//dataDict["tourist_list"] = mainServiceCall("tourist.Set", ctx, callParams);
-	
-	TDataNode dataDict = mainServiceCall("tourist.Set", ctx, callParams);
-	//dataDict["familyName"] =  ctx.request.bodyForm.get("family_name", null);
-//***авторизацыя***********************************************************
-	//dataDict["isAuthenticated"] = isAuthorized;
-	dataDict["isAuthenticated"] = true;
-	//dataDict["isAuthenticated"] = false;
+	import std.json: JSONValue;
 
-	return tpl.run(dataDict).str;
+	auto bodyForm = ctx.request.bodyForm;
+	TouristListFilter filter;
+	formDataToStruct(bodyForm, filter);
+	Navigation nav;
+	formDataToStruct(bodyForm, nav);
+
+	JSONValue jFilter = filter.toStdJSON();
+	TDataNode callResult = mainServiceCall("tourist.list", ctx, JSONValue([
+		"filter": jFilter,
+		"nav": nav.toStdJSON()
+	]));
+	TDataNode dataDict = [
+		"filter": jFilter.toIvyJSON(),
+		"touristList": callResult["rs"],
+		"nav": callResult["nav"]
+	];
+
+	dataDict["isAuthorized"] = ctx.user.isAuthenticated &&
+		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
+
+	return Service.templateCache.getByModuleName("mkk.TouristList").run(dataDict).str;
+}
+
+void touristPlainList(HTTPContext ctx)
+{
+	import std.json: JSONValue;
+	import std.algorithm: canFind;
+
+	auto queryForm = ctx.request.queryForm;
+	TouristListFilter filter;
+	formDataToStruct(queryForm, filter);
+	Navigation nav;
+	formDataToStruct(queryForm, nav);
+
+	JSONValue jFilter = filter.toStdJSON();
+	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
+		"filter": jFilter,
+		"nav": nav.toStdJSON()
+	]));
+	TDataNode dataDict = [
+		"filter": jFilter.toIvyJSON(),
+		"touristList": callResult["rs"],
+		"nav": callResult["nav"]
+	];
+
+	if( "mode" in queryForm ) {
+		if( ["add", "remove"].canFind(queryForm["mode"]) ) {
+			dataDict["mode"] = queryForm["mode"];
+		}
+	}
+	if( "instanceName" in queryForm ) {
+		dataDict["instanceName"] = queryForm["instanceName"];
+	}
+	ctx.response.write(
+		Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict).str
+	);
 }
 
