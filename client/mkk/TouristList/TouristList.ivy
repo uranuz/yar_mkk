@@ -1,69 +1,57 @@
-expr 
+expr
 {=
 from fir.controls.utils import recGet, recGetStr,cls;
 from mkk.Pagination import Pagination;
 
-	def TouristList{=
-
-def.kv
+def TouristList{=
+	def.kv
 		instanceName: 'touristList'
 		cssBaseClass: "mkk-touristList";
 
-def.body {*
+	def.body {*
+	<div class="e-block t-mkk-touristList">
+		<h2>Туристы</h2>
 
-		<div class="e-block t-mkk-touristList">
-			<h2>Туристы</h2>
-			
-			
 		<form id="main_form" method="post">
 			<div class="e-filter t-show_tourist form-inline">
 			<label>
 				<span>Фамилия И О</span>
-				<input name="family_name" type="text" class="form-control"
-				value="{= expr familyName}" placeholder="Смирнов">
-				<input name="given_name" type="text" maxlength="1" size="1"  class="form-control" 
-				value="{= expr givenName}" placeholder="И">
+				<input name="familyName" type="text" class="form-control"
+				value="{{filter.familyName}}" placeholder="Смирнов">
+				<input name="givenName" type="text" maxlength="1" size="1" class="form-control"
+				value="{{filter.givenName}}" placeholder="И">
 				<input name="patronymic" type="text" maxlength="1" size="1" class="form-control"
-				value="{= expr patronymic}" placeholder="П">
-				
+				value="{{filter.patronymic}}" placeholder="П">
+
 			</label>
 			<button type="submit" name="act" class="btn btn-primary">Найти</button>
-		</div>
-	<!-- Переход по страницам ------------------------------>
-
-	
-
-	
-	<div class="{=cls 'pagination'}">
-					{=Pagination
-						formField: 'currentPage'
-						currentPage: currentPage
-						pageCount: pageCount
-					}
-
-					</div>
-
-	<!-- Переход по страницам конец------------------------------>		
-	</form>
-	
+			</div>
+			<div class="{=cls 'pagination'}">
+				{=Pagination
+					formField: 'offset'
+					offset: nav.offset
+					recordCount: nav.recordCount
+				}
+			</div>
+		</form>
 		<div class="e-table_bar t-show_tourist row">
-					<div class="col-md-6">
-									<div class="form-control-static">
-										Найдено туристов:					
-										{= expr touristCount } страниц {= expr pageCount }
-										
-									</div>
-					</div>
-				{=if isAuthenticated {*	
-				<div class="col-md-6" style="text-align: right;">
-					<a href="*dynamic path}}edit_tourist"
-						class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
-						Добавить нового туриста
-					</a>
+			<div class="col-md-6">
+				<div class="form-control-static">
+					Найдено туристов:
+					{{nav.recordCount}} страниц {{nav.pageCount}}
+
 				</div>
-				*}}
+			</div>
+			{=if isAuthorized {*
+			<div class="col-md-6" style="text-align: right;">
+				<a href="*dynamic path}}edit_tourist"
+					class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
+					Добавить нового туриста
+				</a>
+			</div>
+			*}}
 		</div>
-	
+
 
 	<!-- Раздел  таблица-------------------->
 
@@ -73,57 +61,52 @@ def.body {*
 						<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
 							<tr class="{=cls 'tableHeaderRow'} mkk-Table">
 							{%
-								
-								if isAuthorized
-								{=
+								if isAuthorized {=
 									repeat title in
 									["№","Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий","Изм."] {*
 										<th>{{title}}</th>
 									*}
-								}
-								else 
-								{=
+								} else {=
 									repeat title in
 									["Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий"] {*
 										<th>{{title}}</th>
 									*}
 								}
-								
+
 							}
 							</tr>
 						</thead>
 						<!-- Основное   тело  таблицы-->
 						<tbody class="{=cls 'tableContentBody'} mkk-Table">
-						
+
 						{%
-							
-							repeat it in  touristTabl {*
+							repeat it in touristList {*
 								<tr>
-								
+
 								{= if isAuthorized {*
-									<td>{= recGet it "Ключ" }</td>
-									*} 
+									<td>{=recGet it "num" }</td>
+									*}
 								}
 
-									<td>{= recGet it "Имя и год рожд" }</td>
+									<td>{=recGet it "nameAndYear" }</td>
 									<td>
-										<a href="/dyn/tourist/experience?key={= recGet it "Ключ" }">	
-											{=recGet it "Опыт" }
+										<a href="/dyn/tourist/experience?key={=recGet it 'num' }">
+											{=recGet it "experience" }
 										</a>
 									</td>
-									<td>{= recGet it "Контакты" }</td>
-									<td>{= recGetStr it "Разряд" }</br>
-									    {= recGetStr it "Категория" }</td>
-									<td>{= recGet it "Комментарий" }</td>
+									<td>{=recGet it "contacts"}</td>
+									<td>{=recGetStr it "sportsCategory"}</br>
+									    {=recGetStr it "refereeCategory"}</td>
+									<td>{=recGet it "comment"}</td>
 								{= if isAuthorized {*
 									<td>
-										<a href="/dyn/tourist/edit?key={= recGet it "Ключ" }" >Изм.</a>
+										<a href="/dyn/tourist/edit?key={=recGet it 'num'}">Изм.</a>
 									</td>
-									*} 
+									*}
 								}
-									
+
 								</tr>
-								
+
 							*};
 						}
 						</tbody>
@@ -133,5 +116,5 @@ def.body {*
 		</div>
 	*};
 	};
-TouristList	
+TouristList
 }

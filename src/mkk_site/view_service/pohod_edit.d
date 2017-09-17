@@ -2,11 +2,10 @@ module mkk_site.view_service.pohod_edit;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
-import mkk_site.data_defs.pohod_edit: PohodDataToWrite, TouristListFilter, Navigation;
+import mkk_site.data_defs.pohod_edit: PohodDataToWrite;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
-	Service.pageRouter.join!(tousristPlainList)("/dyn/tourist/plainList");
 }
 
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
@@ -90,39 +89,4 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 	}
 
 	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict).str;
-}
-
-void tousristPlainList(HTTPContext ctx)
-{
-	import std.json: JSONValue;
-	import std.algorithm: map, splitter, canFind;
-	import std.conv: to;
-	import std.array: array;
-
-	auto queryForm = ctx.request.queryForm;
-	TouristListFilter filter;
-	formDataToStruct(queryForm, filter);
-	Navigation nav;
-	formDataToStruct(queryForm, nav);
-
-	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
-		"filter": filter.toStdJSON(),
-		"nav": nav.toStdJSON()
-	]));
-	TDataNode dataDict = [
-		"touristList": callResult["rs"],
-		"nav": callResult["nav"]
-	];
-
-	if( "mode" in queryForm ) {
-		if( ["add", "remove"].canFind(queryForm["mode"]) ) {
-			dataDict["mode"] = queryForm["mode"];
-		}
-	}
-	if( "instanceName" in queryForm ) {
-		dataDict["instanceName"] = queryForm["instanceName"];
-	}
-	ctx.response.write(
-		Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict).str
-	);
 }
