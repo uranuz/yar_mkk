@@ -1,7 +1,6 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.Pagination import Pagination;
-
 def TouristList {=
 	def.kv
 		instanceName: 'touristList'
@@ -9,7 +8,7 @@ def TouristList {=
 	def.body {*
 	<div class="{=cls 'block'}">
 		<h2>Туристы</h2>
-		<form id="main_form" method="post">
+		<form method="post">
 			<div class="e-filter t-show_tourist form-inline">
 				<label>
 					<span>Фамилия И. О.</span>
@@ -48,15 +47,13 @@ def TouristList {=
 				<div class="form-control-static">
 					Найдено туристов:
 					{{nav.recordCount}} страниц {{nav.pageCount}}
-
 				</div>
 			</div>
 			{=if isAuthorized {*
 			<div class="col-md-6" style="text-align: right;">
-				<a href="*dynamic path}}edit_tourist"
-					class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
-					Добавить нового туриста
-				</a>
+				<a href="{{vpaths.siteDynamic}}tourist/edit"
+					class="btn btn-primary"
+					>Добавить нового туриста</a>
 			</div>
 			*}}
 		</div>
@@ -67,18 +64,16 @@ def TouristList {=
 					<table class="{=cls 'table'} mkk-Table">
 						<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
 							<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-							{%
-								if isAuthorized {=
-									repeat title in
-									["№","Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий","Изм."] {*
-										<th>{{title}}</th>
-									*}
-								} else {=
-									repeat title in
-									["Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий"] {*
-										<th>{{title}}</th>
-									*}
-								}
+							{=
+								var fieldNames: {=
+									if isAuthorized
+										["№", "Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий", "Изм."]
+									else
+										["Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий"]
+								};
+								repeat title in fieldNames {*
+									<th>{{title}}</th>
+								*}
 							}
 							</tr>
 						</tbody>

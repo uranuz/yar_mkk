@@ -27,7 +27,8 @@ auto touristPlainSearch(TouristListFilter filter, Navigation nav)
 	return getTouristListImpl(
 		filter, nav,
 		shortTouristRecFormat,
-		`num, family_name, given_name, patronymic, birth_year`
+		`num, family_name, given_name, patronymic, birth_year`,
+		`"family_name", "given_name"`
 	);
 }
 
@@ -67,7 +68,8 @@ auto touristList(TouristListFilter filter, Navigation nav)
 		) "contacts",
 		razr "sportsCategory",
 		sud "refereeCategory",
-		comment`
+		comment`,
+		`"nameAndYear"`
 	);
 }
 
@@ -76,7 +78,8 @@ auto getTouristListImpl(ResultFormat)(
 	TouristListFilter filter,
 	Navigation nav,
 	ResultFormat resultFormat,
-	string queryFields
+	string queryFields,
+	string orderBy
 ) {
 	import std.json: JSONValue;
 	import std.traits: getUDAs;
@@ -134,7 +137,10 @@ auto getTouristListImpl(ResultFormat)(
 		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
 	}
 
-	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
+	query ~=
+		(orderBy.length? ` order by ` ~ orderBy: null)
+		~ ` offset ` ~ nav.offset.text
+		~ ` limit ` ~ nav.pageSize.text;
 
 	JSONValue result;
 	result[`nav`] = JSONValue([

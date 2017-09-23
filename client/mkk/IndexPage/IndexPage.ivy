@@ -5,33 +5,33 @@ def RecentPohodList {=
 		cssBaseClass: "mkk-RecentPohodList"
 		instanceName: 'recentPohodList';
 	def.body {*
-		<div class="{=cls "block"}">
-			<h4 class="{=cls "blockTitle"}">Недавно добавленные походы</h4>
+		<div class="{=cls 'block'}">
+			<h4 class="{=cls 'blockTitle'}">Недавно добавленные походы</h4>
 			{=repeat pohod in pohodList {*
-				<div class="{=cls "itemBlock"}">
-					<a class="{=cls "titleLink"}" href="{{vpaths.siteDynamic}}pohod?key={=recGet pohod "num"}">
+				<div class="{=cls 'itemBlock'}">
+					<a class="{=cls 'titleLink'}" href="{{vpaths.siteDynamic}}pohod/read?key={=recGet pohod 'num'}">
 						{=recGetStr pohod "tourismKind"}
 						{=recGetStr pohod "complexity"}
 						{=recGetStr pohod "complexityElems"} к.с.
 						в районе {=recGet pohod "pohodRegion"}
 					</a>
-					<div class="{=cls "itemDetails"}">
-						<p class="{=cls "routeRow"}">
-							<span class="{=cls "routeLabel"}">По маршруту:</span>
-							<span class="{=cls "route"}">{=recGet pohod "route"}</span>
+					<div class="{=cls 'itemDetails'}">
+						<p class="{=cls 'routeRow'}">
+							<span class="{=cls 'routeLabel'}">По маршруту:</span>
+							<span class="{=cls 'route'}">{=recGet pohod "route"}</span>
 						</p>
-						<div class="{=cls "basicInfoRow"}">
-							<span class="{=cls "chiefLabel"}">Руководитель:</span>
-							<a class="{=cls "chiefLink"}"
-								href="{{vpaths.siteDynamic}}show_pohod_for_tourist?key={=recGet pohod "chiefNum"}">
+						<div class="{=cls 'basicInfoRow'}">
+							<span class="{=cls 'chiefLabel'}">Руководитель:</span>
+							<a class="{=cls 'chiefLink'}"
+								href="{{vpaths.siteDynamic}}tourist/experience?key={=recGet pohod 'chiefNum'}">
 								{=recGet pohod "chiefFamilyName"}
 								{=recGet pohod "chiefGivenName"}
 								{=recGet pohod "chiefPatronymic"}
 							</a>
-							<p class="{=cls "dateInterval"}">Сроки похода: {=dtGet {=recGet pohod "beginDate"} "year" }</p>
+							<p class="{=cls 'dateInterval'}">Сроки похода: {=dtGet {=recGet pohod 'beginDate'} "year" }</p>
 						</div>
 					</div>
-					<div class="{=cls "chiefCommentRow"}">
+					<div class="{=cls 'chiefCommentRow'}">
 						{=
 							var chiefComment: {=recGet pohod "chiefComment"};
 							if not {=empty chiefComment} "Описание: " ~ chiefComment

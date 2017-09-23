@@ -42,6 +42,7 @@ string renderTouristList(HTTPContext ctx)
 
 	dataDict["isAuthorized"] = ctx.user.isAuthenticated &&
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
+	dataDict["vpaths"] = Service.virtualPaths;
 
 	return Service.templateCache.getByModuleName("mkk.TouristList").run(dataDict).str;
 }
