@@ -1,83 +1,175 @@
 expr {=
-	def TouristEdit {=
-		def.kv
-			moduleName: 'mkk/TouristEdit/TouristEdit'
-			instanceName: 'touristEdit'
-			cssBaseClass: 'mkk-TouristEdit';
-		def.body {*
-			<div class="{=cls 'block'}">
-					<input type="hidden"  data-fir-opts="{=toJSONBase64 {=scope} }"/>
-					<style>
-						.b-edit_tourist.e-similars_dlg {
-							display: none;
+from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat;
+from fir.controls.PlainDatePicker import PlainDatePicker;
+from fir.controls.PlainListBox import PlainListBox;
+from mkk.TouristPlainList import TouristPlainList;
+def TouristEdit {=
+	def.kv
+		moduleName: 'mkk/TouristEdit/TouristEdit'
+		instanceName: 'touristEdit'
+		cssBaseClass: 'mkk-TouristEdit';
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<form class="{=cls 'touristForm'} form" method="POST">
+			<h2>Редактирование данных туриста</h2>
+			<input type="hidden" name="num" value="{=recGet tourist 'num'}"/>
+			<table style="width: 100%;">
+				<tr>
+					<td>Фамилия</td>
+					<td>
+						<input type="text"
+							name="familyName"
+							class="{=cls 'familyName'} form-control"
+							value="{=recGet tourist 'familyName'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Имя</td>
+					<td>
+						<input type="text"
+							name="givenName"
+							class="{=cls 'givenName'} form-control"
+							value="{=recGet tourist 'givenName'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Отчество</td>
+					<td>
+						<input type="text"
+							name="patronymic"
+							class="{=cls 'patronymic'} form-control"
+							value="{=recGet tourist 'patronymic'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Дата рождения</td>
+					<td>
+						{=PlainDatePicker
+							instanceName: 'birthDateField'
+							formField: 'birthDate'
+							year: {=recGet tourist 'birthYear'}
+							month: {=recGet tourist 'birthMonth'}
+							day: {=recGet tourist 'birthDay'}
 						}
-					</style>
+					</td>
+				</tr>
+				<tr>
+					<td>Адрес проживания</td>
+					<td>
+						<input type="text"
+							name="address"
+							class="form-control"
+							value="{=recGet tourist 'address'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Номер телефона</td>
+					<td>
+						<input type="text"
+							name="phone"
+							class="form-control"
+							value="{=recGetStr tourist 'phone'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Показывать номер телефона</td>
+					<td>
+						<input type="checkbox"
+							name="showPhone"
+							class="checkbox-inline"
+							{=if {=recGet tourist 'showPhone'} 'checked'}/>
+					</td>
+				</tr>
+				<tr>
+					<td>Электронная почта</td>
+					<td>
+						<input type="text"
+							name="email"
+							class="form-control"
+							value="{=recGet tourist 'email'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Показывать адрес эл. почты</td>
+					<td>
+						<input type="checkbox"
+							name="show_email"
+							class="checkbox-inline"
+							{=if {=recGet tourist 'showEmail'} 'checked'}>
+					</td>
+				</tr>
+				<tr>
+					<td>Туристский опыт</td>
+					<td>
+						<input type="text"
+							name="experience"
+							class="form-control"
+							value="{=recGet tourist 'experience'}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>Комментарий</td>
+					<td>
+						<textarea name="comment" class="form-control"
+							>{=recGet tourist 'comment'}</textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Спортивный разряд</td>
+					<td>
+						{=PlainListBox
+							instanceName: 'sportsCategoryField'
+							formField: 'sportsCategory'
+							idField: 'v'
+							captionField: 'n'
+							items: {=at {=rsFieldFormat tourist 'sportsCategory'} 'enum'}
+							selectedId: {=recGet tourist 'sportsCategory'}
+						}
+					</td>
+				</tr>
+				<tr>
+					<td>Судейская категория</td>
+					<td>
+						{=PlainListBox
+							instanceName: 'refereeCategoryField'
+							formField: 'refereeCategory'
+							idField: 'v'
+							captionField: 'n'
+							items: {=at {=rsFieldFormat tourist 'refereeCategory'} 'enum'}
+							selectedId: {=recGet tourist 'refereeCategory'}
+						}
+					</td>
+				</tr>
+				<tr>
+					<td> &nbsp; </td>
+					<td>
+						<button type="button"
+							class="{=cls 'submitBtn'} btn btn-primary btn-block"
+							>Сохранить</button>
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" name="action" value="write"/>
+		</form>
 
-					<form class="{=cls 'tourist_form'} form" method="POST"{{edit_tourist_form}}>
-						<h2>Редактирование данных туриста</h2>
-						<input type="hidden" name="num"{{num}}/>
-						<table style="width: 100%;">
-							<tr><td>Фамилия</td>
-								<td><input type="text" name="family_name" class="{=cls 'familyName'} form-control"{{family_name}}></td>
-							</tr>
-							<tr><td>Имя</td>
-								<td><input type="text" name="given_name" class="{=cls 'givenName'} form-control"{{given_name}}></td>
-							</tr>
-							<tr><td>Отчество</td>
-								<td><input type="text" name="patronymic" class="{=cls 'patronymic'} form-control"{{patronymic}}></td>
-							</tr>
-							<tr><td>Дата рождения</td>
-								<td>
-									{{birth_date_picker}}
-								</td>
-							</tr>
-							<tr><td>Адрес проживания</td>
-								<td><input type="text" name="address" class="form-control"{{address}}></td>
-							</tr>
-							<tr><td>Номер телефона</td>
-								<td><input type="text" name="phone"{{phone}} class="form-control"></td>
-							</tr>
-							<tr><td>Показывать номер телефона</td>
-								<td><input type="checkbox" name="show_phone" class="checkbox-inline"{{show_phone}}></td>
-							</tr>
-							<tr><td>Электронная почта</td>
-								<td><input type="text" name="email" class="form-control"{{email}}></td>
-							</tr>
-							<tr><td>Показывать адрес эл. почты</td>
-								<td><input type="checkbox" name="show_email" class="checkbox-inline"{{show_email}}></td>
-							</tr>
-							<tr><td>Туристский опыт</td>
-								<td><input type="text" name="exp" class="form-control"{{exp}}></td>
-							</tr>
-							<tr><td>Комментарий</td>
-								<td><textarea name="comment" class="form-control">{{comment}}</textarea></td>
-							</tr>
-							<tr><td>Спортивный разряд</td>
-								<td>{{razr}}</td>
-							</tr>
-							<tr><td>Судейская категория</td>
-								<td>{{sud}}</td>
-							</tr>
-							<tr><td> &nbsp; </td>
-								<td><button type="button" class="{=cls 'submitBtn'} btn btn-primary btn-block">Сохранить</td>
-							</tr>
-						</table>
-						<input type="hidden" name="action"{{action}}>
-					</form>
-
-					<div class="{=cls 'similarsDlg'}">
-						<div class="{=cls 'similarsMsg'}">
-							В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе.
-							Если это так, можно перейти к его редактированию. Если новый турист ещё не существует,
-							можно продолжить добавление.
-						</div>
-						<div class="{=cls 'similarsList'}"></div>
-						<button type="button" class="{=cls 'forceSubmitBtn'}">Продолжить добавление</button>
-					</div>
-					<script src="{{js folder}}edit_tourist.js" defer></script>
-
-				</div>
-		*}
-	};
-	TouristEdit;
+		<div class="{=cls 'similarsDlg'}">
+			<div class="{=cls 'similarsMsg'}">
+				В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе.
+				Если это так, можно перейти к его редактированию. Если новый турист ещё не существует,
+				можно продолжить добавление.
+			</div>
+			<div class="{=cls 'similarsBlock'}">
+				{=TouristPlainList
+					instanceName: 'similarsList'
+					touristList: []
+					mode: null
+				}
+			</div>
+			<button type="button" class="{=cls 'forceSubmitBtn'}">Продолжить добавление</button>
+		</div>
+	</div>
+	*}
+};
+TouristEdit;
 }

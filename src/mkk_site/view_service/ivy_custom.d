@@ -132,7 +132,7 @@ public:
 		{
 			case "format": return _rawFormat;
 			case "namesMapping": return TDataNode(_namesMapping);
-			
+
 			default: break;
 		}
 		return TDataNode();
@@ -238,11 +238,16 @@ public:
 		return new Range(this);
 	}
 
-	override TDataNode opIndex(size_t index) {
+	override TDataNode opIndex(size_t index)
+	{
+		import std.conv: text;
+		assert(index < _rawData.array.length, `Record column with index ` ~ index.text ~ ` is not found!`);
 		return _rawData[index];
 	}
 
-	override TDataNode opIndex(string key) {
+	override TDataNode opIndex(string key)
+	{
+		assert(key in _namesMapping, `Record column with name "` ~ key ~ `" is not found!`);
 		return _rawData[ _namesMapping[key] ];
 	}
 
@@ -283,7 +288,7 @@ class RawRSRangeInterpreter: INativeDirectiveInterpreter
 	private __gshared DirAttrsBlock!(true)[] _compilerAttrBlocks;
 	private __gshared DirAttrsBlock!(false)[] _interpAttrBlocks;
 	private __gshared DirectiveDefinitionSymbol _symbol;
-	
+
 	shared static this()
 	{
 		import std.algorithm: map;

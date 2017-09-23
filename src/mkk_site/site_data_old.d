@@ -1,6 +1,6 @@
 module mkk_site.site_data_old;
 
-import 
+import
 	mkk_site.config_parsing,
 	mkk_site.site_data;
 
@@ -47,7 +47,7 @@ immutable(string) errorLogFileName; //Путь к журналу ошибок с
 immutable(string) eventLogFileName; //Путь к журналу событий сайта
 immutable(string) webtankErrorLogFileName; //Логи ошибок библиотеки
 immutable(string) webtankEventLogFileName; //Логи событий библиотеки
-immutable(string) dbQueryLogFileName; //Логи событий библиотеки
+immutable(string) databaseLogFileName; //Логи событий библиотеки
 immutable(string) prioriteLogFileName; //Путь к журналу приоритетных сообщений
 
 ///Ассоциативный массив с путями сайта в файловой системе
@@ -74,7 +74,7 @@ shared static this()
 	auto virtPaths = getServiceVirtualPaths(jsonCurrService);
 	siteFileSystemPaths = assumeUnique(fsPaths);
 	siteVirtualPaths = assumeUnique(virtPaths);
-	
+
 	//Задаем часто используемые виртуальные пути
 	publicPath = siteVirtualPaths["sitePublic"];
 	cssPath = siteVirtualPaths["siteCSS"];
@@ -103,15 +103,15 @@ shared static this()
 	eventLogFileName = siteFileSystemPaths["siteEventLogFile"];
 	webtankErrorLogFileName = siteFileSystemPaths["webtankErrorLogFile"];
 	webtankEventLogFileName = siteFileSystemPaths["webtankEventLogFile"];
-	dbQueryLogFileName = siteFileSystemPaths["databaseQueryLogFile"];
+	databaseLogFileName = siteFileSystemPaths["databaseLogFile"];
 	prioriteLogFileName = siteFileSystemPaths["sitePrioriteLogFile"];
 
 	//Получаем строки подключения к базам данных
 	auto dbConnStrings = getServiceDatabases(jsonCurrService);
 	serviceDBConnStrings = assumeUnique(dbConnStrings);
-	
+
 	commonDBConnStr = serviceDBConnStrings["commonDB"];
 	//Строка подключения к базе с данными аутентификации
 	authDBConnStr = serviceDBConnStrings["authDB"];
 
-} 
+}

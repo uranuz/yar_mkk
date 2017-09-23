@@ -18,7 +18,7 @@ string renderAuth(HTTPContext context)
 
 	auto req = context.request;
 	auto resp = context.response;
-	
+
 	// Адрес страницы для перенаправления после аутентификации
 	string redirectTo = req.queryForm.get("redirectTo", null);
 
@@ -69,9 +69,6 @@ string renderAuth(HTTPContext context)
 			isAuthFailed = true;
 		}
 	}
-
-	debug import std.stdio;
-	debug writeln(`renderAuth, context.user.isAuthenticated: `, context.user.isAuthenticated);
 
 	TDataNode dataDict;
 	dataDict[`userLogin`] = req.cookies.get(`user_login`, null);

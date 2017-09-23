@@ -102,6 +102,7 @@ IBaseRecord readPohod(Optional!size_t pohodNum)
 {
 	import webtank.datctrl.detatched_record;
 	import std.conv: text;
+
 	if( pohodNum.isNull ) {
 		return makeMemoryRecord(pohodRecFormat);
 	}

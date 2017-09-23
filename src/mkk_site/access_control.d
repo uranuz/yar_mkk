@@ -48,7 +48,7 @@ public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{	auto httpCtx = cast(HTTPContext) context;
-		
+
 		if( httpCtx is null )
 			return new AnonymousUser;
 		else
@@ -60,34 +60,34 @@ public:
 	IUserIdentity authenticateSession(HTTPContext context)
 	{
 		string SIDString = context.request.cookies.get( "__sid__", null );
-		
+
 		SessionId sessionId;
-		
+
 		if( SIDString.length != sessionIdStrLength )
 			return new AnonymousUser;
-			
+
 		IDatabase dbase = getAuthDBMethod();
 
 		Base64URL.decode(SIDString, sessionId[]);
-		
+
 		if( sessionId == SessionId.init )
 			return new AnonymousUser;
-		
+
 		//Делаем запрос к БД за информацией о сессии
 		auto session_QRes = dbase.query(
 			//Получим адрес машины и тип клиентской программы, если срок действия не истек или ничего
 			`select client_address, user_agent from session where sid = '`
 			~ Base64URL.encode( sessionId ) ~ `' and current_timestamp < "expires";`
 		);
-		
+
 		if( session_QRes.recordCount != 1 || session_QRes.fieldCount != 2 )
 			return new AnonymousUser;
-		
+
 		//Проверяем адрес и клиентскую программу с имеющимися при создании сессии
 		if( context.request.headers.get("x-real-ip", "") != session_QRes.get(0, 0, "") ||
 			context.request.headers.get("user-agent", "") != session_QRes.get(1, 0, "")
 		) return new AnonymousUser;
-		
+
 		//Делаем запрос к БД за информацией о пользователе
 		auto user_QRes = dbase.query(
 `select U.num, U.email, U.login, U.name, U.user_group
@@ -96,15 +96,15 @@ join site_user as U
 	on U.num = site_user_num
 where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 		);
-		
+
 		if( (user_QRes.recordCount != 1) && (user_QRes.fieldCount != 5) )
 			return new AnonymousUser;
-		
+
 		string[string] userData = [
 			"userNum": user_QRes.get(0, 0, null),
 			"email": user_QRes.get(1, 0, null)
 		];
-		
+
 		//Получаем информацию о пользователе из результата запроса
 		return new MKKUserIdentity(
 			user_QRes.get(2, 0, null), //login
@@ -114,8 +114,8 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 			sessionId
 		);
 	}
-	
-	//Функция выполняет вход пользователя с логином и паролем, 
+
+	//Функция выполняет вход пользователя с логином и паролем,
 	//происходит генерация Ид сессии, сохранение его в БД
 	IUserIdentity authenticateByPassword(
 		string login,
@@ -129,46 +129,46 @@ where session.sid = '` ~ Base64URL.encode( sessionId ) ~ `';`
 		string group;
 		string name;
 		string email;
-		
+
 		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
-		
+
 		//Делаем запрос к БД за информацией о пользователе
 		auto query_res = dbase.query(
 `select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email
 from site_user
 where login = '` ~ PGEscapeStr(login) ~ `';`
 		);
-		
+
 		if( query_res.recordCount != 1 || query_res.fieldCount != 7 )
 			return new AnonymousUser;
-			
+
 		string userNum = query_res.get(0, 0, null);
 		string validEncodedPwHash = query_res.get(1, 0, null);
 		string pwSalt = query_res.get(2, 0, null);
 		string regTimestampStr = query_res.get(3, 0, null);
-		
+
 		DateTime regDateTime = DateTimeFromPGTimestamp(regTimestampStr);
-		
+
 		group = query_res.get(4, 0, null);
 		name = query_res.get(5, 0, null);
 		email = query_res.get(6, 0, null);
-		
+
 		bool isValidPassword = checkPassword( validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString() );
 
-		if( isValidPassword ) 
+		if( isValidPassword )
 		{	SessionId sid = generateSessionId( login, group, Clock.currTime().toISOString() );
-			
+
 			auto newSIDStatusRes = dbase.query(
-				` insert into "session" ` 
-				~ ` ( "sid", "site_user_num", "expires", "client_address", "user_agent" ) ` 
+				` insert into "session" `
+				~ ` ( "sid", "site_user_num", "expires", "client_address", "user_agent" ) `
 				~ ` values( '` ~ Base64URL.encode(sid) ~ `', ` ~ PGEscapeStr(userNum)
-				~ `, ( current_timestamp + interval '` 
-				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' ), ` 
+				~ `, ( current_timestamp + interval '`
+				~ PGEscapeStr( _sessionLifetime.to!string ) ~ ` minutes' ), `
 				~ `'` ~ PGEscapeStr(clientAddress) ~ `', '` ~ PGEscapeStr(userAgent) ~ `' ) `
 				~ ` returning 'authenticated';`
 			);
-			
+
 			if( newSIDStatusRes.recordCount != 1 )
 				return new AnonymousUser;
 
@@ -179,34 +179,28 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 				return new MKKUserIdentity(login, name, group, userData, sid);
 			}
 		}
-		
+
 		return new AnonymousUser;
 	}
 
 	bool logout(IUserIdentity userIdentity)
 	{
-		debug import std.stdio: writeln;
 		MKKUserIdentity mkkUserIdentity = cast(MKKUserIdentity) userIdentity;
-		debug writeln(`auth.logout debug 1`);
 
 		if( !mkkUserIdentity ) {
-			debug writeln(`auth.logout debug 2`);
 			return false;
 		}
 
 		if( !mkkUserIdentity.isAuthenticated ) {
-			debug writeln(`auth.logout debug 3`);
 			return true;
 		}
-		
+
 		size_t userNum;
 		try {
 			userNum = mkkUserIdentity.data.get(`userNum`, null).to!size_t;
 		} catch( ConvException e ) {
-			debug writeln(`auth.logout debug 4`);
 			return false;
 		}
-		debug writeln(`auth.logout debug 5`);
 
 		// Сносим все сессии пользователя из базы
 		getAuthDBMethod().query(
@@ -215,7 +209,6 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 
 		mkkUserIdentity.invalidate(); // Затираем текущий экземпляр удостоверения
 
-		debug writeln(`auth.logout debug 6`);
 		return true;
 	}
 }
@@ -231,12 +224,12 @@ SessionId generateSessionId( const(char)[] login, const(char)[] group, const(cha
 import std.datetime, std.random, core.thread;
 
 ///Генерирует хэш для пароля с "солью" и "перцем"
-ubyte[] makePasswordHash( 
-	const(char)[] password, const(char)[] salt, const(char)[] pepper, 
+ubyte[] makePasswordHash(
+	const(char)[] password, const(char)[] salt, const(char)[] pepper,
 	size_t hashByteLength = pwHashByteLength,
 	ulong N = scryptN, uint r = scryptR, uint p = scryptP  )
 {	ubyte[] pwHash = new ubyte[hashByteLength];
-	
+
 	auto secret = password ~ pepper;
 	auto spice = pepper ~ salt;
 
@@ -245,10 +238,10 @@ ubyte[] makePasswordHash(
 		cast(const(ubyte)*) spice.ptr, spice.length,
 		N, r, p, pwHash.ptr, hashByteLength
 	);
-	
+
 	if( result != 0 )
 		throw new AuthException("Cannot make password hash!!!");
-	
+
 	return pwHash;
 }
 
@@ -266,11 +259,11 @@ bool checkPassword( const(char)[] encodedPwHash, const(char)[] password, const(c
 
 	if( params.length != 6 || params[0] != "scr" )
 		return false;
-	
+
 	ubyte[] pwHash = Base64URL.decode( params[1] );
 	if( pwHash.length != params[2].to!size_t )
 		return false;
-	
+
 	return makePasswordHash( password, salt, pepper, params[2].to!size_t, params[3].to!ulong, params[4].to!uint, params[5].to!uint ) == pwHash;
 }
 

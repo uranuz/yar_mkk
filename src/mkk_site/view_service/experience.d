@@ -6,38 +6,29 @@ shared static this() {
 	Service.pageRouter.join!(renderExperience)("/dyn/tourist/experience");
 }
 
-
-
 import ivy.interpreter_data, ivy.json, ivy.interpreter;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
+import webtank.net.deserialize_web_form: formDataToStruct;
+import webtank.common.std_json.to: toStdJSON;
+
+import mkk_site.data_defs.common: Navigation;
 
 string renderExperience(HTTPContext ctx)
 {
+	import std.json;
+	import std.conv: to;
 
-debug import std.stdio: writeln;
+	Navigation nav;
+	formDataToStruct(ctx.request.bodyForm, nav);
+	JSONValue callParams;
 
-	//debug writeln(`tourist request headers: `, ctx.request.headers.toAA());
+	callParams["touristKey"] = ctx.request.queryForm.get("key", null).to!size_t;
+	callParams["nav"] = nav.toStdJSON();
 
-import std.json;
-import std.conv: to;
-//*************************************************************
-JSONValue callParams;
-
- callParams["currentPage"] = ctx.request.bodyForm.get("currentPage", "1").to!size_t;
- callParams["touristKey"] = ctx.request.queryForm.get("key", null).to!size_t;
-
-//*************************************************************
-
-//dataDict["vpaths"] = Service.virtualPaths;
-
-
-	auto tpl = Service.templateCache.getByModuleName("mkk.Experience");	
 	TDataNode dataDict = mainServiceCall("tourist.experience", ctx, callParams);
 	dataDict["vpaths"] = Service.virtualPaths;
-	
-	return tpl.run(dataDict).str;
 
-
+	return Service.templateCache.getByModuleName("mkk.Experience").run(dataDict).str;
 }

@@ -398,11 +398,7 @@ size_t getPohodCount(PohodFilter filter)
 		.get(0, 0, "0").to!size_t;
 }
 
-struct Navigation
-{
-	size_t offset = 0;
-	size_t pageSize = 20;
-}
+import mkk_site.data_defs.common: Navigation;
 
 auto getPohodList(PohodFilter filter, Navigation nav)
 {
@@ -422,7 +418,5 @@ auto getPohodList(PohodFilter filter, Navigation nav)
 
 	query ~= ` order by pohod.begin_date desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
 
-	return getCommonDB()
-		.query(query)
-		.getRecordSet(pohodRecFormat);
+	return getCommonDB().query(query).getRecordSet(pohodRecFormat);
 }
