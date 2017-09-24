@@ -1,7 +1,6 @@
 module mkk_site.view_service.main;
 
 import webtank.net.web_server: WebServer2;
-
 import mkk_site.view_service.service;
 
 // Подключение разделов сервиса

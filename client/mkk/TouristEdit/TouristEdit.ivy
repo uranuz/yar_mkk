@@ -47,10 +47,12 @@ def TouristEdit {=
 					<td>
 						{=PlainDatePicker
 							instanceName: 'birthDateField'
-							formField: 'birthDate'
-							year: {=recGet tourist 'birthYear'}
-							month: {=recGet tourist 'birthMonth'}
+							dayFormField: 'birthDay'
+							monthFormField: 'birthMonth'
+							yearFormField: 'birthYear'
 							day: {=recGet tourist 'birthDay'}
+							month: {=recGet tourist 'birthMonth'}
+							year: {=recGet tourist 'birthYear'}
 						}
 					</td>
 				</tr>
@@ -94,7 +96,7 @@ def TouristEdit {=
 					<td>Показывать адрес эл. почты</td>
 					<td>
 						<input type="checkbox"
-							name="show_email"
+							name="showEmail"
 							class="checkbox-inline"
 							{=if {=recGet tourist 'showEmail'} 'checked'}>
 					</td>

@@ -46,7 +46,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		throw new Exception("Дата начала похода должна быть раньше даты окончания!!!");
 	}
 
-	//SiteLoger.info( "Формируем набор строковых полей и значений", "Изменение данных похода" );
+	Service.loger.info("Формируем набор строковых полей и значений", "Изменение данных похода");
 	foreach( fieldName; AliasSeq!(__traits(allMembers, PohodDataToWrite)) )
 	{
 		alias FieldType = typeof(__traits(getMember, record, fieldName));
@@ -158,38 +158,35 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	if( fieldNames.length > 0 )
 	{
-		//SiteLoger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
+		Service.loger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 		if( "userNum" !in ctx.user.data ) {
-			//throw new Exception("Не удаётся определить идентификатор пользователя");
+			throw new Exception("Не удаётся определить идентификатор пользователя");
 		}
 		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 		fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
-		//SiteLoger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
+		Service.loger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
 		string queryStr;
 
 		import std.array: join;
 		if( record.num.isSet )	{
-			queryStr = "update pohod set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num='" ~ record.num.value.to!string ~ "';";
+			queryStr = "update pohod set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num = '" ~ record.num.text ~ "' returning num";
 		}
 		else
 		{
-			//SiteLoger.info( "Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода" );
+			Service.loger.info("Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода");
 
 			fieldNames ~= ["registrator_num", "reg_timestamp"];
 			fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
-			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " );";
+			queryStr = "insert into pohod ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " ) returning num";
 		}
 
-		auto writeDBQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
-
-		string dbErrorMsg = getCommonDB().lastErrorMessage;
-		if( dbErrorMsg.length > 0 ) {
-			throw new Exception(`Ошибка при запросе к БД: ` ~ dbErrorMsg);
+		auto writeQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
+		if( writeQueryRes && writeQueryRes.recordCount == 1 ) {
+			return writeQueryRes.get(0, 0, null).to!size_t;
 		}
 	}
 
-	//SiteLoger.info( "Выполнение запроса к БД завершено", "Изменение данных похода" );
-
+	Service.loger.info("Выполнение запроса к БД завершено", "Изменение данных похода");
 	return record.num;
 }
 

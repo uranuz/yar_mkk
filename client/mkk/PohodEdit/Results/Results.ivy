@@ -1,5 +1,5 @@
 expr {%
-	if {=empty pohodNum} {=
+	if isUpdate {=
 		if {=empty errorMsg} {*
 			<h3>Данные о походе успешно добавлены в базу данных!!!</h3>
 			<div>Вы можете <a href="/dyn/pohod/edit">добавить ещё...</a></div>
@@ -21,7 +21,7 @@ expr {%
 		*}
 	};
 	if not{=empty errorMsg} {*
-		<div>Сообщение ошибки:</div>
+		<div>Текст ошибки:</div>
 		<div>{{errorMsg}}</div>
 	*};
 }

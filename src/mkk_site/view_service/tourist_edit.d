@@ -80,10 +80,11 @@ string writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthoriz
 
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
-		"touristNum": touristNum.isSet? TDataNode(touristNum.value): TDataNode(null)
+		"touristNum": touristNum.isSet? TDataNode(touristNum.value): TDataNode(null),
+		"isUpdate": TDataNode(touristNum.isSet)
 	];
 	try {
-		TDataNode touristData = mainServiceCall(`tourist.edit`, ctx, JSONValue([`record`: newTourist]));
+		dataDict["touristNum"] = mainServiceCall(`tourist.edit`, ctx, JSONValue([`record`: newTourist])).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

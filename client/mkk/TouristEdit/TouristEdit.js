@@ -1,8 +1,9 @@
 define('mkk/TouristEdit/TouristEdit', [
 	'fir/controls/FirControl',
-	'fir/datctrl/helpers',
+	'mkk/helpers',
+	'fir/common/helpers',
 	'css!mkk/TouristEdit/TouristEdit'
-], function(FirControl, DatctrlHelpers) {
+], function(FirControl, MKKHelpers, FirHelpers) {
 	__extends(TouristEdit, FirControl);
 
 	function TouristEdit(opts) {
@@ -58,12 +59,12 @@ define('mkk/TouristEdit/TouristEdit', [
 				return false;
 			}
 
-			if( birthDay.length && !mkk_site.checkInt( birthDay, 1, 31 ) ) {
+			if( birthDay.length && !MKKHelpers.checkInt(birthDay, 1, 31) ) {
 				self.showErrorDialog('День рождения должен быть целым числом в диапазоне [1, 31]');
 				return false;
 			}
 
-			if( birthYear.length && !mkk_site.checkInt( birthYear, 1000, 9999 ) ) {
+			if( birthYear.length && !MKKHelpers.checkInt(birthYear, 1000, 9999) ) {
 				self.showErrorDialog('Год рождения похода должен быть четырехзначным целым числом');
 				return false;
 			}
@@ -89,7 +90,7 @@ define('mkk/TouristEdit/TouristEdit', [
 			}
 
 			try {
-				touristKey = parseInt(webtank.parseGetParams().key, 10);
+				touristKey = parseInt(FirHelpers.parseGetParams().key, 10);
 			} catch(e) {
 				touristKey = NaN;
 			}
