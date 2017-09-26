@@ -47,9 +47,6 @@ JSONValue getExperience(
 	Navigation nav
 ) {
 	import std.conv: to, text;
-	auto req = context.request;
-	bool isAuthorized	= context.user.isAuthenticated
-		&& ( context.user.isInRole("admin") || context.user.isInRole("moder") );
 
 	// Получаем запись туриста
 	auto touristRec = getTourist(context, Optional!size_t(touristKey));

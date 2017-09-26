@@ -64,6 +64,7 @@ left outer join tourist alt_chief_rec
 `;
 
 import std.typecons: tuple;
+import std.datetime: Date;
 
 static immutable pohodRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",

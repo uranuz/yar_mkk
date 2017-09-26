@@ -19,24 +19,24 @@ def Experience{=
 				{=recGet tourist "birthYear"} г.р.
 			</h2>
 			<h5>
-			{= if not{=empty {=recGet tourist "experience"} }
-				{*Туристский опыт: {=recGet tourist "experience"}</br>*}
-			}
-			{= if not{=empty {=recGetStr tourist "sportsCategory"} }
-				{* Спортивный разряд: {=recGetStr tourist "sportsCategory"}</br>*}
-			}
-			{= if not{=empty {=recGetStr tourist "refereeCategory"} }
-				{*Судейская категория: {=recGetStr tourist "refereeCategory"}</br>*}
-			}
-			{= if not{=empty {=recGetStr tourist "phone"} }
-				{*Телефон: {=recGet tourist "phone"}</br>*}
-			}
-			{= if not{=empty {=recGetStr tourist "email"} }
-				{*Телефон: {=recGet tourist "email"}</br>*}
-			}
-			{= if not{=empty {=recGet tourist "comment"} }
-				{*Коментарий: {=recGet tourist "comment"} *}
-			}
+			{=if not{=empty {=recGet tourist "experience"} } {*
+				<div>Туристский опыт: {=recGet tourist "experience"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "sportsCategory"} } {*
+				<div>Спортивный разряд: {=recGetStr tourist "sportsCategory"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "refereeCategory"} } {*
+				<div>Судейская категория: {=recGetStr tourist "refereeCategory"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "phone"} } {*
+				<div>Телефон: {=recGet tourist "phone"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "email"} } {*
+				<div>Эл. почта: {=recGet tourist "email"}</div>
+			*}}
+			{=if not{=empty {=recGet tourist "comment"} } {*
+				<div>Коментарий: {=recGet tourist "comment"}</div>
+			*}}
 			</h5>
 		</div>
 		<!-- конец Раздела данные о туристе-->

@@ -21,9 +21,10 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import mkk_site.site_data;
 	import webtank.net.utils: PGEscapeStr;
 
-	bool isAuthorized = ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
+	bool isAuthorized = ctx.user.isAuthenticated
+		&& (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
 	if( !isAuthorized ) {
-		throw new Exception(`Недостаточно прав для изменения похода!!!`);
+		throw new Exception(`Недостаточно прав для редактирования похода!!!`);
 	}
 
 	string[] fieldNames;

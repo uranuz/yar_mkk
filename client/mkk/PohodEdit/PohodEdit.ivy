@@ -54,7 +54,7 @@ def PohodEdit {=
 		</tr>
 		</table>
 		<label for="mkkCommentField">Коментарий МКК</label>
-		<textarea 
+		<textarea
 			class="{=cls 'mkkCommentField'} form-control"
 			id="mkkCommentField"
 			name="mkkComment"
@@ -161,7 +161,7 @@ def PohodEdit {=
 		</table>
 		<label for="chiefComentField">Коментарий руководителя</label><br>
 		<textarea
-			id="chiefComentField" 
+			id="chiefComentField"
 			name="chiefComment"
 			cols="40"
 			class="{=cls 'chiefComentField'} form-control"
@@ -271,8 +271,16 @@ def PohodEdit {=
 	*}
 };
 if __scopeName__ == '__main__' {=
-	PohodEdit
-		pohod: pohod
-		partyList: partyList
+	if isAuthorized {=
+		PohodEdit
+			pohod: pohod
+			partyList: partyList
+	} else {*
+		<h4>
+			Для редактирования данных похода требуется
+			<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
+			на сайт
+		</h4>
+	*}
 };
 }

@@ -21,6 +21,13 @@ auto editTourist(
 	import webtank.net.utils: PGEscapeStr;
 	import std.array: join;
 
+	bool isAuthorized	= ctx.user.isAuthenticated
+		&& ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
+
+	if( !isAuthorized ) {
+		throw new Exception(`Недостаточно прав для редактирования туриста!!!`);
+	}
+
 	string[] fieldNames; // имена полей для записи
 	string[] fieldValues; // значения полей для записи
 
@@ -69,10 +76,10 @@ auto editTourist(
 			}
 			else static if( fieldName == "birthMonth" )
 			{
-				if( field.isSet && field.value > 11 ) {
+				if( field.isSet && (field < 1 || field > 12) ) {
 					throw new Exception("Номер месяца должен быть числом от 1 до 12!!!");
 				}
-				if( field.isSet && field.value > 30 ) {
+				if( field.isSet && (field < 1 || field > 31) ) {
 					throw new Exception("День месяца должен быть числом от 1 до 31!!!");
 				}
 

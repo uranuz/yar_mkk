@@ -8,16 +8,16 @@ string buildNormalPath(T...)(T args)
 {
 	import std.path: buildNormalizedPath;
 	import std.algorithm: endsWith;
-	
+
 	string result = buildNormalizedPath(args);
-	
+
 	static if( args.length > 0 )
 	{
 		//Возвращаем на место слэш в конце пути, который выкидывает стандартная библиотека
 		if( result.length > 1 && args[$-1].endsWith("/") && !result.endsWith("/") )
-			result ~= '/'; 
+			result ~= '/';
 	}
-	
+
 	return result;
 }
 
@@ -36,14 +36,4 @@ string[] parseExtraFileLink(string linkPair)
 	}
 
 	return [ link, comment ];
-}
-
-import std.datetime: Date;
-string rusFormat(Date date)
-{
-	import std.conv: text;
-	return 
-		date.day.text
-		~ "." ~ ( cast(ubyte) date.month ).text
-		~ "." ~ date.year.text;
 }

@@ -173,5 +173,13 @@ def TouristEdit {=
 	</div>
 	*}
 };
-TouristEdit;
+if isAuthorized {=
+	TouristEdit
+} else {*
+	<h4>
+		Для редактирования данных туриста требуется
+		<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
+		на сайт
+	</h4>
+*}
 }
