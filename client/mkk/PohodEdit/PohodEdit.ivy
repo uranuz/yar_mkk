@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat;
+from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.PohodEdit.DeleteArea import DeleteArea;
@@ -47,7 +47,8 @@ def PohodEdit {=
 					formField: 'claimState'
 					idField: 'v'
 					captionField: 'n'
-					items: {=at {=rsFieldFormat pohod 'claimState'} 'enum'}
+					items: {=enumWithNull
+						{=at {=rsFieldFormat pohod 'claimState'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'claimState'}
 				}
 			</td>
@@ -81,7 +82,8 @@ def PohodEdit {=
 					formField: 'tourismKind'
 					idField: 'v'
 					captionField: 'n'
-					items: {=at {=rsFieldFormat pohod 'tourismKind'} 'enum'}
+					items: {=enumWithNull
+						{=at {=rsFieldFormat pohod 'tourismKind'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'tourismKind'}
 				}
 			</td>
@@ -110,7 +112,8 @@ def PohodEdit {=
 					formField: 'complexity'
 					idField: 'v'
 					captionField: 'n'
-					items: {=at {=rsFieldFormat pohod 'complexity'} 'enum'}
+					items: {=enumWithNull
+						{=at {=rsFieldFormat pohod 'complexity'} 'enum'} 'не задана'}
 					selectedId: {=recGet pohod 'complexity'}
 				}
 				{=PlainListBox
@@ -118,7 +121,8 @@ def PohodEdit {=
 					formField: 'complexityElems'
 					idField: 'v'
 					captionField: 'n'
-					items: {=at {=rsFieldFormat pohod 'complexityElems'} 'enum'}
+					items: {=enumWithNull
+						{=at {=rsFieldFormat pohod 'complexityElems'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'complexityElems'}
 				}
 			</td>
@@ -153,7 +157,8 @@ def PohodEdit {=
 					formField: 'progress'
 					idField: 'v'
 					captionField: 'n'
-					items: {=at {=rsFieldFormat pohod 'progress'} 'enum'}
+					items: {=enumWithNull
+						{=at {=rsFieldFormat pohod 'progress'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'progress'}
 				}
 			</td>
