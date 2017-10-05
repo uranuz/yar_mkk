@@ -1,6 +1,6 @@
 module mkk_site.view_service.ivy_custom;
 
-import ivy, ivy.compiler, ivy.interpreter, ivy.common, ivy.interpreter_data;
+import ivy, ivy.compiler.compiler, ivy.interpreter.interpreter, ivy.common, ivy.interpreter.data_node;
 
 private void _deserializeFieldInplace(ref TDataNode fieldData, ref TDataNode format)
 {

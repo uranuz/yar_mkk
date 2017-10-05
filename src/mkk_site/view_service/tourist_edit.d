@@ -4,7 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 import mkk_site.data_defs.tourist_edit: TouristDataToWrite;
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;

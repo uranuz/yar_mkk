@@ -3,7 +3,7 @@ module mkk_site.view_service.utils;
 import std.json;
 import ivy;
 import ivy.json;
-import ivy.interpreter_data;
+import ivy.interpreter.data_node;
 
 import webtank.net.http.context: HTTPContext;
 import webtank.net.http.input: HTTPInput;
@@ -12,8 +12,8 @@ import mkk_site.view_service.ivy_custom;
 
 TDataNode tryExtractRecordSet(TDataNode srcNode)
 {
-	if( srcNode.type != DataNodeType.AssocArray 
-		|| "t" !in srcNode 
+	if( srcNode.type != DataNodeType.AssocArray
+		|| "t" !in srcNode
 		|| srcNode["t"].type != DataNodeType.String
 	) {
 		return srcNode;
@@ -48,7 +48,7 @@ private void _checkJSON_RPCErrors(ref TDataNode response)
 {
 	if( response.type != DataNodeType.AssocArray )
 		throw new Exception(`Expected assoc array as JSON-RPC response`);
-	
+
 	if( "error" in response )
 	{
 		if( response["error"].type != DataNodeType.AssocArray ) {
@@ -100,7 +100,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
-	
+
 	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
@@ -125,7 +125,7 @@ private static immutable _allowedHeaders = [
 private string[string] _getAllowedRequestHeaders(HTTPContext ctx)
 {
 	auto headers = ctx.request.headers;
-	
+
 	string[string] result;
 	foreach( name; _allowedHeaders )
 	{

@@ -5,7 +5,7 @@ import webtank.net.uri_pattern;
 
 import mkk_site.view_service.service: Service;
 import mkk_site.view_service.utils;
-import ivy.interpreter_data;
+import ivy.interpreter.data_node;
 
 alias MKKPageHandler = string delegate(HTTPContext);
 void _renderMessageBody(MKKPageHandler handler, HTTPContext context)
@@ -59,7 +59,7 @@ template join(alias Method)
 		parentHdl.addHandler(new URIPageRoute(toDelegate(&_processRequest), uriPatternStr));
 		return parentHdl;
 	}
-	
+
 	ICompositeHTTPHandler join(ICompositeHTTPHandler parentHdl, URIPattern uriPattern)
 	{
 		parentHdl.addHandler(new URIPageRoute(toDelegate(&_processRequest), uriPattern));

@@ -7,7 +7,7 @@ shared static this() {
 	Service.pageRouter.join!(renderIndex)("/dyn/index");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;

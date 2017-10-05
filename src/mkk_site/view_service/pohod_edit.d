@@ -8,7 +8,7 @@ shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;

@@ -9,7 +9,7 @@ shared static this() {
 	Service.pageRouter.join!(renderExtraFileLinks)("/dyn/pohod/extraFileLinks");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
@@ -53,19 +53,19 @@ string отрисоватьБлокНавигацииДляПечати(VM)( ref
 		полеДаты.nullDayText = "день";
 		полеДаты.nullMonthText = "месяц";
 		полеДаты.nullYearText = "год";
-		
+
 		формаФильтрации.set( имяПоля, полеДаты.print() );
 	}
-	
+
 	with( формаФильтрации )
 	{
 		set( "region_pohod", HTMLEscapeValue(vm.filter.районПохода) );
 		if( vm.filter.сМатериалами )
 			set( "with_files", ` checked="checked"` );
-			
+
 		if( vm.filter.контрольДанных )
 			set( "data_check", ` checked="checked"` );
-			
+
 			if( !vm.isAuthorized )
 			set( "none", ` style="display:none" ` );
 	}
