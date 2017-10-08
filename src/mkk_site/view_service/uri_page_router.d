@@ -32,12 +32,11 @@ void _renderMessageBody(MKKPageHandler handler, HTTPContext context)
 	}
 
 	auto favouriteFilters = mainServiceCall(`pohod.favoriteFilters`, context);
-	assert( "sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response` );
-	assert( "allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response` );
+	assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
+	assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
 
 	payload["pohodFilterFields"] = favouriteFilters["allFields"];
 	payload["pohodFilterSections"] = favouriteFilters["sections"];
-	payload["pohodFiltersJSON"] = favouriteFilters["sections"].toJSONString();
 
 	context.response.write( generalTpl.run(payload).str );
 }

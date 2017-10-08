@@ -30,6 +30,8 @@ def PohodListNavigation {=
 								items: {{pohodEnums.tourismKind}}
 								keyField: "v"
 								captionField: "n"
+								formField: "tourismKind"
+								selectedKeys: filter.tourismKind
 							}
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
@@ -39,6 +41,8 @@ def PohodListNavigation {=
 								items: {{pohodEnums.complexity}}
 								keyField: "v"
 								captionField: "n"
+								formField: "complexity"
+								selectedKeys: filter.complexity
 							}
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
@@ -48,6 +52,8 @@ def PohodListNavigation {=
 								items: {{pohodEnums.progress}}
 								keyField: "v"
 								captionField: "n"
+								formField: "progress"
+								selectedKeys: filter.progress
 							}
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
@@ -57,6 +63,8 @@ def PohodListNavigation {=
 								items: {{pohodEnums.claimState}}
 								keyField: "v"
 								captionField: "n"
+								formField: "claimState"
+								selectedKeys: filter.claimState
 							}
 						</span>
 					</div>

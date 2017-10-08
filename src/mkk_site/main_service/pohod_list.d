@@ -1,14 +1,14 @@
-module mkk_site.main_service.pohod;
+module mkk_site.main_service.pohod_list;
 
 import mkk_site.main_service.devkit;
 import mkk_site.site_data;
+import mkk_site.data_defs.pohod_list;
 
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
 	Service.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
 	Service.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
-	Service.JSON_RPCRouter.join!(getPohodCount)(`pohod.listSize`);
 	Service.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
 	Service.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
 }
@@ -70,26 +70,24 @@ limit 10
 `;
 
 /// Возвращает список последних добавленных походов
-auto recentPohodList()
-{
-	return getCommonDB()
-		.query(recentPohodQuery)
-		.getRecordSet(recentPohodRecFormat);
+auto recentPohodList() {
+	return getCommonDB().query(recentPohodQuery).getRecordSet(recentPohodRecFormat);
 }
 
 import std.json: JSONValue;
-/**
- * Возвращает JSON с перечислимыми типами, относящимися к походу
- */
-JSONValue getPohodEnumTypes()
-{
-	JSONValue jResult;
-	jResult[`tourismKind`] = видТуризма.toStdJSON();
-	jResult[`complexity`] = категорияСложности.toStdJSON();
-	jResult[`progress`] = готовностьПохода.toStdJSON();
-	jResult[`claimState`] = статусЗаявки.toStdJSON();
+static immutable JSONValue pohodEnumTypes;
+shared static this() {
+	pohodEnumTypes = JSONValue([
+		`tourismKind`: видТуризма.toStdJSON(),
+		`complexity`: категорияСложности.toStdJSON(),
+		`progress`: готовностьПохода.toStdJSON(),
+		`claimState`: статусЗаявки.toStdJSON()
+	]);
+}
 
-	return jResult;
+/++ Возвращает JSON с перечислимыми типами, относящимися к походу +/
+JSONValue getPohodEnumTypes() {
+	return pohodEnumTypes;
 }
 
 static immutable participantInfoRecFormat = RecordFormat!(
@@ -152,54 +150,6 @@ from pohod where pohod.num = ` ~ num.text ~ `
 	return jsonResult;
 }
 
-/// Структура фильтра по походам
-struct PohodFilter
-{
-	int[] tourismKinds; /// Виды туризма
-	int[] complexities; /// Категории сложности
-	int[] progress; /// Фазы прохождения похода
-	int[] claimStates; /// Состояния заявок
-	OptionalDate[string] dates; /// Фильтр по датам
-	string pohodRegion; /// Регион проведения похода
-	bool withFiles; /// Записи с доп. материалами
-	bool withDataCheck; /// Режим проверки данных
-
-	/// Проверка, что есть какая-либо фильтрация
-	bool withFilter() @property
-	{
-		import std.algorithm: canFind;
-
-		if( tourismKinds.length > 0 || complexities.length > 0 ||
-			progress.length > 0 || claimStates.length > 0 ||
-			pohodRegion.length > 0 || withFiles || withDataCheck
-		) return true;
-
-		foreach( fieldName, date; this.dates )
-		{
-			// Второе условие на проверку того, что переданное поле даты есть в наборе
-			if( !date.isNull && соотвПолейСроков.canFind!( (x, y)=> x.имяВФорме == y )(fieldName) )
-				return true;
-		}
-		return false;
-	}
-}
-
-struct СоотвПолейСроков {
-	string имяВФорме;
-	string имяВБазе;
-	string опСравн;
-};
-
-//Вспомогательный массив структур для составления запроса
-//Устанавливает соответствие между полями в форме и в базе
-//и операциями сравнения, которые будут в запросе
-static immutable СоотвПолейСроков[] соотвПолейСроков = [
-	{ "beginDateRangeHead", "begin_date", "<=" },
-	{ "beginDateRangeTail", "begin_date", ">=" },
-	{ "endDateRangeHead", "finish_date", "<=" },
-	{ "endDateRangeTail", "finish_date", ">=" }
-];
-
 import std.meta: AliasSeq;
 import std.typecons: tuple;
 
@@ -208,10 +158,10 @@ import std.typecons: tuple;
 // 1: формат перечислимого типа для этого параметра
 // 2: соответствующее название поля в структуре ФильтрПоходов
 alias PohodEnumFields = AliasSeq!(
-	tuple("tourismKinds", видТуризма),
-	tuple("complexities", категорияСложности),
-	tuple("progress", готовностьПохода),
-	tuple("claimStates", статусЗаявки)
+	tuple("tourismKind", видТуризма, "vid"),
+	tuple("complexity", категорияСложности, "ks"),
+	tuple("progress", готовностьПохода, "prepar"),
+	tuple("claimState", статусЗаявки, "stat")
 );
 
 //Формирует чать запроса по фильтрации походов (для SQL-секции where)
@@ -224,7 +174,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	foreach( enumSpec; PohodEnumFields ) {
 		mixin(`
 		if( filter.` ~ enumSpec[0] ~ `.length > 0 )
-			filters ~= "` ~ enumSpec[0] ~ ` in(" ~ filter.` ~ enumSpec[0] ~ `.conv!(string[]).join(", ") ~ ")";
+			filters ~= "\"` ~ enumSpec[2] ~ `\" in(" ~ filter.` ~ enumSpec[0] ~ `.conv!(string[]).join(", ") ~ ")";
 		`);
 	}
 
@@ -377,7 +327,7 @@ private static immutable pohodListQueryPart_data_check =
 `;
 
 
-private static immutable pohodListQueryPart_marchrut = "('Нитка маршрута: ' || coalesce(marchrut::text, '') ) as marchrut,";
+private static immutable pohodListQueryPart_marchrut = `('Нитка маршрута: ' || coalesce(marchrut::text, '') ) as marchrut,`;
 
 private static immutable pohodListQueryPart2 =
 `	prepar, stat
@@ -394,17 +344,14 @@ size_t getPohodCount(PohodFilter filter)
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 
-	 return getCommonDB()
-		.query(query)
-		.get(0, 0, "0").to!size_t;
+	 return getCommonDB().query(query).get(0, 0, "0").to!size_t;
 }
 
 import mkk_site.data_defs.common: Navigation;
 
-auto getPohodList(PohodFilter filter, Navigation nav)
+JSONValue getPohodList(PohodFilter filter, Navigation nav)
 {
 	import std.conv: to;
-
 	string query = pohodListQueryPart;
 
 	if( filter.withDataCheck )
@@ -417,7 +364,21 @@ auto getPohodList(PohodFilter filter, Navigation nav)
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 
+	size_t recordCount = getPohodCount(filter);
+	if( recordCount < nav.offset ) {
+		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
+		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
+	}
+
 	query ~= ` order by pohod.begin_date desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
 
-	return getCommonDB().query(query).getRecordSet(pohodRecFormat);
+	JSONValue result;
+	result[`nav`] = JSONValue([
+		`offset`: JSONValue(nav.offset),
+		`pageSize`: JSONValue(nav.pageSize),
+		`recordCount`: JSONValue(recordCount)
+	]);
+	result["rs"] = getCommonDB().query(query).getRecordSet(pohodRecFormat).toStdJSON();
+
+	return result;
 }

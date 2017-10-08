@@ -16,7 +16,7 @@ def PohodList {=
 				nav: pohodNav
 			}
 		</div>
-		
+
 		<div class="{=cls 'tableBar'} row">
 			<div class="col-md-6">
 				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodNav.recordCount}}</span>
@@ -51,7 +51,7 @@ def PohodList {=
 						</tr>
 					</tbody>
 					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-						{=repeat rec in pohodSet {*
+						{=repeat rec in pohodList {*
 							<tr>
 								{=if isAuthorized and not isForPrint {*
 									<td>{=recGet rec "num"}</td>
@@ -67,7 +67,7 @@ def PohodList {=
 								<td width="8%">{=recGet rec "pohodRegion"}</td>
 								<td>{=recGet rec "chiefName"}</td>
 								<td class="{=cls 'showPartyBtn'}"
-									data-pohod-num="{=recGet rec 'num'}" 
+									data-pohod-num="{=recGet rec 'num'}"
 									title="Щелкните для просмотра списка участников">
 									<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
 										src="{{vpaths.siteImg}}icons/list_icon.png"

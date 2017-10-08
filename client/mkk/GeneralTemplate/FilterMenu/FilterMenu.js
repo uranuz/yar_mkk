@@ -1,16 +1,16 @@
-define('mkk/GeneralTemplate/FilterMenu', [
-	'fir/controls/FirControl'
+define('mkk/GeneralTemplate/FilterMenu/FilterMenu', [
+	'fir/controls/FirControl',
+	'css!mkk/GeneralTemplate/FilterMenu/FilterMenu'
 ], function(FirControl) {
 	__extends(PohodFilterMenu, FirControl);
 
 	function PohodFilterMenu(opts) {
-		opts = opts || {};
-		_super.call(this, opts);
+		FirControl.call(this, opts);
 
-		this._filterSet = opts.filterSet || {};
-		this._form = this._elems().filter('.e-form');
-		this._itemLinks = this._elems().filter('.e-item_link');
-		this._inputs = this._elems().filter('.e-filter_input');
+		this._filterSet = opts.pohodFilterSections;
+		this._form = this._elems('form');
+		this._itemLinks = this._elems('itemLink');
+		this._inputs = this._elems('filterInput');
 
 		this._itemLinks.on('click', this.onFilterItemClick.bind(this));
 	}

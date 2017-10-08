@@ -1,0 +1,41 @@
+expr {=
+from fir.controls.utils import cls;
+from mkk.PohodList.Navigation import PohodListNavigation;
+def PohodFilterMenu {=
+	def.kv
+		moduleName: 'mkk/GeneralTemplate/FilterMenu/FilterMenu'
+		instanceName: 'pohodFilterMenu'
+		cssBaseClass: "mkk-PohodFilterMenu"
+		pohodFilterFields: null
+		pohodFilterSections: null
+		vpaths: null;
+	def.body {*
+		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+			<form action="{{vpaths.siteDynamic}}pohod/list" method="post" class="{=cls 'form'}">
+				{= repeat fieldName in pohodFilterFields {*
+				<input type="hidden"
+					name="{{fieldName}}"
+					class="{=cls 'filterInput'} e-filter__{{fieldName}}"/>
+				*} }
+			</form>
+			<h4>Подборки походов:</h4>
+			<div>
+				{= var i: 0; repeat filterSect in pohodFilterSections {= set i: i + 1; expr {*
+				<h5 class="{=cls 'sectionTitle'}">{{filterSect.title}}:</h5>
+				<ul class="{=cls 'section'}">
+					{= var j: 0; repeat filterItem in filterSect.items {= set j: j + 1; expr {*
+					<li class="{=cls 'listItem'}">
+						<a href="javascript:void(0)"
+							class="{=cls 'itemLink'}"
+							data-mkk-item_pos="{% expr i-1; expr '/'; expr j-1 }"
+							>{{filterItem.text}}</a>
+					</li>
+					*} } }
+				</ul>
+				*} } }
+			</div>
+		</div>
+	*}
+}
+}
