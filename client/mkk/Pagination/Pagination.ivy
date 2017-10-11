@@ -61,7 +61,7 @@ def Pagination {=
 		</div>
 		<div class="{=cls 'notFoundMsg'}" style="display: hidden;">{{notFoundMsg}}</div>
 		<div class="{=cls 'recordCountMsg'}" style="display: nidden;">
-			{{recordCountTitle}}: <span class="{=cls 'recordCount'}">{{recordCount}}</span>
+			{{recordCountTitle}}: <span class="{=cls 'recordCount'}">{=if recordCountTitle recordCount}</span>
 		</div>
 		<input type="hidden"
 			class="{=cls 'pageHiddenField'}"

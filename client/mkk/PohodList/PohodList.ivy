@@ -18,14 +18,11 @@ def PohodList {=
 		</div>
 
 		<div class="{=cls 'tableBar'} row">
-			<div class="col-md-6">
-				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodNav.recordCount}}</span>
-			</div>
 			<div class="col-md-6" style="text-align: right;">
-				{= if isAuthorized and not isForPrint {*
-					<a href="{{vpaths.siteDynamic}}pohod/edit" class="{=cls 'addPohodBtn'} btn btn-primary">
-						Добавить поход
-					</a>
+				{=if isAuthorized and not isForPrint {*
+					<a href="{{vpaths.siteDynamic}}pohod/edit"
+						class="{=cls 'addPohodBtn'} btn btn-primary"
+						>Добавить поход</a>
 				*}}
 			</div>
 		</div>
@@ -42,7 +39,7 @@ def PohodList {=
 							<th>Вид, категория</th>
 							<th>Район</th>
 							<th>Руководитель</th>
-							<th>Участники</th>
+							<th>Группа</th>
 							<th>Город, организация</th>
 							<th>Статус похода</th>
 							{= if isAuthorized and not isForPrint {*

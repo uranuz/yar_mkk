@@ -18,7 +18,7 @@ expr {*
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/umd/popper.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.bootstrapJS}}bootstrap.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require.js" defer></script>
