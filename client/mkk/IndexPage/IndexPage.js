@@ -5,7 +5,6 @@ define('mkk/IndexPage/IndexPage', [
 	__extends(IndexPage, FirControl);
 
 	function IndexPage(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 	}
 	return __mixinProto(IndexPage, {});

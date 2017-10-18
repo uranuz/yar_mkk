@@ -1,6 +1,7 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.PohodList.Navigation import PohodListNavigation;
+from mkk.Helpers import DateRangePrinter;
 def PohodList {=
 	def.kv
 		instanceName: 'pohodList'
@@ -54,15 +55,24 @@ def PohodList {=
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
-									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">{=recGet rec "bookNum"}</a>
+									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+										>{{ {=recGet rec "mkkCode"} or '-'}} {{ {=recGet rec "bookNum"} or '-'}}</a>
 								</td>
-								<td>{=recGet rec "dateRange" }</td>
+								<td>{=DateRangePrinter
+									begin: {=recGet rec "beginDate"}
+									end: {=recGet rec "finishDate"}
+								}</td>
 								<td>
 									<div>{=recGetStr rec "tourismKind"}</div>
 									<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
 								</td>
 								<td width="8%">{=recGet rec "pohodRegion"}</td>
-								<td>{=recGet rec "chiefName"}</td>
+								<td>
+									<div>{=recGet rec "chiefFamilyName"}</div>
+									<div>{=recGet rec "chiefGivenName"}</div>
+									<div>{=recGet rec "chiefPatronymic"}</div>
+									<span>{=recGet rec "chiefBirthYear"}</span>
+								</td>
 								<td class="{=cls 'showPartyBtn'}"
 									data-pohod-num="{=recGet rec 'num'}"
 									title="Щелкните для просмотра списка участников">
@@ -73,7 +83,10 @@ def PohodList {=
 										{=recGet rec "partySize"}
 									</span>
 								</td>
-								<td>{=recGet rec "organization"}</td>
+								<td>
+									<div>{=recGet rec "organization"}</div>
+									<div>{=recGet rec "partyRegion"}</div>
+								</td>
 								<td>
 									<div>{=recGetStr rec "progress"}</div>
 									<div>{=recGetStr rec "claimState"}</div>

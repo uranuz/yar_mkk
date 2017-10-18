@@ -12,12 +12,12 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderModerList(HTTPContext ctx)
+TDataNode renderModerList(HTTPContext ctx)
 {
 	auto tpl = Service.templateCache.getByModuleName("mkk.ModerList");
 	TDataNode dataDict;
 
 	dataDict["moderList"] = mainServiceCall("moder.list", ctx);
 
-	return tpl.run(dataDict).str;
+	return tpl.run(dataDict);
 }

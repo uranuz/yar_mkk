@@ -17,7 +17,7 @@ import webtank.net.http.context;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-string renderPohodList(HTTPContext ctx)
+TDataNode renderPohodList(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE;
 	import std.conv: to, ConvException;
@@ -53,25 +53,20 @@ string renderPohodList(HTTPContext ctx)
 	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
-	debug import std.stdio;
-	debug writeln(`dataDict: `, dataDict);
-
-	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict);
 }
 
-void renderPartyInfo(HTTPContext ctx)
+TDataNode renderPartyInfo(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
 	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 
-	ctx.response.write(
-		Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict).str
-	);
+	return Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict);
 }
 
-void renderExtraFileLinks(HTTPContext ctx)
+TDataNode renderExtraFileLinks(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE, parseJSON;
 	import std.conv: to;
@@ -114,7 +109,5 @@ void renderExtraFileLinks(HTTPContext ctx)
 	}
 	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
 
-	ctx.response.write(
-		Service.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict).str
-	);
+	return Service.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict);
 }

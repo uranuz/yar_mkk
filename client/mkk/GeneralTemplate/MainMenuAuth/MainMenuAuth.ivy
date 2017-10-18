@@ -5,18 +5,22 @@ def MainMenuAuth {=
 		moduleName: 'mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
 		instanceName: 'mainMenuAuth'
 		cssBaseClass: 'mkk-MainMenuAuth'
-		popdownBtnTitle: null
-		popdownBtnText: 'Аутентификация'
-		authStateCls: null
+		isAuthenticated: null
+		userName: null
 		vpaths: undef;
 	def.body {*
+	{=var
+		authStateCls: {=if isAuthenticated 'm-with_auth' else 'm-without_auth'}
+	}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<a
 			href="javascript:void(0)"
 			class="{=cls 'popdownBtn'}"
-			title="{{popdownBtnTitle}}">
-			<span>{{popdownBtnText}}</span>
+			title="{=if isAuthenticated
+				'Открыть список опций для учетной записи' else 'Вход на сайт не выполнен'
+			}">
+			<span>{=if isAuthenticated userName else 'Вход не выполнен'}</span>
 		<span>&#x25BC;</span>
 		</a>
 		<ul class="{=cls 'popdownMenu'} {{authStateCls}}">

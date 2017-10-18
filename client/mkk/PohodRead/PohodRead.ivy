@@ -1,5 +1,6 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr cls;
+from mkk.Helpers import DateRangePrinter;
 def PohodRead {=
 	def.kv
 		moduleName: "mkk/PohodRead/PohodRead"
@@ -35,7 +36,10 @@ def PohodRead {=
 		<div class="{=cls 'prop'} row">
 			<label class="{=cls 'prop_caption'} col-md-4">Сроки похода</label>
 			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">с {=recGet pohod 'beginDate'} по {=recGet pohod 'finishDate'}</span>
+				<span class="{=cls 'prop_value_text'}">{=DateRangePrinter
+					begin: {=recGet pohod 'beginDate'}
+					end: {=recGet pohod 'finishDate'}
+				}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">

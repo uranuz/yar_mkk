@@ -14,7 +14,7 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 
-string renderModerList(HTTPContext ctx)
+TDataNode renderModerList(HTTPContext ctx)
 {
 	import std.json;
 	import std.conv: to;
@@ -31,6 +31,6 @@ string renderModerList(HTTPContext ctx)
 	dataDict["isAuthenticated"] = true;
 
 
-	return tpl.run(dataDict).str;
+	return tpl.run(dataDict);
 }
 

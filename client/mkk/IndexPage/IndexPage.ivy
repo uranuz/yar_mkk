@@ -1,5 +1,6 @@
-expr {%
+expr {=
 from fir.controls.utils import recGet, recGetStr, cls;
+from mkk.Helpers import DateRangePrinter;
 def RecentPohodList {=
 	def.kv
 		cssBaseClass: "mkk-RecentPohodList"
@@ -21,6 +22,11 @@ def RecentPohodList {=
 							<span class="{=cls 'route'}">{=recGet pohod "route"}</span>
 						</p>
 						<div class="{=cls 'basicInfoRow'}">
+							<span>Группа: </span>
+							<span>{=recGet pohod 'organization'} {=recGet pohod 'partyRegion'}</span>
+							<span>в составе {=recGet pohod 'partySize'} человек</span>
+						</div>
+						<div class="{=cls 'basicInfoRow'}">
 							<span class="{=cls 'chiefLabel'}">Руководитель:</span>
 							<a class="{=cls 'chiefLink'}"
 								href="{{vpaths.siteDynamic}}tourist/experience?key={=recGet pohod 'chiefNum'}">
@@ -28,7 +34,11 @@ def RecentPohodList {=
 								{=recGet pohod "chiefGivenName"}
 								{=recGet pohod "chiefPatronymic"}
 							</a>
-							<p class="{=cls 'dateInterval'}">Сроки похода: {=dtGet {=recGet pohod 'beginDate'} "year" }</p>
+							<p class="{=cls 'dateInterval'}"
+								>Сроки похода:	{=DateRangePrinter
+									begin: {=recGet pohod 'beginDate'}
+									end: {=recGet pohod 'finishDate'}
+								}</p>
 						</div>
 					</div>
 					<div class="{=cls 'chiefCommentRow'}">

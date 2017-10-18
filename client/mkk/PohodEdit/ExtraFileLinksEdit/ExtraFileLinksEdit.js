@@ -22,7 +22,7 @@ define('mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit', [
 		},
 
 		_getQueryParams: function(areaName) {
-			return 'instanceName=extraFileLinksEdit';
+			return 'instanceName=extraFileLinksEdit&generalTemplate=no';
 		},
 
 		_updateControlMarkup: function(state) {

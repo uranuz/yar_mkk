@@ -15,9 +15,11 @@ shared static this()
 
 import std.datetime: Date;
 import std.typecons: tuple;
+import std.meta: AliasSeq;
 
-static immutable recentPohodRecFormat = RecordFormat!(
+alias BasePohodFields = AliasSeq!(
 	PrimaryKey!(size_t), "num",
+	string, "mkkCode",
 	string, "bookNum",
 	Date, "beginDate",
 	Date, "finishDate",
@@ -29,8 +31,15 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	string, "chiefFamilyName",
 	string, "chiefGivenName",
 	string, "chiefPatronymic",
+	string, "chiefBirthYear",
+	size_t, "partySize",
 	string, "organization",
-	string, "route",
+	string, "partyRegion",
+	string, "route"
+);
+
+static immutable recentPohodRecFormat = RecordFormat!(
+	BasePohodFields,
 	string, "chiefComment"
 )(
 	null,
@@ -41,29 +50,33 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	)
 );
 
+static immutable basePohodFieldSuquery =`
+	pohod.num "num",
+	kod_mkk "mkkCode",
+	nomer_knigi "bookNum",
+	begin_date "beginDate",
+	finish_date "finishDate",
+	vid "tourismKind",
+	ks "complexity",
+	elem "complexityElems",
+	region_pohod "pohodRegion",
+	chief.num "chiefNum",
+	chief.family_name "chiefFamilyName",
+	chief.given_name "chiefGivenName",
+	chief.patronymic "chiefPatronymic",
+	chief.birth_year "chiefBirthYear",
+	unit "partySize",
+	organization,
+	region_group "partyRegion",
+`;
+
 static immutable recentPohodQuery =
-`select
-	pohod.num as "num",
-	(
-		coalesce(kod_mkk, '000-00') || ' ' ||
-		coalesce(nomer_knigi, '00-00')
-	) as "bookNum",
-	begin_date as "beginDate",
-	finish_date as "finishDate",
-	vid as "tourismKind",
-	ks as "complexity",
-	elem as "complexityElems",
-	region_pohod as "pohodRegion",
-	chef.num as "chiefNum",
-	chef.family_name as "chiefFamilyName",
-	chef.given_name as "chiefGivenName",
-	chef.patronymic as "chiefPatronymic",
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "organization",
-	( coalesce(marchrut, '') ) as "route",
-	( coalesce(chef_coment, '') ) as "chiefComment"
+`select ` ~ basePohodFieldSuquery ~ `
+	marchrut "route",
+	chef_coment "chiefComment"
 from pohod
-left join tourist as chef
-	on chef.num = pohod.chef_grupp
+left join tourist chief
+	on chief.num = pohod.chef_grupp
 where pohod.reg_timestamp is not null
 order by pohod.reg_timestamp desc nulls last
 limit 10
@@ -238,17 +251,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 import std.typecons: tuple;
 
 static immutable pohodRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
-	string, "bookNum",
-	string, "dateRange",
-	typeof(видТуризма), "tourismKind",
-	typeof(категорияСложности), "complexity",
-	typeof(элементыКС), "complexityElems",
-	string, "pohodRegion",
-	string, "chiefName",
-	string, "partySize",
-	string, "organization",
-	string, "route",
+	BasePohodFields,
 	typeof(готовностьПохода), "progress",
 	typeof(статусЗаявки), "claimState"
 )(
@@ -262,43 +265,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	)
 );
 
-private static immutable pohodListQueryPart =
-`with
-t_chef as (
-	select
-		pohod.num,
-		(
-			coalesce(T.family_name,'нет данных')||'<br> '
-			||coalesce(T.given_name,'')||'<br> '
-			||coalesce(T.patronymic,'')||'<br>'
-			||coalesce(T.birth_year::text,'')
-		) as fio
-
-	from pohod
-	LEFT join tourist T
-		on pohod.chef_grupp = T.num
-)
-
-select
-	pohod.num,
-	( coalesce(kod_mkk,'000-00') || '<br>' || coalesce(nomer_knigi, '00-00') ) as nomer_knigi,
-	(
-		date_part('day', begin_date) || '.' ||
-		date_part('month', begin_date) || '.' ||
-		date_part('YEAR', begin_date)
-		||' <br> '||
-		date_part('day', finish_date) || '.' ||
-		date_part('month', finish_date) || '.' ||
-		date_part('YEAR', finish_date)
-	) as dat,
-	vid,
-	ks,
-	elem,
-	region_pohod,
-	t_chef.fio,
-	( coalesce(pohod.unit, '') ) as kol_tur,
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as organiz,
-`;
+private static immutable pohodListQueryPart = `select ` ~ basePohodFieldSuquery;
 
 private static immutable pohodListQueryPart_data_check =
 `(
@@ -327,13 +294,14 @@ private static immutable pohodListQueryPart_data_check =
 `;
 
 
-private static immutable pohodListQueryPart_marchrut = `('Нитка маршрута: ' || coalesce(marchrut::text, '') ) as marchrut,`;
+private static immutable pohodListQueryPart_marchrut = ` marchrut "route",`;
 
 private static immutable pohodListQueryPart2 =
-`	prepar, stat
+`	prepar,
+	stat
 	from pohod
-	LEFT OUTER JOIN t_chef
-		on t_chef.num = pohod.num
+	left join tourist chief
+		on chief.num = pohod.chef_grupp
 `;
 
 size_t getPohodCount(PohodFilter filter)

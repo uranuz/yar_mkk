@@ -12,7 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderPohodRead(HTTPContext ctx)
+TDataNode renderPohodRead(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.json;
@@ -27,7 +27,7 @@ string renderPohodRead(HTTPContext ctx)
 	{
 		static immutable errorMsg = `<h3>Невозможно отобразить данные похода. Номер похода не задан</h3>`;
 		Service.loger.error(errorMsg);
-		return errorMsg;
+		return TDataNode(errorMsg);
 	}
 
 	try {
@@ -37,7 +37,7 @@ string renderPohodRead(HTTPContext ctx)
 	{
 		static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
 		Service.loger.error(errorMsg2);
-		return errorMsg2;
+		return TDataNode(errorMsg2);
 	}
 
 	TDataNode dataDict;
@@ -48,5 +48,5 @@ string renderPohodRead(HTTPContext ctx)
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.PohodRead").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.PohodRead").run(dataDict);
 }

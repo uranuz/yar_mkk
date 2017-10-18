@@ -3,6 +3,7 @@ expr {*
 	from mkk.GeneralTemplate.MainMenuAuth import MainMenuAuth;
 	from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
 	from fir.controls.utils import cls;
+	expr undef;
 }
 <!doctype html>
 <html>
@@ -66,9 +67,8 @@ expr {*
 						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 						<li class="e-auth_item t-main_menu">
 							{=MainMenuAuth
-								popdownBtnTitle: authPopdownBtnTitle
-								popdownBtnText: authPopdownBtnText
-								authStateCls: authStateCls
+								isAuthenticated: isAuthenticated
+								userName: userName
 								vpaths: vpaths
 							}
 						</li>

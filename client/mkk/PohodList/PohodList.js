@@ -16,11 +16,11 @@ define('mkk/PohodList/PohodList', [
 			var
 				el = $(ev.target).closest(this._elemClass('showPartyBtn')),
 				self = this;
-			if( !el && !el.length ) {
+			if( !el || !el.length ) {
 				return;
 			}
 
-			$.ajax('/dyn/pohod/partyInfo?key=' + (+el.data("pohodNum")) , {
+			$.ajax('/dyn/pohod/partyInfo?key=' + (+el.data("pohodNum")) + '&generalTemplate=no' , {
 				success: self.showPartyDialog.bind(self)
 			});
 		},

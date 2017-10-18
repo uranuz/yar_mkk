@@ -19,7 +19,7 @@ import webtank.common.std_json.to: toStdJSON;
 
 import mkk_site.data_defs.tourist_list;
 
-string renderTouristList(HTTPContext ctx)
+TDataNode renderTouristList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 
@@ -44,10 +44,10 @@ string renderTouristList(HTTPContext ctx)
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.TouristList").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.TouristList").run(dataDict);
 }
 
-void touristPlainList(HTTPContext ctx)
+TDataNode touristPlainList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.algorithm: canFind;
@@ -77,8 +77,7 @@ void touristPlainList(HTTPContext ctx)
 	if( "instanceName" in queryForm ) {
 		dataDict["instanceName"] = queryForm["instanceName"];
 	}
-	ctx.response.write(
-		Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict).str
-	);
+
+	return Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict);
 }
 

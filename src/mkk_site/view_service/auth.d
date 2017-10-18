@@ -12,7 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderAuth(HTTPContext context)
+TDataNode renderAuth(HTTPContext context)
 {
 	import std.json;
 
@@ -32,7 +32,7 @@ string renderAuth(HTTPContext context)
 		} else {
 			resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 		}
-		return `Перенаправление...`;
+		return TDataNode(`Перенаправление...`);
 	}
 
 	bool isAuthFailed = false;
@@ -62,7 +62,7 @@ string renderAuth(HTTPContext context)
 			} else {
 				resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 			}
-			return `Перенаправление...`;
+			return TDataNode(`Перенаправление...`);
 		}
 		else
 		{
@@ -75,5 +75,5 @@ string renderAuth(HTTPContext context)
 	dataDict[`isAuthFailed`] = isAuthFailed;
 	dataDict[`isAuthenticated`] = !isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies );
 
-	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict);
 }

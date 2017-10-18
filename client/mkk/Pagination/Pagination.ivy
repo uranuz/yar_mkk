@@ -12,19 +12,21 @@ def Pagination {=
 		offset: null
 		pageCount: null
 		recordCount: null
-		title: 'Переход по страницам'
+		title: 'Страницы'
 		notFoundMsg: 'По заданному критерию не найдено ни одной записи'
 		recordCountTitle: 'Найдено записей';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<h6 class="{=cls 'titleRow'}">{{title}}</h6>
 		<div class="form-inline">
 			<div class="{=cls 'formRow'} form-group">
+				<div class="input-group">
+					<h6 class="{=cls 'titleRow'} input-group-addon">{{title}}</h6>
+				</div>
 				<span class="{=cls 'nearPageBtnWrapper'}">
 					<a class="{=cls 'prevBtn'} btn btn-secondary"
 						href="javascript:void(0)"
-						>Пред. стр</a>
+						>&lt;</a>
 				</span>
 
 				<div class="input-group">
@@ -55,7 +57,7 @@ def Pagination {=
 				<span class="{=cls 'nearPageBtnWrapper'}">
 					<a class="{=cls 'nextBtn'} btn btn-secondary"
 						href="javascript:void(0)"
-						>След. стр</a>
+						>&gt;</a>
 				</span>
 			</div>
 		</div>
