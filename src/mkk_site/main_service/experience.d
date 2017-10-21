@@ -14,6 +14,7 @@ import std.datetime: Date;
 // данные о походах туриста
 static immutable pohodRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
+	string, "mkkCode",
 	string, "bookNum",
 	Date, "beginDate",
 	Date, "finishDate",
@@ -21,6 +22,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	typeof(категорияСложности), "complexity",
 	typeof(элементыКС), "complexityElems",
 	size_t, "chiefNum",
+	string, "partyRegion",
 	string, "organization",
 	string, "pohodRegion",
 	string, "route",
@@ -68,21 +70,20 @@ JSONValue getExperience(
 	auto pohodList = getCommonDB().query(
 `select
 	num,
-	(
-		coalesce(kod_mkk,'000-00') || '<br>' ||
-		coalesce(nomer_knigi,'00-00')
-	) as "bookNum",
+	kod_mkk "mkkCode",
+	nomer_knigi "bookNum",
 	begin_date "beginDate",
-	finish_date as "finishDate",
+	finish_date "finishDate",
 	vid as "tourismKind",
 	ks as "complexity",
 	elem as "complexityElems",
-	chef_grupp as "chiefNum",
-	( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "organization",
-	region_pohod as "pohodRegion",
-	coalesce(marchrut, '') as "route",
-	prepar as "progress",
-	stat as "claimState"
+	chef_grupp "chiefNum",
+	region_group "partyRegion",
+	organization,
+	region_pohod "pohodRegion",
+	marchrut "route",
+	prepar "progress",
+	stat "claimState"
 from pohod
 where ` ~ touristKey.text ~ ` = any(unit_neim)
 order by begin_date desc

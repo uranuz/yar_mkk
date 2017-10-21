@@ -76,11 +76,19 @@ def TouristList {=
 						{=if isAuthorized {*
 							<td>{=recGet it "num"}</td>
 						*}}
-							<td>{=recGet it "nameAndYear"}</td>
 							<td>
-								<a href="/dyn/tourist/experience?key={=recGet it 'num'}">{=recGet it "experience" }</a>
+								{=recGet it "familyName"}
+								{=recGet it "givenName"}
+								{=recGet it "patronymic"}
 							</td>
-							<td>{=recGet it "contacts"}</td>
+							<td>
+								<a href="/dyn/tourist/experience?key={=recGet it 'num'}"
+									>{{ {=recGet it "experience" } or "???"}}</a>
+							</td>
+							<td>
+								<div>{=recGet it "phone"}</div>
+								<div>{=recGet it "email"}</div>
+							</td>
 							<td>
 								<div>{=recGetStr it "sportsCategory"}</div>
 								<div>{=recGetStr it "refereeCategory"}</div>

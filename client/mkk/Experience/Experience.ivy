@@ -75,9 +75,10 @@ def Experience{=
 					{=repeat rec in pohodList {*
 						<tr>
 							<td>
-								<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">
-									{=recGet rec "bookNum"}
-								</a>
+								{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
+								<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+									title="Номер маршрутной книжки не присвоен"
+									>{=if isBookNumSet {=recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
 							</td>
 							<td>
 								{=dtGet {=recGet rec "beginDate" } "day"}.
@@ -96,7 +97,7 @@ def Experience{=
 							</td>
 							<td>{=recGet rec "pohodRegion"}</td>
 							<td>{=if {=recGet rec "chiefNum"} == {=recGet tourist "num"} "Руков." else "Участ."}</td>
-							<td>{=recGet rec "organization"}</td>
+							<td>{=recGet rec "organization"} {=recGet rec "partyRegion"}</td>
 							<td>
 								{=recGetStr rec "progress"}</br>
 								{=recGetStr rec "claimState"}

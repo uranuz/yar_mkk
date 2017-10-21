@@ -23,7 +23,7 @@ struct PohodFilter
 
 		if( tourismKind.length > 0 || complexity.length > 0 ||
 			progress.length > 0 || claimState.length > 0 ||
-			pohodRegion.length > 0 || withFiles || withDataCheck
+			pohodRegion.length > 0 || withFiles
 		) return true;
 
 		foreach( fieldName, date; this.dates )

@@ -51,7 +51,7 @@ static immutable recentPohodRecFormat = RecordFormat!(
 );
 
 static immutable basePohodFieldSuquery =`
-	pohod.num "num",
+	poh.num "num",
 	kod_mkk "mkkCode",
 	nomer_knigi "bookNum",
 	begin_date "beginDate",
@@ -68,17 +68,18 @@ static immutable basePohodFieldSuquery =`
 	unit "partySize",
 	organization,
 	region_group "partyRegion",
+	marchrut "route",
 `;
 
 static immutable recentPohodQuery =
 `select ` ~ basePohodFieldSuquery ~ `
 	marchrut "route",
 	chef_coment "chiefComment"
-from pohod
+from pohod poh
 left join tourist chief
-	on chief.num = pohod.chef_grupp
-where pohod.reg_timestamp is not null
-order by pohod.reg_timestamp desc nulls last
+	on chief.num = poh.chef_grupp
+where poh.reg_timestamp is not null
+order by poh.reg_timestamp desc nulls last
 limit 10
 `;
 
@@ -191,28 +192,6 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 		`);
 	}
 
-	if( filter.withDataCheck )
-		filters ~=
-`(
-	(
-		finish_date < current_date
-		and prepar < 6
-	) /*Поход завершён  изменить состояние подготовки*/
-	OR(
-		nullif(nomer_knigi, '') is not null
-		and stat = 0
-	) /*Присвоен номер маршрутки, не указано состояние по заявке*/
-	OR(
-		begin_date < current_date
-		and finish_date > current_date
-		and prepar != 5
-	) /*Отметить, что группа на маршруте*/
-	OR nullif(region_pohod, '') is null /*Не указан район похода*/
-	OR nullif(marchrut, '') is null /*Не указана нитка маршрута*/
-	OR vid is NULL /*Не указан вид туризма*/
-	OR ks is NULL /*Не указана категория сложности*/
-)`;
-
 	if( filter.withFiles ) {
 		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
 	}
@@ -223,8 +202,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	{
 		OptionalDate dateFilter = filter.dates.get(соотвПоля.имяВФорме, OptionalDate());
 
-		if( dateFilter.isDefined )
-		{
+		if( dateFilter.isDefined ) {
 			dateFilters ~= ` ('` ~ Date( dateFilter.tupleof ).conv!string ~ `'::date `
 				~ соотвПоля.опСравн ~ ` ` ~ соотвПоля.имяВБазе ~ `) `;
 		}
@@ -232,8 +210,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 		{
 			foreach( j, частьДаты; dateFilter.tupleof )
 			{
-				if( !частьДаты.isNull )
-				{
+				if( !частьДаты.isNull ) {
 					dateFilters ~= частьДаты.value.conv!string ~ ` `
 						~ соотвПоля.опСравн ~ ` date_part('` ~ datePartNames[j] ~ `', ` ~ соотвПоля.имяВБазе ~ `)`;
 				}
@@ -252,6 +229,7 @@ import std.typecons: tuple;
 
 static immutable pohodRecFormat = RecordFormat!(
 	BasePohodFields,
+	string[], "problems",
 	typeof(готовностьПохода), "progress",
 	typeof(статусЗаявки), "claimState"
 )(
@@ -265,49 +243,44 @@ static immutable pohodRecFormat = RecordFormat!(
 	)
 );
 
-private static immutable pohodListQueryPart = `select ` ~ basePohodFieldSuquery;
-
-private static immutable pohodListQueryPart_data_check =
-`(
-	(CASE WHEN finish_date < current_date and prepar < 6
-		THEN 'Поход завершён изменить состояние подготовки. <br>'
-			ELSE '' END) ||
-	(CASE WHEN nullif(nomer_knigi, '') is null and stat = 0
-		THEN 'Присвоен номер маршрутки - не указано состояние по заявке. <br>'
-			ELSE '' END) ||
-	(CASE WHEN begin_date < current_date and finish_date > current_date and prepar != 5
-		THEN 'Отметить, что группа на маршруте на маршруте. <br>'
-			ELSE '' END) ||
-	(CASE WHEN nullif(region_pohod, '') is null
-		THEN 'Не указан район похода. <br>'
-			ELSE '' END) ||
-	(CASE WHEN nullif(marchrut, '') is null
-		THEN 'Не указана нитка маршрута. <br>'
-			ELSE '' END) ||
-	(CASE WHEN vid is NULL
-		THEN 'Не указан вид туризма. <br>'
-			ELSE '' END) ||
-	(CASE WHEN ks is NULL
-		THEN 'Не указана категория сложности. <br>'
-			ELSE '' END)
-) as marchrut,
+private static immutable pohodListDataCheckSubquery =
+`array(
+	select 'Сроки истекли, но не указан статус завершения похода'
+		where finish_date < current_date and prepar < 6
+	union
+	select 'Присвоен номер книги, но не указано, что заявка принята'
+		where nullif(nomer_knigi, '') is null and stat < 4
+	union
+	select 'Не установлен статус, что группа на маршруте'
+		where begin_date < current_date
+			and finish_date > current_date and prepar != 5
+	union
+	select 'Не указан район похода'
+		where nullif(region_pohod, '') is null
+	union
+	select 'Не указана нитка маршрута'
+		where nullif(marchrut, '') is null
+	union
+	select 'Не указан вид туризма'
+		where vid is null
+	union
+	select 'Не указана категория сложности'
+		where ks is null
+) problems,
 `;
 
-
-private static immutable pohodListQueryPart_marchrut = ` marchrut "route",`;
-
-private static immutable pohodListQueryPart2 =
-`	prepar,
-	stat
-	from pohod
+private static immutable pohodListFromQueryPart =
+`	prepar "progress",
+	stat "claimState"
+	from pohod poh
 	left join tourist chief
-		on chief.num = pohod.chef_grupp
+		on chief.num = poh.chef_grupp
 `;
 
 size_t getPohodCount(PohodFilter filter)
 {
 	import std.conv: to;
-	string query = `select count(1) from pohod`;
+	string query = `select count(1) from pohod poh`;
 
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
@@ -320,14 +293,14 @@ import mkk_site.data_defs.common: Navigation;
 JSONValue getPohodList(PohodFilter filter, Navigation nav)
 {
 	import std.conv: to;
-	string query = pohodListQueryPart;
+	string query = `select ` ~ basePohodFieldSuquery;
 
 	if( filter.withDataCheck )
-		query ~= pohodListQueryPart_data_check;
+		query ~= pohodListDataCheckSubquery;
 	else
-		query ~= pohodListQueryPart_marchrut;
+		query ~= "ARRAY[]::text[] problems,\n"; // Пустой список проблем, если нет проверки данных
 
-	query ~= pohodListQueryPart2;
+	query ~= pohodListFromQueryPart;
 
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
@@ -338,7 +311,18 @@ JSONValue getPohodList(PohodFilter filter, Navigation nav)
 		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
 	}
 
-	query ~= ` order by pohod.begin_date desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
+	if( filter.withDataCheck ) {
+		// При проверке данных добавляем обертку запроса для отбора походов с проблемами
+		query = `
+		with poh as(
+		` ~ query ~ `
+		)
+		select * from poh where array_length(poh.problems, 1) > 0
+		`;
+	}
+
+	// Упорядочивание и страничный отбор уже делаем по готовым данным
+	query ~= ` order by "beginDate" desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
 
 	JSONValue result;
 	result[`nav`] = JSONValue([

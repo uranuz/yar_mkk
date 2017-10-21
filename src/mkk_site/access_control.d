@@ -148,7 +148,7 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 		string pwSalt = query_res.get(2, 0, null);
 		string regTimestampStr = query_res.get(3, 0, null);
 
-		DateTime regDateTime = DateTimeFromPGTimestamp(regTimestampStr);
+		DateTime regDateTime = fromPGTimestamp!DateTime(regTimestampStr);
 
 		group = query_res.get(4, 0, null);
 		name = query_res.get(5, 0, null);
@@ -289,8 +289,8 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 	);
 	// SiteLoger.info( `Запрос данных о пользователе успешно завершен`, `Смена пароля пользователя` );
 
-	import webtank.common.conv: DateTimeFromPGTimestamp;
-	DateTime regDateTime = DateTimeFromPGTimestamp( userQueryRes.get( 3, 0, null ) );
+	import webtank.common.conv: fromPGTimestamp;
+	DateTime regDateTime = fromPGTimestamp!DateTime( userQueryRes.get( 3, 0, null ) );
 	string regTimestampStr = regDateTime.toISOExtString();
 
 	static if( doPwCheck )

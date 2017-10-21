@@ -50,6 +50,7 @@ void _renderMessageBody(MKKPageHandler)(MKKPageHandler handler, HTTPContext cont
 		}
 	}
 
+	/+
 	debug {
 		import std.stdio;
 		import std.array: appender;
@@ -57,6 +58,7 @@ void _renderMessageBody(MKKPageHandler)(MKKPageHandler handler, HTTPContext cont
 		renderDataNode!(DataRenderType.TextDebug)(payload, sink);
 		writeln(`DEBUG rendered template: `, sink.data);
 	}
+	+/
 
 	renderDataNode!(DataRenderType.HTML)(payload, OutRange(context.response));
 }

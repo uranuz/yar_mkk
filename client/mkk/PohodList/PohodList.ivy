@@ -55,8 +55,10 @@ def PohodList {=
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
+									{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
 									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
-										>{{ {=recGet rec "mkkCode"} or '-'}} {{ {=recGet rec "bookNum"} or '-'}}</a>
+										title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
+										>{=if isBookNumSet {%recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
 								</td>
 								<td>{=DateRangePrinter
 									begin: {=recGet rec "beginDate"}
@@ -96,7 +98,17 @@ def PohodList {=
 								*}}
 							</tr>
 							<tr>
-								<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+								{=if filter.withDataCheck {*
+									<td class="{=cls 'problemsCell'}" colspan="100">
+										<ul>
+										{=repeat problem in {=recGet rec 'problems'} {*
+											<li class="{=cls 'problemItem'}">{{problem}}</li>
+										*}}
+										</ul>
+									</td>
+								*} else {*
+									<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+								*}}
 							</tr>
 						*}}
 					</tbody>
