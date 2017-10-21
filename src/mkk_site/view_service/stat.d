@@ -3,7 +3,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderModerList)("/dyn/stat");
+	Service.pageRouter.join!(renderStat)("/dyn/stat");
 }
 
 
@@ -11,30 +11,31 @@ import ivy.interpreter_data, ivy.json, ivy.interpreter;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-	string renderModerList(HTTPContext ctx)
+import mkk_site.data_defs.stat;
+import webtank.net.deserialize_web_form: formDataToStruct;
+import webtank.common.std_json.to: toStdJSON;
+
+	string renderStat(HTTPContext ctx)
 {
 	debug import std.stdio: writeln;
 	debug writeln(`document request headers: `, ctx.request.headers.toAA());
 	
-	import std.json;
+	import std.json: JSONValue;
 	import std.conv: to;
-//*************************************************************
-	JSONValue callParams;
-	
-			callParams["on_years"] = ctx.request.bodyForm.get("on_years", "checked");
-			callParams["on_KC"] = ctx.request.bodyForm.get("on_KC", "");
-			callParams ["kodMKK"] = ctx.request.bodyForm.get("kodMKK", "176-00");
-			callParams["organization"] = ctx.request.bodyForm.get("organization", "");
-			callParams["territory"] = ctx.request.bodyForm.get("territory", "");
-		
+//*************************************************************	auto bodyForm = ctx.request.bodyForm;
+	auto bodyForm = ctx.request.bodyForm;
+	StatSelect select;
+	formDataToStruct(bodyForm, select);
+	JSONValue jSelect = select.toStdJSON();	
 	
 //**************************************************************
-	auto tpl = Service.templateCache.getByModuleName("mkk.Stat");	
-	TDataNode dataDict = mainServiceCall("stat.Data", ctx, callParams);
-	dataDict["vpaths"] = Service.virtualPaths;
+	//lданные для передачи в в основной сервис
 
-	//dataDict["isAuthenticated"] = true;
+	TDataNode dataDict = [
+		"select": jSelect.toIvyJSON(),
+		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select":jSelect]))
+	];	
+	//lданные для передачи в шаблон
 
-
-	return tpl.run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.Stat").run(dataDict).str;
 }
