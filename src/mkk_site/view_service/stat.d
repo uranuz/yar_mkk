@@ -7,7 +7,7 @@ shared static this() {
 }
 
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
@@ -15,7 +15,7 @@ import mkk_site.data_defs.stat;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-	string renderStat(HTTPContext ctx)
+TDataNode renderStat(HTTPContext ctx)
 {
 	debug import std.stdio: writeln;
 	debug writeln(`document request headers: `, ctx.request.headers.toAA());
@@ -37,5 +37,5 @@ import webtank.common.std_json.to: toStdJSON;
 	];	
 	//lданные для передачи в шаблон
 
-	return Service.templateCache.getByModuleName("mkk.Stat").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.Stat").run(dataDict);
 }
