@@ -15,6 +15,7 @@ import mkk_site.main_service.tourist_list;
 import mkk_site.main_service.tourist_edit;
 import mkk_site.main_service.experience;
 import mkk_site.main_service.user_settings;
+import mkk_site.main_service.stat;
 
 void main(string[] progAgs)
 {
