@@ -1,5 +1,6 @@
 define('mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth', [
-	'fir/controls/FirControl'
+	'fir/controls/FirControl',
+	'css!mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
 ], function(FirControl) {
 	__extends(MainMenuAuth, FirControl);
 

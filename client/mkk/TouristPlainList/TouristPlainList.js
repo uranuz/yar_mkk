@@ -62,6 +62,7 @@ define('mkk/TouristPlainList/TouristPlainList', [
 				}
 			}
 			params.push('instanceName=' + this.instanceName());
+			params.push('generalTemplate=no');
 			return params.join('&');
 		},
 		_onAfterLoad: function() {

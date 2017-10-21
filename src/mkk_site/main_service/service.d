@@ -59,6 +59,9 @@ private:
 	/// Объект для приоритетных записей журнала сайта
 	Loger _prioriteLoger;
 
+	// Объект для логирования драйвера базы данных
+	Loger _databaseLoger;
+
 	ServiceAccessController _accessController;
 
 public:
@@ -82,7 +85,7 @@ public:
 
 		import std.file: read, exists;
 		import std.json;
-		
+
 		assert( exists("mkk_site_config.json"), `Services configuration file "mkk_site_config.json" doesn't exist!` );
 
 		JSONValue fullJSONConfig = parseJSON( cast(string) read(`mkk_site_config.json`) );
@@ -114,6 +117,11 @@ public:
 			assert( "sitePrioriteLogFile" in _fileSystemPaths, `Failed to get priorite log file path!` );
 			_prioriteLoger = new ThreadedLoger( cast(shared) new FileLoger(_fileSystemPaths["sitePrioriteLogFile"], LogLevel.info) );
 		}
+
+		if( !_databaseLoger ) {
+			assert( "siteDatabaseLogFile" in _fileSystemPaths, `Failed to get database log file path!` );
+			_databaseLoger = new ThreadedLoger( cast(shared) new FileLoger(_fileSystemPaths["siteDatabaseLogFile"], LogLevel.dbg) );
+		}
 	}
 
 	Loger loger() @property {
@@ -124,6 +132,27 @@ public:
 	Loger prioriteLoger() @property {
 		assert( _prioriteLoger, `Main service priorite loger is not initialized!` );
 		return _prioriteLoger;
+	}
+
+	// Метод перенаправляющий логи БД в файл
+	void databaseLogerMethod(DBLogInfo logInfo)
+	{
+		import std.datetime;
+		import std.conv: text;
+		if( !_databaseLoger ) {
+			return;
+		}
+		LogEvent wtLogEvent;
+		final switch(logInfo.type) {
+			case DBLogInfoType.info: wtLogEvent.type = LogEventType.dbg; break;
+			case DBLogInfoType.warn: wtLogEvent.type = LogEventType.warn; break;
+			case DBLogInfoType.error: wtLogEvent.type = LogEventType.error; break;
+		}
+
+		wtLogEvent.text = `Database driver: ` ~ logInfo.msg;
+		wtLogEvent.timestamp = std.datetime.Clock.currTime();
+
+		_databaseLoger.writeEvent(wtLogEvent);
 	}
 
 	private string _makeExtendedErrorMsg(Throwable error)
@@ -165,7 +194,7 @@ public:
 
 			_loger.info(msg);
 		});
-		
+
 		//Обработка ошибок в JSON-RPC вызовах
 		_jsonRPCRouter.onError.join( (Throwable error, HTTPContext context) {
 			string extendedMsg = _makeExtendedErrorMsg(error);
@@ -209,8 +238,10 @@ shared static this() {
 private MKKMainDatabaseManager _mkk_main_db_manager;
 
 static this() {
-	import mkk_site.config_parsing: getServiceDatabases;
+	import mkk_site.config_parsing: getServiceDatabases, getServiceFileSystemPaths;
 	auto serviceJSONConfig = Service.JSONConfig;
 	// Get databases config from Service to establish connection
-	_mkk_main_db_manager = new MKKMainDatabaseManager( getServiceDatabases(serviceJSONConfig) );
+	_mkk_main_db_manager = new MKKMainDatabaseManager(
+		getServiceDatabases(serviceJSONConfig), &(Service.databaseLogerMethod)
+	);
 }

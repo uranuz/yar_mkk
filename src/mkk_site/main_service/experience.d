@@ -1,194 +1,173 @@
 module mkk_site.main_service.experience;
-import std.conv, std.string, std.utf;
 import mkk_site.main_service.devkit;
 import mkk_site.site_data;
 
-import std.stdio;
-
-//***********************Обявление метода*******************
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(getExperience)(`tourist.experience`);
-	
+	Service.JSON_RPCRouter.join!(getTourist)(`tourist.read`);
 }
-//**********************************************************
-
-
 
 import std.typecons: tuple;
+import std.datetime: Date;
 
-//получаем данные о ФИО и г.р. туриста
-   static immutable touristPersonRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "keyPerson", 
-		string, "familyName",
-		string, "givenName",
-		string, "patronymic",
-		size_t, "yearBirth",
-		string, "experiencePerson", 
-		typeof(спортивныйРазряд), "sportsCategory", 
-		typeof(судейскаяКатегория), "refereeCategory",
-		bool, "showPhone",
-		string, "phone",
-		bool, "showMail",
-		string, "mail",
-		string, "coment"
-	)(
-		null,
-		tuple(
-			спортивныйРазряд,
-			судейскаяКатегория
-		)
-	);
-	
-	// данные о походах
-	static immutable pohodRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "num",
-		string, "keyBook",
-		Date, "beginDate", 
-		Date, "finishDate",
-		typeof(видТуризма), "tourismKind",
-		typeof(категорияСложности), "complexity",
-		typeof(элементыКС), "complexityElems",
-		size_t, "chiefNum",
-		string, "organization",
-		string, "pohodRegion",  //район похода 
-		string, "route",// нитка маршрута
-		typeof(готовностьПохода), "readiness",
-		typeof(статусЗаявки), "status"
-	)(
-		null,
-		tuple(
-			видТуризма,
-			категорияСложности,
-			элементыКС,
-			готовностьПохода,
-			статусЗаявки
-		)
-	);
+// данные о походах туриста
+static immutable pohodRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "num",
+	string, "mkkCode",
+	string, "bookNum",
+	Date, "beginDate",
+	Date, "finishDate",
+	typeof(видТуризма), "tourismKind",
+	typeof(категорияСложности), "complexity",
+	typeof(элементыКС), "complexityElems",
+	size_t, "chiefNum",
+	string, "partyRegion",
+	string, "organization",
+	string, "pohodRegion",
+	string, "route",
+	typeof(готовностьПохода), "progress",
+	typeof(статусЗаявки), "claimState"
+)(
+	null,
+	tuple(
+		видТуризма,
+		категорияСложности,
+		элементыКС,
+		готовностьПохода,
+		статусЗаявки
+	)
+);
 
 
+import std.json: JSONValue;
+import mkk_site.data_defs.common: Navigation;
 
-	import std.datetime: Date;
-	
-	
-//--------------------------------------------------------
-import std.json;
+JSONValue getExperience(
+	HTTPContext context,
+	size_t touristKey,
+	Navigation nav
+) {
+	import std.conv: to, text;
 
-  JSONValue getExperience
-	(
-		HTTPContext context,
-		Optional!size_t touristKey, //????????????
-		size_t currentPage  //текущая страница
-	)	
-{
+	// Получаем запись туриста
+	auto touristRec = getTourist(context, Optional!size_t(touristKey));
+	if( !touristRec ) {
+		return JSONValue();
+	}
 
+	// Получаем количество походов туриста
+	size_t pohodCount = getCommonDB().query(
+		`select count(1) from pohod where `~ touristKey.text ~ ` = any(unit_neim)`
+	).get(0, 0, "0").to!size_t;
 
-size_t limit = 10; // Число строк на странице	
-	
-bool isAuthorized 
-			= context.user.isAuthenticated 
-			&& ( context.user.isInRole("admin")
-			 || context.user.isInRole("moder") );
+	if( pohodCount < nav.offset ) {
+		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
+		nav.offset = (pohodCount / nav.pageSize) * nav.pageSize;
+	}
 
-	auto req = context.request;	
-	
-	try {
-		if( "key" in req.queryForm )
-			touristKey = req.queryForm["key"].to!size_t;
-	} catch( std.conv.ConvException e ) {  }
-	
-	
-	/*if( touristKey.isNull )
-	{
-		static immutable errorMsg = "<h3>Не задан корректный идентификатор туриста</h3>";
-		Service.loger.error( errorMsg );
-		return errorMsg;		
-	}*/
-	
-		
-	
-	 /*данные туриста */
-	immutable experiencePerson =	
-	`select 
-		num,family_name, given_name, patronymic,birth_year,exp, razr, sud,show_phone, phone,
-		show_email, email,comment
-	from tourist
-	 where num = `~ touristKey.text ~ ` `;
-	 
-	 auto expPerson = getCommonDB()
-							.query(experiencePerson)
-							.getRecordSet(touristPersonRecFormat).front;
-    
-    
-    
-    
-    
-    /*походы туриста число строк в таблице */
-    immutable experienceCount =	
-		`select
-			count(1)
-		from pohod 
-		where `~ touristKey.text ~ ` = any( unit_neim )`;
-   
-   size_t expCount = getCommonDB()
-								.query(experienceCount)
-								.get(0, 0, "0").to!size_t;
-   
-   
-   
-   /*походы туриста основная таблица */
-   
-   size_t pageCount = expCount/ limit + 1; //Количество страниц
-		
-		if(currentPage>pageCount) currentPage=pageCount; //текущая страница
-		//если номер страницы больше числа страниц переходим на последнюю 
+	// Походы туриста - основная таблица
+	auto pohodList = getCommonDB().query(
+`select
+	num,
+	kod_mkk "mkkCode",
+	nomer_knigi "bookNum",
+	begin_date "beginDate",
+	finish_date "finishDate",
+	vid as "tourismKind",
+	ks as "complexity",
+	elem as "complexityElems",
+	chef_grupp "chiefNum",
+	region_group "partyRegion",
+	organization,
+	region_pohod "pohodRegion",
+	marchrut "route",
+	prepar "progress",
+	stat "claimState"
+from pohod
+where ` ~ touristKey.text ~ ` = any(unit_neim)
+order by begin_date desc
+offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
+	).getRecordSet(pohodRecFormat);
 
-		if(currentPage<0) currentPage=0; //текущая страница
-		//если номер страницы меньше 1 переходим на первую 
-   
-   size_t offset = (currentPage) * limit ; //Сдвиг по числу записей
-   
-   immutable experienceTabl =	
-		`select
-			num,
-			( 
-				coalesce(kod_mkk,'000-00') || '<br>' || 
-				coalesce(nomer_knigi,'00-00')
-			) as "Номер книги", 
-			begin_date as "Дата начала",
-			finish_date as "Дата конца",
-			vid as "Вид",
-			ks as "КС",
-			elem as "Элем КС",
-			chef_grupp as "Ключ рук",     
-			( coalesce(organization, '') || '<br>' || coalesce(region_group, '') ) as "Организация",
-			region_pohod as "Район",
-			coalesce(marchrut, '') as "Маршрут",
-			prepar as "Готовность",
-			stat as "Статус"
-		from pohod 
-		where `~ touristKey.text ~ ` = any( unit_neim )
-		order by begin_date desc
-		limit `~limit.to!string~` offset ` ~ offset.to!string ~` ` ;
-		
-				auto expTabl = getCommonDB()
-							.query(experienceTabl)
-							.getRecordSet(pohodRecFormat);
-			
-			
-		
-		//---------Сборка из всех данных------------------------
-		JSONValue ExperienceSet;	
-	
-			ExperienceSet["expCount"]    = expCount ;
-			ExperienceSet["pageCount"]   = pageCount;
-			ExperienceSet["currentPage"]  = currentPage;
-			ExperienceSet["expPerson"]   = expPerson.toStdJSON();
-			ExperienceSet["expTabl"]     = expTabl.toStdJSON();
-
-		return ExperienceSet;
+	// Сборка из всех данных
+	return JSONValue([
+		"tourist": touristRec.toStdJSON(),
+		"pohodList": pohodList.toStdJSON(),
+		"nav": JSONValue([
+			"offset": nav.offset,
+			"pageSize": nav.pageSize,
+			"recordCount": pohodCount
+		])
+	]);
 }
 
+//получаем данные о ФИО и г.р. туриста
+static immutable touristRecFormat = RecordFormat!(
+	PrimaryKey!(size_t), "num",
+	string, "familyName",
+	string, "givenName",
+	string, "patronymic",
+	size_t, "birthYear",
+	ubyte, "birthMonth",
+	ubyte, "birthDay",
+	string, "address",
+	string, "experience",
+	typeof(спортивныйРазряд), "sportsCategory",
+	typeof(судейскаяКатегория), "refereeCategory",
+	string, "phone",
+	bool, "showPhone",
+	string, "email",
+	bool, "showEmail",
+	string, "comment"
+)(
+	null,
+	tuple(
+		спортивныйРазряд,
+		судейскаяКатегория
+	)
+);
 
-//--------------------------------------------------------
+IBaseRecord getTourist(HTTPContext ctx, Optional!size_t touristNum)
+{
+	import std.conv: text;
+	import webtank.datctrl.detatched_record;
 
+	if( touristNum.isNull ) {
+		return makeMemoryRecord(touristRecFormat);
+	}
+
+	bool isAuthorized	= ctx.user.isAuthenticated
+		&& ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
+
+	auto rs = getCommonDB().query(
+	`select
+		num,
+		family_name "familyName",
+		given_name "givenName",
+		patronymic,
+		birth_year "birthYear",
+		-- Разбор даты рождения на месяц и день.
+		-- select здесь необходим, иначе запись не отбирается, если поле birth_date не соответствует шаблону
+		(select (regexp_matches("birth_date", '(\d*)[.,](\d+)'))[2])::integer "birthMonth",
+		(select (regexp_matches("birth_date", '(\d+)[.,](\d*)'))[1])::integer "birthDay",
+		` ~ (isAuthorized? `address`: `null::text`) ~ `,
+		exp "experience",
+		razr "sportsCategory",
+		sud "refereeCategory",
+		case when ` ~ (isAuthorized? `true`: `show_phone`) ~ `
+			then phone else null end "phone",
+		show_phone "showPhone",
+		case when ` ~ (isAuthorized? `true`: `show_email`) ~ `
+			then email else null end "email",
+		show_email "showEmail",
+		comment
+	from tourist
+		where num = ` ~ touristNum.text
+	).getRecordSet(touristRecFormat);
+
+	if( rs && rs.length == 1 ) {
+		return rs[0];
+	}
+	return null;
+}

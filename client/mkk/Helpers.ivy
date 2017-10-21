@@ -1,0 +1,32 @@
+expr {=
+def DateRangePrinter {=
+	def.kv
+		begin: null
+		end: null
+		monthNames: [
+			'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+			'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+		]
+		fromStr: 'c '
+		toStr: ' по '
+		yearSuffix: ' г.'
+		partSep: ' ';
+	def.body {%
+		str fromStr; dtGet begin 'day';
+		if {=dtGet begin 'month'} != {=dtGet end 'month'} {%
+			str partSep;
+			if not{=empty monthNames} {=at monthNames {=dtGet begin 'month'} - 1}
+				else {=dtGet begin 'month'};
+		};
+		if {=dtGet begin 'year'} != {=dtGet end 'year'} {%
+			str partSep; dtGet begin 'year'; str yearSuffix;
+		};
+		str toStr; dtGet end 'day';
+		str partSep;
+		if not{=empty monthNames} {=at monthNames {=dtGet end 'month'} - 1}
+			else {=dtGet end 'month'};
+		str partSep; dtGet end 'year'; str yearSuffix;
+	}
+};
+expr undef;
+}

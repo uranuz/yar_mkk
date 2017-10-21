@@ -3,7 +3,7 @@ module mkk_site.view_service.utils;
 import std.json;
 import ivy;
 import ivy.json;
-import ivy.interpreter_data;
+import ivy.interpreter.data_node;
 
 import webtank.net.http.context: HTTPContext;
 import webtank.net.http.input: HTTPInput;
@@ -12,8 +12,8 @@ import mkk_site.view_service.ivy_custom;
 
 TDataNode tryExtractRecordSet(TDataNode srcNode)
 {
-	if( srcNode.type != DataNodeType.AssocArray 
-		|| "t" !in srcNode 
+	if( srcNode.type != DataNodeType.AssocArray
+		|| "t" !in srcNode
 		|| srcNode["t"].type != DataNodeType.String
 	) {
 		return srcNode;
@@ -42,13 +42,53 @@ TDataNode tryExtractLvlRecordSet(TDataNode srcNode)
 	return srcNode;
 }
 
+class OverridenTraceInfo: object.Throwable.TraceInfo
+{
+	private char[][] _backTrace;
+	this(char[][] traceInfo) {
+		_backTrace = traceInfo;
+	}
+
+	override {
+		int opApply(scope int delegate(ref const(char[])) dg) const
+		{
+			int result = 0;
+			foreach( i; 0.._backTrace.length )
+			{
+				result = dg(_backTrace[i]);
+				if (result)
+					break;
+			}
+			return result;
+		}
+		int opApply(scope int delegate(ref size_t, ref const(char[])) dg) const
+		{
+			int result = 0;
+			foreach( i; 0.._backTrace.length )
+			{
+				result = dg(i, _backTrace[i]);
+				if (result)
+					break;
+			}
+			return result;
+		}
+		string toString() const
+		{
+			import std.array: join;
+			return cast(string) _backTrace.join('\n');
+		}
+	}
+}
+
 // Код проверки результата запроса по протоколу JSON-RPC
 // По сути этот код дублирует webtank.net.http.client, но с другим типом данных
 private void _checkJSON_RPCErrors(ref TDataNode response)
 {
+	import std.algorithm: map;
+	import std.array: array;
 	if( response.type != DataNodeType.AssocArray )
 		throw new Exception(`Expected assoc array as JSON-RPC response`);
-	
+
 	if( "error" in response )
 	{
 		if( response["error"].type != DataNodeType.AssocArray ) {
@@ -68,7 +108,11 @@ private void _checkJSON_RPCErrors(ref TDataNode response)
 				errorData["file"].type == DataNodeType.String &&
 				errorData["line"].type == DataNodeType.Integer
 			) {
-				throw new Exception(errorMsg, errorData["file"].str, errorData["line"].integer);
+				Exception ex = new Exception(errorMsg, errorData["file"].str, errorData["line"].integer);
+				if( "backtrace" in errorData && errorData["backtrace"].type == DataNodeType.Array ) {
+					ex.info = new OverridenTraceInfo(errorData["backtrace"].array.map!( (it) => it.str.dup ).array );
+				}
+				throw ex;
 			}
 		}
 
@@ -100,7 +144,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
-	
+
 	return ivyJSON["result"].tryExtractLvlRecordSet();
 }
 
@@ -125,7 +169,7 @@ private static immutable _allowedHeaders = [
 private string[string] _getAllowedRequestHeaders(HTTPContext ctx)
 {
 	auto headers = ctx.request.headers;
-	
+
 	string[string] result;
 	foreach( name; _allowedHeaders )
 	{

@@ -1,0 +1,34 @@
+.mkk-MainMenuAuth {
+	&.e-dialogWrapper {
+		background: #e4e2bf;
+		padding: 16px 8px 16px 8px;
+		border: solid 2px #598d23;
+		position: relative;
+		z-index: 10;
+	}
+	&.e-popdownMenu {
+		position: absolute;
+		background: #e4e2bf;
+		padding: 16px 8px 16px 8px;
+		border: solid 2px #598d23;
+		border-radius: 4px;
+		z-index: 10;
+		list-style: none;
+		display: none;
+	}
+	&.e-buttonsSeparator {
+		border-top: solid 2px #598d23;
+	}
+	&.e-loginBtn.m-with_auth {
+		display: none;
+	}
+	&.e-logoutBtn.m-without_auth,
+	&.e-userSettingsBtn.m-without_auth,
+	&.e-buttonsSeparator.m-without_auth {
+		display: none;
+	}
+	&.e-popdownBtn,
+	&.e-popdownMenu > li > a {
+		color: #2b3f3d;
+	}
+}

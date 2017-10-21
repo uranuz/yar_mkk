@@ -4,7 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 import mkk_site.data_defs.tourist_edit: TouristDataToWrite;
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
@@ -18,7 +18,7 @@ shared static this() {
 	Service.pageRouter.join!(touristEditController)("/dyn/tourist/edit");
 }
 
-string touristEditController(HTTPContext ctx)
+TDataNode touristEditController(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	auto req = ctx.request;
@@ -36,7 +36,7 @@ string touristEditController(HTTPContext ctx)
 		{
 			static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер туриста должен быть целым числом</h3>`;
 			Service.loger.error(errorMsg2);
-			return errorMsg2;
+			return TDataNode(errorMsg2);
 		}
 	}
 
@@ -47,7 +47,7 @@ string touristEditController(HTTPContext ctx)
 	}
 }
 
-string renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
+TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
 {
 	import std.json: JSONValue;
 	TDataNode dataDict;
@@ -56,10 +56,10 @@ string renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAut
 	dataDict["tourist"] = mainServiceCall(`tourist.read`, ctx, JSONValue([`touristNum`: touristNum.toStdJSON()]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.TouristEdit").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.TouristEdit").run(dataDict);
 }
 
-string writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
+TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -80,13 +80,14 @@ string writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthoriz
 
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
-		"touristNum": touristNum.isSet? TDataNode(touristNum.value): TDataNode(null)
+		"touristNum": touristNum.isSet? TDataNode(touristNum.value): TDataNode(null),
+		"isUpdate": TDataNode(touristNum.isSet)
 	];
 	try {
-		TDataNode touristData = mainServiceCall(`tourist.edit`, ctx, JSONValue([`record`: newTourist]));
+		dataDict["touristNum"] = mainServiceCall(`tourist.edit`, ctx, JSONValue([`record`: newTourist])).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return Service.templateCache.getByModuleName("mkk.TouristEdit.Results").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.TouristEdit.Results").run(dataDict);
 }

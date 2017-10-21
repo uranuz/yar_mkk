@@ -7,17 +7,17 @@ shared static this() {
 	Service.pageRouter.join!(renderIndex)("/dyn/index");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderIndex(HTTPContext ctx)
+TDataNode renderIndex(HTTPContext ctx)
 {
 	auto tpl = Service.templateCache.getByModuleName("mkk.IndexPage");
 	TDataNode dataDict;
 	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return tpl.run(dataDict).str;
+	return tpl.run(dataDict);
 }

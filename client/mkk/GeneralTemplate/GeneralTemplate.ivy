@@ -1,7 +1,9 @@
 expr {*
 {=
 	from mkk.GeneralTemplate.MainMenuAuth import MainMenuAuth;
+	from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
 	from fir.controls.utils import cls;
+	expr undef;
 }
 <!doctype html>
 <html>
@@ -17,7 +19,7 @@ expr {*
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/umd/popper.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.bootstrapJS}}bootstrap.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require.js" defer></script>
@@ -65,9 +67,8 @@ expr {*
 						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 						<li class="e-auth_item t-main_menu">
 							{=MainMenuAuth
-								popdownBtnTitle: authPopdownBtnTitle
-								popdownBtnText: authPopdownBtnText
-								authStateCls: authStateCls
+								isAuthenticated: isAuthenticated
+								userName: userName
 								vpaths: vpaths
 							}
 						</li>
@@ -99,33 +100,11 @@ expr {*
 					<h5>Эл. почта МКК:</h5>
 					<div style="margin-left: 0.5rem">mkk-yar@mail.ru</div>
 				</div>
-				<div class="e-block t-pohod_filter_menu">
-					<form action="{{vpaths.siteDynamic}}show_pohod" method="post" class="i-pohod_filter_menu e-form t-pohod_filter_menu">
-						{= repeat fieldName in pohodFilterFields {*
-						<input type="hidden" name="{{fieldName}}" class="i-pohod_filter_menu e-filter_input e-filter__{{fieldName}} t-pohod_filter_menu"
-						/> *} }
-					</form>
-					<script>
-						var mkk_site = mkk_site || {};
-						mkk_site.pohodFilterMenuData = {{pohodFiltersJSON }};
-					</script>
-					<h4>Подборки походов:</h4>
-					<div>
-						{= var i: 0; repeat filterSect in pohodFilterSections {= set i: i + 1; expr {*
-						<h5 class="i-pohod_filter_menu e-section_title t-pohod_filter_menu">{{filterSect.title}}:</h5>
-						<ul class="i-pohod_filter_menu e-section t-pohod_filter_menu">
-							{= var j: 0; repeat filterItem in filterSect.items {= set j: j + 1; expr {*
-							<li class="i-pohod_filter_menu e-list_item t-pohod_filter_menu">
-								<a href="javascript:void(0)" class="i-pohod_filter_menu e-item_link t-pohod_filter_menu" data-mkk-item_pos="{% expr i-1; expr "
-								/ "; expr j-1 }">
-									{{filterItem.text}}
-								</a>
-							</li>
-							*} } }
-						</ul>
-						*} } }
-					</div>
-				</div>
+				{=PohodFilterMenu
+					pohodFilterFields: pohodFilterFields
+					pohodFilterSections: pohodFilterSections
+					vpaths: vpaths
+				}
 			</div>
 			<!-- #sidebar -->
 

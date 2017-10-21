@@ -1,6 +1,7 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.PohodList.Navigation import PohodListNavigation;
+from mkk.Helpers import DateRangePrinter;
 def PohodList {=
 	def.kv
 		instanceName: 'pohodList'
@@ -16,16 +17,13 @@ def PohodList {=
 				nav: pohodNav
 			}
 		</div>
-		
+
 		<div class="{=cls 'tableBar'} row">
-			<div class="col-md-6">
-				<span class="{=cls 'pohodCount'}">Найдено походов: {{pohodNav.recordCount}}</span>
-			</div>
 			<div class="col-md-6" style="text-align: right;">
-				{= if isAuthorized and not isForPrint {*
-					<a href="{{vpaths.siteDynamic}}pohod/edit" class="{=cls 'addPohodBtn'} btn btn-primary">
-						Добавить поход
-					</a>
+				{=if isAuthorized and not isForPrint {*
+					<a href="{{vpaths.siteDynamic}}pohod/edit"
+						class="{=cls 'addPohodBtn'} btn btn-primary"
+						>Добавить поход</a>
 				*}}
 			</div>
 		</div>
@@ -42,7 +40,7 @@ def PohodList {=
 							<th>Вид, категория</th>
 							<th>Район</th>
 							<th>Руководитель</th>
-							<th>Участники</th>
+							<th>Группа</th>
 							<th>Город, организация</th>
 							<th>Статус похода</th>
 							{= if isAuthorized and not isForPrint {*
@@ -51,23 +49,34 @@ def PohodList {=
 						</tr>
 					</tbody>
 					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-						{=repeat rec in pohodSet {*
+						{=repeat rec in pohodList {*
 							<tr>
 								{=if isAuthorized and not isForPrint {*
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
-									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}">{=recGet rec "bookNum"}</a>
+									{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
+									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+										title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
+										>{=if isBookNumSet {%recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
 								</td>
-								<td>{=recGet rec "dateRange" }</td>
+								<td>{=DateRangePrinter
+									begin: {=recGet rec "beginDate"}
+									end: {=recGet rec "finishDate"}
+								}</td>
 								<td>
 									<div>{=recGetStr rec "tourismKind"}</div>
 									<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
 								</td>
 								<td width="8%">{=recGet rec "pohodRegion"}</td>
-								<td>{=recGet rec "chiefName"}</td>
+								<td>
+									<div>{=recGet rec "chiefFamilyName"}</div>
+									<div>{=recGet rec "chiefGivenName"}</div>
+									<div>{=recGet rec "chiefPatronymic"}</div>
+									<span>{=recGet rec "chiefBirthYear"}</span>
+								</td>
 								<td class="{=cls 'showPartyBtn'}"
-									data-pohod-num="{=recGet rec 'num'}" 
+									data-pohod-num="{=recGet rec 'num'}"
 									title="Щелкните для просмотра списка участников">
 									<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
 										src="{{vpaths.siteImg}}icons/list_icon.png"
@@ -76,7 +85,10 @@ def PohodList {=
 										{=recGet rec "partySize"}
 									</span>
 								</td>
-								<td>{=recGet rec "organization"}</td>
+								<td>
+									<div>{=recGet rec "organization"}</div>
+									<div>{=recGet rec "partyRegion"}</div>
+								</td>
 								<td>
 									<div>{=recGetStr rec "progress"}</div>
 									<div>{=recGetStr rec "claimState"}</div>
@@ -86,7 +98,17 @@ def PohodList {=
 								*}}
 							</tr>
 							<tr>
-								<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+								{=if filter.withDataCheck {*
+									<td class="{=cls 'problemsCell'}" colspan="100">
+										<ul>
+										{=repeat problem in {=recGet rec 'problems'} {*
+											<li class="{=cls 'problemItem'}">{{problem}}</li>
+										*}}
+										</ul>
+									</td>
+								*} else {*
+									<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+								*}}
 							</tr>
 						*}}
 					</tbody>

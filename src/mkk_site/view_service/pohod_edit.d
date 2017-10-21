@@ -8,7 +8,7 @@ shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
@@ -16,7 +16,7 @@ import webtank.common.optional: Optional, Undefable;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-string pohodEditController(HTTPContext ctx)
+TDataNode pohodEditController(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 
@@ -34,7 +34,7 @@ string pohodEditController(HTTPContext ctx)
 		{
 			static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
 			Service.loger.error(errorMsg2);
-			return errorMsg2;
+			return TDataNode(errorMsg2);
 		}
 	}
 
@@ -45,7 +45,7 @@ string pohodEditController(HTTPContext ctx)
 	}
 }
 
-string renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
+TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 {
 	import std.json: JSONValue;
 	TDataNode dataDict;
@@ -56,10 +56,10 @@ string renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthori
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict);
 }
 
-string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
+TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -80,13 +80,14 @@ string writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
 
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
-		"pohodNum": pohodNum.isSet? TDataNode(pohodNum.value): TDataNode(null)
+		"pohodNum": pohodNum.isSet? TDataNode(pohodNum.value): TDataNode(null),
+		"isUpdate": TDataNode(pohodNum.isSet)
 	];
 	try {
-		TDataNode pohodData = mainServiceCall(`pohod.edit`, ctx, JSONValue([`record`: newPohod]));
+		dataDict["pohodNum"] = mainServiceCall(`pohod.edit`, ctx, JSONValue([`record`: newPohod])).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict);
 }

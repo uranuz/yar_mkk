@@ -7,18 +7,18 @@ shared static this() {
 	Service.pageRouter.join!(renderAuth)("/dyn/auth");
 }
 
-import ivy.interpreter_data, ivy.json, ivy.interpreter;
+import ivy;
 
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderAuth(HTTPContext context)
+TDataNode renderAuth(HTTPContext context)
 {
 	import std.json;
 
 	auto req = context.request;
 	auto resp = context.response;
-	
+
 	// Адрес страницы для перенаправления после аутентификации
 	string redirectTo = req.queryForm.get("redirectTo", null);
 
@@ -32,7 +32,7 @@ string renderAuth(HTTPContext context)
 		} else {
 			resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 		}
-		return `Перенаправление...`;
+		return TDataNode(`Перенаправление...`);
 	}
 
 	bool isAuthFailed = false;
@@ -62,7 +62,7 @@ string renderAuth(HTTPContext context)
 			} else {
 				resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 			}
-			return `Перенаправление...`;
+			return TDataNode(`Перенаправление...`);
 		}
 		else
 		{
@@ -70,13 +70,10 @@ string renderAuth(HTTPContext context)
 		}
 	}
 
-	debug import std.stdio;
-	debug writeln(`renderAuth, context.user.isAuthenticated: `, context.user.isAuthenticated);
-
 	TDataNode dataDict;
 	dataDict[`userLogin`] = req.cookies.get(`user_login`, null);
 	dataDict[`isAuthFailed`] = isAuthFailed;
 	dataDict[`isAuthenticated`] = !isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies );
 
-	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict);
 }

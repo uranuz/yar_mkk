@@ -64,6 +64,7 @@ left outer join tourist alt_chief_rec
 `;
 
 import std.typecons: tuple;
+import std.datetime: Date;
 
 static immutable pohodRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
@@ -102,6 +103,7 @@ IBaseRecord readPohod(Optional!size_t pohodNum)
 {
 	import webtank.datctrl.detatched_record;
 	import std.conv: text;
+
 	if( pohodNum.isNull ) {
 		return makeMemoryRecord(pohodRecFormat);
 	}

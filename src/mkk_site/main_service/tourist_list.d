@@ -15,11 +15,11 @@ shared static this()
 import std.typecons: tuple;
 
 static immutable shortTouristRecFormat = RecordFormat!(
-	PrimaryKey!(int), "num",
+	PrimaryKey!(size_t), "num",
 	string, "familyName",
 	string, "givenName",
 	string, "patronymic",
-	int, "birthYear"
+	size_t, "birthYear"
 )();
 
 auto touristPlainSearch(TouristListFilter filter, Navigation nav)
@@ -27,16 +27,21 @@ auto touristPlainSearch(TouristListFilter filter, Navigation nav)
 	return getTouristListImpl(
 		filter, nav,
 		shortTouristRecFormat,
-		`num, family_name, given_name, patronymic, birth_year`
+		`num, family_name, given_name, patronymic, birth_year`,
+		`family_name, given_name, patronymic`
 	);
 }
 
 static immutable touristListRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
-	string, "nameAndYear",
-	string,  "experience",
-	string, "contacts",
-	typeof(спортивныйРазряд),  "sportsCategory",
+	string, "familyName",
+	string, "givenName",
+	string, "patronymic",
+	size_t, "birthYear",
+	string, "experience",
+	string, "phone",
+	string, "email",
+	typeof(спортивныйРазряд), "sportsCategory",
 	typeof(судейскаяКатегория), "refereeCategory",
 	string, "comment"
 )(
@@ -50,24 +55,17 @@ auto touristList(TouristListFilter filter, Navigation nav)
 		filter, nav,
 		touristListRecFormat,
 		`num,
-		(
-			coalesce(family_name, '') ||
-			coalesce(' ' || given_name, '') ||
-			coalesce(' ' || patronymic, '') ||
-			coalesce(', ' || birth_year::text, '')
-		) "nameAndYear",
-		coalesce(exp, '???') "experience",
-		(
-			case
-				when( show_phone = true ) then phone||'<br> '
-			else '' end ||
-			case
-				when( show_email = true ) then email
-			else '' end
-		) "contacts",
+		family_name,
+		given_name,
+		patronymic,
+		birth_year,
+		exp,
+		case when show_phone then phone else null end,
+		case when show_email then email else null end,
 		razr "sportsCategory",
 		sud "refereeCategory",
-		comment`
+		comment`,
+		`family_name, given_name, patronymic`
 	);
 }
 
@@ -76,7 +74,8 @@ auto getTouristListImpl(ResultFormat)(
 	TouristListFilter filter,
 	Navigation nav,
 	ResultFormat resultFormat,
-	string queryFields
+	string queryFields,
+	string orderBy
 ) {
 	import std.json: JSONValue;
 	import std.traits: getUDAs;
@@ -134,7 +133,10 @@ auto getTouristListImpl(ResultFormat)(
 		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
 	}
 
-	query ~= ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
+	query ~=
+		(orderBy.length? ` order by ` ~ orderBy: null)
+		~ ` offset ` ~ nav.offset.text
+		~ ` limit ` ~ nav.pageSize.text;
 
 	JSONValue result;
 	result[`nav`] = JSONValue([

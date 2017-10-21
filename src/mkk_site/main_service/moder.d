@@ -16,16 +16,13 @@ static immutable moderListRecFormat = RecordFormat!(
 	string, "contact_info",
 	size_t, "tourist_num"
 )();
-	
+
 static immutable moderListQuery =
 `select num, name, status, region, email, contact_info, tourist_num
 from site_user where "user_group" in ('moder', 'admin')
 order by name
 ;`;
 
-auto moderList()
-{
-	return getAuthDB()
-		.query(moderListQuery)
-		.getRecordSet(moderListRecFormat);
+auto moderList() {
+	return getAuthDB().query(moderListQuery).getRecordSet(moderListRecFormat);
 }

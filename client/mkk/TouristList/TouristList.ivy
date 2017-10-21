@@ -1,30 +1,38 @@
-expr
-{=
-from fir.controls.utils import recGet, recGetStr,cls;
+expr {=
+from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.Pagination import Pagination;
-
-def TouristList{=
+def TouristList {=
 	def.kv
 		instanceName: 'touristList'
-		cssBaseClass: "mkk-touristList";
-
+		cssBaseClass: "mkk-TouristList";
 	def.body {*
-	<div class="e-block t-mkk-touristList">
+	<div class="{=cls 'block'}">
 		<h2>Туристы</h2>
-
-		<form id="main_form" method="post">
+		<form method="post">
 			<div class="e-filter t-show_tourist form-inline">
-			<label>
-				<span>Фамилия И О</span>
-				<input name="familyName" type="text" class="form-control"
-				value="{{filter.familyName}}" placeholder="Смирнов">
-				<input name="givenName" type="text" maxlength="1" size="1" class="form-control"
-				value="{{filter.givenName}}" placeholder="И">
-				<input name="patronymic" type="text" maxlength="1" size="1" class="form-control"
-				value="{{filter.patronymic}}" placeholder="П">
-
-			</label>
-			<button type="submit" name="act" class="btn btn-primary">Найти</button>
+				<label>
+					<span>Фамилия И. О.</span>
+					<input type="text"
+						name="familyName"
+						class="form-control"
+						value="{{filter.familyName}}"
+						placeholder="Смирнов"/>
+					<input type="text"
+						name="givenName"
+						maxlength="1"
+						size="1"
+						class="form-control"
+						value="{{filter.givenName}}"
+						placeholder="И"/>
+					<input type="text"
+						name="patronymic"
+						maxlength="1"
+						size="1"
+						class="form-control"
+						value="{{filter.patronymic}}"
+						placeholder="П"/>
+				</label>
+				<button type="submit" name="act" class="btn btn-primary">Найти</button>
 			</div>
 			<div class="{=cls 'pagination'}">
 				{=Pagination
@@ -35,86 +43,71 @@ def TouristList{=
 			</div>
 		</form>
 		<div class="e-table_bar t-show_tourist row">
-			<div class="col-md-6">
-				<div class="form-control-static">
-					Найдено туристов:
-					{{nav.recordCount}} страниц {{nav.pageCount}}
-
-				</div>
-			</div>
 			{=if isAuthorized {*
 			<div class="col-md-6" style="text-align: right;">
-				<a href="*dynamic path}}edit_tourist"
-					class="e-add_tourist_btn t-show_tourist *auth_state_cls}} btn btn-primary">
-					Добавить нового туриста
-				</a>
+				<a href="{{vpaths.siteDynamic}}tourist/edit"
+					class="btn btn-primary"
+					>Добавить нового туриста</a>
 			</div>
 			*}}
 		</div>
 
-
-	<!-- Раздел  таблица-------------------->
-
-			<div class="{=cls 'tableBlock'} mkk-Table">
-				<div class="{=cls 'tableScroller'} mkk-Table">
-					<table class="{=cls 'table'} mkk-Table">
-						<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
-							<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-							{%
-								if isAuthorized {=
-									repeat title in
-									["№","Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий","Изм."] {*
-										<th>{{title}}</th>
-									*}
-								} else {=
-									repeat title in
-									["Имя, дата рожд.", "Опыт","Контакты", "Спорт. разряд, cуд. категория", "Комментарий"] {*
-										<th>{{title}}</th>
-									*}
-								}
-
-							}
-							</tr>
-						</thead>
-						<!-- Основное   тело  таблицы-->
-						<tbody class="{=cls 'tableContentBody'} mkk-Table">
-
-						{%
-							repeat it in touristList {*
-								<tr>
-
-								{= if isAuthorized {*
-									<td>{=recGet it "num" }</td>
-									*}
-								}
-
-									<td>{=recGet it "nameAndYear" }</td>
-									<td>
-										<a href="/dyn/tourist/experience?key={=recGet it 'num' }">
-											{=recGet it "experience" }
-										</a>
-									</td>
-									<td>{=recGet it "contacts"}</td>
-									<td>{=recGetStr it "sportsCategory"}</br>
-									    {=recGetStr it "refereeCategory"}</td>
-									<td>{=recGet it "comment"}</td>
-								{= if isAuthorized {*
-									<td>
-										<a href="/dyn/tourist/edit?key={=recGet it 'num'}">Изм.</a>
-									</td>
-									*}
-								}
-
-								</tr>
-
-							*};
+		<div class="{=cls 'tableBlock'} mkk-Table">
+			<div class="{=cls 'tableScroller'} mkk-Table">
+				<table class="{=cls 'table'} mkk-Table">
+					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+						{=
+							var fieldNames: {=
+								if isAuthorized
+									["№", "Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий", "Изм."]
+								else
+									["Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий"]
+							};
+							repeat title in fieldNames {*<th>{{title}}</th>*}
 						}
-						</tbody>
-					</table>
-				</div>
+						</tr>
+					</tbody>
+					<!-- Основное тело таблицы -->
+					<tbody class="{=cls 'tableContentBody'} mkk-Table">
+					{%
+						repeat it in touristList {*
+						<tr>
+						{=if isAuthorized {*
+							<td>{=recGet it "num"}</td>
+						*}}
+							<td>
+								{=recGet it "familyName"}
+								{=recGet it "givenName"}
+								{=recGet it "patronymic"}
+							</td>
+							<td>
+								<a href="/dyn/tourist/experience?key={=recGet it 'num'}"
+									>{{ {=recGet it "experience" } or "???"}}</a>
+							</td>
+							<td>
+								<div>{=recGet it "phone"}</div>
+								<div>{=recGet it "email"}</div>
+							</td>
+							<td>
+								<div>{=recGetStr it "sportsCategory"}</div>
+								<div>{=recGetStr it "refereeCategory"}</div>
+							</td>
+							<td>{=recGet it "comment"}</td>
+						{=if isAuthorized {*
+							<td>
+								<a href="/dyn/tourist/edit?key={=recGet it 'num'}">Изм.</a>
+							</td>
+						*}}
+						</tr>
+						*};
+					}
+					</tbody>
+				</table>
 			</div>
 		</div>
+	</div>
 	*};
-	};
+};
 TouristList
 }

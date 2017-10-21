@@ -1,14 +1,13 @@
 module mkk_site.view_service.main;
 
 import webtank.net.web_server: WebServer2;
-
 import mkk_site.view_service.service;
 
 // Подключение разделов сервиса
 import mkk_site.view_service.index;
 import mkk_site.view_service.moder;
 import mkk_site.view_service.auth;
-import mkk_site.view_service.pohod;
+import mkk_site.view_service.pohod_list;
 import mkk_site.view_service.pohod_read;
 import mkk_site.view_service.pohod_edit;
 import mkk_site.view_service.document;

@@ -5,6 +5,7 @@ define('mkk/PohodList/Navigation/Navigation', [
 
 	function PohodListNavigation(opts) {
 		FirControl.call(this, opts);
+		var self = this;
 
 		this._elems().filter(".e-print_page_btn")
 			.on("click", this.onPrintPageBtnClick.bind(this));

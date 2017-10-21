@@ -1,41 +1,21 @@
 a.btn {
 	text-decoration: none;
+	cursor: default;
 }
 
-a.btn-primary, a.btn-primary:visited {
-  color: $btn-primary-color;
-}
-a.btn-secondary, a.btn-secondary:visited {
-  color: $btn-secondary-color;
-}
-a.btn-info, a.btn-info:visited {
-  color: $btn-info-color;
-}
-a.btn-success, a.btn-success:visited {
-  color: $btn-success-color;
-}
-a.btn-warning, a.btn-warning:visited {
-  color: $btn-warning-color;
-}
-a.btn-danger, a.btn-danger:visited {
-  color: $btn-danger-color;
+// Do not change color of visited links if they are buttons
+@each $color, $value in $theme-colors {
+  .btn-#{$color}:visited {
+    @include button-variant($value, $value);
+  }
 }
 
-a.btn-primary-outlinem a.btn-primary-outline:visited {
-  color: $btn-primary-color;
-}
-a.btn-secondary-outline, a.btn-secondary-outline:visited {
-  color: $btn-secondary-color;
-}
-a.btn-info-outline, a.btn-info-outline:visited {
-  color: $btn-info-color;
-}
-a.btn-success-outline, a.btn-success-outline:visited {
-  color: $btn-success-color;
-}
-a.btn-warning-outline, a.btn-warning-outline:visited {
-  color: $btn-warning-color;
-}
-a.btn-danger-outline, a.btn-danger-outline:visited {
-  color: $btn-danger-color;
+@each $color, $value in $theme-colors {
+  .btn-outline-#{$color}:visited {
+    @if $color == "light" {
+      @include button-outline-variant($value, $gray-900);
+    } @else {
+      @include button-outline-variant($value, $white);
+    }
+  }
 }

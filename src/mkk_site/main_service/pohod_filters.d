@@ -21,58 +21,58 @@ shared static this()
 			"items": jv([
 				[	"text": jv("2018"),
 					"fields": jv([
-						"begin_date_range_head__year": 2018,
-						"end_date_range_tail__year": 2018
+						"beginDateRangeHead__year": 2018,
+						"endDateRangeTail__year": 2018
 					])
 				],
 				[	"text": jv("2017"),
 					"fields": jv([
-						"begin_date_range_head__year": 2017,
-						"end_date_range_tail__year": 2017
+						"beginDateRangeHead__year": 2017,
+						"endDateRangeTail__year": 2017
 					])
 				],
 				[	"text": jv("2016"),
 					"fields": jv([
-						"begin_date_range_head__year": 2016,
-						"end_date_range_tail__year": 2016
+						"beginDateRangeHead__year": 2016,
+						"endDateRangeTail__year": 2016
 					])
 				],
 				[	"text": jv("2015"),
 					"fields": jv([
-						"begin_date_range_head__year": 2015,
-						"end_date_range_tail__year": 2015
+						"beginDateRangeHead__year": 2015,
+						"endDateRangeTail__year": 2015
 					])
 				],
 				[	"text": jv("2014"),
 					"fields": jv([
-						"begin_date_range_head__year": 2014,
-						"end_date_range_tail__year": 2014
+						"beginDateRangeHead__year": 2014,
+						"endDateRangeTail__year": 2014
 					])
 				],
 				[	"text": jv("Последние 5 лет"),
 					"fields": jv([
-						"begin_date_range_head__year": 2014,
-						"end_date_range_tail__year": 2018
+						"beginDateRangeHead__year": 2014,
+						"endDateRangeTail__year": 2018
 					])
 				]
 			])
 		],
 		[	"title": jv("По видам туризма"),
 			"items": jv([
-				[ "text": jv("Водный"), "fields": jv([ "vid": 4]) ],
-				[ "text": jv("Горный"), "fields": jv([ "vid": 3]) ],
-				[ "text": jv("Пеший"), "fields": jv([ "vid": 1]) ],
-				[ "text": jv("Велосипедный"), "fields": jv([ "vid": 5]) ],
-				[ "text": jv("Лыжный"), "fields": jv([ "vid": 2]) ],
+				[ "text": jv("Водный"), "fields": jv([ "tourismKind": 4]) ],
+				[ "text": jv("Горный"), "fields": jv([ "tourismKind": 3]) ],
+				[ "text": jv("Пеший"), "fields": jv([ "tourismKind": 1]) ],
+				[ "text": jv("Велосипедный"), "fields": jv([ "tourismKind": 5]) ],
+				[ "text": jv("Лыжный"), "fields": jv([ "tourismKind": 2]) ],
 			])
 		],
 		[	"title": jv("По состоянию прохождения"),
 			"items": jv([
-				[ "text": jv("Планируется"), "fields": jv([ "prepar": 1]) ],
-				[ "text": jv("Набор группы"), "fields": jv([ "prepar": 2]) ],
-				[ "text": jv("Набор группы завершён"), "fields": jv([ "prepar": 3]) ],
-				[ "text": jv("Подготовка"), "fields": jv([ "prepar": 4]) ],
-				[ "text": jv("На маршруте"), "fields": jv([ "prepar": 5]) ],
+				[ "text": jv("Планируется"), "fields": jv([ "progress": 1]) ],
+				[ "text": jv("Набор группы"), "fields": jv([ "progress": 2]) ],
+				[ "text": jv("Набор группы завершён"), "fields": jv([ "progress": 3]) ],
+				[ "text": jv("Подготовка"), "fields": jv([ "progress": 4]) ],
+				[ "text": jv("На маршруте"), "fields": jv([ "progress": 5]) ],
 			])
 		]
 	]);

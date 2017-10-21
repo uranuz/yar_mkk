@@ -1,115 +1,119 @@
-expr 
+expr
 {=
 from fir.controls.utils import recGet, recGetStr,cls;
 from mkk.Pagination import Pagination;
 
-	def Experience{=
+def Experience{=
 	def.kv
 		moduleName: 'mkk/Experience/Experience'
 		instanceName: 'experience'
 		cssBaseClass: "mkk-Experience";
-
-
-		def.body {*
-			<div class="e-block t-mkk-experience" data-fir-module="{{moduleName}}">
-			<!-- Раздел  данные о туристе-->
-				<div class="e-filter t-show_tourist form-inline">
-				<label>					
-				<h2>{= recGet expPerson "familyName"}  
-				{= recGet expPerson "givenName"}  
-				{= recGet expPerson "patronymic"}  
-				{= recGet expPerson "yearBirth"} г.р. </h2>
-				</label>
-				<label>
-				<h5>
-				{= if not{=empty {= recGet expPerson "experiencePerson"} }   
-									{* Туристский опыт: {= recGet expPerson "experiencePerson"}</br> *} }
-				{= if not{=empty {= recGetStr expPerson "sportsCategory"} }   
-									{* Спортивный разряд: {= recGetStr expPerson "sportsCategory"}</br> *} }			
-				{= if not{=empty {= recGetStr expPerson "refereeCategory"} }   
-									{* Судейская категория: {= recGetStr expPerson "refereeCategory"}</br> *} }
-				{= if {=recGet expPerson "showPhone"}   {* Телефон: {= recGet expPerson "phone"}  </br>*} }
-				{= if {=recGet expPerson "showMail"}    {* Телефон: {= recGet expPerson "mail"}   </br>*} }
-				{= if not{=empty {= recGet expPerson "coment"} }     {* Коментарий: {= recGet expPerson "coment"} *} }
-				</h5>						
-				</label>
-				</div>
-				<!-- конец Раздела  данные о туристе-->
-				<div>
-					<!-- Раздел  переход по страницам-->
-					<form method="post"  >
-					
-					<div class="{=cls 'pagination'}">
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<!-- Раздел данные о туристе-->
+		<div class="{=cls 'touristInfo'}">
+			<h2>
+				{=recGet tourist "familyName"}
+				{=recGet tourist "givenName"}
+				{=recGet tourist "patronymic"}
+				{=recGet tourist "birthYear"} г.р.
+			</h2>
+			<h5>
+			{=if not{=empty {=recGet tourist "experience"} } {*
+				<div>Туристский опыт: {=recGet tourist "experience"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "sportsCategory"} } {*
+				<div>Спортивный разряд: {=recGetStr tourist "sportsCategory"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "refereeCategory"} } {*
+				<div>Судейская категория: {=recGetStr tourist "refereeCategory"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "phone"} } {*
+				<div>Телефон: {=recGet tourist "phone"}</div>
+			*}}
+			{=if not{=empty {=recGetStr tourist "email"} } {*
+				<div>Эл. почта: {=recGet tourist "email"}</div>
+			*}}
+			{=if not{=empty {=recGet tourist "comment"} } {*
+				<div>Коментарий: {=recGet tourist "comment"}</div>
+			*}}
+			</h5>
+		</div>
+		<!-- конец Раздела данные о туристе-->
+		<div>
+			<!-- Раздел переход по страницам-->
+			<form method="post">
+				<div class="{=cls 'pagination'}">
 					{=Pagination
-						formField: 'currentPage'
-						currentPage: currentPage
-						pageCount: pageCount
+						formField: 'offset'
+						offset: nav.offset
+						pageSize: nav.pageSize
+						recordCount: nav.recordCount
 					}
-
-					</div>
-					</form>
-					<!-- конец Раздела  переход по страницам-->
 				</div>
+			</form>
+			<!-- конец Раздела переход по страницам-->
+		</div>
 
-				<!-- Раздел  таблица-->
-				<div class="{=cls 'tableBlock'} mkk-Table">
-					<div class="{=cls 'tableScroller'} mkk-Table">
-						<table class="{=cls 'table'} mkk-Table">
-							<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
-								<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-										
-										<th>№ книги</th>
+		<!-- Раздел таблица-->
+		<div class="{=cls 'tableBlock'} mkk-Table">
+			<div class="{=cls 'tableScroller'} mkk-Table">
+				<table class="{=cls 'table'} mkk-Table">
+					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+							<th>№ книги</th>
 							<th>Сроки похода</th>
 							<th>Вид, категория</th>
 							<th>Район</th>
 							<th>Должность</th>
 							<th>Город, организация</th>
 							<th>Статус похода</th>
-							</tr>
-							</tbody>	
-						<!-- Основное   тело  таблицы-->
-							<tbody class="{=cls 'tableContentBody'} mkk-Table">
-							{=repeat rec in expTabl {*
-							<tr>
-								<td>
-									<a  href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}" >
-									{=recGet rec "keyBook" }
-									</a>
-									</td>
-								<td>
-									{=dtGet  {=recGet rec "beginDate" }"day" }.
-									{=dtGet  {=recGet rec "beginDate" }"month" }.
-									{=dtGet  {=recGet rec "beginDate" }"year" }
+						</tr>
+					</tbody>
+					<!-- Основное тело таблицы-->
+					<tbody class="{=cls 'tableContentBody'} mkk-Table">
+					{=repeat rec in pohodList {*
+						<tr>
+							<td>
+								{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
+								<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+									title="Номер маршрутной книжки не присвоен"
+									>{=if isBookNumSet {=recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
+							</td>
+							<td>
+								{=dtGet {=recGet rec "beginDate" } "day"}.
+								{=dtGet {=recGet rec "beginDate" } "month"}.
+								{=dtGet {=recGet rec "beginDate" } "year"}
 
-									</br>
-									{=dtGet  {=recGet rec "finishDate" }"day" }.
-									{=dtGet  {=recGet rec "finishDate" }"month" }.
-									{=dtGet  {=recGet rec "finishDate" }"year" }
-								</td>
-								<td>{=recGetStr rec "tourismKind" }</br>
-										{=recGet rec "complexity" } 
-										c эл.{=recGet rec "complexityElems" }</td>
-								<td>{=recGet rec "pohodRegion" }</td>
-								<td>{=recGet rec "chiefNum" }</td>
-								<td>{=recGet rec "organization" }</td>
-								<td>{=recGetStr rec "readiness" }</br>
-										{=recGetStr rec "status" }</td>							
-							</tr>
-							<tr>
-								<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
-							</tr>
-
-							*}}
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<!-- конец Раздела  таблица-->
-				
+								</br>
+								{=dtGet {=recGet rec "finishDate"} "day"}.
+								{=dtGet {=recGet rec "finishDate"} "month"}.
+								{=dtGet {=recGet rec "finishDate"} "year"}
+							</td>
+							<td>
+								{=recGetStr rec "tourismKind"}</br>
+								{=recGetStr rec "complexity"}
+								{=recGetStr rec "complexityElems"}
+							</td>
+							<td>{=recGet rec "pohodRegion"}</td>
+							<td>{=if {=recGet rec "chiefNum"} == {=recGet tourist "num"} "Руков." else "Участ."}</td>
+							<td>{=recGet rec "organization"} {=recGet rec "partyRegion"}</td>
+							<td>
+								{=recGetStr rec "progress"}</br>
+								{=recGetStr rec "claimState"}
+							</td>
+						</tr>
+						<tr>
+							<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+						</tr>
+					*}}
+					</tbody>
+				</table>
 			</div>
-
-
-		*};
-	};
+		</div>
+		<!-- конец Раздела  таблица-->
+	</div>
+	*};
+};
 Experience
 }
