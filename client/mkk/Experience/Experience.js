@@ -5,7 +5,6 @@ define('mkk/Experience/Experience', [
 	__extends(Experience, FirControl);
 
 	function Experience(opts) {
-		opts = opts || {};
 		FirControl.call(this, opts);
 	}
 	return __mixinProto(Experience, {});
