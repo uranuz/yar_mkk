@@ -1,3 +1,5 @@
+module mkk_site.tools.server_runner;
+
 import std.process, core.thread, std.file, std.stdio, std.conv, std.datetime;
 
 import core.stdc.stdlib : exit, EXIT_FAILURE, EXIT_SUCCESS;

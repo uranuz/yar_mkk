@@ -1,8 +1,8 @@
-module mkk_site.config_parsing;
+module mkk_site.common.site_config;
 
 import std.json, std.file, std.path;
 
-import mkk_site.utils: buildNormalPath;
+import mkk_site.common.utils: buildNormalPath;
 
 /++
 $(LOCALE_EN_US
@@ -79,7 +79,6 @@ string[string] resolveConfigPaths(bool shouldExpandTilde = false)( JSONValue jso
 				result[pathName] = buildNormalPath( rootPath, jsonPath.str );
 		}
 	}
-
 
 	foreach( string pathName, path; defaultPaths )
 	{
@@ -158,7 +157,7 @@ string[string] resolveConfigDatabases(JSONValue jsonDatabases)
 	return result;
 }
 
-JSONValue getServiceConfig(ref JSONValue jsonConfig, string serviceName)
+JSONValue getServiceConfig(JSONValue jsonConfig, string serviceName)
 {
 	assert( jsonConfig.type == JSON_TYPE.OBJECT, `Config root JSON value must be object!!!` );
 
@@ -173,7 +172,16 @@ JSONValue getServiceConfig(ref JSONValue jsonConfig, string serviceName)
 	return jsonCurrService;
 }
 
-string[string] getServiceFileSystemPaths(ref JSONValue jsonCurrService)
+JSONValue readServiceConfigFile(string serviceName, string fileName = `mkk_site_config.json`)
+{
+	import std.file: read, exists;
+	assert(exists(fileName), `Services configuration file "` ~ fileName ~ `" doesn't exist!`);
+
+	JSONValue fullJSONConfig = parseJSON(cast(string) read(fileName));
+	return fullJSONConfig.getServiceConfig(serviceName);
+}
+
+string[string] getServiceFileSystemPaths(JSONValue jsonCurrService)
 {
 	assert( "fileSystemPaths" in jsonCurrService.object, `Config section "services.[serviceName]" must contain "fileSystemPaths" object!!!` );
 	JSONValue jsonFSPaths = jsonCurrService["fileSystemPaths"];
@@ -202,7 +210,7 @@ string[string] getServiceFileSystemPaths(ref JSONValue jsonCurrService)
 	return resolveConfigPaths!(true)(jsonFSPaths, defaultFileSystemPaths, "siteRoot");
 }
 
-string[string] getServiceVirtualPaths(ref JSONValue jsonCurrService)
+string[string] getServiceVirtualPaths(JSONValue jsonCurrService)
 {
 	assert( "virtualPaths" in jsonCurrService, `Config section "services.[serviceName]" must contain "virtualPaths" object!!!` );
 	JSONValue jsonVirtualPaths = jsonCurrService["virtualPaths"];
@@ -220,7 +228,7 @@ string[string] getServiceVirtualPaths(ref JSONValue jsonCurrService)
 	return resolveConfigPaths!(false)(jsonVirtualPaths, defaultVirtualPaths, "siteRoot");
 }
 
-string[string] getServiceDatabases(ref JSONValue jsonCurrService)
+string[string] getServiceDatabases(JSONValue jsonCurrService)
 {
 	//Вытаскиваем информацию об используемых базах данных
 	assert( "databases" in jsonCurrService, `Config "services.[serviceName]" section must contain "databases" object!!!` );

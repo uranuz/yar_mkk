@@ -1,8 +1,8 @@
 module mkk_site.main_service.pohod_list;
 
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
-import mkk_site.data_defs.pohod_list;
+import mkk_site.data_model.enums;
+import mkk_site.data_model.pohod_list;
 
 shared static this()
 {
@@ -288,7 +288,7 @@ size_t getPohodCount(PohodFilter filter)
 	 return getCommonDB().query(query).get(0, 0, "0").to!size_t;
 }
 
-import mkk_site.data_defs.common: Navigation;
+import mkk_site.data_model.common: Navigation;
 
 JSONValue getPohodList(PohodFilter filter, Navigation nav)
 {

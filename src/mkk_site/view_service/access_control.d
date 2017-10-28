@@ -2,7 +2,7 @@ module mkk_site.view_service.access_control;
 
 import webtank.security.access_control;
 
-import mkk_site.user_identity;
+import mkk_site.common.user_identity;
 import mkk_site.view_service.service: Service;
 import mkk_site.view_service.utils;
 

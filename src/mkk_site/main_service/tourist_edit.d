@@ -1,7 +1,7 @@
 module mkk_site.main_service.tourist_edit;
 
 import mkk_site.main_service.devkit;
-import mkk_site.data_defs.tourist_edit;
+import mkk_site.data_model.tourist_edit;
 
 shared static this()
 {
@@ -17,7 +17,7 @@ auto editTourist(
 	import std.algorithm: canFind, countUntil;
 	import std.conv: to, text, ConvException;
 	import std.typecons: tuple;
-	import mkk_site.site_data;
+	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
 	import std.array: join;
 

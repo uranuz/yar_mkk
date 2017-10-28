@@ -16,7 +16,7 @@ class MKKViewService
 	import ivy;
 	import mkk_site.view_service.ivy_custom;
 
-	import mkk_site.config_parsing;
+	import mkk_site.common.site_config;
 	import mkk_site.view_service.access_control;
 
 	static immutable string serviceName = "yarMKKView";
@@ -92,15 +92,13 @@ public:
 
 	void readConfig()
 	{
-		import mkk_site.config_parsing: getServiceConfig, getServiceVirtualPaths, getServiceFileSystemPaths;
+		import mkk_site.common.site_config:
+			readServiceConfigFile,
+			getServiceVirtualPaths,
+			getServiceFileSystemPaths,
+			getServiceDatabases;
 
-		import std.file: read, exists;
-		import std.json;
-
-		assert( exists("mkk_site_config.json"), `Services configuration file "mkk_site_config.json" doesn't exist!` );
-
-		JSONValue fullJSONConfig = parseJSON( cast(string) read(`mkk_site_config.json`) );
-		_jsonConfig = getServiceConfig(fullJSONConfig, serviceName);
+		_jsonConfig = readServiceConfigFile(serviceName);
 		_fileSystemPaths = getServiceFileSystemPaths(_jsonConfig);
 		_virtualPaths = getServiceVirtualPaths(_jsonConfig);
 	}

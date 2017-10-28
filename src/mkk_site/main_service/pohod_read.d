@@ -1,7 +1,7 @@
 module mkk_site.main_service.pohod_read;
 
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
+import mkk_site.data_model.enums;
 
 shared static this()
 {

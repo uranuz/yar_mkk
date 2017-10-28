@@ -1,6 +1,6 @@
-module mkk_site.data_defs.tourist_list;
+module mkk_site.data_model.tourist_list;
 
-public import mkk_site.data_defs.common;
+public import mkk_site.data_model.common;
 
 // Структура фильтра по списку туристов
 struct TouristListFilter

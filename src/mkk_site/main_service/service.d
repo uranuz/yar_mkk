@@ -1,27 +1,24 @@
 module mkk_site.main_service.service;
 
 // Возвращает ссылку на глобальный экземпляр основного сервиса MKK
-MKKMainService Service() @property {
+MKKMainService Service() @property
+{
 	assert( _mkk_main_service, `MKK main service is not initialized!` );
 	return _mkk_main_service;
 }
 
-import mkk_site.main_service.db_manager;
-
-// Возвращает ссылку на экземпляр менеджера соединений БД основного сервиса МКК
-MKKMainDatabaseManager DBManager() @property {
-	assert( _mkk_main_service, `MKK main database manager is not initialized!` );
-	return _mkk_main_db_manager;
-}
-
 // Метод для получения экземпляра объекта подключения к основной БД сервиса МКК
-IDatabase getCommonDB() @property {
-	return DBManager.commonDB;
+IDatabase getCommonDB() @property
+{
+	assert( _commonDB, `MKK main service common DB connection is not initialized!` );
+	return _commonDB;
 }
 
 // Метод для получения экземпляра объекта подключения к БД аутентификации сервиса МКК
-IDatabase getAuthDB()  @property {
-	return DBManager.authDB;
+IDatabase getAuthDB() @property
+{
+	assert( _authDB, `MKK main service auth DB connection is not initialized!` );
+	return _authDB;
 }
 
 // Класс основного сервиса МКК. Создаётся один глобальный экземпляр на процесс
@@ -30,25 +27,23 @@ IDatabase getAuthDB()  @property {
 class MKKMainService
 {
 	import webtank.common.loger;
-	import webtank.db.database;
-	import webtank.db.postgresql;
 	import webtank.net.http.context;
 	import webtank.net.http.json_rpc_handler;
 	import webtank.net.http.handler;
 
-	import mkk_site.site_data;
-	import mkk_site.config_parsing;
-	import mkk_site.access_control;
+	import mkk_site.common.versions;
+	import mkk_site.data_model.enums;
+	import mkk_site.common.site_config;
+	import mkk_site.security.access_control;
 
-	import std.json: JSONValue;
+	import std.json: JSONValue, parseJSON;
 
 	static immutable string serviceName = "yarMKKMain";
-
-	alias ServiceAccessController = MKKMainAccessController!(getAuthDB);
 private:
 	JSONValue _jsonConfig;
 	string[string] _fileSystemPaths;
 	string[string] _virtualPaths;
+	string[string] _dbConnStrings;
 
 	HTTPRouter _rootRouter;
 	JSON_RPC_Router _jsonRPCRouter;
@@ -62,7 +57,7 @@ private:
 	// Объект для логирования драйвера базы данных
 	Loger _databaseLoger;
 
-	ServiceAccessController _accessController;
+	MKKMainAccessController _accessController;
 
 public:
 	this()
@@ -75,23 +70,23 @@ public:
 		_jsonRPCRouter = new JSON_RPC_Router( _virtualPaths["siteJSON_RPC"] ~ "{remainder}" );
 		_rootRouter.addHandler(_jsonRPCRouter);
 
-		_accessController = new ServiceAccessController;
+		import std.functional: toDelegate;
+		_accessController = new MKKMainAccessController(toDelegate(&getAuthDB));
 		_subscribeRoutingEvents();
 	}
 
 	void readConfig()
 	{
-		import mkk_site.config_parsing: getServiceConfig, getServiceVirtualPaths, getServiceFileSystemPaths;
+		import mkk_site.common.site_config:
+			readServiceConfigFile,
+			getServiceVirtualPaths,
+			getServiceFileSystemPaths,
+			getServiceDatabases;
 
-		import std.file: read, exists;
-		import std.json;
-
-		assert( exists("mkk_site_config.json"), `Services configuration file "mkk_site_config.json" doesn't exist!` );
-
-		JSONValue fullJSONConfig = parseJSON( cast(string) read(`mkk_site_config.json`) );
-		_jsonConfig = getServiceConfig(fullJSONConfig, serviceName);
+		_jsonConfig = readServiceConfigFile(serviceName);
 		_fileSystemPaths = getServiceFileSystemPaths(_jsonConfig);
 		_virtualPaths = getServiceVirtualPaths(_jsonConfig);
+		_dbConnStrings = getServiceDatabases(_jsonConfig);
 	}
 
 	JSONValue JSONConfig() @property {
@@ -104,6 +99,10 @@ public:
 
 	string[string] fileSystemPaths() @property {
 		return _fileSystemPaths;
+	}
+
+	string[string] dbConnStrings() @property {
+		return _dbConnStrings;
 	}
 
 	private void _startLoging()
@@ -134,11 +133,13 @@ public:
 		return _prioriteLoger;
 	}
 
+	import webtank.db.database: DBLogInfo, DBLogInfoType;
 	// Метод перенаправляющий логи БД в файл
 	void databaseLogerMethod(DBLogInfo logInfo)
 	{
 		import std.datetime;
 		import std.conv: text;
+		
 		if( !_databaseLoger ) {
 			return;
 		}
@@ -157,37 +158,23 @@ public:
 
 	private string _makeExtendedErrorMsg(Throwable error)
 	{
-		import std.conv;
-		return error.msg ~ "<br>\r\n" ~"Module: " ~ error.file ~ "(" ~ error.line.to!string ~ ") \r\n" ~ error.info.to!string;
+		import std.conv: text;
+		return error.msg ~ "\r\n" ~"Module: " ~ error.file ~ "(" ~ error.line.text~ ") \r\n" ~ error.info.text;
 	}
 
 	private void _subscribeRoutingEvents() {
 		import std.exception: assumeUnique;
 		import std.conv;
 
-		//Для сообщений об ошибках базового класса Throwable не используем шаблон страницы,
-		//поскольку нить исполнения находится в некорректном состоянии
-		_rootRouter.onError.join( (Throwable error, HTTPContext context) {
-			string extendedMsg = _makeExtendedErrorMsg(error);
-			static if( isMKKSiteReleaseTarget )
-				string msg = error.msg;
-			else
-				string msg = extendedMsg;
-
-			prioriteLoger.error(extendedMsg);
-			loger.error(extendedMsg);
-
-			throw error;
-			return true; //Dummy error
-		} );
-
+		// Обработчик выполняет аутентификацию и устанавливает полученный "билет" в контекст запроса
 		_rootRouter.onPostPoll ~= (HTTPContext context, bool isMatched) {
-			if( isMatched )
-			{	context._setuser( _accessController.authenticate(context) );
+			if( isMatched ) {
+				context._setuser( _accessController.authenticate(context) );
 			}
 		};
 
-		_jsonRPCRouter.onPostPoll ~= ( (HTTPContext context, bool isMatched) {
+		// Логирование приходящих JSON-RPC запросов для отладки
+		_jsonRPCRouter.onPostPoll ~= ( (HTTPContext context, bool) {
 			import std.conv: to;
 			string msg = "Received JSON-RPC request. Headers:\r\n" ~ context.request.headers.toAA().to!string;
 			debug msg ~=  "\r\nMessage body:\r\n" ~ context.request.messageBody;
@@ -196,19 +183,19 @@ public:
 		});
 
 		//Обработка ошибок в JSON-RPC вызовах
-		_jsonRPCRouter.onError.join( (Throwable error, HTTPContext context) {
-			string extendedMsg = _makeExtendedErrorMsg(error);
-			static if( isMKKSiteReleaseTarget )
-				string msg = error.msg;
-			else
-				string msg = extendedMsg;
+		_rootRouter.onError.join(&this._handleError);
+		_jsonRPCRouter.onError.join(&this._handleError);
+	}
 
-			prioriteLoger.error(extendedMsg);
-			loger.error(extendedMsg);
+	// Обработчик пишет информацию о возникших ошибках при выполнении в журнал
+	private bool _handleError(Throwable error, HTTPContext)
+	{
+		string extendedMsg = _makeExtendedErrorMsg(error);
 
-			throw error;
-			return true; //Dummy return
-		} );
+		prioriteLoger.error(extendedMsg);
+		loger.error(extendedMsg);
+
+		throw error;
 	}
 
 	HTTPRouter rootRouter() @property {
@@ -221,27 +208,32 @@ public:
 		return _jsonRPCRouter;
 	}
 
-	ServiceAccessController accessController() @property {
+	MKKMainAccessController accessController() @property {
 		assert( _accessController, `Main service access controller is not initialized!` );
 		return _accessController;
 	}
 
 }
 
+// Service is process singleton object
 private __gshared MKKMainService _mkk_main_service;
 
 shared static this() {
 	_mkk_main_service = new MKKMainService();
 }
 
-// Each thread uses it's own database connection manager
-private MKKMainDatabaseManager _mkk_main_db_manager;
+import webtank.db.database: IDatabase;
 
-static this() {
-	import mkk_site.config_parsing: getServiceDatabases, getServiceFileSystemPaths;
-	auto serviceJSONConfig = Service.JSONConfig;
-	// Get databases config from Service to establish connection
-	_mkk_main_db_manager = new MKKMainDatabaseManager(
-		getServiceDatabases(serviceJSONConfig), &(Service.databaseLogerMethod)
-	);
+// Each thread uses it's own thread local instance of connection to database,
+// because PostgreSQL connection is not thread safe
+private IDatabase _commonDB;
+private IDatabase _authDB;
+
+static this()
+{
+	import mkk_site.common.site_config: getServiceDatabases;
+	import webtank.db.postgresql: DBPostgreSQL;
+
+	_commonDB = new DBPostgreSQL(Service.dbConnStrings["commonDB"], &Service.databaseLogerMethod);
+	_authDB = new DBPostgreSQL(Service.dbConnStrings["authDB"], &Service.databaseLogerMethod);
 }

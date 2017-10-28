@@ -1,6 +1,6 @@
 module mkk_site.main_service.document;
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
+import mkk_site.data_model.enums;
 import std.conv, std.string, std.utf;
 
 //***********************Обявление метода*******************

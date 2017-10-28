@@ -13,7 +13,7 @@ import webtank.net.http.context;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-import mkk_site.data_defs.common: Navigation;
+import mkk_site.data_model.common: Navigation;
 
 TDataNode renderExperience(HTTPContext ctx)
 {

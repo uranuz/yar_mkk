@@ -1,6 +1,6 @@
-module mkk_site.data_defs.pohod_edit;
+module mkk_site.data_model.pohod_edit;
 
-public import mkk_site.data_defs.common;
+public import mkk_site.data_model.common;
 
 struct PohodDataToWrite
 {

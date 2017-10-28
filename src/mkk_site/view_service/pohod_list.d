@@ -2,7 +2,7 @@ module mkk_site.view_service.pohod_list;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
-import mkk_site.data_defs.pohod_list;
+import mkk_site.data_model.pohod_list;
 
 shared static this() {
 	Service.pageRouter.join!(renderPohodList)("/dyn/pohod/list");

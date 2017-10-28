@@ -1,8 +1,8 @@
-module mkk_site.data_defs.pohod_list;
+module mkk_site.data_model.pohod_list;
 
 import webtank.common.optional_date: OptionalDate;
 
-public import mkk_site.data_defs.common;
+public import mkk_site.data_model.common;
 
 /// Структура фильтра по походам
 struct PohodFilter

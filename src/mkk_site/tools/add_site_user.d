@@ -1,4 +1,4 @@
-module mkk_site.utilities.add_site_user;
+module mkk_site.tools.add_site_user;
 
 ///Утилита для добавления пользователя сайта МКК
 
@@ -8,7 +8,7 @@ import std.uuid : randomUUID;
 
 import webtank.db.postgresql;
 
-import mkk_site.access_control, mkk_site.site_data_old;
+import mkk_site.security.access_control;
 
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
