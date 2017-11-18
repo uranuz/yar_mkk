@@ -1,6 +1,7 @@
 define('mkk/PohodList/PohodList', [
 	'fir/controls/FirControl',
 	'fir/network/json_rpc',
+	'mkk/PohodList/Navigation/Navigation',
 	'css!mkk/PohodList/PohodList'
 ], function(FirControl, json_rpc) {
 	__extends(PohodList, FirControl);

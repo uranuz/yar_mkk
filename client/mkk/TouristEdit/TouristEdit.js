@@ -2,6 +2,9 @@ define('mkk/TouristEdit/TouristEdit', [
 	'fir/controls/FirControl',
 	'mkk/helpers',
 	'fir/common/helpers',
+	'fir/controls/PlainDatePicker/PlainDatePicker',
+	'fir/controls/PlainListBox/PlainListBox',
+	'mkk/TouristPlainList/TouristPlainList',
 	'css!mkk/TouristEdit/TouristEdit'
 ], function(FirControl, MKKHelpers, FirHelpers) {
 	__extends(TouristEdit, FirControl);

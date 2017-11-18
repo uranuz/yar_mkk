@@ -1,5 +1,6 @@
 define('mkk/Experience/Experience', [
 	'fir/controls/FirControl',
+	'mkk/Pagination/Pagination',
 	'css!mkk/Experience/Experience'
 ], function (FirControl) {
 	__extends(Experience, FirControl);

@@ -6,6 +6,12 @@ define('mkk/PohodEdit/PohodEdit', [
 	'fir/datctrl/RecordSet',
 	'fir/datctrl/helpers',
 	'mkk/helpers',
+	'mkk/PohodEdit/DeleteArea/DeleteArea',
+	'mkk/PohodEdit/PartyEdit/PartyEdit',
+	'mkk/PohodEdit/ChiefEdit/ChiefEdit',
+	'mkk/PohodEdit/ChiefAddToParty/ChiefAddToParty',
+	'mkk/TouristPlainList/TouristPlainList',
+	'mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit',
 	'css!mkk/PohodEdit/PohodEdit'
 ], function (
 	FirControl,

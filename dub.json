@@ -1,0 +1,108 @@
+{
+	"name": "mkk_site",
+	"authors": [
+		"Uranuz",
+		"Oleg"
+	],
+	"description": "Yaroslavl tourism MKK site",
+	"copyright": "Copyright © 2017, Uranuz, Oleg",
+	"license": "MIT",
+	"subPackages": [
+		{
+			"name": "main_service",
+			"targetType": "executable",
+			"libs-posix": [
+				"pq"
+			],
+			"sourcePaths": [
+				"src/mkk_site/common",
+				"src/mkk_site/security",
+				"src/mkk_site/data_model",
+				"src/mkk_site/main_service"
+			],
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"openssl": ">=0.0.0"
+			},
+			"lflags": [
+				"lib/libtarsnap.a"
+			],
+			"buildRequirements": [
+				"allowWarnings"
+			]
+		},
+		{
+			"name": "view_service",
+			"targetType": "executable",
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"ivy": ">=0.0.0"
+			},
+			"sourcePaths": [
+				"src/mkk_site/common",
+				"src/mkk_site/data_model",
+				"src/mkk_site/view_service"
+			],
+			"sourceFiles": [],
+			"buildRequirements": [
+				"allowWarnings"
+			]
+		},
+		{
+			"name": "set_user_password",
+			"targetType": "executable",
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"openssl": ">=0.0.0"
+			},
+			"libs-posix": [
+				"pq"
+			],
+			"lflags": [
+				"lib/libtarsnap.a"
+			],
+			"sourcePaths": [
+				"src/mkk_site/common",
+				"src/mkk_site/security"
+			],
+			"sourceFiles": [
+				"src/mkk_site/tools/set_user_password"
+			],
+			"buildRequirements": [
+				"allowWarnings"
+			]
+		},
+		{
+			"name": "gen_pw_hash",
+			"targetType": "executable",
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"openssl": ">=0.0.0"
+			},
+			"lflags-posix": [
+				"lib/libtarsnap.a"
+			],
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk_site/security/crypto",
+				"src/mkk_site/tools/gen_pw_hash"
+			]
+		},
+		{
+			"name": "gen_session_id",
+			"targetType": "executable",
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"openssl": ">=0.0.0"
+			},
+			"lflags-posix": [
+				"lib/libtarsnap.a"
+			],
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk_site/security/crypto",
+				"src/mkk_site/tools/gen_session_id"
+			]
+		}
+	]
+}

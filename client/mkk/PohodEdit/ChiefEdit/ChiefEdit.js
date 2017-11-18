@@ -1,5 +1,6 @@
 define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
-	'fir/controls/FirControl'
+	'fir/controls/FirControl',
+	'mkk/TouristSearchArea/TouristSearchArea'
 ], function (FirControl) {
 	__extends(ChiefEdit, FirControl);
 

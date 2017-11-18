@@ -1,7 +1,9 @@
 define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 	'fir/controls/FirControl',
 	'fir/datctrl/helpers',
-	'mkk/helpers'
+	'mkk/helpers',
+	'mkk/TouristSearchArea/TouristSearchArea',
+	'mkk/TouristPlainList/TouristPlainList'
 ], function (
 	FirControl,
 	DatctrlHelpers,

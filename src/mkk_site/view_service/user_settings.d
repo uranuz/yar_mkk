@@ -12,7 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-string renderModerList(HTTPContext ctx)
+TDataNode renderModerList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 
@@ -33,5 +33,5 @@ string renderModerList(HTTPContext ctx)
 		dataDict[`pwChangeMessage`] = ex.msg;
 	}
 
-	return Service.templateCache.getByModuleName("mkk.UserSettings").run(dataDict).str;
+	return Service.templateCache.getByModuleName("mkk.UserSettings").run(dataDict);
 }
