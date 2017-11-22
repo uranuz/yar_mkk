@@ -1,7 +1,7 @@
 module mkk_site.main_service.pohod_edit;
 
 import mkk_site.main_service.devkit;
-import mkk_site.data_defs.pohod_edit: PohodDataToWrite, DBName;
+import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName;
 
 shared static this()
 {
@@ -18,7 +18,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import std.datetime: Date;
 	import std.typecons: tuple;
 	import std.string: strip, join;
-	import mkk_site.site_data;
+	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
 
 	bool isAuthorized = ctx.user.isAuthenticated

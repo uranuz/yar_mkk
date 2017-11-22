@@ -1,4 +1,4 @@
-module mkk_site.utilities.statistics;
+module mkk_site.tools.statistics;
 
 import std.stdio;
 
@@ -6,7 +6,7 @@ import std.stdio;
 import webtank.db, webtank.datctrl; 
 
 //Вспомогательные функции сайта/базы МКК
-import mkk_site.utils, mkk_site.db_utils;
+import mkk_site.common.utils, mkk_site.db_utils;
 
 void main()
 {

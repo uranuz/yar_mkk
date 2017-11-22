@@ -3,6 +3,8 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 	'fir/network/json_rpc',
 	'fir/datctrl/helpers',
 	'mkk/helpers',
+	'mkk/Pagination/Pagination',
+	'mkk/TouristPlainList/TouristPlainList',
 	'css!mkk/TouristSearchArea/TouristSearchArea'
 ], function(
 	FirControl,

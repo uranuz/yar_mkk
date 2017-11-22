@@ -1,10 +1,7 @@
-module mkk_site.user_identity;
+module mkk_site.common.user_identity;
 
 import webtank.security.access_control;
-
-enum uint sessionIdByteLength = 48; //Количество байт в ИД - сессии
-enum uint sessionIdStrLength = sessionIdByteLength * 8 / 6;  //Длина в символах в виде base64 - строки
-alias ubyte[sessionIdByteLength] SessionId; //Тип: ИД сессии
+public import mkk_site.common.session_id;
 
 class MKKUserIdentity: AnonymousUser
 {

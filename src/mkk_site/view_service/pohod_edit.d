@@ -2,7 +2,7 @@ module mkk_site.view_service.pohod_edit;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
-import mkk_site.data_defs.pohod_edit: PohodDataToWrite;
+import mkk_site.data_model.pohod_edit: PohodDataToWrite;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");

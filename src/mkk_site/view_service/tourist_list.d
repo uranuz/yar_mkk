@@ -17,7 +17,7 @@ import webtank.common.optional: Optional, Undefable;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-import mkk_site.data_defs.tourist_list;
+import mkk_site.data_model.tourist_list;
 
 TDataNode renderTouristList(HTTPContext ctx)
 {

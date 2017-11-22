@@ -1,8 +1,4 @@
-module mkk_site.utils;
-
-import webtank.net.http.context;
-
-//import mkk_site.site_data;
+module mkk_site.common.utils;
 
 string buildNormalPath(T...)(T args)
 {

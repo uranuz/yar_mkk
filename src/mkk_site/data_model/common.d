@@ -1,4 +1,4 @@
-module mkk_site.data_defs.common;
+module mkk_site.data_model.common;
 
 // Используется в качестве аттрибута для указания названия поля в базе данных
 struct DBName

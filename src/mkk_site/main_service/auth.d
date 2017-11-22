@@ -12,7 +12,7 @@ shared static this()
 		.join!(logout)(`auth.logout`);
 }
 
-import mkk_site.access_control;
+import mkk_site.security.access_control;
 
 /// Получить базовую информацию о пользователе по идентификатору сессии
 auto baseUserInfo(HTTPContext context)
@@ -51,7 +51,7 @@ string authByPassword(HTTPContext context, string login, string password)
 	);
 
 	if( !userIdentity || !userIdentity.isAuthenticated ) {
-		throw new AuthException(`Failed to authenticate user by login and password`);
+		throw new SecurityException(`Failed to authenticate user by login and password`);
 	}
 
 	auto resp = context.response;

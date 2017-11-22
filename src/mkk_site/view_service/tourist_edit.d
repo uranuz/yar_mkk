@@ -2,7 +2,7 @@ module mkk_site.view_service.tourist_edit;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
-import mkk_site.data_defs.tourist_edit: TouristDataToWrite;
+import mkk_site.data_model.tourist_edit: TouristDataToWrite;
 
 import ivy;
 

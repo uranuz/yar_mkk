@@ -1,6 +1,6 @@
-module mkk_site.data_defs.tourist_edit;
+module mkk_site.data_model.tourist_edit;
 
-public import mkk_site.data_defs.common;
+public import mkk_site.data_model.common;
 
 // Структура для записи данных о туристе
 struct TouristDataToWrite

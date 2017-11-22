@@ -2,9 +2,9 @@ module mkk_site.main_service.tourist_list;
 
 import std.conv, std.string, std.utf;
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
+import mkk_site.data_model.enums;
 
-import mkk_site.data_defs.tourist_list;
+import mkk_site.data_model.tourist_list;
 
 shared static this()
 {

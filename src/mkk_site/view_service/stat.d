@@ -11,7 +11,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-import mkk_site.data_defs.stat;
+import mkk_site.data_model.stat;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 

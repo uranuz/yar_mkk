@@ -27,4 +27,4 @@ public import
 //Импорт модулей сайта
 public import
 	mkk_site.main_service.service,
-	mkk_site.utils;
+	mkk_site.common.utils;

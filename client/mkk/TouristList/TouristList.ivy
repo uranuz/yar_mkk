@@ -3,10 +3,11 @@ from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.Pagination import Pagination;
 def TouristList {=
 	def.kv
+		moduleName: 'mkk/TouristList/TouristList'
 		instanceName: 'touristList'
 		cssBaseClass: "mkk-TouristList";
 	def.body {*
-	<div class="{=cls 'block'}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<h2>Туристы</h2>
 		<form method="post">
 			<div class="e-filter t-show_tourist form-inline">

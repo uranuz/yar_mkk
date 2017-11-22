@@ -1,6 +1,6 @@
 module mkk_site.main_service.experience;
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
+import mkk_site.data_model.enums;
 
 shared static this()
 {
@@ -41,7 +41,7 @@ static immutable pohodRecFormat = RecordFormat!(
 
 
 import std.json: JSONValue;
-import mkk_site.data_defs.common: Navigation;
+import mkk_site.data_model.common: Navigation;
 
 JSONValue getExperience(
 	HTTPContext context,

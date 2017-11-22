@@ -15,47 +15,36 @@ shared static this()
 {
 	alias jv = JSONValue;
 
+	import std.datetime;
+	import std.conv: text;
+
+	static immutable size_t yearCount = 5;
+	SysTime dt = Clock.currTime();
+	JSONValue[] yearItems;
+
+	foreach( i; 0..yearCount )
+	{
+		auto year = dt.year - i;
+		yearItems ~= jv([
+			"text": jv(year.text),
+			"fields": jv([
+				"beginDateRangeHead__year": year,
+				"endDateRangeTail__year": year
+			])
+		]);
+	}
+	yearItems ~= jv([
+		"text": jv("Последние " ~ yearCount.text ~ " лет"),
+		"fields": jv([
+			"beginDateRangeHead__year": dt.year - yearCount + 1,
+			"endDateRangeTail__year": dt.year
+		])
+	]);
+
 	JSONValue pohodFilters;
 	pohodFilters["sections"] = jv([
 		[	"title": jv("По годам"),
-			"items": jv([
-				[	"text": jv("2018"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2018,
-						"endDateRangeTail__year": 2018
-					])
-				],
-				[	"text": jv("2017"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2017,
-						"endDateRangeTail__year": 2017
-					])
-				],
-				[	"text": jv("2016"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2016,
-						"endDateRangeTail__year": 2016
-					])
-				],
-				[	"text": jv("2015"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2015,
-						"endDateRangeTail__year": 2015
-					])
-				],
-				[	"text": jv("2014"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2014,
-						"endDateRangeTail__year": 2014
-					])
-				],
-				[	"text": jv("Последние 5 лет"),
-					"fields": jv([
-						"beginDateRangeHead__year": 2014,
-						"endDateRangeTail__year": 2018
-					])
-				]
-			])
+			"items": jv(yearItems)
 		],
 		[	"title": jv("По видам туризма"),
 			"items": jv([
@@ -76,6 +65,7 @@ shared static this()
 			])
 		]
 	]);
+
 
 	string[] filterFields;
 	import std.algorithm: canFind;

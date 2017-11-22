@@ -1,7 +1,7 @@
 module mkk_site.main_service.stat;
 import mkk_site.main_service.devkit;
-import mkk_site.site_data;
-import mkk_site.data_defs.stat;
+import mkk_site.data_model.enums;
+import mkk_site.data_model.stat;
 
 import std.conv, std.string, std.utf;
 import std.stdio;
@@ -254,7 +254,7 @@ string[] pref_data_array;
 pref_data_array.length = qtyGraf;
 pref_data_array = заголовок;
 for_all[][0]=pref_data_array;
-import mkk_site.site_data;
+import mkk_site.data_model.enums;
 
 foreach( recIndex; 0..rs.recordCount ) 
 {
