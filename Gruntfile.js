@@ -17,6 +17,7 @@ module.exports = function (grunt) {
 		"mkk/PohodRead/PohodRead",
 		"mkk/TouristEdit/TouristEdit",
 		"mkk/TouristList/TouristList",
+		"mkk/Stat/Stat",
 		"mkk/app"
 	], rJSBuildConfig = {
 		options: {
@@ -229,6 +230,7 @@ module.exports = function (grunt) {
 		'symlink:robots',
 		'symlink:bootstrap',
 		'symlink:jqueryui',
+		'symlink:flot',
 		'sass:bootstrap',
 		'requirejs'
 	]);
