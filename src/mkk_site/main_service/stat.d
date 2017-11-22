@@ -10,8 +10,6 @@ import std.datetime;
 import std.typecons: tuple;
 import std.json;
 
-
-
 //***********************Обявление метода*******************
 shared static this()
 {
@@ -19,14 +17,10 @@ shared static this()
 }
 //**********************************************************
 
-
-
 auto statData //начало основной функции////////////////
  (HTTPContext context,StatSelect select)
   
  {   
-	 
-						//AliasSeq aliasSeqOf ###################
 				import std.meta;//staticMap
 				import std.range;//iota
 				static immutable string[] prezent = [ "Год","Вид/КС" ];
@@ -51,12 +45,10 @@ auto statData //начало основной функции////////////////
 		if(!select.endYear.length)  select.endYear=  Clock.currTime().year.text; 
 	
 	 	//***********************************
-	string[] групп_человек;	 
-	string[] заголовок;
-	bool[] bool_заголовок;
-	size_t колонок;
-	size_t строк;
-	
+	string[] заголовок;//заголовок таблицы
+	size_t qtyGraf;//возможное число графиков
+	bool[] boolGraf;//разрешонные графики	
+	qtyGraf = 12;
 
 
 	if( select.conduct == 0 )
@@ -65,7 +57,6 @@ auto statData //начало основной функции////////////////
 			"Год", "","Пеший", "","Лыжный","", "Горный","", "Водный", "","Вело",
 			"","Авто", "","Спелео", "","Парус", "","Конный","", "Комби","", "ВСЕГО"
 		];
-		колонок = 23;
 	}
 
 	if( select.conduct == 1 )
@@ -74,19 +65,16 @@ auto statData //начало основной функции////////////////
 			"Вид/ к.с.", "","н.к.", "","Первая","", "Вторая", "","Третья",
 			"","Четвёртая","", "Пятая", "","Шестая", "","Путеш.", "","ВСЕГО"
 		];
-		колонок = 19;
 	}
 
-		bool_заголовок.length = колонок;
-		bool_заголовок[]= true;
+		boolGraf.length = qtyGraf;
+		boolGraf[]= false;
 
 
 		bool b_kod = false, b_org = false, b_terr = false;
 			if(select.kodMKK.length) b_kod = true;
 			if(select.organization.length) b_org = true;
 			if(select.territory.length) b_terr = true;
-
-		//tpl.set( "skript_Neim", "stat_all.js");
 
 
 	string запрос_статистика;
@@ -164,14 +152,6 @@ st100 AS (
 
  st200 AS ( SELECT*FROM st UNION  SELECT*FROM st100 )
 SELECT*FROM st200 ORDER BY year nulls last			`;
-
-
-
-			
-
-			
-
-
 	}
 	//-----конец -запроса-- по годам--VID-
 
@@ -202,7 +182,8 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		
 
         запрос_статистика ~= `
-			  ks0 AS ( SELECT vid,count(unit) AS gr_0,  sum (unit)  AS un_0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 )GROUP BY vid ORDER BY vid  ),`;
+			  ks0 AS ( SELECT vid,count(unit) AS gr_0,  sum (unit)  
+			      AS un_0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 )GROUP BY vid ORDER BY vid  ),`;
 			foreach(size_t n; 1.. 7) 
 				запрос_статистика ~= `
 					ks`~n.to!string~` AS ( SELECT vid,count(unit) AS gr_`
@@ -236,14 +217,12 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 				SELECT 11 AS vid,`;
 				запрос_статистика ~= `
 				`;
-
 				foreach(size_t n; 0.. 7)
 				запрос_статистика ~= `		
 				sum(gr_`~n.to!string~`) AS gr_s`
 														~n.to!string~`,  sum(un_`
 														~n.to!string~`)   AS  un_s`
 														~n.to!string~`,`;
-
 				запрос_статистика ~= `
 				sum(gr_7) AS gr_put,     sum(un_7)   AS  un_put,
 				sum(gr_всего) AS gr_всего,  sum(un_всего) AS  un_всего    
@@ -256,28 +235,14 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 	//-----конец -запроса--"по КС"
 
-
-
 	auto dbase = getCommonDB(); //Подключение к базе
-
 	IDBQueryResult rs;
-
-	if( select.conduct == 0 )
+	 
 		rs = dbase.query(запрос_статистика);//.getRecordSet(statRecFormatVid);
-	if( select.conduct == 1  )
-		rs = dbase.query(запрос_статистика);//.getRecordSet(statRecFormatKC);
 	//*******************************************
 
-	
-		// --формируем исходные матрицы------///////////
-		string[string] вид = [
-		"0":"Вид/ к.с.", "1":"Пеший","2": "Лыжный", "3":"Горный","4": "Водный", "5":"Вело",
-		"6":"Авто", "7":"Спелео","8": "Парус", "9":"Конный","19": "Комби", "11":"ВСЕГО"
-	];
-
-
 	bool parity;
-	//строк = rs.length;
+		// --формируем исходные матрицы------///////////
 	
 	string[][] for_all;   //обобщённый массив данных 
 //----------------------
@@ -286,8 +251,7 @@ for_all.length = rs.recordCount+1;//строк втаблице
 
 // --первая строка
 string[] pref_data_array;
-//pref_data_array.length = rs.fieldCount;
-pref_data_array.length = колонок;
+pref_data_array.length = qtyGraf;
 pref_data_array = заголовок;
 for_all[][0]=pref_data_array;
 import mkk_site.site_data;
@@ -346,14 +310,116 @@ foreach(i, str; for_all)
 		
 	compressed_data ~= data_array;
 } 
-	//writeln(запрос_статистика);
-//---------------------
+	//--------матрица таблицы-------------
+
+	bool t =false;
+	string[][] tabl_data;
+	size_t  p;
+
+		foreach(data_str;compressed_data) 
+		{
+						p= 0;
+			string  coll;
+         string [] str;
+			foreach(col;data_str) 
+			{
+				switch(p)
+				{
+					case 0: { p=1;  str ~= col;}; break;
+					case 1: { p=2;  coll=col;}; break;
+					case 2: { p=1;  
+								if(coll.length) coll~="/";
+								coll~=col;
+								str ~= coll;};break;
+						default:;break;
+				}
+			}
+			tabl_data ~= str;
+			t=true;
+		}
+		//конец--------матрица таблицы-------------
+
+	//--------матрица графика-------------
 	
-//**************************************
-
-
-
+	string[][] graf_data;
+		foreach(data_str;for_all) 
+		{
+						p= 0;
+         string [] str;
+			foreach(col;data_str) 
+			{
+				switch(p) 
+				{
+					case 0: { p=1;  str ~= col;}; break;
+					case 1: { p=0;  }; break;
+					default:;break;
+				}
+			}
+			graf_data ~= str;
+		}
 	
+	//конец----матрица графика-------------
+	import std.algorithm.searching: count;
+	import std.algorithm.comparison: equal;
+	import std.range.interfaces;
+	import std.array: array;
+	import std.algorithm: map;
+
+	string[][] trans_graf_data;
+	string[][] var;
+	string []Surs0=["0","1","2","3","4","5","6","7" ];
+
+	if(select.conduct == 0)
+	{
+		trans_graf_data = transposed(graf_data[1..compressed_data.length-1]).map!( (a) => a.array ).array;
+	// отбросить первую строку и ТРАНСПОНИРОВАТЬ МАТРИЦУ
+	}
+
+	if(select.conduct == 1)
+	{
+trans_graf_data~=["0","1","2","3","4","5","6","7" ];
+
+	for( int v = 1; v < 11; v++ )
+	{
+		p= 1;
+		foreach(col;graf_data)
+		{
 			
-		return compressed_data;
+			if( count( col,видТуризма.getName(v)) )
+			{
+				//writeln("строкa",v,col);
+				trans_graf_data~=col[1..col.length-1];
+				p= 0;
+			}
+		}
+			if(p) trans_graf_data~=["0","0","0","0","0","0","0","0" ];
+	}
+		trans_graf_data~= graf_data[graf_data.length-1]
+		[1..graf_data[graf_data.length-1].length-1];
+		
+	}
+
+
+//--заполним пустые позиции нулями
+	foreach(i,data_str;trans_graf_data)
+	{
+		foreach(j,str;data_str)
+		{
+			if(!str.length) trans_graf_data[i][j]="0";			
+		      else boolGraf[i]=true;
+		}
+	}
+	//--конец------матрица графика--нули-----------S
+ 
+	//foreach( line; trans_graf_data)writeln(line);
+
+//---------------------graf_data
+JSONValue result;	
+result[`tabl`]=tabl_data;
+result[`graf`]=trans_graf_data;
+result[`grafLength`]=trans_graf_data[0].length;
+result[`boolGraf`]=boolGraf;
+//**************************************
+			
+		return result;
  }

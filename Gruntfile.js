@@ -68,6 +68,14 @@
 				dest: '<%= deployPath %>/pub/jquery-ui-1.12.1.custom/',
 				filter: 'isFile',
 				overwrite: true
+			},
+			flot: {
+				expand: true,
+				cwd: 'client/flot/',
+				src: './**/*.*',
+				dest: '<%= deployPath %>/pub/flot/',
+				filter: 'isFile',
+				overwrite: true
 			}
 		},
 		sass: {
@@ -138,6 +146,10 @@
 			jqueryui: {
 				options: { force: true },
 				files: { src: '<%= deployPath %>/pub/jquery-ui-1.12.1.custom/**/*' }
+			},
+			flot: {
+				options: { force: true },
+				files: { src: '<%= deployPath %>/pub/flot/**/*' }
 			}
 		},
 		watch: {

@@ -33,7 +33,8 @@ TDataNode renderStat(HTTPContext ctx)
 
 	TDataNode dataDict = [
 		"select": jSelect.toIvyJSON(),
-		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select":jSelect]))
+		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select":jSelect])),
+		"vpaths": TDataNode(Service.virtualPaths)
 	];	
 	//lданные для передачи в шаблон
 
