@@ -15,17 +15,16 @@ def PohodList {=
 				pohodEnums: pohodEnums
 				filter: filter
 				nav: pohodNav
+				paginationSideContent: {*
+				<div class="col" style="text-align: right;">
+					{=if isAuthorized and not isForPrint {*
+						<a href="{{vpaths.siteDynamic}}pohod/edit"
+							class="{=cls 'addPohodBtn'} btn btn-primary"
+							>Добавить поход</a>
+					*}}
+				</div>	
+				*}
 			}
-		</div>
-
-		<div class="{=cls 'tableBar'} row">
-			<div class="col-md-6" style="text-align: right;">
-				{=if isAuthorized and not isForPrint {*
-					<a href="{{vpaths.siteDynamic}}pohod/edit"
-						class="{=cls 'addPohodBtn'} btn btn-primary"
-						>Добавить поход</a>
-				*}}
-			</div>
 		</div>
 		<div class="{=cls 'tableBlock'} mkk-Table">
 			<div class="{=cls 'tableScroller'} mkk-Table">
@@ -44,7 +43,7 @@ def PohodList {=
 							<th>Город, организация</th>
 							<th>Статус похода</th>
 							{= if isAuthorized and not isForPrint {*
-								<th class="{=cls 'headerEditCell'}">Изменить</th>
+								<th class="{=cls 'headerEditCell'}">Изм</th>
 							*}}
 						</tr>
 					</tbody>
@@ -94,7 +93,11 @@ def PohodList {=
 									<div>{=recGetStr rec "claimState"}</div>
 								</td>
 								{=if isAuthorized and not isForPrint {*
-									<td><a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}">Изменить</a></td>
+									<td>
+										<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}"
+											class="mkk-Document e-itemEditBtn"
+											title="Изменить"></a>
+									</td>
 								*}}
 							</tr>
 							<tr>

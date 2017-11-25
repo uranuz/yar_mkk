@@ -1,6 +1,7 @@
 define('mkk/TouristList/TouristList', [
 	'fir/controls/FirControl',
-	'mkk/Pagination/Pagination'
+	'mkk/Pagination/Pagination',
+	'css!mkk/TouristList/TouristList'
 ], function (FirControl, DatctrlHelpers) {
 	__extends(TouristList, FirControl);
 

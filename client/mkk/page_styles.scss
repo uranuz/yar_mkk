@@ -67,4 +67,12 @@
 	&.e-listLink {
 		margin-left: 8px;
 	}
+	&.e-itemEditBtn {
+		background: url('img/icons/pencil_4076.png') no-repeat;
+		background-size: 24px 24px;
+		width: 24px;
+		height: 24px;
+		display: inline-block;
+		opacity: 0.8;
+	}
 }

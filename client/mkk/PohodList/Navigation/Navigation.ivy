@@ -10,7 +10,8 @@ def PohodListNavigation {=
 		instanceName: 'pohodListNavigation'
 		pohodEnums: null
 		filter: {}
-		nav: {};
+		nav: {}
+		paginationSideContent: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -71,7 +72,7 @@ def PohodListNavigation {=
 					<fieldset class="{=cls 'dateRangeArea'}">
 						<legend>Сроки похода</legend>
 						<div class="{=cls 'dateRangeWrapper'} row">
-							<div class="col-lg-6">
+							<div class="{=cls 'dateRangeBegin'} col-lg-6">
 								<span>с</span>
 								{=PlainDatePicker
 									instanceName: 'beginDateRangeHeadField'
@@ -84,7 +85,7 @@ def PohodListNavigation {=
 									yearPlaceholder: 'год'
 								}
 							</div>
-							<div class="col-lg-6">
+							<div class="{=cls 'dateRangeEnd'} col-lg-6">
 								<span>по</span>
 								{=PlainDatePicker
 									instanceName: 'endDateRangeTailField'
@@ -102,7 +103,7 @@ def PohodListNavigation {=
 					<div class="form-inline">
 						<div class="row">
 							<label class="col-md-6">
-								<span class="form-control-label">Район похода содержит</span>
+								<span class="form-control-label">Район похода</span>
 								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
 							</label>
 							<label class="col-md-3">
@@ -111,7 +112,7 @@ def PohodListNavigation {=
 							</label>
 							<label class="col-md-3">
 								<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
-								<span class="form-control-label">Режим контроля данных</span>
+								<span class="form-control-label">Контроль данных</span>
 							</label>
 
 						</div>
@@ -122,13 +123,16 @@ def PohodListNavigation {=
 						</button>
 					</div>
 				</div>
-				<div class="{=cls 'pagination'}">
+				<div class="{=cls 'bottomRow'} row">
+					<div class="{=cls 'pagination'} col-auto">
 					{=Pagination
 						formField: 'offset'
 						offset: nav.offset
 						pageSize: nav.pageSize or 10
 						recordCount: nav.recordCount
 					}
+					</div>
+					{{paginationSideContent}}
 				</div>
 			</form>
 		</div>

@@ -17,18 +17,18 @@ expr {*
 		<form method="post" action="#" class="form">
 			<div class="form-group row">
 				<div class="col-md-3">
-					<label class="form-control-static" for="user_login_field">Логин</label>
+					<label class="form-control-static" for="userLoginField">Логин</label>
 				</div>
 				<div class="col-md-5">
-					<input name="user_login" type="text" value="{{userLogin}}" class="form-control" id="user_login_field" />
+					<input name="userLogin" type="text" value="{{userLogin}}" class="form-control" id="userLoginField" />
 				</div>
 			</div>
 			<div class="form-group row">
 				<div class="col-md-3">
-					<label class="form-control-static" for="user_password_field">Пароль</label>
+					<label class="form-control-static" for="userPasswordField">Пароль</label>
 				</div>
 				<div class="col-md-5">
-					<input name="user_password" type="password" class="form-control" id="user_password_field" />
+					<input name="userPassword" type="password" class="form-control" id="userPasswordField" />
 				</div>
 			</div>
 			<div class="form-group row">

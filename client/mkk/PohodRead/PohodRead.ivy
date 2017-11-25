@@ -10,83 +10,84 @@ def PohodRead {=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts=""/>
 		<h2>Данные похода</h2>
-		<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
+		{=if isAuthorized {*
+			<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
 			class="btn btn-sm btn-secondary"
-			style="position: absolute; top: 0.5rem; right: 0.5rem;">
-			Редактировать
-		</a>
+			style="position: absolute; top: 0.5rem; right: 0.5rem;"
+			>Редактировать</a>
+		*}}
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Код МКК</label>
-			<div class="{=cls 'prop_value'} {=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'mkkCode'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Код МКК</label>
+			<div class="{=cls 'propValue'} {=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'mkkCode'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Маршрутная книжка</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'bookNum'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Маршрутная книжка</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'bookNum'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Группа туристов</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'organization'} {=recGet pohod 'partyRegion'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Группа туристов</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'organization'} {=recGet pohod 'partyRegion'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Сроки похода</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=DateRangePrinter
+			<label class="{=cls 'propCaption'} col-md-4">Сроки похода</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=DateRangePrinter
 					begin: {=recGet pohod 'beginDate'}
 					end: {=recGet pohod 'finishDate'}
 				}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Вид туризма</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGetStr pohod 'tourismKind'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Вид туризма</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGetStr pohod 'tourismKind'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Категория сложности</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGetStr pohod 'complexity'} {=recGetStr pohod 'complexityElems'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Категория сложности</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGetStr pohod 'complexity'} {=recGetStr pohod 'complexityElems'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Район похода</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'pohodRegion'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Район похода</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'pohodRegion'}</span>
 			</div>
 		</div>
-		<div class="{=cls 'wide_prop'} row">
-			<label class="{=cls 'wide_prop_caption'} col-md-12">Маршрут</label>
-			<div class="{=cls 'wide_prop_value'} col-md-12">
-				<span class="{=cls 'wide_prop_value_text'}">{=recGet pohod 'route'}</span>
-			</div>
-		</div>
-		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">В составе</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'partySize'}</span>
+		<div class="{=cls 'wideProp'} row">
+			<label class="{=cls 'widePropCaption'} col-md-12">Маршрут</label>
+			<div class="{=cls 'widePropValue'} col-md-12">
+				<span class="{=cls 'widePropValueText'}">{=recGet pohod 'route'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Руководитель группы</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'chiefName'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">В составе</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'partySize'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Зам. руководителя группы</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGet pohod 'altChiefName'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Руководитель группы</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'chiefName'}</span>
 			</div>
 		</div>
-		<div class="{=cls 'wide_prop'} row">
-			<label class="{=cls 'wide_prop_caption'} col-md-12">Состав группы</label>
-			<div class="{=cls 'prop_value'} col-md-12">
+		<div class="{=cls 'prop'} row">
+			<label class="{=cls 'propCaption'} col-md-4">Зам. руководителя группы</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGet pohod 'altChiefName'}</span>
+			</div>
+		</div>
+		<div class="{=cls 'wideProp'} row">
+			<label class="{=cls 'widePropCaption'} col-md-12">Состав группы</label>
+			<div class="{=cls 'propValue'} col-md-12">
 				{=if partyList != null
 				{=repeat tourist in partyList {*
 					<div>
@@ -100,32 +101,32 @@ def PohodRead {=
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Готовность похода</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGetStr pohod 'progress'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Готовность похода</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGetStr pohod 'progress'}</span>
 			</div>
 		</div>
 		<div class="{=cls 'prop'} row">
-			<label class="{=cls 'prop_caption'} col-md-4">Статус заявки</label>
-			<div class="{=cls 'prop_value'} col-md-8">
-				<span class="{=cls 'prop_value_text'}">{=recGetStr pohod 'claimState'}</span>
+			<label class="{=cls 'propCaption'} col-md-4">Статус заявки</label>
+			<div class="{=cls 'propValue'} col-md-8">
+				<span class="{=cls 'propValueText'}">{=recGetStr pohod 'claimState'}</span>
 			</div>
 		</div>
-		<div class="{=cls 'wide_prop'} row">
-			<label class="{=cls 'wide_prop_caption'} col-md-12">Комментарий руководителя</label>
-			<div class="{=cls 'wide_prop_value'} col-md-12">
-				<span class="{=cls 'wide_prop_value_text'}">{=recGet pohod 'chiefComment'}</span>
+		<div class="{=cls 'wideProp'} row">
+			<label class="{=cls 'widePropCaption'} col-md-12">Комментарий руководителя</label>
+			<div class="{=cls 'widePropValue'} col-md-12">
+				<span class="{=cls 'widePropValueText'}">{=recGet pohod 'chiefComment'}</span>
 			</div>
 		</div>
-		<div class="{=cls 'wide_prop'} row">
-			<label class="{=cls 'wide_prop_caption'} col-md-12">Комментарий МКК</label>
-			<div class="{=cls 'wide_prop_value'} col-md-12">
-				<span class="{=cls 'wide_prop_value_text'}">{=recGet pohod 'mkkComment'}</span>
+		<div class="{=cls 'wideProp'} row">
+			<label class="{=cls 'widePropCaption'} col-md-12">Комментарий МКК</label>
+			<div class="{=cls 'widePropValue'} col-md-12">
+				<span class="{=cls 'widePropValueText'}">{=recGet pohod 'mkkComment'}</span>
 			</div>
 		</div>
-		<div class="{=cls 'wide_prop'} row">
-			<label class="{=cls 'wide_prop_caption'} col-md-12">Дополнительные материалы</label>
-			<div class="{=cls 'wide_prop_value_text'} col-md-12">
+		<div class="{=cls 'wideProp'} row">
+			<label class="{=cls 'widePropCaption'} col-md-12">Дополнительные материалы</label>
+			<div class="{=cls 'widePropValueText'} col-md-12">
 				{=if extraFileLinks != null
 				{=repeat linkData in extraFileLinks {*
 					<a href="{=at linkData 0}">{=at linkData 1}</a>

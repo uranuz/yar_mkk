@@ -165,7 +165,57 @@ from pohod where pohod.num = ` ~ num.text ~ `
 }
 
 import std.meta: AliasSeq;
-import std.typecons: tuple;
+import std.typecons: tuple, Tuple;
+
+alias DCTuple = Tuple!(string, `cond`, string, `descr`);
+
+private static immutable pohodDataCheckFilters = [
+	DCTuple(
+		`finish_date < current_date and prepar < 6`,
+		`Сроки истекли, но не указан статус завершения похода`
+	),
+	DCTuple(
+		`nullif(nomer_knigi, '') is null and stat < 4`,
+		`Присвоен номер книги, но не указано, что заявка принята`
+	),
+	DCTuple(
+		`begin_date < current_date
+			and finish_date > current_date and prepar != 5`,
+		`Не установлен статус, что группа на маршруте`
+	),
+	DCTuple(
+		`nullif(region_pohod, '') is null`,
+		`Не указан район похода`
+	),
+	DCTuple(
+		`nullif(marchrut, '') is null`,
+		`Не указана нитка маршрута`
+	),
+	DCTuple(
+		`vid is null`,
+		`Не указан вид туризма`
+	),
+	DCTuple(
+		`ks is null`,
+		`Не указана категория сложности`
+	)
+];
+
+import std.algorithm: map;
+import std.string: join;
+import std.array: array;
+
+// Фильтр для выборки "проблемных" походов при проверке данных
+private static immutable string dataCheckFilterQuery =
+	pohodDataCheckFilters.map!((dcFilter) => dcFilter.cond).join("\nor\n");
+
+// Подзапрос со списком "проблем" у похода в основную секцию select для списка походов
+private static immutable string pohodListDataCheckSubquery =
+	"	array(\n" 
+	~ pohodDataCheckFilters.map!((dcFilter) =>
+		"		select '" ~ dcFilter.descr ~ "'\n			where " ~ dcFilter.cond
+	).join("\nunion\n")
+	~ "	\n) problems,\n";
 
 // Просто список кортежей, который позволяет установить соответствие между тремя полями
 // 0: название поля фильтрации в параметрах метода
@@ -222,10 +272,12 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	if( filter.pohodRegion.length > 0 )
 		filters ~= `region_pohod ILIKE '%` ~ filter.pohodRegion ~ `%'`;
 
-	return ( filters.length > 0 ?	" ( " ~ filters.join(" ) and ( ") ~ " ) " : null );
-}
+	if( filter.withDataCheck )
+		filters ~= dataCheckFilterQuery;
+	
 
-import std.typecons: tuple;
+	return ( filters.length > 0? " ( " ~ filters.join(" ) and ( ") ~ " ) ": null );
+}
 
 static immutable pohodRecFormat = RecordFormat!(
 	BasePohodFields,
@@ -242,32 +294,6 @@ static immutable pohodRecFormat = RecordFormat!(
 		статусЗаявки
 	)
 );
-
-private static immutable pohodListDataCheckSubquery =
-`array(
-	select 'Сроки истекли, но не указан статус завершения похода'
-		where finish_date < current_date and prepar < 6
-	union
-	select 'Присвоен номер книги, но не указано, что заявка принята'
-		where nullif(nomer_knigi, '') is null and stat < 4
-	union
-	select 'Не установлен статус, что группа на маршруте'
-		where begin_date < current_date
-			and finish_date > current_date and prepar != 5
-	union
-	select 'Не указан район похода'
-		where nullif(region_pohod, '') is null
-	union
-	select 'Не указана нитка маршрута'
-		where nullif(marchrut, '') is null
-	union
-	select 'Не указан вид туризма'
-		where vid is null
-	union
-	select 'Не указана категория сложности'
-		where ks is null
-) problems,
-`;
 
 private static immutable pohodListFromQueryPart =
 `	prepar "progress",
@@ -309,16 +335,6 @@ JSONValue getPohodList(PohodFilter filter, Navigation nav)
 	if( recordCount < nav.offset ) {
 		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
 		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
-	}
-
-	if( filter.withDataCheck ) {
-		// При проверке данных добавляем обертку запроса для отбора походов с проблемами
-		query = `
-		with poh as(
-		` ~ query ~ `
-		)
-		select * from poh where array_length(poh.problems, 1) > 0
-		`;
 	}
 
 	// Упорядочивание и страничный отбор уже делаем по готовым данным

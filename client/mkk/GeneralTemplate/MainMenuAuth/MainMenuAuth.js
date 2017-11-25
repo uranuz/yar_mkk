@@ -16,13 +16,12 @@ define('mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth', [
 	return __mixinProto(MainMenuAuth, {
 		onPopdownBtnClick: function(ev) {
 			var popdownMenu = this._elems('popdownMenu');
-
-				if( popdownMenu.is(':visible') ) {
-					$('html').off('click', this._outsideClickHdlInstance);
-				} else {
-					$('html').on('click', this._outsideClickHdlInstance);
-				}
-				popdownMenu.toggle();
+			if( popdownMenu.is(':visible') ) {
+				$('html').off('click', this._outsideClickHdlInstance);
+			} else {
+				$('html').on('click', this._outsideClickHdlInstance);
+			}
+			popdownMenu.toggle();
 		},
 		addOutsideClickHandler: function(ev) {
 			var

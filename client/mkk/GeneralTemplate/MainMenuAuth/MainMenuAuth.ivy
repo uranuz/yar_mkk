@@ -7,7 +7,8 @@ def MainMenuAuth {=
 		cssBaseClass: 'mkk-MainMenuAuth'
 		isAuthenticated: null
 		userName: null
-		vpaths: undef;
+		vpaths: undef
+		authRedirectURI: null;
 	def.body {*
 	{=var
 		authStateCls: {=if isAuthenticated 'm-with_auth' else 'm-without_auth'}
@@ -25,13 +26,13 @@ def MainMenuAuth {=
 		</a>
 		<ul class="{=cls 'popdownMenu'} {{authStateCls}}">
 			<li>
-				<a href="{{vpaths.siteAuthPage}}"
+				<a href="{{authRedirectURI}}"
 					class="{=cls 'loginBtn'} {{authStateCls}}"
 					title="Перейти на страницу аутентификации"
 					>Войти</a>
 			</li>
 			<li>
-				<a href="{{vpaths.siteAuthPage}}?logout=true"
+				<a href="{{authRedirectURI}}&logout=true"
 					class="{=cls 'logoutBtn'} {{authStateCls}}"
 					title="Завершить сеанс работы под пользователем"
 					>Выйти</a>

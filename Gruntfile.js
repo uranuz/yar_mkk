@@ -17,7 +17,8 @@ module.exports = function (grunt) {
 		"mkk/PohodRead/PohodRead",
 		"mkk/TouristEdit/TouristEdit",
 		"mkk/TouristList/TouristList",
-		"mkk/Stat/Stat",
+		//"mkk/Stat/Stat",
+		"mkk/UserSettings/UserSettings",
 		"mkk/app"
 	], rJSBuildConfig = {
 		options: {
@@ -59,8 +60,7 @@ module.exports = function (grunt) {
 		reports: '<%= deployPath %>pub/reports',
 		robots: '<%= deployPath %>pub/robots.txt',
 		bootstrap: '<%= deployPath %>pub/bootstrap/**/*',
-		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*',
-		flot: '<%= deployPath %>/pub/flot/**/*'
+		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*'
 	},
 	cleanConfig = {};
 
@@ -148,14 +148,6 @@ module.exports = function (grunt) {
 				dest: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/',
 				filter: 'isFile',
 				overwrite: true
-			},
-			flot: {
-				expand: true,
-				cwd: 'client/flot/',
-				src: './**/*.*',
-				dest: '<%= deployPath %>/pub/flot/',
-				filter: 'isFile',
-				overwrite: true
 			}
 		},
 		sass: {
@@ -230,7 +222,6 @@ module.exports = function (grunt) {
 		'symlink:robots',
 		'symlink:bootstrap',
 		'symlink:jqueryui',
-		'symlink:flot',
 		'sass:bootstrap',
 		'requirejs'
 	]);
