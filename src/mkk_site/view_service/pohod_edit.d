@@ -3,6 +3,7 @@ module mkk_site.view_service.pohod_edit;
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 import mkk_site.data_model.pohod_edit: PohodDataToWrite;
+import mkk_site.common.utils: getAuthRedirectURI;
 
 shared static this() {
 	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
@@ -55,6 +56,7 @@ TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuth
 	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
 	dataDict["vpaths"] = Service.virtualPaths;
+	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
 	return Service.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict);
 }

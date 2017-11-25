@@ -9,6 +9,7 @@ import webtank.net.uri_pattern;
 
 import mkk_site.view_service.service: Service;
 import mkk_site.view_service.utils;
+import mkk_site.common.utils: getAuthRedirectURI;
 import ivy.interpreter.data_node;
 import ivy.interpreter.data_node_render;
 
@@ -30,6 +31,7 @@ void _renderMessageBody(MKKPageHandler)(MKKPageHandler handler, HTTPContext cont
 		dataDict["content"] = handler(context);
 		dataDict["isAuthenticated"] = context.user.isAuthenticated;
 		dataDict["userName"] = context.user.name;
+		dataDict["authRedirectURI"] = getAuthRedirectURI(context);
 
 		auto favouriteFilters = mainServiceCall(`pohod.favoriteFilters`, context);
 		assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
@@ -49,16 +51,6 @@ void _renderMessageBody(MKKPageHandler)(MKKPageHandler handler, HTTPContext cont
 			_resp.write(data.text);
 		}
 	}
-
-	/+
-	debug {
-		import std.stdio;
-		import std.array: appender;
-		auto sink = appender!string();
-		renderDataNode!(DataRenderType.TextDebug)(payload, sink);
-		writeln(`DEBUG rendered template: `, sink.data);
-	}
-	+/
 
 	renderDataNode!(DataRenderType.HTML)(payload, OutRange(context.response));
 }

@@ -2,11 +2,13 @@ expr {=
 from fir.controls.utils import cls;
 def UserSettings {=
 	def.kv
+		moduleName: 'mkk/UserSettings/UserSettings'
 		instanceName: 'userSettings'
 		cssBaseClass: 'mkk-UserSettings';
 	def.body {*
-	<h2>Персональные настройки</h2>
-	<div>
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h2>Персональные настройки</h2>
 		<div class="row">
 			<label class="form-control-static col-md-3">Пользователь</label>
 			<div class="col-md-7">
@@ -21,34 +23,50 @@ def UserSettings {=
 		</div>
 
 		
-		<form method="post">
+		<form method="post" class="{=cls 'changePasswordForm'}">
 			<h3>Сменить пароль</h3>
 			<h5>{{pwChangeMessage}}</h5>
 			<div class="form-group row">
-				<label for="old_password_field" class="form-control-static col-md-3">Старый пароль</label>
+				<label for="oldPasswordField"
+					class="form-control-static col-md-3">Старый пароль</label>
 				<div class="col-md-7">
-					<input type="password" name="oldPassword" id="old_password_field" class="form-control">
+					<input type="password"
+						name="oldPassword"
+						id="oldPasswordField"
+						class="{=cls 'oldPasswordField'} form-control"/>
 				</div>
 			</div>
 			<div class="form-group row">
-				<label for="new_password_field" class="form-control-static col-md-3">Новый пароль</label>
+				<label for="newPasswordField"
+					class="form-control-static col-md-3">Новый пароль</label>
 				<div class="col-md-7">
-					<input type="password" name="newPassword" id="new_password_field" class="form-control">
+					<input type="password"
+						name="newPassword"
+						id="newPasswordField"
+						class="{=cls 'newPasswordField'} form-control"/>
 				</div>
 			</div>
 			<div class="form-group row">
-				<label for="repeat_password_field" class="form-control-static col-md-3">Повтор пароля</label>
+				<label for="repeatPasswordField"
+					class="form-control-static col-md-3">Повтор пароля</label>
 				<div class="col-md-7">
-					<input type="password" name="repeatPassword" id="repeat_password_field" class="form-control">
+					<input type="password"
+						name="repeatPassword"
+						id="repeatPasswordField"
+						class="{=cls 'repeatPasswordField'} form-control"/>
 				</div>
 			</div>
 			<div class="form-group row">
 				<span class="form-control-static col-md-3"></span>
 				<div class="col-md-7">
-					<button type="submit" class="form-control btn btn-primary">Сохранить</button>
+					<button type="submit"
+						class="{=cls 'saveBtn'} form-control btn btn-primary"
+						>Сохранить</button>
 				</div>
 			</div>
 		</form>
+		<div class="{=cls 'emptyPasswordDlg'}" style="display: none;">Пароль не может быть пустым</div>
+		<div class="{=cls 'mismatchPasswordDlg'}" style="display: none;">Пароль и повтор пароля должны совпадать</div>
 	</div>
 	*}
 };

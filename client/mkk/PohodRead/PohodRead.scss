@@ -1,20 +1,20 @@
 .mkk-PohodRead {
-	&.e-wide_prop,
+	&.e-wideProp,
 	&.e-prop {
 		border-bottom: 1px solid #BECDA0;
 	}
-	&.e-wide_prop_caption {
+	&.e-widePropCaption {
 		/*text-decoration: underline;*/
 	}
-	&.e-prop_caption {
+	&.e-propCaption {
 		/*font-weight: bold;*/
 	}
-	&.e-wide_prop_value,
-	&.e-prop_value {
+	&.e-widePropValue,
+	&.e-propValue {
 		color: #006400;
 		font-weight: bold;
 	}
-	&.e-wide_prop {
+	&.e-wideProp {
 		padding: 0.75rem 0;
 	}
 }

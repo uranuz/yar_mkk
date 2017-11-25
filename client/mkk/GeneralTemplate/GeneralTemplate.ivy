@@ -70,6 +70,7 @@ expr {*
 								isAuthenticated: isAuthenticated
 								userName: userName
 								vpaths: vpaths
+								authRedirectURI: authRedirectURI
 							}
 						</li>
 					</ul>

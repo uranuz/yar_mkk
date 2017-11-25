@@ -38,11 +38,11 @@ TDataNode renderAuth(HTTPContext context)
 	bool isAuthFailed = false;
 
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
-	if( ("user_login" in req.bodyForm) && ("user_password" in req.bodyForm) )
+	if( ("userLogin" in req.bodyForm) && ("userPassword" in req.bodyForm) )
 	{
 		JSONValue jParams;
-		jParams[`login`] = req.bodyForm["user_login"];
-		jParams[`password`] = req.bodyForm["user_password"];
+		jParams[`login`] = req.bodyForm["userLogin"];
+		jParams[`password`] = req.bodyForm["userPassword"];
 
 		JSONValue jResult;
 		try {
@@ -52,7 +52,7 @@ TDataNode renderAuth(HTTPContext context)
 		if( jResult.type == JSON_TYPE.STRING )
 		{
 			resp.cookies["__sid__"] = jResult.str;
-			resp.cookies["user_login"] = req.bodyForm["user_login"];
+			resp.cookies["user_login"] = req.bodyForm["userLogin"];
 			resp.cookies["__sid__"].path = "/";
 			resp.cookies["user_login"].path = "/";
 

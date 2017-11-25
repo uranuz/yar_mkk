@@ -1,0 +1,23 @@
+.mkk-PohodListNavigation {
+	&.e-enumFilterBlock {
+		margin: 0 -0.2rem 1rem -0.2rem;
+	}
+	&.e-enumFilter {
+		padding: 0 0.2rem 0 0.2rem;
+	}
+	&.e-dateRangeArea {
+		margin-bottom: 0.5rem;
+	}
+	&.e-searchBtn {
+		margin: 1rem 0;
+	}
+	&.e-pagination {
+		margin-bottom: 0.5rem;
+	}
+	&.e-dateRangeBegin, &.e-dateRangeEnd {
+		white-space: nowrap;
+	}
+	&.e-dateRangeEnd {
+		text-align: right;
+	}
+}

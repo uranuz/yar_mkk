@@ -2,27 +2,6 @@
 	&.e-routeCell, .e-problemsCell {
 		background-color:#8dc0de;
 	}
-}
-
-.mkk-PohodNavigation {
-	&.e-enumFilterBlock {
-		margin: 0 -0.2rem 1rem -0.2rem;
-	}
-	&.e-enumFilter {
-		padding: 0 0.2rem 0 0.2rem;
-	}
-	&.e-dateRangeArea {
-		margin-bottom: 0.5rem;
-	}
-	&.e-searchBtn {
-		margin: 1rem 0;
-	}
-	&.e-pagination {
-		margin-bottom: 0.5rem;
-	}
-}
-
-.mkk-PohodList {
 	&.e-pagination,
 	&.e-table_bar {
 		margin-bottom: 0.5rem

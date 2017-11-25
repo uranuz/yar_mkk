@@ -29,7 +29,8 @@
 			],
 			"buildRequirements": [
 				"allowWarnings"
-			]
+			],
+			"versions": ["devel"]
 		},
 		{
 			"name": "view_service",
@@ -46,7 +47,8 @@
 			"sourceFiles": [],
 			"buildRequirements": [
 				"allowWarnings"
-			]
+			],
+			"versions": ["devel"]
 		},
 		{
 			"name": "set_user_password",

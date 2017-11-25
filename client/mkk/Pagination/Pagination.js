@@ -19,14 +19,25 @@ define('mkk/Pagination/Pagination', [
 		} else {
 			this._mode = PaginationMode.Offset;
 		}
+		this._elems('firstBtn').on('click', this.gotoFirst.bind(this));
 		this._elems('prevBtn').on('click', this.gotoPrev.bind(this));
 		this._elems('nextBtn').on('click', this.gotoNext.bind(this));
+		this._elems('lastBtn').on('click', this.gotoLast.bind(this));
 		this._elems('gotoPageBtn').on('click', this.gotoPage.bind(this));
 
 		this._setButtonsVisibility();
 	}
 
 	return __mixinProto(Pagination, {
+		/** Переход на первую страницу */
+		gotoFirst: function() {
+			this.setCurrentPage(0);
+		},
+		/** Переход на последнюю страницу */
+		gotoLast: function() {
+			var pageCount = this.getPageCount();
+			this.setCurrentPage(pageCount? pageCount - 1: 0);
+		},
 		/** Переход на предыдущую страницу */
 		gotoPrev: function() {
 			var page = this.getCurrentPage();
@@ -143,9 +154,13 @@ define('mkk/Pagination/Pagination', [
 		_setButtonsVisibility: function() {
 			var
 				page = this.getCurrentPage(),
-				pageCount = this.getPageCount();
-			this._elems('prevBtn').css('visibility', (page != null && page < 1? 'hidden': 'visible'));
-			this._elems('nextBtn').css('visibility', (page != null && pageCount != null && page + 1 >= pageCount? 'hidden': 'visible'));
+				pageCount = this.getPageCount(),
+				isFirstVisible = (page != null && page < 1? 'hidden': 'visible'),
+				isLastVisible = (page != null && pageCount != null && page + 1 >= pageCount? 'hidden': 'visible');
+			this._elems('prevBtn').css('visibility', isFirstVisible);
+			this._elems('firstBtn').css('visibility', isFirstVisible);
+			this._elems('nextBtn').css('visibility', isLastVisible);
+			this._elems('lastBtn').css('visibility', isLastVisible);
 			if( parseInt(this._elems('recordCount').text(), 10) > 0 ) {
 				this._elems('notFoundMsg').hide();
 				this._elems('recordCountMsg').show();

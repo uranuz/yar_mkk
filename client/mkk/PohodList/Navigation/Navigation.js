@@ -1,6 +1,7 @@
 define('mkk/PohodList/Navigation/Navigation', [
 	'fir/controls/FirControl',
-	'mkk/Pagination/Pagination'
+	'mkk/Pagination/Pagination',
+	'css!mkk/PohodList/Navigation/Navigation'
 ], function(FirControl) {
 	__extends(PohodListNavigation, FirControl);
 

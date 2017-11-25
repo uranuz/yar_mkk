@@ -1,11 +1,15 @@
 .mkk-Pagination {
+	&.e-block {
+		display: inline-block;
+		position: relative;
+	}
 	&.e-titleRow {
 		display: block
 	}
 	&.e-pageCountBlock {
 		display: inline-block;
 	}
-	&.e-nearPageBtnWrapper {
+	&.e-nearPageBtnWrapper, &.e-boundaryPageBtnWrapper {
 		display: inline-block;
 		background: #eec;
 		border-radius: 4px;
