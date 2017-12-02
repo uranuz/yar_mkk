@@ -10,12 +10,32 @@ import webtank.net.http.input: HTTPInput;
 import webtank.net.http.client: sendJSON_RPCBlockingA = sendJSON_RPCBlocking;
 import mkk_site.view_service.ivy_custom;
 
-TDataNode tryExtractRecordSet(TDataNode srcNode)
+private bool _isContainerRawData(ref TDataNode srcNode) {
+	return
+		srcNode.type == DataNodeType.AssocArray
+		&& "t" in srcNode 
+		&& srcNode["t"].type == DataNodeType.String;
+}
+
+auto tryExtractRecordSet(ref TDataNode srcNode)
 {
-	if( srcNode.type != DataNodeType.AssocArray
-		|| "t" !in srcNode
-		|| srcNode["t"].type != DataNodeType.String
-	) {
+	if( !_isContainerRawData(srcNode) && srcNode["t"].str != "recordset" ) {
+		return null;
+	}
+	return new RecordSetAdapter(srcNode);
+}
+
+auto tryExtractRecord(ref TDataNode srcNode)
+{
+	if( !_isContainerRawData(srcNode) && srcNode["t"].str != "record" ) {
+		return null;
+	}
+	return new RecordAdapter(srcNode);
+}
+
+TDataNode tryExtractContainer(ref TDataNode srcNode)
+{
+	if( !_isContainerRawData(srcNode) ) {
 		return srcNode;
 	}
 
@@ -30,14 +50,14 @@ TDataNode tryExtractRecordSet(TDataNode srcNode)
 	return srcNode;
 }
 
-TDataNode tryExtractLvlRecordSet(TDataNode srcNode)
+TDataNode tryExtractLvlContainers(TDataNode srcNode)
 {
-	srcNode = srcNode.tryExtractRecordSet();
+	srcNode = srcNode.tryExtractContainer();
 	if( srcNode.type != DataNodeType.AssocArray )
 		return srcNode;
 
 	foreach( key, item; srcNode.assocArray ) {
-		srcNode.assocArray[key] = srcNode.assocArray[key].tryExtractRecordSet();
+		srcNode.assocArray[key] = srcNode.assocArray[key].tryExtractContainer();
 	}
 	return srcNode;
 }
@@ -133,7 +153,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, ref
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
 
-	return ivyJSON["result"].tryExtractLvlRecordSet();
+	return ivyJSON["result"].tryExtractLvlContainers();
 }
 
 // Перегрузка sendJSON_RPCBlocking, которая позволяет передать словарь с HTTP заголовками
@@ -145,7 +165,7 @@ TDataNode sendJSON_RPCBlocking(Result)( string requestURI, string rpcMethod, str
 	TDataNode ivyJSON = parseIvyJSON(response.messageBody);
 	_checkJSON_RPCErrors(ivyJSON);
 
-	return ivyJSON["result"].tryExtractLvlRecordSet();
+	return ivyJSON["result"].tryExtractLvlContainers();
 }
 
 private static immutable _mainServiceEndpoint = `http://localhost/jsonrpc/`;

@@ -1,0 +1,39 @@
+expr {=
+from fir.controls.utils import recGet, recGetStr, cls;
+from mkk.Pagination import Pagination;
+
+def DocumentEdit {=
+	def.kv
+		moduleName: 'mkk/DocumentEdit/DocumentEdit'
+		instanceName: 'documentEdit'
+		cssBaseClass: "mkk-DocumentEdit"
+		document: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h4>Редактирование ссылки</h4>
+		<form class="{=cls 'docForm'}">
+		{=if document {*
+			<input type="text"
+				class="{=cls 'name'}"
+				name="name"
+				value="{=recGet document 'name'}"/>
+			<input type="text"
+				class="{=cls 'link'}"
+				name="link"
+				value="{=recGet document 'link'}"/>
+			<button type="button"
+				class="{=cls 'saveBtn'} btn btn-primary"
+				>Сохранить</button>
+		*} else {*
+			<h4>Не удалось найти документ с заданным идентификатором</h4>
+		*}}
+		</form>
+	</div>
+	*};
+};
+if __scopeName__ == '__main__' {=
+	DocumentEdit
+		document: document;
+}
+}

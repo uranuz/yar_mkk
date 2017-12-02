@@ -4,6 +4,10 @@ define('mkk/TouristPlainList/TouristPlainList', [
 	'css!mkk/TouristPlainList/TouristPlainList'
 ], function (FirControl, DatctrlHelpers) {
 	__extends(TouristPlainList, FirControl);
+	var strParamNames = [
+		'familyName', 'givenName', 'patronymic', 'birthYear',
+		'region', 'city', 'street'
+	];
 
 	function TouristPlainList(opts) {
 		FirControl.call(this, opts);
@@ -33,12 +37,7 @@ define('mkk/TouristPlainList/TouristPlainList', [
 			return '/dyn/tourist/plainList';
 		},
 		_getQueryParams: function() {
-			var
-				strParamNames = [
-					'familyName', 'givenName', 'patronymic', 'birthYear',
-					'region', 'city', 'street'
-				],
-				params = [];
+			var params = [];
 
 			if( this._filter ) {
 				for( var i = 0; i < strParamNames.length; ++i ) {

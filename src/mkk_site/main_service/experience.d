@@ -42,6 +42,7 @@ static immutable pohodRecFormat = RecordFormat!(
 
 import std.json: JSONValue;
 import mkk_site.data_model.common: Navigation;
+import webtank.common.std_json.to: toStdJSON;
 
 JSONValue getExperience(
 	HTTPContext context,
@@ -49,6 +50,8 @@ JSONValue getExperience(
 	Navigation nav
 ) {
 	import std.conv: to, text;
+
+	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 
 	// Получаем запись туриста
 	auto touristRec = getTourist(context, Optional!size_t(touristKey));
@@ -61,10 +64,7 @@ JSONValue getExperience(
 		`select count(1) from pohod where `~ touristKey.text ~ ` = any(unit_neim)`
 	).get(0, 0, "0").to!size_t;
 
-	if( pohodCount < nav.offset ) {
-		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
-		nav.offset = (pohodCount / nav.pageSize) * nav.pageSize;
-	}
+	nav.normalize(pohodCount);
 
 	// Походы туриста - основная таблица
 	auto pohodList = getCommonDB().query(
@@ -94,11 +94,7 @@ offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
 	return JSONValue([
 		"tourist": touristRec.toStdJSON(),
 		"pohodList": pohodList.toStdJSON(),
-		"nav": JSONValue([
-			"offset": nav.offset,
-			"pageSize": nav.pageSize,
-			"recordCount": pohodCount
-		])
+		"nav": nav.toStdJSON()
 	]);
 }
 

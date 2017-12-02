@@ -17,7 +17,7 @@ expr {*
 	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.theme.min.css">
 	<link rel="shortcut icon" href="{{vpaths.siteImg}}znak.png" type="image/png">
 
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/umd/popper.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.bootstrapJS}}bootstrap.min.js" defer></script>
@@ -63,7 +63,7 @@ expr {*
 						<li><a href="{{vpaths.siteDynamic}}pohod/list" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}tourist/list" title="Просмотр данных и поиск туристов">Туристы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}moder/list" title="Список модераторов системы">Модераторы</a></li>
-						<li><a href="{{vpaths.siteDynamic}}document" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
+						<li><a href="{{vpaths.siteDynamic}}document/list" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 						<li class="e-auth_item t-main_menu">
 							{=MainMenuAuth

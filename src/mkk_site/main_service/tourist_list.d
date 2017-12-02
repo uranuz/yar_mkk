@@ -4,6 +4,8 @@ import std.conv, std.string, std.utf;
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 
+import webtank.common.std_json.to: toStdJSON;
+
 import mkk_site.data_model.tourist_list;
 
 shared static this()
@@ -84,6 +86,8 @@ auto getTouristListImpl(ResultFormat)(
 	import std.meta: AliasSeq, Alias;
 	import std.string: join;
 
+	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
+
 	static immutable size_t maxPageSize = 50;
 	string[] filters;
 	if( nav.pageSize > maxPageSize ) {
@@ -128,23 +132,15 @@ auto getTouristListImpl(ResultFormat)(
 		countQuery ~= filtersPart;
 	}
 	size_t recordCount = getCommonDB().query(countQuery).get(0, 0, "0").to!size_t;
-	if( recordCount < nav.offset ) {
-		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
-		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
-	}
+	nav.normalize(recordCount);
 
 	query ~=
 		(orderBy.length? ` order by ` ~ orderBy: null)
 		~ ` offset ` ~ nav.offset.text
 		~ ` limit ` ~ nav.pageSize.text;
 
-	JSONValue result;
-	result[`nav`] = JSONValue([
-		`offset`: JSONValue(nav.offset),
-		`pageSize`: JSONValue(nav.pageSize),
-		`recordCount`: JSONValue(recordCount)
+	return JSONValue([
+		"rs": getCommonDB().query(query).getRecordSet(resultFormat).toStdJSON(),
+		"nav":  nav.toStdJSON()
 	]);
-	result[`rs`] = getCommonDB().query(query).getRecordSet(resultFormat).toStdJSON();
-
-	return result;
 }

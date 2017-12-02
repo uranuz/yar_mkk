@@ -2,7 +2,7 @@ module mkk_site.view_service.ivy_custom;
 
 import ivy, ivy.compiler.compiler, ivy.interpreter.interpreter, ivy.common, ivy.interpreter.data_node;
 
-private void _deserializeFieldInplace(ref TDataNode fieldData, ref TDataNode format)
+private void _deserializeFieldInplace(ref TDataNode fieldData, TDataNode format)
 {
 	import std.datetime: SysTime, Date;
 	if( fieldData.type == DataNodeType.Undef || fieldData.type == DataNodeType.Null ) {
@@ -104,6 +104,8 @@ public:
 
 	private TDataNode _makeRecord(size_t index)
 	{
+		import std.conv: text;
+		assert( index < _rawData.array.length, `No record with index ` ~ index.text ~ ` in record set!` );
 		return TDataNode(new RecordAdapter(
 			TDataNode([
 				"d": _rawData.array[index],

@@ -4,6 +4,8 @@ import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 import mkk_site.data_model.pohod_list;
 
+import webtank.common.std_json.to: toStdJSON;
+
 shared static this()
 {
 	Service.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
@@ -318,7 +320,10 @@ import mkk_site.data_model.common: Navigation;
 
 JSONValue getPohodList(PohodFilter filter, Navigation nav)
 {
-	import std.conv: to;
+	import std.conv: text;
+
+	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
+
 	string query = `select ` ~ basePohodFieldSuquery;
 
 	if( filter.withDataCheck )
@@ -331,22 +336,13 @@ JSONValue getPohodList(PohodFilter filter, Navigation nav)
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 
-	size_t recordCount = getPohodCount(filter);
-	if( recordCount < nav.offset ) {
-		// Устанавливаем offset на начало последней страницы, если offset выходит за число записей
-		nav.offset = (recordCount / nav.pageSize) * nav.pageSize;
-	}
+	nav.normalize(getPohodCount(filter));
 
 	// Упорядочивание и страничный отбор уже делаем по готовым данным
-	query ~= ` order by "beginDate" desc offset ` ~ nav.offset.to!string ~ ` limit ` ~ nav.pageSize.to!string;
+	query ~= ` order by "beginDate" desc offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
 
-	JSONValue result;
-	result[`nav`] = JSONValue([
-		`offset`: JSONValue(nav.offset),
-		`pageSize`: JSONValue(nav.pageSize),
-		`recordCount`: JSONValue(recordCount)
+	return JSONValue([
+		"rs": getCommonDB().query(query).getRecordSet(pohodRecFormat).toStdJSON(),
+		"nav": nav.toStdJSON()
 	]);
-	result["rs"] = getCommonDB().query(query).getRecordSet(pohodRecFormat).toStdJSON();
-
-	return result;
 }

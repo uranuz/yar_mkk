@@ -1,0 +1,56 @@
+expr {=
+from fir.controls.utils import recGet, recGetStr, cls;
+from mkk.Pagination import Pagination;
+from mkk.DocumentEdit import DocumentEdit;
+
+def DocumentList {=
+	def.kv
+		moduleName: 'mkk/DocumentList/DocumentList'
+		instanceName: 'documentList'
+		cssBaseClass: "mkk-DocumentList";
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h2>Статьи и документы</h2>
+		<div class="row">
+			<div class="col-auto">
+				{=Pagination
+					formField: 'offset'
+					offset: nav.offset
+					pageSize: nav.pageSize
+					recordCount: nav.recordCount
+				}
+			</div>
+			{=if isAuthorized {*
+			<div class="col" style="text-align: right;">
+				<a href="javascript:void(0)"
+					class="{=cls 'addDocBtn'} btn btn-primary"
+					>Добавить документ</a>
+			</div>
+			*}}
+		</div>
+
+		<div class="{=cls 'linkList'}">
+		{=
+			var i: 0;
+			repeat it in documentList {*
+			{=set i: i + 1}
+			<div class="{=cls 'listItem'}">{{i}}.
+				<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
+				{=if isAuthorized {*
+				<div class="{=cls 'linkEditBtn'} mkk-Document e-itemEditBtn btn btn-primary"
+					title="Изменить"
+					data-document-num="{=recGet it 'num'}"></div>
+				*}}
+			</div>
+			*}
+		}
+		</div>
+		<div class="{=cls 'addDocWrapper'}" style="display: none;">
+			{=DocumentEdit}
+		</div>
+	</div>
+	*};
+};
+DocumentList	
+}
