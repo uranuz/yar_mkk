@@ -10,6 +10,7 @@ define('mkk/DocumentList/DocumentList', [
 		FirControl.call(this, opts);
 		this._documentEdit = this.getChildInstanceByName('documentEdit');
 		this._documentEdit.subscribe('onDocumentLoaded', self._)
+		this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
 	}
 	return __mixinProto(DocumentList, {
 		_subscribeInternal: function() {
@@ -31,6 +32,9 @@ define('mkk/DocumentList/DocumentList', [
 				return;
 			}
 			this._documentEdit.openDialog(el.data('documentNum'));
+		},
+		_onDocumentChanged: function() {
+			location.reload();
 		}
 	});
 });

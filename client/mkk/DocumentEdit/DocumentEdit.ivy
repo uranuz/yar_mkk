@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.Pagination import Pagination;
 
 def DocumentEdit {=
@@ -10,18 +10,24 @@ def DocumentEdit {=
 		document: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h4>Редактирование ссылки</h4>
 		<form class="{=cls 'docForm'}">
 		{=if document {*
-			<input type="text"
-				class="{=cls 'name'}"
-				name="name"
-				value="{=recGet document 'name'}"/>
-			<input type="text"
-				class="{=cls 'link'}"
-				name="link"
-				value="{=recGet document 'link'}"/>
+			<label class="form-group">
+				<span>Название</span>
+				<input type="text"
+					class="{=cls 'name'} form-control"
+					name="name"
+					value="{=recGet document 'name'}"/>
+			</label>
+			<label class="form-group">
+				<span>Ссылка</span>
+				<input type="text"
+					class="{=cls 'link'} form-control"
+					name="link"
+					value="{=recGet document 'link'}"/>
+			</label>
 			<button type="button"
 				class="{=cls 'saveBtn'} btn btn-primary"
 				>Сохранить</button>

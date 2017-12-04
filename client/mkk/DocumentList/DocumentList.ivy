@@ -35,13 +35,17 @@ def DocumentList {=
 			var i: 0;
 			repeat it in documentList {*
 			{=set i: i + 1}
-			<div class="{=cls 'listItem'}">{{i}}.
-				<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
-				{=if isAuthorized {*
-				<div class="{=cls 'linkEditBtn'} mkk-Document e-itemEditBtn btn btn-primary"
-					title="Изменить"
-					data-document-num="{=recGet it 'num'}"></div>
-				*}}
+			<div class="{=cls 'listItem'} row">
+				<div class="col">{{i}}.
+					<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
+				</div>
+				<div class="col-md-auto">
+					{=if isAuthorized {*
+					<div class="{=cls 'linkEditBtn'} col mkk-Document e-itemEditBtn btn btn-secondary"
+						title="Изменить"
+						data-document-num="{=recGet it 'num'}"></div>
+					*}}
+				</div>
 			</div>
 			*}
 		}

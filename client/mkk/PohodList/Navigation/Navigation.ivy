@@ -75,11 +75,11 @@ def PohodListNavigation {=
 							<div class="{=cls 'dateRangeBegin'} col-lg-6">
 								<span>с</span>
 								{=PlainDatePicker
-									instanceName: 'beginDateRangeHeadField'
-									formField: 'dates__beginDateRangeHead'
-									day: filter.dates.beginDateRangeHead.day
-									month: filter.dates.beginDateRangeHead.month
-									year: filter.dates.beginDateRangeHead.year
+									instanceName: 'beginRangeHeadField'
+									formField: 'dates__beginRangeHead'
+									day: filter.dates.beginRangeHead.day
+									month: filter.dates.beginRangeHead.month
+									year: filter.dates.beginRangeHead.year
 									dayPlaceholder: 'день'
 									monthPlaceholder: 'месяц не выбран'
 									yearPlaceholder: 'год'
@@ -88,11 +88,11 @@ def PohodListNavigation {=
 							<div class="{=cls 'dateRangeEnd'} col-lg-6">
 								<span>по</span>
 								{=PlainDatePicker
-									instanceName: 'endDateRangeTailField'
-									formField: 'dates__endDateRangeTail'
-									day: filter.dates.endDateRangeTail.day
-									month: filter.dates.endDateRangeTail.month
-									year: filter.dates.endDateRangeTail.year
+									instanceName: 'endRangeTailField'
+									formField: 'dates__endRangeTail'
+									day: filter.dates.endRangeTail.day
+									month: filter.dates.endRangeTail.month
+									year: filter.dates.endRangeTail.year
 									dayPlaceholder: 'день'
 									monthPlaceholder: 'месяц не выбран'
 									yearPlaceholder: 'год'

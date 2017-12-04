@@ -34,30 +34,13 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 
 	if( fieldNames.length > 0 )
 	{
-		/*
-		Service.loger.info( "Запись автора последних изменений и даты этих изменений", "Изменение ссылки на документ" );
-		
-		if( "userNum" !in ctx.user.data ) {
-			throw new Exception("Не удаётся определить идентификатор пользователя");
-		}
-		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
-		fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
-		*/
 		Service.loger.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
 		string queryStr;
 
 		import std.array: join;
 		if( record.num.isSet )	{
 			queryStr = "update file_link set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num = '" ~ record.num.text ~ "' returning num";
-		}
-		else
-		{
-			/*
-			Service.loger.info("Запись пользователя, добавившего ссылку на документ и даты добавления", "Изменение ссылки на документ");
-
-			fieldNames ~= ["registrator_num", "reg_timestamp"];
-			fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
-			*/
+		} else {
 			queryStr = "insert into file_link ( " ~ fieldNames.join(", ") ~ " ) values( " ~ fieldValues.join(", ") ~ " ) returning num";
 		}
 
