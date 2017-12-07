@@ -116,8 +116,8 @@ auto getTouristListImpl(ResultFormat)(
 			}
 			else static if( fieldName == "nums" )
 			{
-				if( field.length > 0 ) {
-					filters ~= dbFieldName ~ ` in(` ~ field.to!(string[]).join(",") ~ `)`;
+				if( field.isSet ) {
+					filters ~= dbFieldName ~ ` = any(ARRAY[` ~ field.value.to!(string[]).join(",") ~ `]::integer[])`;
 				}
 			}
 		}

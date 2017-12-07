@@ -14,5 +14,5 @@ struct TouristListFilter
 	@DBName("address") string region;
 	@DBName("address") string city;
 	@DBName("address") string street;
-	@DBName("num") size_t[] nums;
+	@DBName("num") Optional!(size_t[]) nums;
 }
