@@ -1,0 +1,21 @@
+[Unit]
+Description=MKK site view service
+After=network.target
+After=nginx.target
+
+[Service]
+WorkingDirectory=/home/yar_mkk/sites/
+ExecStart=/home/yar_mkk/sites/bin/mkk_site_view_service
+PIDFile=/var/run/mkk_site_view_service.pid
+
+User=yar_mkk
+Group=yar_mkk
+
+Type=simple
+
+TimeoutSec=300
+Restart=always
+OOMScoreAdjust=-100
+
+[Install]
+WantedBy=multi-user.target
