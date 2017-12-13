@@ -5,8 +5,8 @@ After=nginx.target
 After=postgresql-9.6.target
 
 [Service]
-WorkingDirectory=/home/yar_mkk/sites/
-ExecStart=/home/yar_mkk/sites/bin/mkk_site_main_service
+WorkingDirectory=/home/yar_mkk/sites/mkk_site/
+ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_main_service
 PIDFile=/var/run/mkk_site_main_service.pid
 
 User=yar_mkk
