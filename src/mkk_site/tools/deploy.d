@@ -2,7 +2,7 @@ module mkk_site.tools.deploy;
 
 import std.getopt;
 import std.file: exists, read, write, isFile, mkdirRecurse, remove, copy, symlink, getcwd;
-import std.path: buildNormalizedPath;
+import std.path: buildNormalizedPath, dirName;
 import std.algorithm: map;
 import std.stdio;
 
@@ -41,6 +41,7 @@ void main(string[] args)
 		string sourceFile = buildNormalizedPath(workDir, suffix);
 		string destFile = buildNormalizedPath(siteRoot, suffix);
 		if( !exists(destFile) ) {
+			mkdirRecurse( dirName(destFile) );
 			symlink(sourceFile, destFile);
 		}
 	}
@@ -54,6 +55,7 @@ void main(string[] args)
 		string sourceFile = buildNormalizedPath(workDir, suffix);
 		string destFile = buildNormalizedPath(siteRoot, suffix);
 		if( !exists(destFile) ) {
+			mkdirRecurse( dirName(destFile) );
 			copy(sourceFile, destFile);
 		}
 	}
