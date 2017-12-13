@@ -19,7 +19,7 @@ module.exports = function (grunt) {
 		"mkk/TouristList/TouristList",
 		"mkk/DocumentList/DocumentList",
 		"mkk/DocumentEdit/DocumentEdit",
-		//"mkk/Stat/Stat",
+		"mkk/Stat/Stat",
 		"mkk/UserSettings/UserSettings",
 		"mkk/AboutSite/AboutSite",
 		"mkk/app"
