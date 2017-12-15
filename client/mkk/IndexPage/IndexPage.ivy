@@ -53,7 +53,7 @@ def RecentPohodList {=
 		</div>
 	*}
 };
-
+from mkk.AboutSite import AboutSite;
 def IndexPage {=
 	def.kv
 		moduleName: "mkk/IndexPage/IndexPage"
@@ -62,7 +62,12 @@ def IndexPage {=
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-			<h2>Добро пожаловать на сайт!</h2>
+			{=AboutSite shortInfoOnly: true}
+			<div class="{=cls 'aboutSiteBtnRow'}">
+				<a href="/dyn/about"
+					title="Просмотреть информацию о сайте"
+					>Подробнее</a>
+			</div>
 			{=RecentPohodList}
 		</div>
 	*}

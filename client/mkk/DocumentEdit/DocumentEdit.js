@@ -10,12 +10,13 @@ define('mkk/DocumentEdit/DocumentEdit', [
 	function DocumentEdit(opts) {
 		FirControl.call(this, opts);
 		this._filter = {};
-		this._updateControlState(opts);
 		this._firstLoad = true;
+		this._updateControlState(opts);
 	}
 	return __mixinProto(DocumentEdit, {
 		_subscribeInternal: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
+			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
 		},
 		_unsubscribeInternal: function() {
 			this._saveBtn.off('click');
@@ -23,6 +24,7 @@ define('mkk/DocumentEdit/DocumentEdit', [
 		_updateControlState: function(opts) {
 			this._docForm = this._elems('docForm');
 			this._saveBtn = this._elems('saveBtn');
+			this._isResultStep = opts.__scopeName__ === 'Results';
 		},
 		openDialog: function(num) {
 			this.setFilter({
@@ -56,7 +58,8 @@ define('mkk/DocumentEdit/DocumentEdit', [
 				self._container.dialog({
 					modal: true,
 					minWidth: 500,
-					width: 850
+					width: 850,
+					close: self._onDialogClose.bind(this)
 				});
 			} else {
 				this._firstLoad = false;
@@ -73,6 +76,11 @@ define('mkk/DocumentEdit/DocumentEdit', [
 			}
 			this._filter.action = 'write';
 			this._reloadControl();
+		},
+		_onDialogClose: function() {
+			if( this._isResultStep ) {
+				this._notify('documentChanged');
+			}
 		}
 	});
 });

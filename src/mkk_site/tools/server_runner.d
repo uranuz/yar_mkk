@@ -2,10 +2,12 @@ module mkk_site.tools.server_runner;
 
 import std.process, core.thread, std.file, std.stdio, std.conv, std.datetime;
 
-import core.stdc.stdlib : exit, EXIT_FAILURE, EXIT_SUCCESS;
-import core.thread : Thread, dur;
-import core.sys.posix.sys.stat : umask;
-import core.sys.posix.unistd : fork, setsid, chdir, close, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO;
+import core.stdc.stdlib: exit, EXIT_FAILURE, EXIT_SUCCESS;
+import core.thread: Thread, dur;
+import core.sys.posix.sys.stat: umask;
+import core.sys.posix.unistd: fork, setsid, chdir, close, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO;
+
+import std.getopt;
 
 extern (C)
 {
@@ -36,40 +38,67 @@ void daemonize()
 
 	// Close stdin, stdout and stderr
 	close(STDIN_FILENO);
-	//	close(STDOUT_FILENO);
-	//	close(STDERR_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 }
 
-
-static immutable logFileName = "./server_runner.log";
-
-Pid spawnSite()
+Pid spawnApp(string appFile)
 {
-	return spawnProcess( "./mkk_site_release", File("/dev/null"), File("./server_output.txt", "a"), File("./server_errors.txt", "a") );
+	return spawnProcess( appFile, File("/dev/null"), File("/dev/null", "a"), File("/dev/null", "a") );
 }
 
-void main()
+void writeLog(string logFile, string msg)
 {
+	if( logFile.length && exists(logFile) ) {
+		std.file.append( logFile, Clock.currTime().toISOExtString() ~ `: ` ~ msg  ~ "\n\n" );
+	}
+}
+
+void main(string[] args)
+{
+	string appFile;
+	string logFile;
+	int timeout = 10;
+	
+	getopt(args,
+		`app`, &appFile, 
+		`log`, &logFile,
+		`timeout`, &timeout
+	);
+
 	daemonize();
 
-	Pid childPid = spawnSite();
+	bool started = false;
+	Pid childPid;
 	while( true )
 	{
-		auto childInfo = tryWait( childPid );
-		if( childInfo.terminated )
-		{
-			auto currentTime = Clock.currTime();
-			std.file.append( logFileName, currentTime.toISOExtString() ~ ": Child process terminated with code: " ~ childInfo.status.text ~ "\n\n" );
-			Thread.sleep( dur!("seconds")( 3 ) );
-			try {
-				childPid = spawnSite();
+		if( !started ) {
+			try
+			{
+				childPid = spawnApp(appFile);
+				started = true;
+				writeLog( logFile, "Child process started" );
 			}
 			catch (Throwable e)
 			{
-				currentTime = Clock.currTime();
-				std.file.append( logFileName, currentTime.toISOExtString() ~ ": Exception thrown during spawn site: " ~ e.msg ~ "\n\n" );
+				started = false;
+				writeLog( logFile, "Exception thrown during spawn site: " ~ e.msg );
+				Thread.sleep( dur!("seconds")( timeout ) );
+				continue;
 			}
 		}
-		Thread.sleep( dur!("seconds")( 5 ) );
+
+		if( started )
+		{
+			auto childInfo = tryWait( childPid );
+			if( childInfo.terminated )
+			{
+				started = false;
+				writeLog( logFile, "Child process terminated with code: " ~ childInfo.status.text );
+				continue;
+			}
+		}
+		
+		Thread.sleep( dur!("seconds")( timeout ) );
 	}
 }

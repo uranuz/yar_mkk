@@ -60,8 +60,8 @@ JSONValue getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation
 
 	return JSONValue([
 		"rs": getCommonDB().query(
-			`select num, name, link from file_link` ~ filterQuery 
-			~ ` offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
+			`select num, name, link from file_link` ~ filterQuery
+			~ ` order by name offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
 		).getRecordSet(documentRecFormat).toStdJSON(),
 		"nav": nav.toStdJSON()
 	]);

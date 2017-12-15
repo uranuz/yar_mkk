@@ -16,17 +16,19 @@ def PohodListNavigation {=
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 			<form method="post" class="{=cls 'form'}">
+				{=if false {*
 				<div class="" style="text-align:right; position:absolute; top:0.5rem; right:0.5rem;">
-					<button type="button" class="{=cls 'printModeBtn'} btn btn-secondary btn-sm ">
-						Версия для печати
-					</button>
+					<button type="button"
+						class="{=cls 'printModeBtn'} btn btn-secondary btn-sm "
+						>Версия для печати</button>
 					<input type="hidden" name="for_print" class="{=cls 'isForPrintField'}"/>
 				</div>
-				<div class="{ {pohod_filter_regular_cls} }">
+				*}}
+				<div class="{=cls 'filtersWrapper'}">
 					<div class="{=cls 'enumFilterBlock'} row">
 						<span class="{=cls 'enumFilter'} col-md-3">
 							<h6>Вид туризма</h6>
-							{= CheckBoxList
+							{=CheckBoxList
 								instanceName: "tourismKind"
 								items: {{pohodEnums.tourismKind}}
 								keyField: "v"
@@ -37,7 +39,7 @@ def PohodListNavigation {=
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
 							<h6>Категория сложности</h6>
-							{=	CheckBoxList
+							{=CheckBoxList
 								instanceName: "complexity"
 								items: {{pohodEnums.complexity}}
 								keyField: "v"
@@ -48,7 +50,7 @@ def PohodListNavigation {=
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
 							<h6>Стадия прохождения</h6>
-							{=	CheckBoxList
+							{=CheckBoxList
 								instanceName: "progress"
 								items: {{pohodEnums.progress}}
 								keyField: "v"
@@ -59,7 +61,7 @@ def PohodListNavigation {=
 						</span>
 						<span class="{=cls 'enumFilter'} col-md-3">
 							<h6>Статус заявки</h6>
-							{=	CheckBoxList
+							{=CheckBoxList
 								instanceName: "claimState"
 								items: {{pohodEnums.claimState}}
 								keyField: "v"
@@ -75,11 +77,11 @@ def PohodListNavigation {=
 							<div class="{=cls 'dateRangeBegin'} col-lg-6">
 								<span>с</span>
 								{=PlainDatePicker
-									instanceName: 'beginDateRangeHeadField'
-									formField: 'dates__beginDateRangeHead'
-									day: filter.dates.beginDateRangeHead.day
-									month: filter.dates.beginDateRangeHead.month
-									year: filter.dates.beginDateRangeHead.year
+									instanceName: 'beginRangeHeadField'
+									formField: 'dates__beginRangeHead'
+									day: filter.dates.beginRangeHead.day
+									month: filter.dates.beginRangeHead.month
+									year: filter.dates.beginRangeHead.year
 									dayPlaceholder: 'день'
 									monthPlaceholder: 'месяц не выбран'
 									yearPlaceholder: 'год'
@@ -88,11 +90,11 @@ def PohodListNavigation {=
 							<div class="{=cls 'dateRangeEnd'} col-lg-6">
 								<span>по</span>
 								{=PlainDatePicker
-									instanceName: 'endDateRangeTailField'
-									formField: 'dates__endDateRangeTail'
-									day: filter.dates.endDateRangeTail.day
-									month: filter.dates.endDateRangeTail.month
-									year: filter.dates.endDateRangeTail.year
+									instanceName: 'endRangeTailField'
+									formField: 'dates__endRangeTail'
+									day: filter.dates.endRangeTail.day
+									month: filter.dates.endRangeTail.month
+									year: filter.dates.endRangeTail.year
 									dayPlaceholder: 'день'
 									monthPlaceholder: 'месяц не выбран'
 									yearPlaceholder: 'год'
@@ -102,25 +104,31 @@ def PohodListNavigation {=
 					</fieldset>
 					<div class="form-inline">
 						<div class="row">
-							<label class="col-md-6">
+							<label class="col-md-auto">
 								<span class="form-control-label">Район похода</span>
 								<input type="text" name="pohodRegion" class="form-control" value="{{filter.pohodRegion}}"/>
 							</label>
-							<label class="col-md-3">
-								<input type="checkbox" name="withFiles"{=if filter.withFiles == true 'checked'} class="checkbox"/>
+							<label class="col-md-auto">
+								<input type="checkbox"
+									name="withFiles"
+									{=if filter.withFiles == true 'checked'}
+									class="checkbox"/>
 								<span class="form-control-label">С доп. материалами</span>
 							</label>
-							<label class="col-md-3">
-								<input type="checkbox" name="withDataCheck"{=if filter.withDataCheck == true 'checked'} class="checkbox"/>
+							<label class="col-md-auto">
+								<input type="checkbox"
+									name="withDataCheck"
+									{=if filter.withDataCheck == true 'checked'}
+									class="checkbox"/>
 								<span class="form-control-label">Контроль данных</span>
 							</label>
 
 						</div>
 					</div>
 					<div>
-						<button type="submit" class="{=cls 'searchBtn'} btn btn-primary btn-lg btn-block">
-							Найти
-						</button>
+						<button type="submit"
+							class="{=cls 'searchBtn'} btn btn-primary btn-lg btn-block"
+							>Найти</button>
 					</div>
 				</div>
 				<div class="{=cls 'bottomRow'} row">

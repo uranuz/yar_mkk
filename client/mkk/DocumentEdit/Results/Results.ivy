@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc, firScopeOpts;
 def Results {=
 	def.kv
 		instanceName: 'documentEditResults'
@@ -9,25 +9,22 @@ def Results {=
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		{=if isUpdate {=
 			if {=empty errorMsg} {*
-				<h3>Данные о походе успешно обновлены!!!</h3>
-				<div>Вы можете <a href="/dyn/pohod/edit?key={{null}}">продолжить редактирование</a> этой же записи</div>
-				<div>или перейти <a href="/dyn/pohod/list">к списку походов</a></div>
+				<h3>Данные успешно обновлены!!!</h3>
 			*} else {*
 				<h3>Произошла ошибка при обновлении данных!!!</h3>
-				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
-				<div>Однако вы можете <a href="/dyn/pohod/edit?key={{null}}">продолжить редактирование</a> этой же записи</div>
-				<div>или перейти <a href="/dyn/pohod/list">к списку походов</a></div>
+				<div>Если эта ошибка повторяется, обратитесь к администратору сайта</div>
 			*}
 		} else {=
 			if {=empty errorMsg} {*
-				<h3>Данные о походе успешно добавлены в базу данных!!!</h3>
-				<div>Вы можете <a href="/dyn/pohod/edit">добавить ещё...</a></div>
+				<h3>Данные успешно добавлены в базу данных!!!</h3>
 			*} else {*
 				<h3>Произошла ошибка при добавлении данных в базу!!!</h3>
 				<div>Если эта ошибка повторяется, обратитесь к администратору сайта</div>
-				<div>Однако вы можете <a href="/dyn/pohod/edit">попробовать ещё раз...</a></div>
 			*}
 		};}
+		<button type="button"
+			class="{=cls 'continueBtn'} btn btn-primary"
+			>Хорошо</button>
 	</div>
 	*}
 };

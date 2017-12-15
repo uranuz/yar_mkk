@@ -18,8 +18,10 @@ module.exports = function (grunt) {
 		"mkk/TouristEdit/TouristEdit",
 		"mkk/TouristList/TouristList",
 		"mkk/DocumentList/DocumentList",
-		//"mkk/Stat/Stat",
+		"mkk/DocumentEdit/DocumentEdit",
+		"mkk/Stat/Stat",
 		"mkk/UserSettings/UserSettings",
+		"mkk/AboutSite/AboutSite",
 		"mkk/app"
 	], rJSBuildConfig = {
 		options: {

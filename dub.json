@@ -11,6 +11,7 @@
 		{
 			"name": "main_service",
 			"targetType": "executable",
+			"targetPath": "bin",
 			"libs-posix": [
 				"pq"
 			],
@@ -35,6 +36,7 @@
 		{
 			"name": "view_service",
 			"targetType": "executable",
+			"targetPath": "bin",
 			"dependencies": {
 				"webtank": ">=0.0.0",
 				"ivy": ">=0.0.0"
@@ -53,6 +55,7 @@
 		{
 			"name": "set_user_password",
 			"targetType": "executable",
+			"targetPath": "bin",
 			"dependencies": {
 				"webtank": ">=0.0.0",
 				"openssl": ">=0.0.0"
@@ -77,6 +80,7 @@
 		{
 			"name": "gen_pw_hash",
 			"targetType": "executable",
+			"targetPath": "bin",
 			"dependencies": {
 				"webtank": ">=0.0.0",
 				"openssl": ">=0.0.0"
@@ -93,6 +97,7 @@
 		{
 			"name": "gen_session_id",
 			"targetType": "executable",
+			"targetPath": "bin",
 			"dependencies": {
 				"webtank": ">=0.0.0",
 				"openssl": ">=0.0.0"
@@ -104,6 +109,24 @@
 			"sourceFiles": [
 				"src/mkk_site/security/crypto",
 				"src/mkk_site/tools/gen_session_id"
+			]
+		},
+		{
+			"name": "server_runner",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk_site/tools/server_runner.d"
+			]
+		},
+		{
+			"name": "deploy",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk_site/tools/deploy.d"
 			]
 		}
 	]

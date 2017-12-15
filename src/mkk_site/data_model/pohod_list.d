@@ -54,8 +54,8 @@ struct СоотвПолейСроков {
 //Устанавливает соответствие между полями в форме и в базе
 //и операциями сравнения, которые будут в запросе
 static immutable СоотвПолейСроков[] соотвПолейСроков = [
-	{ "beginDateRangeHead", "begin_date", "<=" },
-	{ "beginDateRangeTail", "begin_date", ">=" },
-	{ "endDateRangeHead", "finish_date", "<=" },
-	{ "endDateRangeTail", "finish_date", ">=" }
+	{ "beginRangeHead", "begin_date", "<=" },
+	{ "beginRangeTail", "begin_date", ">=" },
+	{ "endRangeHead", "finish_date", "<=" },
+	{ "endRangeTail", "finish_date", ">=" }
 ];

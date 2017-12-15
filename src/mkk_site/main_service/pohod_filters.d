@@ -28,16 +28,16 @@ shared static this()
 		yearItems ~= jv([
 			"text": jv(year.text),
 			"fields": jv([
-				"beginDateRangeHead__year": year,
-				"endDateRangeTail__year": year
+				"dates__beginRangeHead__year": year,
+				"dates__endRangeTail__year": year
 			])
 		]);
 	}
 	yearItems ~= jv([
 		"text": jv("Последние " ~ yearCount.text ~ " лет"),
 		"fields": jv([
-			"beginDateRangeHead__year": dt.year - yearCount + 1,
-			"endDateRangeTail__year": dt.year
+			"dates__beginRangeHead__year": dt.year - yearCount + 1,
+			"dates__endRangeTail__year": dt.year
 		])
 	]);
 
