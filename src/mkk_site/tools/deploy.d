@@ -4,7 +4,19 @@ import std.getopt;
 import std.file: exists, read, write, isFile, mkdirRecurse, remove, copy, symlink, getcwd;
 import std.path: buildNormalizedPath, dirName;
 import std.algorithm: map;
+import std.process: spawnProcess, wait;
+import std.array: array;
 import std.stdio;
+
+static immutable dubConfigs = [
+	`main_service`,
+	`view_service`,
+	`add_user`,
+	`set_user_password`,
+	`gen_pw_hash`,
+	`gen_session_id`,
+	`server_runner`
+];
 
 void main(string[] args)
 {
@@ -15,15 +27,17 @@ void main(string[] args)
 		`user`, &userName,
 		`makeUnit`, &makeUnitFiles
 	);
-
+	
+	compileAll(); // Собираем все бинарники проекта
 
 	string siteRoot = buildNormalizedPath("/home/", userName, "sites/mkk_site/");
 	writeln(`Deploy to path: `, siteRoot);
 	mkdirRecurse(siteRoot);
-	string[] toRemove = [
-		"bin/mkk_site_main_service",
-		"bin/mkk_site_view_service"
-	];
+
+	// Удаляем всё, что нужно в каталоге развертывания сайта (на всякий случай)
+	string[] toRemove = dubConfigs.map!( (confName) {
+		return `bin/mkk_site_` ~ confName;
+	}).array;
 
 	foreach( suffix; toRemove )
 	{
@@ -35,6 +49,7 @@ void main(string[] args)
 
 	string[] toSimlink = toRemove.dup;
 
+	// Создаём символические ссылки на нужные файлы
 	string workDir = getcwd();
 	foreach( suffix; toSimlink )
 	{
@@ -50,6 +65,7 @@ void main(string[] args)
 		"mkk_site_config.json"
 	];
 
+	// Копируем нужные файлы, если их еще нет
 	foreach( suffix; toCopy )
 	{
 		string sourceFile = buildNormalizedPath(workDir, suffix);
@@ -57,6 +73,17 @@ void main(string[] args)
 		if( !exists(destFile) ) {
 			mkdirRecurse( dirName(destFile) );
 			copy(sourceFile, destFile);
+		}
+	}
+}
+
+/// Компиляция всех нужных бинарей сайта
+void compileAll()
+{
+	foreach( string confName; dubConfigs ) {
+		auto dubPid = spawnProcess([`dub`, `build`, `:` ~ confName]);
+		if( wait(dubPid) != 0 ) {
+			throw new Exception( `Compilition failed for configuration: ` ~ confName );
 		}
 	}
 }

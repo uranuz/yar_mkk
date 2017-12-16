@@ -8,3 +8,5 @@ syntax: glob
 pub_src/dist/
 mkk_site_devel
 mkk_site_release
+.dub/**
+bin/**

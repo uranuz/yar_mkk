@@ -1,14 +1,16 @@
-module mkk_site.tools.add_site_user;
+module mkk_site.tools.add_user;
 
 ///Утилита для добавления пользователя сайта МКК
+import std.stdio;
+import std.getopt;
+import std.datetime;
+import std.conv;
+import std.algorithm: endsWith;
+import std.uuid: randomUUID;
 
-import std.stdio, std.getopt, std.digest.digest, std.base64, std.datetime, std.utf, std.conv, std.algorithm : endsWith;
-
-import std.uuid : randomUUID;
-
-import webtank.db.postgresql;
-
-import mkk_site.security.access_control;
+import mkk_site.security.access_control: minLoginLength, minPasswordLength;
+import mkk_site.security.crypto: makePasswordHash, encodePasswordHash;
+import mkk_site.tools.auth_db: getAuthDB;
 
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
@@ -27,9 +29,24 @@ void main(string[] progAgs) {
 		"email", &email,
 		"help", &isHelp
 	);
+	
+	if( !login.length || !name.length || !group.length || !email.length )
+	{
+		writeln("Ошибка: один или несколько обязательных параметров профиля пользователя пусты!!!");
+		isHelp = true;
+	}
+
+	import std.utf: count;
+
+	if( login.count < minLoginLength )
+	{
+		writeln("Ошибка: длина логина меньше минимально допустимой (", minLoginLength, " символов)!!!");
+		isHelp = true;
+	}
 
 	if( isHelp )
-	{	writeln("Утилита для добавления пользователя сайта МКК.");
+	{
+		writeln("Утилита для добавления пользователя сайта МКК.");
 		writeln(
 			"Опции:\r\n",
 			"  --login=ЛОГИН         Минимум " ~ minLoginLength.to!string ~ " символов\r\n",
@@ -40,26 +57,9 @@ void main(string[] progAgs) {
 		);
 		return;
 	}
-	
-	if( !login.length || !name.length || !group.length || !email.length )
-	{	writeln("Ошибка: один или несколько обязательных параметров профиля пользователя пусты!!!");
-		return;
-	}
-
-	if( login.count < minLoginLength )
-	{	writeln("Ошибка: длина логина меньше минимально допустимой (", minLoginLength, " символов)!!!");
-		return;
-	}
-	
-	auto dbase = new DBPostgreSQL(authDBConnStr);
-	
-	if( dbase is null || !dbase.isConnected )
-	{	writeln("Не удалось подключиться к базе данных МКК");
-		return;
-	}
 
 	if(
-		dbase.query(
+		getAuthDB().query(
 			`select 1 from site_user where login='` ~ login ~ `';`
 		).recordCount != 0
 	)
@@ -87,19 +87,16 @@ void main(string[] progAgs) {
 	ubyte[] pwHash = makePasswordHash( password, pwSaltStr, regTimestampStr );
 	string pwHashStr = encodePasswordHash( pwHash );
 	
-	auto addUserResult = dbase.query(
+	auto addUserResult = getAuthDB().query(
 		`insert into site_user ( login, name, user_group, email, pw_hash, pw_salt, reg_timestamp ) `
 		~ ` values( '` ~ login ~ `', '` ~ name ~ `', '` ~ group ~ `', '` 
 		~ email ~ `', '` ~ pwHashStr ~ `', '` ~ pwSaltStr ~ `', '` ~ regTimestampStr ~ `' ) `
 		~ ` returning 'user added'`
 	);
 	
-	if( addUserResult.recordCount != 1 || addUserResult.get(0, 0, null) != `user added` )
-	{
+	if( addUserResult.recordCount != 1 || addUserResult.get(0, 0, null) != `user added` ) {
 		writeln( `При запросе на регистрацию пользователя произошла ошибка!` );
-	}
-	else
-	{
+	} else {
 		writeln( `Пользователь с логином "`, login, `" успешно зарегистрирован!` );
 	}
 } 

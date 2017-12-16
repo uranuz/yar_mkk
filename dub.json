@@ -53,6 +53,32 @@
 			"versions": ["devel"]
 		},
 		{
+			"name": "add_user",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"dependencies": {
+				"webtank": ">=0.0.0",
+				"openssl": ">=0.0.0"
+			},
+			"libs-posix": [
+				"pq"
+			],
+			"lflags": [
+				"lib/libtarsnap.a"
+			],
+			"sourcePaths": [
+				"src/mkk_site/common",
+				"src/mkk_site/security"
+			],
+			"sourceFiles": [
+				"src/mkk_site/tools/auth_db",
+				"src/mkk_site/tools/add_user"
+			],
+			"buildRequirements": [
+				"allowWarnings"
+			]
+		},
+		{
 			"name": "set_user_password",
 			"targetType": "executable",
 			"targetPath": "bin",
@@ -71,6 +97,7 @@
 				"src/mkk_site/security"
 			],
 			"sourceFiles": [
+				"src/mkk_site/tools/auth_db",
 				"src/mkk_site/tools/set_user_password"
 			],
 			"buildRequirements": [
