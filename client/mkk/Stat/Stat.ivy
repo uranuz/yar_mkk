@@ -1,157 +1,128 @@
-expr 
-{=
+expr {=
 from fir.controls.utils import recGet, recGetStr,cls;
 from mkk.Pagination import Pagination;
-
 def Document {=
 	def.kv
 		moduleName: 'mkk/Stat/Stat'
 		instanceName: 'stat'
-		cssBaseClass: "mkk-stat";
-
+		cssBaseClass: "mkk-Stat",
+		data: null
+		select: null;
 	def.body {*
-		<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.js" defer></script>
-		<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.time.js" defer></script>
-		
-		
-		<script>
-	var prez={{select.conduct}},
+	<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.time.js" defer></script>
 
-	{=
-	   var k:0;
-		repeat  data_str in data.graf {%
-			str "Surs"; str k; str "=[";
-			var n: 0;
-
-			repeat col in data_str {%
-				if n!=0 ",";
-				str col;
-				set n: n+1
-			};
-			str "],
-			";
-			set k: k+1;
-		} }
-
-	
-		
-		{%
-			str "boolGraf=[";
-			var s: 0;
-			repeat  col in data.boolGraf
-				{%
-
-					if s!=0 ",";
-					str col;
-					set s: s+1
-					
-				};		
-				
-			str "],";
-		}	
-	y={{data.grafLength}}
-	;
-
-		</script>
-		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-			<h2> Статьи и документы</h2>
-			<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>
-			<p><a href="/pub/stati_dokument/stat1992_2010.rar"> 
-				Отчёты МКК за 1992-2010 годы (zip)</a></p>
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h2>Статьи и документы</h2>
+		<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>
+		<p>
+			<a href="/pub/stati_dokument/stat1992_2010.rar"
+				>Отчёты МКК за 1992-2010 годы (zip)</a>
+		</p>
 
 		<form id="main_form" method="post">
-				<fieldset>
-						<legend>Тип выборки</legend>
-						<!-  {period}  ->
-						<div>
-							<label class="{=cls 'byYearBtn'}">
-								<input type="radio"
-									name="conduct"
-									value="0"
-									{=if select.conduct == 0 {*checked*} }>
-								<span>по годам</span>
-							</label>
-							<label class="{=cls 'byYearBtn'}">
-								<input
-									type="radio"
-									name="conduct"
-									value=1
-									{= if select.conduct == 1 {*checked*} }/>
-								<span>по КС</span>
-							</label>
+			<fieldset>
+				<legend>Тип выборки</legend>
+				<div>
+					<label class="{=cls 'byYearBtn'}">
+						<input type="radio"
+							name="conduct"
+							value="0"
+							{=if select.conduct == 0 {*checked*} }>
+						<span>по годам</span>
+					</label>
+					<label class="{=cls 'byYearBtn'}">
+						<input
+							type="radio"
+							name="conduct"
+							value=1
+							{= if select.conduct == 1 {*checked*} }/>
+						<span>по категориям сложности</span>
+					</label>
+				</div>
+			</fieldset>
+			<!--Фильтрация-->
+			<fieldset>
+				<legend>Фильтрация</legend>
+				<div>
+					<label class="form-group row">
+						<span class="col-md-3 col-form-label">Код МКК</span>
+						<div class="col-md-9">
+							<input type="text" name="kodMKK" value="{{select.kodMKK}}" class="form-control" placeholder="176-00"/>
 						</div>
-					</fieldset>
-<!-- Фильтрация-------------->
-					<fieldset>
-						<legend>Фильтрация</legend>
-						<!-  {filtrum}  ->
-						<div >
-							<label class="form-group row" style="display: block;">
-								<span class="form-control-label col-md-3">Код МКК</span>
-								<div class="col-md-9">
-									<input type="text" name="kodMKK" value="{{select.kodMKK}}" class="form-control" placeholder="176-00"/>
-								</div>
-							</label>
-							<label class="form-group row" style="display: block;">
-								<span class="form-control-label col-md-3">Организация</span>
-								<div class="col-md-9">
-									<input type="text" name="organization" value="{{select.organization}}" class="form-control" placeholder="Гравицап"/>
-								</div>
-							</label>
-							<label class="form-group row" style="display: block;">
-								<span class="form-control-label col-md-3">Территория</span>
-								<div class="col-md-9">
-									<input type="text" name="territory" value="{{select.territory}}" class="form-control" placeholder="Ярославль"/>
-								</div>
-							</label>
-							<!-  {year_S}  ->
+					</label>
+					<label class="form-group row">
+						<span class="col-md-3 col-form-label">Организация</span>
+						<div class="col-md-9">
+							<input type="text" name="organization" value="{{select.organization}}" class="form-control" placeholder="Гравицап"/>
 						</div>
-
-						
-						<div {= if select.conduct == 0 {* style="display: none"*} } >
-						  С <input name="beginYear" value="{{select.beginYear}}" size="4" maxlength="4" >
-						  по <input name= "endYear"  value="{{select.endYear}}"   size="4" maxlength="4"   > годы
+					</label>
+					<label class="form-group row">
+						<span class="col-md-3 col-form-label">Территория</span>
+						<div class="col-md-9">
+							<input type="text" name="territory" value="{{select.territory}}" class="form-control" placeholder="Ярославль"/>
 						</div>
+					</label>
+				</div>
 
-					</fieldset>
-			<!-- Кнопка обновить-------------------->
-			<button  name="select" type="submit" class="noprint" > Обновить</button>
-
-
+				<div class="form-inline form-group" {=if select.conduct == 0 'style="display: none;"'}>
+					<label>
+						<span class="col-form-label mx-sm-2">с</span>
+						<input type="text"
+							class="form-control"
+							name="beginYear"
+							value="{{select.beginYear}}"
+							size="4"
+							maxlength="4"/>
+					</label>
+					<label>
+						<span class="col-form-label mx-sm-2">по</span>
+						<input type="text"
+							class="form-control"
+							name="endYear"
+							value="{{select.endYear}}"
+							size="4" maxlength="4"/>
+						<span class="col-form-label mx-sm-2">годы</span>
+					</label>
+				</div>
+			</fieldset>
+			<div class="form-group">
+				<button type="submit"
+					name="select"
+					class="btn btn-primary btn-block noprint"
+					>Обновить</button>
+			</div>
 		</form>
 
-<h3>График числа участников походов</h3>
-<div style="margin: 0% -15% 3% 0%;padding: 2px 0px 120px 2px; width:100%;">
-	<div id="placeholder" style="position:relative;margin: 0% 0% -350px 0%; width:70%; height:400px; left:0%; right:auto;"></div><!--окно для графика-->
-	<div id="legend" style="position:relative; left:81%; right:auto;  margin: 0% -3% 0% 0%; width:15%; border:4px solid DarkGreen;border-radius: 10px;"></div><!--Это заглушка для легенды-->
-</div>
+		<h3>Количество участников походов</h3>
+		<div class="{=cls 'plotArea'}">
+			<div class="{=cls 'plot'}"></div><!--окно для графика-->
+			<div class="{=cls 'plotLegend'}"></div><!--Это заглушка для легенды-->
+			<div class="{=cls 'plotTooltip'}"></div>
+		</div>
 
-
+		<h3>Данные по числу походов/ участников</h3>
 		<div class="{=cls 'tableBlock'} mkk-Table">
-		<div class="{=cls 'tableScroller'} mkk-Table">
-			<table class="{=cls 'table'} mkk-Table">
+			<div class="{=cls 'tableScroller'} mkk-Table">
+				<table class="{=cls 'table'} mkk-Table">
 					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-							
-				{=
-
-					repeat data_str in data.tabl {*
-					
-					<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-					{=repeat col in data_str 
-						{*
-								 <td>{{col}}</td>
+					{=repeat data_str in data.tabl {*
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+						{=repeat col in data_str {*
+							<td>{{col}}</td>
 						*}}
-				</tr>
-				
-				*}}
-
-			</tbody>	
-			</table>
-		</div></div>
+						</tr>
+					*}}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 	*};
 	
 	};
-	Document	
+	Document
+		data: data
+		select: select;
 }

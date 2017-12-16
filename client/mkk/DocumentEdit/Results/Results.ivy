@@ -24,7 +24,7 @@ def Results {=
 		};}
 		<button type="button"
 			class="{=cls 'continueBtn'} btn btn-primary"
-			>Хорошо</button>
+			>Ну, и ладно</button>
 	</div>
 	*}
 };
