@@ -367,7 +367,7 @@ foreach(i, str; for_all)
 
 	string[][] trans_graf_data;
 	string[][] var;
-	string []Surs0=["0","1","2","3","4","5","6","7" ];
+	//string []Surs0=["0","1","2","3","4","5","6","7" ];
 
 	if(select.conduct == 0)
 	{
@@ -393,6 +393,7 @@ trans_graf_data~=["0","1","2","3","4","5","6","7" ];
 			}
 		}
 			if(p) trans_graf_data~=["0","0","0","0","0","0","0","0" ];
+			
 	}
 		trans_graf_data~= graf_data[graf_data.length-1]
 		[1..graf_data[graf_data.length-1].length-1];
@@ -405,8 +406,8 @@ trans_graf_data~=["0","1","2","3","4","5","6","7" ];
 	{
 		foreach(j,str;data_str)
 		{
-			if(!str.length) trans_graf_data[i][j]="0";			
-		      else boolGraf[i]=true;
+			if(!str.length) trans_graf_data[i][j]="0";
+			else if(str != "0") boolGraf[i]=true;
 		}
 	}
 	//--конец------матрица графика--нули-----------S
