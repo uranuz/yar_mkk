@@ -63,7 +63,8 @@ module.exports = function (grunt) {
 		reports: '<%= deployPath %>pub/reports',
 		robots: '<%= deployPath %>pub/robots.txt',
 		bootstrap: '<%= deployPath %>pub/bootstrap/**/*',
-		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*'
+		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*',
+		reports: '<%= deployPath %>pub/flot',
 	},
 	cleanConfig = {};
 
@@ -151,7 +152,12 @@ module.exports = function (grunt) {
 				dest: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/',
 				filter: 'isFile',
 				overwrite: true
-			}
+			},
+			reports: {
+				src: 'client/flot/',
+				dest: '<%= deployPath %>pub/flot',
+				filter: 'isDirectory',
+			},
 		},
 		sass: {
 			options: {
