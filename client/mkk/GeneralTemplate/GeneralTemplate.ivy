@@ -15,9 +15,10 @@ expr {*
 	<link rel="stylesheet" href="{{vpaths.bootstrapCSS}}app.css">
 	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.css">
 	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="{{vpaths.sitePublic}}mkk/GeneralTemplate/GeneralTemplate.css">
 	<link rel="shortcut icon" href="{{vpaths.siteImg}}znak.png" type="image/png">
 
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" defer></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" defer></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/umd/popper.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.bootstrapJS}}bootstrap.min.js" defer></script>

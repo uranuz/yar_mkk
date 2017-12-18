@@ -17,16 +17,13 @@ import webtank.common.std_json.to: toStdJSON;
 
 TDataNode renderStat(HTTPContext ctx)
 {
-	debug import std.stdio: writeln;
-	debug writeln(`document request headers: `, ctx.request.headers.toAA());
-	
 	import std.json: JSONValue;
 	import std.conv: to;
 //*************************************************************	auto bodyForm = ctx.request.bodyForm;
 	auto bodyForm = ctx.request.bodyForm;
 	StatSelect select;
 	formDataToStruct(bodyForm, select);
-	JSONValue jSelect = select.toStdJSON();	
+	JSONValue jSelect = select.toStdJSON();
 	
 //**************************************************************
 	//lданные для передачи в в основной сервис
