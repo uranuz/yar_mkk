@@ -25,8 +25,9 @@ TDataNode renderTouristList(HTTPContext ctx)
 
 	auto bodyForm = ctx.request.bodyForm;
 	TouristListFilter filter;
-	formDataToStruct(bodyForm, filter);
 	Navigation nav;
+
+	formDataToStruct(bodyForm, filter);
 	formDataToStruct(bodyForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();

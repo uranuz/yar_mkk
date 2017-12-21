@@ -203,9 +203,6 @@ body {
 }
 
 
-#middle {
-
-}
 #sidebar {
 	width: 250px;
 	float: right;
@@ -214,9 +211,21 @@ body {
 	margin-bottom: 8px;
 }
 
+@media (max-width: 900px) {
+	body #sidebar {
+		display: none;
+	}
+}
+
 #content_column {
-	margin: 8px  280px 0 16px;
+	margin: 8px 280px 0 16px;
 	position: relative;
+}
+
+@media (max-width: 900px) {
+	body #content_column {
+		margin: 8px 8px 0 16px;
+	}
 }
 
 #content {

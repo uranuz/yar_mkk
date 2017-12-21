@@ -12,12 +12,17 @@ class MKKViewService
 	import webtank.net.http.handler;
 	import webtank.net.http.context;
 	import webtank.common.loger;
+	import webtank.common.event;
+	import webtank.net.http.output: HTTPOutput;
 
 	import ivy;
+	import ivy.interpreter.data_node_render: renderDataNode, DataRenderType;
 	import mkk_site.view_service.ivy_custom;
 
 	import mkk_site.common.site_config;
 	import mkk_site.view_service.access_control;
+	import mkk_site.common.utils: getAuthRedirectURI, makeErrorMsg;
+	import mkk_site.view_service.utils: mainServiceCall;
 
 	static immutable string serviceName = "yarMKKView";
 
@@ -127,13 +132,59 @@ public:
 		}
 	}
 
+	void renderResult(TDataNode content, HTTPContext context)
+	{
+		import std.string: toLower;
+		context.response.tryClearBody();
+
+		if( context.request.queryForm.get("generalTemplate", null).toLower() != "no" )
+		{
+			auto favouriteFilters = mainServiceCall(`pohod.favoriteFilters`, context);
+			assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
+			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
+
+			TDataNode payload = [
+				"vpaths": TDataNode(Service.virtualPaths),
+				"content":  TDataNode(content),
+				"isAuthenticated": TDataNode(context.user.isAuthenticated),
+				"userName": TDataNode(context.user.name),
+				"authRedirectURI": TDataNode(getAuthRedirectURI(context)),
+				"pohodFilterFields": TDataNode(favouriteFilters["allFields"]),
+				"pohodFilterSections": TDataNode(favouriteFilters["sections"])
+			];
+
+			content = templateCache.getByModuleName("mkk.GeneralTemplate").run(payload);
+		}
+
+		static struct OutRange
+		{
+			private HTTPOutput _resp;
+			void put(T)(T data) {
+				import std.conv: text;
+				_resp.write(data.text);
+			}
+		}
+
+		renderDataNode!(DataRenderType.HTML)(content, OutRange(context.response));
+	}
+
 	void _subscribeRoutingEvents()
 	{
 		_rootRouter.onPostPoll ~= (HTTPContext context, bool isMatched) {
 			if( isMatched )
 			{	context._setuser( _accessController.authenticate(context) );
-			}
+			} 
 		};
+
+		_pageRouter.onError.join( (Exception ex, HTTPContext context)
+		{
+			auto messages = makeErrorMsg(ex);
+			loger.error(messages.details);
+			renderResult(TDataNode(messages.userError), context);
+			context.response.headers[`status-code`] = `500`;
+			context.response.headers[`reason-phrase`] = `Internal Server Error`;
+			return true;
+		});
 	}
 
 	// Метод перенаправляющий логи шаблонизатора в файл

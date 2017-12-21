@@ -53,3 +53,17 @@ string getAuthRedirectURI(HTTPContext context)
 			~ context.request.headers.get("x-forwarded-host", "")
 			~ context.request.uri.path ~ ( query.length ? "?" ~ query : "" );
 }
+
+auto makeErrorMsg(Throwable error)
+{
+	import std.typecons: Tuple;
+	import std.conv: text;
+	Tuple!(string, "userError", string, "details") res;
+	
+	string debugInfo = "\r\nIn module " ~ error.file ~ ":" ~ error.line.text ~ ". Traceback:\r\n" ~ error.info.text;
+	res.details = error.msg ~ debugInfo;
+	debug res.userError = res.details;
+	else res.userError = error.msg;
+
+	return res;
+}

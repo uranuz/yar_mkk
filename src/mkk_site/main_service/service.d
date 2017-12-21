@@ -35,6 +35,7 @@ class MKKMainService
 	import mkk_site.data_model.enums;
 	import mkk_site.common.site_config;
 	import mkk_site.security.access_control;
+	import mkk_site.common.utils: makeErrorMsg;
 
 	import std.json: JSONValue, parseJSON;
 
@@ -156,12 +157,6 @@ public:
 		_databaseLoger.writeEvent(wtLogEvent);
 	}
 
-	private string _makeExtendedErrorMsg(Throwable error)
-	{
-		import std.conv: text;
-		return error.msg ~ "\r\n" ~"Module: " ~ error.file ~ "(" ~ error.line.text~ ") \r\n" ~ error.info.text;
-	}
-
 	private void _subscribeRoutingEvents() {
 		import std.exception: assumeUnique;
 		import std.conv;
@@ -190,10 +185,10 @@ public:
 	// Обработчик пишет информацию о возникших ошибках при выполнении в журнал
 	private bool _handleError(Throwable error, HTTPContext)
 	{
-		string extendedMsg = _makeExtendedErrorMsg(error);
+		auto messages = makeErrorMsg(error);
 
-		prioriteLoger.error(extendedMsg);
-		loger.error(extendedMsg);
+		prioriteLoger.error(messages.details);
+		loger.error(messages.details);
 
 		throw error;
 	}
