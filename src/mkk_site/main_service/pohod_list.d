@@ -272,7 +272,7 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	filters ~= dateFilters;
 
 	if( filter.pohodRegion.length > 0 )
-		filters ~= `region_pohod ILIKE '%` ~ filter.pohodRegion ~ `%'`;
+		filters ~= `region_pohod ILIKE '%` ~ PGEscapeStr(filter.pohodRegion) ~ `%'`;
 
 	if( filter.withDataCheck )
 		filters ~= dataCheckFilterQuery;
