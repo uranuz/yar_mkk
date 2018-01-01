@@ -81,7 +81,7 @@ void main(string[] args)
 void compileAll()
 {
 	foreach( string confName; dubConfigs ) {
-		auto dubPid = spawnProcess([`dub`, `build`, `:` ~ confName]);
+		auto dubPid = spawnProcess([`dub`, `build`, `:` ~ confName, `--build=release`]);
 		if( wait(dubPid) != 0 ) {
 			throw new Exception( `Compilition failed for configuration: ` ~ confName );
 		}
