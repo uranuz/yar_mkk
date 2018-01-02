@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.PohodList.Navigation import PohodListNavigation;
 from mkk.Helpers import DateRangePrinter;
 def PohodList {=
@@ -8,7 +8,7 @@ def PohodList {=
 		cssBaseClass: "mkk-PohodList";
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="mkk/PohodList/PohodList">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Походы</h2>
 		<div class="{=cls 'navigation'}">
 			{=PohodListNavigation

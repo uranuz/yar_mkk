@@ -66,23 +66,9 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 				summaryDiv = self._elems("touristsFoundSummary"),
 				navigBar = self._elems("pageNavigationBar"),
 				pageCountDiv = self._elems("pageCount");
-				//recordCount = json.recordCount; // Количество записей, удовлетворяющих фильтру
-				//pageSize = json.pageSize || 10;
-
-			//self.recordSet = datctrl.fromJSON(json.rs);
 
 			self._resultsPanel.show();
-			
 			self._pagination.setNavigation(nav);
-			/*
-			if( recordCount < 1 ) {
-				summaryDiv.text("По данному запросу туристов не найдено");
-				navigBar.hide();
-			} else {
-				summaryDiv.text("Найдено " + recordCount + " туристов");
-				navigBar.show();
-			}
-			*/
 		},
 
 		activate: function(place) {

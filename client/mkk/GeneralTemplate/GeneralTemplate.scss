@@ -149,59 +149,53 @@ body {
 	z-index: 10;
 }
 
-.t-main_menu.e-block {
-	/*display: inline-block;
-	float: right;
-	position: relative;
-	height: 100%;
-	font-size:*/
-}
+.mkk-MainMenu {
+	&.e-block {
+		/*display: inline-block;
+		float: right;
+		position: relative;
+		height: 100%;
+		font-size:*/
+	}
+	&.e-bg_left {
+		background: url("../img/design/menu_bg_left.png") no-repeat;
+		width: 40px;
+		height: 36px;
+		float: left;
+	}
+	&.e-bg_right {
+		background: url("../img/design/menu_bg_right.png") no-repeat;
+		width: 40px;
+		height: 36px;
+		float: right;
+	}
+	&.e-menu_bar {
+		background: url("../img/design/menu_bg.png") repeat-x;
+		height: 36px;
+		padding-top: 6px;
+		color: #2b3f3d;
+	}
+	&.e-menu > li {
+		display: inline-block;
+		list-style: none;
+		margin-right: 0.5rem;
+	}
+	&.e-menu > li > a {
+		color: #2b3f3d;
+	}
+	&.e-menu > li > a:hover {
+		/*background: linear-gradient(to top, rgba(54,90,29, 0.8), rgba(1,84,155,0.2));
+		border-radius: 4px;*/
+	}
+	&.e-auth_item {
+		float: right;
+	}
+	&.e-shadow_bottom {
+		background: url("../img/design/menu_shadow_bottom.png") repeat-x;
+		height: 6px;
+	}
 
-.t-main_menu.e-bg_left {
-	background: url("../img/design/menu_bg_left.png") no-repeat;
-	width: 40px;
-	height: 36px;
-	float: left;
 }
-
-.t-main_menu.e-bg_right {
-	background: url("../img/design/menu_bg_right.png") no-repeat;
-	width: 40px;
-	height: 36px;
-	float: right;
-}
-
-.t-main_menu.e-menu_bar {
-	background: url("../img/design/menu_bg.png") repeat-x;
-	height: 36px;
-	padding-top: 6px;
-	color: #2b3f3d;
-}
-
-.t-main_menu.e-menu > li {
-	display: inline-block;
-	list-style: none;
-	margin-right: 0.5rem;
-}
-
-.t-main_menu.e-menu > li > a {
-	color: #2b3f3d;
-}
-
-.t-main_menu.e-menu > li > a:hover {
-	/*background: linear-gradient(to top, rgba(54,90,29, 0.8), rgba(1,84,155,0.2));
-	border-radius: 4px;*/
-}
-
-.t-main_menu.e-auth_item {
-	float: right;
-}
-
-.t-main_menu.e-shadow_bottom {
-	background: url("../img/design/menu_shadow_bottom.png") repeat-x;
-	height: 6px;
-}
-
 
 #sidebar {
 	width: 250px;

@@ -17,7 +17,6 @@ def LinkItems {=
 			};
 		}
 		<tbody class="{=cls 'linksTableBody'}">
-		<!--<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }">-->
 		{=repeat i in {=range 0 inputCount} {*
 			<tr>
 				<td>

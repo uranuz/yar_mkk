@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.Helpers import DateRangePrinter;
 def RecentPohodList {=
 	def.kv
@@ -61,7 +61,7 @@ def IndexPage {=
 		instanceName: 'indexPage';
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			{=AboutSite shortInfoOnly: true}
 			<div class="{=cls 'aboutSiteBtnRow'}">
 				<a href="/dyn/about"

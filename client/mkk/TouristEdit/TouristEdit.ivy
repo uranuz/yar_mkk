@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNull;
+from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNull, firScopeOptsEnc;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.TouristPlainList import TouristPlainList;
@@ -10,7 +10,7 @@ def TouristEdit {=
 		cssBaseClass: 'mkk-TouristEdit';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<form class="{=cls 'touristForm'} form" method="POST">
 			<h2>Редактирование данных туриста</h2>
 			<input type="hidden" name="num" value="{=recGet tourist 'num'}"/>

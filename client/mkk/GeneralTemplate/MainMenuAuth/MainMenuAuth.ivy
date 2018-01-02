@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def MainMenuAuth {=
 	def.kv
 		moduleName: 'mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
@@ -14,7 +14,7 @@ def MainMenuAuth {=
 		authStateCls: {=if isAuthenticated 'm-with_auth' else 'm-without_auth'}
 	}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<a
 			href="javascript:void(0)"
 			class="{=cls 'popdownBtn'}"

@@ -11,6 +11,7 @@ expr {*
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
 	<link rel="stylesheet" href="{{vpaths.bootstrapCSS}}app.css">
 	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.css">
@@ -55,18 +56,18 @@ expr {*
 
 			</div>
 			<!-- #header -->
-			<div class="e-block t-main_menu">
-				<div class="e-bg_left t-main_menu"></div>
-				<div class="e-bg_right t-main_menu"></div>
-				<div class="e-menu_bar t-main_menu">
-					<ul class="e-menu t-main_menu">
+			<div class="e-block mkk-MainMenu">
+				<div class="e-bg_left mkk-MainMenu"></div>
+				<div class="e-bg_right mkk-MainMenu"></div>
+				<div class="e-menu_bar mkk-MainMenu">
+					<ul class="e-menu mkk-MainMenu">
 						<li><a href="/" title="Главная страница сайта">Главная</a></li>
 						<li><a href="{{vpaths.siteDynamic}}pohod/list" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}tourist/list" title="Просмотр данных и поиск туристов">Туристы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}moder/list" title="Список модераторов системы">Модераторы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}document/list" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
 						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
-						<li class="e-auth_item t-main_menu">
+						<li class="e-auth_item mkk-MainMenu">
 							{=MainMenuAuth
 								isAuthenticated: isAuthenticated
 								userName: userName
@@ -76,9 +77,9 @@ expr {*
 						</li>
 					</ul>
 				</div>
-				<!-- e-menu_bar t-main_menu -->
-				<div class="e-shadow_bottom t-main_menu"></div>
-				<!-- e-shadow_bottom t-main_menu -->
+				<!-- e-menu_bar mkk-MainMenu -->
+				<div class="e-shadow_bottom mkk-MainMenu"></div>
+				<!-- e-shadow_bottom mkk-MainMenu -->
 			</div>
 		</div>
 		<!-- #top -->
