@@ -35,50 +35,24 @@ def PohodListNavigation {=
 						</div>
 					</label>
 					<div class="{=cls 'enumFilterBlock'} row">
+						{=repeat item in [
+							{key: 'tourismKind', title: 'Вид туризма'},
+							{key: 'complexity', title: 'Категория сложности'},
+							{key: 'progress', title: 'Прохождение'},
+							{key: 'claimState', title: 'Заявка'}
+						] {*
 						<span class="{=cls 'enumFilter'} col-md col-sm-6 mb-2">
 							{=CheckBoxList
-								instanceName: "tourismKind"
-								items: {{pohodEnums.tourismKind}}
+								instanceName: item.key
+								items: {=at pohodEnums item.key}
 								keyField: "v"
 								captionField: "n"
-								formField: "tourismKind"
-								selectedKeys: filter.tourismKind
-								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">Вид туризма</span>*}
+								formField: item.key
+								selectedKeys: {=at filter item.key}
+								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">{{item.title}}</span>*}
 							}
-						</span>
-						<span class="{=cls 'enumFilter'} col-md col-sm-6 mb-2">
-							{=CheckBoxList
-								instanceName: "complexity"
-								items: {{pohodEnums.complexity}}
-								keyField: "v"
-								captionField: "n"
-								formField: "complexity"
-								selectedKeys: filter.complexity
-								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">Категория сложности</span>*}
-							}
-						</span>
-						<span class="{=cls 'enumFilter'} col-md col-sm-6 mb-2">
-							{=CheckBoxList
-								instanceName: "progress"
-								items: {{pohodEnums.progress}}
-								keyField: "v"
-								captionField: "n"
-								formField: "progress"
-								selectedKeys: filter.progress
-								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">Прохождение</span>*}
-							}
-						</span>
-						<span class="{=cls 'enumFilter'} col-md col-sm-6 mb-2">
-							{=CheckBoxList
-								instanceName: "claimState"
-								items: {{pohodEnums.claimState}}
-								keyField: "v"
-								captionField: "n"
-								formField: "claimState"
-								selectedKeys: filter.claimState
-								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">Заявка</span>*}
-							}
-						</span>
+						</span> 
+						*}}
 					</div>
 					<h6>Сроки похода</h6>
 					<div class="{=cls 'dateRangeWrapper'} row form-group">
@@ -95,7 +69,7 @@ def PohodListNavigation {=
 								yearPlaceholder: 'год'
 							}
 						</label>
-						<label class="{=cls 'dateRangeEnd'} col-md text-lg-right">
+						<label class="{=cls 'dateRangeEnd'} col-md text-xl-right">
 							<span class="{=cls 'dateRangeBefore'} col-form-label">по</span>
 							{=PlainDatePicker
 								instanceName: 'endRangeTailField'
@@ -111,18 +85,18 @@ def PohodListNavigation {=
 					</div>
 					<div class="form-inline form-group">
 						<div class="row">
-							<label class="col-md-auto">
+							<label class="col-md-auto justify-content-start">
 								<input type="checkbox"
 									name="withFiles"
 									{=if filter.withFiles == true 'checked'}
-									class="checkbox"/>
+									class="checkbox mr-2"/>
 								<span class="form-control-label">С доп. материалами</span>
 							</label>
-							<label class="col-md-auto">
+							<label class="col-md-auto justify-content-start">
 								<input type="checkbox"
 									name="withDataCheck"
 									{=if filter.withDataCheck == true 'checked'}
-									class="checkbox"/>
+									class="checkbox mr-2"/>
 								<span class="form-control-label">Контроль данных</span>
 							</label>
 
