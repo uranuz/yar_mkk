@@ -1,8 +1,9 @@
 expr
 {=
-from fir.controls.utils import recGet, recGetStr,cls;
+from fir.controls.utils import recGet, recGetStr, cls;
 from mkk.Pagination import Pagination;
-
+from mkk.Helpers import RusDateFormat;
+from mkk.Helpers.EntityProperty import EntityProperty;
 def Experience{=
 	def.kv
 		moduleName: 'mkk/Experience/Experience'
@@ -18,26 +19,27 @@ def Experience{=
 				{=recGet tourist "patronymic"}
 				{=recGet tourist "birthYear"} г.р.
 			</h2>
-			<h5>
-			{=if not{=empty {=recGet tourist "experience"} } {*
-				<div>Туристский опыт: {=recGet tourist "experience"}</div>
-			*}}
-			{=if not{=empty {=recGetStr tourist "sportsCategory"} } {*
-				<div>Спортивный разряд: {=recGetStr tourist "sportsCategory"}</div>
-			*}}
-			{=if not{=empty {=recGetStr tourist "refereeCategory"} } {*
-				<div>Судейская категория: {=recGetStr tourist "refereeCategory"}</div>
-			*}}
-			{=if not{=empty {=recGetStr tourist "phone"} } {*
-				<div>Телефон: {=recGet tourist "phone"}</div>
-			*}}
-			{=if not{=empty {=recGetStr tourist "email"} } {*
-				<div>Эл. почта: {=recGet tourist "email"}</div>
-			*}}
-			{=if not{=empty {=recGet tourist "comment"} } {*
-				<div>Коментарий: {=recGet tourist "comment"}</div>
-			*}}
-			</h5>
+			{%
+				EntityProperty
+					title: 'Туристский опыт'
+					value: {=recGet tourist "experience"};
+				EntityProperty
+					title: 'Спортивный разряд'
+					value: {=recGetStr tourist "sportsCategory"};
+				EntityProperty
+					title: 'Судейская категория'
+					value: {=recGetStr tourist "refereeCategory"};
+				EntityProperty
+					title: 'Телефон'
+					value: {=recGet tourist "phone"};
+				EntityProperty
+					title: 'Эл. почта'
+					value: {=recGet tourist "email"};
+				EntityProperty
+					title: 'Коментарий'
+					value: {=recGet tourist "comment"}
+					isWide: true;
+			}
 		</div>
 		<!-- конец Раздела данные о туристе-->
 		<div>
@@ -78,33 +80,33 @@ def Experience{=
 								{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
 								<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
 									title="Номер маршрутной книжки не присвоен"
-									>{=if isBookNumSet {=recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
+									>{=if isBookNumSet
+										{*<div>{=recGet rec "mkkCode"}</div><div>{=recGet rec "bookNum"}</div>*} else "???"
+									}</a>
 							</td>
 							<td>
-								{=dtGet {=recGet rec "beginDate" } "day"}.
-								{=dtGet {=recGet rec "beginDate" } "month"}.
-								{=dtGet {=recGet rec "beginDate" } "year"}
-
-								</br>
-								{=dtGet {=recGet rec "finishDate"} "day"}.
-								{=dtGet {=recGet rec "finishDate"} "month"}.
-								{=dtGet {=recGet rec "finishDate"} "year"}
+								<div class="text-nowrap">{=RusDateFormat {=recGet rec "beginDate" } }</div>
+								<div class="text-nowrap">{=RusDateFormat {=recGet rec "finishDate" } }</div>
 							</td>
 							<td>
-								{=recGetStr rec "tourismKind"}</br>
-								{=recGetStr rec "complexity"}
-								{=recGetStr rec "complexityElems"}
+								<div>{=recGetStr rec "tourismKind"}</div>
+								<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
 							</td>
 							<td>{=recGet rec "pohodRegion"}</td>
 							<td>{=if {=recGet rec "chiefNum"} == {=recGet tourist "num"} "Руков." else "Участ."}</td>
-							<td>{=recGet rec "organization"} {=recGet rec "partyRegion"}</td>
 							<td>
-								{=recGetStr rec "progress"}</br>
-								{=recGetStr rec "claimState"}
+								<div>{=recGet rec "organization"}</div>
+								<div>{=recGet rec "partyRegion"}</div>
+							</td>
+							<td>
+								<div>{=recGetStr rec "progress"}</div>
+								<div>{=recGetStr rec "claimState"}</div>
 							</td>
 						</tr>
 						<tr>
-							<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+							<td class="{=cls 'routeCell'}"
+								colspan="100"
+								>Маршрут: {=recGet rec 'route'}</td>
 						</tr>
 					*}}
 					</tbody>

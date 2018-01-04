@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.PohodList.Navigation import PohodListNavigation;
-from mkk.Helpers import DateRangePrinter;
+from mkk.Helpers import RusDateFormat;
 def PohodList {=
 	def.kv
 		instanceName: 'pohodList'
@@ -57,12 +57,16 @@ def PohodList {=
 									{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
 									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
 										title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
-										>{=if isBookNumSet {%recGet rec "mkkCode"; str ' '; recGet rec "bookNum"} else "???"}</a>
+										>{=if isBookNumSet
+											{*<div class="text-nowrap">{=recGet rec "mkkCode"}</div>
+											<div class="text-nowrap">{=recGet rec "bookNum"}</div>*}
+											else "???"
+										}</a>
 								</td>
-								<td>{=DateRangePrinter
-									begin: {=recGet rec "beginDate"}
-									end: {=recGet rec "finishDate"}
-								}</td>
+								<td>
+									<div class="text-nowrap">{=RusDateFormat {=recGet rec "beginDate"} }</div>
+									<div class="text-nowrap">{=RusDateFormat {=recGet rec "finishDate"} }</div>
+								</td>
 								<td>
 									<div>{=recGetStr rec "tourismKind"}</div>
 									<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
@@ -110,7 +114,7 @@ def PohodList {=
 										</ul>
 									</td>
 								*} else {*
-									<td class="{=cls 'routeCell'}" colspan="100">{=recGet rec 'route'}</td>
+									<td class="{=cls 'routeCell'}" colspan="100">Маршрут: {=recGet rec 'route'}</td>
 								*}}
 							</tr>
 						*}}

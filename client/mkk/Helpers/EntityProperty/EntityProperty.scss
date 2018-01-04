@@ -1,0 +1,14 @@
+.mkk-EntityProperty {
+	&.e-wideProp,
+	&.e-prop {
+		border-bottom: 1px solid #BECDA0;
+	}
+	&.e-widePropValue,
+	&.e-propValue {
+		color: #006400;
+		font-weight: bold;
+	}
+	&.e-wideProp {
+		padding: 0.75rem 0;
+	}
+}

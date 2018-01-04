@@ -1,18 +1,19 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.Pagination import Pagination;
 def TouristList {=
 	def.kv
 		moduleName: 'mkk/TouristList/TouristList'
 		instanceName: 'touristList'
-		cssBaseClass: "mkk-TouristList";
+		cssBaseClass: 'mkk-TouristList';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Туристы</h2>
 		<form method="post">
-			<div class="e-filter t-show_tourist form-inline">
+			<div class="{=cls 'filter'} form-inline form-group">
 				<label>
-					<span>Фамилия И. О.</span>
+					<span class="mr-2">Фамилия И. О.</span>
 					<input type="text"
 						name="familyName"
 						class="form-control"
@@ -35,8 +36,8 @@ def TouristList {=
 				</label>
 				<button type="submit" name="act" class="btn btn-primary">Найти</button>
 			</div>
-			<div class="e-table_bar t-show_tourist row">
-				<div class="{=cls 'pagination'} col-md-6">
+			<div class="{=cls 'tableBar'} row">
+				<div class="{=cls 'pagination'} col-md-6 form-group">
 					{=Pagination
 						formField: 'offset'
 						offset: nav.offset
@@ -44,7 +45,7 @@ def TouristList {=
 					}
 				</div>
 				{=if isAuthorized {*
-				<div class="col-md-6" style="text-align: right;">
+				<div class="col-md-6 form-group" style="text-align: right;">
 					<a href="{{vpaths.siteDynamic}}tourist/edit"
 						class="btn btn-primary"
 						>Добавить туриста</a>
@@ -77,11 +78,7 @@ def TouristList {=
 						{=if isAuthorized {*
 							<td>{=recGet it "num"}</td>
 						*}}
-							<td>
-								{=recGet it "familyName"}
-								{=recGet it "givenName"}
-								{=recGet it "patronymic"}
-							</td>
+							<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
 							<td>
 								<a href="/dyn/tourist/experience?key={=recGet it 'num'}"
 									>{{ {=recGet it "experience" } or "???"}}</a>

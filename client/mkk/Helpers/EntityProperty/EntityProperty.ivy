@@ -1,0 +1,27 @@
+expr {=
+from fir.controls.utils import cls;
+def EntityProperty {=
+	def.kv
+		instanceName: 'entityProperty'
+		moduleName: 'mkk/Helpers/EntityProperty/EntityProperty'
+		cssBaseClass: 'mkk-EntityProperty'
+		title: null
+		value: null
+		isWide: false;
+	def.body {=
+		if not{=empty value} {*
+		<div class="{=cls {=if isWide 'wideProp' else 'prop'} } row" data-fir-module="{{moduleName}}">
+			<label
+				class="{=cls {=if isWide 'widePropCaption' else 'propCaption'} } {=if isWide 'col-md-12' else 'col-md-4'}"
+				>{{title}}</label>
+			<div class="{=cls {=if isWide 'widePropValue' else 'propValue'} } {=if isWide 'col-md-12' else 'col-md-8'}">
+				<span
+					class="{=cls {=if isWide 'widePropValueText' else 'propValueText'} }"
+					>{{value}}</span>
+			</div>
+		</div>
+		*}
+	}
+};
+expr undef;
+};

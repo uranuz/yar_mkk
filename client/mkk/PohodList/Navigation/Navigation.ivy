@@ -41,7 +41,7 @@ def PohodListNavigation {=
 							{key: 'progress', title: 'Прохождение'},
 							{key: 'claimState', title: 'Заявка'}
 						] {*
-						<span class="{=cls 'enumFilter'} col-md col-sm-6 mb-2">
+						<span class="{=cls 'enumFilter'} col-md-3 col-sm-6 pr-2 mb-2">
 							{=CheckBoxList
 								instanceName: item.key
 								items: {=at pohodEnums item.key}

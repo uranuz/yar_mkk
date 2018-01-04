@@ -32,5 +32,16 @@ def DateRangePrinter {=
 		}
 	}
 };
+def RusDateFormat {=
+	def.pos
+		date;
+	def.body {%
+		if not{=empty date} {%
+			dtGet date 'day'; expr '.';
+			dtGet date 'month'; expr '.';
+			dtGet date 'year';
+		}
+	}
+};
 expr undef;
 }
