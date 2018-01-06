@@ -39,6 +39,9 @@ void main(string[] args)
 		return `bin/mkk_site_` ~ confName;
 	}).array;
 
+	// Добавляем скрипт дампирования БД
+	toRemove ~= `dump_databases.py`;
+
 	foreach( suffix; toRemove )
 	{
 		string fullName = buildNormalizedPath(siteRoot, suffix);
