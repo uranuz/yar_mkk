@@ -96,7 +96,7 @@ def remove_local_extra_files(dir_name, num_of_files):
 		
 
 import subprocess
-pg_dump_path = '/usr/local/postgresql/bin/pg_dump'
+pg_dump_path = 'pg_dump'
 
 def make_pg_dump(dbname, file_name, host='127.0.0.1', username='postgres'):
 	subprocess.call([pg_dump_path, '--host', host, '--user', username, '--clean', '--format', 't', '--file', file_name, dbname])
