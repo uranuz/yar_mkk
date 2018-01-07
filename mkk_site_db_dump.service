@@ -3,7 +3,7 @@ Description=Backup of yar-mkk.ru site databases
 
 [Service]
 Type=simple
-ExecStart=/home/yar_mkk/sites/dump_databases.py
+ExecStart=/home/yar_mkk/sites/mkk_site/dump_databases.py
 
 [Install]
 WantedBy=multi-user.target
