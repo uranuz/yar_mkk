@@ -2,7 +2,7 @@
 Description=Execute backup of yar-mkk.ru databases once a day
 
 [Timer]
-OnCalendar=*-*-* 15:15:00
+OnCalendar=*-*-* 16:48:00
 Unit=mkk_site_db_dump.service
 
 [Install]
