@@ -7,7 +7,7 @@ import webtank.common.optional: Optional, Undefable;
 struct DocumentListFilter
 {
 	@DBName("name") string name; // Фильтр по названию документа
-	Undefable!(size_t[]) nums; // Фильтр по списку идентификаторов документов
+	Optional!(size_t[]) nums; // Фильтр по списку идентификаторов документов
 }
 
 struct DocumentDataToWrite
