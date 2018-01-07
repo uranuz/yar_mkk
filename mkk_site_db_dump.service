@@ -4,6 +4,8 @@ Description=Backup of yar-mkk.ru site databases
 [Service]
 Type=simple
 ExecStart=/home/yar_mkk/sites/mkk_site/dump_databases.py
+User=yar_mkk
+Group=yar_mkk
 
 [Install]
 WantedBy=multi-user.target
