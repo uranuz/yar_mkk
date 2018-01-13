@@ -62,9 +62,9 @@ def TouristList {=
 						{=
 							var fieldNames: {=
 								if isAuthorized
-									["№", "Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий", "Изм"]
+									["№", "Имя, дата рожд.", "Опыт", "Спорт. разряд, cуд. категория", "Комментарий", "Изм"]
 								else
-									["Имя, дата рожд.", "Опыт", "Контакты", "Спорт. разряд, cуд. категория", "Комментарий"]
+									["Имя, дата рожд.", "Опыт", "Спорт. разряд, cуд. категория", "Комментарий"]
 							};
 							repeat title in fieldNames {*<th>{{title}}</th>*}
 						}
@@ -82,10 +82,6 @@ def TouristList {=
 							<td>
 								<a href="/dyn/tourist/experience?key={=recGet it 'num'}"
 									>{{ {=recGet it "experience" } or "???"}}</a>
-							</td>
-							<td>
-								<div>{=recGet it "phone"}</div>
-								<div>{=recGet it "email"}</div>
 							</td>
 							<td>
 								<div>{=recGetStr it "sportsCategory"}</div>
