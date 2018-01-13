@@ -1,6 +1,7 @@
 define('mkk/PohodList/PartyInfo/PartyInfo', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/FilteredUpdateableDialog'
+	'mkk/Helpers/FilteredUpdateableDialog',
+	'mkk/TouristPlainList/TouristPlainList'
 ], function(FirControl, FilteredUpdateableDialog) {
 	__extends(PartyInfo, FirControl);
 
