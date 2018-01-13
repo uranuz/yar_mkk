@@ -11,16 +11,32 @@ def TouristSearchArea {=
 	<!-- Диалог поиска туристов -->
 	<div class="{=cls 'block'}" title="Поиск туристов" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<div class="{=cls 'filterItem'}">
-			<label>Имя
-				<input type="text" placeholder="Петечкин" class="{=cls 'familyFilter'}">
+		<div class="{=cls 'filterItem'} form-inline">
+			<label>
+				<span class="mr-2">Имя</span>
+				<input type="text"
+					placeholder="Петечкин"
+					class="{=cls 'familyFilter'} form-control">
 			</label>
-			<input type="text" placeholder="В"  size="1"  maxlength="1" class="{=cls 'nameFilter'}">
-			<input type="text" placeholder="И"  size="1"  maxlength="1" class="{=cls 'patronymicFilter'}">
+			<input type="text"
+				placeholder="В"
+				size="1"
+				maxlength="1"
+				class="{=cls 'nameFilter'} form-control">
+			<input type="text"
+				placeholder="И"
+				size="1"
+				maxlength="1"
+				class="{=cls 'patronymicFilter'} form-control">
 		</div>
-		<div class="{=cls 'filterItem'}">
-			<label>Год рожд.
-				<input type="text" placeholder="1812"  size="4"  maxlength="4" class="{=cls 'yearFilter'}">
+		<div class="{=cls 'filterItem'} form-inline">
+			<label>
+				<span class="mr-2">Год рожд.</span>
+				<input type="text"
+					placeholder="1812"
+					size="4"
+					maxlength="4"
+					class="{=cls 'yearFilter'} form-control">
 			</label>
 		</div>
 
@@ -28,15 +44,27 @@ def TouristSearchArea {=
 			<legend>Адрес</legend>
 			<div class="{=cls 'addrElementItem'}">
 				<label class="{=cls 'addrElementLabel'}">Область</label>
-				<input type="text" placeholder="Ярославская" size="15" maxlength="15" class="{=cls 'regionFilter e-addrElementFilter'}">
+				<input type="text"
+					placeholder="Ярославская"
+					size="15"
+					maxlength="15"
+					class="{=cls 'regionFilter e-addrElementFilter'} form-control">
 			</div>
 			<div class="{=cls 'addrElementItem'}">
 				<label class="{=cls 'addrElementLabel'}">Нас. пункт</label>
-				<input type="text" placeholder="Рыбинск" size="15" maxlength="15" class="{=cls 'cityFilter e-addrElementFilter'}">
+				<input type="text"
+					placeholder="Рыбинск"
+					size="15"
+					maxlength="15"
+					class="{=cls 'cityFilter e-addrElementFilter'} form-control">
 			</div>
 			<div class="{=cls 'addrElementItem'}">
 				<label class="{=cls 'addrElementLabel'}">Улица</label>
-				<input type="text" placeholder="Строителей" size="15" maxlength="15" class="{=cls 'streetFilter e-addrElementFilter'}">
+				<input type="text"
+					placeholder="Строителей"
+					size="15"
+					maxlength="15"
+					class="{=cls 'streetFilter e-addrElementFilter'} form-control">
 			</div>
 		</fieldset>
 		<div style='clear: both;'></div>

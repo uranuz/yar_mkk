@@ -37,7 +37,7 @@ def TouristList {=
 				<button type="submit" name="act" class="btn btn-primary">Найти</button>
 			</div>
 			<div class="{=cls 'tableBar'} row">
-				<div class="{=cls 'pagination'} col-md-6 form-group">
+				<div class="{=cls 'pagination'} col-auto form-group">
 					{=Pagination
 						formField: 'offset'
 						offset: nav.offset
@@ -45,7 +45,7 @@ def TouristList {=
 					}
 				</div>
 				{=if isAuthorized {*
-				<div class="col-md-6 form-group" style="text-align: right;">
+				<div class="col form-group text-right">
 					<a href="{{vpaths.siteDynamic}}tourist/edit"
 						class="btn btn-primary"
 						>Добавить туриста</a>

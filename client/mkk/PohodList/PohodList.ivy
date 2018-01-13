@@ -1,6 +1,7 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
 from mkk.PohodList.Navigation import PohodListNavigation;
+from mkk.PohodList.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
 def PohodList {=
 	def.kv
@@ -16,7 +17,7 @@ def PohodList {=
 				filter: filter
 				nav: pohodNav
 				paginationSideContent: {*
-				<div class="col" style="text-align: right;">
+				<div class="col text-right">
 					{=if isAuthorized and not isForPrint {*
 						<a href="{{vpaths.siteDynamic}}pohod/edit"
 							class="{=cls 'addPohodBtn'} btn btn-primary"
@@ -121,6 +122,9 @@ def PohodList {=
 					</tbody>
 				</table>
 			</div>
+		</div>
+		<div style="display: none;">
+			{=PartyInfo}
 		</div>
 	</div>
 	*}

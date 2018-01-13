@@ -9,7 +9,6 @@ define('mkk/DocumentList/DocumentList', [
 	function DocumentList(opts) {
 		FirControl.call(this, opts);
 		this._documentEdit = this.getChildInstanceByName('documentEdit');
-		this._documentEdit.subscribe('onDocumentLoaded', self._)
 		this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
 	}
 	return __mixinProto(DocumentList, {
@@ -22,7 +21,7 @@ define('mkk/DocumentList/DocumentList', [
 			this._elems('linkList').off('click');
 		},
 		_onAddDocBtn_click: function() {
-			this._documentEdit.openDialog(null);
+			this._documentEdit.openDialog();
 		},
 		_onLinkEditBtn_click: function(ev) {
 			var
@@ -31,7 +30,7 @@ define('mkk/DocumentList/DocumentList', [
 			if( !el || !el.length ) {
 				return;
 			}
-			this._documentEdit.openDialog(el.data('documentNum'));
+			this._documentEdit.openDialog({key: el.data('documentNum')});
 		},
 		_onDocumentChanged: function() {
 			location.reload();

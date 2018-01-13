@@ -1,19 +1,26 @@
 define('mkk/DocumentEdit/DocumentEdit', [
 	'fir/controls/FirControl',
+	'mkk/Helpers/FilteredUpdateableDialog',
 	'css!mkk/DocumentEdit/DocumentEdit'
-], function (FirControl, DatctrlHelpers) {
+], function (FirControl, FilteredUpdateableDialog) {
 	__extends(DocumentEdit, FirControl);
-	var allowedFilterParams = [
-		'key', 'name', 'link', 'action'
-	];
 
 	function DocumentEdit(opts) {
 		FirControl.call(this, opts);
 		this._filter = {};
 		this._firstLoad = true;
+		this.setDialogOptions({
+			modal: true,
+			minWidth: 500,
+			width: 850,
+			close: this._onDialogClose.bind(this)
+		});
+		this.setAllowedFilterParams([
+			'key', 'name', 'link', 'action'
+		]);
 		this._updateControlState(opts);
 	}
-	return __mixinProto(DocumentEdit, {
+	return __mixinProto(DocumentEdit, [FilteredUpdateableDialog, {
 		_subscribeInternal: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
@@ -26,45 +33,8 @@ define('mkk/DocumentEdit/DocumentEdit', [
 			this._saveBtn = this._elems('saveBtn');
 			this._isResultStep = opts.__scopeName__ === 'Results';
 		},
-		openDialog: function(num) {
-			this.setFilter({
-				key: num
-			});
-			this._reloadControl();
-		},
-		setFilter: function(filter) {
-			this._filter = filter;
-		},
 		_getRequestURI: function() {
 			return '/dyn/document/edit';
-		},
-		_getQueryParams: function(areaName) {
-			var params = [];
-			if( this._filter ) {
-				for( var i = 0; i < allowedFilterParams.length; ++i ) {
-					if( this._filter[ allowedFilterParams[i] ] ) {
-						params.push(allowedFilterParams[i] + '=' + this._filter[ allowedFilterParams[i] ]);
-					}
-				}
-			}
-			params.push('generalTemplate=no');
-			params.push('instanceName=documentEdit');
-			return params.join('&');
-		},
-		_onAfterLoad: function() {
-			var self = this;
-			FirControl.prototype._onAfterLoad.call(this, arguments);
-			if( !this._firstLoad ) {
-				self._container.dialog({
-					modal: true,
-					minWidth: 500,
-					width: 850,
-					close: self._onDialogClose.bind(this)
-				});
-			} else {
-				this._firstLoad = false;
-			}
-			this._notify('onDocumentLoaded');
 		},
 		_onSaveBtn_click: function() {
 			var	formData = this._docForm.serializeArray();
@@ -82,5 +52,5 @@ define('mkk/DocumentEdit/DocumentEdit', [
 				this._notify('documentChanged');
 			}
 		}
-	});
+	}]);
 });

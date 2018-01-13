@@ -9,28 +9,31 @@ def DocumentEdit {=
 		cssBaseClass: "mkk-DocumentEdit"
 		document: null;
 	def.body {*
-	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}" title="Редактирование ссылки на документ">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<h4>Редактирование ссылки</h4>
-		<form class="{=cls 'docForm'}">
+		<form class="{=cls 'docForm'} container-fluid">
 		{=if document {*
-			<label class="form-group">
+			<label class="row form-group">
 				<span>Название</span>
 				<input type="text"
 					class="{=cls 'name'} form-control"
 					name="name"
-					value="{=recGet document 'name'}"/>
+					value="{=recGet document 'name'}"
+					placeholder="Введите отображаемое название"/>
 			</label>
-			<label class="form-group">
+			<label class="row form-group">
 				<span>Ссылка</span>
 				<input type="text"
 					class="{=cls 'link'} form-control"
 					name="link"
-					value="{=recGet document 'link'}"/>
+					value="{=recGet document 'link'}"
+					placeholder="Введите адрес ссылки"/>
 			</label>
-			<button type="button"
-				class="{=cls 'saveBtn'} btn btn-primary"
-				>Сохранить</button>
+			<div class="row form-group">
+				<button type="button"
+					class="{=cls 'saveBtn'} btn btn-primary"
+					>Сохранить</button>
+			</div>
 		*} else {*
 			<h4>Не удалось найти документ с заданным идентификатором</h4>
 		*}}
