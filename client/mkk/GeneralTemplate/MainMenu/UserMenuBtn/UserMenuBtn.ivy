@@ -1,10 +1,10 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
-def MainMenuAuth {=
+def UserMenuBtn {=
 	def.kv
-		moduleName: 'mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
-		instanceName: 'mainMenuAuth'
-		cssBaseClass: 'mkk-MainMenuAuth'
+		moduleName: 'mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn'
+		instanceName: 'userMenuBtn'
+		cssBaseClass: 'mkk-UserMenuBtn'
 		isAuthenticated: null
 		userName: null
 		vpaths: undef

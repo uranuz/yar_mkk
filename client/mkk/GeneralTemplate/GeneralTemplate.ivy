@@ -1,6 +1,6 @@
 expr {*
 {=
-	from mkk.GeneralTemplate.MainMenuAuth import MainMenuAuth;
+	from mkk.GeneralTemplate.MainMenu import MainMenu;
 	from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
 	from fir.controls.utils import cls;
 	expr undef;
@@ -53,34 +53,14 @@ expr {*
 				<div id="site_title">
 					<h1>Маршрутно-квалификационная комиссия Ярославской области</h1>
 				</div>
-
+				{=MainMenu
+					isAuthenticated: isAuthenticated
+					userName: userName
+					vpaths: vpaths
+					authRedirectURI: authRedirectURI
+				}
 			</div>
 			<!-- #header -->
-			<div class="e-block mkk-MainMenu">
-				<div class="e-bg_left mkk-MainMenu"></div>
-				<div class="e-bg_right mkk-MainMenu"></div>
-				<div class="e-menu_bar mkk-MainMenu">
-					<ul class="e-menu mkk-MainMenu">
-						<li><a href="/" title="Главная страница сайта">Главная</a></li>
-						<li><a href="{{vpaths.siteDynamic}}pohod/list" title="Поиск и просмотр данных по зарегистрированным походам">Походы</a></li>
-						<li><a href="{{vpaths.siteDynamic}}tourist/list" title="Просмотр данных и поиск туристов">Туристы</a></li>
-						<li><a href="{{vpaths.siteDynamic}}moder/list" title="Список модераторов системы">Модераторы</a></li>
-						<li><a href="{{vpaths.siteDynamic}}document/list" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
-						<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
-						<li class="e-auth_item mkk-MainMenu">
-							{=MainMenuAuth
-								isAuthenticated: isAuthenticated
-								userName: userName
-								vpaths: vpaths
-								authRedirectURI: authRedirectURI
-							}
-						</li>
-					</ul>
-				</div>
-				<!-- e-menu_bar mkk-MainMenu -->
-				<div class="e-shadow_bottom mkk-MainMenu"></div>
-				<!-- e-shadow_bottom mkk-MainMenu -->
-			</div>
 		</div>
 		<!-- #top -->
 

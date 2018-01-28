@@ -1,10 +1,10 @@
-define('mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth', [
+define('mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn', [
 	'fir/controls/FirControl',
-	'css!mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth'
+	'css!mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn'
 ], function(FirControl) {
-	__extends(MainMenuAuth, FirControl);
+	__extends(UserMenuBtn, FirControl);
 
-	function MainMenuAuth(opts) {
+	function UserMenuBtn(opts) {
 		FirControl.call(this, opts);
 
 		var popdownBtn = this._elems('popdownBtn');
@@ -13,7 +13,7 @@ define('mkk/GeneralTemplate/MainMenuAuth/MainMenuAuth', [
 		popdownBtn.on('click', this.onPopdownBtnClick.bind(this));
 	}
 
-	return __mixinProto(MainMenuAuth, {
+	return __mixinProto(UserMenuBtn, {
 		onPopdownBtnClick: function(ev) {
 			var popdownMenu = this._elems('popdownMenu');
 			if( popdownMenu.is(':visible') ) {
