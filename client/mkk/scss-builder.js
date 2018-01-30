@@ -91,8 +91,7 @@ define(['require', './normalize'], function(req, normalize) {
 	scssAPI.load = function(name, req, load, _config) {
 		//store config
 		config = config || _config;
-		debugger;
-	
+
 		if (!siteRoot) {
 			siteRoot = path.resolve(
 				config.dir || path.dirname(typeof config.out === 'string' ? config.out : ''),
@@ -109,7 +108,7 @@ define(['require', './normalize'], function(req, normalize) {
 			file: fileUrl
 		});
 
-		scssBuffer[name] = normalize(String(result.css), fileUrl, siteRoot);
+		scssBuffer[name] = normalize(String(result.css), siteRoot, fileUrl);
 		
 		load();
 	};
@@ -129,8 +128,7 @@ define(['require', './normalize'], function(req, normalize) {
 		} else {
 			global._requirejsCssData.usedBy.scss = true;
 		}
-		
-		debugger;
+
 		if (config.name !== moduleName) {
 			write.asModule('css!' + moduleName, 'define(function(){})');
 		}
@@ -168,8 +166,7 @@ define(['require', './normalize'], function(req, normalize) {
 				"('" + escape(compress(css)) + "');\n"
 			);
 		}
-	
-		debugger;
+
 		//clear layer buffer for next layer
 		layerBuffer = [];
 	};
