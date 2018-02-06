@@ -50,6 +50,9 @@
 			"buildRequirements": [
 				"allowWarnings"
 			],
+			"subConfigurations": {
+				"webtank": "with_ivy"
+			},
 			"versions": ["devel"]
 		},
 		{

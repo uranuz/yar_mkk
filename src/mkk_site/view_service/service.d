@@ -17,7 +17,7 @@ class MKKViewService
 
 	import ivy;
 	import ivy.interpreter.data_node_render: renderDataNode, DataRenderType;
-	import mkk_site.view_service.ivy_custom;
+	import webtank.ivy;
 
 	import mkk_site.common.site_config;
 	import mkk_site.view_service.access_control;
