@@ -1,22 +1,5 @@
 module mkk_site.common.utils;
 
-string buildNormalPath(T...)(T args)
-{
-	import std.path: buildNormalizedPath;
-	import std.algorithm: endsWith;
-
-	string result = buildNormalizedPath(args);
-
-	static if( args.length > 0 )
-	{
-		//Возвращаем на место слэш в конце пути, который выкидывает стандартная библиотека
-		if( result.length > 1 && args[$-1].endsWith("/") && !result.endsWith("/") )
-			result ~= '/';
-	}
-
-	return result;
-}
-
 string[] parseExtraFileLink(string linkPair)
 {
 	import std.algorithm : splitter;
@@ -52,18 +35,4 @@ string getAuthRedirectURI(HTTPContext context)
 			~ context.request.headers.get("x-forwarded-proto", "http") ~ "://"
 			~ context.request.headers.get("x-forwarded-host", "")
 			~ context.request.uri.path ~ ( query.length ? "?" ~ query : "" );
-}
-
-auto makeErrorMsg(Throwable error)
-{
-	import std.typecons: Tuple;
-	import std.conv: text;
-	Tuple!(string, "userError", string, "details") res;
-	
-	string debugInfo = "\r\nIn module " ~ error.file ~ ":" ~ error.line.text ~ ". Traceback:\r\n" ~ error.info.text;
-	res.details = error.msg ~ debugInfo;
-	debug res.userError = res.details;
-	else res.userError = error.msg;
-
-	return res;
 }

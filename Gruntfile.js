@@ -94,8 +94,8 @@ module.exports = function (grunt) {
 			// Используем путь к для разворота, указанный у сервиса представления,
 			// чтобы каждый раз явно не указывать его в консоли
 			var config = {};
-			if( grunt.file.exists('mkk_site_config.json') ) {
-				config = grunt.file.readJSON('mkk_site_config.json');
+			if( grunt.file.exists('services_config.json') ) {
+				config = grunt.file.readJSON('services_config.json');
 			}
 			return expandTilde(config.services.yarMKKView.fileSystemPaths.siteRoot);
 		})(),

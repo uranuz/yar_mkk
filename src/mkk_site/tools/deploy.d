@@ -65,7 +65,7 @@ void main(string[] args)
 	}
 
 	string[] toCopy = [
-		"mkk_site_config.json"
+		"services_config.json"
 	];
 
 	// Копируем нужные файлы, если их еще нет
