@@ -75,7 +75,6 @@ static immutable basePohodFieldSuquery =`
 
 static immutable recentPohodQuery =
 `select ` ~ basePohodFieldSuquery ~ `
-	marchrut "route",
 	chef_coment "chiefComment"
 from pohod poh
 left join tourist chief
