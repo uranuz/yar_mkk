@@ -90,20 +90,20 @@ auto statData //начало основной функции////////////////
 			запрос_статистика ~= ` WHERE `;
 		if( b_kod )
 		{
-			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ select.kodMKK ~ `%'`;
+			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%'`;
 			if( b_org || b_terr )
 				запрос_статистика ~= ` AND `;
 		}
 
 		if( b_org )
 		{
-			запрос_статистика ~= ` organization ILIKE '%` ~ select.organization~ `%'`;
+			запрос_статистика ~= ` organization ILIKE '%` ~ PGEscapeStr(select.organization) ~ `%'`;
 			if( b_terr )
 				запрос_статистика ~= ` AND `;
 		}
 
 		if( b_terr )
-			запрос_статистика ~= ` region_group ILIKE '%` ~ select.territory ~ `%'`;
+			запрос_статистика ~= ` region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ORDER BY year ),`;
 
@@ -166,20 +166,20 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		SELECT CAST(unit AS integer) AS unit,vid,ks
 		FROM pohod
 		WHERE
-			(date_part('YEAR', begin_date)>=` ~ select.beginYear
+			(date_part('YEAR', begin_date)>=` ~ PGEscapeStr(select.beginYear)
 		~` AND
-			date_part('YEAR', begin_date)<=` ~ select.endYear ~`)`;
+			date_part('YEAR', begin_date)<=` ~ PGEscapeStr(select.endYear) ~`)`;
 		if( b_kod )
 			запрос_статистика ~= `
-			 AND  kod_mkk ILIKE '%` ~ select.kodMKK ~ `%' `;
+			 AND  kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%' `;
 
 		if( b_org )
 			запрос_статистика ~= `
-			  AND  organization ILIKE '%` ~ select.organization ~ `%'`;
+			  AND  organization ILIKE '%` ~ PGEscapeStr(select.organization) ~ `%'`;
 
 		if( b_terr )
 			запрос_статистика ~= `
-			  AND  region_group ILIKE '%` ~ select.territory ~ `%'`;
+			  AND  region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ) ,`;
 		
