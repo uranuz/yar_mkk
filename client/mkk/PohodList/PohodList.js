@@ -1,9 +1,9 @@
 define('mkk/PohodList/PohodList', [
 	'fir/controls/FirControl',
-	'fir/network/json_rpc',
+	'mkk/PohodList/PartyInfo/PartyInfo',
 	'mkk/PohodList/Navigation/Navigation',
 	'css!mkk/PohodList/PohodList'
-], function(FirControl, json_rpc) {
+], function(FirControl) {
 	__extends(PohodList, FirControl);
 
 	function PohodList(opts) {
@@ -11,6 +11,7 @@ define('mkk/PohodList/PohodList', [
 
 		this._elems("tableContentBody")
 			.on("click", this.onShowPartyBtn_click.bind(this));
+		this._partyInfo = this.getChildInstanceByName('partyInfo');
 	}
 	return __mixinProto(PohodList, {
 		onShowPartyBtn_click: function(ev) {
@@ -21,19 +22,10 @@ define('mkk/PohodList/PohodList', [
 				return;
 			}
 
-			$.ajax('/dyn/pohod/partyInfo?key=' + (+el.data("pohodNum")) + '&generalTemplate=no' , {
-				success: self.showPartyDialog.bind(self)
-			});
-		},
-		showPartyDialog: function(data) {
-			var
-				//Создаем контейнер для списка участников
-				touristList = $('<div id="gruppa" title="Участники похода"></div>');
-
-			//Вставка текста в слой списка участников
-			touristList.html(data)
-				.appendTo("body")
-				.dialog({ modal: true, width: 500 });
+			var pohodNum = parseInt(el.data("pohodNum"), 10)
+			if( !isNaN(pohodNum)) {
+				this._partyInfo.openDialog({key: pohodNum});
+			}
 		}
 	});
 });

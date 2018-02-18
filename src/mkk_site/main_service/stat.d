@@ -2,7 +2,6 @@ module mkk_site.main_service.stat;
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 import mkk_site.data_model.stat;
-import webtank.net.utils: PGEscapeStr;
 
 import std.conv, std.string, std.utf;
 import std.stdio;
@@ -98,7 +97,7 @@ auto statData //начало основной функции////////////////
 
 		if( b_org )
 		{
-			запрос_статистика ~= ` organization ILIKE '%` ~ PGEscapeStr(select.organization)~ `%'`;
+			запрос_статистика ~= ` organization ILIKE '%` ~ PGEscapeStr(select.organization) ~ `%'`;
 			if( b_terr )
 				запрос_статистика ~= ` AND `;
 		}
@@ -236,8 +235,6 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			SELECT*FROM st2 ORDER BY vid
 			`;
 	}
-	//import webtank.net.utils;
-	//запрос_статистика=PGEscapeStr(запрос_статистика);
 
 	//-----конец -запроса--"по КС"
 
@@ -355,7 +352,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	//конец--------матрица таблицы-------------
 
 	//  ----"csv"-----------
-
+  /++
   string csv_stat;
   csv_stat ~= "Данные по числу походов/ участников \n\r";
   
@@ -372,7 +369,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 			 }
 
-
+   ++/
 	//-----конец -"csv"-
 
 	
@@ -456,8 +453,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		}
 	}
 	//--конец------матрица графика--нули-----------
-   writeln(csv_stat);
-	//writeln(trans_graf_data);
+
 	//---------------------graf_data
 	JSONValue result;	
 	result[`tabl`]=tabl_data;

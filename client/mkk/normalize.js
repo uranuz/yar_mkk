@@ -67,11 +67,9 @@ define(function() {
     var toBaseProtocol = toBase.match(protocolRegEx);
     var fromBaseProtocol = fromBase.match(protocolRegEx);
     if (fromBaseProtocol && (!toBaseProtocol || toBaseProtocol[1] != fromBaseProtocol[1] || toBaseProtocol[2] != fromBaseProtocol[2])) {
-      debugger;
       return absoluteURI(uri, fromBase);
     }
     else {
-      debugger;
       return relativeURI(absoluteURI(uri, fromBase), toBase);
     }
   };
@@ -142,8 +140,7 @@ define(function() {
       source = source.substr(0, urlRegEx.lastIndex - url.length - quoteLen - 1) + newUrl + source.substr(urlRegEx.lastIndex - quoteLen - 1);
       urlRegEx.lastIndex = urlRegEx.lastIndex + (newUrl.length - url.length);
     }
-    
-    debugger;
+
     return source;
   };
   

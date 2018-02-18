@@ -7,7 +7,7 @@ private IDatabase _authDB;
 IDatabase getAuthDB() @property
 {
 	import webtank.db.postgresql: DBPostgreSQL;
-	import mkk_site.common.site_config: readServiceConfigFile, getServiceDatabases;
+	import webtank.net.service.config: readServiceConfigFile, getServiceDatabases;
 
 	if( _authDB is null )
 	{

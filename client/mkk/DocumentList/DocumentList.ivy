@@ -22,7 +22,7 @@ def DocumentList {=
 				}
 			</div>
 			{=if isAuthorized {*
-			<div class="col" style="text-align: right;">
+			<div class="col text-right">
 				<a href="javascript:void(0)"
 					class="{=cls 'addDocBtn'} btn btn-primary"
 					>Добавить документ</a>

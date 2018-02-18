@@ -53,7 +53,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			this._container.dialog({
 				modal: true,
 				minWidth: 500,
-				width: 850,
+				width: 1000,
 				resize: function() {
 					setTimeout(self._onDialog_resize.bind(self), 100);
 				}
@@ -64,7 +64,7 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 
 		_onDialog_resize: function() {
 			if( this._partyList && this._partyList.getLength() ) {
-				if( this._container.innerWidth() < 700 ) {
+				if( this._container.innerWidth() < 999 ) {
 					this._panelsArea.css("display", "block");
 					this._searchPanel.css("display", "block");
 					this._searchPanel.css("width", "100%");

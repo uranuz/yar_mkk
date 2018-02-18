@@ -27,13 +27,13 @@ JSONValue getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 
-	if( filter.nums.isNull )
+	if( filter.nums.isSet && filter.nums.length == 0 )
 	{
-		// Особый случай/костыль - список идентфикаторов передан, но он пуст (null или length == 0)
+		// Особый случай/костыль - список идентфикаторов передан, но он пуст (length == 0)
 		// при этом возвращаем только одну пустую запись по формату документа без похода в базу.
-		// Остальные фильтры в этом случае уже по боку.
+		// Остальные фильтры в этом случае уже не важны.
 		// Эта подпорка требуется для создания нового документа.
-		// Но если фильтра нет вовсе filter.nums.isUndef == true, то он просто не работает.
+		// Но если фильтра нет вовсе filter.nums.isNull == true, то он просто не работает.
 		auto rsWithOneItem = makeMemoryRecordSet(documentRecFormat);
 		rsWithOneItem.addItems(1); // Добавляем одну пустую запись для редактирования
 		nav.normalize(1);

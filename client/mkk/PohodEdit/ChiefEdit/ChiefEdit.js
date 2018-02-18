@@ -55,7 +55,7 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 				dlgTitle = 'Выбор руководителя';
 			}
 			this._searchBlock.activate(this._elems("searchBlock"));
-			this._container.dialog({modal: true, minWidth: 400, title: dlgTitle});
+			this._container.dialog({modal: true, minWidth: 500, title: dlgTitle});
 		},
 
 		closeDialog: function() {

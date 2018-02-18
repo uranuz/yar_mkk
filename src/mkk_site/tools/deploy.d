@@ -39,6 +39,9 @@ void main(string[] args)
 		return `bin/mkk_site_` ~ confName;
 	}).array;
 
+	// Добавляем скрипт дампирования БД
+	toRemove ~= `dump_databases.py`;
+
 	foreach( suffix; toRemove )
 	{
 		string fullName = buildNormalizedPath(siteRoot, suffix);
@@ -62,7 +65,7 @@ void main(string[] args)
 	}
 
 	string[] toCopy = [
-		"mkk_site_config.json"
+		"services_config.json"
 	];
 
 	// Копируем нужные файлы, если их еще нет

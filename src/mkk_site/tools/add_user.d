@@ -11,6 +11,7 @@ import std.uuid: randomUUID;
 import mkk_site.security.access_control: minLoginLength, minPasswordLength;
 import mkk_site.security.crypto: makePasswordHash, encodePasswordHash;
 import mkk_site.tools.auth_db: getAuthDB;
+import webtank.common.conv: fromPGTimestamp;
 
 void main(string[] progAgs) {
 	//Основной поток - поток управления потоками
@@ -79,24 +80,31 @@ void main(string[] progAgs) {
 	{	writeln("Ошибка: длина пароля меньше минимально допустимой (", minPasswordLength, " символов)!!!");
 		return;
 	}
-	
-	string pwSaltStr = randomUUID().toString();
-	DateTime regDateTime = cast(DateTime) Clock.currTime();
-	string regTimestampStr = regDateTime.toISOExtString();
-	
-	ubyte[] pwHash = makePasswordHash( password, pwSaltStr, regTimestampStr );
-	string pwHashStr = encodePasswordHash( pwHash );
-	
+
+	// Сначала устанавливаем общую информацию о пользователе,
+	// и заставляем БД саму установить дату регистрации, чтобы не иметь проблем с временными зонами
 	auto addUserResult = getAuthDB().query(
-		`insert into site_user ( login, name, user_group, email, pw_hash, pw_salt, reg_timestamp ) `
-		~ ` values( '` ~ login ~ `', '` ~ name ~ `', '` ~ group ~ `', '` 
-		~ email ~ `', '` ~ pwHashStr ~ `', '` ~ pwSaltStr ~ `', '` ~ regTimestampStr ~ `' ) `
-		~ ` returning 'user added'`
+		`insert into site_user ( login, name, user_group, email, reg_timestamp ) `
+		~ ` values( '` ~ login ~ `', '` ~ name ~ `', '` ~ group ~ `', '` ~ email ~ `', current_timestamp ) `
+		~ ` returning 'user added', num, reg_timestamp`
 	);
-	
+
 	if( addUserResult.recordCount != 1 || addUserResult.get(0, 0, null) != `user added` ) {
 		writeln( `При запросе на регистрацию пользователя произошла ошибка!` );
-	} else {
-		writeln( `Пользователь с логином "`, login, `" успешно зарегистрирован!` );
 	}
+
+	// Генерируем случайную соль для пароля, и используем дату регистрации из базы для сотворения хэша пароля
+	string pwSaltStr = randomUUID().toString();
+	DateTime regDateTime = fromPGTimestamp!DateTime(addUserResult.get(2, 0, null));
+
+	ubyte[] pwHash = makePasswordHash( password, pwSaltStr, regDateTime.toISOExtString() );
+	string pwHashStr = encodePasswordHash( pwHash );
+
+	// Прописываем хэш пароля в БД
+	getAuthDB().query(
+		`update site_user set pw_hash = '` ~ pwHashStr ~ `', pw_salt = '` ~ pwSaltStr ~ `' `
+		~ `where num = ` ~ addUserResult.get(1, 0, null)
+	);
+
+	writeln( `Пользователь с логином "`, login, `" успешно зарегистрирован!` );
 } 
