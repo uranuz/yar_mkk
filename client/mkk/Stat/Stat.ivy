@@ -44,7 +44,7 @@ def Document {=
 					</label>
 					<button type="button"  name="CSV" 
 						onclick="location.href='{{vpaths.siteDynamic}}tourist/list'"						
-													class="{=cls 'csvBtn'} btn btn-outline-success"
+													class="{=cls 'csvBtn'} btn btn-outline-success" style="display: none;"
 									>Печать  в CSV формат</button>
 				</div>
 				
