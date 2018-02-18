@@ -5,13 +5,15 @@ define('mkk/Stat/Stat', [
 	'mkk/Stat/flot/jquery.flot',
 	'mkk/Stat/flot/jquery.flot.time',*/
 	'css!mkk/Stat/Stat'
-], function (FirControl, Flot, FlotTime) {
+],
+ function (FirControl, Flot, FlotTime) {
 	__extends(Stat, FirControl);
 
 	function Stat(opts) {
 		FirControl.call(this, opts);
 		this._elems('byYearBtn').on('click', this.reloadPage);
 		this._elems('byComplexityBtn').on('click', this.reloadPage);
+		//this._elems('csvBtn').on('click', this.reloadPage);
 		this._opts = opts;
 		this._tooltipWindow = this._elems('plotTooltip');
 		this.doFlot();

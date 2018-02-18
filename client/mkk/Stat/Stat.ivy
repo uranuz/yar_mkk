@@ -32,15 +32,22 @@ def Document {=
 							{=if select.conduct == 0 {*checked*} }>
 						<span>по годам</span>
 					</label>
-					<label class="{=cls 'byYearBtn'}">
+					<label class="{=cls 'byComplexityBtn'}">
 						<input
 							type="radio"
 							name="conduct"
 							value=1
 							{= if select.conduct == 1 {*checked*} }/>
 						<span>по категориям сложности</span>
+
+						
 					</label>
+					<button type="button"  name="CSV" 
+						onclick="location.href='{{vpaths.siteDynamic}}tourist/list'"						
+													class="{=cls 'csvBtn'} btn btn-outline-success"
+									>Печать  в CSV формат</button>
 				</div>
+				
 			</fieldset>
 			<!--Фильтрация-->
 			<fieldset>

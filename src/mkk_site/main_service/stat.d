@@ -2,6 +2,7 @@ module mkk_site.main_service.stat;
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 import mkk_site.data_model.stat;
+import webtank.net.utils: PGEscapeStr;
 
 import std.conv, std.string, std.utf;
 import std.stdio;
@@ -42,7 +43,7 @@ auto statData //начало основной функции////////////////
 	//#############################################
 
 	if( !select.beginYear.length )
-		select.beginYear = "1992";
+		select.beginYear = "1960";
 	if( !select.endYear.length )
 		select.endYear = Clock.currTime().year.text;
 	
@@ -90,20 +91,20 @@ auto statData //начало основной функции////////////////
 			запрос_статистика ~= ` WHERE `;
 		if( b_kod )
 		{
-			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ select.kodMKK ~ `%'`;
+			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%'`;
 			if( b_org || b_terr )
 				запрос_статистика ~= ` AND `;
 		}
 
 		if( b_org )
 		{
-			запрос_статистика ~= ` organization ILIKE '%` ~ select.organization~ `%'`;
+			запрос_статистика ~= ` organization ILIKE '%` ~ PGEscapeStr(select.organization)~ `%'`;
 			if( b_terr )
 				запрос_статистика ~= ` AND `;
 		}
 
 		if( b_terr )
-			запрос_статистика ~= ` region_group ILIKE '%` ~ select.territory ~ `%'`;
+			запрос_статистика ~= ` region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ORDER BY year ),`;
 
@@ -166,20 +167,20 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		SELECT CAST(unit AS integer) AS unit,vid,ks
 		FROM pohod
 		WHERE
-			(date_part('YEAR', begin_date)>=` ~ select.beginYear
+			(date_part('YEAR', begin_date)>=` ~ PGEscapeStr(select.beginYear)
 		~` AND
-			date_part('YEAR', begin_date)<=` ~ select.endYear ~`)`;
+			date_part('YEAR', begin_date)<=` ~ PGEscapeStr(select.endYear) ~`)`;
 		if( b_kod )
 			запрос_статистика ~= `
-			 AND  kod_mkk ILIKE '%` ~ select.kodMKK ~ `%' `;
+			 AND  kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%' `;
 
 		if( b_org )
 			запрос_статистика ~= `
-			  AND  organization ILIKE '%` ~ select.organization ~ `%'`;
+			  AND  organization ILIKE '%` ~ PGEscapeStr(select.organization) ~ `%'`;
 
 		if( b_terr )
 			запрос_статистика ~= `
-			  AND  region_group ILIKE '%` ~ select.territory ~ `%'`;
+			  AND  region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ) ,`;
 		
@@ -235,6 +236,8 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			SELECT*FROM st2 ORDER BY vid
 			`;
 	}
+	//import webtank.net.utils;
+	//запрос_статистика=PGEscapeStr(запрос_статистика);
 
 	//-----конец -запроса--"по КС"
 
@@ -351,6 +354,29 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	}
 	//конец--------матрица таблицы-------------
 
+	//  ----"csv"-----------
+
+  string csv_stat;
+  csv_stat ~= "Данные по числу походов/ участников \n\r";
+  
+	if( select.conduct == 0 )  csv_stat ~="по годам \n\r";	
+	if( select.conduct == 1 ) csv_stat ~="по КС \n\r";
+	foreach( str; tabl_data )
+			 {
+				 foreach( el; str )  csv_stat ~= el.to!string~',';
+				 csv_stat ~= "\n\r";
+				 //writeln(col.to!string);
+
+				 
+
+
+			 }
+
+
+	//-----конец -"csv"-
+
+	
+
 	//--------матрица графика-------------
 	
 	string[][] graf_data;
@@ -391,6 +417,9 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	{
 		trans_graf_data = transposed(graf_data[1..compressed_data.length-1]).map!( (a) => a.array ).array;
 		// отбросить первую строку и ТРАНСПОНИРОВАТЬ МАТРИЦУ
+		if(!trans_graf_data.length) trans_graf_data ~=[["1992"], ["0"], ["0"], ["0"], ["0"],
+		 ["0"], ["0"], ["0"], ["0"], ["0"], ["0"], ["0"]];
+
 	}
 
 	if(select.conduct == 1)
@@ -427,7 +456,8 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		}
 	}
 	//--конец------матрица графика--нули-----------
-
+   writeln(csv_stat);
+	//writeln(trans_graf_data);
 	//---------------------graf_data
 	JSONValue result;	
 	result[`tabl`]=tabl_data;
