@@ -50,6 +50,28 @@
 
 				"siteIvyTemplates": "res/templates/"
 			}
+		},
+		"yarMKKHistory": {
+			"URI": "//localhost/",
+			"endpoints": {
+				"default": "http://localhost/history/jsonrpc/"
+			},
+			"virtualPaths": {
+				"siteRoot": "/",
+				"siteHistoryJSON_RPC": "history/jsonrpc/"
+			},
+			"fileSystemPaths": {
+				"siteRoot": "~/sites/mkk_site/",
+				"siteLogs": "logs/"
+			},
+			"databases": {
+				"historyDB": {
+					"host": "127.0.0.1",
+					"dbname": "mkk_site_history",
+					"username": "postgres",
+					"password": "postgres"
+				}
+			}
 		}
 	}
 }

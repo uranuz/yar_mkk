@@ -57,6 +57,27 @@
 			"versions": ["devel"]
 		},
 		{
+			"name": "history_service",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"libs-posix": [
+				"pq"
+			],
+			"sourcePaths": [
+				"src/mkk_site/common",
+				"src/mkk_site/security/common",
+				"src/mkk_site/history/common",
+				"src/mkk_site/history/service"
+			],
+			"dependencies": {
+				"webtank": ">=0.0.0"
+			},
+			"buildRequirements": [
+				"allowWarnings"
+			],
+			"versions": ["devel"]
+		},
+		{
 			"name": "add_user",
 			"targetType": "executable",
 			"targetPath": "bin",
