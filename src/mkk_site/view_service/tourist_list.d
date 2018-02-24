@@ -4,8 +4,8 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderTouristList)("/dyn/tourist/list");
-	Service.pageRouter.join!(touristPlainList)("/dyn/tourist/plainList");
+	ViewService.pageRouter.join!(renderTouristList)("/dyn/tourist/list");
+	ViewService.pageRouter.join!(touristPlainList)("/dyn/tourist/plainList");
 }
 
 import ivy;
@@ -45,7 +45,7 @@ TDataNode renderTouristList(HTTPContext ctx)
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.TouristList").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.TouristList").run(dataDict);
 }
 
 TDataNode touristPlainList(HTTPContext ctx)
@@ -79,6 +79,6 @@ TDataNode touristPlainList(HTTPContext ctx)
 		dataDict["instanceName"] = queryForm["instanceName"];
 	}
 
-	return Service.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict);
 }
 

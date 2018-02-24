@@ -15,7 +15,7 @@ import webtank.common.std_json.to: toStdJSON;
 import webtank.common.optional: Undefable, Optional;
 
 shared static this() {
-	Service.pageRouter.join!(touristEditController)("/dyn/tourist/edit");
+	ViewService.pageRouter.join!(touristEditController)("/dyn/tourist/edit");
 }
 
 TDataNode touristEditController(HTTPContext ctx)
@@ -56,7 +56,7 @@ TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool is
 	dataDict["tourist"] = mainServiceCall(`tourist.read`, ctx, JSONValue([`touristNum`: touristNum.toStdJSON()]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.TouristEdit").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.TouristEdit").run(dataDict);
 }
 
 TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
@@ -89,5 +89,5 @@ TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAutho
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return Service.templateCache.getByModuleName("mkk.TouristEdit.Results").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.TouristEdit.Results").run(dataDict);
 }

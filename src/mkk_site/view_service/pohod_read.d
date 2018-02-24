@@ -4,7 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderPohodRead)("/dyn/pohod/read");
+	ViewService.pageRouter.join!(renderPohodRead)("/dyn/pohod/read");
 }
 
 import ivy;
@@ -48,5 +48,5 @@ TDataNode renderPohodRead(HTTPContext ctx)
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.PohodRead").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodRead").run(dataDict);
 }

@@ -10,8 +10,8 @@ import mkk_site.data_model.tourist_list;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(touristList)(`tourist.list`);
-	Service.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
+	MainService.JSON_RPCRouter.join!(touristList)(`tourist.list`);
+	MainService.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
 }
 
 import std.typecons: tuple;

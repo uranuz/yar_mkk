@@ -3,7 +3,7 @@ import mkk_site.main_service.devkit;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(moderList)(`moder.list`);
+	MainService.JSON_RPCRouter.join!(moderList)(`moder.list`);
 }
 
 /// Формат записи для списка модераторов сайта

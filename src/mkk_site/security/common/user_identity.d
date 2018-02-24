@@ -1,7 +1,7 @@
-module mkk_site.common.user_identity;
+module mkk_site.security.common.user_identity;
 
 import webtank.security.access_control;
-public import mkk_site.common.session_id;
+public import mkk_site.security.common.session_id;
 
 class MKKUserIdentity: AnonymousUser
 {

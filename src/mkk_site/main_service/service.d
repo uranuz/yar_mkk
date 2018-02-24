@@ -1,10 +1,11 @@
 module mkk_site.main_service.service;
 
-import webtank.net.service.main_service: MainService;
+import webtank.net.service.json_rpc_service: JSON_RPCService;
+import mkk_site.common.service;
 
-class MKKMainService: MainService
+class MKKMainService: JSON_RPCService
 {
-	import mkk_site.security.access_control: MKKMainAccessController;
+	import mkk_site.security.core.access_control: MKKMainAccessController;
 	import std.functional: toDelegate;
 
 	this(string serviceName)
@@ -23,10 +24,11 @@ class MKKMainService: MainService
 }
 
 // Возвращает ссылку на глобальный экземпляр основного сервиса MKK
-MKKMainService Service() @property
+MKKMainService MainService() @property
 {
-	assert( _mkk_main_service, `MKK main service is not initialized!` );
-	return _mkk_main_service;
+	MKKMainService srv = cast(MKKMainService) Service();
+	assert( srv, `View service is null` );
+	return srv;
 }
 
 // Метод для получения экземпляра объекта подключения к основной БД сервиса МКК
@@ -43,11 +45,8 @@ IDatabase getAuthDB() @property
 	return _authDB;
 }
 
-// Service is process singleton object
-private __gshared MKKMainService _mkk_main_service;
-
 shared static this() {
-	_mkk_main_service = new MKKMainService("yarMKKMain");
+	Service(new MKKMainService("yarMKKMain"));
 }
 
 import webtank.db.database: IDatabase;
@@ -62,6 +61,6 @@ static this()
 	import webtank.net.service.config: getServiceDatabases;
 	import webtank.db.postgresql: DBPostgreSQL;
 
-	_commonDB = new DBPostgreSQL(Service.dbConnStrings["commonDB"], &Service.databaseLogerMethod);
-	_authDB = new DBPostgreSQL(Service.dbConnStrings["authDB"], &Service.databaseLogerMethod);
+	_commonDB = new DBPostgreSQL(MainService.dbConnStrings["commonDB"], &MainService.databaseLogerMethod);
+	_authDB = new DBPostgreSQL(MainService.dbConnStrings["authDB"], &MainService.databaseLogerMethod);
 }

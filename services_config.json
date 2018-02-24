@@ -3,7 +3,7 @@
 		"yarMKKMain": {
 			"URI": "//localhost/",
 			"endpoints": {
-				"jsonrpc": "//localhost/jsonrpc/"
+				"default": "http://localhost/jsonrpc/"
 			},
 			"databases": {
 				"commonDB": {
@@ -25,11 +25,7 @@
 			},
 			"virtualPaths": {
 				"siteRoot": "/",
-				"siteJSON_RPC": "jsonrpc/",
-				"siteDynamic": "dyn/",
-				"sitePublic": "pub/",
-
-				"siteAuthPage": "dyn/auth"
+				"siteJSON_RPC": "jsonrpc/"
 			}
 		},
 		"yarMKKView": {

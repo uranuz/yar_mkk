@@ -4,7 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderAuth)("/dyn/auth");
+	ViewService.pageRouter.join!(renderAuth)("/dyn/auth");
 }
 
 import ivy;
@@ -75,5 +75,5 @@ TDataNode renderAuth(HTTPContext context)
 	dataDict[`isAuthFailed`] = isAuthFailed;
 	dataDict[`isAuthenticated`] = !isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies );
 
-	return Service.templateCache.getByModuleName("mkk.Auth").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.Auth").run(dataDict);
 }

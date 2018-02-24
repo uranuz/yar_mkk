@@ -5,9 +5,9 @@ import mkk_site.view_service.utils;
 import mkk_site.data_model.pohod_list;
 
 shared static this() {
-	Service.pageRouter.join!(renderPohodList)("/dyn/pohod/list");
-	Service.pageRouter.join!(renderPartyInfo)("/dyn/pohod/partyInfo");
-	Service.pageRouter.join!(renderExtraFileLinks)("/dyn/pohod/extraFileLinks");
+	ViewService.pageRouter.join!(renderPohodList)("/dyn/pohod/list");
+	ViewService.pageRouter.join!(renderPartyInfo)("/dyn/pohod/partyInfo");
+	ViewService.pageRouter.join!(renderExtraFileLinks)("/dyn/pohod/extraFileLinks");
 }
 
 import ivy;
@@ -53,7 +53,7 @@ TDataNode renderPohodList(HTTPContext ctx)
 	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
-	return Service.templateCache.getByModuleName("mkk.PohodList").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodList").run(dataDict);
 }
 
 TDataNode renderPartyInfo(HTTPContext ctx)
@@ -63,7 +63,7 @@ TDataNode renderPartyInfo(HTTPContext ctx)
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
 	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 
-	return Service.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict);
 }
 
 TDataNode renderExtraFileLinks(HTTPContext ctx)
@@ -109,5 +109,5 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 	}
 	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
 
-	return Service.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict);
 }

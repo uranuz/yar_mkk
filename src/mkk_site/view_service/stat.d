@@ -3,7 +3,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderStat)("/dyn/stat");
+	ViewService.pageRouter.join!(renderStat)("/dyn/stat");
 }
 
 
@@ -35,5 +35,5 @@ TDataNode renderStat(HTTPContext ctx)
 	];	
 	//lданные для передачи в шаблон
 
-	return Service.templateCache.getByModuleName("mkk.Stat").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.Stat").run(dataDict);
 }

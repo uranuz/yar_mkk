@@ -1,15 +1,18 @@
-module mkk_site.view_service.access_control;
+module mkk_site.security.common.access_control_client;
 
 import webtank.security.access_control;
 import webtank.net.http.context: HTTPContext;
+import webtank.net.utils;
+import webtank.net.service.endpoint;
 
-import mkk_site.common.user_identity;
-import mkk_site.view_service.service: Service;
-import mkk_site.view_service.utils;
+import mkk_site.security.common.user_identity;
+import mkk_site.common.service;
+import webtank.net.std_json_rpc_client;
 
 ///Класс управляет выдачей билетов для доступа
-class MKKViewAccessController: IAccessController
+class MKKAccessControlClient: IAccessController
 {
+	this() {}
 public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
@@ -27,7 +30,7 @@ public:
 	{
 		import std.json;
 		import std.base64: Base64URL;
-		auto jUserInfo = mainServiceCall!(JSONValue)(`auth.baseUserInfo`, context);
+		auto jUserInfo = endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`, context);
 
 		assert(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
 

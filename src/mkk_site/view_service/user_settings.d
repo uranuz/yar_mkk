@@ -4,7 +4,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderModerList)("/dyn/user_settings");
+	ViewService.pageRouter.join!(renderUserSettings)("/dyn/user_settings");
 }
 
 import ivy;
@@ -12,7 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-TDataNode renderModerList(HTTPContext ctx)
+TDataNode renderUserSettings(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 
@@ -33,5 +33,5 @@ TDataNode renderModerList(HTTPContext ctx)
 		dataDict[`pwChangeMessage`] = ex.msg;
 	}
 
-	return Service.templateCache.getByModuleName("mkk.UserSettings").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.UserSettings").run(dataDict);
 }

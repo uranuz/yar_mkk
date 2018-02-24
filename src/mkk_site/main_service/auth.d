@@ -3,23 +3,24 @@ module mkk_site.main_service.auth;
 import webtank.net.http.context: HTTPContext;
 
 import mkk_site.main_service.service;
+import mkk_site.security.common.exception: SecurityException;
 
 shared static this()
 {
-	Service.JSON_RPCRouter
+	MainService.JSON_RPCRouter
 		.join!(baseUserInfo)(`auth.baseUserInfo`)
 		.join!(authByPassword)(`auth.authByPassword`)
 		.join!(logout)(`auth.logout`);
 }
 
-import mkk_site.security.access_control;
+import mkk_site.security.core.access_control;
 
 /// Получить базовую информацию о пользователе по идентификатору сессии
 auto baseUserInfo(HTTPContext context)
 {
 	import std.json: JSONValue;
 	import std.conv: to, ConvException;
-	auto userIdentity = Service.accessController.authenticate(context);
+	auto userIdentity = MainService.accessController.authenticate(context);
 
 	JSONValue result;
 	result[`login`] = userIdentity.id;
@@ -43,7 +44,7 @@ string authByPassword(HTTPContext context, string login, string password)
 {
 	import std.base64: Base64URL;
 	
-	auto userIdentity = cast(MKKUserIdentity) Service.accessController.authenticateByPassword(
+	auto userIdentity = cast(MKKUserIdentity) MainService.accessController.authenticateByPassword(
 		login,
 		password,
 		context.request.headers[`x-real-ip`],
@@ -67,5 +68,5 @@ string authByPassword(HTTPContext context, string login, string password)
 
 void logout(HTTPContext context)
 {
-	Service.accessController.logout(context.user);
+	MainService.accessController.logout(context.user);
 }

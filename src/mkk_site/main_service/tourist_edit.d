@@ -5,7 +5,7 @@ import mkk_site.data_model.tourist_edit;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(editTourist)(`tourist.edit`);
+	MainService.JSON_RPCRouter.join!(editTourist)(`tourist.edit`);
 }
 
 auto editTourist(

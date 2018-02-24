@@ -92,5 +92,5 @@ shared static this()
 	pohodFiltersJSON = pohodFilters;
 
 	// Регистрируем метод в сервисе
-	Service.JSON_RPCRouter.join!(getFavoritePohodFilters)(`pohod.favoriteFilters`);
+	MainService.JSON_RPCRouter.join!(getFavoritePohodFilters)(`pohod.favoriteFilters`);
 }

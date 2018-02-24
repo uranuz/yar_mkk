@@ -5,8 +5,8 @@ import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
-	Service.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
+	MainService.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
+	MainService.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
 }
 
 auto editPohod(HTTPContext ctx, PohodDataToWrite record)
@@ -47,7 +47,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		throw new Exception("Дата начала похода должна быть раньше даты окончания!!!");
 	}
 
-	Service.loger.info("Формируем набор строковых полей и значений", "Изменение данных похода");
+	MainService.loger.info("Формируем набор строковых полей и значений", "Изменение данных похода");
 	foreach( fieldName; AliasSeq!(__traits(allMembers, PohodDataToWrite)) )
 	{
 		alias FieldType = typeof(__traits(getMember, record, fieldName));
@@ -159,13 +159,13 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	if( fieldNames.length > 0 )
 	{
-		Service.loger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
+		MainService.loger.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 		if( "userNum" !in ctx.user.data ) {
 			throw new Exception("Не удаётся определить идентификатор пользователя");
 		}
 		fieldNames ~= ["last_editor_num", "last_edit_timestamp"] ;
 		fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
-		Service.loger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
+		MainService.loger.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
 		string queryStr;
 
 		import std.array: join;
@@ -174,7 +174,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		}
 		else
 		{
-			Service.loger.info("Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода");
+			MainService.loger.info("Запись пользователя, добавившего поход и даты добавления", "Изменение данных похода");
 
 			fieldNames ~= ["registrator_num", "reg_timestamp"];
 			fieldValues ~= [ctx.user.data["userNum"], "current_timestamp"];
@@ -187,7 +187,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		}
 	}
 
-	Service.loger.info("Выполнение запроса к БД завершено", "Изменение данных похода");
+	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение данных похода");
 	return record.num;
 }
 

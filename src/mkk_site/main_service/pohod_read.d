@@ -5,8 +5,8 @@ import mkk_site.data_model.enums;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(readPohod)(`pohod.read`);
-	Service.JSON_RPCRouter.join!(getExtraFileLinks)(`pohod.extraFileLinks`);
+	MainService.JSON_RPCRouter.join!(readPohod)(`pohod.read`);
+	MainService.JSON_RPCRouter.join!(getExtraFileLinks)(`pohod.extraFileLinks`);
 }
 
 static immutable pohodInfoQueryBase =

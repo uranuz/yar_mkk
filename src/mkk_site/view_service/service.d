@@ -1,19 +1,22 @@
 module mkk_site.view_service.service;
 
-public import mkk_site.view_service.uri_page_router;
 public import webtank.net.http.handler;
+public import mkk_site.view_service.utils;
+public import mkk_site.common.service: Service;
 
-MKKViewService Service() @property {
-	return _mkk_view_service;
+MKKViewService ViewService() @property
+{
+	MKKViewService srv = cast(MKKViewService) Service();
+	assert( srv, `View service is null` );
+	return srv;
 }
 
 import webtank.ivy.view_service: IvyViewService;
-
+import mkk_site.security.common.access_control_client: MKKAccessControlClient;
 class MKKViewService: IvyViewService
 {
-	import mkk_site.view_service.access_control;
-	import mkk_site.view_service.utils;
 	import mkk_site.common.utils;
+
 	import ivy;
 	import ivy.interpreter.data_node_render: renderDataNode, DataRenderType;
 	import webtank.net.http.output: HTTPOutput;
@@ -21,14 +24,14 @@ public:
 	this(string serviceName, string pageURIPatternStr)
 	{
 		super(serviceName,
-			new MKKViewAccessController,
+			new MKKAccessControlClient,
 			pageURIPatternStr
 		);
 	}
 
-	override MKKViewAccessController accessController() @property
+	override MKKAccessControlClient accessController() @property
 	{
-		auto controller = cast(MKKViewAccessController) _accessController;
+		auto controller = cast(MKKAccessControlClient) _accessController;
 		assert(controller, `MKK access controller is null`);
 		return controller;
 	}
@@ -70,8 +73,6 @@ public:
 	}
 }
 
-private __gshared MKKViewService _mkk_view_service;
-
 shared static this() {
-	_mkk_view_service = new MKKViewService("yarMKKView", "/dyn/{remainder}");
+	Service(new MKKViewService("yarMKKView", "/dyn/{remainder}"));
 }

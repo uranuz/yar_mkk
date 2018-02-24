@@ -1,11 +1,12 @@
 module mkk_site.main_service.user_settings;
 
 import mkk_site.main_service.devkit;
-import mkk_site.security.access_control;
+import mkk_site.security.core.access_control: changeUserPassword;
+import mkk_site.security.common.exception: SecurityException;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(changePassword)(`user.changePassword`);
+	MainService.JSON_RPCRouter.join!(changePassword)(`user.changePassword`);
 }
 
 void changePassword(

@@ -6,7 +6,7 @@ import mkk_site.view_service.utils;
 //import mkk_site.page_devkit;
 
 shared static this() {
-	Service.pageRouter.join!(documentListController)("/dyn/document/list");
+	ViewService.pageRouter.join!(documentListController)("/dyn/document/list");
 }
 
 import ivy;
@@ -43,6 +43,6 @@ TDataNode documentListController(HTTPContext ctx)
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.DocumentList").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.DocumentList").run(dataDict);
 }
 

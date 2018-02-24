@@ -1,4 +1,4 @@
-module mkk_site.security.access_control;
+module mkk_site.security.core.access_control;
 
 import std.conv, std.digest.digest, std.datetime, std.utf, std.base64 : Base64URL;
 
@@ -9,21 +9,13 @@ import
 	webtank.net.http.context,
 	webtank.common.conv;
 
-public import mkk_site.common.user_identity;
+public import mkk_site.security.common.user_identity;
 
-import mkk_site.common.session_id;
-import mkk_site.security.crypto;
+import mkk_site.security.common.session_id;
+import mkk_site.security.core.crypto;
 
 enum uint minLoginLength = 3;  //Минимальная длина логина
 enum uint minPasswordLength = 8;  //Минимальная длина пароля
-
-// Класс исключения в аутентификации
-class SecurityException: Exception
-{
-	this(string msg, string file = __FILE__, size_t line = __LINE__) {
-		super(msg, file, line);
-	}
-}
 
 /// Класс управляет выдачей билетов для доступа
 class MKKMainAccessController: IAccessController

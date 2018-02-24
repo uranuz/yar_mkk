@@ -3,7 +3,7 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderExperience)("/dyn/tourist/experience");
+	ViewService.pageRouter.join!(renderExperience)("/dyn/tourist/experience");
 }
 
 import ivy;
@@ -30,5 +30,5 @@ TDataNode renderExperience(HTTPContext ctx)
 	TDataNode dataDict = mainServiceCall("tourist.experience", ctx, callParams);
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.Experience").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.Experience").run(dataDict);
 }

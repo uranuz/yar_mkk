@@ -4,8 +4,8 @@ import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
 shared static this() {
-	Service.pageRouter.join!(renderIndex)("/dyn/index");
-	Service.pageRouter.join!(renderAboutSite)("/dyn/about");
+	ViewService.pageRouter.join!(renderIndex)("/dyn/index");
+	ViewService.pageRouter.join!(renderAboutSite)("/dyn/about");
 }
 
 import ivy;
@@ -19,9 +19,9 @@ TDataNode renderIndex(HTTPContext ctx)
 	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return Service.templateCache.getByModuleName("mkk.IndexPage").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.IndexPage").run(dataDict);
 }
 
 TDataNode renderAboutSite(HTTPContext ctx) {
-	return Service.templateCache.getByModuleName("mkk.AboutSite").run();
+	return ViewService.templateCache.getByModuleName("mkk.AboutSite").run();
 }

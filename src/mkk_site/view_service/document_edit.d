@@ -6,7 +6,7 @@ import mkk_site.data_model.document: DocumentDataToWrite;
 import mkk_site.common.utils: getAuthRedirectURI;
 
 shared static this() {
-	Service.pageRouter.join!(documentEditController)("/dyn/document/edit");
+	ViewService.pageRouter.join!(documentEditController)("/dyn/document/edit");
 }
 
 import ivy;
@@ -63,7 +63,7 @@ TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum, bool isAut
 		"isAuthorized": TDataNode(isAuthorized)
 	];
 
-	return Service.templateCache.getByModuleName("mkk.DocumentEdit").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.DocumentEdit").run(dataDict);
 }
 
 TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthorized)
@@ -97,5 +97,5 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthoriz
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return Service.templateCache.getByModuleName("mkk.DocumentEdit.Results").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.DocumentEdit.Results").run(dataDict);
 }

@@ -6,7 +6,7 @@ import mkk_site.data_model.pohod_edit: PohodDataToWrite;
 import mkk_site.common.utils: getAuthRedirectURI;
 
 shared static this() {
-	Service.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
+	ViewService.pageRouter.join!(pohodEditController)("/dyn/pohod/edit");
 }
 
 import ivy;
@@ -58,7 +58,7 @@ TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuth
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
-	return Service.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict);
 }
 
 TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
@@ -91,5 +91,5 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorize
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return Service.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict);
+	return ViewService.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict);
 }

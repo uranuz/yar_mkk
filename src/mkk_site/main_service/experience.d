@@ -4,8 +4,8 @@ import mkk_site.data_model.enums;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(getExperience)(`tourist.experience`);
-	Service.JSON_RPCRouter.join!(getTourist)(`tourist.read`);
+	MainService.JSON_RPCRouter.join!(getExperience)(`tourist.experience`);
+	MainService.JSON_RPCRouter.join!(getTourist)(`tourist.read`);
 }
 
 import std.typecons: tuple;

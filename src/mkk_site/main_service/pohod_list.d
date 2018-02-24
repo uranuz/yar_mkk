@@ -8,11 +8,11 @@ import webtank.common.std_json.to: toStdJSON;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
-	Service.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
-	Service.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
-	Service.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
-	Service.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
+	MainService.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
+	MainService.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
+	MainService.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
+	MainService.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
+	MainService.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
 }
 
 import std.datetime: Date;

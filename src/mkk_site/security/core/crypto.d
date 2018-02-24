@@ -1,11 +1,11 @@
-module mkk_site.security.crypto;
+module mkk_site.security.core.crypto;
 
 import std.base64: Base64URL;
 import std.conv: to;
 
 import deimos.openssl.sha;
 import webtank.crypto.scrypt;
-import mkk_site.common.session_id;
+import mkk_site.security.common.session_id;
 
 enum uint pwHashByteLength = 72; //Количество байт в хэше пароля
 enum uint pwHashStrLength = pwHashByteLength * 8 / 6; //Длина в символах в виде base64 - строки

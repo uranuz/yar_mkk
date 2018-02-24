@@ -13,7 +13,7 @@ import std.json;
 //***********************Обявление метода*******************
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(statData)(`stat.Data`);
+	MainService.JSON_RPCRouter.join!(statData)(`stat.Data`);
 }
 //**********************************************************
 

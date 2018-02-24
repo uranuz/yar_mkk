@@ -1,7 +1,7 @@
 module mkk_site.main_service.main;
 
 import webtank.net.web_server: WebServer2;
-import mkk_site.main_service.service: Service;
+import mkk_site.common.service: Service;
 
 // Подключение разделов сервиса
 import mkk_site.main_service.auth;

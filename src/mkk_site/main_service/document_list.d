@@ -8,7 +8,7 @@ import webtank.common.std_json.to: toStdJSON;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(getDocumentList)(`document.list`);
+	MainService.JSON_RPCRouter.join!(getDocumentList)(`document.list`);
 }
 
 import std.json: JSONValue;

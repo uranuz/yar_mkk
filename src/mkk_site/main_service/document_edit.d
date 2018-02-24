@@ -5,8 +5,8 @@ import mkk_site.data_model.document;
 
 shared static this()
 {
-	Service.JSON_RPCRouter.join!(editDocument)(`document.edit`);
-	Service.JSON_RPCRouter.join!(deleteDocument)(`document.delete`);
+	MainService.JSON_RPCRouter.join!(editDocument)(`document.edit`);
+	MainService.JSON_RPCRouter.join!(deleteDocument)(`document.delete`);
 }
 
 auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
@@ -34,7 +34,7 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 
 	if( fieldNames.length > 0 )
 	{
-		Service.loger.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
+		MainService.loger.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
 		string queryStr;
 
 		import std.array: join;
@@ -50,7 +50,7 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 		}
 	}
 
-	Service.loger.info("Выполнение запроса к БД завершено", "Изменение ссылки на документ");
+	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение ссылки на документ");
 	return record.num;
 }
 
