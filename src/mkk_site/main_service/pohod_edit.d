@@ -2,6 +2,8 @@ module mkk_site.main_service.pohod_edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName;
+import mkk_site.history.client;
+import mkk_site.history.common;
 
 shared static this()
 {
@@ -182,8 +184,20 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		}
 
 		auto writeQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
-		if( writeQueryRes && writeQueryRes.recordCount == 1 ) {
-			return writeQueryRes.get(0, 0, null).to!size_t;
+		if( writeQueryRes && writeQueryRes.recordCount == 1 )
+		{
+			// Сохранение истории действий и изменений
+			import webtank.common.std_json.to: toStdJSON;
+			size_t recordNum = writeQueryRes.get(0, 0, null).to!size_t;
+			record.dbSerializeMode = true; // Пишем в JSON имена полей как в БД
+			HistoryRecordData historyData = {
+				tableName: `pohod`,
+				recordNum: recordNum,
+				data: record.toStdJSON(),
+				isSnapshot: true // TODO: Пока всегда передается полный набор данных, а не изменения
+			};
+			sendToHistory(ctx, (record.num.isSet? `Редактирование похода`: `Добавление похода`), historyData);
+			return recordNum;
 		}
 	}
 

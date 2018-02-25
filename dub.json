@@ -19,7 +19,9 @@
 				"src/mkk_site/common",
 				"src/mkk_site/security",
 				"src/mkk_site/data_model",
-				"src/mkk_site/main_service"
+				"src/mkk_site/main_service",
+				"src/mkk_site/history/common",
+				"src/mkk_site/history/client"
 			],
 			"dependencies": {
 				"webtank": ">=0.0.0",

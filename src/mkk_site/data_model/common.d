@@ -6,6 +6,24 @@ struct DBName
 	string dbName;
 }
 
+import std.json: JSONValue;
+public import webtank.common.std_json.to: FieldSerializer;
+void maybeDBSerializeMethod(string name, T)(ref T dValue, ref JSONValue[string] jArray)
+{
+	import webtank.common.std_json.to: toStdJSON;
+	static if( name != `dbSerializeMode` )
+	{
+		import std.traits: getUDAs;
+		alias dbAttrs = getUDAs!( __traits(getMember, dValue, name), DBName );
+		static if( dbAttrs.length == 0 ) {
+			jArray[name] = toStdJSON( __traits(getMember, dValue, name) );
+		} else static if( dbAttrs.length == 1 ) {
+			string serializedName = dValue.dbSerializeMode? dbAttrs[0].dbName: name;
+			jArray[serializedName] = toStdJSON( __traits(getMember, dValue, name) );
+		} else static assert(false, `Expected 0 or 1 DBName attributes count!!!`);
+	}
+}
+
 // Структура для навигации по выборке данных
 struct Navigation
 {

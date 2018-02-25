@@ -1,12 +1,24 @@
-module mkk_site.history_service.common;
+module mkk_site.history.common;
 
 import std.datetime: DateTime;
+import std.json: JSONValue;
+import webtank.common.optional: Optional;
+
+struct HistoryRecordData
+{
+	string tableName;
+	Optional!size_t recordNum;
+	JSONValue data;
+	Optional!size_t userNum;
+	string actionUUID;
+	bool isSnapshot = false;
+}
 
 struct HistoryActionData
 {
 	string uuid;
 	string parentUUID;
 	string description;
-	size_t userNum;
+	Optional!size_t userNum;
 	DateTime time_stamp;
 }

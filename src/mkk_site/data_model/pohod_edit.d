@@ -8,6 +8,7 @@ struct PohodDataToWrite
 	import std.datetime: Date;
 	Optional!size_t num; // Номер походе в базе
 
+@FieldSerializer!maybeDBSerializeMethod {
 	// Секция "Маршрутная книжка"
 	@DBName("kod_mkk") Undefable!string mkkCode; // Код МКК
 	@DBName("nomer_knigi") Undefable!string bookNum; // Номер книги
@@ -35,4 +36,7 @@ struct PohodDataToWrite
 
 	// Секция "Ссылки на доп. материалы"
 	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
+}
+
+	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных 
 }

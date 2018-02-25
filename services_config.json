@@ -58,16 +58,19 @@
 			},
 			"virtualPaths": {
 				"siteRoot": "/",
-				"siteHistoryJSON_RPC": "history/jsonrpc/"
+				"siteJSON_RPC": "history/jsonrpc/"
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",
-				"siteLogs": "logs/"
+				"siteLogs": "logs/",
+				"siteEventLogFile": "logs/history_event.log",
+				"siteErrorLogFile": "logs/history_error.log",
+				"siteDatabaseLogFile": "logs/history_database.log"
 			},
 			"databases": {
 				"historyDB": {
 					"host": "127.0.0.1",
-					"dbname": "mkk_site_history",
+					"dbname": "baza_MKK",
 					"username": "postgres",
 					"password": "postgres"
 				}

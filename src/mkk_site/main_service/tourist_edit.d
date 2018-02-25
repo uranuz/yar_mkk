@@ -2,6 +2,8 @@ module mkk_site.main_service.tourist_edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.tourist_edit;
+import mkk_site.history.client;
+import mkk_site.history.common;
 
 shared static this()
 {
@@ -119,7 +121,18 @@ auto editTourist(
 		}
 
 		auto writeQueryRes = getCommonDB().query(queryStr);
-		if( writeQueryRes && writeQueryRes.recordCount == 1 ) {
+		if( writeQueryRes && writeQueryRes.recordCount == 1 )
+		{
+			// Сохранение истории действий и изменений
+			import webtank.common.std_json.to: toStdJSON;
+			record.dbSerializeMode = true; // Пишем в JSON имена полей как в БД
+			HistoryRecordData historyData = {
+				tableName: `tourist`,
+				recordNum: writeQueryRes.get(0, 0, null).to!size_t,
+				data: record.toStdJSON(),
+				isSnapshot: true // TODO: Пока всегда передается полный набор данных, а не изменения
+			};
+			sendToHistory(ctx, (record.num.isSet? `Редактирование туриста`: `Добавление туриста`), historyData);
 			return writeQueryRes.get(0, 0, null).to!size_t;
 		}
 	}

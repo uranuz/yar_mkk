@@ -8,6 +8,7 @@ struct TouristDataToWrite
 	import webtank.common.optional: Undefable, Optional;
 	Optional!size_t num; // номер туриста
 
+@FieldSerializer!maybeDBSerializeMethod {
 	@DBName("family_name") Undefable!string familyName; // фамилия
 	@DBName("given_name") Undefable!string givenName; // имя
 	@DBName("patronymic") Undefable!string patronymic; // отчество
@@ -23,4 +24,8 @@ struct TouristDataToWrite
 	@DBName("comment") Undefable!string comment; // коментарий
 	@DBName("razr") Undefable!int sportsCategory; // спортивный разряд
 	@DBName("sud") Undefable!int refereeCategory; // судейская категория
+}
+
+	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных
+
 }
