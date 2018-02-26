@@ -8,14 +8,16 @@
 			"databases": {
 				"commonDB": {
 					"host": "127.0.0.1",
+					"port": 5432,
 					"dbname": "baza_MKK",
-					"username": "postgres",
+					"user": "postgres",
 					"password": "postgres"
 				},
 				"authDB": {
 					"host": "127.0.0.1",
+					"port": 5432,
 					"dbname": "MKK_site_base",
-					"username": "postgres",
+					"user": "postgres",
 					"password": "postgres"
 				}
 			},
@@ -70,8 +72,9 @@
 			"databases": {
 				"historyDB": {
 					"host": "127.0.0.1",
+					"port": 5432,
 					"dbname": "baza_MKK",
-					"username": "postgres",
+					"user": "postgres",
 					"password": "postgres"
 				}
 			}
