@@ -144,7 +144,7 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/security/crypto",
+				"src/mkk_site/security/core/crypto",
 				"src/mkk_site/tools/gen_pw_hash"
 			]
 		},
@@ -161,7 +161,7 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/security/crypto",
+				"src/mkk_site/security/core/crypto",
 				"src/mkk_site/tools/gen_session_id"
 			]
 		},
