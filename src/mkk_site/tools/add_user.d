@@ -8,8 +8,8 @@ import std.conv;
 import std.algorithm: endsWith;
 import std.uuid: randomUUID;
 
-import mkk_site.security.access_control: minLoginLength, minPasswordLength;
-import mkk_site.security.crypto: makePasswordHash, encodePasswordHash;
+import mkk_site.security.core.access_control: minLoginLength, minPasswordLength;
+import mkk_site.security.core.crypto: makePasswordHash, encodePasswordHash;
 import mkk_site.tools.auth_db: getAuthDB;
 import webtank.common.conv: fromPGTimestamp;
 

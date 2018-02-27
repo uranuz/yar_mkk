@@ -7,7 +7,7 @@ import std.getopt: getopt;
 import std.conv: to;
 import std.algorithm: endsWith;
 
-import mkk_site.security.access_control;
+import mkk_site.security.core.access_control;
 import mkk_site.tools.auth_db: getAuthDB;
 
 void main(string[] progAgs)

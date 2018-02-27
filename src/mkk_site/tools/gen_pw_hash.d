@@ -6,7 +6,7 @@ import std.stdio: writeln;
 import std.getopt: getopt;
 import std.datetime: Clock;
 
-import mkk_site.security.crypto: makePasswordHash, encodePasswordHash;
+import mkk_site.security.core.crypto: makePasswordHash, encodePasswordHash;
 
 void main(string[] progAgs)
 {

@@ -5,7 +5,7 @@ import std.stdio: writeln;
 import std.getopt: getopt;
 import std.base64: Base64URL;
 
-import mkk_site.security.crypto: generateSessionId;
+import mkk_site.security.core.crypto: generateSessionId;
 
 void main(string[] progAgs)
 {
