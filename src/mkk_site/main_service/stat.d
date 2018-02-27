@@ -197,7 +197,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			put AS ( SELECT vid,count(unit) AS gr_7,  sum (unit)  AS un_7
 			      FROM stat_by_year  WHERE  (ks=7 OR ks is NULL)  GROUP BY vid ORDER BY vid  ),
 			всего AS ( SELECT vid,count(unit) AS gr_всего,sum (unit)  AS un_всего
-			FROM stat_by_year GROUP BY vid ORDER BY vid ),
+			FROM stat_by_year  WHERE vid is not null GROUP BY vid ORDER BY vid ),
 			st AS (
 			SELECT
 			всего.vid,`; 
@@ -352,7 +352,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	//конец--------матрица таблицы-------------
 
 	//  ----"csv"-----------
-  /++
+ 
   string csv_stat;
   csv_stat ~= "Данные по числу походов/ участников \n\r";
   
@@ -369,7 +369,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 			 }
 
-   ++/
+  
 	//-----конец -"csv"-
 
 	
