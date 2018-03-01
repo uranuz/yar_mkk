@@ -18,62 +18,118 @@ shared static this()
 	HistoryService.JSON_RPCRouter.join!(saveActionToHistory)(`history.writeAction`);
 }
 
-void writeDataToHistory(HTTPContext ctx, HistoryRecordData data)
+void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 {
 	//if( !ctx.user.isAuthenticated )
 	//	throw new Exception(`Недостаточно прав для записи в историю!!!`);
-	
-	import std.conv: text, to;
 
-	if( !data.tableName.length )
-		throw new Exception(`"tableName" field expected!!!`);
+	HistoryRecordData[][string] byTableData;
 
-	if( data.recordNum.isNull )
-		throw new Exception(`"recordNum" field expected!!!`);
+	// Распределяем записи по таблицам
+	foreach( item; data )
+	{
+		if( !item.tableName.length )
+			throw new Exception(`"tableName" field expected!!!`);
 
-	if( data.userNum.isNull ) {
-		throw new Exception(`"userNum" field expected!!!`);
-	}
+		if( item.recordNum.isNull )
+			throw new Exception(`"recordNum" field expected!!!`);
 		
-	
+		if( item.userNum.isNull ) {
+			throw new Exception(`"userNum" field expected!!!`);
+		}
+
+		if( auto itemsPtr = item.tableName in byTableData ) {
+			(*itemsPtr) ~= item;
+		} else {
+			byTableData[item.tableName] = [item];
+		}
+	}
+
+	foreach( tableName, tableData; byTableData ) {
+		writeDataForTable(tableData, tableName);
+	}
+}
+
+void writeDataForTable(HistoryRecordData[] data, string tableName)
+{
 	auto db = getHistoryDB();
 	auto trans = new PostgreSQLTransaction(db);
 	scope(failure) trans.rollback();
 	scope(success) trans.commit();
 
-	string getLastQuery = `
-	with updating as(
-		select num, tab.is_last
-		from "_hc__` ~ data.tableName ~ `" tab
-		where tab.rec_num = ` ~ data.recordNum.text ~ `
-		for update
-	)
-	select num from updating where is_last = true
-	order by num
-	`;
+	import std.algorithm: map, filter;
+	import std.array: join;
+	import std.conv: text, to;
 
-	auto getLastQueryRes = db.query(getLastQuery);
-	Optional!size_t oldLastNum;
-	if( getLastQueryRes.recordCount > 0 && getLastQueryRes.fieldCount > 0 ) {
-		oldLastNum = getLastQueryRes.get(0, 0, "0").to!size_t;
+	alias goodItemsFilter = (it) => it.recordNum.isSet && it.userNum.isSet;
+
+	auto lastChangesRes = db.query(`
+	with rec_nums as(
+		select unnest(ARRAY[
+		` ~
+			data.filter!(goodItemsFilter)
+			.map!( (it) => it.recordNum.text )
+			.join(`, `)
+		~ `
+		]::bigint[]) num
+	)
+	select tab.num, rec_nums.num
+	from rec_nums
+	inner join "_hc__` ~ tableName ~ `" tab
+		on tab.rec_num = rec_nums.num and tab.is_last = true
+	for update
+	`);
+	// Словарь: по номеру записи получаем её последнее изменение в истории
+	size_t[size_t] historyNums;
+	foreach( recIndex; 0 .. lastChangesRes.recordCount )
+	{
+		if(
+			lastChangesRes.isNull(0, recIndex)
+			&& lastChangesRes.isNull(1, recIndex)
+		) continue;
+
+		historyNums[
+			lastChangesRes.get(0, recIndex).to!size_t
+		] = lastChangesRes.get(1, recIndex).to!size_t;
 	}
 
-	string dropLastQuery = `
-	update "_hc__` ~ data.tableName ~ `" set is_last = null where rec_num = ` ~ data.recordNum.text ~ `
-	`;
-	db.query(dropLastQuery);
+	string preparedData = data.filter!(goodItemsFilter)
+		.map!( (item) => [
+			item.recordNum.text, // Номер оригинальной записи
+			(`'` ~ PGEscapeStr(item.data.toString()) ~ `'::jsonb`), // Измененения
+			`current_timestamp`, // Время изменений
+			item.userNum.text, // Номер изменившего пользователя
+			`1`, // Тип записи об изменении
+			(item.recordNum.value in historyNums? historyNums[item.recordNum.value].text: `null::bigint`), // Номер пред. изменения
+			`true`, // Что это последнее изменение
+			(`(select num from _history_action ha where ha.uuid_num = '` ~ PGEscapeStr(item.actionUUID) ~ `'::uuid)`) // Номер действия
+		].join(", "))
+		.join("),\n(");
 
-	string insertNewQuery = `
-	insert into "_hc__` ~ data.tableName ~ `"
-	(rec_num, data, time_stamp, user_num, rec_kind, prev_num, is_last, action_num)
-	values
-	( ` ~ data.recordNum.text ~ `, '` ~ PGEscapeStr(data.data.toString()) ~ `'::jsonb, current_timestamp, ` ~ data.userNum.text ~ `, 1, ` ~ (oldLastNum.isNull? `null`: oldLastNum.text) ~ `, true, (select num from _history_action ha where ha.uuid_num = '` ~ PGEscapeStr(data.actionUUID) ~ `'::uuid) )
-	`;
+	if( preparedData.length )
+	{
+		// Вставка новых данных в историю
+		db.query(`
+		insert into "_hc__` ~ tableName ~ `"
+		(rec_num, data, time_stamp, user_num, rec_kind, prev_num, is_last, action_num)
+		select * from(
+			values
+			( ` ~ preparedData ~ ` )
+		) as dat
+		`);
+	}
 
-	db.query(insertNewQuery);
+	// Убираем флаг is_last у записей которые 
+	db.query(`
+	with nums as(
+		select unnest(ARRAY[
+			` ~ historyNums.byValue().map!( (it) => it.text ).join(", ") ~ `
+		]::bigint[]) num
+	)
+	update "_hc__` ~ tableName ~ `" set is_last = null
+	where num in (select num from nums)
+	`);
 }
-
-
 
 
 size_t saveActionToHistory(HistoryActionData data)

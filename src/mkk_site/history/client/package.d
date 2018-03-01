@@ -10,6 +10,7 @@ import std.uuid;
 import std.json: JSONValue, JSON_TYPE;
 import webtank.common.std_json.to: toStdJSON;
 
+/// Добавить запись о совершаемом действии в историю
 UUID sendActionToHistory(HTTPContext ctx, string description, Optional!size_t userNum = Optional!size_t())
 {
 	import std.datetime: Clock, UTC, DateTime;
@@ -35,25 +36,43 @@ UUID sendActionToHistory(HTTPContext ctx, string description, Optional!size_t us
 	return newActionUUID;
 }
 
-void sendChangesToHistory(HTTPContext ctx, HistoryRecordData recordData)
+/// Сохранить изменения в историю (для одной записи)
+void sendChangesToHistory(HTTPContext ctx, HistoryRecordData data) {
+	sendChangesToHistory(ctx, [data]);
+}
+
+/// Сохранить изменения в историю (несколько записей)
+void sendChangesToHistory(HTTPContext ctx, HistoryRecordData[] data)
 {
 	import std.exception: enforceEx;
 	import std.conv: to;
-	enforceEx!Exception(!recordData.recordNum.isNull, `Record num must be specified!`);
-	enforceEx!Exception(recordData.tableName.length, `Table name be specified!`);
+	size_t userNum = ctx.user.data.get(`userNum`, `0`).to!size_t;
+	foreach( ref item; data )
+	{
+		enforceEx!Exception(!item.recordNum.isNull, `Record num must be specified!`);
+		enforceEx!Exception(item.tableName.length, `Table name be specified!`);
 
-	// Номер пользователя берется из контекста, если не задан явно
-	if( recordData.userNum.isNull ) {
-		recordData.userNum = ctx.user.data.get(`userNum`, `0`).to!size_t;
+		// Номер пользователя берется из контекста, если не задан явно
+		if( item.userNum.isNull ) {
+			item.userNum = userNum;
+		}
 	}
 
 	Service.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
-		`history.writeData`, ctx, JSONValue(["data": recordData.toStdJSON()]));
+		`history.writeData`, ctx, JSONValue(["data": data.toStdJSON()]));
 }
 
 // Записать действие в историю и сохранить изменения
-void sendToHistory(HTTPContext ctx, string description, HistoryRecordData recordData)
+void sendToHistory(HTTPContext ctx, string description, HistoryRecordData data) {
+	sendToHistory(ctx, description, [data]);
+}
+
+// Записать действие в историю и сохранить изменения
+void sendToHistory(HTTPContext ctx, string description, HistoryRecordData[] data)
 {
-	recordData.actionUUID = sendActionToHistory(ctx, description).toString();
-	sendChangesToHistory(ctx, recordData);
+	auto actionUUID = sendActionToHistory(ctx, description).toString();
+	foreach( ref item; data ) {
+		item.actionUUID = actionUUID;
+	}
+	sendChangesToHistory(ctx, data);
 }
