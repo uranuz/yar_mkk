@@ -197,6 +197,18 @@ private static immutable pohodDataCheckFilters = [
 		`Не указан вид туризма`
 	),
 	DCTuple(
+		`begin_date is null`,
+		`Не указана дата начала похода`
+	),
+		DCTuple(
+		`finish_date is null`,
+		`Не указана дата окончания похода`
+	),
+		DCTuple(
+		`unit is null`,
+		`Не указано число участников`
+	),
+	DCTuple(
 		`ks is null`,
 		`Не указана категория сложности`
 	)
