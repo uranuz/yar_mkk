@@ -8,6 +8,7 @@ import mkk_site.history.common;
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editTourist)(`tourist.edit`);
+	MainService.JSON_RPCRouter.join!(touristDelete)(`tourist.delete`);
 }
 
 auto editTourist(
@@ -130,7 +131,7 @@ auto editTourist(
 				tableName: `tourist`,
 				recordNum: writeQueryRes.get(0, 0, null).to!size_t,
 				data: record.toStdJSON(),
-				isSnapshot: true // TODO: Пока всегда передается полный набор данных, а не изменения
+				recordKind: (record.num.isSet? HistoryRecordKind.Update: HistoryRecordKind.Insert)
 			};
 			sendToHistory(ctx, (record.num.isSet? `Редактирование туриста`: `Добавление туриста`), historyData);
 			return writeQueryRes.get(0, 0, null).to!size_t;
@@ -138,4 +139,20 @@ auto editTourist(
 	}
 
 	return record.num;
+}
+
+/++ Простой, но опасный метод, который удаляет туриста по ключу. Требует прав админа! +/
+void touristDelete(HTTPContext ctx, size_t num)
+{
+	import std.conv: text;
+	if( !ctx.user.isAuthenticated || !ctx.user.isInRole("admin") )
+		throw new Exception("Недостаточно прав для удаления туриста!");
+
+	HistoryRecordData historyData = {
+		tableName: `tourist`,
+		recordNum: num,
+		recordKind: HistoryRecordKind.Delete
+	};
+	sendToHistory(ctx, `Удаление туриста`, historyData);
+	getCommonDB().query(`delete from tourist where num = ` ~ num.text);
 }

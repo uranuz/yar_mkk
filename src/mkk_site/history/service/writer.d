@@ -20,8 +20,8 @@ shared static this()
 
 void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 {
-	//if( !ctx.user.isAuthenticated )
-	//	throw new Exception(`Недостаточно прав для записи в историю!!!`);
+	if( !ctx.user.isAuthenticated )
+		throw new Exception(`Недостаточно прав для записи в историю!!!`);
 
 	HistoryRecordData[][string] byTableData;
 
@@ -99,7 +99,7 @@ void writeDataForTable(HistoryRecordData[] data, string tableName)
 			(`'` ~ PGEscapeStr(item.data.toString()) ~ `'::jsonb`), // Измененения
 			`current_timestamp`, // Время изменений
 			item.userNum.text, // Номер изменившего пользователя
-			`1`, // Тип записи об изменении
+			(cast(ubyte) item.recordKind).text, // Тип записи об изменении
 			(item.recordNum.value in historyNums? historyNums[item.recordNum.value].text: `null::bigint`), // Номер пред. изменения
 			`true`, // Что это последнее изменение
 			(`(select num from _history_action ha where ha.uuid_num = '` ~ PGEscapeStr(item.actionUUID) ~ `'::uuid)`) // Номер действия
@@ -132,9 +132,11 @@ void writeDataForTable(HistoryRecordData[] data, string tableName)
 }
 
 
-size_t saveActionToHistory(HistoryActionData data)
+size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 {
 	import std.conv: text, to;
+	if( !ctx.user.isAuthenticated )
+		throw new Exception(`Недостаточно прав для записи в историю!!!`);
 	
 	auto db = getHistoryDB();
 

@@ -1,15 +1,17 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, firScopeOpts;
 from mkk.Helpers import DateRangePrinter;
 from mkk.Helpers.EntityProperty import EntityProperty;
+from mkk.Tourist.NavigatedList import TouristNavigatedList;
 def PohodRead {=
 	def.kv
 		moduleName: "mkk/PohodRead/PohodRead"
 		instanceName: 'pohodRead'
-		cssBaseClass: 'mkk-PohodRead';
+		cssBaseClass: 'mkk-PohodRead'
+		partyList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['partyList']}"/>
 		<h2>Данные похода</h2>
 		{=if isAuthorized {*
 			<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
@@ -56,16 +58,16 @@ def PohodRead {=
 				title: 'Зам. руководителя группы'
 				value: {=recGet pohod 'altChiefName'};
 			EntityProperty
+				instanceName: 'partyListProp'
 				title: 'Состав группы'
 				value: {=if partyList != null
-					{=repeat tourist in partyList {*
-						<div>
-							{=recGet tourist 'familyName'}
-							{=recGet tourist 'givenName'}
-							{=recGet tourist 'patronymic'},
-							{=recGet tourist 'birthYear'}
-						</div>
-					*}}
+					{=
+						var sliceLen: {=len partyList};
+						if sliceLen > 10 {=set sliceLen: 10};
+						TouristNavigatedList
+							instanceName: 'partyList'
+							touristList: {=slice partyList 0 sliceLen}
+					}
 				}
 				isWide: true;
 			EntityProperty
@@ -95,4 +97,5 @@ def PohodRead {=
 	*}
 };
 PohodRead
+	partyList: partyList
 }

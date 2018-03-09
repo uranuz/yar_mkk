@@ -1,0 +1,36 @@
+expr {=
+from fir.controls.utils import rsGet, recGet, cls, firScopeOptsEnc;
+from mkk.TouristPlainList import TouristPlainList;
+from mkk.Pagination import Pagination;
+def TouristNavigatedList {=
+	def.kv
+		moduleName: 'mkk/Tourist/NavigatedList/NavigatedList'
+		instanceName: 'touristNavigatedList'
+		cssBaseClass: 'mkk-TouristNavigatedList'
+		touristList: null
+		nav: null
+		itemTextTag: 'div'
+		itemIcon: null
+		mode: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc
+				fields: ['touristList', 'nav', 'mode']
+			}"/>
+		<div class="{=cls 'navBar'}">
+			{=Pagination
+				instanceName: instanceName ~ 'Pagination'
+			}
+		</div>
+		{=TouristPlainList
+			instanceName: instanceName ~ 'View'
+			touristList: touristList
+			nav: nav
+			itemTextTag: itemTextTag
+			itemIcon: itemIcon
+			mode: mode
+		}
+	</div>
+	*}
+}
+}

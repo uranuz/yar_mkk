@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls;
 from mkk.TouristSearchArea import TouristSearchArea;
-from mkk.TouristPlainList import TouristPlainList;
+from mkk.Tourist.NavigatedList import TouristNavigatedList;
 def PartyEdit {=
 	def.kv
 		moduleName: 'mkk/PohodEdit/PartyEdit/PartyEdit'
@@ -27,7 +27,7 @@ def PartyEdit {=
 				<div class="{=cls 'selectedTouristsPanel'}">
 					<h5>Участники похода</h5>
 					<div class="{=cls 'selectedTourists'}">
-						{=TouristPlainList
+						{=TouristNavigatedList
 							instanceName: 'selectedTourists'
 							touristList: partyList
 							mode: 'remove'

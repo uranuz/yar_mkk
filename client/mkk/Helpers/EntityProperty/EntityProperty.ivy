@@ -1,5 +1,6 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
+var mega_counter: 2000;
 def EntityProperty {=
 	def.kv
 		instanceName: 'entityProperty'
@@ -9,8 +10,13 @@ def EntityProperty {=
 		value: null
 		isWide: false;
 	def.body {=
+		if instanceName == 'entityProperty' {=
+			set instanceName: instanceName ~ '-' ~ {=str mega_counter};
+			set mega_counter: mega_counter + 1;
+		};
 		if not{=empty value} {*
 		<div class="{=cls {=if isWide 'wideProp' else 'prop'} } row" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			<label
 				class="{=cls {=if isWide 'widePropCaption' else 'propCaption'} } {=if isWide 'col-md-12' else 'col-md-4'}"
 				>{{title}}</label>

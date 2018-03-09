@@ -4,6 +4,14 @@ import std.datetime: DateTime;
 import std.json: JSONValue;
 import webtank.common.optional: Optional;
 
+enum HistoryRecordKind: ubyte
+{
+	Update, // Обновление записи (передана вся запись)
+	Insert, // Вставка новой записи
+	UpdatePartial, // Обновление записи (переданы изменения)
+	Delete // Удаление записи
+}
+
 struct HistoryRecordData
 {
 	string tableName;
@@ -11,7 +19,7 @@ struct HistoryRecordData
 	JSONValue data;
 	Optional!size_t userNum;
 	string actionUUID;
-	bool isSnapshot = false;
+	HistoryRecordKind recordKind;
 }
 
 struct HistoryActionData

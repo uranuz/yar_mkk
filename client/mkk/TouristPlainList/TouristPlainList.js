@@ -81,6 +81,9 @@ define('mkk/TouristPlainList/TouristPlainList', [
 		setFilter: function(filter) {
 			this._filter = filter;
 		},
+		setMode: function(mode) {
+			this._mode = mode;
+		},
 		setNavigation: function(nav) {
 			this._nav = nav;
 		},

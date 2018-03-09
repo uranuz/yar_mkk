@@ -194,7 +194,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 				tableName: `pohod`,
 				recordNum: recordNum,
 				data: record.toStdJSON(),
-				isSnapshot: true // TODO: Пока всегда передается полный набор данных, а не изменения
+				recordKind: (record.num.isSet? HistoryRecordKind.Update: HistoryRecordKind.Insert)
 			};
 			sendToHistory(ctx, (record.num.isSet? `Редактирование похода`: `Добавление похода`), historyData);
 			return recordNum;
@@ -206,11 +206,17 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 }
 
 /++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/
-void pohodDelete(HTTPContext context, size_t num)
+void pohodDelete(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
-	if( !context.user.isAuthenticated || !context.user.isInRole("admin") )
+	if( !ctx.user.isAuthenticated || !ctx.user.isInRole("admin") )
 		throw new Exception("Недостаточно прав для удаления похода!");
 
+	HistoryRecordData historyData = {
+		tableName: `pohod`,
+		recordNum: num,
+		recordKind: HistoryRecordKind.Delete
+	};
+	sendToHistory(ctx, `Удаление похода`, historyData);
 	getCommonDB().query(`delete from pohod where num = ` ~ num.text);
 }

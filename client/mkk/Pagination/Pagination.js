@@ -156,12 +156,17 @@ define('mkk/Pagination/Pagination', [
 				page = this.getCurrentPage(),
 				pageCount = this.getPageCount(),
 				isFirstVisible = (page != null && page < 1? 'hidden': 'visible'),
-				isLastVisible = (page != null && pageCount != null && page + 1 >= pageCount? 'hidden': 'visible');
+				isLastVisible = (page != null && pageCount != null && page + 1 >= pageCount? 'hidden': 'visible'),
+				recordCount = parseInt(this._elems('recordCount').text(), 10);
 			this._elems('prevBtn').css('visibility', isFirstVisible);
 			this._elems('firstBtn').css('visibility', isFirstVisible);
 			this._elems('nextBtn').css('visibility', isLastVisible);
 			this._elems('lastBtn').css('visibility', isLastVisible);
-			if( parseInt(this._elems('recordCount').text(), 10) > 0 ) {
+
+			if( isNaN(recordCount) ) {
+				this._elems('notFoundMsg').hide();
+				this._elems('recordCountMsg').hide();
+			} else if( recordCount > 0 ) {
 				this._elems('notFoundMsg').hide();
 				this._elems('recordCountMsg').show();
 			} else {

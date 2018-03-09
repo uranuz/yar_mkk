@@ -10,7 +10,7 @@ define('mkk/PohodEdit/PohodEdit', [
 	'mkk/PohodEdit/PartyEdit/PartyEdit',
 	'mkk/PohodEdit/ChiefEdit/ChiefEdit',
 	'mkk/PohodEdit/ChiefAddToParty/ChiefAddToParty',
-	'mkk/TouristPlainList/TouristPlainList',
+	'mkk/Tourist/NavigatedList/NavigatedList',
 	'mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit',
 	'css!mkk/PohodEdit/PohodEdit'
 ], function (
@@ -69,6 +69,10 @@ define('mkk/PohodEdit/PohodEdit', [
 		
 		this._chiefEditBlock.subscribe("selectChief", this.onSelectChief.bind(this));
 		this._chiefEditBlock.subscribe("deleteChief", this.onDeleteChief.bind(this));
+
+		this._partyList.setFilter({
+			selectedKeys: this.getPartyNums()
+		});
 	}
 	
 	return __mixinProto(PohodEdit, {
@@ -107,23 +111,30 @@ define('mkk/PohodEdit/PohodEdit', [
 			keyInp.val("null");
 			chiefBtn.text("Редактировать");
 		},
-		
-		//Сохраняет список участников группы и выводит его в главное окно
-		saveParty: function(rs) {
-			var rec, selectedKeys = [];
 
-			this._partyRS = rs;
-			this._partyRS.rewind();
-			while( rec = this._partyRS.next() ) {
+		/** Получить идентификаторы участников группы */
+		getPartyNums: function() {
+			var selectedKeys = [], rec;
+			for( this._partyRS.rewind(); rec = this._partyRS.next(); ) {
 				selectedKeys.push( rec.getKey() );
 			}
+			return selectedKeys;
+		},
 
+		/** Обновить отображение списка группы */
+		updatePartyList: function() {
 			// Передаём список идентификаторов туристов в фильтр компонента отображения списка туристов...
 			this._partyList.setFilter({
-				selectedKeys: selectedKeys
+				selectedKeys: this.getPartyNums()
 			});
 			// ...и обновляем компонент
 			this._partyList._reloadControl();
+		},
+		
+		//Сохраняет список участников группы и выводит его в главное окно
+		saveParty: function(rs) {
+			this._partyRS = rs;
+			this.updatePartyList();
 		},
 
 		showErrorDialog: function(errorMsg) {

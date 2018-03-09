@@ -6,7 +6,7 @@ from mkk.PohodEdit.DeleteArea import DeleteArea;
 from mkk.PohodEdit.PartyEdit import PartyEdit;
 from mkk.PohodEdit.ChiefEdit import ChiefEdit;
 from mkk.PohodEdit.ChiefAddToParty import ChiefAddToParty;
-from mkk.TouristPlainList import TouristPlainList;
+from mkk.Tourist.NavigatedList import TouristNavigatedList;
 from mkk.PohodEdit.ExtraFileLinksEdit import ExtraFileLinksEdit;
 def PohodEdit {=
 	def.kv
@@ -252,9 +252,9 @@ def PohodEdit {=
 			<tr>
 				<td colspan="999">
 					<div class="{=cls 'partyList'}">
-						{=TouristPlainList
+						{=TouristNavigatedList
 							instanceName: 'partyList'
-							touristList: partyList
+							touristList: {=slice partyList 0 10}
 						}
 					</div>
 				</td>
