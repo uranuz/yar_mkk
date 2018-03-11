@@ -47,7 +47,8 @@
 				"src/mkk_site/common",
 				"src/mkk_site/security/common",
 				"src/mkk_site/data_model",
-				"src/mkk_site/view_service"
+				"src/mkk_site/view_service",
+				"src/mkk_site/history/common"
 			],
 			"sourceFiles": [],
 			"buildRequirements": [
@@ -67,6 +68,7 @@
 			],
 			"sourcePaths": [
 				"src/mkk_site/common",
+				"src/mkk_site/data_model",
 				"src/mkk_site/security/common",
 				"src/mkk_site/history/common",
 				"src/mkk_site/history/service"

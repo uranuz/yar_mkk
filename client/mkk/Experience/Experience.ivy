@@ -11,6 +11,16 @@ def Experience{=
 		cssBaseClass: "mkk-Experience";
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<div class="{=cls 'topButtons'}">
+			{=if isAuthorized {*
+			<a href="{{vpaths.siteDynamic}}tourist/history?key={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
+			<a href="{{vpaths.siteDynamic}}tourist/edit?key={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>Редактировать</a>
+			*}}
+		</div>
 		<!-- Раздел данные о туристе-->
 		<div class="{=cls 'touristInfo'}">
 			<h2>

@@ -2,7 +2,7 @@ module mkk_site.history.client;
 
 import webtank.net.std_json_rpc_client;
 import webtank.net.http.context: HTTPContext;
-import webtank.common.optional: Optional;
+import webtank.common.optional: Optional, Undefable;
 
 import mkk_site.history.common;
 import mkk_site.common.service;
@@ -11,7 +11,7 @@ import std.json: JSONValue, JSON_TYPE;
 import webtank.common.std_json.to: toStdJSON;
 
 /// Добавить запись о совершаемом действии в историю
-UUID sendActionToHistory(HTTPContext ctx, string description, Optional!size_t userNum = Optional!size_t())
+UUID sendActionToHistory(HTTPContext ctx, string description, Undefable!size_t userNum = Undefable!size_t())
 {
 	import std.datetime: Clock, UTC, DateTime;
 	import std.conv: to;
@@ -19,7 +19,7 @@ UUID sendActionToHistory(HTTPContext ctx, string description, Optional!size_t us
 	UUID namespaceUUID = sha1UUID(`somenamespace`);
 	UUID newActionUUID = sha1UUID(randomUUID().toString(), namespaceUUID);
 	UUID parentUUID;
-	if( userNum.isNull ) {
+	if( userNum.isUndef ) {
 		userNum = ctx.user.data.get(`userNum`, `0`).to!size_t;
 	}
 
@@ -46,6 +46,8 @@ void sendChangesToHistory(HTTPContext ctx, HistoryRecordData[] data)
 {
 	import std.exception: enforceEx;
 	import std.conv: to;
+	import std.range: chunks;
+
 	size_t userNum = ctx.user.data.get(`userNum`, `0`).to!size_t;
 	foreach( ref item; data )
 	{
@@ -53,13 +55,14 @@ void sendChangesToHistory(HTTPContext ctx, HistoryRecordData[] data)
 		enforceEx!Exception(item.tableName.length, `Table name be specified!`);
 
 		// Номер пользователя берется из контекста, если не задан явно
-		if( item.userNum.isNull ) {
+		if( item.userNum.isUndef ) {
 			item.userNum = userNum;
 		}
 	}
 
-	Service.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
-		`history.writeData`, ctx, JSONValue(["data": data.toStdJSON()]));
+	foreach( piece; data.chunks(400) )
+		Service.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
+			`history.writeData`, ctx, JSONValue(["data": piece.toStdJSON()]));
 }
 
 // Записать действие в историю и сохранить изменения

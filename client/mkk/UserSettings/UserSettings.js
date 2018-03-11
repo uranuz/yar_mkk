@@ -1,7 +1,8 @@
 define('mkk/UserSettings/UserSettings', [
-	'fir/controls/FirControl'
+	'fir/controls/FirControl',
+	'fir/network/json_rpc'
 ], function(
-	FirControl
+	FirControl, json_rpc
 ) {
 	__extends(UserSettings, FirControl);
 
@@ -13,6 +14,9 @@ define('mkk/UserSettings/UserSettings', [
 		this._saveBtn = this._elems('saveBtn');
 		this._emptyPasswordDlg = this._elems('emptyPasswordDlg');
 		this._mismatchPasswordDlg = this._elems('mismatchPasswordDlg');
+
+		this._elems('initPohodHistory').on('click', this.initPohodHistory.bind(this));
+		this._elems('initTouristHistory').on('click', this.initTouristHistory.bind(this));
 	}
 
 	return __mixinProto(UserSettings, {
@@ -42,6 +46,20 @@ define('mkk/UserSettings/UserSettings', [
 					width: 200
 				});
 			}
+		},
+		initTouristHistory: function() {
+			json_rpc.invoke({
+				uri: "/jsonrpc/",
+				method: "tourist.initHistoryData",
+				params: null
+			});
+		},
+		initPohodHistory: function() {
+			json_rpc.invoke({
+				uri: "/jsonrpc/",
+				method: "pohod.initHistoryData",
+				params: null
+			});
 		}
 	});
 });

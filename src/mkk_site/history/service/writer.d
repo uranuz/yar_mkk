@@ -25,6 +25,8 @@ void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 
 	HistoryRecordData[][string] byTableData;
 
+	HistoryService.loger.info(`Подготовка записи изменений в историю`);
+
 	// Распределяем записи по таблицам
 	foreach( item; data )
 	{
@@ -34,7 +36,7 @@ void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 		if( item.recordNum.isNull )
 			throw new Exception(`"recordNum" field expected!!!`);
 		
-		if( item.userNum.isNull ) {
+		if( item.userNum.isUndef ) {
 			throw new Exception(`"userNum" field expected!!!`);
 		}
 
@@ -45,9 +47,12 @@ void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 		}
 	}
 
+	HistoryService.loger.info(`Запуск записи изменений в историю`);
+
 	foreach( tableName, tableData; byTableData ) {
 		writeDataForTable(tableData, tableName);
 	}
+	HistoryService.loger.info(`Завершение записи изменений в историю`);
 }
 
 void writeDataForTable(HistoryRecordData[] data, string tableName)
@@ -61,7 +66,7 @@ void writeDataForTable(HistoryRecordData[] data, string tableName)
 	import std.array: join;
 	import std.conv: text, to;
 
-	alias goodItemsFilter = (it) => it.recordNum.isSet && it.userNum.isSet;
+	alias goodItemsFilter = (it) => it.recordNum.isSet;
 
 	auto lastChangesRes = db.query(`
 	with rec_nums as(
@@ -73,7 +78,7 @@ void writeDataForTable(HistoryRecordData[] data, string tableName)
 		~ `
 		]::bigint[]) num
 	)
-	select tab.num, rec_nums.num
+	select rec_nums.num, tab.num
 	from rec_nums
 	inner join "_hc__` ~ tableName ~ `" tab
 		on tab.rec_num = rec_nums.num and tab.is_last = true
@@ -97,8 +102,16 @@ void writeDataForTable(HistoryRecordData[] data, string tableName)
 		.map!( (item) => [
 			item.recordNum.text, // Номер оригинальной записи
 			(`'` ~ PGEscapeStr(item.data.toString()) ~ `'::jsonb`), // Измененения
-			`current_timestamp`, // Время изменений
-			item.userNum.text, // Номер изменившего пользователя
+			(item.time_stamp.isSet?
+				// Время изменений указано - ставим его
+				`'` ~ item.time_stamp.toISOExtString() ~ `'::timestamp without time zone`:
+				(item.time_stamp.isUndef?
+					// Время изменений не передано устанавливаем текущее
+					`current_timestamp at time zone 'UTC'`:
+					// Явно указано, что нужно установить null
+					`null::timestamp without time zone`)
+			), // Время изменений
+			(item.userNum.isSet? item.userNum.text: `null::bigint`), // Номер изменившего пользователя
 			(cast(ubyte) item.recordKind).text, // Тип записи об изменении
 			(item.recordNum.value in historyNums? historyNums[item.recordNum.value].text: `null::bigint`), // Номер пред. изменения
 			`true`, // Что это последнее изменение
@@ -137,6 +150,8 @@ size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 	import std.conv: text, to;
 	if( !ctx.user.isAuthenticated )
 		throw new Exception(`Недостаточно прав для записи в историю!!!`);
+
+	HistoryService.loger.info(`Начало записи действия в историю`);
 	
 	auto db = getHistoryDB();
 
@@ -144,7 +159,11 @@ size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 		insert into "_history_action"
 		(description, time_stamp, user_num, uuid_num, parent_num)
 		values
-		( '` ~ PGEscapeStr(data.description) ~ `', '` ~ data.time_stamp.toISOExtString() ~ `'::timestamp without time zone, ` ~ data.userNum.text ~ `, '` ~ data.uuid ~ `'::uuid, (select num from _history_action ha where ha.uuid_num = '` ~ data.parentUUID ~ `'::uuid limit 1)::bigint )
+		( '` ~ PGEscapeStr(data.description) ~ `', '` 
+		~ data.time_stamp.toISOExtString() ~ `'::timestamp without time zone, ` 
+		~ (data.userNum.isSet? data.userNum.text: `null::bigint`) ~ `, '` 
+		~ data.uuid ~ `'::uuid, (select num from _history_action ha where ha.uuid_num = '` 
+		~ data.parentUUID ~ `'::uuid limit 1)::bigint )
 		returning num
 	`;
 	Optional!size_t actionNum;
@@ -152,5 +171,6 @@ size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 	if( numResult.recordCount > 0 && numResult.fieldCount > 0 ) {
 		actionNum = numResult.get(0, 0, "0").to!size_t;
 	}
+	HistoryService.loger.info(`Окончание записи действия в историю`);
 	return actionNum;
 }

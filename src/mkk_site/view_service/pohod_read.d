@@ -16,33 +16,22 @@ TDataNode renderPohodRead(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.json;
+	import std.exception: enforce;
 
 	auto req = ctx.request;
 	auto queryForm = req.queryForm;
-	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
+	enforce( queryForm["key"].length, `Невозможно отобразить данные похода. Номер похода не задан` );
 
 	size_t pohodNum;
-
-	if( queryForm.get("key", null).length == 0 )
-	{
-		static immutable errorMsg = `<h3>Невозможно отобразить данные похода. Номер похода не задан</h3>`;
-		Service.loger.error(errorMsg);
-		return TDataNode(errorMsg);
-	}
-
 	try {
-		pohodNum = queryForm.get("key", null).to!size_t;
-	}
-	catch( ConvException e )
-	{
-		static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
-		Service.loger.error(errorMsg2);
-		return TDataNode(errorMsg2);
+		pohodNum = queryForm["key"].to!size_t;
+	} catch( ConvException e ) {
+		throw new Exception(`Невозможно отобразить данные похода. Номер похода должен быть целым числом`);
 	}
 
 	TDataNode dataDict;
 	dataDict["pohodNum"] = pohodNum;
-	dataDict["isAuthorized"] = isAuthorized;
+	dataDict["isAuthorized"] = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum]));
 	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));

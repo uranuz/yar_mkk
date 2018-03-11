@@ -36,7 +36,8 @@ struct PohodDataToWrite
 
 	// Секция "Ссылки на доп. материалы"
 	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
+
+	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных
 }
 
-	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных 
 }

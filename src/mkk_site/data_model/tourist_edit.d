@@ -24,8 +24,8 @@ struct TouristDataToWrite
 	@DBName("comment") Undefable!string comment; // коментарий
 	@DBName("razr") Undefable!int sportsCategory; // спортивный разряд
 	@DBName("sud") Undefable!int refereeCategory; // судейская категория
-}
 
 	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных
+}
 
 }

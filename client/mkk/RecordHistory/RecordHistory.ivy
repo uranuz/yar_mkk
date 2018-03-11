@@ -1,0 +1,40 @@
+expr {=
+from fir.controls.utils import cls;
+def RecordHistory {=
+	def.kv
+		moduleName: 'mkk/RecordHistory/RecordHistory'
+		instanceName: 'recordHistory'
+		cssBaseClass: 'mkk-RecordHistory'
+		history: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<h2>История изменений данных похода</h2>
+		{=if history {=
+			repeat it in history {*
+				<div>
+					<h5>Дата изменений: {{it.time_stamp}}, пользователь №{{it.userNum}}</h5>
+					<h5>Изменения: </h5>
+					{=repeat key in it.changes {*
+						<div>
+							<span>{=str {{key}} }: </span>
+							<span>{=str {=at it.changes key} }</span>
+						</div>
+					*}}
+					<h5>Данные: </h5>
+					{=repeat key in it.data {*
+						<div>
+							<span>{=str {{key}} }: </span>
+							<span>{=str {=at it.data key} }</span>
+						</div>
+					*}}
+				</div>
+				<hr/>
+			*}
+		} }
+	</div>
+	*}
+};
+RecordHistory
+	history: history;
+}

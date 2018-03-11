@@ -13,12 +13,16 @@ def PohodRead {=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['partyList']}"/>
 		<h2>Данные похода</h2>
-		{=if isAuthorized {*
+		<div class="{=cls 'topButtons'}">
+			{=if isAuthorized {*
+			<a href="{{vpaths.siteDynamic}}pohod/history?key={=recGet pohod 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
 			<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
-			class="btn btn-sm btn-secondary"
-			style="position: absolute; top: 0.5rem; right: 0.5rem;"
-			>Редактировать</a>
-		*}}
+				class="btn btn-sm btn-secondary"
+				>Редактировать</a>
+			*}}
+		</div>
 		{%
 			EntityProperty
 				title: 'Код МКК'

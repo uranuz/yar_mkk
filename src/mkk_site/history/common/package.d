@@ -2,7 +2,7 @@ module mkk_site.history.common;
 
 import std.datetime: DateTime;
 import std.json: JSONValue;
-import webtank.common.optional: Optional;
+import webtank.common.optional: Optional, Undefable;
 
 enum HistoryRecordKind: ubyte
 {
@@ -17,7 +17,8 @@ struct HistoryRecordData
 	string tableName;
 	Optional!size_t recordNum;
 	JSONValue data;
-	Optional!size_t userNum;
+	Undefable!size_t userNum;
+	Undefable!DateTime time_stamp; // Must be in UTC
 	string actionUUID;
 	HistoryRecordKind recordKind;
 }
@@ -27,6 +28,12 @@ struct HistoryActionData
 	string uuid;
 	string parentUUID;
 	string description;
-	Optional!size_t userNum;
+	Undefable!size_t userNum;
 	DateTime time_stamp;
+}
+
+struct RecordHistoryFilter
+{
+	size_t recordNum;
+	string tableName;
 }
