@@ -85,7 +85,8 @@ auto statData //начало основной функции////////////////
 	if( select.conduct == 0 )
 	{
 		запрос_статистика =
-			` WITH stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod `;
+			` WITH stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod 
+			WHERE begin_date is not null and vid is not null and ks is not null and unit is not null `;
 		if( b_kod || b_org ||  b_terr )
 			запрос_статистика ~= ` WHERE `;
 		if( b_kod )
@@ -166,6 +167,8 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		SELECT CAST(unit AS integer) AS unit,vid,ks
 		FROM pohod
 		WHERE
+		   unit is not null AND 
+         vid is not null AND
 			(date_part('YEAR', begin_date)>=` ~ PGEscapeStr(select.beginYear)
 		~` AND
 			date_part('YEAR', begin_date)<=` ~ PGEscapeStr(select.endYear) ~`)`;
