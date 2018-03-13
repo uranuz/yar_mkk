@@ -6,10 +6,10 @@ import webtank.common.optional: Optional, Undefable;
 
 enum HistoryRecordKind: ubyte
 {
-	Update, // Обновление записи (передана вся запись)
-	Insert, // Вставка новой записи
-	UpdatePartial, // Обновление записи (переданы изменения)
-	Delete // Удаление записи
+	Update = 0, // Обновление записи (передана вся запись)
+	Insert = 1, // Вставка новой записи
+	UpdatePartial = 2, // Обновление записи (переданы изменения)
+	Delete = 3 // Удаление записи
 }
 
 struct HistoryRecordData

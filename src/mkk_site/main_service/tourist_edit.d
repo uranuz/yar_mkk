@@ -4,6 +4,7 @@ import mkk_site.main_service.devkit;
 import mkk_site.data_model.tourist_edit;
 import mkk_site.history.client;
 import mkk_site.history.common;
+import mkk_site.data_model.full_format;
 
 shared static this()
 {
@@ -124,13 +125,21 @@ auto editTourist(
 		auto writeQueryRes = getCommonDB().query(queryStr);
 		if( writeQueryRes && writeQueryRes.recordCount == 1 )
 		{
+			size_t recordNum = writeQueryRes.get(0, 0, null).to!size_t;
+			
+			auto full_rec = getCommonDB().query(
+				touristFullQuery ~ ` where num = ` ~ recordNum.text).getRecordSet(touristFullFormat).front;
+			JSONValue jFullData;
+			foreach( field; touristFullFormat.names )
+				jFullData[field] = full_rec.getField(field).getStdJSONValue(full_rec.recordIndex);
+			
 			// Сохранение истории действий и изменений
 			import webtank.common.std_json.to: toStdJSON;
 			record.dbSerializeMode = true; // Пишем в JSON имена полей как в БД
 			HistoryRecordData historyData = {
 				tableName: `tourist`,
 				recordNum: writeQueryRes.get(0, 0, null).to!size_t,
-				data: record.toStdJSON(),
+				data: jFullData,
 				recordKind: (record.num.isSet? HistoryRecordKind.Update: HistoryRecordKind.Insert)
 			};
 			sendToHistory(ctx, (record.num.isSet? `Редактирование туриста`: `Добавление туриста`), historyData);
