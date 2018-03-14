@@ -1,33 +1,37 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
+from mkk.Helpers.EntityProperty import EntityProperty;
 def RecordHistory {=
 	def.kv
 		moduleName: 'mkk/RecordHistory/RecordHistory'
 		instanceName: 'recordHistory'
 		cssBaseClass: 'mkk-RecordHistory'
-		history: null;
+		history: null
+		objectName: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
-		<h2>История изменений данных похода</h2>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<h2>История изменений данных {=if objectName objectName ~ 'а'}</h2>
 		{=if history {=
 			repeat it in history {*
 				<div>
 					<h5>Дата изменений: {{it.time_stamp}}, пользователь №{{it.userNum}}</h5>
-					<h5>Изменения: </h5>
-					{=repeat key in it.changes {*
-						<div>
-							<span>{=str {{key}} }: </span>
-							<span>{=str {=at it.changes key} }</span>
+					<h5>Изменения</h5>
+					{=repeat key in it.changes {=
+						EntityProperty
+							title: key
+							value: {=at it.changes key}
+					} }
+					<div class="{=cls 'dataSpoilerBlock'}">
+						<h5 class="{=cls 'dataSpoilerBtn'}">Данные</h5>
+						<div class="{=cls 'dataSpoiler'}">
+						{=repeat key in it.data {=
+							EntityProperty
+								title: key
+								value: {=at it.data key}
+						} }
 						</div>
-					*}}
-					<h5>Данные: </h5>
-					{=repeat key in it.data {*
-						<div>
-							<span>{=str {{key}} }: </span>
-							<span>{=str {=at it.data key} }</span>
-						</div>
-					*}}
+					</div>
 				</div>
 				<hr/>
 			*}
@@ -36,5 +40,6 @@ def RecordHistory {=
 	*}
 };
 RecordHistory
-	history: history;
+	history: history
+	objectName: objectName;
 }

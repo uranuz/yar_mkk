@@ -1,0 +1,22 @@
+.mkk-RecordHistory {
+	&.e-dataSpoilerBlock {
+		margin-top: 12px;
+		margin-bottom: 16px;
+	}
+	&.e-dataSpoiler {
+		display: none;
+	}
+	&.e-dataSpoilerBtn {
+		cursor: pointer;
+	}
+	&.e-dataSpoilerBtn::after {
+		content: '▼';
+		display: inline-block;
+	}
+	&.e-dataSpoilerBtn:hover {
+		text-decoration: underline;
+	}
+	&.e-dataSpoilerBtn.is-open::after {
+		content: '▲';
+	}
+}

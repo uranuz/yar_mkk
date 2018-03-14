@@ -1,4 +1,4 @@
-module mkk_site.view_service.pohod_history;
+module mkk_site.view_service.record_history;
 
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
@@ -34,24 +34,16 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	string method = ctx.request.requestURIMatch.params.get("object", null).to!string;
 	enforce( ["pohod", "tourist"].canFind(method), `Объект истории не найден!` );
-	
 
 	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
 	RecordHistoryFilter pohodFilter;
 
-	if( !queryForm.get("key", null).length )
-	{
-		static immutable errorMsg = `<h3>Невозможно отобразить историю. Номер записи не задан</h3>`;
-		Service.loger.error(errorMsg);
-		return TDataNode(errorMsg);
-	}
+	enforce( queryForm["key"].length, `Невозможно отобразить историю. Номер записи не задан` );
 
 	try {
 		pohodFilter.recordNum = queryForm.get("key", null).to!size_t;
 	} catch( ConvException e ) {
-		static immutable errorMsg2 = `<h3>Невозможно отобразить историю. Номер записи должен быть целым числом</h3>`;
-		Service.loger.error(errorMsg2);
-		return TDataNode(errorMsg2);
+		throw new Exception(`Невозможно отобразить историю. Номер записи должен быть целым числом`);
 	}
 
 	Navigation nav;
@@ -63,6 +55,7 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	]));
 	TDataNode dataDict;
 	dataDict["history"] = callResult;
+	dataDict["objectName"] = ("pohod" == method? "поход": "турист");
 	dataDict["isAuthorized"] = isAuthorized;
 
 	return ViewService.templateCache.getByModuleName("mkk.RecordHistory").run(dataDict);

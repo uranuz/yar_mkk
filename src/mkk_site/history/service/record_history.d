@@ -34,6 +34,10 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 	import std.conv: to, text;
 	import std.string: join;
 	import std.algorithm: canFind;
+	import std.exception;
+
+	enforce( ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder")),
+		`Требуется вход на сайт для просмотра истории изменений!`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 	auto history_rs = getHistoryDB().query(`
