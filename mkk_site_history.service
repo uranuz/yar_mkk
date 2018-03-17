@@ -1,0 +1,22 @@
+[Unit]
+Description=MKK site history service
+After=network.target
+After=nginx.target
+After=postgresql-9.6.target
+
+[Service]
+WorkingDirectory=/home/yar_mkk/sites/mkk_site/
+ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_history_service
+PIDFile=/var/run/mkk_site_history_service.pid
+
+User=yar_mkk
+Group=yar_mkk
+
+Type=simple
+
+TimeoutSec=300
+Restart=always
+OOMScoreAdjust=-100
+
+[Install]
+WantedBy=multi-user.target
