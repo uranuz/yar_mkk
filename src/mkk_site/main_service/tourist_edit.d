@@ -24,6 +24,7 @@ auto editTourist(
 	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
 	import std.array: join;
+	import std.json: JSONValue;
 
 	bool isAuthorized	= ctx.user.isAuthenticated
 		&& ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );

@@ -21,6 +21,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import std.datetime: Date;
 	import std.typecons: tuple;
 	import std.string: strip, join;
+	import std.json: JSONValue;
 	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
 
