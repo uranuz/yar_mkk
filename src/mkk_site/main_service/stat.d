@@ -14,17 +14,17 @@ import std.json;
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(statData)(`stat.Data`);
+	MainService.JSON_RPCRouter.join!(statCsv)(`stat.Csv`);
 }
 //**********************************************************
-
-auto statData //начало основной функции////////////////
- (HTTPContext context,StatSelect select)
-  
- {   
-	import std.meta;//staticMap
+auto first_reading// первичное чтение и очистка
+(HTTPContext context,StatSelect select)
+{
+import std.meta;//staticMap
 	import std.range;//iota
 	static immutable string[] prezent = [ "Год","Вид/КС" ];
 	static immutable size_t[] number_lines = [12,10];
+	
 
 	template FieldPairFormat(size_t index) {
 		alias FieldPairFormat = AliasSeq!(
@@ -48,9 +48,7 @@ auto statData //начало основной функции////////////////
 	
 	 	//***********************************
 	string[] заголовок;//заголовок таблицы
-	size_t qtyGraf;//возможное число графиков
-	bool[] boolGraf;//разрешонные графики	
-	qtyGraf = 12;
+	
 
 	if( select.conduct == 0 )
 	{
@@ -68,8 +66,7 @@ auto statData //начало основной функции////////////////
 		];
 	}
 
-	boolGraf.length = qtyGraf;
-	boolGraf[] = false;
+	
 
 	bool b_kod = false, b_org = false, b_terr = false;
 	if(select.kodMKK.length)
@@ -185,7 +182,6 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			  AND  region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ) ,`;
-		
 
 		запрос_статистика ~= `
 			  ks0 AS ( SELECT vid,count(unit) AS gr_0,  sum (unit)  
@@ -238,25 +234,22 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			SELECT*FROM st2 ORDER BY vid
 			`;
 	}
-
 	//-----конец -запроса--"по КС"
 
 	auto dbase = getCommonDB(); //Подключение к базе
 	IDBQueryResult rs;
 	 
 	rs = dbase.query(запрос_статистика);//.getRecordSet(statRecFormatVid);
-	//*******************************************
-
+	                  //************************
 	bool parity;
-	// --формируем исходные матрицы------///////////
-	
+	// --формируем исходные матрицы------//
 	string[][] for_all; //обобщённый массив данных 
 	//----------------------
-
 	for_all.length = rs.recordCount+1; //строк втаблице
 
 	// --первая строка
 	string[] pref_data_array;
+	size_t qtyGraf;//возможное число графиков
 	pref_data_array.length = qtyGraf;
 	pref_data_array = заголовок;
 	for_all[][0]=pref_data_array;
@@ -300,7 +293,12 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 		for_all[][recIndex+1]=data_array;
 	}
-	// -----удаляем пустые столбцы----
+
+	return for_all;
+}
+//*******************************************************
+auto compressed_data (string[][]for_all)//удаляем пустые столбцы
+{
 	string[][]compressed_data;
 	string[] last_line = for_all[for_all.length-1];
 
@@ -315,6 +313,16 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 			
 		compressed_data ~= data_array;
 	} 
+	return compressed_data;
+}
+ 
+
+//*******************************************************
+auto tabl_data (string[][] for_all)//матрица таблицы
+{
+	//удаляем пустые столбцы
+	string[][]compressed_data = compressed_data (for_all);
+
 	//--------матрица таблицы-------------
 
 	bool t = false;
@@ -351,34 +359,51 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 		}
 		tabl_data ~= str;
 		t = true;
+		
 	}
-	//конец--------матрица таблицы-------------
+	//конец--------матрица таблицы------------
+	return tabl_data;
+}
+//*******************************************************
 
-	//  ----"csv"-----------
- 
-  string csv_stat;
-  csv_stat ~= "Данные по числу походов/ участников \n\r";
+auto statData //начало основной функции////////////////
+ (HTTPContext context,StatSelect select)
   
-	if( select.conduct == 0 )  csv_stat ~="по годам \n\r";	
-	if( select.conduct == 1 ) csv_stat ~="по КС \n\r";
-	foreach( str; tabl_data )
-			 {
-				 foreach( el; str )  csv_stat ~= el.to!string~',';
-				 csv_stat ~= "\n\r";
-				 //writeln(col.to!string);
+ {   
+	import std.meta;//staticMap
+	import std.range;//iota
 
-				 
+	size_t qtyGraf;//возможное число графиков
+	bool[] boolGraf;//разрешонные графики	
+	qtyGraf = 12;
+	boolGraf.length = qtyGraf;
+	boolGraf[] = false;
 
+	string[][] for_all=first_reading ( context,select);
+	// первичное чтение и очистка
 
-			 }
+// -----удаляем пустые столбцы----
+	string[][]compressed_data;
+	string[] last_line = for_all[for_all.length-1];
 
-  
-	//-----конец -"csv"-
+	foreach(i, str; for_all)
+	{
+		string[] data_array;
+		data_array ~=for_all[i][0];
 
+		for( int g=1; g < str.length; ++g )
+			if( last_line[g].length != 0 )
+				data_array ~= for_all[i][g];
+			
+		compressed_data ~= data_array;
+	} 
 	
+	string[][] tabl_data = tabl_data (for_all);//матрица таблицы
+
+
 
 	//--------матрица графика-------------
-	
+	size_t  p;
 	string[][] graf_data;
 	foreach( data_str; for_all )
 	{
@@ -411,8 +436,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 	string[][] trans_graf_data;
 	string[][] var;
-	//string []Surs0=["0","1","2","3","4","5","6","7" ];
-
+	
 	if(select.conduct == 0)
 	{
 		trans_graf_data = transposed(graf_data[1..compressed_data.length-1]).map!( (a) => a.array ).array;
@@ -463,7 +487,35 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	result[`graf`]=trans_graf_data;
 	result[`grafLength`]=trans_graf_data[0].length;
 	result[`boolGraf`]=boolGraf;
-	//**************************************
+	
 			
 	return result;
  }
+//********"csv"******************************
+ auto statCsv (HTTPContext context, StatSelect select)
+ {
+	string[][] for_all= first_reading(context, select);
+	string[][]tabl_data=tabl_data (for_all);//удаляем пустые столбцы
+
+	//  ----"csv"-----------
+    string csv_stat;
+   csv_stat ~= ",Данные ,по числу ,походов/, участников \n\r";
+  
+	if( select.conduct == 0 )  csv_stat ~="по годам \n\r";	
+	if( select.conduct == 1 ) csv_stat ~="по КС \n\r";
+	foreach( str; tabl_data )
+			 {
+				 foreach( el; str )  csv_stat ~= el.to!string~',';
+				 csv_stat ~= "\n\r";
+			 }
+ 		
+
+		 //JSONValue result;
+		 //result[`csv_stat`]=csv_stat;
+
+		//writeln(result.to!string);
+
+
+		 //return result;
+		 return csv_stat;
+ };
