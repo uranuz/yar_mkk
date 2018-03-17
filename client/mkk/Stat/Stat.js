@@ -13,7 +13,7 @@ define('mkk/Stat/Stat', [
 		FirControl.call(this, opts);
 		this._elems('byYearBtn').on('click', this.reloadPage);
 		this._elems('byComplexityBtn').on('click', this.reloadPage);
-		//this._elems('csvBtn').on('click', this.reloadPage);
+		this._elems('csvBtn').on('click', this.reloadPage);
 		this._opts = opts;
 		this._tooltipWindow = this._elems('plotTooltip');
 		this.doFlot();

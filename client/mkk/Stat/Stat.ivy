@@ -15,6 +15,10 @@ def Document {=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<h2>Статьи и документы</h2>
+		<button type="submit"  name="CSV" value="Добавить" formaction="{{vpaths.siteDynamic}}stat.csv"
+			class="{=cls 'csvBtn'} btn btn-outline-success btn-sm"
+			style="position: absolute; top: 0.5rem; right: 0.5rem;"
+			>Печать  в CSV формат</button>
 		<p>Относительно полная информация с 1992 года, ранее фрагментарный характер информации.</p>
 		<p>
 			<a href="/pub/stati_dokument/stat1992_2010.rar"
@@ -42,10 +46,6 @@ def Document {=
 
 						
 					</label>
-					<button type="button"  name="CSV" 
-						onclick="location.href='{{vpaths.siteDynamic}}tourist/list'"						
-													class="{=cls 'csvBtn'} btn btn-outline-success" style="display: none;"
-									>Печать  в CSV формат</button>
 				</div>
 				
 			</fieldset>
