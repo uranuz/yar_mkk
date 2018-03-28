@@ -1,6 +1,6 @@
 module mkk_site.main_service.main;
 
-import webtank.net.web_server: WebServer2;
+import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
 import mkk_site.common.service: Service;
 
 // Подключение разделов сервиса
@@ -19,13 +19,12 @@ import mkk_site.main_service.user_settings;
 import mkk_site.main_service.stat;
 import mkk_site.main_service.init_history_data;
 
-void main(string[] progAgs)
+void main(string[] progArgs)
 {
-	import std.getopt: getopt;
-
-	ushort port = 8083;
-	getopt(progAgs, "port", &port);
-
-	auto server = new WebServer2(port, Service.rootRouter, Service.loger, 5);
-	server.start();
+	WorkerOpts opts;
+	opts.port = 8083;
+	parseWorkerOptsFromCmd(progArgs, opts);
+	opts.handler = Service.rootRouter;
+	opts.loger = Service.loger;
+	runServer(opts);
 }

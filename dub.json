@@ -177,6 +177,18 @@
 			]
 		},
 		{
+			"name": "dispatcher",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"dependencies": {
+				"webtank": ">=0.0.0"
+			},
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk_site/tools/dispatcher.d"
+			]
+		},
+		{
 			"name": "deploy",
 			"targetType": "executable",
 			"targetPath": "bin",
