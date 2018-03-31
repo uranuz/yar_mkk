@@ -11,14 +11,17 @@ define('mkk/Pagination/Pagination', [
 	function Pagination(opts) {
 		FirControl.call(this, opts);
 		this._formField = opts.formField;
+		this._pageSizeFormField = opts.pageSizeFormField;
 
 		// Пытаемся определить тип постраничной нафигации на основе того, какая опция задана.
 		// По-умолчанию предполагаем режим с использованием offset (сдвига по записям)
 		if( opts.currentPage != null ) {
-			this._mode = PaginationMode.Page;
+			this.setPaginationMode(PaginationMode.Page);
 		} else {
-			this._mode = PaginationMode.Offset;
+			this.setPaginationMode(PaginationMode.Offset);
 		}
+		this.setPageSize(opts.pageSize);
+
 		this._elems('firstBtn').on('click', this.gotoFirst.bind(this));
 		this._elems('prevBtn').on('click', this.gotoPrev.bind(this));
 		this._elems('nextBtn').on('click', this.gotoNext.bind(this));
@@ -97,6 +100,34 @@ define('mkk/Pagination/Pagination', [
 			var pageSize = parseInt(this._elems('pageSizeField').val(), 10);
 			return isNaN(pageSize)? null: pageSize;
 		},
+		setPaginationMode: function(mode) {
+			if( [PaginationMode.Page, PaginationMode.Offset].indexOf(mode) < 0 ) {
+				throw new Error('Invalid navigation mode: ' + mode);
+			}
+			this._mode = mode;
+			switch(this._mode) {
+				case PaginationMode.Offset: {
+					this._elems('pageHiddenField').attr('name', null);
+					this._elems('offsetField').attr('name', this._formField);
+					break;
+				}
+				case PaginationMode.Page: {
+					this._elems('pageHiddenField').attr('name', this._formField);
+					this._elems('offsetField').attr('name', null);
+					break;
+				}
+				default: break;
+			}
+		},
+		setPageSize: function(pageSize) {
+			if( pageSize === null ) {
+				return;
+			}
+			this._elems('pageSizeField').val(pageSize);
+			if( this.pageSizeFormField ) {
+				this._elems('pageSizeField').attr('name', this.pageSizeFormField);
+			}
+		},
 		/**
 		 * Метод, который нужно вызывать для установки навигационного состояния
 		 * @param {object} nav - состояние навигации
@@ -106,19 +137,13 @@ define('mkk/Pagination/Pagination', [
 		 * 	offset - индекс первой записи страницы в списке записей, по которым идёт навигация (начинается с 0)
 		 */
 		setNavigation: function(nav) {
-			if( nav.pageSize != null ) {
-				this._elems('pageSizeField').val(nav.pageSize);
-			}
+			this.setPageSize(nav.pageSize);
 
 			// Пытаемся уточнить режим постраничной навигации по возвращённой структуре
 			if( nav.currentPage != null && nav.offset == null ) {
-				this._mode = PaginationMode.Page;
-				this._elems('pageHiddenField').attr('name', this._formField);
-				this._elems('offsetField').attr('name', null);
+				this.setPaginationMode(PaginationMode.Page);
 			} else if( nav.offset != null ) {
-				this._mode = PaginationMode.Offset;
-				this._elems('pageHiddenField').attr('name', null);
-				this._elems('offsetField').attr('name', this._formField);
+				this.setPaginationMode(PaginationMode.Offset);
 			} // else: Режим навигации не изменился
 
 			// Обновляем значения основных полей изходя из полученной стуктуры навигации,
