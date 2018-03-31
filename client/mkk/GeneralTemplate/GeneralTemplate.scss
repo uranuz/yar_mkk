@@ -153,6 +153,7 @@ body {
 	background: #d4d2ab;
 	margin-right: 16px;
 	margin-bottom: 8px;
+	border-radius: 4px;
 }
 
 @media (max-width: 900px) {
@@ -178,6 +179,7 @@ body {
 	background: #e4e2bf;
 	display: inline-block; /* Создает новый Block formatting context */
 	width: 100%;
+	border-radius: 4px;
 }
 
 #footer_pusher {
