@@ -42,8 +42,10 @@ def TouristList {=
 				<div class="{=cls 'pagination'} col-auto form-group">
 					{=Pagination
 						formField: 'offset'
+						pageSizeFormField: 'pageSize'
 						offset: nav.offset
 						recordCount: nav.recordCount
+						pageSize: nav.pageSize or 10
 					}
 				</div>
 				{=if isAuthorized {*
