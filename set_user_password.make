@@ -1,1 +1,0 @@
-rdmd --build-only --force -version=devel "-Isrc/" "-I../webtank/src/" "-I../openssl/" "-I../" -ofset_user_password src/mkk_site/utilities/set_user_password.d

@@ -12,6 +12,7 @@ static immutable dubConfigs = [
 	`main_service`,
 	`view_service`,
 	`history_service`,
+	`dispatcher`,
 	`add_user`,
 	`set_user_password`,
 	`gen_pw_hash`,

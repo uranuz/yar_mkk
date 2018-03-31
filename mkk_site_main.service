@@ -6,7 +6,7 @@ After=postgresql-9.6.target
 
 [Service]
 WorkingDirectory=/home/yar_mkk/sites/mkk_site/
-ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_main_service
+ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_dispatcher --workerPath=./bin/mkk_site_main_service --port=8083
 PIDFile=/var/run/mkk_site_main_service.pid
 
 User=yar_mkk
