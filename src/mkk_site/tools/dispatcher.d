@@ -6,7 +6,7 @@ void main(string[] progArgs)
 {
 	import std.getopt: getopt;
 	string workerPath;
-	ushort port = 8082;
+	ushort port = 0; // Invalid port
 	string workerSockAddr;
 	getopt(progArgs,
 		"port", &port,

@@ -5,7 +5,7 @@ After=nginx.target
 
 [Service]
 WorkingDirectory=/home/yar_mkk/sites/mkk_site/
-ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_view_service
+ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_dispatcher --workerPath=./bin/mkk_site_view_service --port=8082
 PIDFile=/var/run/mkk_site_view_service.pid
 
 User=yar_mkk
