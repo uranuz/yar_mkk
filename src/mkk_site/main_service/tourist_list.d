@@ -104,6 +104,8 @@ auto getTouristListImpl(ResultFormat)(
 			auto field = __traits(getMember, filter, fieldName);
 			static if( is( FieldType == string ) )
 			{
+				import std.string: strip;
+				field = field.strip();
 				if( field.length > 0 ) {
 					filters ~= dbFieldName ~ ` ilike '%` ~ PGEscapeStr(field) ~ `%'`;
 				}

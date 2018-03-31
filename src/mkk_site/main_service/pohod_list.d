@@ -242,7 +242,7 @@ alias PohodEnumFields = AliasSeq!(
 );
 
 //Формирует чать запроса по фильтрации походов (для SQL-секции where)
-string getPohodFilterQueryPart(ref const(PohodFilter) filter)
+string getPohodFilterQueryPart(ref PohodFilter filter)
 {
 	import std.datetime: Date;
 	import std.array: join;
@@ -282,6 +282,8 @@ string getPohodFilterQueryPart(ref const(PohodFilter) filter)
 	}
 	filters ~= dateFilters;
 
+	import std.string: strip;
+	filter.pohodRegion = filter.pohodRegion.strip();
 	if( filter.pohodRegion.length > 0 )
 		filters ~= `region_pohod ILIKE '%` ~ PGEscapeStr(filter.pohodRegion) ~ `%'`;
 

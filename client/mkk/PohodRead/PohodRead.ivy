@@ -90,10 +90,16 @@ def PohodRead {=
 				isWide: true;
 			EntityProperty
 				title: 'Дополнительные материалы'
-				value: {=if extraFileLinks != null
+				value: {=if extraFileLinks != null {*
+				<ol class="{=cls 'extraFileLinksList'}">
 					{=repeat linkData in extraFileLinks {*
-						<a href="{=at linkData 0}">{=at linkData 1}</a>
+					<li>
+						<a href="{=at linkData 0}" target="__blank" title="{=at linkData 0}">{=at linkData 1}</a>
+					</li>
 					*}}
+				</ol>
+				*}
+					
 				}
 				isWide: true;
 		}
