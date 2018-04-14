@@ -5,6 +5,8 @@ import mkk_site.data_model.enums;
 import mkk_site.data_model.pohod_list;
 
 import webtank.common.std_json.to: toStdJSON;
+import webtank.common.optional_date;
+
 
 shared static this()
 {
@@ -13,11 +15,14 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
 	MainService.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
 	MainService.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
+	MainService.JSON_RPCRouter.join!(pohodCsv)(`pohod.Csv`);
+
 }
 
 import std.datetime: Date;
 import std.typecons: tuple;
 import std.meta: AliasSeq;
+import std.stdio;
 
 alias BasePohodFields = AliasSeq!(
 	PrimaryKey!(size_t), "num",
@@ -235,10 +240,10 @@ private static immutable string pohodListDataCheckSubquery =
 // 1: формат перечислимого типа для этого параметра
 // 2: соответствующее название поля в структуре ФильтрПоходов
 alias PohodEnumFields = AliasSeq!(
-	tuple("tourismKind", видТуризма, "vid"),
-	tuple("complexity", категорияСложности, "ks"),
-	tuple("progress", готовностьПохода, "prepar"),
-	tuple("claimState", статусЗаявки, "stat")
+	tuple("tourismKind", видТуризма, "vid", "вид туризма"),
+	tuple("complexity", категорияСложности, "ks", "категория cложности"),
+	tuple("progress", готовностьПохода, "prepar", "готовность похода"),
+	tuple("claimState", статусЗаявки, "stat", "статус заявки")
 );
 
 //Формирует чать запроса по фильтрации походов (для SQL-секции where)
@@ -326,12 +331,15 @@ size_t getPohodCount(PohodFilter filter)
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 
+		 import std.stdio;
+	
+
 	 return getCommonDB().query(query).get(0, 0, "0").to!size_t;
 }
+//-----------------------------------------------------------------
+import mkk_site.data_model.common: Navigation;// Структура для навигации по выборке данных сдвиг,чисо записей...
 
-import mkk_site.data_model.common: Navigation;
-
-JSONValue getPohodList(PohodFilter filter, Navigation nav)
+IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 {
 	import std.conv: text;
 
@@ -349,13 +357,168 @@ JSONValue getPohodList(PohodFilter filter, Navigation nav)
 	if( filter.withFilter )
 		query ~= ` where ` ~ getPohodFilterQueryPart(filter);
 
-	nav.normalize(getPohodCount(filter));
+	//nav.normalize(getPohodCount(filter));//****************************************************
 
 	// Упорядочивание и страничный отбор уже делаем по готовым данным
 	query ~= ` order by "beginDate" desc offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
 
+	
+ 	IDBQueryResult rs=getCommonDB().query(query); //таблица данных
+
+		
+	
+ return rs;
+			
+}
+//---------------------------------------------------------------
+JSONValue getPohodList( PohodFilter filter, Navigation nav)
+{
+
+	import std.conv: text;
+
+	nav.normalize(getPohodCount(filter));
+ IDBQueryResult rs=PohodList(filter, nav);
+
+
 	return JSONValue([
-		"rs": getCommonDB().query(query).getRecordSet(pohodRecFormat).toStdJSON(),
+		"rs": rs.getRecordSet(pohodRecFormat).toStdJSON(),
 		"nav": nav.toStdJSON()
 	]);
+}
+//---------------------------------------------------------------
+auto pohodCsv(HTTPContext context,PohodFilter filter)
+{
+	import std.stdio;
+	import std.string: translate;
+	import std.datetime.date;
+	import std.conv; 
+	import mkk_site.data_model.enums;
+
+
+
+	string [ dchar ] transTable1 = [',':" /",'\r':" ",'\n':" " ];
+
+
+
+
+	
+	 string pohod_csv=",Походы\r\n";
+//--------------
+	import std.algorithm: map;
+	import std.string: join;
+		
+	string[] enumFields;
+	foreach( enumSpec; PohodEnumFields )
+	{
+		enumFields ~= `, ` ~ enumSpec[3] ~ `:, ` ~ 
+			__traits(getMember, filter, enumSpec[0]).map!( (it) => enumSpec[1].getName(it) ).join(",");
+	}
+	
+
+		
+		pohod_csv ~=("Фильтры походов\r\n",enumFields.join("\r\n"));
+		pohod_csv ~= ",,,\r\n";
+
+		if(filter.pohodRegion.length) pohod_csv ~= ",Район, похода,"~filter.pohodRegion~",\r\n";
+
+		if(!filter.dates["beginRangeHead"].isNull) pohod_csv ~= ",с,"  ~ dateRusFormatLetter ( filter.dates["beginRangeHead"])~",\r\n";
+
+		if(!filter.dates["endRangeTail"].isNull)pohod_csv ~= ",по," ~ dateRusFormatLetter ( filter.dates["endRangeTail"]) ~ ",\r\n" ;	
+
+		if(filter.withFiles) pohod_csv ~= ",Походы с ,дополнительными, материалами,"~",\r\n";
+
+//--------------------------
+
+
+  pohod_csv ~= "№ в базе,код МКК,№ книги,Начало похода,Конец похода,Вид,Категория,с эл.,Район,Руков Ф,Руков И,Руков О,Руков ГР,Число участников,Организация,Город,Маршрут, Готовность похода,Статус заявки,\r\n";
+
+	Navigation nav;
+	 nav.offset.getOrSet(0); nav.pageSize.getOrSet(10000);
+
+
+	IDBQueryResult rs=PohodList(filter, nav);
+
+
+	string[][] for_all; //обобщённый массив данных 
+	for_all.length = rs.recordCount+1; //строк втаблице
+
+		foreach( recIndex; 0..rs.recordCount ) 
+	{
+		string[] data_array;
+		data_array.length = rs.fieldCount;
+			
+		foreach( column_num; 0..rs.fieldCount )
+		{
+			data_array[column_num]=rs.get(column_num, recIndex);
+		}
+
+		for_all[][recIndex]=data_array;
+	}
+
+
+
+    foreach( str; for_all )
+			 {
+				size_t  columnNumberInQuery=0;
+
+				size_t p=0;
+
+				 foreach( el; str ) 
+				 {
+							
+								switch(p)
+									{
+										case 3,4:
+											if(el.length!=0)
+										{
+											
+											auto dt = Date.fromISOExtString(el);
+										pohod_csv ~= dt.day.to!string ~ `.` ~ (cast(int) dt.month).to!string ~ `.` ~ dt.year.to!string ~  ',';
+										} else pohod_csv ~=  ',';
+										//преобразование формата даты	
+										break;
+
+										case 6:
+										if(el.length!=0)
+										{											
+										    pohod_csv ~= категорияСложности[el.to!int]~  ',';
+										}	else pohod_csv ~=  ',';									
+										break;
+
+										case 5:
+										if(el.length!=0)
+										{
+										    pohod_csv ~= видТуризма[el.to!int]~  ',';
+										} else pohod_csv ~=  ',';
+										break;
+
+										case 19:
+										if(el.length!=0)
+										{
+										    pohod_csv ~= готовностьПохода[el.to!int]~  ',';
+										} else pohod_csv ~=  ',';
+										break;
+
+										case 20:
+										if(el.length!=0)
+										{
+										    pohod_csv ~= статусЗаявки[el.to!int]~  ',';
+										} else pohod_csv ~=  ',';
+										break;
+
+										case 9,18:										
+										break;
+
+									 default: 
+									 pohod_csv ~= translate ( el , transTable1)~  ',';
+										break;
+									}
+
+								p=p+1;
+				 }
+				 pohod_csv ~= "\r\n";
+			 }
+
+ 
+		return pohod_csv;
 }

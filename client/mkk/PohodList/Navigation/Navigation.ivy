@@ -11,7 +11,8 @@ def PohodListNavigation {=
 		pohodEnums: null
 		filter: {}
 		nav: {}
-		paginationSideContent: null;
+		paginationSideContent: null
+		vpaths: {};
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -101,6 +102,12 @@ def PohodListNavigation {=
 							</label>
 
 						</div>
+								<button type="submit"
+										name="CSV"
+										value="CSV"
+										formaction="{{vpaths.siteDynamic}}pohod.csv"
+										class="{=cls 'csvBtn'} btn btn-outline-success btn-sm"
+										>Печать  в CSV формат</button>
 					</div>
 					<div class="form-group">
 						<button type="submit"

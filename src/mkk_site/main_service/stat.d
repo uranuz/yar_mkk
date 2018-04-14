@@ -85,7 +85,7 @@ import std.meta;//staticMap
 			` WITH stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod 
 			WHERE begin_date is not null and vid is not null and ks is not null and unit is not null `;
 		if( b_kod || b_org ||  b_terr )
-			запрос_статистика ~= ` WHERE `;
+			запрос_статистика ~= ` AND `;
 		if( b_kod )
 		{
 			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%'`;
@@ -499,23 +499,27 @@ auto statData //начало основной функции////////////////
 
 	//  ----"csv"-----------
     string csv_stat;
-   csv_stat ~= ",Данные ,по числу ,походов/, участников \n\r";
-  
-	if( select.conduct == 0 )  csv_stat ~="по годам \n\r";	
-	if( select.conduct == 1 ) csv_stat ~="по КС \n\r";
+   csv_stat ~= ",Данные ,по числу ,походов/, участников \r\n";
+
+	if(select.kodMKK.length)        csv_stat ~=",Код МКК,"~ select.kodMKK ~" \r\n";
+	if(select.organization.length)  csv_stat ~=",Организация,"~ select.organization ~" \r\n";
+	if(select.territory.length)     csv_stat ~=",Территория,"~ select.territory ~" \r\n";
+
+	if( select.conduct == 0 )  csv_stat ~=",по годам \r\n";
+	if( select.conduct == 1 )
+	{  
+		csv_stat ~=",по КС  ";
+		if(select.beginYear.length) csv_stat ~= ",С " ~ select.beginYear ;
+		if(select.endYear.length) csv_stat ~= ",по "  ~  select.endYear ;
+		csv_stat ~=",\r\n";
+	}
+
+
 	foreach( str; tabl_data )
 			 {
 				 foreach( el; str )  csv_stat ~= el.to!string~',';
-				 csv_stat ~= "\n\r";
+				 csv_stat ~= "\r\n";
 			 }
- 		
-
-		 //JSONValue result;
-		 //result[`csv_stat`]=csv_stat;
-
-		//writeln(result.to!string);
-
-
-		 //return result;
+			 
 		 return csv_stat;
  };

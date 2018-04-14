@@ -18,7 +18,7 @@ def Document {=
 			<h2>Статьи и документы</h2>
 			<button type="submit"
 				name="CSV"
-				value="Добавить"
+				value="CSV"
 				formaction="{{vpaths.siteDynamic}}stat.csv"
 				class="{=cls 'csvBtn'} btn btn-outline-success btn-sm"
 				>Печать  в CSV формат</button>

@@ -11,4 +11,9 @@
 		display: inline-block;
 		width: 3ex;
 	}
+	&.e-csvBtn {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+	}
 }
