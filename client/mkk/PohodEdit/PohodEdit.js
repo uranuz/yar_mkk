@@ -96,13 +96,12 @@ define('mkk/PohodEdit/PohodEdit', [
 			chiefBtn.text( MKKHelpers.getTouristInfoString(rec) );
 		},
 		
-		onDeleteChief: function(ev) {
+		onDeleteChief: function(ev, rec, isAltChief) {
 			var
-				sender = ev.target,
-				keyInp = this._elems(sender.isAltChief? 'altChiefNumField': 'chiefNumField'),
-				chiefBtn = this._elems(sender.isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
+				keyInp = this._elems(isAltChief? 'altChiefNumField': 'chiefNumField'),
+				chiefBtn = this._elems(isAltChief? 'altChiefEditBtn': 'chiefEditBtn');
 
-			if( sender.isAltChief ) {
+			if( isAltChief ) {
 				this._altChiefRec = null;
 			} else {
 				this._chiefRec = null;

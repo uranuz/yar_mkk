@@ -36,8 +36,9 @@ define('mkk/PohodEdit/ChiefEdit/ChiefEdit', [
 
 		//Тык по кнопке удаления зам. руководителя похода
 		_onDeleteChief: function(ev) {
+			var rec = this._chiefRec;
 			this._chiefRec = null;
-			this._notify("deleteChief");
+			this._notify("deleteChief", rec, this._isAltChief);
 			this.closeDialog();
 		},
 

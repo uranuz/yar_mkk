@@ -11,6 +11,7 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 		this.setFilter(opts.filter);
 		this.setMode(opts.mode);
 		this._listView.subscribe('onTouristListLoaded', this._onTouristListLoaded.bind(this));
+		this._listView.subscribe('itemActivated', this._onTouristItemActivated.bind(this));
 		this._pagination = this.getChildInstanceByName(this.instanceName() + 'Pagination');
 		this._pagination.subscribe('onSetCurrentPage', this._onSetCurrentPage.bind(this));
 	}
@@ -29,6 +30,11 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 		},
 		_onTouristListLoaded: function(ev, rs, nav) {
 			this._pagination.setNavigation(nav);
+			this._notify.apply(this, ['onTouristListLoaded'].concat([].slice.call(arguments, 1)));
+		},
+		_onTouristItemActivated: function() {
+			// Пробрасываем событие внутр. компонента наружу
+			this._notify.apply(this, ['itemActivated'].concat([].slice.call(arguments, 1)));
 		},
 		_onSetCurrentPage: function() {
 			this._listView.setNavigation({
