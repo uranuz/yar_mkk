@@ -34,7 +34,7 @@ auto baseUserInfo(HTTPContext context)
 		} catch(ConvException ex) {}
 	}
 
-	result[`group`] = userIdentity.data.get(`group`, null);
+	result[`accessRoles`] = userIdentity.data.get(`accessRoles`, null);
 	result[`touristNum`] = null; // TODO: Добавить получение идентификатора туриста для пользователя
 
 	return result;

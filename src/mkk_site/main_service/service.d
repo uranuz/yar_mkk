@@ -6,12 +6,19 @@ import mkk_site.common.service;
 class MKKMainService: JSON_RPCService
 {
 	import mkk_site.security.core.access_control: MKKMainAccessController;
+	import mkk_site.security.common.access_rules: makeCoreAccessRules;
+	import webtank.security.right.controller: AccessRightController;
+	import webtank.security.right.db_source: RightDatabaseSource;
 	import std.functional: toDelegate;
 
 	this(string serviceName)
 	{
 		super(serviceName,
-			new MKKMainAccessController(toDelegate(&getAuthDB))
+			new MKKMainAccessController(toDelegate(&getAuthDB)),
+			new AccessRightController(
+				makeCoreAccessRules(),
+				new RightDatabaseSource(toDelegate(&getAuthDB))
+			)
 		);
 	}
 
@@ -45,8 +52,15 @@ IDatabase getAuthDB() @property
 	return _authDB;
 }
 
-shared static this() {
+shared static this()
+{
 	Service(new MKKMainService("yarMKKMain"));
+
+	import webtank.security.right.source_method: getAccessRightList;
+	// Добавляем метод получения прав доступа в состав основного сервиса
+	MainService.JSON_RPCRouter.join!( () =>
+		getAccessRightList(MainService.rights.rightSource)
+	)(`accessRight.list`);
 }
 
 import webtank.db.database: IDatabase;

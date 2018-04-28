@@ -16,9 +16,9 @@ enum scryptR = 8;
 enum scryptP = 1;
 
 //Служебная функция для генерации Ид сессии
-SessionId generateSessionId(const(char)[] login, const(char)[] group, const(char)[] dateString)
+SessionId generateSessionId(const(char)[] login, const(char)[] rolesStr, const(char)[] dateString)
 {
-    auto idSource = login ~ "::" ~ dateString ~ "::" ~ group; //Создаём исходную строку
+    auto idSource = login ~ "::" ~ dateString ~ "::" ~ rolesStr; //Создаём исходную строку
 	SessionId sessionId;
 	SHA384( cast(const(ubyte)*) idSource.ptr, idSource.length, sessionId.ptr );
 	return sessionId; //Возвращаем идентификатор сессии

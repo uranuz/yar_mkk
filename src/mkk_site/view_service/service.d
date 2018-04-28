@@ -13,6 +13,8 @@ MKKViewService ViewService() @property
 
 import webtank.ivy.view_service: IvyViewService;
 import mkk_site.security.common.access_control_client: MKKAccessControlClient;
+import webtank.security.right.controller: AccessRightController;
+import webtank.security.right.remote_source: RightRemoteSource;
 class MKKViewService: IvyViewService
 {
 	import mkk_site.common.utils;
@@ -25,7 +27,10 @@ public:
 	{
 		super(serviceName,
 			new MKKAccessControlClient,
-			pageURIPatternStr
+			pageURIPatternStr,
+			new AccessRightController(
+				new RightRemoteSource(this, `yarMKKMain`, `asseccRight.list`)
+			)
 		);
 	}
 

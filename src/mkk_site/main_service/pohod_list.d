@@ -416,7 +416,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 	
 
 		
-		pohod_csv ~=("Фильтры походов\r\n",enumFields.join("\r\n"));
+		pohod_csv ~= "Фильтры походов\r\n" ~ enumFields.join("\r\n");
 		pohod_csv ~= ",,,\r\n";
 
 		if(filter.pohodRegion.length) pohod_csv ~= ",Район, похода,"~filter.pohodRegion~",\r\n";

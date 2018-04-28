@@ -28,26 +28,35 @@ public:
 	///Возвращает удостоверение пользователя
 	IUserIdentity authenticateSession(HTTPContext context)
 	{
-		import std.json;
-		import std.base64: Base64URL;
+		import std.json: JSON_TYPE, JSONValue;
+		// Запрос получает минимальную информацию о пользователе по Ид. сессии в контексте
 		auto jUserInfo = endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`, context);
 
-		assert(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
+		import std.exception: enforce;
+		enforce(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
 
 		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSON_TYPE.INTEGER ) {
 			return new AnonymousUser();
 		}
 
+		import std.base64: Base64URL;
 		SessionId sid;
 		Base64URL.decode(context.request.cookies.get(`__sid__`, null), sid[]);
 
-		//Получаем информацию о пользователе из результата запроса
-		return new MKKUserIdentity(
-			( `login` in jUserInfo && jUserInfo[`login`].type == JSON_TYPE.STRING? jUserInfo[`login`].str: null ),
-			( `name` in jUserInfo && jUserInfo[`name`].type == JSON_TYPE.STRING? jUserInfo[`name`].str: null ),
-			( `group` in jUserInfo && jUserInfo[`group`].type == JSON_TYPE.STRING? jUserInfo[`group`].str: null ),
-			null,
-			sid
-		);
+		import std.algorithm: splitter, filter;
+		import std.array: array;
+
+		//Получаем информацию о пользователе из результата запроса: логин, имя, роли доступа
+		string login; string name; string[] accessRoles;
+		if( auto it = `login` in jUserInfo ) {
+			login = it.type == JSON_TYPE.STRING? it.str: null;
+		}
+		if( auto it = `name` in jUserInfo ) {
+			name = it.type == JSON_TYPE.STRING? it.str: null;
+		}
+		if( auto it = `accessRoles` in jUserInfo ) {
+			accessRoles = it.type == JSON_TYPE.STRING? it.str.splitter(`;`).filter!( (it) => it.length > 0 ).array: null;
+		}
+		return new MKKUserIdentity(login, name, accessRoles, /*data=*/null, sid);
 	}
 }

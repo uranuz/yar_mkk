@@ -7,15 +7,19 @@ class MKKUserIdentity: AnonymousUser
 {
 	this(
 		string login, string name,
-		string group, string[string] data,
+		string[] accessRoles,
+		string[string] data,
 		ref const(SessionId) sid
 	) {
 		_login = login;
 		_name = name;
-		_group = group;
+		_accessRoles = accessRoles;
 		_data = data;
 		_sessionId = sid;
-		_data["group"] = group; // Добавим название группы и в словарь с доп. данными, чтобы можно было узнать его извне
+
+		// Добавим название группы и в словарь с доп. данными, чтобы можно было узнать его извне
+		import std.array: join;
+		_data["accessRoles"] = roles.join(`;`);
 	}
 	
 	override {
@@ -40,28 +44,31 @@ class MKKUserIdentity: AnonymousUser
 		}
 		
 		///Функция возвращает true, если пользователь входит в группу
-		bool isInRole( string roleName ) {
-			return ( roleName == _group );
+		bool isInRole(string roleName)
+		{
+			import std.algorithm: canFind;
+			return _accessRoles.canFind(roleName);
 		}
 
 		///Делает текущий экземпляр удостоверения пользователя недействительным
 		void invalidate() {
 			_login = null;
 			_name = null;
-			_group = null;
+			_accessRoles = null;
 			_data = null;
 			_sessionId = SessionId.init;
 		}
 	}
 	
 	///Идентификатор сессии
-	ref const(SessionId) sessionId() @property
-	{	return _sessionId; }
+	ref const(SessionId) sessionId() @property {
+		return _sessionId;
+	}
 
 protected:
 	SessionId _sessionId; 
 	string _login;
-	string _group;
+	string[] _accessRoles;
 	string _name;
 	string[string] _data;
 }

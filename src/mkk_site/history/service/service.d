@@ -6,12 +6,17 @@ import mkk_site.common.service;
 class MKKHistoryService: JSON_RPCService
 {
 	import mkk_site.security.common.access_control_client: MKKAccessControlClient;
+	import webtank.security.right.controller: AccessRightController;
+	import webtank.security.right.remote_source: RightRemoteSource;
 	import std.functional: toDelegate;
 
 	this(string serviceName)
 	{
 		super(serviceName,
-			new MKKAccessControlClient()
+			new MKKAccessControlClient(),
+			new AccessRightController(
+				new RightRemoteSource(this, `yarMKKMain`, `accessRight.list`)
+			)
 		);
 	}
 

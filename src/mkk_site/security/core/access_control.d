@@ -74,28 +74,49 @@ public:
 			return new AnonymousUser;
 		}
 
-		//Делаем запрос к БД за информацией о пользователе
-		auto userQueryRes = _getAuthDB().query(
-`select U.num, U.email, U.login, U.name, U.user_group
-from session
-join site_user as U
-	on U.num = site_user_num
-where session.sid = '` ~ Base64URL.encode(sessionId) ~ `';`
-		);
+		import webtank.datctrl.record_format: RecordFormat;
+		import webtank.db.datctrl_joint: getRecordSet;
+		static immutable userDataRecFormat = RecordFormat!(
+			PrimaryKey!(size_t), "num",
+			string, "email",
+			string, "login",
+			string, "name",
+			string[], "roles"
+		)();
 
-		if( (userQueryRes.recordCount != 1) && (userQueryRes.fieldCount != 5) )
+		//Делаем запрос к БД за информацией о пользователе
+		auto userRS = _getAuthDB().query(
+`select
+	U.num, U.email, U.login, U.name,
+	to_json(coalesce(
+		array_agg(R.name) filter(where nullif(R.name, '') is not null), ARRAY[]::text[]
+	)) "roles"
+from session
+join site_user U
+	on U.num = site_user_num
+left join user_access_role UR
+	on UR.user_num = U.num
+left join access_role R
+	on R.num = UR.role_num
+where session.sid = '` ~ Base64URL.encode(sessionId) ~ `'
+group by num, email, login, name`
+		).getRecordSet(userDataRecFormat);
+
+		if( !userRS.length )
 			return new AnonymousUser;
+		auto userRec = userRS.front;
 
 		string[string] userData = [
-			"userNum": userQueryRes.get(0, 0, null),
-			"email": userQueryRes.get(1, 0, null)
+			"userNum": userRec.getStr!"num",
+			"email": userRec.getStr!"email"
 		];
 
+		import std.array: join;
 		//Получаем информацию о пользователе из результата запроса
 		return new MKKUserIdentity(
-			userQueryRes.get(2, 0, null), //login
-			userQueryRes.get(3, 0, null), //name
-			userQueryRes.get(4, 0, null), //group
+			userRec.getStr!"login",
+			userRec.getStr!"name",
+			userRec.get!"roles"().join(`;`),
 			userData,
 			sessionId
 		);
@@ -112,32 +133,54 @@ where session.sid = '` ~ Base64URL.encode(sessionId) ~ `';`
 		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
 
-		//Делаем запрос к БД за информацией о пользователе
-		auto queryRes = _getAuthDB().query(
-`select num, pw_hash, pw_salt, reg_timestamp, user_group, name, email
-from site_user
-where login = '` ~ PGEscapeStr(login) ~ `';`
-		);
+		import webtank.datctrl.record_format: RecordFormat;
+		import webtank.db.datctrl_joint: getRecordSet;
+		static immutable userPwDataRecFormat = RecordFormat!(
+			PrimaryKey!(size_t), "num",
+			string, "pwHash",
+			string, "pwSalt",
+			DateTime, "regTimestamp",
+			string, "names",
+			string, "email",
+			string[], "roles"
+		)();
 
-		if( queryRes.recordCount != 1 || queryRes.fieldCount != 7 )
+		//Делаем запрос к БД за информацией о пользователе
+		auto userRS = _getAuthDB().query(
+`select
+	U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email,
+	to_json(coalesce(
+		array_agg(R.name) filter(where nullif(R.name, '') is not null), ARRAY[]::text[]
+	)) "roles"
+from site_user U
+left join user_access_role UR
+	on UR.user_num = U.num
+left join access_role R
+	on R.num = UR.role_num
+where login = '` ~ PGEscapeStr(login) ~ `'
+group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
+		).getRecordSet(userPwDataRecFormat);
+
+		if( !userRs.length )
 			return new AnonymousUser;
 
-		string userNum = queryRes.get(0, 0, null);
-		string validEncodedPwHash = queryRes.get(1, 0, null);
-		string pwSalt = queryRes.get(2, 0, null);
-		string regTimestampStr = queryRes.get(3, 0, null);
+		auto userRec = userRS.front;
 
-		DateTime regDateTime = fromPGTimestamp!DateTime(regTimestampStr);
 
-		string group = queryRes.get(4, 0, null);
-		string name = queryRes.get(5, 0, null);
-		string email = queryRes.get(6, 0, null);
+		string userNum = userRec.getStr!"num";
+		string validEncodedPwHash = userRec.getStr!"pwHash";
+		string pwSalt = userRec.getStr!"pwSalt";
+		DateTime regDateTime = userRec.get!"regTimestamp";
+
+		string rolesStr = userRec.get!"roles"().join(`;`);
+		string name = userRec.getStr!"name";
+		string email = userRec.getStr!"email";
 
 		bool isValidPassword = checkPassword(validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString());
 
 		if( isValidPassword )
 		{
-			SessionId sid = generateSessionId(login, group, Clock.currTime().toISOString());
+			SessionId sid = generateSessionId(login, rolesStr, Clock.currTime().toISOString());
 
 			auto newSIDStatusRes = _getAuthDB().query(
 				` insert into "session" `
@@ -154,9 +197,13 @@ where login = '` ~ PGEscapeStr(login) ~ `';`
 
 			if( newSIDStatusRes.get(0, 0, null) == "authenticated" )
 			{
-				string[string] userData = [ "userNum": userNum, "email": email ];
+				string[string] userData = [
+					"userNum": userNum,
+					"roles": userRec.get!"roles"(),
+					"email": email
+				];
 				//Аутентификация завершена успешно
-				return new MKKUserIdentity(login, name, group, userData, sid);
+				return new MKKUserIdentity(login, name, userRec.get!"roles"(), userData, sid);
 			}
 		}
 

@@ -28,7 +28,8 @@
 				"openssl": ">=0.0.0"
 			},
 			"lflags": [
-				"lib/libtarsnap.a"
+				"lib/libtarsnap.a",
+				"--demangle=dlang"
 			],
 			"buildRequirements": [
 				"allowWarnings"
