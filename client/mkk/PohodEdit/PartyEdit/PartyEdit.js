@@ -35,6 +35,8 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 			});
 
 			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
+			// После загрузки списка обновляем состояние отображения
+			this._selectedTouristsCtrl.subscribe("onTouristListLoaded", this._onDialog_resize.bind(this));
 			this._container.on('dialogclose', this.onDialog_close.bind(this));
 			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
 		},
@@ -58,8 +60,6 @@ define('mkk/PohodEdit/PartyEdit/PartyEdit', [
 					setTimeout(self._onDialog_resize.bind(self), 100);
 				}
 			});
-
-			this._onDialog_resize();
 		},
 
 		_onDialog_resize: function() {
