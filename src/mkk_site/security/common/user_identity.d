@@ -19,7 +19,7 @@ class MKKUserIdentity: AnonymousUser
 
 		// Добавим название группы и в словарь с доп. данными, чтобы можно было узнать его извне
 		import std.array: join;
-		_data["accessRoles"] = roles.join(`;`);
+		_data["accessRoles"] = accessRoles.join(`;`);
 	}
 	
 	override {

@@ -28,6 +28,13 @@ class MKKMainService: JSON_RPCService
 		assert(controller, `MKK access controller is null`);
 		return controller;
 	}
+
+	override AccessRightController rightController() @property
+	{
+		auto controller = cast(AccessRightController) _accessController;
+		assert(controller, `MKK right controller is null`);
+		return controller;
+	}
 }
 
 // Возвращает ссылку на глобальный экземпляр основного сервиса MKK
@@ -59,7 +66,7 @@ shared static this()
 	import webtank.security.right.source_method: getAccessRightList;
 	// Добавляем метод получения прав доступа в состав основного сервиса
 	MainService.JSON_RPCRouter.join!( () =>
-		getAccessRightList(MainService.rights.rightSource)
+		getAccessRightList(MainService.rightController.rightSource)
 	)(`accessRight.list`);
 }
 

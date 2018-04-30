@@ -25,7 +25,6 @@ void main(string[] progArgs)
 	WorkerOpts opts;
 	opts.port = 8082;
 	parseWorkerOptsFromCmd(progArgs, opts);
-	opts.handler = Service.rootRouter;
-	opts.loger = Service.loger;
+	opts.service = Service;
 	runServer(opts);
 }

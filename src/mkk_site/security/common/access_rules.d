@@ -1,6 +1,9 @@
 module mkk_site.security.common.access_rules;
 
-import webtank.security.right.access_rule;
+import webtank.security.access_control: IUserIdentity;
+import webtank.security.right.plain_rule: PlainAccessRule;
+import webtank.security.right.core_storage: CoreAccessRuleStorage;
+
 
 bool regionalModerRule(IUserIdentity identity, string[string] data)
 {

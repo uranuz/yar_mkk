@@ -74,7 +74,7 @@ public:
 			return new AnonymousUser;
 		}
 
-		import webtank.datctrl.record_format: RecordFormat;
+		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
 		static immutable userDataRecFormat = RecordFormat!(
 			PrimaryKey!(size_t), "num",
@@ -99,7 +99,7 @@ left join user_access_role UR
 left join access_role R
 	on R.num = UR.role_num
 where session.sid = '` ~ Base64URL.encode(sessionId) ~ `'
-group by num, email, login, name`
+group by U.num, U.email, U.login, U.name`
 		).getRecordSet(userDataRecFormat);
 
 		if( !userRS.length )
@@ -116,7 +116,7 @@ group by num, email, login, name`
 		return new MKKUserIdentity(
 			userRec.getStr!"login",
 			userRec.getStr!"name",
-			userRec.get!"roles"().join(`;`),
+			userRec.get!"roles"(),
 			userData,
 			sessionId
 		);
@@ -133,14 +133,14 @@ group by num, email, login, name`
 		if( login.count < minLoginLength || password.count < minPasswordLength )
 			return new AnonymousUser;
 
-		import webtank.datctrl.record_format: RecordFormat;
+		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
 		static immutable userPwDataRecFormat = RecordFormat!(
 			PrimaryKey!(size_t), "num",
 			string, "pwHash",
 			string, "pwSalt",
 			DateTime, "regTimestamp",
-			string, "names",
+			string, "name",
 			string, "email",
 			string[], "roles"
 		)();
@@ -161,7 +161,7 @@ where login = '` ~ PGEscapeStr(login) ~ `'
 group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
 		).getRecordSet(userPwDataRecFormat);
 
-		if( !userRs.length )
+		if( !userRS.length )
 			return new AnonymousUser;
 
 		auto userRec = userRS.front;
@@ -172,6 +172,7 @@ group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
 		string pwSalt = userRec.getStr!"pwSalt";
 		DateTime regDateTime = userRec.get!"regTimestamp";
 
+		import std.array: join;
 		string rolesStr = userRec.get!"roles"().join(`;`);
 		string name = userRec.getStr!"name";
 		string email = userRec.getStr!"email";
@@ -199,7 +200,7 @@ group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
 			{
 				string[string] userData = [
 					"userNum": userNum,
-					"roles": userRec.get!"roles"(),
+					"roles": rolesStr,
 					"email": email
 				];
 				//Аутентификация завершена успешно
