@@ -75,5 +75,5 @@ TDataNode renderAuth(HTTPContext context)
 	dataDict[`isAuthFailed`] = isAuthFailed;
 	dataDict[`isAuthenticated`] = !isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies );
 
-	return ViewService.templateCache.getByModuleName("mkk.Auth").run(dataDict);
+	return ViewService.runIvyModule("mkk.Auth", dataDict);
 }

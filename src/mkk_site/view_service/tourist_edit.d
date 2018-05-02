@@ -56,7 +56,7 @@ TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool is
 	dataDict["tourist"] = mainServiceCall(`tourist.read`, ctx, JSONValue([`touristNum`: touristNum.toStdJSON()]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.templateCache.getByModuleName("mkk.TouristEdit").run(dataDict);
+	return ViewService.runIvyModule("mkk.TouristEdit", dataDict);
 }
 
 TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
@@ -89,5 +89,5 @@ TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAutho
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.templateCache.getByModuleName("mkk.TouristEdit.Results").run(dataDict);
+	return ViewService.runIvyModule("mkk.TouristEdit.Results", dataDict);
 }

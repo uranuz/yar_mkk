@@ -33,5 +33,5 @@ TDataNode renderUserSettings(HTTPContext ctx)
 		dataDict[`pwChangeMessage`] = ex.msg;
 	}
 
-	return ViewService.templateCache.getByModuleName("mkk.UserSettings").run(dataDict);
+	return ViewService.runIvyModule("mkk.UserSettings", dataDict);
 }

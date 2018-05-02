@@ -31,7 +31,7 @@ class MKKMainService: JSON_RPCService
 
 	override AccessRightController rightController() @property
 	{
-		auto controller = cast(AccessRightController) _accessController;
+		auto controller = cast(AccessRightController) _rights;
 		assert(controller, `MKK right controller is null`);
 		return controller;
 	}

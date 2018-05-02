@@ -19,21 +19,21 @@ TDataNode renderStat(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
-//*************************************************************	auto bodyForm = ctx.request.bodyForm;
+//*************************************************************
 	auto bodyForm = ctx.request.bodyForm;
 	StatSelect select;
 	formDataToStruct(bodyForm, select);
 	JSONValue jSelect = select.toStdJSON();
 	
 //**************************************************************
-	//lданные для передачи в в основной сервис
+	//данные для передачи в в основной сервис
 
 	TDataNode dataDict = [
 		"select": jSelect.toIvyJSON(),
 		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select":jSelect])),
 		"vpaths": TDataNode(Service.virtualPaths)
-	];	
-	//lданные для передачи в шаблон
+	];
+	//данные для передачи в шаблон
 
-	return ViewService.templateCache.getByModuleName("mkk.Stat").run(dataDict);
+	return ViewService.runIvyModule("mkk.Stat", dataDict);
 }

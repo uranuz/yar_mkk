@@ -13,6 +13,7 @@ MKKViewService ViewService() @property
 
 import webtank.ivy.view_service: IvyViewService;
 import mkk_site.security.common.access_control_client: MKKAccessControlClient;
+import mkk_site.security.common.access_rules: makeCoreAccessRules;
 import webtank.security.right.controller: AccessRightController;
 import webtank.security.right.remote_source: RightRemoteSource;
 class MKKViewService: IvyViewService
@@ -29,7 +30,8 @@ public:
 			new MKKAccessControlClient,
 			pageURIPatternStr,
 			new AccessRightController(
-				new RightRemoteSource(this, `yarMKKMain`, `asseccRight.list`)
+				makeCoreAccessRules(),
+				new RightRemoteSource(this, `yarMKKMain`, `accessRight.list`)
 			)
 		);
 	}
@@ -62,7 +64,7 @@ public:
 				"pohodFilterSections": TDataNode(favouriteFilters["sections"])
 			];
 
-			content = templateCache.getByModuleName("mkk.GeneralTemplate").run(payload);
+			content = runIvyModule("mkk.GeneralTemplate", payload);
 		}
 
 		static struct OutRange

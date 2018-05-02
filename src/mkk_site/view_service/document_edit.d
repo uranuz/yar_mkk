@@ -63,7 +63,7 @@ TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum, bool isAut
 		"isAuthorized": TDataNode(isAuthorized)
 	];
 
-	return ViewService.templateCache.getByModuleName("mkk.DocumentEdit").run(dataDict);
+	return ViewService.runIvyModule("mkk.DocumentEdit", dataDict);
 }
 
 TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthorized)
@@ -97,5 +97,5 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthoriz
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.templateCache.getByModuleName("mkk.DocumentEdit.Results").run(dataDict);
+	return ViewService.runIvyModule("mkk.DocumentEdit.Results", dataDict);
 }

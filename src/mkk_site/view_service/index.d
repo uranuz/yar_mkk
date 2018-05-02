@@ -19,9 +19,9 @@ TDataNode renderIndex(HTTPContext ctx)
 	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.templateCache.getByModuleName("mkk.IndexPage").run(dataDict);
+	return ViewService.runIvyModule("mkk.IndexPage", dataDict);
 }
 
 TDataNode renderAboutSite(HTTPContext ctx) {
-	return ViewService.templateCache.getByModuleName("mkk.AboutSite").run();
+	return ViewService.runIvyModule("mkk.AboutSite");
 }

@@ -14,10 +14,8 @@ import webtank.net.http.context;
 
 TDataNode renderModerList(HTTPContext ctx)
 {
-	auto tpl = ViewService.templateCache.getByModuleName("mkk.ModerList");
 	TDataNode dataDict;
-
 	dataDict["moderList"] = mainServiceCall("moder.list", ctx);
 
-	return tpl.run(dataDict);
+	return ViewService.runIvyModule("mkk.ModerList", dataDict);
 }

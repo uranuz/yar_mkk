@@ -58,5 +58,5 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	dataDict["objectName"] = ("pohod" == method? "поход": "турист");
 	dataDict["isAuthorized"] = isAuthorized;
 
-	return ViewService.templateCache.getByModuleName("mkk.RecordHistory").run(dataDict);
+	return ViewService.runIvyModule("mkk.RecordHistory", dataDict);
 }

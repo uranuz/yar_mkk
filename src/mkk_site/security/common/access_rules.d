@@ -15,12 +15,10 @@ CoreAccessRuleStorage makeCoreAccessRules()
 	CoreAccessRuleStorage rs = new CoreAccessRuleStorage;
 	import std.functional: toDelegate;
 	rs.join(new PlainAccessRule(
-		"regional_moder",
-		toDelegate(&regionalModerRule)
-	));
-	rs.join(new PlainAccessRule(
-		"vid_moder",
-		toDelegate(&regionalModerRule)
+		// Rule to allow access
+		"allow", (IUserIdentity identity, string[string] data) {
+			return true;
+		}
 	));
 	return rs;
 }

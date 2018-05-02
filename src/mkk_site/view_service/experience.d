@@ -42,5 +42,5 @@ TDataNode renderExperience(HTTPContext ctx)
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["isAuthorized"] = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 
-	return ViewService.templateCache.getByModuleName("mkk.Experience").run(dataDict);
+	return ViewService.runIvyModule("mkk.Experience", dataDict);
 }

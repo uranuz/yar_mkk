@@ -45,7 +45,7 @@ TDataNode renderTouristList(HTTPContext ctx)
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.templateCache.getByModuleName("mkk.TouristList").run(dataDict);
+	return ViewService.runIvyModule("mkk.TouristList", dataDict);
 }
 
 TDataNode touristPlainList(HTTPContext ctx)
@@ -79,6 +79,6 @@ TDataNode touristPlainList(HTTPContext ctx)
 		dataDict["instanceName"] = queryForm["instanceName"];
 	}
 
-	return ViewService.templateCache.getByModuleName("mkk.TouristPlainList").run(dataDict);
+	return ViewService.runIvyModule("mkk.TouristPlainList", dataDict);
 }
 

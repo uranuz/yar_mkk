@@ -58,7 +58,7 @@ TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuth
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodEdit").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit", dataDict);
 }
 
 TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
@@ -91,5 +91,5 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorize
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodEdit.Results").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit.Results", dataDict);
 }

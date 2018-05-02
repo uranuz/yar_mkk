@@ -37,5 +37,5 @@ TDataNode renderPohodRead(HTTPContext ctx)
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodRead").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodRead", ctx, dataDict);
 }

@@ -43,6 +43,6 @@ TDataNode documentListController(HTTPContext ctx)
 		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
 	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.templateCache.getByModuleName("mkk.DocumentList").run(dataDict);
+	return ViewService.runIvyModule("mkk.DocumentList", dataDict);
 }
 

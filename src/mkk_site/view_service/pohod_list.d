@@ -53,7 +53,7 @@ TDataNode renderPohodList(HTTPContext ctx)
 	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodList").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodList", dataDict);
 }
 
 TDataNode renderPartyInfo(HTTPContext ctx)
@@ -63,7 +63,7 @@ TDataNode renderPartyInfo(HTTPContext ctx)
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
 	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodList.PartyInfo").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodList.PartyInfo", dataDict);
 }
 
 TDataNode renderExtraFileLinks(HTTPContext ctx)
@@ -109,5 +109,5 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 	}
 	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
 
-	return ViewService.templateCache.getByModuleName("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems").run(dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems", dataDict);
 }
