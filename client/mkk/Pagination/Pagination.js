@@ -171,7 +171,7 @@ define('mkk/Pagination/Pagination', [
 			if( nav.pageCount != null ) {
 				this._elems('pageCount').text(nav.pageCount);
 			} else if( nav.recordCount != null && pageSize ) {
-				this._elems('pageCount').text(Math.floor(nav.recordCount / pageSize));
+				this._elems('pageCount').text(Math.ceil(nav.recordCount / pageSize));
 			}
 
 			this._elems('recordCount').text(nav.recordCount);
