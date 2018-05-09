@@ -64,7 +64,7 @@ public:
 				"pohodFilterSections": TDataNode(favouriteFilters["sections"])
 			];
 
-			content = runIvyModule("mkk.GeneralTemplate", payload);
+			content = runIvyModule("mkk.GeneralTemplate", context, payload);
 		}
 
 		static struct OutRange

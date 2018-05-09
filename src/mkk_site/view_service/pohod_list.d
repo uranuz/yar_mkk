@@ -53,7 +53,7 @@ TDataNode renderPohodList(HTTPContext ctx)
 	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["isForPrint"] = isForPrint;
 
-	return ViewService.runIvyModule("mkk.PohodList", dataDict);
+	return ViewService.runIvyModule("mkk.PohodList", ctx, dataDict);
 }
 
 TDataNode renderPartyInfo(HTTPContext ctx)

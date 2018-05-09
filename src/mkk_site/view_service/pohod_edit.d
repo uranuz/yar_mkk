@@ -58,7 +58,7 @@ TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuth
 	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
-	return ViewService.runIvyModule("mkk.PohodEdit", dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit", ctx, dataDict);
 }
 
 TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)

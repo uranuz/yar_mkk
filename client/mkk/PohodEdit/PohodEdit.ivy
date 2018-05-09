@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull;
+from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull, hasRight;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.PohodEdit.DeleteArea import DeleteArea;
@@ -14,7 +14,8 @@ def PohodEdit {=
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
 		pohod: null
-		partyList: null;
+		partyList: null
+		accessObject: 'pohod.edit';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -30,7 +31,8 @@ def PohodEdit {=
 					class="{=cls 'mkkCommentField'} form-control"
 					id="mkkCodeField"
 					name="mkkCode"
-					value="{=recGet pohod 'mkkCode'}">
+					value="{=recGet pohod 'mkkCode'}"
+					{=if not{=hasRight subobj: 'book.mkkCode' kind: 'edit'} 'disabled'}>
 			</td>
 			<td>
 				<label for="bookNumField">Номер книжки</label>
@@ -38,7 +40,8 @@ def PohodEdit {=
 					class="{=cls 'bookNumField'} form-control"
 					id="bookNumField"
 					name="bookNum"
-					value="{=recGet pohod 'bookNum'}">
+					value="{=recGet pohod 'bookNum'}"
+					{=if not{=hasRight subobj: 'book.num' kind: 'edit'} 'disabled'}>
 			</td>
 			<td>
 				<label for="claimStateField">Статус заявки</label>
@@ -59,7 +62,9 @@ def PohodEdit {=
 			class="{=cls 'mkkCommentField'} form-control"
 			id="mkkCommentField"
 			name="mkkComment"
-			cols="40">{=recGet pohod 'mkkComment'}</textarea>
+			cols="40"
+			{=if not{=hasRight subobj: 'book.mkkComment' kind: 'edit'} 'disabled'}
+			>{=recGet pohod 'mkkComment'}</textarea>
 
 		<hr>
 		<h4>Поход</h4>
@@ -71,7 +76,8 @@ def PohodEdit {=
 					class="{=cls 'pohodRegionField'} form-control"
 					id="pohodRegionField"
 					name="pohodRegion"
-					value="{=recGet pohod 'pohodRegion'}"/>
+					value="{=recGet pohod 'pohodRegion'}"
+					{=if not{=hasRight subobj: 'pohod.region' kind: 'edit'} 'disabled'}/>
 			</td>
 		</tr>
 		<tr>
@@ -96,7 +102,8 @@ def PohodEdit {=
 					id="routeField"
 					name="route"
 					size="55"
-					value="{=recGet pohod 'route'}"/>
+					value="{=recGet pohod 'route'}"
+					{=if not{=hasRight subobj: 'pohod.route' kind: 'edit'} 'disabled'}/>
 			</td>
 		</tr>
 		<tr>
@@ -268,7 +275,7 @@ def PohodEdit {=
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr>
 
-		<input type="hidden" name="action" value="write"><!-- Значение-команда на запись данных в БД -->
+		<input type="hidden" name="action" value="write"/><!-- Значение-команда на запись данных в БД -->
 		<span><input type="submit" class="{=cls 'submitBtn'} btn btn-primary" value="Сохранить"/></span>
 		<span style="float: right;"><input type="button" class="{=cls 'deleteDialogBtn'} btn btn-secondary" value="Удалить поход"></span>
 		<div style="clear: both"></div>

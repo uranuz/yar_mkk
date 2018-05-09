@@ -1,0 +1,77 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc, recGet;
+def renderObject {=
+	def.kv
+		objKey: null
+		idxByKey: {}
+		objectList: null
+		level: 0;
+	def.body noscope {*
+		{=
+			var item: {=at idxByKey objKey};
+			var obj: {=at objectList item.idx};
+		}
+		<div class="{=cls 'rightObject'}" style="margin-left: {{level*16}}px;">
+			<div>Номер: {=recGet obj 'num'}</div>
+			<div>Имя: {=recGet obj 'name'}</div>
+			<div>Описание: {=recGet obj 'description'}</div>
+			<div>Родитель: {=recGet obj 'parent_num'}</div>
+		</div>
+		{=repeat childKey in item.children {=renderObject
+			objKey: childKey
+			idxByKey: idxByKey
+			objectList: objectList
+			level: level + 1
+		} }
+	*}
+};
+def ObjectList {=
+	def.kv
+		moduleName: 'mkk/Right/ObjectList/ObjectList'
+		instanceName: 'rightObjectList'
+		cssBaseClass: 'mkk-RightObjectList'
+		objectList: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		{=
+			var roots: [];
+			var idxByKey: {};
+			var i: 0;
+			for obj in objectList {=
+				var parentNum: {=str {=recGet obj 'parent_num'} };
+				var num: {=str {=recGet obj 'num'} };
+				if not{=recGet obj 'parent_num'} {=
+					insert roots num null
+				} else {=
+					var dat: {=
+						if {=has idxByKey parentNum}
+							{=at idxByKey parentNum}
+						else
+							{idx: null, children: []}
+					};
+					insert dat.children num null;
+					setat idxByKey dat parentNum;
+				};
+				var dat2: {=
+					if {=has idxByKey num}
+						{=at idxByKey num}
+					else
+						{idx: i, children: []}
+				};
+				set dat2.idx: i;
+				setat idxByKey dat2 num;
+				set i: i + 1;
+			};
+			repeat root in roots {=renderObject
+				objKey: root
+				idxByKey: idxByKey
+				objectList: objectList
+			};
+		}
+	</div>
+	*}
+};
+ObjectList
+	objectList: objectList;
+}

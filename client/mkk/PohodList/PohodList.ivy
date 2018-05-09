@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, hasRight;
 from mkk.PohodList.Navigation import PohodListNavigation;
 from mkk.PohodList.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
@@ -11,10 +11,6 @@ def PohodList {=
 	<div class="{=cls 'block'}" data-fir-module="mkk/PohodList/PohodList">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Походы</h2>
-					
-		
-			
-
 		<div class="{=cls 'navigation'}">
 			{=PohodListNavigation
 				pohodEnums: pohodEnums
@@ -22,7 +18,7 @@ def PohodList {=
 				nav: pohodNav
 				paginationSideContent: {*
 				<div class="col text-right">
-					{=if isAuthorized and not isForPrint {*
+					{=if {=hasRight obj: 'pohod' kind: 'add'} and not isForPrint {*
 						<a href="{{vpaths.siteDynamic}}pohod/edit"
 							class="{=cls 'addPohodBtn'} btn btn-primary"
 							>Добавить поход</a>
@@ -37,7 +33,7 @@ def PohodList {=
 				<table class="{=cls 'table'} mkk-Table">
 					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
 						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
-							{=if isAuthorized and not isForPrint {*
+							{=if {=hasRight obj: 'pohod' kind: 'edit'} and not isForPrint {*
 								<th class="{=cls 'headerNumCell'}">#</th>
 							*}}
 							<th>№ книги</th>
@@ -48,7 +44,7 @@ def PohodList {=
 							<th>Группа</th>
 							<th>Город, организация</th>
 							<th>Статус похода</th>
-							{= if isAuthorized and not isForPrint {*
+							{=if {=hasRight obj: 'pohod' kind: 'edit'} and not isForPrint {*
 								<th class="{=cls 'headerEditCell'}">Изм</th>
 							*}}
 						</tr>
@@ -56,7 +52,7 @@ def PohodList {=
 					<tbody class="{=cls 'tableContentBody'} mkk-Table">
 						{=repeat rec in pohodList {*
 							<tr>
-								{=if isAuthorized and not isForPrint {*
+								{=if {=hasRight obj: 'pohod' kind: 'edit'} and not isForPrint {*
 									<td>{=recGet rec "num"}</td>
 								*}}
 								<td>
@@ -102,7 +98,7 @@ def PohodList {=
 									<div>{=recGetStr rec "progress"}</div>
 									<div>{=recGetStr rec "claimState"}</div>
 								</td>
-								{=if isAuthorized and not isForPrint {*
+								{=if {=hasRight obj: 'pohod' kind: 'edit'} and not isForPrint {*
 									<td>
 										<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}"
 											class="mkk-Document e-itemEditBtn"
