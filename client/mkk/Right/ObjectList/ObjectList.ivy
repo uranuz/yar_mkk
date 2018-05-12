@@ -15,7 +15,10 @@ def renderObject {=
 			<div>Номер: {=recGet obj 'num'}</div>
 			<div>Имя: {=recGet obj 'name'}</div>
 			<div>Описание: {=recGet obj 'description'}</div>
-			<div>Родитель: {=recGet obj 'parent_num'}</div>
+			<div>Родитель: {=recGet obj 'parentNum'}</div>
+			<div>
+				<a href="/dyn/right/object/right/list?key={=recGet obj 'num'}">Права</a>
+			</div>
 		</div>
 		{=repeat childKey in item.children {=renderObject
 			objKey: childKey
@@ -34,14 +37,15 @@ def ObjectList {=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<h2>Объекты доступа</h2>
 		{=
 			var roots: [];
 			var idxByKey: {};
 			var i: 0;
 			for obj in objectList {=
-				var parentNum: {=str {=recGet obj 'parent_num'} };
+				var parentNum: {=str {=recGet obj 'parentNum'} };
 				var num: {=str {=recGet obj 'num'} };
-				if not{=recGet obj 'parent_num'} {=
+				if not{=recGet obj 'parentNum'} {=
 					insert roots num null
 				} else {=
 					var dat: {=

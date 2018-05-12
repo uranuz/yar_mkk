@@ -25,8 +25,9 @@ TDataNode renderObjectRightList(HTTPContext ctx)
 {
 	TDataNode dataDict;
 	import std.json: JSONValue;
-	import std.conv: text;
-	dataDict["objectRightList"] = mainServiceCall("right.objectRightList", ctx, JSONValue(ctx.request.form.get("key", null).text));
+	import std.conv: to;
+	dataDict["objectRightList"] = mainServiceCall("right.objectRightList", ctx,
+		JSONValue([`num`: ctx.request.form.get("key", null).to!size_t]));
 
 	return ViewService.runIvyModule("mkk.Right.ObjectRightList", dataDict);
 }

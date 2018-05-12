@@ -12,7 +12,7 @@ static immutable rightObjectRecFormat = RecordFormat!(
 	PrimaryKey!size_t, "num",
 	string, "name",
 	string, "description",
-	size_t, "parent_num"
+	size_t, "parentNum"
 )();
 
 auto getObjectList(HTTPContext ctx)
@@ -25,11 +25,12 @@ auto getObjectList(HTTPContext ctx)
 	`).getRecordSet(rightObjectRecFormat);
 }
 
-static immutable objRightsRecFormat = RecordFormat!(
+static immutable objRightRecFormat = RecordFormat!(
 	PrimaryKey!size_t, "num",
-	string, "access_kind",
-	string, "role_name",
-	string, "rule_name"
+	string, "accessKind",
+	string, "roleName",
+	string, "ruleName",
+	bool, "inheritance"
 )();
 
 auto getObjectRightList(HTTPContext ctx, size_t num)
@@ -40,14 +41,15 @@ auto getObjectRightList(HTTPContext ctx, size_t num)
 	return getAuthDB().query(`
 	select
 		rgh.num,
-		rgh.kind "access_kind",
-		a_role.name "role_name",
-		a_rule.name "rule_name"
+		rgh."access_kind" "accessKind",
+		a_role.name "roleName",
+		a_rule.name "ruleName",
+		rgh.inheritance
 	from access_right rgh
 	left join access_role a_role
 		on a_role.num = rgh.role_num
 	left join access_rule a_rule
 		on a_rule.num = rgh.rule_num
 	where rgh.object_num = ` ~ num.text ~ `
-	`).getRecordSet(rightObjectRecFormat);
+	`).getRecordSet(objRightRecFormat);
 }

@@ -1,0 +1,26 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc, recGet;
+def ObjectRightList {=
+	def.kv
+		moduleName: 'mkk/Right/ObjectRightList/ObjectRightList'
+		instanceName: 'objectRightList'
+		cssBaseClass: 'mkk-ObjectRightList'
+		objectRightList: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<h2>Права доступа к объекту</h2>
+		{=repeat right in objectRightList {*
+			<div class="{=cls 'rightItem'}">
+				<div>Тип доступа: {=recGet right 'accessKind'}</div>
+				<div>Роль: {=recGet right 'roleName'}</div>
+				<div>Правило: {=recGet right 'ruleName'}</div>
+				<div>Дочерние объекты: {=if not{=recGet right 'inheritance'} 'не '} распространяется</div>
+			</div>
+		*}}
+	</div>
+	*}
+};
+ObjectRightList
+	objectRightList: objectRightList;
+}
