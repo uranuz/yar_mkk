@@ -2,6 +2,7 @@ module mkk_site.main_service.document_edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.document;
+import webtank.security.right.common: GetSymbolAccessObject;
 
 shared static this()
 {
@@ -13,23 +14,31 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 {
 	import webtank.net.utils: PGEscapeStr;
 	import std.conv: text, to;
-	
-	bool isAuthorized = ctx.user.isAuthenticated
-		&& (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
-	if( !isAuthorized ) {
-		throw new Exception(`Недостаточно прав для редактирования ссылки на документ!!!`);
-	}
-	
+	import std.meta: AliasSeq;
+	import std.traits: isSomeString, getUDAs;
+	import std.exception: enforce;
+
 	string[] fieldNames;
 	string[] fieldValues;
+	foreach( fieldName; AliasSeq!(__traits(allMembers, DocumentDataToWrite)) )
+	{
+		alias FieldType = typeof(__traits(getMember, record, fieldName));
+		static if( isOptional!FieldType && OptionalIsUndefable!FieldType ) {
+			auto field = __traits(getMember, record, fieldName);
+			if( field.isUndef )
+				continue; // Поля, которые undef с нашей т.зрения не изменились
 
-	if( !record.name.isUndef ) {
-		fieldNames ~= `"name"`;
-		fieldValues ~= record.name.isSet? `'` ~ PGEscapeStr(record.name) ~ `'`: `null`;
-	}
-	if( !record.link.isUndef ) {
-		fieldNames ~= `"link"`;
-		fieldValues ~= record.link.isSet? `'` ~ PGEscapeStr(record.link) ~ `'`: `null`;
+			string accessObj = GetSymbolAccessObject!(DocumentDataToWrite, fieldName)();
+			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля документа: ` ~ fieldName);
+
+			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
+			fieldNames ~= `"` ~ dbFieldName ~ `"`;
+			static if( isSomeString!( OptionalValueType!FieldType ) ) {
+				fieldValues ~= ( (field.isSet && field.length > 0)? "'" ~ PGEscapeStr(field.value) ~ "'": "NULL" );
+			} else {
+				static assert(false, `Unprocessed Undefable field: ` ~ fieldName);
+			}
+		}
 	}
 
 	if( fieldNames.length > 0 )
@@ -58,11 +67,8 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 void deleteDocument(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
-	bool isAuthorized = ctx.user.isAuthenticated
-		&& (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
-	if( !isAuthorized ) {
-		throw new Exception(`Недостаточно прав для удаления ссылки на документ!!!`);
-	}
+	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`document.edit`, `delete`), `Недостаточно прав для удаления документа!`);
 
 	getCommonDB().query(`delete from file_link where num = ` ~ num.text);
 }

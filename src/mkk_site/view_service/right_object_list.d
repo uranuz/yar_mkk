@@ -13,21 +13,20 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
-TDataNode renderObjectList(HTTPContext ctx)
-{
-	TDataNode dataDict;
-	dataDict["objectList"] = mainServiceCall("right.objectList", ctx);
-
-	return ViewService.runIvyModule("mkk.Right.ObjectList", dataDict);
+@IvyModuleAttr(`mkk.Right.ObjectList`)
+TDataNode renderObjectList(HTTPContext ctx) {
+	return TDataNode(["objectList": mainServiceCall("right.objectList", ctx)]);
 }
 
+@IvyModuleAttr(`mkk.Right.ObjectRightList`)
 TDataNode renderObjectRightList(HTTPContext ctx)
 {
 	TDataNode dataDict;
 	import std.json: JSONValue;
 	import std.conv: to;
-	dataDict["objectRightList"] = mainServiceCall("right.objectRightList", ctx,
-		JSONValue([`num`: ctx.request.form.get("key", null).to!size_t]));
-
-	return ViewService.runIvyModule("mkk.Right.ObjectRightList", dataDict);
+	return TDataNode([
+		"objectRightList": mainServiceCall("right.objectRightList", ctx,
+			JSONValue([
+				`num`: ctx.request.form.get("key", null).to!size_t]))
+	]);
 }

@@ -23,7 +23,6 @@ TDataNode documentEditController(HTTPContext ctx)
 	auto req = ctx.request;
 	auto queryForm = req.queryForm;
 	auto bodyForm = req.bodyForm;
-	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	Optional!size_t docNum;
 
 	if( "key" in queryForm )
@@ -40,13 +39,13 @@ TDataNode documentEditController(HTTPContext ctx)
 	}
 
 	if( queryForm.get("action", null) == "write" ) {
-		return writeDocument(ctx, docNum, isAuthorized);
+		return writeDocument(ctx, docNum);
 	} else {
-		return renderEditDocument(ctx, docNum, isAuthorized);
+		return renderEditDocument(ctx, docNum);
 	}
 }
 
-TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthorized)
+TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum)
 {
 	import std.json: JSONValue;
 	import std.datetime: Clock, DateTime;
@@ -58,15 +57,12 @@ TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum, bool isAut
 		"nav": JSONValue() // Empty placeholder
 	]));
 
-	TDataNode dataDict = [
-		"document": (!callResult["rs"].empty? callResult["rs"][0]: TDataNode(null)),
-		"isAuthorized": TDataNode(isAuthorized)
-	];
-
-	return ViewService.runIvyModule("mkk.DocumentEdit", dataDict);
+	return ViewService.runIvyModule("mkk.DocumentEdit", ctx, TDataNode([
+		"document": (!callResult["rs"].empty? callResult["rs"][0]: TDataNode(null))
+	]));
 }
 
-TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthorized)
+TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -97,5 +93,5 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum, bool isAuthoriz
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.DocumentEdit.Results", dataDict);
+	return ViewService.runIvyModule("mkk.DocumentEdit.Results", ctx, dataDict);
 }

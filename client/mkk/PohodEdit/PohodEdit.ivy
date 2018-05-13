@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull, hasRight;
+from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.PohodEdit.DeleteArea import DeleteArea;
@@ -53,6 +53,7 @@ def PohodEdit {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat pohod 'claimState'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'claimState'}
+					disabled: not{=hasRight subobj: 'book.claimState' kind: 'edit'}
 				}
 			</td>
 		</tr>
@@ -91,6 +92,7 @@ def PohodEdit {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat pohod 'tourismKind'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'tourismKind'}
+					disabled: not{=hasRight subobj: 'pohod.tourismKind' kind: 'edit'}
 				}
 			</td>
 		</tr>
@@ -122,6 +124,7 @@ def PohodEdit {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat pohod 'complexity'} 'enum'} 'не задана'}
 					selectedId: {=recGet pohod 'complexity'}
+					disabled: not{=hasRight subobj: 'pohod.complexity' kind: 'edit'}
 				}
 				{=PlainListBox
 					instanceName: 'complexityElemsField'
@@ -131,6 +134,7 @@ def PohodEdit {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat pohod 'complexityElems'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'complexityElems'}
+					disabled: not{=hasRight subobj: 'pohod.complexityElems' kind: 'edit'}
 				}
 			</td>
 		</tr>
@@ -143,6 +147,7 @@ def PohodEdit {=
 						instanceName: 'beginDateField'
 						formField: 'beginDate'
 						date: {=recGet pohod 'beginDate'}
+						disabled: not{=hasRight subobj: 'pohod.beginDate' kind: 'edit'}
 					}
 				</label>
 				<br/>
@@ -152,6 +157,7 @@ def PohodEdit {=
 						instanceName: 'finishDateField'
 						formField: 'finishDate'
 						date: {=recGet pohod 'finishDate'}
+						disabled: not{=hasRight subobj: 'pohod.finishDate' kind: 'edit'}
 					}
 				</label>
 			</td>
@@ -167,6 +173,7 @@ def PohodEdit {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat pohod 'progress'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'progress'}
+					disabled: not{=hasRight subobj: 'pohod.progress' kind: 'edit'}
 				}
 			</td>
 		</tr>
@@ -177,6 +184,7 @@ def PohodEdit {=
 			name="chiefComment"
 			cols="40"
 			class="{=cls 'chiefComentField'} form-control"
+			{=if not{=hasRight subobj: 'pohod.chiefComment' kind: 'edit'} 'disabled'}
 			>{=recGet pohod 'chiefComment'}</textarea>
 
 		<hr>
@@ -192,7 +200,8 @@ def PohodEdit {=
 					<input type="text"
 						name="organization"
 						class="{=cls 'organizationField'} form-control"
-						value="{=recGet pohod 'organization'}"/>
+						value="{=recGet pohod 'organization'}"
+						{=if not{=hasRight subobj: 'group.organization' kind: 'edit'} 'disabled'}/>
 				</td>
 			</tr>
 			<tr>
@@ -201,7 +210,8 @@ def PohodEdit {=
 					<input type="text"
 						name="partyRegion"
 						class="form-control"
-						value="{=recGet pohod 'partyRegion'}"/>
+						value="{=recGet pohod 'partyRegion'}"
+						{=if not{=hasRight subobj: 'group.partyRegion' kind: 'edit'} 'disabled'}/>
 				</td>
 			</tr>
 			<tr>
@@ -210,7 +220,8 @@ def PohodEdit {=
 					<input type="hidden"
 						name="chiefNum"
 						class="{=cls 'chiefNumField'}"
-						value="{=recGet pohod 'chiefNum'}"/>
+						value="{=recGet pohod 'chiefNum'}"
+						{=if not{=hasRight subobj: 'group.chiefNum' kind: 'edit'} 'disabled'}/>
 					<a href="#_NOLink"
 						class="{=cls 'chiefEditBtn'}"
 						>{=if {=recGet pohod 'chiefNum'}   
@@ -225,7 +236,8 @@ def PohodEdit {=
 					<input type="hidden"
 						name="altChiefNum"
 						class="{=cls 'altChiefNumField'}"
-						value="{=recGet pohod 'altChiefNum'}"/>
+						value="{=recGet pohod 'altChiefNum'}"
+						{=if not{=hasRight subobj: 'group.altChiefNum' kind: 'edit'} 'disabled'}/>
 					<a href="#_NOLink"
 						class="{=cls 'altChiefEditBtn'}"
 						>{=if {=recGet pohod 'altChiefNum'}   
@@ -239,7 +251,8 @@ def PohodEdit {=
 				<td>
 					<input type="hidden"
 						name="partyNums"
-						class="{=cls 'partyNumsField'}"/>
+						class="{=cls 'partyNumsField'}"
+						{=if not{=hasRight subobj: 'group.partyNums' kind: 'edit'} 'disabled'}/>
 					<a href="#_NOLink"
 						class="{=cls 'partyEditBtn'}"
 						>Редактировать</a>
@@ -253,7 +266,8 @@ def PohodEdit {=
 						name="partySize"
 						class="{=cls 'partySizeField'} form-control"
 						style="width: 5em;"
-						value="{=recGet pohod 'partySize'}"/>
+						value="{=recGet pohod 'partySize'}"
+						{=if not{=hasRight subobj: 'group.partySize' kind: 'edit'} 'disabled'}/>
 				</td>
 			</tr>
 			<tr>
@@ -270,7 +284,10 @@ def PohodEdit {=
 		</div>
 
 		<hr>
-		{=ExtraFileLinksEdit linkList: extraFileLinks }
+		{=ExtraFileLinksEdit
+			linkList: extraFileLinks
+			disabled: {=if not{=hasRight subobj: 'extraFileLinks' kind: 'edit'} 'disabled'}
+		}
 
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr>
@@ -289,7 +306,7 @@ def PohodEdit {=
 	*}
 };
 if __scopeName__ == '__main__' {=
-	if isAuthorized {=
+	if {=isInRoles ['admin', 'moder']} {=
 		PohodEdit
 			pohod: pohod
 			partyList: partyList

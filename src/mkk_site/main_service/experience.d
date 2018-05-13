@@ -133,8 +133,7 @@ IBaseRecord getTourist(HTTPContext ctx, Optional!size_t touristNum)
 		return makeMemoryRecord(touristRecFormat);
 	}
 
-	bool isAuthorized	= ctx.user.isAuthenticated
-		&& ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
+	bool isAuthorized = ctx.user.isInRole("admin") || ctx.user.isInRole("moder");
 
 	auto rs = getCommonDB().query(
 	`select

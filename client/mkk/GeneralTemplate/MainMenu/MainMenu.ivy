@@ -6,9 +6,6 @@ def MainMenu {=
 		moduleName: 'mkk/GeneralTemplate/MainMenu/MainMenu'
 		instanceName: 'siteMainMenu'
 		cssBaseClass: 'mkk-MainMenu'
-		isAuthenticated: null
-		userName: null
-		vpaths: undef
 		authRedirectURI: null;
 	def.body {*
 	<div class="{=cls 'block'}">
@@ -23,12 +20,7 @@ def MainMenu {=
 				<li><a href="{{vpaths.siteDynamic}}document/list" title="Различные полезные (и не очень) файлы">Статьи и документы</a></li>
 				<li><a href="{{vpaths.siteDynamic}}stat" title="Статистический отчет по работе МКК за последние годы">Статистика</a></li>
 				<li class="{=cls 'authItem'}">
-					{=UserMenuBtn
-						isAuthenticated: isAuthenticated
-						userName: userName
-						vpaths: vpaths
-						authRedirectURI: authRedirectURI
-					}
+					{=UserMenuBtn authRedirectURI: authRedirectURI}
 				</li>
 			</ul>
 		</div>

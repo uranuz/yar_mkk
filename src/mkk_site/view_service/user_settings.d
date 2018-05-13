@@ -12,6 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
+@IvyModuleAttr(`mkk.UserSettings`)
 TDataNode renderUserSettings(HTTPContext ctx)
 {
 	import std.json: JSONValue;
@@ -33,5 +34,5 @@ TDataNode renderUserSettings(HTTPContext ctx)
 		dataDict[`pwChangeMessage`] = ex.msg;
 	}
 
-	return ViewService.runIvyModule("mkk.UserSettings", dataDict);
+	return dataDict;
 }

@@ -24,7 +24,6 @@ TDataNode pohodEditController(HTTPContext ctx)
 	auto req = ctx.request;
 	auto queryForm = req.queryForm;
 	auto bodyForm = req.bodyForm;
-	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	Optional!size_t pohodNum;
 	if( "key" in queryForm )
 	{
@@ -40,28 +39,26 @@ TDataNode pohodEditController(HTTPContext ctx)
 	}
 
 	if( bodyForm.get("action", null) == "write" ) {
-		return writePohod(ctx, pohodNum, isAuthorized);
+		return writePohod(ctx, pohodNum);
 	} else {
-		return renderEditPohod(ctx, pohodNum, isAuthorized);
+		return renderEditPohod(ctx, pohodNum);
 	}
 }
 
-TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
+TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
 	import std.json: JSONValue;
 	TDataNode dataDict;
 
-	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.toStdJSON()]));
 	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
 	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
-	dataDict["vpaths"] = Service.virtualPaths;
 	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
 	return ViewService.runIvyModule("mkk.PohodEdit", ctx, dataDict);
 }
 
-TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorized)
+TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -91,5 +88,5 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum, bool isAuthorize
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.PohodEdit.Results", dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit.Results", ctx, dataDict);
 }

@@ -1,6 +1,6 @@
 expr
 {=
-from fir.controls.utils import recGet, recGetStr, cls;
+from fir.controls.utils import recGet, recGetStr, cls, isInRoles;
 from mkk.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
@@ -12,7 +12,7 @@ def Experience{=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<div class="{=cls 'topButtons'}">
-			{=if isAuthorized {*
+			{=if {=isInRoles ['admin', 'moder']} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?key={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>История</a>

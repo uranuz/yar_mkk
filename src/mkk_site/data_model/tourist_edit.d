@@ -1,12 +1,15 @@
 module mkk_site.data_model.tourist_edit;
 
 public import mkk_site.data_model.common;
+import webtank.security.right.common: RightObjAttr;
 
 // Структура для записи данных о туристе
 struct TouristDataToWrite
 {
 	import webtank.common.optional: Undefable, Optional;
 	Optional!size_t num; // номер туриста
+
+@RightObjAttr(`tourist.edit`) @RightObjAttr():
 
 @FieldSerializer!maybeDBSerializeMethod {
 	@DBName("family_name") Undefable!string familyName; // фамилия

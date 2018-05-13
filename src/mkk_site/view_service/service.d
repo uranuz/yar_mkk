@@ -55,10 +55,7 @@ public:
 			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
 
 			TDataNode payload = [
-				"vpaths": TDataNode(Service.virtualPaths),
 				"content":  TDataNode(content),
-				"isAuthenticated": TDataNode(context.user.isAuthenticated),
-				"userName": TDataNode(context.user.name),
 				"authRedirectURI": TDataNode(getAuthRedirectURI(context)),
 				"pohodFilterFields": TDataNode(favouriteFilters["allFields"]),
 				"pohodFilterSections": TDataNode(favouriteFilters["sections"])

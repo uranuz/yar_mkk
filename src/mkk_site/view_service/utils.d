@@ -33,6 +33,11 @@ Result mainServiceCall(Result = TDataNode)( string rpcMethod, HTTPContext contex
 
 alias TDataNode = DataNode!string;
 
+// Аттрибут, который говорит, что данные возвращаемые методом нужно передать в шаблон
+struct IvyModuleAttr {
+	string moduleName;
+}
+
 import std.traits: ReturnType, Parameters;
 template join(alias Method)
 	if(
@@ -41,7 +46,20 @@ template join(alias Method)
 	)
 {
 	void _processRequest(HTTPContext context) {
-		ViewService.renderResult(Method(context), context);
+		import std.traits: getUDAs;
+		enum modAttr = getUDAs!(Method, IvyModuleAttr);
+		static if( modAttr.length == 0 ) {
+			ViewService.renderResult(Method(context), context);
+		} else static if( modAttr.length == 1 ) {
+			// Если есть аттрибут шаблона на методе, то используем этот шаблон для отображения
+			// результата выполнения метода
+			ViewService.renderResult(
+				ViewService.runIvyModule(modAttr[0].moduleName, context, Method(context)),
+				context
+			);
+		} else {
+			static assert(false, `Expected only one template name`);
+		}
 	}
 
 	import std.functional: toDelegate;

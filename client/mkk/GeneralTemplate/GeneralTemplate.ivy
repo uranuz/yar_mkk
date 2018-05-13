@@ -53,12 +53,7 @@ expr {*
 				<div id="site_title">
 					<h1>Маршрутно-квалификационная комиссия Ярославской области</h1>
 				</div>
-				{=MainMenu
-					isAuthenticated: isAuthenticated
-					userName: userName
-					vpaths: vpaths
-					authRedirectURI: authRedirectURI
-				}
+				{=MainMenu authRedirectURI: authRedirectURI}
 			</div>
 			<!-- #header -->
 		</div>
@@ -89,7 +84,6 @@ expr {*
 				{=PohodFilterMenu
 					pohodFilterFields: pohodFilterFields
 					pohodFilterSections: pohodFilterSections
-					vpaths: vpaths
 				}
 				{=if {=hasRight obj: 'right.object.list' kind: 'read'} {*
 				<div>

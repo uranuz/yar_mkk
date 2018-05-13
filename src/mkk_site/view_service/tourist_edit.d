@@ -24,7 +24,6 @@ TDataNode touristEditController(HTTPContext ctx)
 	auto req = ctx.request;
 	auto queryForm = req.queryForm;
 	auto bodyForm = req.bodyForm;
-	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 	Optional!size_t touristNum;
 
 	if( "key" in queryForm )
@@ -41,25 +40,22 @@ TDataNode touristEditController(HTTPContext ctx)
 	}
 
 	if( bodyForm.get("action", null) == "write" ) {
-		return writeTourist(ctx, touristNum, isAuthorized);
+		return writeTourist(ctx, touristNum);
 	} else {
-		return renderEditTourist(ctx, touristNum, isAuthorized);
+		return renderEditTourist(ctx, touristNum);
 	}
 }
 
-TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
+TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
 	import std.json: JSONValue;
 	TDataNode dataDict;
-
-	dataDict["isAuthorized"] = isAuthorized;
 	dataDict["tourist"] = mainServiceCall(`tourist.read`, ctx, JSONValue([`touristNum`: touristNum.toStdJSON()]));
-	dataDict["vpaths"] = Service.virtualPaths;
 
-	return ViewService.runIvyModule("mkk.TouristEdit", dataDict);
+	return ViewService.runIvyModule("mkk.TouristEdit", ctx, dataDict);
 }
 
-TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAuthorized)
+TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -89,5 +85,5 @@ TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum, bool isAutho
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.TouristEdit.Results", dataDict);
+	return ViewService.runIvyModule("mkk.TouristEdit.Results", ctx, dataDict);
 }

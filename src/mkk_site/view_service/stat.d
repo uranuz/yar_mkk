@@ -6,7 +6,6 @@ shared static this() {
 	ViewService.pageRouter.join!(renderStat)("/dyn/stat");
 }
 
-
 import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
@@ -15,25 +14,17 @@ import mkk_site.data_model.stat;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
+@IvyModuleAttr(`mkk.Stat`)
 TDataNode renderStat(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
-//*************************************************************
-	auto bodyForm = ctx.request.bodyForm;
 	StatSelect select;
-	formDataToStruct(bodyForm, select);
+	formDataToStruct(ctx.request.bodyForm, select);
 	JSONValue jSelect = select.toStdJSON();
-	
-//**************************************************************
-	//данные для передачи в в основной сервис
 
-	TDataNode dataDict = [
+	return TDataNode([
 		"select": jSelect.toIvyJSON(),
-		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select":jSelect])),
-		"vpaths": TDataNode(Service.virtualPaths)
-	];
-	//данные для передачи в шаблон
-
-	return ViewService.runIvyModule("mkk.Stat", dataDict);
+		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select": jSelect]))
+	]);
 }

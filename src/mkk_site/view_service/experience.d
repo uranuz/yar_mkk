@@ -15,6 +15,7 @@ import webtank.common.std_json.to: toStdJSON;
 
 import mkk_site.data_model.common: Navigation;
 
+@IvyModuleAttr(`mkk.Experience`)
 TDataNode renderExperience(HTTPContext ctx)
 {
 	import std.json;
@@ -38,9 +39,5 @@ TDataNode renderExperience(HTTPContext ctx)
 	callParams["touristKey"] = touristNum;
 	callParams["nav"] = nav.toStdJSON();
 
-	TDataNode dataDict = mainServiceCall("tourist.experience", ctx, callParams);
-	dataDict["vpaths"] = Service.virtualPaths;
-	dataDict["isAuthorized"] = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
-
-	return ViewService.runIvyModule("mkk.Experience", dataDict);
+	return mainServiceCall("tourist.experience", ctx, callParams);
 }

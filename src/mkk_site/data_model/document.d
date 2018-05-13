@@ -10,9 +10,13 @@ struct DocumentListFilter
 	Optional!(size_t[]) nums; // Фильтр по списку идентификаторов документов
 }
 
+import webtank.security.right.common: RightObjAttr;
+
 struct DocumentDataToWrite
 {
-	Optional!size_t num; // Номер походе в базе
+	Optional!size_t num; // Номер похода в базе
+
+@RightObjAttr(`document.edit`) @RightObjAttr():
 
 	@DBName("name") Undefable!string name;
 	@DBName("link") Undefable!string link;

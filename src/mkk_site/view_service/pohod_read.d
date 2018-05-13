@@ -12,6 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
+@IvyModuleAttr(`mkk.PohodRead`)
 TDataNode renderPohodRead(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
@@ -29,13 +30,10 @@ TDataNode renderPohodRead(HTTPContext ctx)
 		throw new Exception(`Невозможно отобразить данные похода. Номер похода должен быть целым числом`);
 	}
 
-	TDataNode dataDict;
-	dataDict["pohodNum"] = pohodNum;
-	dataDict["isAuthorized"] = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
-	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum]));
-	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum]));
-	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]));
-	dataDict["vpaths"] = Service.virtualPaths;
-
-	return ViewService.runIvyModule("mkk.PohodRead", ctx, dataDict);
+	return TDataNode([
+		"pohodNum": TDataNode(pohodNum),
+		"pohod": mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum])),
+		"extraFileLinks": mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum])),
+		"partyList": mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]))
+	]);
 }

@@ -2,6 +2,7 @@ module mkk_site.main_service.pohod_edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName;
+import webtank.security.right.common: GetSymbolAccessObject;
 import mkk_site.history.client;
 import mkk_site.history.common;
 import mkk_site.data_model.full_format;
@@ -24,12 +25,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import std.json: JSONValue;
 	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
-
-	bool isAuthorized = ctx.user.isAuthenticated
-		&& (ctx.user.isInRole("admin") || ctx.user.isInRole("moder"));
-	if( !isAuthorized ) {
-		throw new Exception(`Недостаточно прав для редактирования похода!!!`);
-	}
+	import std.exception: enforce;
 
 	string[] fieldNames;
 	string[] fieldValues;
@@ -57,9 +53,13 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		alias FieldType = typeof(__traits(getMember, record, fieldName));
 		static if( isOptional!FieldType && OptionalIsUndefable!FieldType ) {
 			auto field = __traits(getMember, record, fieldName);
-			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
 			if( field.isUndef )
 				continue; // Поля, которые undef с нашей т.зрения не изменились
+
+			string accessObj = GetSymbolAccessObject!(PohodDataToWrite, fieldName)();
+			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля похода: ` ~ fieldName);
+
+			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
 			fieldNames ~= `"` ~ dbFieldName ~ `"`;
 			static if( isSomeString!( OptionalValueType!FieldType ) )
 			{
@@ -173,7 +173,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		string queryStr;
 
 		import std.array: join;
-		if( record.num.isSet )	{
+		if( record.num.isSet ) {
 			queryStr = "update pohod set( " ~ fieldNames.join(", ") ~ " ) = ( " ~ fieldValues.join(", ") ~ " ) where num = '" ~ record.num.text ~ "' returning num";
 		}
 		else
@@ -219,8 +219,8 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 void pohodDelete(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
-	if( !ctx.user.isAuthenticated || !ctx.user.isInRole("admin") )
-		throw new Exception("Недостаточно прав для удаления похода!");
+	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`pohod.edit`, `delete`), `Недостаточно прав для удаления похода!`);
 
 	HistoryRecordData historyData = {
 		tableName: `pohod`,

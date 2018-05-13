@@ -5,23 +5,20 @@ def UserMenuBtn {=
 		moduleName: 'mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn'
 		instanceName: 'userMenuBtn'
 		cssBaseClass: 'mkk-UserMenuBtn'
-		isAuthenticated: null
-		userName: null
-		vpaths: undef
 		authRedirectURI: null;
 	def.body {*
 	{=var
-		authStateCls: {=if isAuthenticated 'm-with_auth' else 'm-without_auth'}
+		authStateCls: {=if userIdentity.isAuthenticated 'm-with_auth' else 'm-without_auth'}
 	}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<a
 			href="javascript:void(0)"
 			class="{=cls 'popdownBtn'}"
-			title="{=if isAuthenticated
+			title="{=if userIdentity.isAuthenticated
 				'Открыть список опций для учетной записи' else 'Вход на сайт не выполнен'
 			}">
-			<span>{=if isAuthenticated userName else 'Вход не выполнен'}</span>
+			<span>{=if userIdentity.isAuthenticated userIdentity.name else 'Вход не выполнен'}</span>
 		<span>&#x25BC;</span>
 		</a>
 		<ul class="{=cls 'popdownMenu'} {{authStateCls}}">

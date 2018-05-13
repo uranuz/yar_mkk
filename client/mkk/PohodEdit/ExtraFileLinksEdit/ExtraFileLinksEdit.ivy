@@ -7,7 +7,8 @@ def ExtraFileLinksEdit {=
 		instanceName: 'extraFileLinksEdit'
 		cssBaseClass: 'mkk-ExtraFileLinksEdit'
 		linkList: null,
-		portionSize: 5;
+		portionSize: 5
+		disabled: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -21,10 +22,14 @@ def ExtraFileLinksEdit {=
 					instanceName: instanceName
 					linkList: linkList
 					portionSize: portionSize
+					disabled: disabled
 				}
 				<tbody>
 					<tr><td>
-						<input type="hidden" class="{=cls 'linksDataField'}" name="extraFileLinks">
+						<input type="hidden"
+							class="{=cls 'linksDataField'}"
+							name="extraFileLinks"
+							{=if disabled 'disabled'}/>
 						<button type="button" class="{=cls 'moreLinksBtn'} btn btn-primary btn-block">
 							Добавить ещё
 						</button>

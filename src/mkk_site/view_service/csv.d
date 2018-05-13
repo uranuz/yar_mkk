@@ -59,5 +59,4 @@ void pohodCsv (HTTPContext ctx)
 	writeln(ctx.request.messageBody);
 	ctx.response.headers["Content-Type"]=`text/csv; charset="utf-8`;
 	ctx.response.write(csv);
-
-	}
+}

@@ -13,15 +13,15 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
+@IvyModuleAttr(`mkk.IndexPage`)
 TDataNode renderIndex(HTTPContext ctx)
 {
-	TDataNode dataDict;
-	dataDict["pohodList"] = mainServiceCall("pohod.recentList", ctx);
-	dataDict["vpaths"] = Service.virtualPaths;
-
-	return ViewService.runIvyModule("mkk.IndexPage", dataDict);
+	return TDataNode([
+		"pohodList": mainServiceCall("pohod.recentList", ctx)
+	]);
 }
 
+@IvyModuleAttr(`mkk.AboutSite`)
 TDataNode renderAboutSite(HTTPContext ctx) {
-	return ViewService.runIvyModule("mkk.AboutSite");
+	return TDataNode();
 }

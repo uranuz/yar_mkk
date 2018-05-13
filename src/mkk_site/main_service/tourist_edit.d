@@ -5,6 +5,7 @@ import mkk_site.data_model.tourist_edit;
 import mkk_site.history.client;
 import mkk_site.history.common;
 import mkk_site.data_model.full_format;
+import webtank.security.right.common: GetSymbolAccessObject;
 
 shared static this()
 {
@@ -25,13 +26,7 @@ auto editTourist(
 	import webtank.net.utils: PGEscapeStr;
 	import std.array: join;
 	import std.json: JSONValue;
-
-	bool isAuthorized	= ctx.user.isAuthenticated
-		&& ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
-
-	if( !isAuthorized ) {
-		throw new Exception(`Недостаточно прав для редактирования туриста!!!`);
-	}
+	import std.exception: enforce;
 
 	string[] fieldNames; // имена полей для записи
 	string[] fieldValues; // значения полей для записи
@@ -52,6 +47,8 @@ auto editTourist(
 
 			if( field.isUndef )
 				continue; // Поля, которые undef с нашей т.зрения не изменились
+			string accessObj = GetSymbolAccessObject!(TouristDataToWrite, fieldName)();
+			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля: ` ~ fieldName);
 
 			enum DBFields = getUDAs!(__traits(getMember, record, fieldName), DBName);
 			static if( DBFields.length > 0 ) {
@@ -155,8 +152,8 @@ auto editTourist(
 void touristDelete(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
-	if( !ctx.user.isAuthenticated || !ctx.user.isInRole("admin") )
-		throw new Exception("Недостаточно прав для удаления туриста!");
+	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`tourist.edit`, `delete`), `Недостаточно прав для удаления туриста!`);
 
 	HistoryRecordData historyData = {
 		tableName: `tourist`,

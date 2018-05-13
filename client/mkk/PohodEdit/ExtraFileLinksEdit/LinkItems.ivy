@@ -6,7 +6,8 @@ def LinkItems {=
 		cssBaseClass: 'mkk-ExtraFileLinksEdit'
 		linkList: null
 		portionSize: 5
-		minBlockCount: 1;
+		minBlockCount: 1
+		disabled: null;
 	def.body {*
 		{=var
 				linkCount: {=if not{=empty linkList} {=len linkList} else 0}
@@ -20,10 +21,16 @@ def LinkItems {=
 		{=repeat i in {=range 0 inputCount} {*
 			<tr>
 				<td>
-					<input type="text" class="form-control" value="{=if i < linkCount {=at {=at linkList i} 0} }"/>
+					<input type="text"
+						class="form-control"
+						value="{=if i < linkCount {=at {=at linkList i} 0} }"
+						{=if disabled 'disabled'}/>
 				</td>
 				<td>
-					<input type="text" class="form-control" value="{=if i < linkCount {=at {=at linkList i} 1} }"/>
+					<input type="text"
+						class="form-control"
+						value="{=if i < linkCount {=at {=at linkList i} 1} }"
+						{=if disabled 'disabled'}/>
 				</td>
 			</tr>
 		*}}

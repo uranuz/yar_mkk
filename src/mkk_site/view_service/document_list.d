@@ -17,6 +17,7 @@ import webtank.common.std_json.to: toStdJSON;
 
 import mkk_site.data_model.document;
 
+@IvyModuleAttr("mkk.DocumentList")
 TDataNode documentListController(HTTPContext ctx)
 {
 	import std.json;
@@ -33,16 +34,11 @@ TDataNode documentListController(HTTPContext ctx)
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
 	]));
-	TDataNode dataDict = [
+
+	return TDataNode([
 		"filter": jFilter.toIvyJSON(),
 		"documentList": callResult["rs"],
 		"nav": callResult["nav"]
-	];
-
-	dataDict["isAuthorized"] = ctx.user.isAuthenticated &&
-		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
-	dataDict["vpaths"] = Service.virtualPaths;
-
-	return ViewService.runIvyModule("mkk.DocumentList", dataDict);
+	]);
 }
 

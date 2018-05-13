@@ -17,6 +17,7 @@ import webtank.net.http.context;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
+@IvyModuleAttr(`mkk.PohodList`)
 TDataNode renderPohodList(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE;
@@ -26,7 +27,6 @@ TDataNode renderPohodList(HTTPContext ctx)
 	auto req = ctx.request;
 	auto bodyForm = ctx.request.bodyForm;
 	bool isForPrint = req.bodyForm.get("isForPrint", null) == "on";
-	bool isAuthorized = ctx.user.isAuthenticated && ( ctx.user.isInRole("admin") || ctx.user.isInRole("moder") );
 
 	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
 	PohodFilter pohodFilter;
@@ -44,28 +44,26 @@ TDataNode renderPohodList(HTTPContext ctx)
 		"filter": filter,
 		"nav": nav.toStdJSON()
 	]));
-	TDataNode dataDict;
-	dataDict["pohodList"] = callResult["rs"];
-	dataDict["pohodNav"] = callResult["nav"];
-	dataDict["filter"] = filter.toIvyJSON(); // Возвращаем поля фильтрации назад пользователю
-	dataDict["pohodEnums"] = mainServiceCall("pohod.enumTypes", ctx);
-	dataDict["vpaths"] = Service.virtualPaths;
-	dataDict["isAuthorized"] = isAuthorized;
-	dataDict["isForPrint"] = isForPrint;
-
-	return ViewService.runIvyModule("mkk.PohodList", ctx, dataDict);
+	return TDataNode([
+		"pohodList": callResult["rs"],
+		"pohodNav": callResult["nav"],
+		// Возвращаем поля фильтрации назад пользователю
+		"filter": filter.toIvyJSON(),
+		"pohodEnums": mainServiceCall("pohod.enumTypes", ctx),
+		"isForPrint": TDataNode(isForPrint)
+	]);
 }
 
+@IvyModuleAttr(`mkk.PohodList.PartyInfo`)
 TDataNode renderPartyInfo(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
-	TDataNode dataDict = mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
-
-	return ViewService.runIvyModule("mkk.PohodList.PartyInfo", dataDict);
+	return mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
 }
 
+@IvyModuleAttr(`mkk.PohodEdit.ExtraFileLinksEdit.LinkItems`)
 TDataNode renderExtraFileLinks(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE, parseJSON;
@@ -109,5 +107,5 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 	}
 	dataDict["instanceName"] = ctx.request.queryForm.get("instanceName", null);
 
-	return ViewService.runIvyModule("mkk.PohodEdit.ExtraFileLinksEdit.LinkItems", dataDict);
+	return dataDict;
 }

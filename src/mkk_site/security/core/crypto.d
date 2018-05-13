@@ -29,14 +29,14 @@ import std.datetime, std.random, core.thread;
 ///Генерирует хэш для пароля с "солью" и "перцем"
 ubyte[] makePasswordHash(
 	const(char)[] password,
-    const(char)[] salt,
-    const(char)[] pepper,
+	const(char)[] salt,
+	const(char)[] pepper,
 	size_t hashByteLength = pwHashByteLength,
 	ulong N = scryptN,
-    uint r = scryptR,
-    uint p = scryptP
-) {	
-    ubyte[] pwHash = new ubyte[hashByteLength];
+	uint r = scryptR,
+	uint p = scryptP
+) {
+	ubyte[] pwHash = new ubyte[hashByteLength];
 
 	auto secret = password ~ pepper;
 	auto spice = pepper ~ salt;
@@ -56,7 +56,7 @@ ubyte[] makePasswordHash(
 ///Кодирует хэш пароля для хранения в виде строки
 string encodePasswordHash( const(ubyte[]) pwHash, ulong N = scryptN, uint r = scryptR, uint p = scryptP )
 {
-    return ( "scr$" ~ Base64URL.encode(pwHash) ~ "$" ~ pwHash.length.to!string
+	return ( "scr$" ~ Base64URL.encode(pwHash) ~ "$" ~ pwHash.length.to!string
 		~ "$" ~ N.to!string ~ "$" ~ r.to!string ~ "$" ~ p.to!string ).idup;
 }
 
@@ -65,7 +65,7 @@ import std.array;
 ///Проверяет пароль на соответствие закодированному хэшу с заданной солью и перцем
 bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(char)[] salt, const(char)[] pepper)
 {
-    auto params = encodedPwHash.split("$");
+	auto params = encodedPwHash.split("$");
 
 	if( params.length != 6 || params[0] != "scr" )
 		return false;
@@ -75,12 +75,12 @@ bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(ch
 		return false;
 
 	return pwHash == makePasswordHash(
-        password,
-        salt,
-        pepper,
-        params[2].to!size_t,
-        params[3].to!ulong,
-        params[4].to!uint,
-        params[5].to!uint
-    );
+		password,
+		salt,
+		pepper,
+		params[2].to!size_t,
+		params[3].to!ulong,
+		params[4].to!uint,
+		params[5].to!uint
+	);
 }

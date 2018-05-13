@@ -19,6 +19,7 @@ import webtank.common.std_json.to: toStdJSON;
 
 import mkk_site.data_model.tourist_list;
 
+@IvyModuleAttr(`mkk.TouristList`)
 TDataNode renderTouristList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
@@ -41,13 +42,10 @@ TDataNode renderTouristList(HTTPContext ctx)
 		"nav": callResult["nav"]
 	];
 
-	dataDict["isAuthorized"] = ctx.user.isAuthenticated &&
-		( ctx.user.isInRole("moder") || ctx.user.isInRole("admin") );
-	dataDict["vpaths"] = Service.virtualPaths;
-
-	return ViewService.runIvyModule("mkk.TouristList", dataDict);
+	return dataDict;
 }
 
+@IvyModuleAttr(`mkk.TouristPlainList`)
 TDataNode touristPlainList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
@@ -70,15 +68,15 @@ TDataNode touristPlainList(HTTPContext ctx)
 		"nav": callResult["nav"]
 	];
 
-	if( "mode" in queryForm ) {
-		if( ["add", "remove"].canFind(queryForm["mode"]) ) {
-			dataDict["mode"] = queryForm["mode"];
+	if( auto it = "mode" in queryForm ) {
+		if( ["add", "remove"].canFind(*it) ) {
+			dataDict["mode"] = *it;
 		}
 	}
-	if( "instanceName" in queryForm ) {
-		dataDict["instanceName"] = queryForm["instanceName"];
+	if( auto it = "instanceName" in queryForm ) {
+		dataDict["instanceName"] = *it;
 	}
 
-	return ViewService.runIvyModule("mkk.TouristPlainList", dataDict);
+	return dataDict;
 }
 

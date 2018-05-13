@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNull, firScopeOptsEnc;
+from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.TouristPlainList import TouristPlainList;
@@ -7,7 +7,8 @@ def TouristEdit {=
 	def.kv
 		moduleName: 'mkk/TouristEdit/TouristEdit'
 		instanceName: 'touristEdit'
-		cssBaseClass: 'mkk-TouristEdit';
+		cssBaseClass: 'mkk-TouristEdit'
+		accessObject: 'tourist.edit';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -21,7 +22,8 @@ def TouristEdit {=
 						<input type="text"
 							name="familyName"
 							class="{=cls 'familyName'} form-control"
-							value="{=recGet tourist 'familyName'}"/>
+							value="{=recGet tourist 'familyName'}"
+							{=if not{=hasRight subobj: 'familyName' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -30,7 +32,8 @@ def TouristEdit {=
 						<input type="text"
 							name="givenName"
 							class="{=cls 'givenName'} form-control"
-							value="{=recGet tourist 'givenName'}"/>
+							value="{=recGet tourist 'givenName'}"
+							{=if not{=hasRight subobj: 'givenName' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -39,7 +42,8 @@ def TouristEdit {=
 						<input type="text"
 							name="patronymic"
 							class="{=cls 'patronymic'} form-control"
-							value="{=recGet tourist 'patronymic'}"/>
+							value="{=recGet tourist 'patronymic'}"
+							{=if not{=hasRight subobj: 'patronymic' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -53,6 +57,7 @@ def TouristEdit {=
 							day: {=recGet tourist 'birthDay'}
 							month: {=recGet tourist 'birthMonth'}
 							year: {=recGet tourist 'birthYear'}
+							disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'}
 						}
 					</td>
 				</tr>
@@ -62,7 +67,8 @@ def TouristEdit {=
 						<input type="text"
 							name="address"
 							class="form-control"
-							value="{=recGet tourist 'address'}"/>
+							value="{=recGet tourist 'address'}"
+							{=if not{=hasRight subobj: 'address' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -71,7 +77,8 @@ def TouristEdit {=
 						<input type="text"
 							name="phone"
 							class="form-control"
-							value="{=recGetStr tourist 'phone'}"/>
+							value="{=recGetStr tourist 'phone'}"
+							{=if not{=hasRight subobj: 'phone' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -80,7 +87,8 @@ def TouristEdit {=
 						<input type="checkbox"
 							name="showPhone"
 							class="checkbox-inline"
-							{=if {=recGet tourist 'showPhone'} 'checked'}/>
+							{=if {=recGet tourist 'showPhone'} 'checked'}
+							{=if not{=hasRight subobj: 'showPhone' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -89,7 +97,8 @@ def TouristEdit {=
 						<input type="text"
 							name="email"
 							class="form-control"
-							value="{=recGet tourist 'email'}"/>
+							value="{=recGet tourist 'email'}"
+							{=if not{=hasRight subobj: 'email' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -98,7 +107,8 @@ def TouristEdit {=
 						<input type="checkbox"
 							name="showEmail"
 							class="checkbox-inline"
-							{=if {=recGet tourist 'showEmail'} 'checked'}>
+							{=if {=recGet tourist 'showEmail'} 'checked'}
+							{=if not{=hasRight subobj: 'showEmail' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
@@ -107,13 +117,15 @@ def TouristEdit {=
 						<input type="text"
 							name="experience"
 							class="form-control"
-							value="{=recGet tourist 'experience'}"/>
+							value="{=recGet tourist 'experience'}"
+							{=if not{=hasRight subobj: 'experience' kind: 'edit'} 'disabled'}/>
 					</td>
 				</tr>
 				<tr>
 					<td>Комментарий</td>
 					<td>
 						<textarea name="comment" class="form-control"
+							{=if not{=hasRight subobj: 'comment' kind: 'edit'} 'disabled'}
 							>{=recGet tourist 'comment'}</textarea>
 					</td>
 				</tr>
@@ -128,6 +140,7 @@ def TouristEdit {=
 							items: {=enumWithNull
 								{=at {=rsFieldFormat tourist 'sportsCategory'} 'enum'} 'не задано'}
 							selectedId: {=recGet tourist 'sportsCategory'}
+							disabled: not{=hasRight subobj: 'sportsCategory' kind: 'edit'}
 						}
 					</td>
 				</tr>
@@ -142,6 +155,7 @@ def TouristEdit {=
 							items: {=enumWithNull
 								{=at {=rsFieldFormat tourist 'refereeCategory'} 'enum'} 'не задано'}
 							selectedId: {=recGet tourist 'refereeCategory'}
+							disabled: not{=hasRight subobj: 'refereeCategory' kind: 'edit'}
 						}
 					</td>
 				</tr>
@@ -175,7 +189,7 @@ def TouristEdit {=
 	</div>
 	*}
 };
-if isAuthorized {=
+if {=isInRoles ['admin', 'moder']} {=
 	TouristEdit
 } else {*
 	<h4>
