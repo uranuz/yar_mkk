@@ -19,7 +19,6 @@ import webtank.common.std_json.to: toStdJSON;
 
 void statCsv(HTTPContext ctx)
 {
-	import std.json: JSONValue;
 	import std.conv: to;
 //*************************************************************	auto bodyForm = ctx.request.bodyForm;
 	auto bodyForm = ctx.request.bodyForm;
@@ -39,7 +38,6 @@ void statCsv(HTTPContext ctx)
 
 void pohodCsv (HTTPContext ctx)
 {
-	import std.json: JSONValue;
 	import std.conv: to;
 //*************************************************************
 	auto bodyForm = ctx.request.bodyForm;

@@ -22,7 +22,6 @@ TDataNode renderObjectList(HTTPContext ctx) {
 TDataNode renderObjectRightList(HTTPContext ctx)
 {
 	TDataNode dataDict;
-	import std.json: JSONValue;
 	import std.conv: to;
 	return TDataNode([
 		"objectRightList": ctx.mainServiceCall("right.objectRightList", [

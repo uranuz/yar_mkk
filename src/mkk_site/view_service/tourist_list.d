@@ -23,7 +23,6 @@ import mkk_site.data_model.tourist_list;
 TDataNode renderTouristList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
-
 	auto bodyForm = ctx.request.bodyForm;
 	TouristListFilter filter;
 	Navigation nav;
@@ -36,13 +35,12 @@ TDataNode renderTouristList(HTTPContext ctx)
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
 	]);
-	TDataNode dataDict = [
+
+	return TDataNode([
 		"filter": jFilter.toIvyJSON(),
 		"touristList": callResult["rs"],
 		"nav": callResult["nav"]
-	];
-
-	return dataDict;
+	]);
 }
 
 @IvyModuleAttr(`mkk.TouristPlainList`)

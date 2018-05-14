@@ -67,28 +67,20 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum)
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
 	import std.array: array;
-	import std.json: JSONValue;
 	import std.datetime: Date;
 	import std.string: toLower;
 
-	auto queryForm = ctx.request.queryForm;
 	DocumentDataToWrite inputDocData;
-	formDataToStruct(queryForm, inputDocData);
-	JSONValue newDoc = inputDocData.toStdJSON();
-
-	// Если идентификатор похода не передаётся, то создаётся новый вместо обновления
-	if( docNum.isSet ) {
-		newDoc["num"] = docNum.value;
-	}
+	formDataToStruct(ctx.request.form, inputDocData);
 
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
 		"docNum": docNum.isSet? TDataNode(docNum.value): TDataNode(null),
 		"isUpdate": TDataNode(docNum.isSet),
-		"instanceName": TDataNode(ctx.request.queryForm.get("instanceName", null))
+		"instanceName": TDataNode(ctx.request.form.get("instanceName", null))
 	];
 	try {
-		dataDict["docNum"] = ctx.mainServiceCall(`document.edit`, [`record`: newDoc]).integer;
+		dataDict["docNum"] = ctx.mainServiceCall(`document.edit`, [`record`: inputDocData]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

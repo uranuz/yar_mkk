@@ -25,15 +25,14 @@ TDataNode renderPohodList(HTTPContext ctx)
 	import std.exception: ifThrown;
 
 	auto req = ctx.request;
-	auto bodyForm = ctx.request.bodyForm;
 	bool isForPrint = req.bodyForm.get("isForPrint", null) == "on";
 
 	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
 	PohodFilter pohodFilter;
 	pohodFilter.init();
-	formDataToStruct(bodyForm, pohodFilter);
+	formDataToStruct(req.form, pohodFilter);
 	Navigation nav;
-	formDataToStruct(bodyForm, nav);
+	formDataToStruct(req.form, nav);
 	JSONValue filter = pohodFilter.toStdJSON(); // JSON с фильтрами по походам
 
 	if( isForPrint ) {
@@ -57,7 +56,6 @@ TDataNode renderPohodList(HTTPContext ctx)
 @IvyModuleAttr(`mkk.PohodList.PartyInfo`)
 TDataNode renderPartyInfo(HTTPContext ctx)
 {
-	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
 	return ctx.mainServiceCall("pohod.partyInfo", ["num": pohodNum]);

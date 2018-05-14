@@ -45,16 +45,16 @@ string dateRusFormatLetter ( OptionalDate date )
 {
 	string  dateRu;
 
-	import std.typecons: AliasSeq;
-		auto tmpDate = date;
-		foreach( fieldName; AliasSeq!(`day`, `month`, `year`) )
-		{
-			auto dtPart = __traits(getMember, tmpDate, fieldName);
-			if(fieldName!=`month`)
-					dateRu ~= (dtPart.isNull? `__`: dtPart.value.text)~" ";
-				else
-					dateRu ~= (dtPart.isNull? `__`:месяцы[dtPart.value] )~" ";
-		}
+	import std.meta: AliasSeq;
+	auto tmpDate = date;
+	foreach( fieldName; AliasSeq!(`day`, `month`, `year`) )
+	{
+		auto dtPart = __traits(getMember, tmpDate, fieldName);
+		if( fieldName != `month` )
+			dateRu ~= (dtPart.isNull? `__`: dtPart.value.text) ~ " ";
+		else
+			dateRu ~= (dtPart.isNull? `__`: месяцы[dtPart.value]) ~ " ";
+	}
 
 	return dateRu;
 	// вывод  в формате 23 февраля 2013
@@ -64,16 +64,16 @@ string dateRusFormatNumber ( OptionalDate date )
 {
 	string  dateRu;
 
-	import std.typecons: AliasSeq;
-		auto tmpDate = date;
-		foreach( fieldName; AliasSeq!(`day`, `month`, `year`) )
-		{
-			auto dtPart = __traits(getMember, tmpDate, fieldName);
-			if(fieldName!=`year`)
-					dateRu ~= (dtPart.isNull? `__`: dtPart.value.text)~".";
-				else
-					dateRu ~= (dtPart.isNull? `__`:месяцы[dtPart.value] );
-		}
+	import std.meta: AliasSeq;
+	auto tmpDate = date;
+	foreach( fieldName; AliasSeq!(`day`, `month`, `year`) )
+	{
+		auto dtPart = __traits(getMember, tmpDate, fieldName);
+		if( fieldName != `year` )
+			dateRu ~= (dtPart.isNull? `__`: dtPart.value.text) ~ ".";
+		else
+			dateRu ~= (dtPart.isNull? `__`:месяцы[dtPart.value]);
+	}
 
 	return dateRu;
 	// вывод  в формате 23.02.2013

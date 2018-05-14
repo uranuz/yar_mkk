@@ -23,7 +23,6 @@ import mkk_site.data_model.common: Navigation;
 @IvyModuleAttr(`mkk.RecordHistory`)
 TDataNode renderRecordHistory(HTTPContext ctx)
 {
-	import std.json: JSONValue, JSON_TYPE;
 	import std.conv: to, ConvException;
 	import std.exception: ifThrown, enforce;
 	import std.algorithm: canFind;

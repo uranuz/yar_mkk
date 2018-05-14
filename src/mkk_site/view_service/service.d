@@ -23,6 +23,7 @@ class MKKViewService: IvyViewService
 	import ivy;
 	import ivy.interpreter.data_node_render: renderDataNode, DataRenderType;
 	import webtank.net.http.output: HTTPOutput;
+	import webtank.net.http.context: HTTPContext;
 public:
 	this(string serviceName, string pageURIPatternStr)
 	{

@@ -22,13 +22,11 @@ TDataNode pohodEditController(HTTPContext ctx)
 	import std.conv: to, ConvException;
 
 	auto req = ctx.request;
-	auto queryForm = req.queryForm;
-	auto bodyForm = req.bodyForm;
 	Optional!size_t pohodNum;
-	if( "key" in queryForm )
+	if( "key" in req.form )
 	{
 		try {
-			pohodNum = queryForm.get("key", null).to!size_t;
+			pohodNum = req.form.get("key", null).to!size_t;
 		}
 		catch(ConvException e)
 		{
@@ -38,7 +36,7 @@ TDataNode pohodEditController(HTTPContext ctx)
 		}
 	}
 
-	if( bodyForm.get("action", null) == "write" ) {
+	if( req.form.get("action", null) == "write" ) {
 		return writePohod(ctx, pohodNum);
 	} else {
 		return renderEditPohod(ctx, pohodNum);
@@ -47,7 +45,6 @@ TDataNode pohodEditController(HTTPContext ctx)
 
 TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
-	import std.json: JSONValue;
 	TDataNode dataDict;
 
 	dataDict["pohod"] = ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]);
@@ -67,23 +64,15 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum)
 	import std.datetime: Date;
 	import std.string: toLower;
 
-	auto bodyForm = ctx.request.bodyForm;
 	PohodDataToWrite inputPohodData;
-	formDataToStruct(bodyForm, inputPohodData);
-	JSONValue newPohod = inputPohodData.toStdJSON();
-
-	// Если идентификатор похода не передаётся, то создаётся новый вместо обновления
-	if( pohodNum.isSet ) {
-		newPohod["num"] = pohodNum.value;
-	}
-
+	formDataToStruct(ctx.request.form, inputPohodData);
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
 		"pohodNum": pohodNum.isSet? TDataNode(pohodNum.value): TDataNode(null),
 		"isUpdate": TDataNode(pohodNum.isSet)
 	];
 	try {
-		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: newPohod]).integer;
+		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: inputPohodData]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
