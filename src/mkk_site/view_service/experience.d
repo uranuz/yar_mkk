@@ -35,9 +35,6 @@ TDataNode renderExperience(HTTPContext ctx)
 		throw new Exception(`Невозможно отобразить данные туриста. Номер туриста должен быть целым числом`);
 	}
 
-	JSONValue callParams;
-	
-
 	return ctx.mainServiceCall("tourist.experience", [
 		"touristKey": JSONValue(touristNum),
 		"nav": nav.toStdJSON()
