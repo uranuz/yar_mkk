@@ -4,7 +4,6 @@ import mkk_site.data_model.enums;
 import mkk_site.data_model.stat;
 
 import std.conv, std.string, std.utf;
-import std.stdio;
 import std.typecons;
 import std.datetime;
 import std.typecons: tuple;

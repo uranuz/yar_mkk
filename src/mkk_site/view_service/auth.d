@@ -41,13 +41,12 @@ TDataNode renderAuth(HTTPContext ctx)
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( ("userLogin" in req.bodyForm) && ("userPassword" in req.bodyForm) )
 	{
-		JSONValue jParams;
-		jParams[`login`] = req.bodyForm["userLogin"];
-		jParams[`password`] = req.bodyForm["userPassword"];
-
 		JSONValue jResult;
 		try {
-			jResult = ctx.mainServiceCall!(JSONValue)(`auth.authByPassword`, jParams);
+			jResult = ctx.mainServiceCall!(JSONValue)(`auth.authByPassword`, [
+				`login`: req.bodyForm["userLogin"],
+				`password`: req.bodyForm["userPassword"]
+			]);
 		} catch(Exception) {}
 
 		if( jResult.type == JSON_TYPE.STRING )
