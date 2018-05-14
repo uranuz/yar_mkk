@@ -36,8 +36,10 @@ TDataNode renderExperience(HTTPContext ctx)
 	}
 
 	JSONValue callParams;
-	callParams["touristKey"] = touristNum;
-	callParams["nav"] = nav.toStdJSON();
+	
 
-	return mainServiceCall("tourist.experience", ctx, callParams);
+	return ctx.mainServiceCall("tourist.experience", [
+		"touristKey": JSONValue(touristNum),
+		"nav": nav.toStdJSON()
+	]);
 }

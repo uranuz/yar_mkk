@@ -32,8 +32,8 @@ TDataNode renderPohodRead(HTTPContext ctx)
 
 	return TDataNode([
 		"pohodNum": TDataNode(pohodNum),
-		"pohod": mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum])),
-		"extraFileLinks": mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum])),
-		"partyList": mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum]))
+		"pohod": ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]),
+		"extraFileLinks": ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]),
+		"partyList": ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum])
 	]);
 }

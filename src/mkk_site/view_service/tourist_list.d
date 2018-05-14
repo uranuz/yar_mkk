@@ -32,10 +32,10 @@ TDataNode renderTouristList(HTTPContext ctx)
 	formDataToStruct(bodyForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = mainServiceCall("tourist.list", ctx, JSONValue([
+	TDataNode callResult = ctx.mainServiceCall("tourist.list", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
-	]));
+	]);
 	TDataNode dataDict = [
 		"filter": jFilter.toIvyJSON(),
 		"touristList": callResult["rs"],
@@ -58,10 +58,10 @@ TDataNode touristPlainList(HTTPContext ctx)
 	formDataToStruct(queryForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = mainServiceCall("tourist.plainSearch", ctx, JSONValue([
+	TDataNode callResult = ctx.mainServiceCall("tourist.plainSearch", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
-	]));
+	]);
 	TDataNode dataDict = [
 		"filter": jFilter.toIvyJSON(),
 		"touristList": callResult["rs"],

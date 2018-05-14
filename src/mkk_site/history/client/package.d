@@ -31,8 +31,8 @@ UUID sendActionToHistory(HTTPContext ctx, string description, Undefable!size_t u
 		time_stamp: cast(DateTime) Clock.currTime(UTC())
 	};
 
-	Service.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
-		`history.writeAction`, ctx, JSONValue(["data": data.toStdJSON()]));
+	ctx.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
+		`history.writeAction`, ["data": data.toStdJSON()]);
 	return newActionUUID;
 }
 
@@ -61,8 +61,8 @@ void sendChangesToHistory(HTTPContext ctx, HistoryRecordData[] data)
 	}
 
 	foreach( piece; data.chunks(400) )
-		Service.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
-			`history.writeData`, ctx, JSONValue(["data": piece.toStdJSON()]));
+		ctx.endpoint(`yarMKKHistory`).remoteCall!(JSONValue)(
+			`history.writeData`, ["data": piece.toStdJSON()]);
 }
 
 // Записать действие в историю и сохранить изменения

@@ -15,7 +15,7 @@ import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.Right.ObjectList`)
 TDataNode renderObjectList(HTTPContext ctx) {
-	return TDataNode(["objectList": mainServiceCall("right.objectList", ctx)]);
+	return TDataNode(["objectList": ctx.mainServiceCall("right.objectList")]);
 }
 
 @IvyModuleAttr(`mkk.Right.ObjectRightList`)
@@ -25,8 +25,7 @@ TDataNode renderObjectRightList(HTTPContext ctx)
 	import std.json: JSONValue;
 	import std.conv: to;
 	return TDataNode([
-		"objectRightList": mainServiceCall("right.objectRightList", ctx,
-			JSONValue([
-				`num`: ctx.request.form.get("key", null).to!size_t]))
+		"objectRightList": ctx.mainServiceCall("right.objectRightList",
+			[`num`: ctx.request.form.get("key", null).to!size_t])
 	]);
 }

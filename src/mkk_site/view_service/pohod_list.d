@@ -40,16 +40,16 @@ TDataNode renderPohodList(HTTPContext ctx)
 		nav.pageSize = 10000;
 	}
 
-	TDataNode callResult = mainServiceCall("pohod.list", ctx, JSONValue([
+	TDataNode callResult = ctx.mainServiceCall("pohod.list", [
 		"filter": filter,
 		"nav": nav.toStdJSON()
-	]));
+	]);
 	return TDataNode([
 		"pohodList": callResult["rs"],
 		"pohodNav": callResult["nav"],
 		// Возвращаем поля фильтрации назад пользователю
 		"filter": filter.toIvyJSON(),
-		"pohodEnums": mainServiceCall("pohod.enumTypes", ctx),
+		"pohodEnums": ctx.mainServiceCall("pohod.enumTypes"),
 		"isForPrint": TDataNode(isForPrint)
 	]);
 }
@@ -60,7 +60,7 @@ TDataNode renderPartyInfo(HTTPContext ctx)
 	import std.json: JSONValue;
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
-	return mainServiceCall("pohod.partyInfo", ctx, JSONValue(["num": pohodNum]));
+	return ctx.mainServiceCall("pohod.partyInfo", ["num": pohodNum]);
 }
 
 @IvyModuleAttr(`mkk.PohodEdit.ExtraFileLinksEdit.LinkItems`)
@@ -74,7 +74,7 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 	if( "key" in ctx.request.queryForm ) {
 		// Если есть ключ похода, то берем ссылки из похода
 		size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
-		dataDict["linkList"] = mainServiceCall("pohod.extraFileLinks", ctx, JSONValue(["num": pohodNum]));
+		dataDict["linkList"] = ctx.mainServiceCall("pohod.extraFileLinks", ["num": pohodNum]);
 	} else {
 		// Иначе отрисуем список ссылок, который нам передали
 		string rawExtraFileLinks = ctx.request.queryForm.get("extraFileLinks", null);

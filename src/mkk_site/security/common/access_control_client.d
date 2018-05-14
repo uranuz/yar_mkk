@@ -3,7 +3,6 @@ module mkk_site.security.common.access_control_client;
 import webtank.security.access_control;
 import webtank.net.http.context: HTTPContext;
 import webtank.net.utils;
-import webtank.net.service.endpoint;
 
 import mkk_site.security.common.user_identity;
 import mkk_site.common.service;
@@ -26,11 +25,11 @@ public:
 
 	///Метод выполняет аутентификацию сессии для HTTP контекста
 	///Возвращает удостоверение пользователя
-	IUserIdentity authenticateSession(HTTPContext context)
+	IUserIdentity authenticateSession(HTTPContext ctx)
 	{
 		import std.json: JSON_TYPE, JSONValue;
 		// Запрос получает минимальную информацию о пользователе по Ид. сессии в контексте
-		auto jUserInfo = endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`, context);
+		auto jUserInfo = ctx.endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`);
 
 		import std.exception: enforce;
 		enforce(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
@@ -41,7 +40,7 @@ public:
 
 		import std.base64: Base64URL;
 		SessionId sid;
-		Base64URL.decode(context.request.cookies.get(`__sid__`, null), sid[]);
+		Base64URL.decode(ctx.request.cookies.get(`__sid__`, null), sid[]);
 
 		import std.algorithm: splitter, filter;
 		import std.array: array;

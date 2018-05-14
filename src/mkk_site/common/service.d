@@ -1,7 +1,6 @@
 module mkk_site.common.service;
 
 import webtank.net.service.iface: IWebService;
-import webtank.net.service.endpoint: EndPoint;
 
 // Возвращает ссылку на глобальный экземпляр основного сервиса MKK
 IWebService Service() @property
@@ -17,7 +16,7 @@ void Service(IWebService service) @property
 	_mkk_service = service;
 }
 
-EndPoint endpoint(string serviceName, string endpointName = `default`) {
+string endpoint(string serviceName, string endpointName = `default`) {
 	return Service.endpoint(serviceName, endpointName);
 }
 

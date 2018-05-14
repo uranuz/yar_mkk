@@ -17,7 +17,7 @@ import webtank.net.http.context;
 TDataNode renderIndex(HTTPContext ctx)
 {
 	return TDataNode([
-		"pohodList": mainServiceCall("pohod.recentList", ctx)
+		"pohodList": ctx.mainServiceCall("pohod.recentList")
 	]);
 }
 

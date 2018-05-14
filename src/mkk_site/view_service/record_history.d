@@ -3,8 +3,7 @@ module mkk_site.view_service.record_history;
 import mkk_site.view_service.service;
 import mkk_site.view_service.utils;
 
-import mkk_site.common.service: Service, endpoint;
-import webtank.net.service.endpoint;
+import mkk_site.common.service: Service;
 import webtank.ivy.rpc_client;
 
 shared static this() {
@@ -49,10 +48,10 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	Navigation nav;
 	formDataToStruct(bodyForm, nav);
 
-	TDataNode callResult = Service.endpoint(`yarMKKHistory`).remoteCall!(TDataNode)("history." ~ method, ctx, JSONValue([
+	TDataNode callResult = ctx.endpoint(`yarMKKHistory`).remoteCall!(TDataNode)("history." ~ method, [
 		"filter": pohodFilter.toStdJSON(),
 		"nav": nav.toStdJSON()
-	]));
+	]);
 
 	return TDataNode([
 		"history": callResult,

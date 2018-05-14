@@ -15,8 +15,6 @@ import webtank.net.http.context;
 @IvyModuleAttr(`mkk.UserSettings`)
 TDataNode renderUserSettings(HTTPContext ctx)
 {
-	import std.json: JSONValue;
-
 	TDataNode dataDict = [
 		`userFullName`: TDataNode(ctx.user.name),
 		`userLogin`: TDataNode(ctx.user.id),
@@ -25,11 +23,11 @@ TDataNode renderUserSettings(HTTPContext ctx)
 
 	try
 	{
-		mainServiceCall("user.changePassword", ctx, JSONValue([
+		ctx.mainServiceCall("user.changePassword", [
 			`oldPassword`: ctx.request.bodyForm.get(`oldPassword`, null),
 			`newPassword`: ctx.request.bodyForm.get(`newPassword`, null),
 			`repeatPassword`: ctx.request.bodyForm.get(`repeatPassword`, null),
-		]));
+		]);
 	} catch(Exception ex) {
 		dataDict[`pwChangeMessage`] = ex.msg;
 	}

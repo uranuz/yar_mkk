@@ -16,6 +16,6 @@ import webtank.net.http.context;
 TDataNode renderModerList(HTTPContext ctx)
 {
 	return TDataNode([
-		"moderList": mainServiceCall("moder.list", ctx)
+		"moderList": ctx.mainServiceCall("moder.list")
 	]);
 }

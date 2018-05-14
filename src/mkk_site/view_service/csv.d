@@ -28,9 +28,9 @@ void statCsv(HTTPContext ctx)
 	
 //**************************************************************
 	//lданные для передачи в в основной сервис
-	string csv = mainServiceCall("stat.Csv", ctx, JSONValue([
+	string csv = ctx.mainServiceCall("stat.Csv", [
 		"select": select.toStdJSON()
-	])).to!string;
+	]).to!string;
 
 	ctx.response.headers["Content-Type"]=`text/csv; charset="utf-8`;
 	ctx.response.write(csv);
@@ -41,22 +41,17 @@ void pohodCsv (HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
-	import std.stdio;
 //*************************************************************
-	writeln(`bodyForm:`, ctx.request.bodyForm);
 	auto bodyForm = ctx.request.bodyForm;
 	PohodFilter filter;
 	formDataToStruct(bodyForm, filter);
-	writeln(`formDataToStruct:`, filter);
-	
+
 //**************************************************************
 	//lданные для передачи в в основной сервис
-     string csv = mainServiceCall("pohod.Csv", ctx, JSONValue([
+	string csv = ctx.mainServiceCall("pohod.Csv", [
 		"filter": filter.toStdJSON()
-		])).to!string;
-    import std.stdio;
-	//string csv=">.>.>.>.>.>.";
-	writeln(ctx.request.messageBody);
+	]).to!string;
+
 	ctx.response.headers["Content-Type"]=`text/csv; charset="utf-8`;
 	ctx.response.write(csv);
 }

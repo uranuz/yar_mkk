@@ -48,11 +48,9 @@ TDataNode touristEditController(HTTPContext ctx)
 
 TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
-	import std.json: JSONValue;
-	TDataNode dataDict;
-	dataDict["tourist"] = mainServiceCall(`tourist.read`, ctx, JSONValue([`touristNum`: touristNum.toStdJSON()]));
-
-	return ViewService.runIvyModule("mkk.TouristEdit", ctx, dataDict);
+	return ViewService.runIvyModule("mkk.TouristEdit", ctx, TDataNode([
+		"tourist": ctx.mainServiceCall(`tourist.read`, [`touristNum`: touristNum.toStdJSON()])
+	]));
 }
 
 TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum)
@@ -80,7 +78,7 @@ TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum)
 		"isUpdate": TDataNode(touristNum.isSet)
 	];
 	try {
-		dataDict["touristNum"] = mainServiceCall(`tourist.edit`, ctx, JSONValue([`record`: newTourist])).integer;
+		dataDict["touristNum"] = ctx.mainServiceCall(`tourist.edit`, [`record`: newTourist]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

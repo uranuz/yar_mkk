@@ -13,19 +13,19 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.Auth`)
-TDataNode renderAuth(HTTPContext context)
+TDataNode renderAuth(HTTPContext ctx)
 {
 	import std.json;
 
-	auto req = context.request;
-	auto resp = context.response;
+	auto req = ctx.request;
+	auto resp = ctx.response;
 
 	// Адрес страницы для перенаправления после аутентификации
 	string redirectTo = req.queryForm.get("redirectTo", null);
 
 	if( "logout" in req.queryForm )
 	{
-		mainServiceCall(`auth.logout`, context); // Делаем "разаутентификацию"
+		ctx.mainServiceCall(`auth.logout`); // Делаем "разаутентификацию"
 
 		// Если есть куда перенаправлять - перенаправляем...
 		if( redirectTo.length > 0 ) {
@@ -47,7 +47,7 @@ TDataNode renderAuth(HTTPContext context)
 
 		JSONValue jResult;
 		try {
-			jResult = mainServiceCall!(JSONValue)(`auth.authByPassword`, context, jParams);
+			jResult = ctx.mainServiceCall!(JSONValue)(`auth.authByPassword`, jParams);
 		} catch(Exception) {}
 
 		if( jResult.type == JSON_TYPE.STRING )
@@ -74,6 +74,6 @@ TDataNode renderAuth(HTTPContext context)
 	return TDataNode([
 		`userLogin`: TDataNode(req.cookies.get(`user_login`, null)),
 		`isAuthFailed`: TDataNode(isAuthFailed),
-		`isAuthenticated`: TDataNode(!isAuthFailed && ( context.user.isAuthenticated || "__sid__" in resp.cookies ))
+		`isAuthenticated`: TDataNode(!isAuthFailed && ( ctx.user.isAuthenticated || "__sid__" in resp.cookies ))
 	]);
 }

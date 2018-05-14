@@ -25,6 +25,6 @@ TDataNode renderStat(HTTPContext ctx)
 
 	return TDataNode([
 		"select": jSelect.toIvyJSON(),
-		"data": mainServiceCall("stat.Data", ctx, JSONValue(["select": jSelect]))
+		"data": ctx.mainServiceCall("stat.Data", ["select": jSelect])
 	]);
 }

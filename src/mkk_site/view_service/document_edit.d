@@ -50,12 +50,12 @@ TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum)
 	import std.json: JSONValue;
 	import std.datetime: Clock, DateTime;
 
-	TDataNode callResult = mainServiceCall(`document.list`, ctx, JSONValue([
+	TDataNode callResult = ctx.mainServiceCall(`document.list`, [
 		"filter": JSONValue([
-			`nums`: JSONValue(docNum.isSet? [docNum.value]: [])
+			`nums`: docNum.isSet? [docNum.value]: null
 		]),
 		"nav": JSONValue() // Empty placeholder
-	]));
+	]);
 
 	return ViewService.runIvyModule("mkk.DocumentEdit", ctx, TDataNode([
 		"document": (!callResult["rs"].empty? callResult["rs"][0]: TDataNode(null))
@@ -88,7 +88,7 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum)
 		"instanceName": TDataNode(ctx.request.queryForm.get("instanceName", null))
 	];
 	try {
-		dataDict["docNum"] = mainServiceCall(`document.edit`, ctx, JSONValue([`record`: newDoc])).integer;
+		dataDict["docNum"] = ctx.mainServiceCall(`document.edit`, [`record`: newDoc]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

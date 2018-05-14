@@ -11,24 +11,15 @@ import webtank.net.http.http;
 import webtank.net.uri_pattern: URIPattern;
 import webtank.net.std_json_rpc_client;
 import webtank.ivy.rpc_client;
-import mkk_site.common.service: Service, endpoint;
 import mkk_site.view_service.service: ViewService;
-import webtank.net.service.endpoint;
 import ivy.interpreter.data_node: DataNode;
 
-// То же самое, что remoteCall, но делает вызов с основного сервиса МКК
-Result mainServiceCall(Result = TDataNode)( string rpcMethod, string[string] headers, JSONValue params = JSONValue.init )
-	if( is(Result == TDataNode) || is(Result == JSONValue) )
-{
-	return endpoint(`yarMKKMain`).remoteCall!(Result)(rpcMethod, headers, params);
-}
-
 // Перегрузка mainServiceCall для удобства, которая позволяет передать HTTP контекст для извлечения заголовков
-Result mainServiceCall(Result = TDataNode)( string rpcMethod, HTTPContext context, JSONValue params = JSONValue.init )
-	if( is(Result == TDataNode) || is(Result == JSONValue) )
+Result mainServiceCall(Result = TDataNode, T...)(HTTPContext ctx, string rpcMethod, auto ref T paramsObj)
+	if( (is(Result == TDataNode) || is(Result == JSONValue)) && T.length <= 1 )
 {
-	assert( context !is null, `HTTP context is null` );
-	return endpoint(`yarMKKMain`).remoteCall!(Result)(rpcMethod, context, params);
+	assert( ctx !is null, `HTTP context is null` );
+	return ctx.endpoint(`yarMKKMain`).remoteCall!(Result)(rpcMethod, paramsObj);
 }
 
 alias TDataNode = DataNode!string;

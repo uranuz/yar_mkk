@@ -30,10 +30,10 @@ TDataNode documentListController(HTTPContext ctx)
 	formDataToStruct(bodyForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = mainServiceCall("document.list", ctx, JSONValue([
+	TDataNode callResult = ctx.mainServiceCall("document.list", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
-	]));
+	]);
 
 	return TDataNode([
 		"filter": jFilter.toIvyJSON(),

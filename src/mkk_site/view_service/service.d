@@ -43,25 +43,25 @@ public:
 		return controller;
 	}
 
-	override void renderResult(TDataNode content, HTTPContext context)
+	override void renderResult(TDataNode content, HTTPContext ctx)
 	{
 		import std.string: toLower;
-		context.response.tryClearBody();
+		ctx.response.tryClearBody();
 
-		if( context.request.queryForm.get("generalTemplate", null).toLower() != "no" )
+		if( ctx.request.queryForm.get("generalTemplate", null).toLower() != "no" )
 		{
-			auto favouriteFilters = mainServiceCall(`pohod.favoriteFilters`, context);
+			auto favouriteFilters = ctx.mainServiceCall(`pohod.favoriteFilters`);
 			assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
 			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
 
 			TDataNode payload = [
-				"content":  TDataNode(content),
-				"authRedirectURI": TDataNode(getAuthRedirectURI(context)),
-				"pohodFilterFields": TDataNode(favouriteFilters["allFields"]),
-				"pohodFilterSections": TDataNode(favouriteFilters["sections"])
+				"content":  content,
+				"authRedirectURI": TDataNode(getAuthRedirectURI(ctx)),
+				"pohodFilterFields": favouriteFilters["allFields"],
+				"pohodFilterSections": favouriteFilters["sections"]
 			];
 
-			content = runIvyModule("mkk.GeneralTemplate", context, payload);
+			content = runIvyModule("mkk.GeneralTemplate", ctx, payload);
 		}
 
 		static struct OutRange
@@ -73,7 +73,7 @@ public:
 			}
 		}
 
-		renderDataNode!(DataRenderType.HTML)(content, OutRange(context.response));
+		renderDataNode!(DataRenderType.HTML)(content, OutRange(ctx.response));
 	}
 }
 

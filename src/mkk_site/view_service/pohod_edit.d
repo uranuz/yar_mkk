@@ -50,9 +50,9 @@ TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 	import std.json: JSONValue;
 	TDataNode dataDict;
 
-	dataDict["pohod"] = mainServiceCall(`pohod.read`, ctx, JSONValue([`pohodNum`: pohodNum.toStdJSON()]));
-	dataDict["extraFileLinks"] = mainServiceCall(`pohod.extraFileLinks`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
-	dataDict["partyList"] = mainServiceCall(`pohod.partyList`, ctx, JSONValue([`num`: pohodNum.toStdJSON()]));
+	dataDict["pohod"] = ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]);
+	dataDict["extraFileLinks"] = ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]);
+	dataDict["partyList"] = ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum]);
 	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
 
 	return ViewService.runIvyModule("mkk.PohodEdit", ctx, dataDict);
@@ -83,7 +83,7 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum)
 		"isUpdate": TDataNode(pohodNum.isSet)
 	];
 	try {
-		dataDict["pohodNum"] = mainServiceCall(`pohod.edit`, ctx, JSONValue([`record`: newPohod])).integer;
+		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: newPohod]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
