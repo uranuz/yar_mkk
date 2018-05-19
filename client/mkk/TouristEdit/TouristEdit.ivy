@@ -18,7 +18,7 @@ def TouristEdit {=
 				class="btn btn-sm btn-secondary"
 				>История</a>
 			*}}
-			<a href="{{vpaths.siteDynamic}}read/edit?num={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/experience?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>Просмотр</a>
 		</div>
@@ -194,7 +194,9 @@ def TouristEdit {=
 					mode: null
 				}
 			</div>
-			<button type="button" class="{=cls 'forceSubmitBtn'}">Продолжить добавление</button>
+			<button type="button"
+				class="{=cls 'forceSubmitBtn'}"
+				>Продолжить добавление</button>
 		</div>
 	</div>
 	*}

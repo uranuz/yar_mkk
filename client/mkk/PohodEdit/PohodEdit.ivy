@@ -303,8 +303,16 @@ def PohodEdit {=
 		<hr>
 
 		<input type="hidden" name="action" value="write"/><!-- Значение-команда на запись данных в БД -->
-		<span><input type="submit" class="{=cls 'submitBtn'} btn btn-primary" value="Сохранить"/></span>
-		<span style="float: right;"><input type="button" class="{=cls 'deleteDialogBtn'} btn btn-secondary" value="Удалить поход"></span>
+		<span>
+			<button type="submit"
+				class="{=cls 'submitBtn'} btn btn-primary"
+				>Сохранить</button>
+		</span>
+		<span style="float: right;">
+			<button type="button"
+				class="{=cls 'deleteDialogBtn'} btn btn-secondary"
+				>Удалить поход</button>
+		</span>
 		<div style="clear: both"></div>
 		</form>
 
