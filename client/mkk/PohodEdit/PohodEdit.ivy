@@ -309,9 +309,11 @@ def PohodEdit {=
 				>Сохранить</button>
 		</span>
 		<span style="float: right;">
+			{=if {=hasRight obj: 'pohod.edit' kind: 'delete'} {*
 			<button type="button"
 				class="{=cls 'deleteDialogBtn'} btn btn-secondary"
 				>Удалить поход</button>
+			*}}
 		</span>
 		<div style="clear: both"></div>
 		</form>
