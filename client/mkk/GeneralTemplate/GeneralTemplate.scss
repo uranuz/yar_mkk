@@ -199,17 +199,15 @@ body {
 
 .last_pohod_comment {font-size: 80%;}
 
-.t-useful_links_side_menu.e-block {
-	padding: 0.5rem;
+.mkk-UsefulLinksMenu, .mkk-AdminSideMenu {
+	&.e-block {
+		padding: 0.5rem;
+	}
+	&.e-listItem {
+		list-style: none;
+		margin-left: 0.5rem;
+	}
 }
-.t-useful_links_side_menu.e-link_list {
-	/*padding-left: 0.5rem;*/
-}
-.t-useful_links_side_menu.e-list_item {
-	list-style: none;
-	margin-left: 0.5rem;
-}
-
 
 /*начало: Для jQuery UI*/
 .ui-dialog, .ui-dialog-content {

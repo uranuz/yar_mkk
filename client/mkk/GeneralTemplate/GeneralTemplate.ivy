@@ -3,7 +3,32 @@ expr {*
 	from mkk.GeneralTemplate.MainMenu import MainMenu;
 	from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
 	from fir.controls.utils import cls, hasRight;
-	expr undef;
+	def UsefulLinksMenu {=
+		def.kv
+			cssBaseClass: 'mkk-UsefulLinksMenu'
+			instanceName: 'usefulLinksMenu';
+		def.body {*
+		<div class="{=cls 'block'}">
+			<h4>Полезные ссылки:</h4>
+			<ul class="{=cls 'linkList'}">
+				<li class="{=cls 'listItem'}">
+					<a href="http://tssr.ru">Туристско-спортивный союз России</a>
+				</li>
+				<li class="{=cls 'listItem'}">
+					<a href="http://tkirbis.ru">Турклуб "Ирбис"</a>
+				</li>
+				<li class="{=cls 'listItem'}">
+					<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a>
+				</li>
+				<li class="{=cls 'listItem'}">
+					<a href="http://turclub-kostroma.ru">Костромская областная федерация туризма</a>
+				</li>
+			</ul>
+			<h5>Эл. почта МКК:</h5>
+			<div style="margin-left: 0.5rem">mkk-yar@mail.ru</div>
+		</div>
+		*}
+	};
 }
 <!doctype html>
 <html>
@@ -62,33 +87,15 @@ expr {*
 		<div id="middle">
 			<div id="sidebar">
 				<!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
-				<div class="i-useful_links_side_menu e-block t-useful_links_side_menu">
-					<h4>Полезные ссылки:</h4>
-					<ul class="e-link_list t-useful_links_side_menu">
-						<li class="e-list_item t-useful_links_side_menu">
-							<a href="http://tssr.ru">Туристско-спортивный союз России</a>
-						</li>
-						<li class="e-list_item t-useful_links_side_menu">
-							<a href="http://tkirbis.ru">Турклуб "Ирбис"</a>
-						</li>
-						<li class="e-list_item t-useful_links_side_menu">
-							<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a>
-						</li>
-						<li class="e-list_item t-useful_links_side_menu">
-							<a href="http://turclub-kostroma.ru">Костромская областная федерация туризма</a>
-						</li>
-					</ul>
-					<h5>Эл. почта МКК:</h5>
-					<div style="margin-left: 0.5rem">mkk-yar@mail.ru</div>
-				</div>
+				{=UsefulLinksMenu}
 				{=PohodFilterMenu
 					pohodFilterFields: pohodFilterFields
 					pohodFilterSections: pohodFilterSections
 				}
 				{=if {=hasRight obj: 'right.object.list' kind: 'read'} {*
-				<div>
+				<div class="mkk-AdminSideMenu e-block">
 					<h4>Администрирование:</h4>
-					<ul>
+					<ul class="mkk-AdminSideMenu e-listItem">
 						<li>
 							<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
 						</li>
