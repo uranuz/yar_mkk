@@ -51,3 +51,11 @@
 	vertical-align: top;
 	padding: 3px 4px 0 4px;
 }
+
+.mkk-PohodEdit {
+	&.e-topButtons {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+	}
+}

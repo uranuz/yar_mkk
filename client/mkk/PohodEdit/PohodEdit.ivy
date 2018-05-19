@@ -19,6 +19,16 @@ def PohodEdit {=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<div class="{=cls 'topButtons'}">
+			{=if {=isInRoles ['admin', 'moder']} {*
+			<a href="{{vpaths.siteDynamic}}pohod/history?key={=recGet pohod 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
+			*}}
+			<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet pohod 'num'}"
+				class="btn btn-sm btn-secondary"
+				>Просмотр</a>
+		</div>
 		<form class="{=cls 'mainForm'}" method="post">
 		<h2>Редактирование данных похода</h2>
 		<hr>
@@ -41,7 +51,7 @@ def PohodEdit {=
 					id="bookNumField"
 					name="bookNum"
 					value="{=recGet pohod 'bookNum'}"
-					{=if not{=hasRight subobj: 'book.num' kind: 'edit'} 'disabled'}>
+					{=if not{=hasRight subobj: 'book.bookNum' kind: 'edit'} 'disabled'}>
 			</td>
 			<td>
 				<label for="claimStateField">Статус заявки</label>
@@ -78,7 +88,7 @@ def PohodEdit {=
 					id="pohodRegionField"
 					name="pohodRegion"
 					value="{=recGet pohod 'pohodRegion'}"
-					{=if not{=hasRight subobj: 'pohod.region' kind: 'edit'} 'disabled'}/>
+					{=if not{=hasRight subobj: 'pohod.pohodRegion' kind: 'edit'} 'disabled'}/>
 			</td>
 		</tr>
 		<tr>

@@ -12,6 +12,16 @@ def TouristEdit {=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<div class="{=cls 'topButtons'}">
+			{=if {=isInRoles ['admin', 'moder']} {*
+			<a href="{{vpaths.siteDynamic}}tourist/history?key={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
+			*}}
+			<a href="{{vpaths.siteDynamic}}read/edit?key={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>Просмотр</a>
+		</div>
 		<form class="{=cls 'touristForm'} form" method="POST">
 			<h2>Редактирование данных туриста</h2>
 			<input type="hidden" name="num" value="{=recGet tourist 'num'}"/>
