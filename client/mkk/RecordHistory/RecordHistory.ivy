@@ -17,18 +17,18 @@ def RecordHistory {=
 				<div>
 					<h5>Дата изменений: {{it.time_stamp}}, пользователь №{{it.userNum}}</h5>
 					<h5>Изменения</h5>
-					{=repeat key in it.changes {=
+					{=repeat num in it.changes {=
 						EntityProperty
-							title: key
-							value: {=at it.changes key}
+							title: num
+							value: {=at it.changes num}
 					} }
 					<div class="{=cls 'dataSpoilerBlock'}">
 						<h5 class="{=cls 'dataSpoilerBtn'}">Данные</h5>
 						<div class="{=cls 'dataSpoiler'}">
-						{=repeat key in it.data {=
+						{=repeat num in it.data {=
 							EntityProperty
-								title: key
-								value: {=at it.data key}
+								title: num
+								value: {=at it.data num}
 						} }
 						</div>
 					</div>

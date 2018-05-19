@@ -25,10 +25,10 @@ TDataNode documentEditController(HTTPContext ctx)
 	auto bodyForm = req.bodyForm;
 	Optional!size_t docNum;
 
-	if( "key" in queryForm )
+	if( "num" in queryForm )
 	{
 		try {
-			docNum = queryForm.get("key", null).to!size_t;
+			docNum = queryForm.get("num", null).to!size_t;
 		}
 		catch(ConvException e)
 		{

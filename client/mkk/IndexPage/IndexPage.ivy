@@ -10,7 +10,7 @@ def RecentPohodList {=
 			<h4 class="{=cls 'blockTitle'}">Недавно добавленные походы</h4>
 			{=repeat pohod in pohodList {*
 				<div class="{=cls 'itemBlock'}">
-					<a class="{=cls 'titleLink'}" href="{{vpaths.siteDynamic}}pohod/read?key={=recGet pohod 'num'}">
+					<a class="{=cls 'titleLink'}" href="{{vpaths.siteDynamic}}pohod/read?num={=recGet pohod 'num'}">
 						{=recGetStr pohod "tourismKind"}
 						{=recGetStr pohod "complexity"}
 						{=recGetStr pohod "complexityElems"} к.с.
@@ -29,7 +29,7 @@ def RecentPohodList {=
 						<div class="{=cls 'basicInfoRow'}">
 							<span class="{=cls 'chiefLabel'}">Руководитель:</span>
 							<a class="{=cls 'chiefLink'}"
-								href="{{vpaths.siteDynamic}}tourist/experience?key={=recGet pohod 'chiefNum'}">
+								href="{{vpaths.siteDynamic}}tourist/experience?num={=recGet pohod 'chiefNum'}">
 								{=recGet pohod "chiefFamilyName"}
 								{=recGet pohod "chiefGivenName"}
 								{=recGet pohod "chiefPatronymic"}

@@ -37,19 +37,19 @@ def PohodListNavigation {=
 					</label>
 					<div class="{=cls 'enumFilterBlock'} row">
 						{=repeat item in [
-							{key: 'tourismKind', title: 'Вид туризма'},
-							{key: 'complexity', title: 'Категория сложности'},
-							{key: 'progress', title: 'Прохождение'},
-							{key: 'claimState', title: 'Заявка'}
+							{num: 'tourismKind', title: 'Вид туризма'},
+							{num: 'complexity', title: 'Категория сложности'},
+							{num: 'progress', title: 'Прохождение'},
+							{num: 'claimState', title: 'Заявка'}
 						] {*
 						<span class="{=cls 'enumFilter'} col-md-3 col-sm-6 pr-2 mb-2">
 							{=CheckBoxList
-								instanceName: item.key
-								items: {=at pohodEnums item.key}
+								instanceName: item.num
+								items: {=at pohodEnums item.num}
 								keyField: "v"
 								captionField: "n"
-								formField: item.key
-								selectedKeys: {=at filter item.key}
+								formField: item.num
+								selectedKeys: {=at filter item.num}
 								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">{{item.title}}</span>*}
 							}
 						</span> 

@@ -15,10 +15,10 @@ def PohodRead {=
 		<h2>Данные похода</h2>
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
-			<a href="{{vpaths.siteDynamic}}pohod/history?key={=recGet pohod 'num'}"
+			<a href="{{vpaths.siteDynamic}}pohod/history?num={=recGet pohod 'num'}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
-			<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet pohod 'num'}"
+			<a href="{{vpaths.siteDynamic}}pohod/edit?num={=recGet pohod 'num'}"
 				class="btn btn-sm btn-secondary"
 				>Редактировать</a>
 			*}}

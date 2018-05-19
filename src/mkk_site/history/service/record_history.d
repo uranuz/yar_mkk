@@ -117,32 +117,32 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 		{
 			if( prevData.type == JSON_TYPE.OBJECT )
 			{
-				foreach( string key, JSONValue val; data )
+				foreach( string num, JSONValue val; data )
 				{
-					if( auto prevVal = key in prevData )
+					if( auto prevVal = num in prevData )
 					{
 						if( *prevVal != val )
-							changes[key] = val;
+							changes[num] = val;
 					} else if( val.type != JSON_TYPE.NULL ) {
-						changes[key] = null;
+						changes[num] = null;
 					}
 				}
-				foreach( string key, JSONValue val; prevData )
+				foreach( string num, JSONValue val; prevData )
 				{
-					if( key !in data && val.type != JSON_TYPE.NULL )
-						changes[key] = null;
+					if( num !in data && val.type != JSON_TYPE.NULL )
+						changes[num] = null;
 				}
-				foreach( string key, JSONValue val; changes )
+				foreach( string num, JSONValue val; changes )
 				{
-					if( !allowedFields.canFind(key) )
-						changes.object.remove(key);
+					if( !allowedFields.canFind(num) )
+						changes.object.remove(num);
 				}
 			}
 
-			foreach( string key, JSONValue val; data )
+			foreach( string num, JSONValue val; data )
 			{
-				if( !allowedFields.canFind(key) )
-					data.object.remove(key);
+				if( !allowedFields.canFind(num) )
+					data.object.remove(num);
 			}
 			item["data"] = data;
 			item["changes"] = changes;

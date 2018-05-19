@@ -57,7 +57,7 @@ TDataNode renderPohodList(HTTPContext ctx)
 TDataNode renderPartyInfo(HTTPContext ctx)
 {
 	import std.conv: to;
-	size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
+	size_t pohodNum = ctx.request.queryForm.get("num", "0").to!size_t;
 	return ctx.mainServiceCall("pohod.partyInfo", ["num": pohodNum]);
 }
 
@@ -69,9 +69,9 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 	import std.base64: Base64;
 
 	TDataNode dataDict;
-	if( "key" in ctx.request.queryForm ) {
+	if( "num" in ctx.request.queryForm ) {
 		// Если есть ключ похода, то берем ссылки из похода
-		size_t pohodNum = ctx.request.queryForm.get("key", "0").to!size_t;
+		size_t pohodNum = ctx.request.queryForm.get("num", "0").to!size_t;
 		dataDict["linkList"] = ctx.mainServiceCall("pohod.extraFileLinks", ["num": pohodNum]);
 	} else {
 		// Иначе отрисуем список ссылок, который нам передали

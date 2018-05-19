@@ -80,10 +80,10 @@ shared static this()
 			if( item.type != JSON_TYPE.OBJECT )
 				continue;
 
-			foreach( key, val; item["fields"].object )
+			foreach( num, val; item["fields"].object )
 			{
-				if( !filterFields.canFind( key ) )
-					filterFields ~= key;
+				if( !filterFields.canFind( num ) )
+					filterFields ~= num;
 			}
 		}
 	}

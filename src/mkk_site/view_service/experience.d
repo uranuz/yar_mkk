@@ -26,11 +26,11 @@ TDataNode renderExperience(HTTPContext ctx)
 	formDataToStruct(ctx.request.bodyForm, nav);
 	auto queryForm = ctx.request.queryForm;
 
-	enforce( queryForm["key"].length, `Невозможно отобразить данные туриста. Номер туриста не задан` );
+	enforce( queryForm["num"].length, `Невозможно отобразить данные туриста. Номер туриста не задан` );
 
 	size_t touristNum;
 	try {
-		touristNum = queryForm["key"].to!size_t;
+		touristNum = queryForm["num"].to!size_t;
 	} catch( ConvException e ) {
 		throw new Exception(`Невозможно отобразить данные туриста. Номер туриста должен быть целым числом`);
 	}

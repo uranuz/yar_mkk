@@ -13,10 +13,10 @@ def Experience{=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
-			<a href="{{vpaths.siteDynamic}}tourist/history?key={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/history?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
-			<a href="{{vpaths.siteDynamic}}tourist/edit?key={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/edit?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>Редактировать</a>
 			*}}
@@ -88,7 +88,7 @@ def Experience{=
 						<tr>
 							<td>
 								{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
-								<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+								<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
 									title="Номер маршрутной книжки не присвоен"
 									>{=if isBookNumSet
 										{*<div>{=recGet rec "mkkCode"}</div><div>{=recGet rec "bookNum"}</div>*} else "???"

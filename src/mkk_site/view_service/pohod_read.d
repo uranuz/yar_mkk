@@ -21,11 +21,11 @@ TDataNode renderPohodRead(HTTPContext ctx)
 
 	auto req = ctx.request;
 	auto queryForm = req.queryForm;
-	enforce( queryForm["key"].length, `Невозможно отобразить данные похода. Номер похода не задан` );
+	enforce( queryForm["num"].length, `Невозможно отобразить данные похода. Номер похода не задан` );
 
 	size_t pohodNum;
 	try {
-		pohodNum = queryForm["key"].to!size_t;
+		pohodNum = queryForm["num"].to!size_t;
 	} catch( ConvException e ) {
 		throw new Exception(`Невозможно отобразить данные похода. Номер похода должен быть целым числом`);
 	}

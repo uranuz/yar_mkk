@@ -28,7 +28,7 @@ def ModerList {=
 									if touristKey == null {=
 										recGet moderRec "name"
 									} else {*
-										<a href="/dyn/tourist/experience?key={{touristKey}}">
+										<a href="/dyn/tourist/experience?num={{touristKey}}">
 											{=recGet moderRec "name"}
 										</a>
 									*}

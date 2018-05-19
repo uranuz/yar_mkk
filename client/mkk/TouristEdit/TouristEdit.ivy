@@ -14,11 +14,11 @@ def TouristEdit {=
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
-			<a href="{{vpaths.siteDynamic}}tourist/history?key={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/history?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
 			*}}
-			<a href="{{vpaths.siteDynamic}}read/edit?key={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}read/edit?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>Просмотр</a>
 		</div>

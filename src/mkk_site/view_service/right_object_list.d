@@ -25,7 +25,7 @@ TDataNode renderObjectRightList(HTTPContext ctx)
 	import std.conv: to;
 	return TDataNode([
 		"objectRightList": ctx.mainServiceCall("right.objectRightList", [
-			`num`: ctx.request.form.get("key", null).to!size_t
+			`num`: ctx.request.form.get("num", null).to!size_t
 		])
 	]);
 }

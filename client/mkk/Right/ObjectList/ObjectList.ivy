@@ -17,7 +17,7 @@ def renderObject {=
 			<div>Описание: {=recGet obj 'description'}</div>
 			<div>Родитель: {=recGet obj 'parentNum'}</div>
 			<div>
-				<a href="/dyn/right/object/right/list?key={=recGet obj 'num'}">Права</a>
+				<a href="/dyn/right/object/right/list?num={=recGet obj 'num'}">Права</a>
 			</div>
 		</div>
 		{=repeat childKey in item.children {=renderObject

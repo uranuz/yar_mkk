@@ -23,10 +23,10 @@ TDataNode pohodEditController(HTTPContext ctx)
 
 	auto req = ctx.request;
 	Optional!size_t pohodNum;
-	if( "key" in req.form )
+	if( "num" in req.form )
 	{
 		try {
-			pohodNum = req.form.get("key", null).to!size_t;
+			pohodNum = req.form.get("num", null).to!size_t;
 		}
 		catch(ConvException e)
 		{
@@ -37,7 +37,7 @@ TDataNode pohodEditController(HTTPContext ctx)
 	}
 
 	if( req.form.get("action", null) == "write" ) {
-		return writePohod(ctx, pohodNum);
+		return writePohod(ctx);
 	} else {
 		return renderEditPohod(ctx, pohodNum);
 	}
@@ -45,17 +45,15 @@ TDataNode pohodEditController(HTTPContext ctx)
 
 TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
-	TDataNode dataDict;
-
-	dataDict["pohod"] = ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]);
-	dataDict["extraFileLinks"] = ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]);
-	dataDict["partyList"] = ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum]);
-	dataDict["authRedirectURI"] = getAuthRedirectURI(ctx);
-
-	return ViewService.runIvyModule("mkk.PohodEdit", ctx, dataDict);
+	return ViewService.runIvyModule("mkk.PohodEdit", ctx, TDataNode([
+		"pohod": ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]),
+		"extraFileLinks": ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]),
+		"partyList": ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum]),
+		"authRedirectURI": TDataNode(getAuthRedirectURI(ctx))
+	]));
 }
 
-TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum)
+TDataNode writePohod(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -64,15 +62,16 @@ TDataNode writePohod(HTTPContext ctx, Optional!size_t pohodNum)
 	import std.datetime: Date;
 	import std.string: toLower;
 
-	PohodDataToWrite inputPohodData;
-	formDataToStruct(ctx.request.form, inputPohodData);
+	PohodDataToWrite record;
+	formDataToStruct(ctx.request.form, record);
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
-		"pohodNum": pohodNum.isSet? TDataNode(pohodNum.value): TDataNode(null),
-		"isUpdate": TDataNode(pohodNum.isSet)
+		"pohodNum": (record.num.isSet?
+			TDataNode(record.num.value): TDataNode(null)),
+		"isUpdate": TDataNode(record.num.isSet)
 	];
 	try {
-		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: inputPohodData]).integer;
+		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: record]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

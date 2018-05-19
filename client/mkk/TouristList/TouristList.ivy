@@ -85,7 +85,7 @@ def TouristList {=
 						*}}
 							<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
 							<td>
-								<a href="/dyn/tourist/experience?key={=recGet it 'num'}"
+								<a href="/dyn/tourist/experience?num={=recGet it 'num'}"
 									>{{ {=recGet it "experience" } or "???"}}</a>
 							</td>
 							<td>
@@ -95,7 +95,7 @@ def TouristList {=
 							<td>{=recGet it "comment"}</td>
 						{=if isAuthorized {*
 							<td>
-								<a href="/dyn/tourist/edit?key={=recGet it 'num'}"
+								<a href="/dyn/tourist/edit?num={=recGet it 'num'}"
 									class="mkk-Document e-itemEditBtn"
 									title="Изменить"></a>
 							</td>

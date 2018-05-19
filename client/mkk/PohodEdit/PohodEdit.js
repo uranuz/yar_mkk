@@ -355,7 +355,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			json_rpc.invoke({
 				uri: "/jsonrpc/",
 				method: "pohod.delete",
-				params: { "num": parseInt(CommonHelpers.parseGetParams()["key"], 10) },
+				params: { "num": parseInt(CommonHelpers.parseGetParams()["num"], 10) },
 				success: function() {
 					document.location.replace("/dyn/pohod/list");
 				},

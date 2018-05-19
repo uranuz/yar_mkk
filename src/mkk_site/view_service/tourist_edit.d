@@ -26,10 +26,10 @@ TDataNode touristEditController(HTTPContext ctx)
 	auto bodyForm = req.bodyForm;
 	Optional!size_t touristNum;
 
-	if( "key" in queryForm )
+	if( "num" in queryForm )
 	{
 		try {
-			touristNum = queryForm.get("key", null).to!size_t;
+			touristNum = queryForm.get("num", null).to!size_t;
 		}
 		catch(ConvException e)
 		{
@@ -40,7 +40,7 @@ TDataNode touristEditController(HTTPContext ctx)
 	}
 
 	if( bodyForm.get("action", null) == "write" ) {
-		return writeTourist(ctx, touristNum);
+		return writeTourist(ctx);
 	} else {
 		return renderEditTourist(ctx, touristNum);
 	}
@@ -49,11 +49,11 @@ TDataNode touristEditController(HTTPContext ctx)
 TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
 	return ViewService.runIvyModule("mkk.TouristEdit", ctx, TDataNode([
-		"tourist": ctx.mainServiceCall(`tourist.read`, [`touristNum`: touristNum.toStdJSON()])
+		"tourist": ctx.mainServiceCall(`tourist.read`, [`touristNum`: touristNum])
 	]));
 }
 
-TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum)
+TDataNode writeTourist(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -62,23 +62,17 @@ TDataNode writeTourist(HTTPContext ctx, Optional!size_t touristNum)
 	import std.datetime: Date;
 	import std.string: toLower;
 
-	auto bodyForm = ctx.request.bodyForm;
-	TouristDataToWrite inputTouristData;
-	formDataToStruct(bodyForm, inputTouristData);
-	JSONValue newTourist = inputTouristData.toStdJSON();
-
-	// Если идентификатор похода не передаётся, то создаётся новый вместо обновления
-	if( touristNum.isSet ) {
-		newTourist["num"] = touristNum.value;
-	}
+	TouristDataToWrite record;
+	formDataToStruct(ctx.request.form, record);
 
 	TDataNode dataDict = [
 		"errorMsg": TDataNode(null),
-		"touristNum": touristNum.isSet? TDataNode(touristNum.value): TDataNode(null),
-		"isUpdate": TDataNode(touristNum.isSet)
+		"touristNum": (record.num.isSet?
+			TDataNode(record.num.value): TDataNode(null)),
+		"isUpdate": TDataNode(record.num.isSet)
 	];
 	try {
-		dataDict["touristNum"] = ctx.mainServiceCall(`tourist.edit`, [`record`: newTourist]).integer;
+		dataDict["touristNum"] = ctx.mainServiceCall(`tourist.edit`, [`record`: record]).integer;
 	} catch(Exception ex) {
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}

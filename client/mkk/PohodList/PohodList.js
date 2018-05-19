@@ -24,7 +24,7 @@ define('mkk/PohodList/PohodList', [
 
 			var pohodNum = parseInt(el.data("pohodNum"), 10)
 			if( !isNaN(pohodNum)) {
-				this._partyInfo.openDialog({key: pohodNum});
+				this._partyInfo.openDialog({num: pohodNum});
 			}
 		}
 	});

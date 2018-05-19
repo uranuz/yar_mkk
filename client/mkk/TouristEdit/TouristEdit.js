@@ -93,7 +93,7 @@ define('mkk/TouristEdit/TouristEdit', [
 			}
 
 			try {
-				touristKey = parseInt(FirHelpers.parseGetParams().key, 10);
+				touristKey = parseInt(FirHelpers.parseGetParams().num, 10);
 			} catch(e) {
 				touristKey = NaN;
 			}

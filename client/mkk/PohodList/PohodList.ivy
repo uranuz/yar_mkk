@@ -57,7 +57,7 @@ def PohodList {=
 								*}}
 								<td>
 									{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
-									<a href="{{vpaths.siteDynamic}}pohod/read?key={=recGet rec 'num'}"
+									<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
 										title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
 										>{=if isBookNumSet
 											{*<div class="text-nowrap">{=recGet rec "mkkCode"}</div>
@@ -100,7 +100,7 @@ def PohodList {=
 								</td>
 								{=if {=hasRight obj: 'pohod' kind: 'edit'} and not isForPrint {*
 									<td>
-										<a href="{{vpaths.siteDynamic}}pohod/edit?key={=recGet rec 'num'}"
+										<a href="{{vpaths.siteDynamic}}pohod/edit?num={=recGet rec 'num'}"
 											class="mkk-Document e-itemEditBtn"
 											title="Изменить"></a>
 									</td>

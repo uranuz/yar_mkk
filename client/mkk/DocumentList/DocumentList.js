@@ -30,7 +30,7 @@ define('mkk/DocumentList/DocumentList', [
 			if( !el || !el.length ) {
 				return;
 			}
-			this._documentEdit.openDialog({key: el.data('documentNum')});
+			this._documentEdit.openDialog({num: el.data('documentNum')});
 		},
 		_onDocumentChanged: function() {
 			location.reload();

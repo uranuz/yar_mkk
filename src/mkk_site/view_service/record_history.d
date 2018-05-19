@@ -36,10 +36,10 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	// Далее идёт вытаскивание данных фильтрации из формы и создание JSON со структурой фильтра
 	RecordHistoryFilter pohodFilter;
 
-	enforce( queryForm["key"].length, `Невозможно отобразить историю. Номер записи не задан` );
+	enforce( queryForm["num"].length, `Невозможно отобразить историю. Номер записи не задан` );
 
 	try {
-		pohodFilter.recordNum = queryForm.get("key", null).to!size_t;
+		pohodFilter.recordNum = queryForm.get("num", null).to!size_t;
 	} catch( ConvException e ) {
 		throw new Exception(`Невозможно отобразить историю. Номер записи должен быть целым числом`);
 	}

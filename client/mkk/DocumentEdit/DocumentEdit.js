@@ -16,7 +16,7 @@ define('mkk/DocumentEdit/DocumentEdit', [
 			close: this._onDialogClose.bind(this)
 		});
 		this.setAllowedFilterParams([
-			'key', 'name', 'link', 'action'
+			'num', 'name', 'link', 'action'
 		]);
 		this._updateControlState(opts);
 	}

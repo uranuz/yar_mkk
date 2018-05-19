@@ -2,12 +2,12 @@ expr {%
 	if isUpdate {=
 		if {=empty errorMsg} {*
 			<h3>Данные о туристе успешно обновлены!!!</h3>
-			<div>Вы можете <a href="/dyn/tourist/edit?key={{touristNum}}">продолжить редактирование</a> этой же записи</div>
+			<div>Вы можете <a href="/dyn/tourist/edit?num={{touristNum}}">продолжить редактирование</a> этой же записи</div>
 			<div>или перейти <a href="/dyn/tourist/list">к списку туристов</a></div>
 		*} else {*
 			<h3>Произошла ошибка при обновлении данных туриста!!!</h3>
 			<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
-			<div>Однако вы можете <a href="/dyn/tourist/edit?key={{touristNum}}">продолжить редактирование</a> этой же записи</div>
+			<div>Однако вы можете <a href="/dyn/tourist/edit?num={{touristNum}}">продолжить редактирование</a> этой же записи</div>
 			<div>или перейти <a href="/dyn/tourist/list">к списку туристов</a></div>
 		*}
 	} else {=
