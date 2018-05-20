@@ -62,7 +62,7 @@ body {
 #page, #footer_framing {
 	/*Обязательные поля по краям*/
 	padding: 0 25px;
-	min-width: 450px;
+	min-width: 400px;
 	max-width: 1200px;
 	margin: auto; /*Выравнивание блока по центру*/
 
@@ -85,6 +85,23 @@ body {
 	bottom: 0;
 	top: 0;
 	z-index: -10;
+}
+
+@media (max-width: 500px) {
+	#page {
+		/*На маленьком экране убираем тень*/
+		background: none;
+	}
+
+	#page, #footer_framing {
+		/*На маленьком экране убираем поля*/
+		padding: 0;
+	}
+
+	#page_bg {
+		left: 0;
+		right: 0;
+	}
 }
 
 #footer_framing {
@@ -170,6 +187,12 @@ body {
 @media (max-width: 900px) {
 	body #content_column {
 		margin: 8px 8px 0 16px;
+	}
+}
+
+@media (max-width: 500px) {
+	body #content_column {
+		margin: 8px 0 0 0;
 	}
 }
 
