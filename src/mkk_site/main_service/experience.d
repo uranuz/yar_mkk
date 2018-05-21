@@ -133,8 +133,6 @@ IBaseRecord getTourist(HTTPContext ctx, Optional!size_t touristNum)
 		return makeMemoryRecord(touristRecFormat);
 	}
 
-	bool isAuthorized = ctx.user.isInRole("admin") || ctx.user.isInRole("moder");
-
 	auto rs = getCommonDB().query(
 	`select
 		num,
@@ -146,14 +144,14 @@ IBaseRecord getTourist(HTTPContext ctx, Optional!size_t touristNum)
 		-- select здесь необходим, иначе запись не отбирается, если поле birth_date не соответствует шаблону
 		(select (regexp_matches("birth_date", '(\d*)[.,](\d+)'))[2])::integer "birthMonth",
 		(select (regexp_matches("birth_date", '(\d+)[.,](\d*)'))[1])::integer "birthDay",
-		` ~ (isAuthorized? `address`: `null::text`) ~ `,
+		` ~ (ctx.rights.hasRight(`tourist.item.address`, `forcedRead`)? `address`: `null::text`) ~ `,
 		exp "experience",
 		razr "sportsCategory",
 		sud "refereeCategory",
-		case when ` ~ (isAuthorized? `true`: `show_phone`) ~ `
+		case when ` ~ (ctx.rights.hasRight(`tourist.item.phone`, `forcedRead`)? `true`: `show_phone`) ~ `
 			then phone else null end "phone",
 		show_phone "showPhone",
-		case when ` ~ (isAuthorized? `true`: `show_email`) ~ `
+		case when ` ~ (ctx.rights.hasRight(`tourist.item.email`, `forcedRead`)? `true`: `show_email`) ~ `
 			then email else null end "email",
 		show_email "showEmail",
 		comment

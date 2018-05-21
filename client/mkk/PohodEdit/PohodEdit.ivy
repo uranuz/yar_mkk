@@ -15,7 +15,7 @@ def PohodEdit {=
 		cssBaseClass: 'mkk-PohodEdit'
 		pohod: null
 		partyList: null
-		accessObject: 'pohod.edit';
+		accessObject: 'pohod.item';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
@@ -293,14 +293,14 @@ def PohodEdit {=
 			</table>
 		</div>
 
-		<hr>
+		<hr/>
 		{=ExtraFileLinksEdit
 			linkList: extraFileLinks
 			disabled: {=if not{=hasRight subobj: 'extraFileLinks' kind: 'edit'} 'disabled'}
 		}
 
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
-		<hr>
+		<hr/>
 
 		<input type="hidden" name="action" value="write"/><!-- Значение-команда на запись данных в БД -->
 		<span>
@@ -309,7 +309,7 @@ def PohodEdit {=
 				>Сохранить</button>
 		</span>
 		<span style="float: right;">
-			{=if {=hasRight obj: 'pohod.edit' kind: 'delete'} {*
+			{=if {=hasRight kind: 'delete'} {*
 			<button type="button"
 				class="{=cls 'deleteDialogBtn'} btn btn-secondary"
 				>Удалить поход</button>
@@ -318,7 +318,7 @@ def PohodEdit {=
 		<div style="clear: both"></div>
 		</form>
 
-		{=DeleteArea}
+		{=DeleteArea deleteWhat: 'похода'}
 		{=PartyEdit}
 		{=ChiefEdit}
 		{=ChiefAddToParty}

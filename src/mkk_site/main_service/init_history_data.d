@@ -41,8 +41,10 @@ void initPohodTouristData(Fmt, FmtExt)(
 	string query,
 	string tableName)
 {
-	if( !ctx.user.isAuthenticated || !ctx.user.isInRole("admin")  )
-		throw new Exception(`Недостаточно прав для инициализации истории!!!`);
+	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(tableName ~ `.history`, `init`),
+		`Недостаточно прав для инициализации истории!!!`
+	);
 
 	auto rs = getCommonDB().query(query).getRecordSet(formatExt);
 

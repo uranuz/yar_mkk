@@ -15,7 +15,7 @@ define('mkk/PohodEdit/PohodEdit', [
 	'css!mkk/PohodEdit/PohodEdit'
 ], function (
 	FirControl,
-	CommonHelpers,
+	FirHelpers,
 	json_rpc,
 	Record,
 	RecordSet,
@@ -355,7 +355,7 @@ define('mkk/PohodEdit/PohodEdit', [
 			json_rpc.invoke({
 				uri: "/jsonrpc/",
 				method: "pohod.delete",
-				params: { "num": parseInt(CommonHelpers.parseGetParams()["num"], 10) },
+				params: { "num": parseInt(FirHelpers.parseGetParams()["num"], 10) },
 				success: function() {
 					document.location.replace("/dyn/pohod/list");
 				},

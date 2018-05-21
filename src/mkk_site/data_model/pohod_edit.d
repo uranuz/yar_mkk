@@ -7,9 +7,9 @@ struct PohodDataToWrite
 {
 	import webtank.common.optional: Optional, Undefable;
 	import std.datetime: Date;
-	Optional!size_t num; // Номер походе в базе
+	Optional!size_t num; // Номер похода в базе
 
-@RightObjAttr(`pohod.edit`): // Пространство имён для прав
+@RightObjAttr(`pohod.item`): // Пространство имён для прав
 @RightObjAttr(): // Признак, что нужно добавлять название самого поля в качестве последнего элемента
 
 @FieldSerializer!maybeDBSerializeMethod {

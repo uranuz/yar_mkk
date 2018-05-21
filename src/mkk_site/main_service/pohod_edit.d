@@ -26,6 +26,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import mkk_site.data_model.enums;
 	import webtank.net.utils: PGEscapeStr;
 	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`pohod.item`, `edit`), `Недостаточно прав для редактирования похода!`);
 
 	string[] fieldNames;
 	string[] fieldValues;
@@ -57,7 +58,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 				continue; // Поля, которые undef с нашей т.зрения не изменились
 
 			string accessObj = GetSymbolAccessObject!(PohodDataToWrite, fieldName)();
-			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля похода: ` ~ fieldName);
+			enforce(ctx.rights.hasRight(accessObj, `edit`), `Недостаточно прав для редактирования поля похода: ` ~ fieldName);
 
 			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
 			fieldNames ~= `"` ~ dbFieldName ~ `"`;
@@ -220,7 +221,7 @@ void pohodDelete(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
 	import std.exception: enforce;
-	enforce(ctx.rights.hasRight(`pohod.edit`, `delete`), `Недостаточно прав для удаления похода!`);
+	enforce(ctx.rights.hasRight(`pohod.item`, `delete`), `Недостаточно прав для удаления похода!`);
 
 	HistoryRecordData historyData = {
 		tableName: `pohod`,

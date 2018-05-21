@@ -16,7 +16,7 @@ struct DocumentDataToWrite
 {
 	Optional!size_t num; // Номер похода в базе
 
-@RightObjAttr(`document.edit`) @RightObjAttr():
+@RightObjAttr(`document.item`) @RightObjAttr():
 
 	@DBName("name") Undefable!string name;
 	@DBName("link") Undefable!string link;

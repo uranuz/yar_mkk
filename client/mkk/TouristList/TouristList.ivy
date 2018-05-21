@@ -49,7 +49,7 @@ def TouristList {=
 						pageSize: nav.pageSize or 10
 					}
 				</div>
-				{=if {=hasRight obj: 'tourist.edit' kind: 'add'} {*
+				{=if {=hasRight obj: 'tourist.item' kind: 'add'} {*
 				<div class="col form-group text-right">
 					<a href="{{vpaths.siteDynamic}}tourist/edit"
 						class="btn btn-primary"
@@ -66,7 +66,7 @@ def TouristList {=
 						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
 						{=
 							var fieldNames: {=
-								if {=hasRight obj: 'tourist.edit' kind: 'edit'}
+								if {=hasRight obj: 'tourist.item' kind: 'edit'}
 									["№", "Имя, дата рожд.", "Опыт", "Спорт. разряд, cуд. категория", "Комментарий", "Изм"]
 								else
 									["Имя, дата рожд.", "Опыт", "Спорт. разряд, cуд. категория", "Комментарий"]
@@ -80,7 +80,7 @@ def TouristList {=
 					{%
 						repeat it in touristList {*
 						<tr>
-						{=if {=hasRight obj: 'tourist.edit' kind: 'edit'} {*
+						{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
 							<td>{=recGet it "num"}</td>
 						*}}
 							<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
@@ -93,7 +93,7 @@ def TouristList {=
 								<div>{=recGetStr it "refereeCategory"}</div>
 							</td>
 							<td>{=recGet it "comment"}</td>
-						{=if {=hasRight obj: 'tourist.edit' kind: 'edit'} {*
+						{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
 							<td>
 								<a href="/dyn/tourist/edit?num={=recGet it 'num'}"
 									class="mkk-Document e-itemEditBtn"

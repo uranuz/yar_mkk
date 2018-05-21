@@ -21,7 +21,7 @@ def DocumentList {=
 					recordCount: nav.recordCount
 				}
 			</div>
-			{=if {=hasRight obj: 'document.edit' kind: 'add'} {*
+			{=if {=hasRight obj: 'document.item' kind: 'add'} {*
 			<div class="col text-right">
 				<a href="javascript:void(0)"
 					class="{=cls 'addDocBtn'} btn btn-primary"
@@ -40,7 +40,7 @@ def DocumentList {=
 					<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
 				</div>
 				<div class="col-md-auto">
-					{=if {=hasRight obj: 'document.edit' kind: 'edit'} {*
+					{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
 					<div class="{=cls 'linkEditBtn'} col mkk-Document e-itemEditBtn btn btn-secondary"
 						title="Изменить"
 						data-document-num="{=recGet it 'num'}"></div>
@@ -56,5 +56,5 @@ def DocumentList {=
 	</div>
 	*};
 };
-DocumentList	
+DocumentList
 }

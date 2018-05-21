@@ -27,6 +27,7 @@ auto editTourist(
 	import std.array: join;
 	import std.json: JSONValue;
 	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`tourist.item`, `edit`), `Недостаточно прав для редактирования туриста!`);
 
 	string[] fieldNames; // имена полей для записи
 	string[] fieldValues; // значения полей для записи
@@ -48,7 +49,7 @@ auto editTourist(
 			if( field.isUndef )
 				continue; // Поля, которые undef с нашей т.зрения не изменились
 			string accessObj = GetSymbolAccessObject!(TouristDataToWrite, fieldName)();
-			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля: ` ~ fieldName);
+			enforce(ctx.rights.hasRight(accessObj, `edit`), `Недостаточно прав для редактирования поля: ` ~ fieldName);
 
 			enum DBFields = getUDAs!(__traits(getMember, record, fieldName), DBName);
 			static if( DBFields.length > 0 ) {
@@ -153,7 +154,7 @@ void touristDelete(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
 	import std.exception: enforce;
-	enforce(ctx.rights.hasRight(`tourist.edit`, `delete`), `Недостаточно прав для удаления туриста!`);
+	enforce(ctx.rights.hasRight(`tourist.item`, `delete`), `Недостаточно прав для удаления туриста!`);
 
 	HistoryRecordData historyData = {
 		tableName: `tourist`,

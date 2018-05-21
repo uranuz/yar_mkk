@@ -20,6 +20,7 @@ import webtank.datctrl.record_format;
 import webtank.datctrl.iface.data_field;
 import webtank.db.datctrl_joint;
 
+import std.datetime: DateTime;
 static immutable historyRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
 	string, "data",
@@ -34,10 +35,12 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 	import std.conv: to, text;
 	import std.string: join;
 	import std.algorithm: canFind;
-	import std.exception;
+	import std.exception: enforce;
 
-	enforce( ctx.user.isAuthenticated && (ctx.user.isInRole("admin") || ctx.user.isInRole("moder")),
-		`Требуется вход на сайт для просмотра истории изменений!`);
+	enforce([`pohod`, `tourist`].canFind(filter.tableName), `Просмотр истории пока доступен только для походов или туристов`);
+	enforce(ctx.rights.hasRight(filter.tableName ~ `.history`, `read`),
+		`Требуется вход на сайт для просмотра истории изменений!`
+	);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 	auto history_rs = getHistoryDB().query(`

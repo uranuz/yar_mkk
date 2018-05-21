@@ -2,11 +2,12 @@ define('mkk/TouristEdit/TouristEdit', [
 	'fir/controls/FirControl',
 	'mkk/helpers',
 	'fir/common/helpers',
+	'fir/network/json_rpc',
 	'fir/controls/PlainDatePicker/PlainDatePicker',
 	'fir/controls/PlainListBox/PlainListBox',
 	'mkk/TouristPlainList/TouristPlainList',
 	'css!mkk/TouristEdit/TouristEdit'
-], function(FirControl, MKKHelpers, FirHelpers) {
+], function(FirControl, MKKHelpers, FirHelpers, json_rpc) {
 	__extends(TouristEdit, FirControl);
 
 	function TouristEdit(opts) {
@@ -19,6 +20,16 @@ define('mkk/TouristEdit/TouristEdit', [
 		this._touristForm = this._elems('touristForm');
 		this._similarsDlg = this._elems("similarsDlg");
 		this._forceSubmitBtn = this._elems("forceSubmitBtn");
+		this._touristDeleteArea = this.getChildInstanceByName('touristDeleteArea');
+		this._partyList = this.getChildInstanceByName('partyList');
+		this._extraFileLinks = this.getChildInstanceByName('extraFileLinksEdit');
+		this._chiefAddToParty = this.getChildInstanceByName('chiefAddToParty');
+
+		this._elems("deleteDialogBtn").on("click", function() {
+			self._touristDeleteArea.showDialog();
+		});
+
+		this._touristDeleteArea.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
 
 		this._updateControlState(opts);
 	}
@@ -110,6 +121,21 @@ define('mkk/TouristEdit/TouristEdit', [
 				//Редактирование существующего
 				this._forcedSubmitForm();
 			}
+		},
+
+		//Обработчик тыка по кнопке подтверждения удаления туриста
+		onDeleteConfirm: function() {
+			json_rpc.invoke({
+				uri: "/jsonrpc/",
+				method: "tourist.delete",
+				params: { "num": parseInt(FirHelpers.parseGetParams()["num"], 10) },
+				success: function() {
+					document.location.replace("/dyn/tourist/list");
+				},
+				error: function(res) {
+					$('<div title="Ошибка операции">' + res.message + '</div>').dialog({modal: true});
+				}
+			});
 		}
 	});
 });

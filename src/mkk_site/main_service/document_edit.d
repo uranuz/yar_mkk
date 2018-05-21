@@ -17,6 +17,8 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 	import std.meta: AliasSeq;
 	import std.traits: isSomeString, getUDAs;
 	import std.exception: enforce;
+	enforce(ctx.rights.hasRight(`document.item`, `edit`), `Недостаточно прав для редактирования ссылки на документ!`);
+
 
 	string[] fieldNames;
 	string[] fieldValues;
@@ -29,7 +31,7 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 				continue; // Поля, которые undef с нашей т.зрения не изменились
 
 			string accessObj = GetSymbolAccessObject!(DocumentDataToWrite, fieldName)();
-			enforce(ctx.rights.hasRight(accessObj, "edit"), `Недостаточно прав для редактирования поля документа: ` ~ fieldName);
+			enforce(ctx.rights.hasRight(accessObj, `edit`), `Недостаточно прав для редактирования поля документа: ` ~ fieldName);
 
 			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
 			fieldNames ~= `"` ~ dbFieldName ~ `"`;
@@ -68,7 +70,7 @@ void deleteDocument(HTTPContext ctx, size_t num)
 {
 	import std.conv: text;
 	import std.exception: enforce;
-	enforce(ctx.rights.hasRight(`document.edit`, `delete`), `Недостаточно прав для удаления документа!`);
+	enforce(ctx.rights.hasRight(`document.item`, `delete`), `Недостаточно прав для удаления документа!`);
 
 	getCommonDB().query(`delete from file_link where num = ` ~ num.text);
 }

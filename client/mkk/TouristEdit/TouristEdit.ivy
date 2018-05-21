@@ -3,12 +3,13 @@ from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNu
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.TouristPlainList import TouristPlainList;
+from mkk.PohodEdit.DeleteArea import DeleteArea;
 def TouristEdit {=
 	def.kv
 		moduleName: 'mkk/TouristEdit/TouristEdit'
 		instanceName: 'touristEdit'
 		cssBaseClass: 'mkk-TouristEdit'
-		accessObject: 'tourist.edit';
+		accessObject: 'tourist.item';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -169,18 +170,28 @@ def TouristEdit {=
 						}
 					</td>
 				</tr>
-				<tr>
-					<td> &nbsp; </td>
-					<td>
-						<button type="button"
-							class="{=cls 'submitBtn'} btn btn-primary btn-block"
-							>Сохранить</button>
-					</td>
-				</tr>
 			</table>
 			<input type="hidden" name="action" value="write"/>
+			<hr/>
+			<span>
+				<button type="submit"
+					class="{=cls 'submitBtn'} btn btn-primary"
+					>Сохранить</button>
+			</span>
+			<span style="float: right;">
+				{=if {=hasRight kind: 'delete'} {*
+				<button type="button"
+					class="{=cls 'deleteDialogBtn'} btn btn-secondary"
+					>Удалить поход</button>
+				*}}
+			</span>
+			<div style="clear: both"></div>
 		</form>
 
+		{=DeleteArea
+			instanceName: 'touristDeleteArea'
+			deleteWhat: 'похода'
+		}
 		<div class="{=cls 'similarsDlg'}">
 			<div class="{=cls 'similarsMsg'}">
 				В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе.

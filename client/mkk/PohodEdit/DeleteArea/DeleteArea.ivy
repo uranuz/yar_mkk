@@ -4,16 +4,17 @@ def DeleteArea {=
 	def.kv
 		moduleName: 'mkk/PohodEdit/DeleteArea/DeleteArea'
 		instanceName: 'pohodDeleteArea'
-		cssBaseClass: 'mkk-PohodDeleteArea';
+		cssBaseClass: 'mkk-PohodDeleteArea'
+		deleteWhat: 'объекта';
 	def.body {*
-	<!-- Диалог удаления похода -->
-	<div class="{=cls 'block'}" title="Удаление похода" style="display: none;" data-fir-module="{{moduleName}}">
+	<!-- Диалог удаления объекта -->
+	<div class="{=cls 'block'}" title="Удаление {{deleteWhat}}" style="display: none;" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<p>Для подтверждения удаления похода введите слово "удалить" (без кавычек) и нажмите на кнопку</p>
+		<p>Для подтверждения удаления {{deleteWhat}} введите слово "удалить" (без кавычек) и нажмите на кнопку</p>
 
 		<div class="form-inline">
-			<input type="text" class="{=cls 'deleteConfirmField'} form-control">
-			<input type="button" class="{=cls 'deleteConfirmBtn'} btn btn-danger" value="OK">
+			<input type="text" class="{=cls 'deleteConfirmField'} form-control"/>
+			<input type="button" class="{=cls 'deleteConfirmBtn'} btn btn-danger" value="OK"/>
 		</div>
 	</div>
 	*}
