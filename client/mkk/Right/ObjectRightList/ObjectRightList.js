@@ -7,5 +7,5 @@ define('mkk/Right/ObjectRightList/ObjectRightList', [
 	function ObjectRightList(opts) {
 		FirControl.call(this, opts);
 	}
-	return __mixinProto(ModerList, {});
+	return __mixinProto(ObjectRightList, {});
 });
