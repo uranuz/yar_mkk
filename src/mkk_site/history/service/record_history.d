@@ -39,7 +39,7 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 
 	enforce([`pohod`, `tourist`].canFind(filter.tableName), `Просмотр истории пока доступен только для походов или туристов`);
 	enforce(ctx.rights.hasRight(filter.tableName ~ `.history`, `read`),
-		`Требуется вход на сайт для просмотра истории изменений!`
+		`Недостаточно прав для просмотра истории изменений!`
 	);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
