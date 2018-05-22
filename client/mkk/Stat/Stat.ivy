@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr,cls;
-from mkk.Pagination import Pagination;
+from fir.controls.Pagination import Pagination;
 def Document {=
 	def.kv
 		moduleName: 'mkk/Stat/Stat'

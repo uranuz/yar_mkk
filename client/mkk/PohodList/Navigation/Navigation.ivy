@@ -2,7 +2,7 @@ expr {=
 from fir.controls.CheckBoxList import CheckBoxList;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.utils import cls, firScopeOptsEnc;
-from mkk.Pagination import Pagination;
+from fir.controls.Pagination import Pagination;
 def PohodListNavigation {=
 	def.kv
 		moduleName: "mkk/PohodList/Navigation/Navigation"

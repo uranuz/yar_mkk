@@ -1,6 +1,6 @@
 define('mkk/Experience/Experience', [
 	'fir/controls/FirControl',
-	'mkk/Pagination/Pagination',
+	'fir/controls/Pagination/Pagination',
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Experience/Experience'
 ], function (FirControl) {

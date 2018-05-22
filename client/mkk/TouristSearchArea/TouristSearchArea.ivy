@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
-from mkk.Pagination import Pagination;
+from fir.controls.Pagination import Pagination;
 from mkk.TouristPlainList import TouristPlainList;
 def TouristSearchArea {=
 	def.kv

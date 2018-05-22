@@ -1,7 +1,7 @@
 expr
 {=
 from fir.controls.utils import recGet, recGetStr, cls, isInRoles;
-from mkk.Pagination import Pagination;
+from fir.controls.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
 def Experience{=

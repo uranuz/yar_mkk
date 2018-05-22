@@ -1,6 +1,6 @@
 define('mkk/DocumentList/DocumentList', [
 	'fir/controls/FirControl',
-	'mkk/Pagination/Pagination',
+	'fir/controls/Pagination/Pagination',
 	'mkk/DocumentEdit/DocumentEdit',
 	'css!mkk/DocumentList/DocumentList'
 ], function (FirControl, DatctrlHelpers) {

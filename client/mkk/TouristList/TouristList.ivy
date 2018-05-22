@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, isInRoles, hasRight;
-from mkk.Pagination import Pagination;
+from fir.controls.Pagination import Pagination;
 def TouristList {=
 	def.kv
 		moduleName: 'mkk/TouristList/TouristList'

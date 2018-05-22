@@ -1,7 +1,7 @@
 define('mkk/Tourist/NavigatedList/NavigatedList', [
 	'fir/controls/FirControl',
 	'mkk/TouristPlainList/TouristPlainList',
-	'mkk/Pagination/Pagination',
+	'fir/controls/Pagination/Pagination',
 	'css!mkk/Tourist/NavigatedList/NavigatedList'
 ], function (FirControl) {
 	__extends(TouristNavigatedList, FirControl);
