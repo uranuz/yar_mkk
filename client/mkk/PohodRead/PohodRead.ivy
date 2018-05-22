@@ -94,7 +94,10 @@ def PohodRead {=
 				<ol class="{=cls 'extraFileLinksList'}">
 					{=repeat linkData in extraFileLinks {*
 					<li>
-						<a href="{=at linkData 0}" target="__blank" title="{=at linkData 0}">{=at linkData 1}</a>
+						<a href="{=recGet linkData 'link'}"
+							target="__blank"
+							title="{=recGet linkData 'name'}"
+							>{{ {=recGet linkData 'name'} or {=recGet linkData 'link'} }}</a>
 					</li>
 					*}}
 				</ol>

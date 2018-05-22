@@ -118,36 +118,16 @@ IBaseRecord readPohod(Optional!size_t pohodNum)
 	return null;
 }
 
-static immutable extraFileLinkRecordFormat = RecordFormat!(
-	PrimaryKey!string, "linkData"
+static immutable pohodFileLinkRecFormat = RecordFormat!(
+	PrimaryKey!size_t, "num",
+	string, "name",
+	string, "link"
 )();
-
-import std.typecons: Tuple;
-
-alias ExtraFileLink = Tuple!( string, "uri", string, "descr" );
 
 auto getExtraFileLinks(Optional!size_t num)
 {
 	import std.conv: text;
-	ExtraFileLink[] links;
-	if( num.isNull ) {
-		return links;
-	}
-
-	auto rs = getCommonDB().query(
-		`select unnest(links) as num from pohod where pohod.num = ` ~ num.text
-	).getRecordSet(extraFileLinkRecordFormat);
-
-	links.length = rs.length;
-	size_t i = 0;
-	foreach( rec; rs )
-	{
-		string[] linkPair = parseExtraFileLink(rec.get!"linkData"());
-		links[i].uri = linkPair[0];
-		links[i].descr = linkPair[1];
-
-		++i;
-	}
-
-	return links;
+	return getCommonDB().query(
+		`select num, name, link as num from pohod_file_link where pohod_num = ` ~ (num.isSet? num.text: `null::integer`)
+	).getRecordSet(pohodFileLinkRecFormat);
 }

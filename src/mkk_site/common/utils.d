@@ -1,23 +1,5 @@
 module mkk_site.common.utils;
 
-string[] parseExtraFileLink(string linkPair)
-{
-	import std.algorithm : splitter;
-	import std.algorithm : startsWith;
-	auto linkPairSplitter = splitter(linkPair, "><");
-	string link = linkPairSplitter.empty ? null : linkPairSplitter.front;
-	string comment;
-
-	if( link.length > 0 && link.length+2 < linkPair.length )
-		comment = linkPair[ link.length+2..$ ];
-	else
-	{	if( !linkPair.startsWith("><") )
-			link = linkPair;
-	}
-
-	return [ link, comment ];
-}
-
 import webtank.net.http.context: HTTPContext;
 import mkk_site.common.versions: isMKKSiteDevelTarget;
 

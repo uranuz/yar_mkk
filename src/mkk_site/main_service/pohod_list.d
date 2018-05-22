@@ -261,7 +261,7 @@ string getPohodFilterQueryPart(ref PohodFilter filter)
 	}
 
 	if( filter.withFiles ) {
-		filters ~= `(array_length(links, 1) != 0 AND array_to_string(links, '', '')!= '')`;
+		filters ~= `exists( select 1 from pohod_file_link fl where fl.pohod_num = poh.num limit 1 )`;
 	}
 
 	static immutable datePartNames = ["year", "month", "day"];

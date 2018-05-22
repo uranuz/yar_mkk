@@ -3,6 +3,14 @@ module mkk_site.data_model.pohod_edit;
 public import mkk_site.data_model.common;
 import webtank.security.right.common: RightObjAttr;
 
+import std.typecons: Tuple;
+import webtank.common.optional: Optional;
+alias PohodFileLink = Tuple!(
+	string, `link`,
+	string, `name`,
+	Optional!size_t, `num`
+);
+
 struct PohodDataToWrite
 {
 	import webtank.common.optional: Optional, Undefable;
@@ -64,7 +72,7 @@ struct PohodDataToWrite
 	}
 
 	// Секция "Ссылки на доп. материалы"
-	@DBName("links") Undefable!(string[][]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
+	@DBName("links") Undefable!(PohodFileLink[]) extraFileLinks; // Ссылки на файлы/ документы связанные с походом/ маршрутом с их наименованием
 
 	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных
 } // @FieldSerializer

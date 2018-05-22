@@ -46,10 +46,14 @@ define('mkk/PohodEdit/ExtraFileLinksEdit/ExtraFileLinksEdit', [
 			{
 				currInputs = $(tableRows[i]).children("td").children("input");
 				link = $(currInputs[0]).val();
-				comment = $(currInputs[1]).val();
+				comment = $(currInputs[1]).val(),
+				num = parseInt($(tableRows[i]).data('mkkNum'), 10);
+				if( isNaN(num) ) {
+					num = null; // Если это новая ссылка, то номера не будет
+				}
 
-				if( $.trim(link).length && $.trim(link).length )
-					result.push([link, comment]);
+				if( $.trim(link).length && $.trim(comment).length )
+					result.push([link, comment, num]);
 			}
 			return result;
 		},

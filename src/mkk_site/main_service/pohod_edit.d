@@ -1,7 +1,7 @@
 module mkk_site.main_service.pohod_edit;
 
 import mkk_site.main_service.devkit;
-import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName;
+import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName, PohodFileLink;
 import webtank.security.right.common: GetSymbolAccessObject;
 import mkk_site.history.client;
 import mkk_site.history.common;
@@ -54,11 +54,13 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 		alias FieldType = typeof(__traits(getMember, record, fieldName));
 		static if( isOptional!FieldType && OptionalIsUndefable!FieldType ) {
 			auto field = __traits(getMember, record, fieldName);
-			if( field.isUndef )
+			if( field.isUndef  )
 				continue; // Поля, которые undef с нашей т.зрения не изменились
 
 			string accessObj = GetSymbolAccessObject!(PohodDataToWrite, fieldName)();
 			enforce(ctx.rights.hasRight(accessObj, `edit`), `Недостаточно прав для редактирования поля похода: ` ~ fieldName);
+			if( fieldName == "extraFileLinks" )
+				continue; // Ссылки обрабатываем позже
 
 			enum string dbFieldName = getUDAs!(__traits(getMember, record, fieldName), DBName)[0].dbName;
 			fieldNames ~= `"` ~ dbFieldName ~ `"`;
@@ -81,33 +83,7 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 			}
 			else static if( fieldName == "extraFileLinks" )
 			{
-				if( field.isNull )
-				{
-					fieldValues ~= "NULL";
-					continue;
-				}
-
-				//SiteLoger.info( "Запись списка ссылок на доп. материалы по походу", "Изменение данных похода" );
-				string[] processedLinks;
-
-				foreach( ref linkPair; field.value )
-				{
-					string uriStr = strip(linkPair[0]);
-					if( !uriStr.length )
-						continue;
-
-					URI uri;
-					try {
-						uri = URI( uriStr );
-					} catch(Exception ex) {
-						throw new Exception("Некорректная ссылка на доп. материалы!!!");
-					}
-
-					if( uri.scheme.length == 0 )
-						uri.scheme = "http";
-					processedLinks ~= PGEscapeStr(uri.toString()) ~ "><" ~ PGEscapeStr(linkPair[1]);
-				}
-				fieldValues ~= "ARRAY['" ~ processedLinks.join("','") ~ "']";
+				// Ссылки обрабатываются потом
 			}
 			else static if( ["chiefNum", "altChiefNum"].canFind(fieldName) )
 			{
@@ -208,12 +184,89 @@ auto editPohod(HTTPContext ctx, PohodDataToWrite record)
 				recordKind: (record.num.isSet? HistoryRecordKind.Update: HistoryRecordKind.Insert)
 			};
 			sendToHistory(ctx, (record.num.isSet? `Редактирование похода`: `Добавление похода`), historyData);
+
+			writePohodFileLinks(record.extraFileLinks, recordNum);
 			return recordNum;
 		}
 	}
 
 	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение данных похода");
 	return record.num;
+}
+
+void writePohodFileLinks(Undefable!(PohodFileLink[]) fileLinks, size_t pohodNum)
+{
+	import std.algorithm: map;
+	import std.array: join;
+	import std.conv: text;
+	import std.string: strip;
+
+	if( fileLinks.isUndef )
+		return;
+	string[] insertFileLinks;
+	string[] updateFileLinks;
+	size_t[] updateKeys;
+
+	
+	foreach( ref item; fileLinks )
+	{
+		string uriStr = strip(item.link);
+		if( !uriStr.length )
+			continue;
+
+		URI uri;
+		try {
+			uri = URI(uriStr);
+		} catch(Exception ex) {
+			throw new Exception("Некорректная ссылка на доп. материалы!!!");
+		}
+
+		if( uri.scheme.length == 0 )
+			uri.scheme = "http";
+
+		if( item.num.isSet ) {
+			updateKeys ~= item.num.value;
+			updateFileLinks ~= `(` ~ item.num.text ~ `, '` ~ PGEscapeStr(item.name) ~ `', '` ~ PGEscapeStr(item.link) ~ `', ` ~ pohodNum.text ~ `)`;
+		} else {
+			insertFileLinks ~= `('` ~ PGEscapeStr(item.name) ~ `', '` ~ PGEscapeStr(item.link) ~ `', ` ~ pohodNum.text ~ `  )`;
+		}
+	}
+
+	// Удаляем ссылки на файлы похода, которых нет в списке
+	getCommonDB().query(`with upd_keys as(
+		select unnest(ARRAY[` ~ updateKeys.map!( (it) => it.text ).join(`,`) ~ `]::integer[]) num
+	)
+	delete from pohod_file_link
+	where pohod_num = ` ~ pohodNum.text ~ `
+		and num not in(select num from upd_keys)
+	`);
+
+	// Обновляем существующие ссылки
+	if( updateFileLinks.length ) {
+		getCommonDB().query(`with dat(num, name, link, pohod_num) as(
+			values
+			` ~ updateFileLinks.join(",\n") ~ `
+		)
+		update pohod_file_link
+		set
+			name = dat.name,
+			link = dat.link,
+			pohod_num = dat.pohod_num
+		from dat
+		where dat.num = pohod_file_link.num
+		`);
+	}
+
+	// Вставляем новые записи
+	if( insertFileLinks.length ) {
+		getCommonDB().query(`with dat(name, link, pohod_num) as(
+			values
+			` ~ insertFileLinks.join(",\n") ~ `
+		)
+		insert into pohod_file_link (name, link, pohod_num)
+		select * from dat
+		`);
+	}
 }
 
 /++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/
