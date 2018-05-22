@@ -138,7 +138,7 @@ select
 	tourist.patronymic,
 	tourist.birth_year
 from tourist_num
-left join tourist
+join tourist
 	on tourist.num = tourist_num.num
 order by family_name, given_name`
 	).getRecordSet(participantInfoRecFormat);
