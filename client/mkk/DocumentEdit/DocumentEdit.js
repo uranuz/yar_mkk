@@ -1,7 +1,6 @@
 define('mkk/DocumentEdit/DocumentEdit', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/FilteredUpdateableDialog',
-	'css!mkk/DocumentEdit/DocumentEdit'
+	'mkk/Helpers/FilteredUpdateableDialog'
 ], function (FirControl, FilteredUpdateableDialog) {
 	__extends(DocumentEdit, FirControl);
 

@@ -5,7 +5,7 @@ def Results {=
 		instanceName: 'documentEditResults'
 		cssBaseClass: 'mkk-DocumentEditResults';
 	def.body {*
-	<div class="{=cls 'block'}" data-fir-module>
+	<div class="{=cls 'block'} container-fluid" data-fir-module title="Редактирование ссылки на документ">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		{=if isUpdate {=
 			if {=empty errorMsg} {*

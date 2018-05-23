@@ -9,11 +9,11 @@ def DocumentEdit {=
 		cssBaseClass: "mkk-DocumentEdit"
 		document: null;
 	def.body {*
-	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}" title="Редактирование ссылки на документ">
+	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}" title="Редактирование ссылки на документ">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<form class="{=cls 'docForm'} container-fluid">
+		<form class="{=cls 'docForm'}">
 		{=if document {*
-			<label class="row form-group">
+			<label class="form-row form-group">
 				<span>Название</span>
 				<input type="text"
 					class="{=cls 'name'} form-control"
@@ -21,7 +21,7 @@ def DocumentEdit {=
 					value="{=recGet document 'name'}"
 					placeholder="Введите отображаемое название"/>
 			</label>
-			<label class="row form-group">
+			<label class="form-row form-group">
 				<span>Ссылка</span>
 				<input type="text"
 					class="{=cls 'link'} form-control"
@@ -29,7 +29,7 @@ def DocumentEdit {=
 					value="{=recGet document 'link'}"
 					placeholder="Введите адрес ссылки"/>
 			</label>
-			<div class="row form-group">
+			<div class="form-row form-group">
 				<button type="button"
 					class="{=cls 'saveBtn'} btn btn-primary"
 					>Сохранить</button>
