@@ -44,15 +44,15 @@ void sendChangesToHistory(HTTPContext ctx, HistoryRecordData data) {
 /// Сохранить изменения в историю (несколько записей)
 void sendChangesToHistory(HTTPContext ctx, HistoryRecordData[] data)
 {
-	import std.exception: enforceEx;
+	import std.exception: enforce;
 	import std.conv: to;
 	import std.range: chunks;
 
 	size_t userNum = ctx.user.data.get(`userNum`, `0`).to!size_t;
 	foreach( ref item; data )
 	{
-		enforceEx!Exception(!item.recordNum.isNull, `Record num must be specified!`);
-		enforceEx!Exception(item.tableName.length, `Table name be specified!`);
+		enforce!Exception(!item.recordNum.isNull, `Record num must be specified!`);
+		enforce!Exception(item.tableName.length, `Table name be specified!`);
 
 		// Номер пользователя берется из контекста, если не задан явно
 		if( item.userNum.isUndef ) {
