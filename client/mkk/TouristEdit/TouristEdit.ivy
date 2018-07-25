@@ -182,7 +182,7 @@ def TouristEdit {=
 				{=if {=hasRight kind: 'delete'} {*
 				<button type="button"
 					class="{=cls 'deleteDialogBtn'} btn btn-secondary"
-					>Удалить поход</button>
+					>Удалить туриста</button>
 				*}}
 			</span>
 			<div style="clear: both"></div>
@@ -190,7 +190,7 @@ def TouristEdit {=
 
 		{=DeleteArea
 			instanceName: 'touristDeleteArea'
-			deleteWhat: 'похода'
+			deleteWhat: 'туриста'
 		}
 		<div class="{=cls 'similarsDlg'}">
 			<div class="{=cls 'similarsMsg'}">

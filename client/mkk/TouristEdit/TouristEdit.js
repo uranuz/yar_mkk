@@ -6,6 +6,7 @@ define('mkk/TouristEdit/TouristEdit', [
 	'fir/controls/PlainDatePicker/PlainDatePicker',
 	'fir/controls/PlainListBox/PlainListBox',
 	'mkk/TouristPlainList/TouristPlainList',
+	'mkk/PohodEdit/DeleteArea/DeleteArea',
 	'css!mkk/TouristEdit/TouristEdit'
 ], function(FirControl, MKKHelpers, FirHelpers, json_rpc) {
 	__extends(TouristEdit, FirControl);
