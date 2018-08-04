@@ -49,7 +49,7 @@ define('mkk/TouristEdit/TouristEdit', [
 		},
 		processSimilarTourists: function(ev, rs, nav) {
 			if (rs && rs.getLength()) {
-				this._similarsDlg.dialog({title: "Добавление туриста", modal: true});
+				this._similarsDlg.dialog({title: "Добавление туриста", modal: true, width: 450});
 			} else {
 				this._forcedSubmitForm();
 			}

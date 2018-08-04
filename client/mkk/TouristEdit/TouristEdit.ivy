@@ -174,7 +174,7 @@ def TouristEdit {=
 			<input type="hidden" name="action" value="write"/>
 			<hr/>
 			<span>
-				<button type="submit"
+				<button type="button"
 					class="{=cls 'submitBtn'} btn btn-primary"
 					>Сохранить</button>
 			</span>
@@ -206,7 +206,7 @@ def TouristEdit {=
 				}
 			</div>
 			<button type="button"
-				class="{=cls 'forceSubmitBtn'}"
+				class="{=cls 'forceSubmitBtn'} btn btn-primary"
 				>Продолжить добавление</button>
 		</div>
 	</div>
