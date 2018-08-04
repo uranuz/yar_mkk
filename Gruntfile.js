@@ -3,7 +3,9 @@ module.exports = function (grunt) {
 
 	// Force use of Unix newlines
 	grunt.util.linefeed = '\n';
-	var expandTilde = require('expand-tilde');
+	var
+		expandTilde = require('expand-tilde'),
+		sass = require('node-sass');
 
 	var entryPoints = [
 		"mkk/require",
@@ -171,7 +173,9 @@ module.exports = function (grunt) {
 				precision: 6,
 				sourceComments: false,
 				sourceMap: true,
-				outputStyle: 'expanded'
+				outputStyle: 'expanded',
+				// Обход бага: https://github.com/sourcey/spectacle/issues/156
+				implementation: sass
 			},
 			bootstrap: {
 				files: [
