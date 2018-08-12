@@ -25,6 +25,6 @@ void main(string[] progArgs)
 	WorkerOpts opts;
 	opts.port = 8082;
 	parseWorkerOptsFromCmd(progArgs, opts);
-	opts.service = Service;
+	opts.service = Service();
 	runServer(opts);
 }

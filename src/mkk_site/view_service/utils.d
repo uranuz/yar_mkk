@@ -39,15 +39,41 @@ template join(alias Method)
 	void _processRequest(HTTPContext context) {
 		import std.traits: getUDAs;
 		enum modAttr = getUDAs!(Method, IvyModuleAttr);
+		debug {
+			import std.datetime.stopwatch: StopWatch, AutoStart;
+			auto methSW = StopWatch(AutoStart.yes);
+		}
+		auto methodRes = Method(context);
+		debug {
+			import std.stdio: writeln;
+			methSW.stop();
+			writeln(`Call view method: `, __traits(identifier, Method), ` duration: `, methSW.peek());
+		}
+
 		static if( modAttr.length == 0 ) {
-			ViewService.renderResult(Method(context), context);
+			ViewService.renderResult(methodRes, context);
 		} else static if( modAttr.length == 1 ) {
 			// Если есть аттрибут шаблона на методе, то используем этот шаблон для отображения
 			// результата выполнения метода
-			ViewService.renderResult(
-				ViewService.runIvyModule(modAttr[0].moduleName, context, Method(context)),
-				context
-			);
+			debug {
+				import std.stdio: writeln;
+				import std.datetime.stopwatch: StopWatch, AutoStart;
+				auto ivyResSW = StopWatch(AutoStart.yes);
+			}
+			auto ivyRes = ViewService.runIvyModule(modAttr[0].moduleName, context, methodRes);
+			debug {
+				ivyResSW.stop();
+				writeln(`Run ivy module: `, modAttr[0].moduleName, ` duration: `, ivyResSW.peek());
+			}
+
+			debug {
+				auto ivyRenderSW = StopWatch(AutoStart.yes);
+			}
+			ViewService.renderResult(ivyRes, context);
+			debug {
+				ivyRenderSW.stop();
+				writeln(`Render ivy wrapper module for: `, modAttr[0].moduleName, ` duration: `, ivyRenderSW.peek());
+			}
 		} else {
 			static assert(false, `Expected only one template name`);
 		}

@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+docs/
+mkk_site.so
+mkk_site.dylib
+mkk_site.dll
+mkk_site.a
+mkk_site.lib
+mkk_site-test-*
+*.exe
+*.o
+*.obj
+*.lst
