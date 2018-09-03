@@ -4,7 +4,7 @@ import mkk_site.history.service.service;
 import mkk_site.common.utils;
 import mkk_site.history.common;
 
-import webtank.db.transaction: PostgreSQLTransaction;
+import webtank.db.transaction: makeTransaction;
 import webtank.net.utils: PGEscapeStr;
 import webtank.net.http.context: HTTPContext;
 import webtank.common.optional: Optional;
@@ -58,7 +58,7 @@ void writeDataToHistory(HTTPContext ctx, HistoryRecordData[] data)
 void writeDataForTable(HistoryRecordData[] data, string tableName)
 {
 	auto db = getHistoryDB();
-	auto trans = new PostgreSQLTransaction(db);
+	auto trans = db.makeTransaction();
 	scope(failure) trans.rollback();
 	scope(success) trans.commit();
 

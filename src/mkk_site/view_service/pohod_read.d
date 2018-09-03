@@ -13,7 +13,7 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.PohodRead`)
-TDataNode renderPohodRead(HTTPContext ctx)
+IvyData renderPohodRead(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.json;
@@ -30,8 +30,8 @@ TDataNode renderPohodRead(HTTPContext ctx)
 		throw new Exception(`Невозможно отобразить данные похода. Номер похода должен быть целым числом`);
 	}
 
-	return TDataNode([
-		"pohodNum": TDataNode(pohodNum),
+	return IvyData([
+		"pohodNum": IvyData(pohodNum),
 		"pohod": ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]),
 		"extraFileLinks": ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]),
 		"partyList": ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum])

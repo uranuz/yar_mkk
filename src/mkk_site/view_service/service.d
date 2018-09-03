@@ -44,7 +44,7 @@ public:
 		return controller;
 	}
 
-	override void renderResult(TDataNode content, HTTPContext ctx)
+	override void renderResult(IvyData content, HTTPContext ctx)
 	{
 		import std.string: toLower;
 		ctx.response.tryClearBody();
@@ -55,9 +55,9 @@ public:
 			assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
 			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
 
-			TDataNode payload = [
+			IvyData payload = [
 				"content":  content,
-				"authRedirectURI": TDataNode(getAuthRedirectURI(ctx)),
+				"authRedirectURI": IvyData(getAuthRedirectURI(ctx)),
 				"pohodFilterFields": favouriteFilters["allFields"],
 				"pohodFilterSections": favouriteFilters["sections"]
 			];
@@ -98,8 +98,8 @@ debug {
 	}
 
 	@IvyModuleAttr("mkk.JSRender")
-	TDataNode templatePlayground(HTTPContext ctx) {
-		return TDataNode();
+	IvyData templatePlayground(HTTPContext ctx) {
+		return IvyData();
 	}
 
 	import ivy;

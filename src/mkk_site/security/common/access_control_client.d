@@ -15,7 +15,8 @@ class MKKAccessControlClient: IAccessController
 public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
-	{	auto httpCtx = cast(HTTPContext) context;
+	{
+		auto httpCtx = cast(HTTPContext) context;
 		
 		if( httpCtx is null )
 			return new AnonymousUser;

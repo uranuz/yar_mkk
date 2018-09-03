@@ -13,9 +13,9 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.ModerList`)
-TDataNode renderModerList(HTTPContext ctx)
+IvyData renderModerList(HTTPContext ctx)
 {
-	return TDataNode([
+	return IvyData([
 		"moderList": ctx.mainServiceCall("moder.list")
 	]);
 }

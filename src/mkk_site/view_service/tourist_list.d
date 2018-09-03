@@ -20,7 +20,7 @@ import webtank.common.std_json.to: toStdJSON;
 import mkk_site.data_model.tourist_list;
 
 @IvyModuleAttr(`mkk.TouristList`)
-TDataNode renderTouristList(HTTPContext ctx)
+IvyData renderTouristList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	auto bodyForm = ctx.request.bodyForm;
@@ -31,12 +31,12 @@ TDataNode renderTouristList(HTTPContext ctx)
 	formDataToStruct(bodyForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = ctx.mainServiceCall("tourist.list", [
+	IvyData callResult = ctx.mainServiceCall("tourist.list", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
 	]);
 
-	return TDataNode([
+	return IvyData([
 		"filter": jFilter.toIvyJSON(),
 		"touristList": callResult["rs"],
 		"nav": callResult["nav"]
@@ -44,7 +44,7 @@ TDataNode renderTouristList(HTTPContext ctx)
 }
 
 @IvyModuleAttr(`mkk.TouristPlainList`)
-TDataNode touristPlainList(HTTPContext ctx)
+IvyData touristPlainList(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.algorithm: canFind;
@@ -56,11 +56,11 @@ TDataNode touristPlainList(HTTPContext ctx)
 	formDataToStruct(queryForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = ctx.mainServiceCall("tourist.plainSearch", [
+	IvyData callResult = ctx.mainServiceCall("tourist.plainSearch", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
 	]);
-	TDataNode dataDict = [
+	IvyData dataDict = [
 		"filter": jFilter.toIvyJSON(),
 		"touristList": callResult["rs"],
 		"nav": callResult["nav"]

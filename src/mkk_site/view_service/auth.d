@@ -13,7 +13,7 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.Auth`)
-TDataNode renderAuth(HTTPContext ctx)
+IvyData renderAuth(HTTPContext ctx)
 {
 	import std.json;
 
@@ -33,7 +33,7 @@ TDataNode renderAuth(HTTPContext ctx)
 		} else {
 			resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 		}
-		return TDataNode();
+		return IvyData();
 	}
 
 	bool isAuthFailed = false;
@@ -62,7 +62,7 @@ TDataNode renderAuth(HTTPContext ctx)
 			} else {
 				resp.redirect(Service.virtualPaths.get(`siteAuthPage`, null));
 			}
-			return TDataNode();
+			return IvyData();
 		}
 		else
 		{
@@ -70,9 +70,9 @@ TDataNode renderAuth(HTTPContext ctx)
 		}
 	}
 
-	return TDataNode([
-		`userLogin`: TDataNode(req.cookies.get(`user_login`, null)),
-		`isAuthFailed`: TDataNode(isAuthFailed),
-		`isAuthenticated`: TDataNode(!isAuthFailed && ( ctx.user.isAuthenticated || "__sid__" in resp.cookies ))
+	return IvyData([
+		`userLogin`: IvyData(req.cookies.get(`user_login`, null)),
+		`isAuthFailed`: IvyData(isAuthFailed),
+		`isAuthenticated`: IvyData(!isAuthFailed && ( ctx.user.isAuthenticated || "__sid__" in resp.cookies ))
 	]);
 }

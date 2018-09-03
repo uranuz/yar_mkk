@@ -19,6 +19,7 @@ import mkk_site.main_service.user_settings;
 import mkk_site.main_service.stat;
 import mkk_site.main_service.init_history_data;
 import mkk_site.main_service.right_object_list;
+import mkk_site.main_service.registration;
 
 void main(string[] progArgs)
 {

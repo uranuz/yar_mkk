@@ -38,3 +38,9 @@ struct TouristDataToWrite
 }
 
 }
+
+struct UserRegData
+{
+	string login;
+	string password;
+}

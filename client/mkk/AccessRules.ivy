@@ -1,0 +1,8 @@
+expr {=
+def CheckSomething {=
+	def.kv data;
+	def.body {=
+		return true;
+	}
+}
+}

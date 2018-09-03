@@ -4,16 +4,75 @@ from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.TouristPlainList import TouristPlainList;
 from mkk.PohodEdit.DeleteArea import DeleteArea;
+
+def LabeledInput {=
+	def.kv caption field appendix: null;
+	def.body noscope{*
+	<div class="form-group row align-items-center">
+		<label class="col-md-3 col-form-label" for="{{field ~ 'Field'}}">{{caption}}</label>
+		<div class="col-md-6">
+			<input type="text"
+				name="{{field}}"
+				class="{=cls field} form-control"
+				value="{=recGet tourist field}"
+				id="{{field ~ 'Field'}}"
+				{=if not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog 'disabled'}/>
+		</div>
+		<div class="col-auto px-1">{{appendix}}</div>
+	</div>
+	*};
+};
+
+def ShowCheckBox {=
+	def.kv caption: 'Показать всем' field;
+	def.body noscope{*
+		<div class="form-check">
+			<input type="checkbox"
+				name="{{field}}"
+				class="{=cls field} form-check-input"
+				id="{{field ~ 'Field'}}"
+				{=if {=recGet tourist field} 'checked'}
+				{=if not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog 'disabled'}/>
+			<label class="form-check-label" for="{{field ~ 'Field'}}">{{caption}}</label>
+		</div>
+	*};
+};
+
+def ListBoxRow {=
+	def.kv caption field;
+	def.body noscope{*
+		<div class="form-group row">
+			<label class="col-md-3 col-form-label">{{caption}}</label>
+			<div class="col-md-6">
+				{=PlainListBox
+					instanceName: field ~ 'Field'
+					formField: field
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=rsFieldFormat tourist field} 'enum'} 'не задано'}
+					selectedId: {=recGet tourist field}
+					disabled: not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog
+				}
+			</div>
+		</div>
+	*}
+};
+
 def TouristEdit {=
 	def.kv
 		moduleName: 'mkk/TouristEdit/TouristEdit'
 		instanceName: 'touristEdit'
 		cssBaseClass: 'mkk-TouristEdit'
-		accessObject: 'tourist.item';
+		accessObject: 'tourist.item'
+		tourist: tourist
+		isEditDialog: true
+		isNewUserDialog: false;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div class="{=cls 'topButtons'}">
+			{=if isEditDialog {*
 			{=if {=isInRoles ['admin', 'moder']} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
@@ -22,172 +81,77 @@ def TouristEdit {=
 			<a href="{{vpaths.siteDynamic}}tourist/experience?num={=recGet tourist 'num'}"
 				class="btn btn-sm btn-secondary"
 				>Просмотр</a>
+			*} }
 		</div>
-		<form class="{=cls 'touristForm'} form" method="POST">
-			<h2>Редактирование данных туриста</h2>
+		{=if isEditDialog {*<form class="{=cls 'touristForm'} form" method="POST">*} }
+			{=if isEditDialog {*<h2>Редактирование данных туриста</h2>*} }
 			<input type="hidden" name="num" value="{=recGet tourist 'num'}"/>
-			<table style="width: 100%;">
-				<tr>
-					<td>Фамилия</td>
-					<td>
-						<input type="text"
-							name="familyName"
-							class="{=cls 'familyName'} form-control"
-							value="{=recGet tourist 'familyName'}"
-							{=if not{=hasRight subobj: 'familyName' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Имя</td>
-					<td>
-						<input type="text"
-							name="givenName"
-							class="{=cls 'givenName'} form-control"
-							value="{=recGet tourist 'givenName'}"
-							{=if not{=hasRight subobj: 'givenName' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Отчество</td>
-					<td>
-						<input type="text"
-							name="patronymic"
-							class="{=cls 'patronymic'} form-control"
-							value="{=recGet tourist 'patronymic'}"
-							{=if not{=hasRight subobj: 'patronymic' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Дата рождения</td>
-					<td>
-						{=PlainDatePicker
-							instanceName: 'birthDateField'
-							dayFormField: 'birthDay'
-							monthFormField: 'birthMonth'
-							yearFormField: 'birthYear'
-							day: {=recGet tourist 'birthDay'}
-							month: {=recGet tourist 'birthMonth'}
-							year: {=recGet tourist 'birthYear'}
-							disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'}
-						}
-					</td>
-				</tr>
-				<tr>
-					<td>Адрес проживания</td>
-					<td>
-						<input type="text"
-							name="address"
-							class="form-control"
-							value="{=recGet tourist 'address'}"
-							{=if not{=hasRight subobj: 'address' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Номер телефона</td>
-					<td>
-						<input type="text"
-							name="phone"
-							class="form-control"
-							value="{=recGetStr tourist 'phone'}"
-							{=if not{=hasRight subobj: 'phone' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Показывать номер телефона</td>
-					<td>
-						<input type="checkbox"
-							name="showPhone"
-							class="checkbox-inline"
-							{=if {=recGet tourist 'showPhone'} 'checked'}
-							{=if not{=hasRight subobj: 'showPhone' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Электронная почта</td>
-					<td>
-						<input type="text"
-							name="email"
-							class="form-control"
-							value="{=recGet tourist 'email'}"
-							{=if not{=hasRight subobj: 'email' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Показывать адрес эл. почты</td>
-					<td>
-						<input type="checkbox"
-							name="showEmail"
-							class="checkbox-inline"
-							{=if {=recGet tourist 'showEmail'} 'checked'}
-							{=if not{=hasRight subobj: 'showEmail' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Туристский опыт</td>
-					<td>
-						<input type="text"
-							name="experience"
-							class="form-control"
-							value="{=recGet tourist 'experience'}"
-							{=if not{=hasRight subobj: 'experience' kind: 'edit'} 'disabled'}/>
-					</td>
-				</tr>
-				<tr>
-					<td>Комментарий</td>
-					<td>
-						<textarea name="comment" class="form-control"
-							{=if not{=hasRight subobj: 'comment' kind: 'edit'} 'disabled'}
-							>{=recGet tourist 'comment'}</textarea>
-					</td>
-				</tr>
-				<tr>
-					<td>Спортивный разряд</td>
-					<td>
-						{=PlainListBox
-							instanceName: 'sportsCategoryField'
-							formField: 'sportsCategory'
-							idField: 'v'
-							captionField: 'n'
-							items: {=enumWithNull
-								{=at {=rsFieldFormat tourist 'sportsCategory'} 'enum'} 'не задано'}
-							selectedId: {=recGet tourist 'sportsCategory'}
-							disabled: not{=hasRight subobj: 'sportsCategory' kind: 'edit'}
-						}
-					</td>
-				</tr>
-				<tr>
-					<td>Судейская категория</td>
-					<td>
-						{=PlainListBox
-							instanceName: 'refereeCategoryField'
-							formField: 'refereeCategory'
-							idField: 'v'
-							captionField: 'n'
-							items: {=enumWithNull
-								{=at {=rsFieldFormat tourist 'refereeCategory'} 'enum'} 'не задано'}
-							selectedId: {=recGet tourist 'refereeCategory'}
-							disabled: not{=hasRight subobj: 'refereeCategory' kind: 'edit'}
-						}
-					</td>
-				</tr>
-			</table>
+			{%
+				LabeledInput caption: 'Фамилия' field: 'familyName';
+				LabeledInput caption: 'Имя' field: 'givenName';
+				LabeledInput caption: 'Отчество' field: 'patronymic';
+			}
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label">Дата рождения</label>
+				<div class="col-md-8">
+					{=PlainDatePicker
+						instanceName: 'birthDateField'
+						dayFormField: 'birthDay'
+						monthFormField: 'birthMonth'
+						yearFormField: 'birthYear'
+						day: {=recGet tourist 'birthDay'}
+						month: {=recGet tourist 'birthMonth'}
+						year: {=recGet tourist 'birthYear'}
+						disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'} and not isNewUserDialog
+					}
+				</div>
+			</div>
+			{=if isEditDialog {%
+				LabeledInput caption: 'Адрес проживания' field: 'address';
+				LabeledInput
+					caption: 'Номер телефона' field: 'phone'
+					appendix: {=ShowCheckBox field: 'showPhone'};
+				LabeledInput
+					caption: 'Электронная почта' field: 'email'
+					appendix: {=ShowCheckBox field: 'showEmail'};
+				LabeledInput caption: 'Туристский опыт' field: 'experience'
+			} }
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label" for="commentField">Комментарий</label>
+				<div class="col-md-9">
+					<textarea
+						name="comment"
+						class="form-control"
+						id="commentField"
+						{=if not{=hasRight subobj: 'comment' kind: 'edit'} and not isNewUserDialog 'disabled'}
+						>{=recGet tourist 'comment'}</textarea>
+				</div>
+			</div>
+			{%
+				ListBoxRow caption: 'Спортивный разряд' field: 'sportsCategory';
+				ListBoxRow caption: 'Судейская категория' field: 'refereeCategory'
+			}
 			<input type="hidden" name="action" value="write"/>
 			<hr/>
-			<span>
-				<button type="button"
-					class="{=cls 'submitBtn'} btn btn-primary"
-					>Сохранить</button>
-			</span>
-			<span style="float: right;">
-				{=if {=hasRight kind: 'delete'} {*
-				<button type="button"
-					class="{=cls 'deleteDialogBtn'} btn btn-secondary"
-					>Удалить туриста</button>
-				*}}
-			</span>
-			<div style="clear: both"></div>
-		</form>
+			{=if isEditDialog {*
+			<div class="form-group row justify-content-between">
+				<span class="col-auto">
+					<button type="button"
+						class="{=cls 'submitBtn'} btn btn-primary"
+						>Сохранить</button>
+				</span>
+				<span class="col-auto">
+					{=if {=hasRight kind: 'delete'} {*
+					<button type="button"
+						class="{=cls 'deleteDialogBtn'} btn btn-secondary"
+						>Удалить туриста</button>
+					*}}
+				</span>
+			</div>
+			*}}
+		{=if isEditDialog {*</form>*} }
 
+	{=if isEditDialog {*
 		{=DeleteArea
 			instanceName: 'touristDeleteArea'
 			deleteWhat: 'туриста'
@@ -209,16 +173,19 @@ def TouristEdit {=
 				class="{=cls 'forceSubmitBtn'} btn btn-primary"
 				>Продолжить добавление</button>
 		</div>
+	*}}
 	</div>
 	*}
 };
-if {=isInRoles ['admin', 'moder']} {=
-	TouristEdit
-} else {*
-	<h4>
-		Для редактирования данных туриста требуется
-		<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
-		на сайт
-	</h4>
-*}
+if __scopeName__ == 'main' {=
+	if {=isInRoles ['admin', 'moder']} {=
+		TouristEdit tourist: tourist
+	} else {*
+		<h4>
+			Для редактирования данных туриста требуется
+			<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
+			на сайт
+		</h4>
+	*}
+}
 }

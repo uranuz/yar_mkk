@@ -15,7 +15,7 @@ import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
 @IvyModuleAttr(`mkk.Stat`)
-TDataNode renderStat(HTTPContext ctx)
+IvyData renderStat(HTTPContext ctx)
 {
 	import std.json: JSONValue;
 	import std.conv: to;
@@ -23,7 +23,7 @@ TDataNode renderStat(HTTPContext ctx)
 	formDataToStruct(ctx.request.bodyForm, select);
 	JSONValue jSelect = select.toStdJSON();
 
-	return TDataNode([
+	return IvyData([
 		"select": jSelect.toIvyJSON(),
 		"data": ctx.mainServiceCall("stat.Data", ["select": jSelect])
 	]);

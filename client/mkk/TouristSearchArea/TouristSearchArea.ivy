@@ -2,72 +2,86 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Pagination import Pagination;
 from mkk.TouristPlainList import TouristPlainList;
+def LabeledInput {=
+	def.kv caption field placeholder;
+	def.body noscope{*
+	<label class="{=cls 'addrElementItem'} form-group row">
+		<span class="{=cls 'addrElementLabel'} col-sm-2 col-md-3 col-form-label">{{caption}}</span>
+		<div class="col-sm-10 col-md-9">
+			<input type="text"
+				placeholder="{{placeholder}}"
+				maxlength="15"
+				class="{=cls field ~ ' e-addrElementFilter'} form-control"/>
+		</div>
+	</label>
+	*}
+};
 def TouristSearchArea {=
 	def.kv
 		moduleName: 'mkk/TouristSearchArea/TouristSearchArea'
 		instanceName: 'touristSearchArea'
-		cssBaseClass: 'mkk-TouristSearchArea';
+		cssBaseClass: 'mkk-TouristSearchArea'
+		visible: true
+		addrFiltersCollapsed: true;
 	def.body {*
 	<!-- Диалог поиска туристов -->
-	<div class="{=cls 'block'}" title="Поиск туристов" data-fir-module="{{moduleName}}">
+	<div
+		class="{=cls 'block'}"
+		title="Поиск туристов"
+		data-fir-module="{{moduleName}}"
+		style="{=if visible == false 'display: none;'}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<div class="{=cls 'filterItem'} form-inline">
-			<label>
-				<span class="mr-2">Имя</span>
+		<label class="{=cls 'filterItem'} form-group row form-inline">
+			<span class="col-sm-2 col-md-3 col-form-label">ФИО</span>
+			<div class="col-sm-10 col-md-9">
 				<input type="text"
 					placeholder="Петечкин"
 					class="{=cls 'familyFilter'} form-control">
-			</label>
-			<input type="text"
-				placeholder="В"
-				size="1"
-				maxlength="1"
-				class="{=cls 'nameFilter'} form-control">
-			<input type="text"
-				placeholder="И"
-				size="1"
-				maxlength="1"
-				class="{=cls 'patronymicFilter'} form-control">
-		</div>
-		<div class="{=cls 'filterItem'} form-inline">
-			<label>
-				<span class="mr-2">Год рожд.</span>
+				<input type="text"
+					placeholder="В"
+					size="1"
+					maxlength="1"
+					class="{=cls 'nameFilter'} form-control">
+				<input type="text"
+					placeholder="И"
+					size="1"
+					maxlength="1"
+					class="{=cls 'patronymicFilter'} form-control">
+			</div>
+		</label>
+		<label class="{=cls 'filterItem'} form-group row form-inline">
+			<span class="col-sm-2 col-md-3 col-form-label">Год рожд.</span>
+			<div class="col-sm-10 col-md-9">
 				<input type="text"
 					placeholder="1812"
 					size="4"
 					maxlength="4"
 					class="{=cls 'yearFilter'} form-control">
-			</label>
-		</div>
+			</div>
+		</label>
 
 		<fieldset class="{=cls 'addrFilterPanel'}">
-			<legend>Адрес</legend>
-			<div class="{=cls 'addrElementItem'}">
-				<label class="{=cls 'addrElementLabel'}">Область</label>
-				<input type="text"
-					placeholder="Ярославская"
-					size="15"
-					maxlength="15"
-					class="{=cls 'regionFilter e-addrElementFilter'} form-control">
-			</div>
-			<div class="{=cls 'addrElementItem'}">
-				<label class="{=cls 'addrElementLabel'}">Нас. пункт</label>
-				<input type="text"
-					placeholder="Рыбинск"
-					size="15"
-					maxlength="15"
-					class="{=cls 'cityFilter e-addrElementFilter'} form-control">
-			</div>
-			<div class="{=cls 'addrElementItem'}">
-				<label class="{=cls 'addrElementLabel'}">Улица</label>
-				<input type="text"
-					placeholder="Строителей"
-					size="15"
-					maxlength="15"
-					class="{=cls 'streetFilter e-addrElementFilter'} form-control">
+			<legend
+				title="Показать/ скрыть"
+				class="{=cls 'addrFilterToggleBtn'}"
+				>Доп. фильтры <span class="{=cls 'addrFilterArrow'} is-collapsed"></span></legend>
+			<div class="{=cls 'addrFilterContent'} is-collapsed">
+				{%
+					LabeledInput
+						caption: 'Область'
+						field: 'regionFilter'
+						placeholder: 'Ярославская';
+					LabeledInput
+						caption: 'Нас. пункт'
+						field: 'cityFilter'
+						placeholder: 'Рыбинск';
+					LabeledInput
+						caption: 'Улица'
+						field: 'streetFilter'
+						placeholder: 'Строителей';
+				}
 			</div>
 		</fieldset>
-		<div style='clear: both;'></div>
 		<button type="button" class="{=cls 'searchBtn'} btn btn-primary">Искать!</button>
 		<div class="{=cls 'searchResultsPanel'}">
 			<h5>Найденные туристы</h5>

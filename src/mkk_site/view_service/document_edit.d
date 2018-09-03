@@ -17,7 +17,7 @@ import webtank.common.optional: Optional, Undefable;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-TDataNode documentEditController(HTTPContext ctx)
+IvyData documentEditController(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	auto req = ctx.request;
@@ -34,7 +34,7 @@ TDataNode documentEditController(HTTPContext ctx)
 		{
 			static immutable errorMsg2 = `<h3>Невозможно отобразить данные документа. Номер документа должен быть целым числом</h3>`;
 			Service.loger.error(errorMsg2);
-			return TDataNode(errorMsg2);
+			return IvyData(errorMsg2);
 		}
 	}
 
@@ -45,24 +45,24 @@ TDataNode documentEditController(HTTPContext ctx)
 	}
 }
 
-TDataNode renderEditDocument(HTTPContext ctx, Optional!size_t docNum)
+IvyData renderEditDocument(HTTPContext ctx, Optional!size_t docNum)
 {
 	import std.json: JSONValue;
 	import std.datetime: Clock, DateTime;
 
-	TDataNode callResult = ctx.mainServiceCall(`document.list`, [
+	IvyData callResult = ctx.mainServiceCall(`document.list`, [
 		"filter": JSONValue([
 			`nums`: docNum.isSet? [docNum.value]: null
 		]),
 		"nav": JSONValue() // Empty placeholder
 	]);
 
-	return ViewService.runIvyModule("mkk.DocumentEdit", ctx, TDataNode([
-		"document": (!callResult["rs"].empty? callResult["rs"][0]: TDataNode(null))
+	return ViewService.runIvyModule("mkk.DocumentEdit", ctx, IvyData([
+		"document": (!callResult["rs"].empty? callResult["rs"][0]: IvyData(null))
 	]));
 }
 
-TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum)
+IvyData writeDocument(HTTPContext ctx, Optional!size_t docNum)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -73,11 +73,11 @@ TDataNode writeDocument(HTTPContext ctx, Optional!size_t docNum)
 	DocumentDataToWrite inputDocData;
 	formDataToStruct(ctx.request.form, inputDocData);
 
-	TDataNode dataDict = [
-		"errorMsg": TDataNode(null),
-		"docNum": docNum.isSet? TDataNode(docNum.value): TDataNode(null),
-		"isUpdate": TDataNode(docNum.isSet),
-		"instanceName": TDataNode(ctx.request.form.get("instanceName", null))
+	IvyData dataDict = [
+		"errorMsg": IvyData(null),
+		"docNum": docNum.isSet? IvyData(docNum.value): IvyData(null),
+		"isUpdate": IvyData(docNum.isSet),
+		"instanceName": IvyData(ctx.request.form.get("instanceName", null))
 	];
 	try {
 		dataDict["docNum"] = ctx.mainServiceCall(`document.edit`, [`record`: inputDocData]).integer;

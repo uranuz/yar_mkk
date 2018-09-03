@@ -233,10 +233,11 @@ body {
 }
 
 /*начало: Для jQuery UI*/
-.ui-dialog, .ui-dialog-content {
-	-webkit-box-sizing: content-box!important;
-	-moz-box-sizing:content-box!important;
-	box-sizing: content-box!important;
+
+/* Некое исправление, чтобы содержимое не выпирало за пределы диалога */
+body .ui-dialog-content.ui-widget-content {
+	max-width: 100% !important;
+	max-height: calc(100% - 42px) !important;
 }
 
 .ui-dialog .ui-button-icon-only .ui-button-text {

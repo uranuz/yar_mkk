@@ -18,7 +18,7 @@ import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
 @IvyModuleAttr(`mkk.PohodList`)
-TDataNode renderPohodList(HTTPContext ctx)
+IvyData renderPohodList(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE;
 	import std.conv: to, ConvException;
@@ -39,22 +39,22 @@ TDataNode renderPohodList(HTTPContext ctx)
 		nav.pageSize = 10000;
 	}
 
-	TDataNode callResult = ctx.mainServiceCall("pohod.list", [
+	IvyData callResult = ctx.mainServiceCall("pohod.list", [
 		"filter": filter,
 		"nav": nav.toStdJSON()
 	]);
-	return TDataNode([
+	return IvyData([
 		"pohodList": callResult["rs"],
 		"pohodNav": callResult["nav"],
 		// Возвращаем поля фильтрации назад пользователю
 		"filter": filter.toIvyJSON(),
 		"pohodEnums": ctx.mainServiceCall("pohod.enumTypes"),
-		"isForPrint": TDataNode(isForPrint)
+		"isForPrint": IvyData(isForPrint)
 	]);
 }
 
 @IvyModuleAttr(`mkk.PohodList.PartyInfo`)
-TDataNode renderPartyInfo(HTTPContext ctx)
+IvyData renderPartyInfo(HTTPContext ctx)
 {
 	import std.conv: to;
 	size_t pohodNum = ctx.request.queryForm.get("num", "0").to!size_t;
@@ -62,13 +62,13 @@ TDataNode renderPartyInfo(HTTPContext ctx)
 }
 
 @IvyModuleAttr(`mkk.PohodEdit.ExtraFileLinksEdit.LinkItems`)
-TDataNode renderExtraFileLinks(HTTPContext ctx)
+IvyData renderExtraFileLinks(HTTPContext ctx)
 {
 	import std.json: JSONValue, JSON_TYPE, parseJSON;
 	import std.conv: to;
 	import std.base64: Base64;
 
-	TDataNode dataDict;
+	IvyData dataDict;
 	if( "num" in ctx.request.queryForm ) {
 		// Если есть ключ похода, то берем ссылки из похода
 		size_t pohodNum = ctx.request.queryForm.get("num", "0").to!size_t;
@@ -82,7 +82,7 @@ TDataNode renderExtraFileLinks(HTTPContext ctx)
 			throw new Exception(`Некорректный формат списка ссылок на доп. материалы`);
 		}
 
-		TDataNode[] linkList;
+		IvyData[] linkList;
 		if( extraFileLinks.type == JSON_TYPE.ARRAY ) {
 			linkList.length = extraFileLinks.array.length;
 			foreach( size_t i, ref JSONValue entry; extraFileLinks ) {

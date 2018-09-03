@@ -18,7 +18,7 @@ shared static this() {
 	ViewService.pageRouter.join!(touristEditController)("/dyn/tourist/edit");
 }
 
-TDataNode touristEditController(HTTPContext ctx)
+IvyData touristEditController(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	auto req = ctx.request;
@@ -35,7 +35,7 @@ TDataNode touristEditController(HTTPContext ctx)
 		{
 			static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер туриста должен быть целым числом</h3>`;
 			Service.loger.error(errorMsg2);
-			return TDataNode(errorMsg2);
+			return IvyData(errorMsg2);
 		}
 	}
 
@@ -46,14 +46,14 @@ TDataNode touristEditController(HTTPContext ctx)
 	}
 }
 
-TDataNode renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
+IvyData renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
-	return ViewService.runIvyModule("mkk.TouristEdit", ctx, TDataNode([
+	return ViewService.runIvyModule("mkk.TouristEdit", ctx, IvyData([
 		"tourist": ctx.mainServiceCall(`tourist.read`, [`touristNum`: touristNum])
 	]));
 }
 
-TDataNode writeTourist(HTTPContext ctx)
+IvyData writeTourist(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -65,11 +65,11 @@ TDataNode writeTourist(HTTPContext ctx)
 	TouristDataToWrite record;
 	formDataToStruct(ctx.request.form, record);
 
-	TDataNode dataDict = [
-		"errorMsg": TDataNode(null),
+	IvyData dataDict = [
+		"errorMsg": IvyData(null),
 		"touristNum": (record.num.isSet?
-			TDataNode(record.num.value): TDataNode(null)),
-		"isUpdate": TDataNode(record.num.isSet)
+			IvyData(record.num.value): IvyData(null)),
+		"isUpdate": IvyData(record.num.isSet)
 	];
 	try {
 		dataDict["touristNum"] = ctx.mainServiceCall(`tourist.edit`, [`record`: record]).integer;

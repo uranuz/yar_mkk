@@ -1,29 +1,20 @@
 .mkk-TouristSearchArea {
-	&.e-filterItem {
-		padding: 2px 0 6px 0;
-	}
 	&.e-addrFilterPanel {
 		display: block;
-		float: left;
-		clear: both;
 		padding: 6px 8px 6px 8px;
 		margin: 8px 0 8px 0;
 	}
-	&.e-addrElementItem {
-		display: block;
-		clear: both;
-		text-align: right;
-		padding: 3px 0 2px 0;
-	}
-	&.e-addrElementLabel {
-		display: inline-block;
-		float: left;
-		padding: 4px 10px 0 0;
-	}
-	&.e-addrElementFilter {
-		display: inline-block;
-	}
 	&.e-searchResultsPanel {
 		margin-top: 15px;
+	}
+	&.e-addrFilterArrow::before {
+		display: inline-block;
+		content: '▲';
+	}
+	&.e-addrFilterArrow.is-collapsed::before {
+		content: '▼';
+	}
+	&.e-addrFilterContent.is-collapsed {
+		display: none;
 	}
 }

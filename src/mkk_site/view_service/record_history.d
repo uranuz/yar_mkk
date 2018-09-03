@@ -21,7 +21,7 @@ import mkk_site.history.common;
 import mkk_site.data_model.common: Navigation;
 
 @IvyModuleAttr(`mkk.RecordHistory`)
-TDataNode renderRecordHistory(HTTPContext ctx)
+IvyData renderRecordHistory(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.exception: ifThrown, enforce;
@@ -47,13 +47,13 @@ TDataNode renderRecordHistory(HTTPContext ctx)
 	Navigation nav;
 	formDataToStruct(bodyForm, nav);
 
-	TDataNode callResult = ctx.endpoint(`yarMKKHistory`).remoteCall!(TDataNode)("history." ~ method, [
+	IvyData callResult = ctx.endpoint(`yarMKKHistory`).remoteCall!(IvyData)("history." ~ method, [
 		"filter": pohodFilter.toStdJSON(),
 		"nav": nav.toStdJSON()
 	]);
 
-	return TDataNode([
+	return IvyData([
 		"history": callResult,
-		"objectName": TDataNode("pohod" == method? "поход": "турист")
+		"objectName": IvyData("pohod" == method? "поход": "турист")
 	]);
 }

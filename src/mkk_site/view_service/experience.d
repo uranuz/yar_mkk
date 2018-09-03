@@ -16,7 +16,7 @@ import webtank.common.std_json.to: toStdJSON;
 import mkk_site.data_model.common: Navigation;
 
 @IvyModuleAttr(`mkk.Experience`)
-TDataNode renderExperience(HTTPContext ctx)
+IvyData renderExperience(HTTPContext ctx)
 {
 	import std.json;
 	import std.conv: to, ConvException;

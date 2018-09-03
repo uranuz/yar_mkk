@@ -17,7 +17,7 @@ import webtank.common.optional: Optional, Undefable;
 import webtank.net.deserialize_web_form: formDataToStruct;
 import webtank.common.std_json.to: toStdJSON;
 
-TDataNode pohodEditController(HTTPContext ctx)
+IvyData pohodEditController(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 
@@ -32,7 +32,7 @@ TDataNode pohodEditController(HTTPContext ctx)
 		{
 			static immutable errorMsg2 = `<h3>Невозможно отобразить данные похода. Номер похода должен быть целым числом</h3>`;
 			Service.loger.error(errorMsg2);
-			return TDataNode(errorMsg2);
+			return IvyData(errorMsg2);
 		}
 	}
 
@@ -43,17 +43,17 @@ TDataNode pohodEditController(HTTPContext ctx)
 	}
 }
 
-TDataNode renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
+IvyData renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
-	return ViewService.runIvyModule("mkk.PohodEdit", ctx, TDataNode([
+	return ViewService.runIvyModule("mkk.PohodEdit", ctx, IvyData([
 		"pohod": ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]),
 		"extraFileLinks": ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]),
 		"partyList": ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum]),
-		"authRedirectURI": TDataNode(getAuthRedirectURI(ctx))
+		"authRedirectURI": IvyData(getAuthRedirectURI(ctx))
 	]));
 }
 
-TDataNode writePohod(HTTPContext ctx)
+IvyData writePohod(HTTPContext ctx)
 {
 	import std.conv: to, ConvException;
 	import std.algorithm: splitter, map, all;
@@ -64,11 +64,11 @@ TDataNode writePohod(HTTPContext ctx)
 
 	PohodDataToWrite record;
 	formDataToStruct(ctx.request.form, record);
-	TDataNode dataDict = [
-		"errorMsg": TDataNode(null),
+	IvyData dataDict = [
+		"errorMsg": IvyData(null),
 		"pohodNum": (record.num.isSet?
-			TDataNode(record.num.value): TDataNode(null)),
-		"isUpdate": TDataNode(record.num.isSet)
+			IvyData(record.num.value): IvyData(null)),
+		"isUpdate": IvyData(record.num.isSet)
 	];
 	try {
 		dataDict["pohodNum"] = ctx.mainServiceCall(`pohod.edit`, [`record`: record]).integer;

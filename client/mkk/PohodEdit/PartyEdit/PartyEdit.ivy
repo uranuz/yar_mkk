@@ -17,7 +17,7 @@ def PartyEdit {=
 				<button type="button" class="{=cls 'acceptBtn'} btn btn-primary btn-secondary">Сохранить</button>
 			</div>
 			<div class="{=cls 'selectMessage'}"></div>
-			<div class="{=cls 'panelsArea'}">
+			<div class="{=cls 'panelsArea'} container-fluid">
 				<div class="{=cls 'searchPanel'}">
 					<h5>Поиск туристов</h5>
 					<div class="{=cls 'searchBlock'}">

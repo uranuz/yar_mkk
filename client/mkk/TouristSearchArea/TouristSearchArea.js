@@ -19,29 +19,36 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 		var self = this;
 
 		this._resultsPanel = this._elems('searchResultsPanel');
+		this._addrFilterContent = this._elems('addrFilterContent');
+		this._addrFilterArrow = this._elems('addrFilterArrow');
 		this._pagination = this.findInstanceByName(this.instanceName() + 'Pagination');
 		this._touristList = this.findInstanceByName(this.instanceName() + 'List');
 
-		this._elems('searchBtn').on('click', this.onSearchTourists_BtnClick.bind(this));
+		this._elems('searchBtn').on('click', this._onSearchTourists_BtnClick.bind(this));
+		this._elems('addrFilterToggleBtn').on('click', this.setAddrFiltersCollapsed.bind(this, null));
 
-		this._pagination.subscribe('onSetCurrentPage', this.onSearchTourists.bind(this));
-		this._touristList.subscribe('onTouristListLoaded', this.onTouristLoaded.bind(this));
+		this._pagination.subscribe('onSetCurrentPage', this._onSearchTourists.bind(this));
+		this._touristList.subscribe('onTouristListLoaded', this._onTouristLoaded.bind(this));
 		this._touristList.subscribe('itemActivated', function(ev, rec) {
 			self._notify('itemSelect', rec);
 		});
-
-		this._elems('block').hide();
+		this.setAddrFiltersCollapsed(opts.addrFiltersCollapsed);
 	}
 
 	return __mixinProto(TouristSearchArea, {
-		/** Тык по кнопке поиска туристов  */
-		onSearchTourists_BtnClick: function() {
+		setAddrFiltersCollapsed: function(val) {
+			this._addrFilterContent.toggleClass('is-collapsed', val);
+			this._addrFilterArrow.toggleClass('is-collapsed', val);
+		},
+
+		/** Тык по кнопке поиска туристов */
+		_onSearchTourists_BtnClick: function() {
 			this._pagination.setCurrentPage(0);
-			//this.onSearchTourists(); //Переход к действию по кнопке Искать
+			//this._onSearchTourists(); //Переход к действию по кнопке Искать
 		},
 
 		/** Поиск туристов и отображение результата в диалоге */
-		onSearchTourists: function() {
+		_onSearchTourists: function() {
 			this._touristList.setFilter({
 				familyName: this._elems("familyFilter").val() || undefined, 
 				givenName: this._elems("nameFilter").val() || undefined,
@@ -58,7 +65,7 @@ define('mkk/TouristSearchArea/TouristSearchArea', [
 			this._touristList._reloadControl();
 		},
 
-		onTouristLoaded: function(ev, rs, nav) {
+		_onTouristLoaded: function(ev, rs, nav) {
 			var
 				self = this,
 				rec,

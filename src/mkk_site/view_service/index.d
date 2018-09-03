@@ -14,14 +14,14 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.IndexPage`)
-TDataNode renderIndex(HTTPContext ctx)
+IvyData renderIndex(HTTPContext ctx)
 {
-	return TDataNode([
+	return IvyData([
 		"pohodList": ctx.mainServiceCall("pohod.recentList")
 	]);
 }
 
 @IvyModuleAttr(`mkk.AboutSite`)
-TDataNode renderAboutSite(HTTPContext ctx) {
-	return TDataNode();
+IvyData renderAboutSite(HTTPContext ctx) {
+	return IvyData();
 }

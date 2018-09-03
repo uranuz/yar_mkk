@@ -24,16 +24,19 @@
 				"src/mkk_site/history/client"
 			],
 			"dependencies": {
-				"webtank": ">=0.0.0",
-				"openssl": ">=0.0.0"
+				"webtank": ">=0.0.0"
 			},
 			"lflags": [
 				"lib/libtarsnap.a",
+				"lib/libscrypt_sse2.a",
 				"--demangle=dlang"
 			],
 			"buildRequirements": [
 				"allowWarnings"
 			],
+			"subConfigurations": {
+				"webtank": "with_ivy_and_db"
+			},
 			"versions": ["devel"]
 		},
 		{
@@ -41,8 +44,7 @@
 			"targetType": "executable",
 			"targetPath": "bin",
 			"dependencies": {
-				"webtank": ">=0.0.0",
-				"ivy": ">=0.0.0"
+				"webtank": ">=0.0.0"
 			},
 			"sourcePaths": [
 				"src/mkk_site/common",

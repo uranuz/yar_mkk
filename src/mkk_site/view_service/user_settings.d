@@ -13,12 +13,12 @@ import webtank.net.http.handler;
 import webtank.net.http.context;
 
 @IvyModuleAttr(`mkk.UserSettings`)
-TDataNode renderUserSettings(HTTPContext ctx)
+IvyData renderUserSettings(HTTPContext ctx)
 {
-	TDataNode dataDict = [
-		`userFullName`: TDataNode(ctx.user.name),
-		`userLogin`: TDataNode(ctx.user.id),
-		`pwChangeMessage`: TDataNode(null)
+	IvyData dataDict = [
+		`userFullName`: IvyData(ctx.user.name),
+		`userLogin`: IvyData(ctx.user.id),
+		`pwChangeMessage`: IvyData(null)
 	];
 
 	try

@@ -1,0 +1,21 @@
+expr {=
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, firScopeOpts, isInRoles;
+from mkk.TouristSearchArea import TouristSearchArea;
+def UserRegFindTourist {=
+	def.kv
+		moduleName: "mkk/UserReg/FindTourist/FindTourist"
+		instanceName: 'userRegFindTourist'
+		cssBaseClass: 'mkk-UserRegFindTourist';
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: []}"/>
+		<h2>Регистрация пользователя</h2>
+		<form method="post" action="#" class="form">
+			{=TouristSearchArea instanceName: 'touristSelectArea'}
+			<a href="/dyn/user/reg" class="btn btn-secondary">Не нашёл себя, ввести данные вручную</a>
+		</form>
+	</div>
+	*}
+};
+UserRegFindTourist
+}

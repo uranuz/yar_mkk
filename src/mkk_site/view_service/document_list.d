@@ -18,7 +18,7 @@ import webtank.common.std_json.to: toStdJSON;
 import mkk_site.data_model.document;
 
 @IvyModuleAttr("mkk.DocumentList")
-TDataNode documentListController(HTTPContext ctx)
+IvyData documentListController(HTTPContext ctx)
 {
 	import std.json;
 	import std.conv: to;
@@ -30,12 +30,12 @@ TDataNode documentListController(HTTPContext ctx)
 	formDataToStruct(bodyForm, nav);
 
 	JSONValue jFilter = filter.toStdJSON();
-	TDataNode callResult = ctx.mainServiceCall("document.list", [
+	IvyData callResult = ctx.mainServiceCall("document.list", [
 		"filter": jFilter,
 		"nav": nav.toStdJSON()
 	]);
 
-	return TDataNode([
+	return IvyData([
 		"filter": jFilter.toIvyJSON(),
 		"documentList": callResult["rs"],
 		"nav": callResult["nav"]
