@@ -65,7 +65,7 @@ def TouristEdit {=
 		instanceName: 'touristEdit'
 		cssBaseClass: 'mkk-TouristEdit'
 		accessObject: 'tourist.item'
-		tourist: tourist
+		tourist: null
 		isEditDialog: true
 		isNewUserDialog: false;
 	def.body {*

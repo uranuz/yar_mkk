@@ -2,12 +2,14 @@ expr {=
 from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, firScopeOpts, isInRoles;
 from mkk.TouristSearchArea import TouristSearchArea;
 from mkk.TouristEdit import TouristEdit;
+from mkk.UserReg.Results import UserRegResults;
 def UserReg {=
 	def.kv
 		moduleName: "mkk/UserReg/UserReg"
 		instanceName: 'userReg'
 		cssBaseClass: 'mkk-UserReg'
-		accessObject: 'pohod.item';
+		accessObject: 'pohod.item'
+		tourist: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: []}"/>
@@ -51,5 +53,18 @@ def UserReg {=
 	</div>
 	*}
 };
-UserReg
+def UserRegSwitch {=
+	def.kv
+		tourist: null
+		touristNum: null
+		userNum: null
+		errorMsg: null;
+	def.body {=
+		if errorMsg or userNum {=
+			UserRegResults errorMsg: errorMsg touristNum: touristNum
+		} else {=
+			UserReg tourist: tourist
+		}
+	}
+}
 }

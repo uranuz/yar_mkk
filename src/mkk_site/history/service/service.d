@@ -6,9 +6,9 @@ import mkk_site.common.service;
 class MKKHistoryService: JSON_RPCService
 {
 	import mkk_site.security.common.access_control_client: MKKAccessControlClient;
-	import mkk_site.security.common.access_rules: makeCoreAccessRules;
 	import webtank.security.right.controller: AccessRightController;
 	import webtank.security.right.remote_source: RightRemoteSource;
+	import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 	import std.functional: toDelegate;
 
 	this(string serviceName)
@@ -16,7 +16,7 @@ class MKKHistoryService: JSON_RPCService
 		super(serviceName,
 			new MKKAccessControlClient(),
 			new AccessRightController(
-				makeCoreAccessRules(),
+				new IvyAccessRuleFactory(this),
 				new RightRemoteSource(this, `yarMKKMain`, `accessRight.list`)
 			)
 		);

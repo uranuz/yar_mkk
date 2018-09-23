@@ -1,6 +1,12 @@
 expr {=
-def CheckSomething {=
-	def.kv data;
+def Allow {=
+	def.kv identity data;
+	def.body {=
+		return true;
+	}
+};
+def CheckNewUser {=
+	def.kv identity data;
 	def.body {=
 		return true;
 	}

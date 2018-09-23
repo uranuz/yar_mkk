@@ -24,6 +24,7 @@ Result mainServiceCall(Result = IvyData, T...)(HTTPContext ctx, string rpcMethod
 // Аттрибут, который говорит, что данные возвращаемые методом нужно передать в шаблон
 struct IvyModuleAttr {
 	string moduleName;
+	string dirName;
 }
 
 import std.traits: ReturnType, Parameters;
@@ -57,7 +58,15 @@ template join(alias Method)
 				import std.datetime.stopwatch: StopWatch, AutoStart;
 				auto ivyResSW = StopWatch(AutoStart.yes);
 			}
-			auto ivyRes = ViewService.runIvyModule(modAttr[0].moduleName, context, methodRes);
+
+			IvyData ivyRes;
+			if( modAttr[0].dirName.length == 0 ) {
+				ivyRes = ViewService.runIvyModule(modAttr[0].moduleName, context, methodRes);
+			} else {
+				ivyRes = ViewService
+					.runIvySaveState(modAttr[0].moduleName, context)
+					.runModuleDirective(modAttr[0].dirName, methodRes);
+			}
 			debug {
 				ivyResSW.stop();
 				writeln(`Run ivy module: `, modAttr[0].moduleName, ` duration: `, ivyResSW.peek());

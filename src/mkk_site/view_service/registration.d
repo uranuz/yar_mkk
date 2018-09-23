@@ -19,7 +19,7 @@ IvyData findTourist(HTTPContext ctx)
 	return IvyData();
 }
 
-@IvyModuleAttr(`mkk.UserReg`)
+@IvyModuleAttr(`mkk.UserReg`, `UserRegSwitch`)
 IvyData userReg(HTTPContext ctx)
 {
 	import std.conv: ConvException, to;
@@ -40,16 +40,21 @@ IvyData userReg(HTTPContext ctx)
 		formDataToStruct(req.form, touristData);
 		formDataToStruct(req.form, userData);
 
-		ctx.mainServiceCall(`user.register`, [
-			`touristData`: touristData.toStdJSON(),
-			`userData`: userData.toStdJSON()
-		]);
-	} else {
-		return IvyData([
-			"tourist": ctx.mainServiceCall(`tourist.read`, [
-				`touristNum`: (touristNum.isSet? JSONValue(touristNum): JSONValue())
-			])
-		]);
+		IvyData writeRes;
+		try {
+			writeRes = ctx.mainServiceCall(`user.register`, [
+				`touristData`: touristData.toStdJSON(),
+				`userData`: userData.toStdJSON()
+			]);
+			writeRes[`errorMsg`] = IvyData();
+		} catch(Exception ex) {
+			writeRes[`errorMsg`] = ex.msg;
+		}
+		return writeRes;
 	}
-	return IvyData();
+	return IvyData([
+		"tourist": ctx.mainServiceCall(`tourist.read`, [
+			`touristNum`: (touristNum.isSet? JSONValue(touristNum): JSONValue())
+		])
+	]);
 }

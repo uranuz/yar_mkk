@@ -3,11 +3,11 @@ module mkk_site.main_service.service;
 import webtank.net.service.json_rpc_service: JSON_RPCService;
 import mkk_site.common.service;
 import webtank.ivy.service_mixin: IvyServiceMixin, IIvyServiceMixin;
+import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 
 class MKKMainService: JSON_RPCService, IIvyServiceMixin
 {
 	import mkk_site.security.core.access_control: MKKMainAccessController;
-	import mkk_site.security.common.access_rules: makeCoreAccessRules;
 	import webtank.security.right.controller: AccessRightController;
 	import webtank.security.right.db_source: RightDatabaseSource;
 	import std.functional: toDelegate;
@@ -19,7 +19,7 @@ class MKKMainService: JSON_RPCService, IIvyServiceMixin
 		super(serviceName,
 			new MKKMainAccessController(toDelegate(&getAuthDB)),
 			new AccessRightController(
-				makeCoreAccessRules(),
+				new IvyAccessRuleFactory(this),
 				new RightDatabaseSource(toDelegate(&getAuthDB))
 			)
 		);

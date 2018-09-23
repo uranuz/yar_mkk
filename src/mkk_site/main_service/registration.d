@@ -16,8 +16,8 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(regUser)(`user.register`);
 }
 
-
-void regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
+import std.json: JSONValue;
+JSONValue regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 {
 	import webtank.db.transaction: makeTransaction;
 	auto trans = getAuthDB().makeTransaction();
@@ -36,14 +36,14 @@ void regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userDa
 		nameParts ~= touristData.patronymic.value;
 	}
 	
-	size_t userId = registerUser!(getAuthDB)(
+	size_t userNum = registerUser!(getAuthDB)(
 		userData.login,
 		userData.password,
 		nameParts.join(` `),
 		touristData.email
 	);
 
-	addUserRoles!(getAuthDB)(userId, [`new_user`]);
+	addUserRoles!(getAuthDB)(userNum, [`new_user`]);
 
 	ctx.user = MainService.accessController.authenticateByPassword(
 		userData.login,
@@ -52,5 +52,8 @@ void regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userDa
 		ctx.request.headers[`user-agent`]
 	);
 
-	editTourist(ctx, touristData);
+	return JSONValue([
+		"touristNum":  editTourist(ctx, touristData),
+		"userNum": userNum
+	]);
 }
