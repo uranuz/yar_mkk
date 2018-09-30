@@ -6,6 +6,7 @@ import mkk_site.view_service.utils;
 shared static this() {
 	ViewService.pageRouter.join!(findTourist)("/dyn/user/reg/find_tourist");
 	ViewService.pageRouter.join!(userReg)("/dyn/user/reg");
+	ViewService.pageRouter.join!(emailConfirm)("/dyn/user/reg/email_confirm");
 }
 
 import ivy;
@@ -56,5 +57,13 @@ IvyData userReg(HTTPContext ctx)
 		"tourist": ctx.mainServiceCall(`tourist.read`, [
 			`touristNum`: (touristNum.isSet? JSONValue(touristNum): JSONValue())
 		])
+	]);
+}
+
+@IvyModuleAttr(`mkk.UserReg.EmailConfirm`, `EmailConfirm`)
+IvyData emailConfirm(HTTPContext ctx)
+{
+	return ctx.mainServiceCall(`user.confirmEmail`, [
+		`confirmUUID`: ctx.request.form.get(`uuid`, null)
 	]);
 }

@@ -16,12 +16,13 @@ import mkk_site.security.core.crypto;
 
 enum uint minLoginLength = 3;  //Минимальная длина логина
 enum uint minPasswordLength = 8;  //Минимальная длина пароля
+enum size_t sessionLifetime = 180; //Время жизни сессии в минутах
+enum size_t emailConfirmDaysLimit = 3;  // Время на подтверждение адреса электронной почты пользователем
 
 /// Класс управляет выдачей билетов для доступа
 class MKKMainAccessController: IAccessController
 {
 protected:
-	static immutable size_t _sessionLifetime = 180; //Время жизни сессии в минутах
 	IDatabase delegate() _getAuthDB;
 
 public:
@@ -34,9 +35,14 @@ public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{
-		if( auto httpCtx = cast(HTTPContext) context ) {
+		//debug import std.stdio: writeln;
+		//debug writeln(`TRACE authenticate 1`);
+		if( auto httpCtx = cast(HTTPContext) context )
+		{
+			//debug writeln(`TRACE authenticate 2`);
 			return authenticateSession(httpCtx);
 		}
+		//debug writeln(`TRACE authenticate 2`);
 		return new AnonymousUser;
 	}
 
@@ -44,27 +50,36 @@ public:
 	///Возвращает удостоверение пользователя
 	IUserIdentity authenticateSession(HTTPContext context)
 	{
+		//debug import std.stdio: writeln;
+		import std.conv: text;
 		auto req = context.request;
 		string SIDString = req.cookies.get("__sid__", null);
 
+		//debug writeln(`TRACE authenticateSession 1`);
 		if( SIDString.length != sessionIdStrLength )
 			return new AnonymousUser;
+		//debug writeln(`TRACE authenticateSession 2`);
 
 		SessionId sessionId;
 		Base64URL.decode(SIDString, sessionId[]);
 
 		if( sessionId == SessionId.init )
 			return new AnonymousUser;
+		//debug writeln(`TRACE authenticateSession 3`);
 
 		//Делаем запрос к БД за информацией о сессии
 		auto sidQueryRes = _getAuthDB().query(
 			//Получим адрес машины и тип клиентской программы, если срок действия не истек или ничего
-			`select client_address, user_agent from session where sid = '`
-			~ Base64URL.encode(sessionId) ~ `' and current_timestamp < "expires";`
+`select client_address, user_agent
+from session
+where
+	sid = '` ~ Base64URL.encode(sessionId) ~ `'
+	and current_timestamp at time zone 'UTC' <= (created + '` ~ sessionLifetime.text ~ ` minutes')`
 		);
 
 		if( sidQueryRes.recordCount != 1 || sidQueryRes.fieldCount != 2 )
 			return new AnonymousUser;
+		//debug writeln(`TRACE authenticateSession 4`);
 
 		//Проверяем адрес и клиентскую программу с имеющимися при создании сессии
 		if(
@@ -73,6 +88,7 @@ public:
 		) {
 			return new AnonymousUser;
 		}
+		//debug writeln(`TRACE authenticateSession 5`);
 
 		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
@@ -87,23 +103,25 @@ public:
 		//Делаем запрос к БД за информацией о пользователе
 		auto userRS = _getAuthDB().query(
 `select
-	U.num, U.email, U.login, U.name,
+	su.num, su.email, su.login, su.name,
 	to_json(coalesce(
 		array_agg(R.name) filter(where nullif(R.name, '') is not null), ARRAY[]::text[]
 	)) "roles"
 from session
-join site_user U
-	on U.num = site_user_num
+join site_user su
+	on su.num = site_user_num
 left join user_access_role UR
-	on UR.user_num = U.num
+	on UR.user_num = su.num
 left join access_role R
 	on R.num = UR.role_num
 where session.sid = '` ~ Base64URL.encode(sessionId) ~ `'
-group by U.num, U.email, U.login, U.name`
+	and su.is_blocked is not true
+group by su.num, su.email, su.login, su.name`
 		).getRecordSet(userDataRecFormat);
 
 		if( !userRS.length )
 			return new AnonymousUser;
+		//debug writeln(`TRACE authenticateSession 6`);
 		auto userRec = userRS.front;
 
 		string[string] userData = [
@@ -148,17 +166,18 @@ group by U.num, U.email, U.login, U.name`
 		//Делаем запрос к БД за информацией о пользователе
 		auto userRS = _getAuthDB().query(
 `select
-	U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email,
+	su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email,
 	to_json(coalesce(
 		array_agg(R.name) filter(where nullif(R.name, '') is not null), ARRAY[]::text[]
 	)) "roles"
-from site_user U
+from site_user su
 left join user_access_role UR
-	on UR.user_num = U.num
+	on UR.user_num = su.num
 left join access_role R
 	on R.num = UR.role_num
 where login = '` ~ PGEscapeStr(login) ~ `'
-group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
+	and su.is_blocked is not true
+group by su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email`
 		).getRecordSet(userPwDataRecFormat);
 
 		if( !userRS.length )
@@ -184,13 +203,17 @@ group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
 			SessionId sid = generateSessionId(login, rolesStr, Clock.currTime().toISOString());
 
 			auto newSIDStatusRes = _getAuthDB().query(
-				` insert into "session" `
-				~ ` ( "sid", "site_user_num", "expires", "client_address", "user_agent" ) `
-				~ ` values( '` ~ Base64URL.encode(sid) ~ `', ` ~ PGEscapeStr(userNum)
-				~ `, ( current_timestamp + interval '`
-				~ PGEscapeStr(_sessionLifetime.to!string) ~ ` minutes' ), `
-				~ `'` ~ PGEscapeStr(clientAddress) ~ `', '` ~ PGEscapeStr(userAgent) ~ `' ) `
-				~ ` returning 'authenticated';`
+`insert into "session" (
+	"sid", "site_user_num", "created", "client_address", "user_agent"
+)
+values(
+	'` ~ Base64URL.encode(sid) ~ `',
+	`  ~ PGEscapeStr(userNum) ~ `,
+	current_timestamp at time zone 'UTC',
+	'` ~ PGEscapeStr(clientAddress) ~ `',
+	'` ~ PGEscapeStr(userAgent) ~ `'
+)
+returning 'authenticated'`
 			);
 
 			if( newSIDStatusRes.recordCount != 1 )
@@ -209,6 +232,43 @@ group by U.num, U.pw_hash, U.pw_salt, U.reg_timestamp, U.name, U.email`
 		}
 
 		return new AnonymousUser;
+	}
+
+	// Эта обертка над authenticateByPassword получает некоторые параметры из контекста.
+	// Выполняет аутентификацию, устанавливает идентификатор сессии в Cookie запроса и ответа,
+	// устанавливает св-во user в контексте
+	IUserIdentity authenticateByPassword(HTTPContext ctx, string login, string password)
+	{
+		import std.base64: Base64URL;
+
+		IUserIdentity userIdentity = authenticateByPassword(
+			login,
+			password,
+			ctx.request.headers[`x-real-ip`],
+			ctx.request.headers[`user-agent`]
+		);
+		MKKUserIdentity mkkIdentity = cast(MKKUserIdentity) userIdentity;
+		if( mkkIdentity !is null )
+		{
+			string sidStr = Base64URL.encode(mkkIdentity.sessionId) ;
+			ctx.request.cookies[`__sid__`] = sidStr;
+			ctx.response.cookies[`__sid__`] = sidStr;
+		}
+		else
+		{
+			// Удаляем возможный старый __sid__, если не удалось получить
+			ctx.request.cookies[`__sid__`] = null;
+			ctx.response.cookies[`__sid__`] = null;
+		}
+		// Проставляем path (только для заголовка ответа), чтобы не было случайностей
+		ctx.response.cookies[`__sid__`].path = "/";
+
+		// Для удобства установим логин пользователя
+		ctx.request.cookies[`user_login`] = userIdentity.id;
+		ctx.response.cookies[`user_login`] = userIdentity.id;
+		ctx.response.cookies[`user_login`].path = "/";
+		ctx.user = userIdentity; 
+		return userIdentity;
 	}
 
 	bool logout(IUserIdentity userIdentity)

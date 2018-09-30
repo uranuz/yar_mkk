@@ -6,7 +6,7 @@ def UserRegResults {=
 	def.body {%
 		if {=empty errorMsg} {*
 			<h3>Регистрация пользователя выполнена успешно!!!</h3>
-			<div><a href="/dyn/tourist/read?num={{touristNum}}">Перейти к информации о туристе</a></div>
+			<div><a href="/dyn/tourist/experience?num={{touristNum}}">Перейти к информации о туристе</a></div>
 			<div><a href="/dyn/auth">Войти под пользователем</a></div>
 		*} else {*
 			<h3>Произошла ошибка при регистрации пользователя!!!</h3>

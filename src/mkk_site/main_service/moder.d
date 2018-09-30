@@ -32,6 +32,7 @@ join user_access_role uar
 join site_user su
 	on su.num = uar.user_num
 where ar.name in ('moder', 'admin')
+	and su.is_blocked is not true
 order by name
 `;
 

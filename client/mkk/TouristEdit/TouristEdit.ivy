@@ -106,16 +106,17 @@ def TouristEdit {=
 					}
 				</div>
 			</div>
-			{=if isEditDialog {%
-				LabeledInput caption: 'Адрес проживания' field: 'address';
+			{=if isEditDialog {=LabeledInput caption: 'Адрес проживания' field: 'address'} }
+			{=if isEditDialog {=
 				LabeledInput
 					caption: 'Номер телефона' field: 'phone'
 					appendix: {=ShowCheckBox field: 'showPhone'};
-				LabeledInput
-					caption: 'Электронная почта' field: 'email'
-					appendix: {=ShowCheckBox field: 'showEmail'};
-				LabeledInput caption: 'Туристский опыт' field: 'experience'
 			} }
+			{=LabeledInput
+				caption: 'Электронная почта' field: 'email'
+				appendix: {=ShowCheckBox field: 'showEmail'};
+			}
+			{=if isEditDialog {=LabeledInput caption: 'Туристский опыт' field: 'experience'} }
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label" for="commentField">Комментарий</label>
 				<div class="col-md-9">

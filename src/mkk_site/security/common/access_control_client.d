@@ -16,21 +16,29 @@ public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{
+		//debug import std.stdio: writeln;
 		auto httpCtx = cast(HTTPContext) context;
-		
-		if( httpCtx is null )
-			return new AnonymousUser;
-		else
+
+		//debug writeln(`TRACE authenticate 1`);
+		if( httpCtx !is null ) {
+			//debug writeln(`TRACE authenticate 2`);
 			return authenticateSession(httpCtx);
+		}
+		//debug writeln(`TRACE authenticate 3`);
+		return new AnonymousUser;
 	}
 
 	///Метод выполняет аутентификацию сессии для HTTP контекста
 	///Возвращает удостоверение пользователя
 	IUserIdentity authenticateSession(HTTPContext ctx)
 	{
+		//debug import std.stdio: writeln;
+		//debug writeln(`TRACE authenticateSession 1`);
 		import std.json: JSON_TYPE, JSONValue;
 		// Запрос получает минимальную информацию о пользователе по Ид. сессии в контексте
 		auto jUserInfo = ctx.endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`);
+
+		//debug writeln(`TRACE authenticateSession jUserInfo: `, jUserInfo);
 
 		import std.exception: enforce;
 		enforce(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
@@ -38,10 +46,11 @@ public:
 		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSON_TYPE.INTEGER ) {
 			return new AnonymousUser();
 		}
+		//debug writeln(`TRACE authenticateSession 2`);
 
 		import std.base64: Base64URL;
 		SessionId sid;
-		Base64URL.decode(ctx.request.cookies.get(`__sid__`, null), sid[]);
+		Base64URL.decode(ctx.request.cookies.get(`__sid__`), sid[]);
 
 		import std.algorithm: splitter, filter;
 		import std.array: array;
@@ -57,6 +66,7 @@ public:
 		if( auto it = `accessRoles` in jUserInfo ) {
 			accessRoles = it.type == JSON_TYPE.STRING? it.str.splitter(`;`).filter!( (it) => it.length > 0 ).array: null;
 		}
+		//debug writeln(`TRACE authenticateSession 3`);
 		return new MKKUserIdentity(login, name, accessRoles, /*data=*/null, sid);
 	}
 }

@@ -42,28 +42,13 @@ auto baseUserInfo(HTTPContext context)
 
 string authByPassword(HTTPContext context, string login, string password)
 {
-	import std.base64: Base64URL;
-	
-	auto userIdentity = cast(MKKUserIdentity) MainService.accessController.authenticateByPassword(
-		login,
-		password,
-		context.request.headers[`x-real-ip`],
-		context.request.headers[`user-agent`]
-	);
+	auto userIdentity = cast(MKKUserIdentity) MainService.accessController.authenticateByPassword(context, login, password);
 
 	if( !userIdentity || !userIdentity.isAuthenticated ) {
 		throw new SecurityException(`Failed to authenticate user by login and password`);
 	}
 
-	auto resp = context.response;
-	string sidStr = Base64URL.encode(userIdentity.sessionId) ;
-
-	resp.cookies["__sid__"] = sidStr;
-	resp.cookies["user_login"] = login;
-	resp.cookies["__sid__"].path = "/";
-	resp.cookies["user_login"].path = "/";
-
-	return sidStr;
+	return context.request.cookies.get(`__sid__`);
 }
 
 void logout(HTTPContext context)

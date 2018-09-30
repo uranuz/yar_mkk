@@ -1,0 +1,12 @@
+expr {=
+def EmailConfirm {=
+	def.kv
+		message: null;
+	def.body {*
+		<div>
+			<h2>Подтверждение электронной почты</h2>
+			<div>{{message}}</div>
+		</div>
+	*}
+}
+}

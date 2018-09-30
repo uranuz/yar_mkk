@@ -10,8 +10,12 @@ import webtank.common.conv: fromPGTimestamp;
 import webtank.net.utils: PGEscapeStr;
 import webtank.db.datctrl_joint: getRecordSet;
 import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
+import std.typecons: Tuple;
+import std.uuid: randomUUID, sha1UUID, UUID;
 
-size_t registerUser(alias getAuthDB)(string login, string password, string name, string email)
+alias RegUserResult = Tuple!(size_t, `userNum`, UUID, `confirmUUID`);
+
+RegUserResult registerUser(alias getAuthDB)(string login, string password, string name, string email)
 {
 	import std.utf: count;
 	import std.conv: text;
@@ -42,11 +46,28 @@ size_t registerUser(alias getAuthDB)(string login, string password, string name,
 		DateTime, "regTimestamp"
 	)();
 
+	// Генерируем UUID, который используется для ссылки подтверждения email
+	UUID confirmUUID = sha1UUID(randomUUID().toString(), sha1UUID(login));
+	string email_confirm_uuid = confirmUUID.toString();
+
+	import std.array: join;
+	string[] fieldNames;
+	string[] fieldValues;
+	static foreach( field; [`login`, `name`, `email`, `email_confirm_uuid`] )
+	{
+		fieldNames ~= field;
+		mixin(`fieldValues ~= "'" ~ PGEscapeStr(` ~ field ~ `) ~ "'";`);
+	}
+	
+	fieldNames ~= `reg_timestamp`;
+	fieldValues ~= `current_timestamp at time zone 'UTC'`;
+
+
 	// Сначала устанавливаем общую информацию о пользователе,
 	// и заставляем БД саму установить дату регистрации, чтобы не иметь проблем с временными зонами
 	auto addUserResult = getAuthDB().query(
-		`insert into site_user (login, name, email, reg_timestamp) `
-		~ ` values('` ~ PGEscapeStr(login) ~ `', '` ~ PGEscapeStr(name) ~ `', '` ~ PGEscapeStr(email) ~ `', current_timestamp) `
+		`insert into site_user (` ~ fieldNames.join(`, `) ~ `) `
+		~ ` values(` ~ fieldValues.join(`, `) ~ `) `
 		~ ` returning num, 'user added' "status", reg_timestamp`
 	).getRecordSet(addUserResultFmt);
 
@@ -62,7 +83,8 @@ size_t registerUser(alias getAuthDB)(string login, string password, string name,
 	// Прописываем хэш пароля в БД
 	auto setPasswordResult = getAuthDB().query(
 		`update site_user set pw_hash = '` ~ PGEscapeStr(pwHashStr) ~ `', pw_salt = '` ~ PGEscapeStr(pwSaltStr) ~ `' `
-		~ `where num = ` ~ addUserResult.front.getStr!"num"() ~ ` returning num, 'user upd' "status", reg_timestamp`
+		~ `where num = ` ~ addUserResult.front.getStr!"num"()
+		~ ` returning num, 'user upd' "status", reg_timestamp`
 	).getRecordSet(addUserResultFmt);
 
 	if( setPasswordResult.length != 1 || setPasswordResult.front.get!"status"() != `user upd` ) {
@@ -70,7 +92,7 @@ size_t registerUser(alias getAuthDB)(string login, string password, string name,
 	}
 
 	// Возвращаем идентификатор нового пользователя народу
-	return setPasswordResult.front.get!"num"();
+	return RegUserResult(setPasswordResult.front.get!"num"(), confirmUUID);
 }
 
 void addUserRoles(alias getAuthDB)(size_t userId, string[] roles, bool overwrite = false)

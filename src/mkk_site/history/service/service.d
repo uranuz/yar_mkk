@@ -2,14 +2,18 @@ module mkk_site.history.service.service;
 
 import webtank.net.service.json_rpc_service: JSON_RPCService;
 import mkk_site.common.service;
+import webtank.ivy.service_mixin: IvyServiceMixin, IIvyServiceMixin;
+import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 
-class MKKHistoryService: JSON_RPCService
+class MKKHistoryService: JSON_RPCService, IIvyServiceMixin
 {
 	import mkk_site.security.common.access_control_client: MKKAccessControlClient;
 	import webtank.security.right.controller: AccessRightController;
 	import webtank.security.right.remote_source: RightRemoteSource;
 	import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 	import std.functional: toDelegate;
+
+	mixin IvyServiceMixin;
 
 	this(string serviceName)
 	{
