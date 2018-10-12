@@ -97,7 +97,7 @@ module.exports = function (grunt) {
 
 	grunt.initConfig({
 		deployPath: (function() {
-			// Используем путь к для разворота, указанный у сервиса представления,
+			// Используем путь для разворота, указанный у сервиса представления,
 			// чтобы каждый раз явно не указывать его в консоли
 			var config = {};
 			if( grunt.file.exists('services_config.json') ) {

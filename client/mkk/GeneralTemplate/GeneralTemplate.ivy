@@ -29,6 +29,25 @@ expr {*
 		</div>
 		*}
 	};
+	def AdminSideMenu {=
+		def.kv
+			cssBaseClass: 'mkk-AdminSideMenu'
+			instanceName: 'adminSideMenu';
+		def.body {*
+		<div class="{=cls 'block'}">
+			<h4>Администрирование:</h4>
+			<ul class="{=cls 'cls'}">
+				<li class="{=cls 'listItem'}">
+					<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
+				</li>
+				<li class="{=cls 'listItem'}">
+					<a href="{{vpaths.siteDynamic}}user/list">Пользователи</a>
+				</li>
+			</ul>
+		</div>
+		*}
+	}
+
 }
 <!doctype html>
 <html>
@@ -92,16 +111,9 @@ expr {*
 					pohodFilterFields: pohodFilterFields
 					pohodFilterSections: pohodFilterSections
 				}
-				{=if {=hasRight obj: 'right.object.list' kind: 'read'} {*
-				<div class="mkk-AdminSideMenu e-block">
-					<h4>Администрирование:</h4>
-					<ul class="mkk-AdminSideMenu e-listItem">
-						<li>
-							<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
-						</li>
-					</ul>
-				</div>
-				*}}
+				{=if {=hasRight obj: 'right.object.list' kind: 'read'}
+					{=AdminSideMenu}
+				}
 			</div>
 			<!-- #sidebar -->
 

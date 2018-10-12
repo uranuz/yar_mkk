@@ -8,7 +8,7 @@ def Allow {=
 def CheckNewUser {=
 	def.kv identity data;
 	def.body {=
-		return true;
+		return {=has identity.data 'touristNum'} and {=empty identity.data.touristNum};
 	}
 }
 }

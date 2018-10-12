@@ -40,7 +40,7 @@ def UserReg {=
 			{=TouristEdit
 				tourist: tourist
 				isEditDialog: false
-				isNewUserDialog: true
+				checkRights: true
 			}
 			<div class="form-group row">
 				<div class="col-md-3">

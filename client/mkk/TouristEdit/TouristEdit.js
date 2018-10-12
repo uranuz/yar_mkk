@@ -13,7 +13,10 @@ define('mkk/TouristEdit/TouristEdit', [
 
 	function TouristEdit(opts) {
 		FirControl.call(this, opts);
-		var self = this;
+
+		this._isEditDialog = opts.isEditDialog;
+		this._checkRights = opts.checkRights;
+
 		this._elems('submitBtn').click(this.sendButtonClick.bind(this));
 
 		this._birthDatePicker = this.getChildInstanceByName('birthDateField');
@@ -26,11 +29,10 @@ define('mkk/TouristEdit/TouristEdit', [
 		this._extraFileLinks = this.getChildInstanceByName('extraFileLinksEdit');
 		this._chiefAddToParty = this.getChildInstanceByName('chiefAddToParty');
 
-		this._elems("deleteDialogBtn").on("click", function() {
-			self._touristDeleteArea.showDialog();
-		});
-
-		this._touristDeleteArea.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
+		if( this._isEditDialog ) {
+			this._elems("deleteDialogBtn").on("click", this._touristDeleteArea.showDialog.bind(this));
+			this._touristDeleteArea.subscribe('onDeleteConfirm', this.onDeleteConfirm.bind(this));
+		}
 
 		this._updateControlState(opts);
 	}
@@ -110,7 +112,8 @@ define('mkk/TouristEdit/TouristEdit', [
 				touristKey = NaN;
 			}
 
-			if( isNaN(touristKey) ) {
+			// Если ключ не передан (новый турист), и находимся в разделе
+			if( isNaN(touristKey) && this._isEditDialog ) {
 				this._similarsList.setFilter({
 					familyName: this._elems('familyName').val(),
 					givenName: this._elems('givenName').val(),

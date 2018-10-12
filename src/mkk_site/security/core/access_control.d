@@ -160,7 +160,8 @@ group by su.num, su.email, su.login, su.name`
 			DateTime, "regTimestamp",
 			string, "name",
 			string, "email",
-			string[], "roles"
+			string[], "roles",
+			size_t, "tourist_num"
 		)();
 
 		//Делаем запрос к БД за информацией о пользователе
@@ -169,7 +170,8 @@ group by su.num, su.email, su.login, su.name`
 	su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email,
 	to_json(coalesce(
 		array_agg(R.name) filter(where nullif(R.name, '') is not null), ARRAY[]::text[]
-	)) "roles"
+	)) "roles",
+	su.tourist_num
 from site_user su
 left join user_access_role UR
 	on UR.user_num = su.num
@@ -195,6 +197,7 @@ group by su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email`
 		string rolesStr = userRec.get!"roles"().join(`;`);
 		string name = userRec.getStr!"name";
 		string email = userRec.getStr!"email";
+		string touristNum = userRec.getStr!"tourist_num";
 
 		bool isValidPassword = checkPassword(validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString());
 
@@ -224,7 +227,8 @@ returning 'authenticated'`
 				string[string] userData = [
 					"userNum": userNum,
 					"roles": rolesStr,
-					"email": email
+					"email": email,
+					"touristNum": touristNum
 				];
 				//Аутентификация завершена успешно
 				return new MKKUserIdentity(login, name, userRec.get!"roles"(), userData, sid);

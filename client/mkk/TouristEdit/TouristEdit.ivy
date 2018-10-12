@@ -16,7 +16,7 @@ def LabeledInput {=
 				class="{=cls field} form-control"
 				value="{=recGet tourist field}"
 				id="{{field ~ 'Field'}}"
-				{=if not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog 'disabled'}/>
+				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
 		</div>
 		<div class="col-auto px-1">{{appendix}}</div>
 	</div>
@@ -32,7 +32,7 @@ def ShowCheckBox {=
 				class="{=cls field} form-check-input"
 				id="{{field ~ 'Field'}}"
 				{=if {=recGet tourist field} 'checked'}
-				{=if not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog 'disabled'}/>
+				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
 			<label class="form-check-label" for="{{field ~ 'Field'}}">{{caption}}</label>
 		</div>
 	*};
@@ -52,7 +52,7 @@ def ListBoxRow {=
 					items: {=enumWithNull
 						{=at {=rsFieldFormat tourist field} 'enum'} 'не задано'}
 					selectedId: {=recGet tourist field}
-					disabled: not{=hasRight subobj: field kind: 'edit'} and not isNewUserDialog
+					disabled: not{=hasRight subobj: field kind: 'edit'} and checkRights
 				}
 			</div>
 		</div>
@@ -67,10 +67,10 @@ def TouristEdit {=
 		accessObject: 'tourist.item'
 		tourist: null
 		isEditDialog: true
-		isNewUserDialog: false;
+		checkRights: true;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['isEditDialog', 'checkRights'] }"/>
 		<div class="{=cls 'topButtons'}">
 			{=if isEditDialog {*
 			{=if {=isInRoles ['admin', 'moder']} {*
@@ -102,7 +102,7 @@ def TouristEdit {=
 						day: {=recGet tourist 'birthDay'}
 						month: {=recGet tourist 'birthMonth'}
 						year: {=recGet tourist 'birthYear'}
-						disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'} and not isNewUserDialog
+						disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'} and checkRights
 					}
 				</div>
 			</div>
@@ -124,7 +124,7 @@ def TouristEdit {=
 						name="comment"
 						class="form-control"
 						id="commentField"
-						{=if not{=hasRight subobj: 'comment' kind: 'edit'} and not isNewUserDialog 'disabled'}
+						{=if not{=hasRight subobj: 'comment' kind: 'edit'} and checkRights 'disabled'}
 						>{=recGet tourist 'comment'}</textarea>
 				</div>
 			</div>
@@ -179,7 +179,7 @@ def TouristEdit {=
 	*}
 };
 if __scopeName__ == 'main' {=
-	if {=isInRoles ['admin', 'moder']} {=
+	if {=isInRoles ['admin', 'moder', 'new_user']} {=
 		TouristEdit tourist: tourist
 	} else {*
 		<h4>

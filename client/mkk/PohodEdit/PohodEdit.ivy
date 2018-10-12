@@ -326,7 +326,7 @@ def PohodEdit {=
 	*}
 };
 if __scopeName__ == '__main__' {=
-	if {=isInRoles ['admin', 'moder']} {=
+	if {=isInRoles ['admin', 'moder', 'new_user']} {=
 		PohodEdit
 			pohod: pohod
 			partyList: partyList
