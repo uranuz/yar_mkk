@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet, recGetStr, rsFieldFormat, enumWithNull, hasRight, isInRoles;
+from fir.controls.utils import cls, recGet, recGetStr, enumWithNull, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.PohodEdit.DeleteArea import DeleteArea;
@@ -61,7 +61,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat pohod 'claimState'} 'enum'} 'не задан'}
+						{=at {=at pohod.format 'claimState'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'claimState'}
 					disabled: not{=hasRight subobj: 'book.claimState' kind: 'edit'}
 				}
@@ -100,7 +100,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat pohod 'tourismKind'} 'enum'} 'не задан'}
+						{=at {=at pohod.format 'tourismKind'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'tourismKind'}
 					disabled: not{=hasRight subobj: 'pohod.tourismKind' kind: 'edit'}
 				}
@@ -132,7 +132,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat pohod 'complexity'} 'enum'} 'не задана'}
+						{=at {=at pohod.format 'complexity'} 'enum'} 'не задана'}
 					selectedId: {=recGet pohod 'complexity'}
 					disabled: not{=hasRight subobj: 'pohod.complexity' kind: 'edit'}
 				}
@@ -142,7 +142,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat pohod 'complexityElems'} 'enum'} 'не задано'}
+						{=at {=at pohod.format 'complexityElems'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'complexityElems'}
 					disabled: not{=hasRight subobj: 'pohod.complexityElems' kind: 'edit'}
 				}
@@ -181,7 +181,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat pohod 'progress'} 'enum'} 'не задано'}
+						{=at {=at pohod.format 'progress'} 'enum'} 'не задано'}
 					selectedId: {=recGet pohod 'progress'}
 					disabled: not{=hasRight subobj: 'pohod.progress' kind: 'edit'}
 				}

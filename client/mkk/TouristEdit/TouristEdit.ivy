@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, rsFieldFormat, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
+from fir.controls.utils import recGet, recGetStr, cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.TouristPlainList import TouristPlainList;
@@ -50,7 +50,7 @@ def ListBoxRow {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=rsFieldFormat tourist field} 'enum'} 'не задано'}
+						{=at {=at tourist.format field} 'enum'} 'не задано'}
 					selectedId: {=recGet tourist field}
 					disabled: not{=hasRight subobj: field kind: 'edit'} and checkRights
 				}
