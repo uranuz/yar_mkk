@@ -45,7 +45,7 @@ IvyData pohodEditController(HTTPContext ctx)
 
 IvyData renderEditPohod(HTTPContext ctx, Optional!size_t pohodNum)
 {
-	return ViewService.runIvyModule("mkk.PohodEdit", ctx, IvyData([
+	return ViewService.runIvyModuleSync("mkk.PohodEdit", ctx, IvyData([
 		"pohod": ctx.mainServiceCall(`pohod.read`, [`pohodNum`: pohodNum]),
 		"extraFileLinks": ctx.mainServiceCall(`pohod.extraFileLinks`, [`num`: pohodNum]),
 		"partyList": ctx.mainServiceCall(`pohod.partyList`, [`num`: pohodNum]),
@@ -76,5 +76,5 @@ IvyData writePohod(HTTPContext ctx)
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.PohodEdit.Results", ctx, dataDict);
+	return ViewService.runIvyModuleSync("mkk.PohodEdit.Results", ctx, dataDict);
 }

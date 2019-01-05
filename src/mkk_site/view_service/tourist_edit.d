@@ -48,7 +48,7 @@ IvyData touristEditController(HTTPContext ctx)
 
 IvyData renderEditTourist(HTTPContext ctx, Optional!size_t touristNum)
 {
-	return ViewService.runIvyModule("mkk.TouristEdit", ctx, IvyData([
+	return ViewService.runIvyModuleSync("mkk.TouristEdit", ctx, IvyData([
 		"tourist": ctx.mainServiceCall(`tourist.read`, [`touristNum`: touristNum])
 	]));
 }
@@ -77,5 +77,5 @@ IvyData writeTourist(HTTPContext ctx)
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.TouristEdit.Results", ctx, dataDict);
+	return ViewService.runIvyModuleSync("mkk.TouristEdit.Results", ctx, dataDict);
 }

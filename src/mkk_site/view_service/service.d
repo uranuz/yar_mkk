@@ -49,6 +49,15 @@ public:
 		import std.string: toLower;
 		ctx.response.tryClearBody();
 
+		static struct OutRange
+		{
+			private HTTPOutput _resp;
+			void put(T)(T data) {
+				import std.conv: text;
+				_resp.write(data.text);
+			}
+		}
+
 		if( ctx.request.queryForm.get("generalTemplate", null).toLower() != "no" )
 		{
 			auto favouriteFilters = ctx.mainServiceCall(`pohod.favoriteFilters`);
@@ -62,19 +71,14 @@ public:
 				"pohodFilterSections": favouriteFilters["sections"]
 			];
 
-			content = runIvyModule("mkk.GeneralTemplate", ctx, payload);
+			runIvyModule("mkk.GeneralTemplate", ctx, payload).then(
+				(IvyData fullContent) {
+					super.renderResult(fullContent, ctx);
+				}
+			);
+		} else {
+			super.renderResult(content, ctx);
 		}
-
-		static struct OutRange
-		{
-			private HTTPOutput _resp;
-			void put(T)(T data) {
-				import std.conv: text;
-				_resp.write(data.text);
-			}
-		}
-
-		renderDataNode!(DataRenderType.HTML)(content, OutRange(ctx.response));
 	}
 }
 
