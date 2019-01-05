@@ -57,7 +57,7 @@ IvyData renderEditDocument(HTTPContext ctx, Optional!size_t docNum)
 		"nav": JSONValue() // Empty placeholder
 	]);
 
-	return ViewService.runIvyModule("mkk.DocumentEdit", ctx, IvyData([
+	return ViewService.runIvyModuleSync("mkk.DocumentEdit", ctx, IvyData([
 		"document": (!callResult["rs"].empty? callResult["rs"][0]: IvyData(null))
 	]));
 }
@@ -85,5 +85,5 @@ IvyData writeDocument(HTTPContext ctx, Optional!size_t docNum)
 		dataDict["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
 	}
 
-	return ViewService.runIvyModule("mkk.DocumentEdit.Results", ctx, dataDict);
+	return ViewService.runIvyModuleSync("mkk.DocumentEdit.Results", ctx, dataDict);
 }
