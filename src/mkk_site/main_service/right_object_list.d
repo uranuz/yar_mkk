@@ -6,6 +6,9 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(getObjectList)(`right.objectList`);
 	MainService.JSON_RPCRouter.join!(getObjectRightList)(`right.objectRightList`);
+
+	MainService.pageRouter.joinWebFormAPI!(renderObjectList)("/api/right/object/list");
+	MainService.pageRouter.joinWebFormAPI!(renderObjectRightList)("/api/right/object/right/list");
 }
 
 static immutable rightObjectRecFormat = RecordFormat!(
@@ -52,4 +55,16 @@ auto getObjectRightList(HTTPContext ctx, size_t num)
 		on a_rule.num = rgh.rule_num
 	where rgh.object_num = ` ~ num.text ~ `
 	`).getRecordSet(objRightRecFormat);
+}
+
+import std.json: JSONValue;
+JSONValue renderObjectList(HTTPContext ctx) {
+	return JSONValue(["objectList": getObjectList(ctx).toStdJSON()]);
+}
+
+JSONValue renderObjectRightList(HTTPContext ctx, size_t num)
+{
+	return JSONValue([
+		"objectRightList": getObjectRightList(ctx, num).toStdJSON()
+	]);
 }

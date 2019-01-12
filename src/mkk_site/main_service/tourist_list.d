@@ -146,3 +146,48 @@ auto getTouristListImpl(ResultFormat)(
 		"nav":  nav.toStdJSON()
 	]);
 }
+
+shared static this() {
+	MainService.pageRouter.joinWebFormAPI!(renderTouristList)("/api/tourist/list");
+	MainService.pageRouter.joinWebFormAPI!(renderTouristPlainList)("/api/tourist/plainList");
+}
+
+import std.json: JSONValue;
+JSONValue renderTouristList(TouristListFilter filter, Navigation nav)
+{
+	JSONValue callResult = touristList(filter, nav);
+
+	return JSONValue([
+		"filter": filter.toStdJSON(),
+		"touristList": callResult["rs"],
+		"nav": callResult["nav"]
+	]);
+}
+
+struct ListSettings
+{
+	string mode; // Режим списка: на добавление/ на удаление записей
+	string instanceName; // Название экземпляра компонента
+}
+
+JSONValue renderTouristPlainList(TouristListFilter filter, Navigation nav, ListSettings settings)
+{
+	import std.algorithm: canFind;
+
+	JSONValue callResult = touristPlainSearch(filter, nav);
+	JSONValue dataDict = [
+		"filter": filter.toStdJSON(),
+		"touristList": callResult["rs"],
+		"nav": callResult["nav"]
+	];
+
+	if( ["add", "remove"].canFind(settings.mode) ) {
+		dataDict["mode"] = settings.mode;
+	}
+
+	if( settings.instanceName.length > 0 ) {
+		dataDict["instanceName"] = settings.instanceName;
+	}
+
+	return dataDict;
+}

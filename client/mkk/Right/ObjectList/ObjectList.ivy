@@ -76,6 +76,4 @@ def ObjectList {=
 	</div>
 	*}
 };
-ObjectList
-	objectList: objectList;
 }

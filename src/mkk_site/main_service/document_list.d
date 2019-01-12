@@ -4,14 +4,11 @@ import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 import mkk_site.data_model.document;
 
-import webtank.common.std_json.to: toStdJSON;
-
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(getDocumentList)(`document.list`);
+	MainService.pageRouter.joinWebFormAPI!(getDocumentList)("/api/document/list");
 }
-
-import std.json: JSONValue;
 
 static immutable documentRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
@@ -19,7 +16,10 @@ static immutable documentRecFormat = RecordFormat!(
 	string, "link"
 )();
 
-JSONValue getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation nav)
+import std.typecons: Tuple;
+
+Tuple!(IBaseRecordSet, "documentList", Navigation, "nav", DocumentListFilter, "filter")
+getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation nav)
 {
 	import webtank.datctrl.record_set;
 	import std.conv: to, text;
@@ -37,10 +37,7 @@ JSONValue getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation
 		auto rsWithOneItem = makeMemoryRecordSet(documentRecFormat);
 		rsWithOneItem.addItems(1); // Добавляем одну пустую запись для редактирования
 		nav.normalize(1);
-		return JSONValue([
-			"rs": rsWithOneItem.toStdJSON(),
-			"nav": nav.toStdJSON()
-		]);
+		return typeof(return)(rsWithOneItem, nav, filter);
 	}
 	
 	string[] filters;
@@ -58,14 +55,12 @@ JSONValue getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation
 		).get(0, 0, "0").to!size_t
 	);
 
-	return JSONValue([
-		"rs": getCommonDB().query(
+	return typeof(return)(
+		getCommonDB().query(
 			`select num, name, link from file_link` ~ filterQuery
 			~ ` order by name offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
-		).getRecordSet(documentRecFormat).toStdJSON(),
-		"nav": nav.toStdJSON()
-	]);
+		).getRecordSet(documentRecFormat),
+		nav,
+		filter
+	);
 }
-
-
-

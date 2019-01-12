@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, firScopeOpts;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def Results {=
 	def.kv
 		instanceName: 'documentEditResults'
@@ -28,8 +28,4 @@ def Results {=
 	</div>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	Results
-		instanceName: instanceName
-}
 }

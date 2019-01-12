@@ -4,7 +4,7 @@ require.config({
 });
 
 define('mkk/app', [
-	"fir/controls/FirControl",
+	"fir/controls/ControlManager",
 	"fir/common/globals",
 	"fir/common/helpers",
 	"fir/common/text_encoder",
@@ -19,7 +19,7 @@ define('mkk/app', [
 	"fir/controls/PlainListBox/PlainListBox",
 	"fir/controls/PlainDatePicker/PlainDatePicker",
 	"css!mkk/app"
-], function(FirControl) {
-	FirControl.prototype.initAllControls();
+], function(ControlManager) {
+	ControlManager.launchMarkup($('body'));
 });
 require(['mkk/app'], function() {});

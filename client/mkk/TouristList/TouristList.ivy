@@ -5,7 +5,10 @@ def TouristList {=
 	def.kv
 		moduleName: 'mkk/TouristList/TouristList'
 		instanceName: 'touristList'
-		cssBaseClass: 'mkk-TouristList';
+		cssBaseClass: 'mkk-TouristList'
+		touristList: null
+		nav: null
+		filter: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -110,5 +113,4 @@ def TouristList {=
 	</div>
 	*};
 };
-TouristList
 }

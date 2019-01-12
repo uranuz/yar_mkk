@@ -25,3 +25,14 @@ auto userList(HTTPContext ctx)
 	`).getRecordSet(userListRecFormat);
 	return user_rs;
 }
+
+shared static this() {
+	MainService.pageRouter.joinWebFormAPI!(renderUserList)("/api/user/list");
+}
+
+auto renderUserList(HTTPContext ctx)
+{
+	return JSONValue([
+		"userList": userList(ctx).toStdJSON()
+	]);
+}

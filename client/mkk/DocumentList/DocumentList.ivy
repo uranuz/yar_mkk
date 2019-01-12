@@ -7,7 +7,9 @@ def DocumentList {=
 	def.kv
 		moduleName: 'mkk/DocumentList/DocumentList'
 		instanceName: 'documentList'
-		cssBaseClass: "mkk-DocumentList";
+		cssBaseClass: "mkk-DocumentList"
+		nav: null
+		documentList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -56,5 +58,4 @@ def DocumentList {=
 	</div>
 	*};
 };
-DocumentList
 }

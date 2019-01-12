@@ -17,6 +17,9 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
 	MainService.JSON_RPCRouter.join!(pohodCsv)(`pohod.Csv`);
 
+	MainService.pageRouter.joinWebFormAPI!(getPohodList)("/api/pohod/list");
+	MainService.pageRouter.joinWebFormAPI!(partyInfo)("/api/pohod/partyInfo");
+	MainService.pageRouter.joinWebFormAPI!(renderPohodCsv)("/api/pohod.csv");
 }
 
 import std.datetime: Date;
@@ -334,7 +337,7 @@ size_t getPohodCount(PohodFilter filter)
 	return getCommonDB().query(query).get(0, 0, "0").to!size_t;
 }
 //-----------------------------------------------------------------
-import mkk_site.data_model.common: Navigation;// Структура для навигации по выборке данных сдвиг,чисо записей...
+import mkk_site.data_model.common: Navigation;
 
 IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 {
@@ -362,16 +365,17 @@ IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 	return getCommonDB().query(query);
 }
 //---------------------------------------------------------------
-JSONValue getPohodList( PohodFilter filter, Navigation nav)
+JSONValue getPohodList(PohodFilter filter, Navigation nav)
 {
-	import std.conv: text;
-
+	filter.initializeDates();
 	nav.normalize(getPohodCount(filter));
-	IDBQueryResult rs=PohodList(filter, nav);
 
 	return JSONValue([
-		"rs": rs.getRecordSet(pohodRecFormat).toStdJSON(),
-		"nav": nav.toStdJSON()
+		"pohodList": PohodList(filter, nav).getRecordSet(pohodRecFormat).toStdJSON(),
+		"pohodNav": nav.toStdJSON(),
+		"filter": filter.toStdJSON(),
+		"pohodEnums": getPohodEnumTypes(),
+		"isForPrint": JSONValue(false)
 	]);
 }
 //---------------------------------------------------------------
@@ -384,7 +388,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 
 	string[dchar] transTable1 = [',':" /",'\r':" ",'\n':" " ];
 
-	string pohod_csv=",Походы\r\n";
+	string pohod_csv = ",Походы\r\n";
 //--------------
 	import std.algorithm: map;
 	import std.string: join;
@@ -426,7 +430,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 	{
 		string[] data_array;
 		data_array.length = rs.fieldCount;
-			
+
 		foreach( column_num; 0..rs.fieldCount ) {
 			data_array[column_num] = rs.get(column_num, recIndex);
 		}
@@ -436,68 +440,82 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 
 
 
-    foreach( str; for_all )
-			 {
-				size_t  columnNumberInQuery=0;
+	foreach( str; for_all )
+	{
+		size_t columnNumberInQuery = 0;
+		size_t p = 0;
 
-				size_t p=0;
+		foreach( el; str )
+		{
+			switch(p)
+			{
+				case 3, 4:
+					if( el.length != 0 )
+					{
+						auto dt = Date.fromISOExtString(el);
+						pohod_csv ~= dt.day.to!string ~ `.` ~ (cast(int) dt.month).to!string ~ `.` ~ dt.year.to!string ~ ',';
+					}
+					else
+						pohod_csv ~= ',';
+					//преобразование формата даты
+				break;
 
-				 foreach( el; str ) 
-				 {
-							
-								switch(p)
-									{
-										case 3,4:
-											if(el.length!=0)
-										{
-											
-											auto dt = Date.fromISOExtString(el);
-										pohod_csv ~= dt.day.to!string ~ `.` ~ (cast(int) dt.month).to!string ~ `.` ~ dt.year.to!string ~  ',';
-										} else pohod_csv ~=  ',';
-										//преобразование формата даты	
-										break;
+				case 6:
+					if( el.length != 0 )
+					{
+						pohod_csv ~= категорияСложности[el.to!int]~  ',';
+					}
+					else
+						pohod_csv ~= ',';
+				break;
 
-										case 6:
-										if(el.length!=0)
-										{											
-										    pohod_csv ~= категорияСложности[el.to!int]~  ',';
-										}	else pohod_csv ~=  ',';									
-										break;
+				case 5:
+					if( el.length != 0 )
+					{
+						pohod_csv ~= видТуризма[el.to!int] ~ ',';
+					}
+					else
+						pohod_csv ~= ',';
+				break;
 
-										case 5:
-										if(el.length!=0)
-										{
-										    pohod_csv ~= видТуризма[el.to!int]~  ',';
-										} else pohod_csv ~=  ',';
-										break;
+				case 19:
+					if( el.length != 0 )
+					{
+						pohod_csv ~= готовностьПохода[el.to!int]~  ',';
+					}
+					else
+						pohod_csv ~= ',';
+				break;
 
-										case 19:
-										if(el.length!=0)
-										{
-										    pohod_csv ~= готовностьПохода[el.to!int]~  ',';
-										} else pohod_csv ~=  ',';
-										break;
+				case 20:
+					if(el.length!=0)
+					{
+						pohod_csv ~= статусЗаявки[el.to!int]~  ',';
+					}
+					else
+						pohod_csv ~= ',';
+				break;
 
-										case 20:
-										if(el.length!=0)
-										{
-										    pohod_csv ~= статусЗаявки[el.to!int]~  ',';
-										} else pohod_csv ~=  ',';
-										break;
+				case 9, 18:
+				break;
 
-										case 9,18:										
-										break;
+				default:
+					pohod_csv ~= translate(el , transTable1) ~ ',';
+				break;
+			}
 
-									 default: 
-									 pohod_csv ~= translate ( el , transTable1)~  ',';
-										break;
-									}
+			p = p+1;
+		}
+		pohod_csv ~= "\r\n";
+	}
 
-								p=p+1;
-				 }
-				 pohod_csv ~= "\r\n";
-			 }
+	return pohod_csv;
+}
 
- 
-		return pohod_csv;
+void renderPohodCsv(HTTPContext ctx, PohodFilter filter)
+{
+	import std.conv: to;
+
+	ctx.response.headers["Content-Type"] = `text/csv; charset="utf-8`;
+	ctx.response.write(pohodCsv(ctx, filter).to!string);
 }

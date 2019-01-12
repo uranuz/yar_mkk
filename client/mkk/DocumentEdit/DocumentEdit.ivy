@@ -41,8 +41,4 @@ def DocumentEdit {=
 	</div>
 	*};
 };
-if __scopeName__ == '__main__' {=
-	DocumentEdit
-		document: document;
-}
 }

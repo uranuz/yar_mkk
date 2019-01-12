@@ -34,9 +34,4 @@ def PartyInfo {=
 	</div>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	PartyInfo
-		pohodInfo: {=if {=has {=scope} 'pohodInfo'} pohodInfo}
-		partyList: partyList
-}
 }

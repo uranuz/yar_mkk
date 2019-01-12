@@ -4,11 +4,14 @@ from fir.controls.utils import recGet, recGetStr, cls, isInRoles;
 from fir.controls.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
-def Experience{=
+def Experience {=
 	def.kv
 		moduleName: 'mkk/Experience/Experience'
 		instanceName: 'experience'
-		cssBaseClass: "mkk-Experience";
+		cssBaseClass: "mkk-Experience"
+		tourist: null
+		pohodList: null
+		nav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<div class="{=cls 'topButtons'}">
@@ -127,5 +130,4 @@ def Experience{=
 	</div>
 	*};
 };
-Experience
 }

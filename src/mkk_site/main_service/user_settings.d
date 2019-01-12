@@ -4,9 +4,13 @@ import mkk_site.main_service.devkit;
 import mkk_site.security.core.access_control: changeUserPassword;
 import mkk_site.security.common.exception: SecurityException;
 
+import std.json: JSONValue;
+
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(changePassword)(`user.changePassword`);
+
+	MainService.pageRouter.joinWebFormAPI!(renderUserSettings)("/api/user_settings");
 }
 
 void changePassword(
@@ -34,4 +38,25 @@ void changePassword(
 		changeUserPassword!(true)( toDelegate(&getAuthDB), ctx.user.id, oldPassword, newPassword ),
 		`Произошла ошибка при попытке смены пароля! Возможно, введен неверный старый пароль`
 	);
+}
+
+JSONValue renderUserSettings(
+	HTTPContext ctx,
+	string oldPassword,
+	string newPassword,
+	string repeatPassword
+) {
+	JSONValue dataDict = [
+		`userFullName`: JSONValue(ctx.user.name),
+		`userLogin`: JSONValue(ctx.user.id),
+		`pwChangeMessage`: JSONValue(null)
+	];
+
+	try {
+		changePassword(ctx, oldPassword, newPassword, repeatPassword);
+	} catch(Exception ex) {
+		dataDict[`pwChangeMessage`] = ex.msg;
+	}
+
+	return dataDict;
 }

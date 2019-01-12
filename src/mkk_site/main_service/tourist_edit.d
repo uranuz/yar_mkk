@@ -11,6 +11,9 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editTourist)(`tourist.edit`);
 	MainService.JSON_RPCRouter.join!(touristDelete)(`tourist.delete`);
+
+	MainService.pageRouter.joinWebFormAPI!(writeTourist)("/api/tourist/edit/results");
+	MainService.pageRouter.joinWebFormAPI!(renderEditTourist)("/api/tourist/edit");
 }
 
 auto editTourist(
@@ -163,4 +166,31 @@ void touristDelete(HTTPContext ctx, size_t num)
 	};
 	sendToHistory(ctx, `Удаление туриста`, historyData);
 	getCommonDB().query(`delete from tourist where num = ` ~ num.text);
+}
+
+import mkk_site.main_service.experience: getTourist;
+import std.json: JSONValue;
+
+JSONValue renderEditTourist(HTTPContext ctx, Optional!size_t num)
+{
+	return JSONValue([
+		"tourist": getTourist(ctx, num).toStdJSON()
+	]);
+}
+
+JSONValue writeTourist(HTTPContext ctx, TouristDataToWrite record)
+{
+	JSONValue result = [
+		"errorMsg": JSONValue(null),
+		"touristNum": (record.num.isSet?
+			JSONValue(record.num.value): JSONValue(null)),
+		"isUpdate": JSONValue(record.num.isSet)
+	];
+	try {
+		result["touristNum"] = editTourist(ctx, record);
+	} catch(Exception ex) {
+		result["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
+	}
+
+	return result;
 }

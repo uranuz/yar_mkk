@@ -16,6 +16,11 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(regUser)(`user.register`);
 	MainService.JSON_RPCRouter.join!(confirmEmail)(`user.confirmEmail`);
+
+	MainService.pageRouter.joinWebFormAPI!(findTourist)("/api/user/reg/find_tourist");
+	MainService.pageRouter.joinWebFormAPI!(emailConfirm)("/api/user/reg/email_confirm");
+	MainService.pageRouter.joinWebFormAPI!(userReg)("/api/user/reg/results");
+	MainService.pageRouter.joinWebFormAPI!(userReg)("/api/user/reg");
 }
 
 import std.json: JSONValue;
@@ -225,4 +230,41 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 	smtp.verifyHost = false;
 	smtp.verifyPeer = false;
 	smtp.perform();
+}
+
+import mkk_site.data_model.tourist_edit;
+JSONValue findTourist(HTTPContext ctx)
+{
+	auto req = ctx.request;
+
+	return JSONValue();
+}
+
+JSONValue userReg(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
+{
+	import webtank.common.std_json.to: toStdJSON;
+
+	JSONValue writeRes;
+	try {
+		writeRes = regUser(ctx, touristData, userData).toStdJSON();
+		writeRes[`errorMsg`] = JSONValue();
+	} catch(Exception ex) {
+		writeRes[`errorMsg`] = ex.msg;
+	}
+	return writeRes;
+}
+
+import mkk_site.main_service.experience: getTourist;
+JSONValue renderUserReg(HTTPContext ctx, Optional!size_t num)
+{
+	return JSONValue([
+		"tourist": getTourist(ctx, num).toStdJSON()
+	]);
+}
+
+JSONValue emailConfirm(HTTPContext ctx, string uuid)
+{
+	return JSONValue([
+		`confirmUUID`: confirmEmail(ctx, uuid)
+	]);
 }

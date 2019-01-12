@@ -4,7 +4,10 @@ def UserSettings {=
 	def.kv
 		moduleName: 'mkk/UserSettings/UserSettings'
 		instanceName: 'userSettings'
-		cssBaseClass: 'mkk-UserSettings';
+		cssBaseClass: 'mkk-UserSettings'
+		userFullName: null
+		userLogin: null
+		pwChangeMessage: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -85,5 +88,4 @@ def UserSettings {=
 	</div>
 	*}
 };
-UserSettings;
 }

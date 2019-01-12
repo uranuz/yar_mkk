@@ -39,7 +39,4 @@ def RecordHistory {=
 	</div>
 	*}
 };
-RecordHistory
-	history: history
-	objectName: objectName;
 }

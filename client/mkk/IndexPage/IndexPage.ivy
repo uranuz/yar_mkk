@@ -4,7 +4,8 @@ from mkk.Helpers import DateRangePrinter;
 def RecentPohodList {=
 	def.kv
 		cssBaseClass: "mkk-RecentPohodList"
-		instanceName: 'recentPohodList';
+		instanceName: 'recentPohodList'
+		pohodList: null;
 	def.body {*
 		<div class="{=cls 'block'}">
 			<h4 class="{=cls 'blockTitle'}">Недавно добавленные походы</h4>
@@ -58,7 +59,8 @@ def IndexPage {=
 	def.kv
 		moduleName: "mkk/IndexPage/IndexPage"
 		cssBaseClass: "mkk-IndexPage"
-		instanceName: 'indexPage';
+		instanceName: 'indexPage'
+		pohodList: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -68,9 +70,8 @@ def IndexPage {=
 					title="Просмотреть информацию о сайте"
 					>Подробнее</a>
 			</div>
-			{=RecentPohodList}
+			{=RecentPohodList pohodList: pohodList}
 		</div>
 	*}
 };
-IndexPage;
 }

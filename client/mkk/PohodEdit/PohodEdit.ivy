@@ -15,8 +15,18 @@ def PohodEdit {=
 		cssBaseClass: 'mkk-PohodEdit'
 		pohod: null
 		partyList: null
-		accessObject: 'pohod.item';
+		accessObject: 'pohod.item'
+		authRedirectURI: null;
 	def.body {*
+		if not {=isInRoles ['admin', 'moder', 'new_user']} {=
+			return {*
+				<h4>
+					Для редактирования данных похода требуется
+					<a href="{{authRedirectURI}}" title="Аутентификация">выполнить вход</a>
+					на сайт
+				</h4>
+			*}
+		}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<div class="{=cls 'topButtons'}">
@@ -29,7 +39,10 @@ def PohodEdit {=
 				class="btn btn-sm btn-secondary"
 				>Просмотр</a>
 		</div>
-		<form class="{=cls 'mainForm'}" method="post">
+		<form
+			class="{=cls 'mainForm'}"
+			method="post"
+			action="{{vpaths.siteDynamic}}pohod/edit/result">
 		<h2>Редактирование данных похода</h2>
 		<hr>
 		<h4>Маршрутная книжка</h4>
@@ -323,19 +336,6 @@ def PohodEdit {=
 		{=ChiefEdit}
 		{=ChiefAddToParty}
 	</div>
-	*}
-};
-if __scopeName__ == '__main__' {=
-	if {=isInRoles ['admin', 'moder', 'new_user']} {=
-		PohodEdit
-			pohod: pohod
-			partyList: partyList
-	} else {*
-		<h4>
-			Для редактирования данных похода требуется
-			<a href="{{authRedirectURI}}" title="Аутентификация">выполнить вход</a>
-			на сайт
-		</h4>
 	*}
 };
 }

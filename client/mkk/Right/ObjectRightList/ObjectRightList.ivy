@@ -21,6 +21,4 @@ def ObjectRightList {=
 	</div>
 	*}
 };
-ObjectRightList
-	objectRightList: objectRightList;
 }

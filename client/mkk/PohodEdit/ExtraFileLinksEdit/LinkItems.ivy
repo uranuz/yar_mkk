@@ -37,9 +37,4 @@ def LinkItems {=
 		</tbody>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	LinkItems
-		instanceName: instanceName
-		linkList: {=if {=has {=scope} 'linkList'} linkList else null};
-}
 }

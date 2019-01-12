@@ -4,7 +4,8 @@ def ModerList {=
 	def.kv
 		moduleName: "mkk/ModerList/ModerList"
 		cssBaseClass: "mkk-ModerList"
-		instanceName: "moderList";
+		instanceName: "moderList"
+		moderList: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -45,5 +46,4 @@ def ModerList {=
 		</div>
 	*}
 };
-ModerList
 }

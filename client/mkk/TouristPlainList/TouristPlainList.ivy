@@ -46,11 +46,4 @@ def TouristPlainList {=
 		</div>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	TouristPlainList
-		touristList: touristList
-		nav: nav
-		mode: {=if {=has {=scope} 'mode'} mode}
-		instanceName: {=if {=has {=scope} 'instanceName'} instanceName};
-}
 }

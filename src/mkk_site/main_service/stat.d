@@ -9,18 +9,19 @@ import std.datetime;
 import std.typecons: tuple;
 import std.json;
 
-//***********************Обявление метода*******************
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(statData)(`stat.Data`);
 	MainService.JSON_RPCRouter.join!(statCsv)(`stat.Csv`);
+
+	MainService.pageRouter.joinWebFormAPI!(renderStat)("/api/stat");
+	MainService.pageRouter.joinWebFormAPI!(renderStatCsv)("/api/stat.csv");
 }
-//**********************************************************
-auto first_reading// первичное чтение и очистка
-(HTTPContext context,StatSelect select)
+
+auto first_reading(HTTPContext context,StatSelect select)
 {
-import std.meta;//staticMap
-	import std.range;//iota
+	import std.meta; //staticMap
+	import std.range; //iota
 	static immutable string[] prezent = [ "Год","Вид/КС" ];
 	static immutable size_t[] number_lines = [12,10];
 	
@@ -521,4 +522,21 @@ auto statData //начало основной функции////////////////
 			 }
 			 
 		 return csv_stat;
- };
+}
+
+JSONValue renderStat(HTTPContext ctx, StatSelect select)
+{
+	import webtank.common.std_json.to: toStdJSON;
+	return JSONValue([
+		"select": select.toStdJSON(),
+		"data": statData(ctx, select)
+	]);
+}
+
+void renderStatCsv(HTTPContext ctx, StatSelect select)
+{
+	import std.conv: to;
+
+	ctx.response.headers["Content-Type"]=`text/csv; charset="utf-8`;
+	ctx.response.write(statCsv(ctx, select).to!string);
+}

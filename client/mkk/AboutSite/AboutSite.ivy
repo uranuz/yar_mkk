@@ -84,7 +84,4 @@ def AboutSite {=
 	</div>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	AboutSite
-}
 }

@@ -69,6 +69,15 @@ def TouristEdit {=
 		isEditDialog: true
 		checkRights: true;
 	def.body {*
+		if not {=isInRoles ['admin', 'moder', 'new_user']} {=
+			return {*
+				<h4>
+					Для редактирования данных туриста требуется
+					<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
+					на сайт
+				</h4>
+			*}
+		}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['isEditDialog', 'checkRights'] }"/>
 		<div class="{=cls 'topButtons'}">
@@ -178,15 +187,4 @@ def TouristEdit {=
 	</div>
 	*}
 };
-if __scopeName__ == 'main' {=
-	if {=isInRoles ['admin', 'moder', 'new_user']} {=
-		TouristEdit tourist: tourist
-	} else {*
-		<h4>
-			Для редактирования данных туриста требуется
-			<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
-			на сайт
-		</h4>
-	*}
-}
 }

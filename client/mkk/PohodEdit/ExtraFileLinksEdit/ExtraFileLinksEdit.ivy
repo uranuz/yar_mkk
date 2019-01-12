@@ -40,7 +40,4 @@ def ExtraFileLinksEdit {=
 	</div>
 	*}
 };
-if __scopeName__ == '__main__' {=
-	ExtraFileLinksEdit
-}
 }

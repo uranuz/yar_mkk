@@ -6,6 +6,8 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(getExperience)(`tourist.experience`);
 	MainService.JSON_RPCRouter.join!(getTourist)(`tourist.read`);
+
+	MainService.pageRouter.joinWebFormAPI!(getExperience)("/api/tourist/experience");
 }
 
 import std.typecons: tuple;
@@ -46,22 +48,24 @@ import webtank.common.std_json.to: toStdJSON;
 
 JSONValue getExperience(
 	HTTPContext context,
-	size_t touristKey,
+	Optional!size_t num,
 	Navigation nav
 ) {
 	import std.conv: to, text;
+	import std.exception: enforce;
+	enforce(num.isSet, `Невозможно отобразить данные туриста. Номер туриста не задан`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 
 	// Получаем запись туриста
-	auto touristRec = getTourist(context, Optional!size_t(touristKey));
+	auto touristRec = getTourist(context, num);
 	if( !touristRec ) {
 		return JSONValue();
 	}
 
 	// Получаем количество походов туриста
 	size_t pohodCount = getCommonDB().query(
-		`select count(1) from pohod where `~ touristKey.text ~ ` = any(unit_neim)`
+		`select count(1) from pohod where `~ num.text ~ ` = any(unit_neim)`
 	).get(0, 0, "0").to!size_t;
 
 	nav.normalize(pohodCount);
@@ -85,7 +89,7 @@ JSONValue getExperience(
 	prepar "progress",
 	stat "claimState"
 from pohod
-where ` ~ touristKey.text ~ ` = any(unit_neim)
+where ` ~ num.text ~ ` = any(unit_neim)
 order by begin_date desc
 offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
 	).getRecordSet(pohodRecFormat);

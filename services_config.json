@@ -27,7 +27,8 @@
 			},
 			"virtualPaths": {
 				"siteRoot": "/",
-				"siteJSON_RPC": "jsonrpc/"
+				"siteJSON_RPC": "jsonrpc/",
+				"siteWebFormAPI": "api/"
 			}
 		},
 		"yarMKKView": {
@@ -35,6 +36,7 @@
 				"siteRoot": "/",
 				"siteJSON_RPC": "jsonrpc/",
 				"siteDynamic": "dyn/",
+				"siteWebFormAPI": "api/",
 				"sitePublic": "pub/",
 				"siteImg": "pub/mkk/img/",
 
@@ -51,7 +53,129 @@
 				"sitePublic": "pub/",
 
 				"siteIvyTemplates": "res/templates/"
-			}
+			},
+			"pageRouting": [
+				{
+					"pageURI": "/dyn/index",
+					"apiURI": "/api/index",
+					"ivyModule": "mkk.IndexPage",
+					"ivyMethod": "IndexPage"
+				}, {
+					"pageURI": "/dyn/about",
+					"ivyModule": "mkk.AboutSite",
+					"ivyMethod": "AboutSite"
+				}, {
+					"pageURI": "/dyn/document/list",
+					"apiURI": "/api/document/list",
+					"ivyModule": "mkk.DocumentList",
+					"ivyMethod": "DocumentList"
+				}, {
+					"pageURI": "/dyn/document/edit",
+					"apiURI": "/api/document/edit",
+					"ivyModule": "mkk.DocumentEdit",
+					"ivyMethod": "DocumentEdit"
+				}, {
+					"pageURI": "/dyn/document/edit/results",
+					"apiURI": "/api/document/edit/results",
+					"ivyModule": "mkk.DocumentEdit.Results"
+				}, {
+					"pageURI": "/dyn/tourist/plainList",
+					"apiURI": "/dyn/tourist/plainList",
+					"ivyModule": "mkk.TouristPlainList",
+					"ivyMethod": "TouristPlainList"
+				}, {
+					"pageURI": "/dyn/tourist/list",
+					"apiURI": "/api/tourist/list",
+					"ivyModule": "mkk.TouristList",
+					"ivyMethod": "TouristList"
+				}, {
+					"pageURI": "/dyn/tourist/edit",
+					"apiURI": "/api/tourist/edit",
+					"ivyModule": "mkk.TouristEdit",
+					"ivyMethod": "TouristEdit"
+				}, {
+					"pageURI": "/dyn/tourist/edit/results",
+					"apiURI": "/api/tourist/edit/results",
+					"ivyModule": "mkk.TouristEdit.Results"
+				}, {
+					"pageURI": "/dyn/tourist/experience",
+					"apiURI": "/api/tourist/experience",
+					"ivyModule": "mkk.Experience",
+					"ivyMethod": "Experience"
+				}, {
+					"pageURI": "/dyn/user/list",
+					"apiURI": "/api/user/list",
+					"ivyModule": "mkk.UserList",
+					"ivyMethod": "UserList"
+				}, {
+					"pageURI": "/dyn/user/reg/find_tourist",
+					"apiURI": "/api/user/reg/find_tourist",
+					"ivyModule": "mkk.UserList",
+					"ivyMethod": "UserList"
+				}, {
+					"pageURI": "/dyn/user/reg/email_confirm",
+					"apiURI": "/api/user/reg/email_confirm",
+					"ivyModule": "mkk.UserList",
+					"ivyMethod": "UserList"
+				}, {
+					"pageURI": "/dyn/user/reg",
+					"apiURI": "/api/user/reg",
+					"ivyModule": "mkk.UserList",
+					"ivyMethod": "UserList"
+				}, {
+					"pageURI": "/dyn/stat",
+					"apiURI": "/api/stat",
+					"ivyModule": "mkk.Stat",
+					"ivyMethod": "Stat"
+				}, {
+					"pageURI": "/dyn/moder/list",
+					"apiURI": "/api/moder/list",
+					"ivyModule": "mkk.ModerList",
+					"ivyMethod": "ModerList"
+				}, {
+					"pageURI": "/dyn/pohod/list",
+					"apiURI": "/api/pohod/list",
+					"ivyModule": "mkk.PohodList",
+					"ivyMethod": "PohodList"
+				}, {
+					"pageURI": "/dyn/pohod/read",
+					"apiURI": "/api/pohod/read",
+					"ivyModule": "mkk.PohodRead",
+					"ivyMethod": "PohodRead"
+				}, {
+					"pageURI": "/dyn/pohod/partyInfo",
+					"apiURI": "/api/pohod/partyInfo",
+					"ivyModule": "mkk.PohodList.PartyInfo",
+					"ivyMethod": "PartyInfo"
+				}, {
+					"pageURI": "/dyn/pohod/edit",
+					"apiURI": "/api/pohod/edit",
+					"ivyModule": "mkk.PohodEdit",
+					"ivyMethod": "PohodEdit"
+				}, {
+					"pageURI": "/dyn/pohod/edit/results",
+					"apiURI": "/api/pohod/edit/results",
+					"ivyModule": "mkk.PohodEdit.Results"
+				}, {
+					"pageURI": "/dyn/pohod/extraFileLinks",
+					"ivyModule": "mkk.PohodEdit.ExtraFileLinksEdit.LinkItems"
+				}, {
+					"pageURI": "/dyn/user_settings",
+					"apiURI": "/api/user_settings",
+					"ivyModule": "mkk.UserSettings",
+					"ivyMethod": "UserSettings"
+				}, {
+					"pageURI": "/dyn/right/object/list",
+					"apiURI": "/api/right/object/list",
+					"ivyModule": "mkk.Right.ObjectList",
+					"ivyMethod": "ObjectList"
+				}, {
+					"pageURI": "/dyn/right/object/right/list",
+					"apiURI": "/api/right/object/right/list",
+					"ivyModule": "mkk.Right.ObjectRightList",
+					"ivyMethod": "ObjectRightList"
+				}
+			]
 		},
 		"yarMKKHistory": {
 			"URI": "//localhost/",

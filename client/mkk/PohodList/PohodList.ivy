@@ -6,7 +6,12 @@ from mkk.Helpers import RusDateFormat;
 def PohodList {=
 	def.kv
 		instanceName: 'pohodList'
-		cssBaseClass: "mkk-PohodList";
+		cssBaseClass: "mkk-PohodList"
+		pohodEnums: null
+		filter: null
+		pohodList: null
+		pohodNav: null
+		isForPrint: false;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="mkk/PohodList/PohodList">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -130,5 +135,4 @@ def PohodList {=
 	</div>
 	*}
 };
-PohodList
 }

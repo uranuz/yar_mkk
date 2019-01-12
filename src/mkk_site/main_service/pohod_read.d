@@ -7,6 +7,9 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(readPohod)(`pohod.read`);
 	MainService.JSON_RPCRouter.join!(getExtraFileLinks)(`pohod.extraFileLinks`);
+
+	MainService.pageRouter.joinWebFormAPI!(renderPohodRead)("/api/pohod/read");
+	MainService.pageRouter.joinWebFormAPI!(renderExtraFileLinks)("/api/pohod/extraFileLinks");
 }
 
 static immutable pohodInfoQueryBase =
@@ -118,6 +121,25 @@ IBaseRecord readPohod(Optional!size_t pohodNum)
 	return null;
 }
 
+import mkk_site.common.utils: getAuthRedirectURI;
+import std.json: JSONValue;
+
+import mkk_site.main_service.pohod_list: getPartyList;
+
+JSONValue renderPohodRead(HTTPContext ctx, Optional!size_t num)
+{
+	import std.exception: enforce;
+	enforce(num.isSet, `Невозможно отобразить данные похода. Номер похода не задан или некорректен`);
+
+	return JSONValue([
+		"pohodNum": JSONValue(num.value),
+		"pohod": readPohod(num).toStdJSON(),
+		"extraFileLinks": getExtraFileLinks(num).toStdJSON(),
+		"partyList": getPartyList(num).toStdJSON(),
+		"authRedirectURI": JSONValue(getAuthRedirectURI(ctx))
+	]);
+}
+
 static immutable pohodFileLinkRecFormat = RecordFormat!(
 	PrimaryKey!size_t, "num",
 	string, "name",
@@ -130,4 +152,49 @@ auto getExtraFileLinks(Optional!size_t num)
 	return getCommonDB().query(
 		`select num, name, link as num from pohod_file_link where pohod_num = ` ~ (num.isSet? num.text: `null::integer`)
 	).getRecordSet(pohodFileLinkRecFormat);
+}
+
+JSONValue renderExtraFileLinks(Optional!size_t num, string extraFileLinks, string instanceName)
+{
+	import std.json: JSONValue, JSON_TYPE, parseJSON;
+	import std.conv: to;
+	import std.base64: Base64;
+	import webtank.common.optional: Optional;
+
+	JSONValue dataDict;
+	if( num.isSet ) {
+		// Если есть ключ похода, то берем ссылки из похода
+		dataDict["linkList"] = getExtraFileLinks(num).toStdJSON();
+	} else {
+		// Иначе отрисуем список ссылок, который нам передали
+		string decodedExtraFileLinks = cast(string) Base64.decode(extraFileLinks);
+		JSONValue jExtraFileLinks = parseJSON(decodedExtraFileLinks);
+		if( jExtraFileLinks.type != JSON_TYPE.ARRAY && jExtraFileLinks.type != JSON_TYPE.NULL  ) {
+			throw new Exception(`Некорректный формат списка ссылок на доп. материалы`);
+		}
+
+		JSONValue[] linkList;
+		if( jExtraFileLinks.type == JSON_TYPE.ARRAY ) {
+			linkList.length = jExtraFileLinks.array.length;
+			foreach( size_t i, ref JSONValue entry; jExtraFileLinks ) {
+				if( entry.type != JSON_TYPE.ARRAY || entry.array.length < 2) {
+					throw new Exception(`Некорректный формат элемента списка ссылок на доп. материалы`);
+				}
+				if( entry[0].type != JSON_TYPE.STRING && entry[0].type != JSON_TYPE.NULL ) {
+					throw new Exception(`Некорректный формат описания ссылки на доп. материалы`);
+				}
+				if( entry[1].type != JSON_TYPE.STRING && entry[1].type != JSON_TYPE.NULL ) {
+					throw new Exception(`Некорректный формат ссылки на доп. материалы`);
+				}
+				linkList[i] = [
+					(entry[0].type == JSON_TYPE.STRING? entry[0].str : null),
+					(entry[1].type == JSON_TYPE.STRING? entry[1].str : null)
+				];
+			}
+		}
+		dataDict["linkList"] = linkList;
+	}
+	dataDict["instanceName"] = instanceName;
+
+	return dataDict;
 }

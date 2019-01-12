@@ -1,19 +1,25 @@
 define('mkk/JSRender/JSRender', [
 	'fir/controls/FirControl',
-	'ivy/ProgrammeCache',
-	'ivy/RemoteCodeLoader',
+	'ivy/Engine',
+	'ivy/EngineConfig',
+	'ivy/RemoteModuleLoader',
 	'ivy/utils',
 	'fir/network/json_rpc',
 	'fir/datctrl/ivy/helpers',
-	'fir/datctrl/ivy/UserRights'
+	'fir/datctrl/ivy/UserRights',
+	'fir/datctrl/ivy/UserIdentity',
+	'fir/controls/ControlManager'
 ], function(
 	FirControl,
-	ProgrammeCache,
-	RemoteCodeLoader,
+	IvyEngine,
+	IvyEngineConfig,
+	RemoteModuleLoader,
 	iu,
 	json_rpc,
 	FirIvyHelpers,
-	IvyUserRights
+	IvyUserRights,
+	IvyUserIdentity,
+	ControlManager
 ) {
 	__extends(JSRender, FirControl);
 
@@ -21,8 +27,10 @@ define('mkk/JSRender/JSRender', [
 		FirControl.call(this, opts);
 		var
 			self = this,
-			progCache = new ProgrammeCache(
-			new RemoteCodeLoader('/dyn/server/template')),
+			progCache = new IvyEngine(
+				new IvyEngineConfig(),
+				new RemoteModuleLoader('/dyn/server/template')
+			),
 			waitedSources = 3,
 			prog = null,
 			progData = {};
@@ -30,16 +38,26 @@ define('mkk/JSRender/JSRender', [
 		function tryRunRender() {
 			--waitedSources;
 			if( waitedSources <= 0 ) {
-				progData.userRights = new IvyUserRights();
-				progData.filter = {};
-				var
-					res = prog.run(progData),
-					rendered = iu.toString(res);
-				self._elems('content').html(rendered);
+				progData.filter = {
+					dates: {
+						beginRangeHead: {},
+						endRangeTail: {}
+					}
+				};
+				progData.isForPrint = false;
+				progData.vpaths = {};
+				prog.run(progData, {
+					userRights: new IvyUserRights(),
+					userIdentity: new IvyUserIdentity()
+				}).then(function(res) {
+					var rendered = $(iu.toString(res.data));
+					self._elems('content').html(rendered);
+					ControlManager.launchMarkup(rendered);
+				});
 			}
 		}
 		
-		progCache.getIvyModule('mkk.PohodList', function(res) {
+		progCache.getByModuleName('mkk.PohodList', function(res) {
 			prog = res;
 			tryRunRender();
 		});

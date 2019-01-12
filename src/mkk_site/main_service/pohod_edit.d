@@ -7,10 +7,15 @@ import mkk_site.history.client;
 import mkk_site.history.common;
 import mkk_site.data_model.full_format;
 
+import mkk_site.main_service.pohod_read: renderPohodRead;
+
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 	MainService.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
+
+	MainService.pageRouter.joinWebFormAPI!(writePohod)("/api/pohod/edit/result");
+	MainService.pageRouter.joinWebFormAPI!(renderPohodRead)("/api/pohod/edit");
 }
 
 auto editPohod(HTTPContext ctx, PohodDataToWrite record)
@@ -283,4 +288,24 @@ void pohodDelete(HTTPContext ctx, size_t num)
 	};
 	sendToHistory(ctx, `Удаление похода`, historyData);
 	getCommonDB().query(`delete from pohod where num = ` ~ num.text);
+}
+
+import webtank.common.optional: Optional;
+import std.json: JSONValue;
+
+JSONValue writePohod(HTTPContext ctx, PohodDataToWrite record)
+{
+	JSONValue result = [
+		"errorMsg": JSONValue(null),
+		"pohodNum": (record.num.isSet?
+			JSONValue(record.num.value): JSONValue(null)),
+		"isUpdate": JSONValue(record.num.isSet)
+	];
+	try {
+		result["pohodNum"] = editPohod(ctx, record);
+	} catch(Exception ex) {
+		result["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
+	}
+
+	return result;
 }

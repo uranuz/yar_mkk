@@ -8,6 +8,9 @@ shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editDocument)(`document.edit`);
 	MainService.JSON_RPCRouter.join!(deleteDocument)(`document.delete`);
+
+	MainService.pageRouter.joinWebFormAPI!(renderEditDocument)("/api/document/edit");
+	MainService.pageRouter.joinWebFormAPI!(writeDocument)("/api/document/edit/results");
 }
 
 auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
@@ -73,4 +76,42 @@ void deleteDocument(HTTPContext ctx, size_t num)
 	enforce(ctx.rights.hasRight(`document.item`, `delete`), `Недостаточно прав для удаления документа!`);
 
 	getCommonDB().query(`delete from file_link where num = ` ~ num.text);
+}
+
+
+import mkk_site.main_service.document_list: getDocumentList;
+
+import std.json: JSONValue;
+JSONValue renderEditDocument(HTTPContext ctx, Optional!size_t num)
+{
+	DocumentListFilter filter;
+	Navigation nav;
+	if( num.isSet ) {
+		filter.nums = [num.value];
+	}
+	auto callResult = getDocumentList(ctx, filter, nav);
+
+	return JSONValue([
+		"document": (
+			callResult.documentList && callResult.documentList.length?
+			callResult.documentList[0].toStdJSON():
+			JSONValue(null))
+	]);
+}
+
+JSONValue writeDocument(HTTPContext ctx, DocumentDataToWrite record, string instanceName)
+{
+	JSONValue result = [
+		"errorMsg": JSONValue(null),
+		"docNum": record.num.isSet? JSONValue(record.num.value): JSONValue(null),
+		"isUpdate": JSONValue(record.num.isSet),
+		"instanceName": JSONValue(instanceName)
+	];
+	try {
+		result["docNum"] = editDocument(ctx, record);
+	} catch(Exception ex) {
+		result["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
+	}
+
+	return result;
 }

@@ -35,11 +35,13 @@ struct PohodFilter
 		return false;
 	}
 
-	void init() pure nothrow
+	void initializeDates() pure nothrow
 	{
 		// Подпорка для инициализации фильтра дат чем-нибудь. Нужно для шаблонизатора
 		foreach( item; соотвПолейСроков ) {
-			dates[item.имяВФорме] = OptionalDate();
+			if( item.имяВФорме !in dates ) {
+				dates[item.имяВФорме] = OptionalDate();
+			}
 		}
 	}
 }

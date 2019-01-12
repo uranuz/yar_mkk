@@ -5,8 +5,7 @@ def UserList {=
 		moduleName: 'mkk/UserList/UserList'
 		instanceName: 'userList'
 		cssBaseClass: 'mkk-UserList'
-		userList: null
-		;
+		userList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -47,5 +46,5 @@ def UserList {=
 		</div>
 	</div>
 	*}
-}
+};
 }

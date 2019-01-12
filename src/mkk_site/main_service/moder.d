@@ -3,7 +3,9 @@ import mkk_site.main_service.devkit;
 
 shared static this()
 {
-	MainService.JSON_RPCRouter.join!(moderList)(`moder.list`);
+	MainService.JSON_RPCRouter.join!(getModerList)(`moder.list`);
+
+	MainService.pageRouter.joinWebFormAPI!(getModerList)("/api/moder/list");
 }
 
 /// Формат записи для списка модераторов сайта
@@ -36,6 +38,11 @@ where ar.name in ('moder', 'admin')
 order by name
 `;
 
-auto moderList() {
-	return getAuthDB().query(moderListQuery).getRecordSet(moderListRecFormat);
+import std.json: JSONValue;
+
+JSONValue getModerList()
+{
+	return JSONValue([
+		"moderList": getAuthDB().query(moderListQuery).getRecordSet(moderListRecFormat).toStdJSON()
+	]);
 }
