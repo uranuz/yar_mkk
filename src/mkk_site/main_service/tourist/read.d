@@ -39,12 +39,12 @@ static immutable touristRecFormat = RecordFormat!(
 );
 
 Tuple!(IBaseRecord, "tourist")
-readTourist(HTTPContext ctx, Optional!size_t touristNum)
+readTourist(HTTPContext ctx, Optional!size_t num)
 {
 	import std.conv: text;
 	import webtank.datctrl.detatched_record;
 
-	if( touristNum.isNull ) {
+	if( num.isNull ) {
 		return typeof(return)(makeMemoryRecord(touristRecFormat));
 	}
 
@@ -71,7 +71,7 @@ readTourist(HTTPContext ctx, Optional!size_t touristNum)
 		show_email "showEmail",
 		comment
 	from tourist
-		where num = ` ~ touristNum.text
+		where num = ` ~ num.text
 	).getRecordSet(touristRecFormat);
 
 	if( rs && rs.length == 1 ) {

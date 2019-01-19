@@ -13,12 +13,14 @@ def PohodEdit {=
 		moduleName: 'mkk/PohodEdit/PohodEdit'
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
+		accessObject: 'pohod.item'
+
 		pohod: null
 		partyList: null
-		accessObject: 'pohod.item'
+		extraFileLinks: null
 		authRedirectURI: null;
 	def.body {*
-		if not {=isInRoles ['admin', 'moder', 'new_user']} {=
+		{=if not {=isInRoles ['admin', 'moder', 'new_user']} {=
 			return {*
 				<h4>
 					Для редактирования данных похода требуется
@@ -26,7 +28,7 @@ def PohodEdit {=
 					на сайт
 				</h4>
 			*}
-		}
+		} }
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<div class="{=cls 'topButtons'}">
@@ -263,7 +265,7 @@ def PohodEdit {=
 						{=if not{=hasRight subobj: 'group.altChiefNum' kind: 'edit'} 'disabled'}/>
 					<a href="#_NOLink"
 						class="{=cls 'altChiefEditBtn'}"
-						>{=if {=recGet pohod 'altChiefNum'}   
+						>{=if {=recGet pohod 'altChiefNum'}
 							{=recGet pohod 'altChiefName'} or '<Имя не задано>'
 							else 'Редактировать'
 						}</a>

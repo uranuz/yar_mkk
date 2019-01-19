@@ -81,7 +81,7 @@
 					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/tourist/plainList",
-					"apiURI": "/dyn/tourist/plainList",
+					"apiURI": "/api/tourist/plainList",
 					"ivyModule": "mkk.TouristPlainList",
 					"ivyMethod": "TouristPlainList"
 				}, {
@@ -91,7 +91,7 @@
 					"ivyMethod": "TouristList"
 				}, {
 					"pageURI": "/dyn/tourist/edit",
-					"apiURI": "/api/tourist/edit",
+					"apiURI": "/api/tourist/read",
 					"ivyModule": "mkk.TouristEdit",
 					"ivyMethod": "TouristEdit"
 				}, {
