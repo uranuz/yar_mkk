@@ -1,15 +1,15 @@
-module mkk_site.main_service.pohod_read;
+module mkk_site.main_service.pohod.read;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 
 shared static this()
 {
-	MainService.JSON_RPCRouter.join!(readPohod)(`pohod.read`);
-	MainService.JSON_RPCRouter.join!(getExtraFileLinks)(`pohod.extraFileLinks`);
+	MainService.JSON_RPCRouter.join!(pohodReadBase)(`pohod.readBase`);
+	MainService.JSON_RPCRouter.join!(pohodRead)(`pohod.read`);
 
-	MainService.pageRouter.joinWebFormAPI!(renderPohodRead)("/api/pohod/read");
-	MainService.pageRouter.joinWebFormAPI!(renderExtraFileLinks)("/api/pohod/extraFileLinks");
+	MainService.pageRouter.joinWebFormAPI!(pohodReadBase)("/api/pohod/read_base");
+	MainService.pageRouter.joinWebFormAPI!(pohodRead)("/api/pohod/read");
 }
 
 static immutable pohodInfoQueryBase =
@@ -102,13 +102,14 @@ static immutable pohodRecFormat = RecordFormat!(
 	)
 );
 
-IBaseRecord readPohod(Optional!size_t pohodNum)
+Tuple!(IBaseRecord, "pohod")
+pohodReadBase(Optional!size_t pohodNum)
 {
 	import webtank.datctrl.detatched_record;
 	import std.conv: text;
 
 	if( pohodNum.isNull ) {
-		return makeMemoryRecord(pohodRecFormat);
+		return typeof(return)(makeMemoryRecord(pohodRecFormat));
 	}
 
 	auto rs = getCommonDB().query(
@@ -116,28 +117,34 @@ IBaseRecord readPohod(Optional!size_t pohodNum)
 	).getRecordSet(pohodRecFormat);
 
 	if( rs && rs.length == 1 ) {
-		return rs[0];
+		return typeof(return)(rs[0]);
 	}
-	return null;
+	return typeof(return)();
 }
 
 import mkk_site.common.utils: getAuthRedirectURI;
 import std.json: JSONValue;
 
-import mkk_site.main_service.pohod_list: getPartyList;
+import mkk_site.main_service.pohod.party: getPartyList;
+import std.typecons: Tuple;
 
-JSONValue renderPohodRead(HTTPContext ctx, Optional!size_t num)
+Tuple!(
+	IBaseRecord, "pohod",
+	IBaseRecordSet, "extraFileLinks",
+	IBaseRecordSet, "partyList",
+	string, "authRedirectURI"
+)
+pohodRead(HTTPContext ctx, Optional!size_t num)
 {
 	import std.exception: enforce;
 	enforce(num.isSet, `Невозможно отобразить данные похода. Номер похода не задан или некорректен`);
 
-	return JSONValue([
-		"pohodNum": JSONValue(num.value),
-		"pohod": readPohod(num).toStdJSON(),
-		"extraFileLinks": getExtraFileLinks(num).toStdJSON(),
-		"partyList": getPartyList(num).toStdJSON(),
-		"authRedirectURI": JSONValue(getAuthRedirectURI(ctx))
-	]);
+	return typeof(return)(
+		pohodReadBase(num).pohod,
+		getExtraFileLinks(num),
+		getPartyList(num).partyList,
+		getAuthRedirectURI(ctx)
+	);
 }
 
 static immutable pohodFileLinkRecFormat = RecordFormat!(
@@ -146,7 +153,7 @@ static immutable pohodFileLinkRecFormat = RecordFormat!(
 	string, "link"
 )();
 
-auto getExtraFileLinks(Optional!size_t num)
+IBaseRecordSet getExtraFileLinks(Optional!size_t num)
 {
 	import std.conv: text;
 	return getCommonDB().query(

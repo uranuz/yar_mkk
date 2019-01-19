@@ -1,4 +1,4 @@
-module mkk_site.main_service.registration;
+module mkk_site.main_service.user.registration;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.pohod_edit: PohodDataToWrite, DBName, PohodFileLink;
@@ -9,7 +9,7 @@ import mkk_site.data_model.tourist_edit;
 import mkk_site.security.core.register_user: registerUser, addUserRoles, RegUserResult;
 import mkk_site.security.core.access_control: emailConfirmDaysLimit;
 
-import mkk_site.main_service.tourist_edit: editTourist;
+import mkk_site.main_service.tourist.edit: editTourist;
 
 
 shared static this()
@@ -20,7 +20,7 @@ shared static this()
 	MainService.pageRouter.joinWebFormAPI!(findTourist)("/api/user/reg/find_tourist");
 	MainService.pageRouter.joinWebFormAPI!(emailConfirm)("/api/user/reg/email_confirm");
 	MainService.pageRouter.joinWebFormAPI!(userReg)("/api/user/reg/results");
-	MainService.pageRouter.joinWebFormAPI!(userReg)("/api/user/reg");
+	MainService.pageRouter.joinWebFormAPI!(renderUserReg)("/api/user/reg");
 }
 
 import std.json: JSONValue;
@@ -83,7 +83,7 @@ JSONValue regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData u
 	sendConfirmEmail(touristData.email, regUserRes.confirmUUID);
 
 	auto jResult = JSONValue([
-		"touristNum":  editTourist(ctx, touristData),
+		"touristNum":  editTourist(ctx, touristData).touristNum,
 		"userNum": regUserRes.userNum
 	]);
 
@@ -254,11 +254,11 @@ JSONValue userReg(HTTPContext ctx, TouristDataToWrite touristData, UserRegData u
 	return writeRes;
 }
 
-import mkk_site.main_service.experience: getTourist;
+import mkk_site.main_service.tourist.read: readTourist;
 JSONValue renderUserReg(HTTPContext ctx, Optional!size_t num)
 {
 	return JSONValue([
-		"tourist": getTourist(ctx, num).toStdJSON()
+		"tourist": readTourist(ctx, num).tourist.toStdJSON()
 	]);
 }
 

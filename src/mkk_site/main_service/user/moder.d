@@ -1,4 +1,4 @@
-module mkk_site.main_service.moder;
+module mkk_site.main_service.user.moder;
 import mkk_site.main_service.devkit;
 
 shared static this()
@@ -38,11 +38,9 @@ where ar.name in ('moder', 'admin')
 order by name
 `;
 
-import std.json: JSONValue;
-
-JSONValue getModerList()
+Tuple!(IBaseRecordSet, "moderList") getModerList()
 {
-	return JSONValue([
-		"moderList": getAuthDB().query(moderListQuery).getRecordSet(moderListRecFormat).toStdJSON()
-	]);
+	return typeof(return)(
+		getAuthDB().query(moderListQuery).getRecordSet(moderListRecFormat)
+	);
 }

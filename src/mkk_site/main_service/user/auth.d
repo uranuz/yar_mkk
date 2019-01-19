@@ -1,4 +1,4 @@
-module mkk_site.main_service.auth;
+module mkk_site.main_service.user.auth;
 
 import webtank.net.http.context: HTTPContext;
 
@@ -14,30 +14,38 @@ shared static this()
 }
 
 import mkk_site.security.core.access_control;
+import std.typecons: Tuple;
+import webtank.common.optional: Optional;
 
 /// Получить базовую информацию о пользователе по идентификатору сессии
-auto baseUserInfo(HTTPContext context)
+Tuple!(
+	string, `login`,
+	string, `name`,
+	Optional!size_t, `userNum`,
+	string, `accessRoles`,
+	Optional!size_t, `touristNum`
+)
+baseUserInfo(HTTPContext context)
 {
 	import std.json: JSONValue;
 	import std.conv: to, ConvException;
 	auto userIdentity = MainService.accessController.authenticate(context);
 
-	JSONValue result;
-	result[`login`] = userIdentity.id;
-	result[`name`] = userIdentity.name;
+	typeof(return) res;
+	res.login = userIdentity.id;
+	res.name = userIdentity.name;
 
-	result[`userNum`] = null;
 	if( userIdentity.data.get(`userNum`, null).length > 0 )
 	{
 		try {
-			result[`userNum`] = userIdentity.data[`userNum`].to!size_t;
+			res.userNum = userIdentity.data[`userNum`].to!size_t;
 		} catch(ConvException ex) {}
 	}
 
-	result[`accessRoles`] = userIdentity.data.get(`accessRoles`, null);
-	result[`touristNum`] = null; // TODO: Добавить получение идентификатора туриста для пользователя
+	res.accessRoles = userIdentity.data.get(`accessRoles`, null);
+	// TODO: Добавить получение идентификатора туриста для пользователя
 
-	return result;
+	return res;
 }
 
 string authByPassword(HTTPContext context, string login, string password)

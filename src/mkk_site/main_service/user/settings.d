@@ -1,16 +1,14 @@
-module mkk_site.main_service.user_settings;
+module mkk_site.main_service.user.settings;
 
 import mkk_site.main_service.devkit;
 import mkk_site.security.core.access_control: changeUserPassword;
 import mkk_site.security.common.exception: SecurityException;
 
-import std.json: JSONValue;
-
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(changePassword)(`user.changePassword`);
 
-	MainService.pageRouter.joinWebFormAPI!(renderUserSettings)("/api/user_settings");
+	MainService.pageRouter.joinWebFormAPI!(renderUserSettings)("/api/user/settings");
 }
 
 void changePassword(
@@ -40,23 +38,26 @@ void changePassword(
 	);
 }
 
-JSONValue renderUserSettings(
+Tuple!(
+	string, `userFullName`,
+	string, `userLogin`,
+	string, `pwChangeMessage`
+)
+renderUserSettings(
 	HTTPContext ctx,
 	string oldPassword,
 	string newPassword,
 	string repeatPassword
 ) {
-	JSONValue dataDict = [
-		`userFullName`: JSONValue(ctx.user.name),
-		`userLogin`: JSONValue(ctx.user.id),
-		`pwChangeMessage`: JSONValue(null)
-	];
+	typeof(return) res;
+	res.userFullName = ctx.user.name;
+	res.userLogin = ctx.user.id;
 
 	try {
 		changePassword(ctx, oldPassword, newPassword, repeatPassword);
 	} catch(Exception ex) {
-		dataDict[`pwChangeMessage`] = ex.msg;
+		res.pwChangeMessage = ex.msg;
 	}
 
-	return dataDict;
+	return res;
 }

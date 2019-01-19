@@ -71,13 +71,14 @@
 					"ivyMethod": "DocumentList"
 				}, {
 					"pageURI": "/dyn/document/edit",
-					"apiURI": "/api/document/edit",
+					"apiURI": "/api/document/read",
 					"ivyModule": "mkk.DocumentEdit",
 					"ivyMethod": "DocumentEdit"
 				}, {
 					"pageURI": "/dyn/document/edit/results",
 					"apiURI": "/api/document/edit/results",
-					"ivyModule": "mkk.DocumentEdit.Results"
+					"ivyModule": "mkk.DocumentEdit.Results",
+					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/tourist/plainList",
 					"apiURI": "/dyn/tourist/plainList",
@@ -96,7 +97,8 @@
 				}, {
 					"pageURI": "/dyn/tourist/edit/results",
 					"apiURI": "/api/tourist/edit/results",
-					"ivyModule": "mkk.TouristEdit.Results"
+					"ivyModule": "mkk.TouristEdit.Results",
+					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/tourist/experience",
 					"apiURI": "/api/tourist/experience",
@@ -149,19 +151,20 @@
 					"ivyMethod": "PartyInfo"
 				}, {
 					"pageURI": "/dyn/pohod/edit",
-					"apiURI": "/api/pohod/edit",
+					"apiURI": "/api/pohod/read",
 					"ivyModule": "mkk.PohodEdit",
 					"ivyMethod": "PohodEdit"
 				}, {
 					"pageURI": "/dyn/pohod/edit/results",
 					"apiURI": "/api/pohod/edit/results",
-					"ivyModule": "mkk.PohodEdit.Results"
+					"ivyModule": "mkk.PohodEdit.Results",
+					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/pohod/extraFileLinks",
 					"ivyModule": "mkk.PohodEdit.ExtraFileLinksEdit.LinkItems"
 				}, {
-					"pageURI": "/dyn/user_settings",
-					"apiURI": "/api/user_settings",
+					"pageURI": "/dyn/user/settings",
+					"apiURI": "/api/user/settings",
 					"ivyModule": "mkk.UserSettings",
 					"ivyMethod": "UserSettings"
 				}, {
@@ -174,6 +177,16 @@
 					"apiURI": "/api/right/object/right/list",
 					"ivyModule": "mkk.Right.ObjectRightList",
 					"ivyMethod": "ObjectRightList"
+				}, {
+					"pageURI": "/dyn/tourist/history",
+					"apiURI": "/history/api/tourist/history",
+					"ivyModule": "mkk.RecordHistory",
+					"ivyMethod": "RecordHistory"
+				}, {
+					"pageURI": "/dyn/pohod/history",
+					"apiURI": "/history/api/pohod/history",
+					"ivyModule": "mkk.RecordHistory",
+					"ivyMethod": "RecordHistory"
 				}
 			]
 		},
@@ -184,7 +197,8 @@
 			},
 			"virtualPaths": {
 				"siteRoot": "/",
-				"siteJSON_RPC": "history/jsonrpc/"
+				"siteJSON_RPC": "history/jsonrpc/",
+				"siteWebFormAPI": "history/api/"
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",

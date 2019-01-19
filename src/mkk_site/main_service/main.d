@@ -4,22 +4,32 @@ import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
 import mkk_site.common.service: Service;
 
 // Подключение разделов сервиса
-import mkk_site.main_service.auth;
-import mkk_site.main_service.moder;
-import mkk_site.main_service.pohod_list;
-import mkk_site.main_service.pohod_read;
-import mkk_site.main_service.pohod_filters;
-import mkk_site.main_service.pohod_edit;
-import mkk_site.main_service.document_list;
-import mkk_site.main_service.document_edit;
-import mkk_site.main_service.tourist_list;
-import mkk_site.main_service.tourist_edit;
-import mkk_site.main_service.experience;
-import mkk_site.main_service.user_settings;
-import mkk_site.main_service.stat;
+import mkk_site.main_service.document.edit;
+import mkk_site.main_service.document.list;
+import mkk_site.main_service.document.read;
+
+import mkk_site.main_service.pohod.list;
+import mkk_site.main_service.pohod.read;
+import mkk_site.main_service.pohod.filters;
+import mkk_site.main_service.pohod.edit;
+import mkk_site.main_service.pohod.stat;
+
+import mkk_site.main_service.right.object_list;
+
+import mkk_site.main_service.tourist.read;
+import mkk_site.main_service.tourist.experience;
+import mkk_site.main_service.tourist.list;
+import mkk_site.main_service.tourist.edit;
+
+import mkk_site.main_service.user.auth;
+import mkk_site.main_service.user.moder;
+import mkk_site.main_service.user.settings;
+import mkk_site.main_service.user.registration;
+import mkk_site.main_service.user.list;
+
 import mkk_site.main_service.init_history_data;
-import mkk_site.main_service.right_object_list;
-import mkk_site.main_service.registration;
+
+
 
 void main(string[] progArgs)
 {

@@ -5,7 +5,6 @@ import mkk_site.view_service.service;
 
 // Подключение разделов сервиса
 import mkk_site.view_service.auth;
-import mkk_site.view_service.record_history;
 
 void main(string[] progArgs)
 {

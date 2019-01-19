@@ -1,4 +1,4 @@
-module mkk_site.main_service.pohod_filters;
+module mkk_site.main_service.pohod.filters;
 
 import mkk_site.main_service.service;
 

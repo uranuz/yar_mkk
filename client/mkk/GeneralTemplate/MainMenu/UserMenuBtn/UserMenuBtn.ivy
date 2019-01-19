@@ -36,7 +36,7 @@ def UserMenuBtn {=
 			</li>
 			<div class="{=cls 'buttonsSeparator'} {{authStateCls}}"></div>
 			<li>
-				<a href="{{vpaths.siteDynamic}}user_settings"
+				<a href="{{vpaths.siteDynamic}}user/settings"
 					class="{=cls 'userSettingsBtn'} {{authStateCls}}"
 					title="Открыть страницу персональных настроек"
 					>Настройки</a>

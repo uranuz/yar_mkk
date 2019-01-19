@@ -1,4 +1,4 @@
-module mkk_site.main_service.right_object_list;
+module mkk_site.main_service.right.object_list;
 
 import mkk_site.main_service.devkit;
 
@@ -7,8 +7,8 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(getObjectList)(`right.objectList`);
 	MainService.JSON_RPCRouter.join!(getObjectRightList)(`right.objectRightList`);
 
-	MainService.pageRouter.joinWebFormAPI!(renderObjectList)("/api/right/object/list");
-	MainService.pageRouter.joinWebFormAPI!(renderObjectRightList)("/api/right/object/right/list");
+	MainService.pageRouter.joinWebFormAPI!(getObjectList)("/api/right/object/list");
+	MainService.pageRouter.joinWebFormAPI!(getObjectRightList)("/api/right/object/right/list");
 }
 
 static immutable rightObjectRecFormat = RecordFormat!(
@@ -18,14 +18,16 @@ static immutable rightObjectRecFormat = RecordFormat!(
 	size_t, "parentNum"
 )();
 
-auto getObjectList(HTTPContext ctx)
+Tuple!(IBaseRecordSet, `objectList`)
+getObjectList(HTTPContext ctx)
 {
 	import std.exception: enforce;
+
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
-	return getAuthDB().query(`
+	return typeof(return)(getAuthDB().query(`
 	select num, name, description, parent_num
 	from access_object
-	`).getRecordSet(rightObjectRecFormat);
+	`).getRecordSet(rightObjectRecFormat));
 }
 
 static immutable objRightRecFormat = RecordFormat!(
@@ -36,12 +38,13 @@ static immutable objRightRecFormat = RecordFormat!(
 	bool, "inheritance"
 )();
 
-auto getObjectRightList(HTTPContext ctx, size_t num)
+Tuple!(IBaseRecordSet, `objectRightList`)
+getObjectRightList(HTTPContext ctx, size_t num)
 {
 	import std.exception: enforce;
 	import std.conv: text;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
-	return getAuthDB().query(`
+	return typeof(return)(getAuthDB().query(`
 	select
 		rgh.num,
 		rgh."access_kind" "accessKind",
@@ -54,17 +57,5 @@ auto getObjectRightList(HTTPContext ctx, size_t num)
 	left join access_rule a_rule
 		on a_rule.num = rgh.rule_num
 	where rgh.object_num = ` ~ num.text ~ `
-	`).getRecordSet(objRightRecFormat);
-}
-
-import std.json: JSONValue;
-JSONValue renderObjectList(HTTPContext ctx) {
-	return JSONValue(["objectList": getObjectList(ctx).toStdJSON()]);
-}
-
-JSONValue renderObjectRightList(HTTPContext ctx, size_t num)
-{
-	return JSONValue([
-		"objectRightList": getObjectRightList(ctx, num).toStdJSON()
-	]);
+	`).getRecordSet(objRightRecFormat));
 }

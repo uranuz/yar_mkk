@@ -1,4 +1,4 @@
-module mkk_site.main_service.tourist_edit;
+module mkk_site.main_service.tourist.edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.tourist_edit;
@@ -12,11 +12,13 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(editTourist)(`tourist.edit`);
 	MainService.JSON_RPCRouter.join!(touristDelete)(`tourist.delete`);
 
-	MainService.pageRouter.joinWebFormAPI!(writeTourist)("/api/tourist/edit/results");
-	MainService.pageRouter.joinWebFormAPI!(renderEditTourist)("/api/tourist/edit");
+	MainService.pageRouter.joinWebFormAPI!(editTourist)("/api/tourist/edit/results");
 }
 
-auto editTourist(
+import std.typecons: Tuple;
+
+Tuple!(Optional!size_t, `touristNum`)
+editTourist(
 	HTTPContext ctx,
 	TouristDataToWrite record
 ) {
@@ -103,6 +105,7 @@ auto editTourist(
 		}
 	}
 
+	auto res = typeof(return)(record.num);
 	if( fieldNames.length > 0 )
 	{
 		if( "userNum" !in ctx.user.data ) {
@@ -145,11 +148,11 @@ auto editTourist(
 				recordKind: (record.num.isSet? HistoryRecordKind.Update: HistoryRecordKind.Insert)
 			};
 			sendToHistory(ctx, (record.num.isSet? `Редактирование туриста`: `Добавление туриста`), historyData);
-			return writeQueryRes.get(0, 0, null).to!size_t;
+			res.touristNum = writeQueryRes.get(0, 0, null).to!size_t;
 		}
 	}
 
-	return record.num;
+	return res;
 }
 
 /++ Простой, но опасный метод, который удаляет туриста по ключу. Требует прав админа! +/
@@ -166,31 +169,4 @@ void touristDelete(HTTPContext ctx, size_t num)
 	};
 	sendToHistory(ctx, `Удаление туриста`, historyData);
 	getCommonDB().query(`delete from tourist where num = ` ~ num.text);
-}
-
-import mkk_site.main_service.experience: getTourist;
-import std.json: JSONValue;
-
-JSONValue renderEditTourist(HTTPContext ctx, Optional!size_t num)
-{
-	return JSONValue([
-		"tourist": getTourist(ctx, num).toStdJSON()
-	]);
-}
-
-JSONValue writeTourist(HTTPContext ctx, TouristDataToWrite record)
-{
-	JSONValue result = [
-		"errorMsg": JSONValue(null),
-		"touristNum": (record.num.isSet?
-			JSONValue(record.num.value): JSONValue(null)),
-		"isUpdate": JSONValue(record.num.isSet)
-	];
-	try {
-		result["touristNum"] = editTourist(ctx, record);
-	} catch(Exception ex) {
-		result["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
-	}
-
-	return result;
 }

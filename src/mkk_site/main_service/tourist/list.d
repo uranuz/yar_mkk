@@ -1,4 +1,4 @@
-module mkk_site.main_service.tourist_list;
+module mkk_site.main_service.tourist.list;
 
 import std.conv, std.string, std.utf;
 import mkk_site.main_service.devkit;
@@ -11,10 +11,13 @@ import mkk_site.data_model.tourist_list;
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(touristList)(`tourist.list`);
-	MainService.JSON_RPCRouter.join!(touristPlainSearch)(`tourist.plainSearch`);
+	MainService.JSON_RPCRouter.join!(plainListTourist)(`tourist.plainList`);
+
+	MainService.pageRouter.joinWebFormAPI!(touristList)("/api/tourist/list");
+	MainService.pageRouter.joinWebFormAPI!(plainListTourist)("/api/tourist/plainList");
 }
 
-import std.typecons: tuple;
+import std.typecons: tuple, Tuple;
 
 static immutable shortTouristRecFormat = RecordFormat!(
 	PrimaryKey!(size_t), "num",
@@ -24,14 +27,20 @@ static immutable shortTouristRecFormat = RecordFormat!(
 	size_t, "birthYear"
 )();
 
-auto touristPlainSearch(TouristListFilter filter, Navigation nav)
+/// Возвращает список туристов с базовой информацией
+Tuple!(
+	IBaseRecordSet, "touristList",
+	Navigation, "nav",
+	TouristListFilter, "filter"
+)
+plainListTourist(TouristListFilter filter, Navigation nav)
 {
-	return getTouristListImpl(
+	auto listRes = getTouristListImpl(
 		filter, nav,
 		shortTouristRecFormat,
 		`num, family_name, given_name, patronymic, birth_year`,
-		`family_name, given_name, patronymic`
-	);
+		`family_name, given_name, patronymic`);
+	return typeof(return)(listRes.touristList, listRes.nav, filter);
 }
 
 static immutable touristListRecFormat = RecordFormat!(
@@ -51,9 +60,15 @@ static immutable touristListRecFormat = RecordFormat!(
 	tuple(спортивныйРазряд, судейскаяКатегория)
 );
 
-auto touristList(TouristListFilter filter, Navigation nav)
+/// Возвращает список туристов в подробном варианте
+Tuple!(
+	IBaseRecordSet, "touristList",
+	Navigation, "nav",
+	TouristListFilter, "filter"
+)
+touristList(TouristListFilter filter, Navigation nav)
 {
-	return getTouristListImpl(
+	auto listRes = getTouristListImpl(
 		filter, nav,
 		touristListRecFormat,
 		`num,
@@ -67,19 +82,27 @@ auto touristList(TouristListFilter filter, Navigation nav)
 		razr "sportsCategory",
 		sud "refereeCategory",
 		comment`,
-		`family_name, given_name, patronymic`
+		`family_name, given_name, patronymic`);
+	
+	return typeof(return)(
+		listRes.touristList,
+		listRes.nav,
+		filter
 	);
 }
 
 // Реализация двух методов "tourist.list" и "tourist.plainSearch", отличающихся только набором возвращаемых полей
-auto getTouristListImpl(ResultFormat)(
+Tuple!(
+	IBaseRecordSet, "touristList",
+	Navigation, "nav"
+)
+getTouristListImpl(ResultFormat)(
 	TouristListFilter filter,
 	Navigation nav,
 	ResultFormat resultFormat,
 	string queryFields,
 	string orderBy
 ) {
-	import std.json: JSONValue;
 	import std.traits: getUDAs;
 	import webtank.common.optional: Optional, isOptional, OptionalValueType;
 	import std.conv: text, to;
@@ -141,53 +164,8 @@ auto getTouristListImpl(ResultFormat)(
 		~ ` offset ` ~ nav.offset.text
 		~ ` limit ` ~ nav.pageSize.text;
 
-	return JSONValue([
-		"rs": getCommonDB().query(query).getRecordSet(resultFormat).toStdJSON(),
-		"nav":  nav.toStdJSON()
-	]);
-}
-
-shared static this() {
-	MainService.pageRouter.joinWebFormAPI!(renderTouristList)("/api/tourist/list");
-	MainService.pageRouter.joinWebFormAPI!(renderTouristPlainList)("/api/tourist/plainList");
-}
-
-import std.json: JSONValue;
-JSONValue renderTouristList(TouristListFilter filter, Navigation nav)
-{
-	JSONValue callResult = touristList(filter, nav);
-
-	return JSONValue([
-		"filter": filter.toStdJSON(),
-		"touristList": callResult["rs"],
-		"nav": callResult["nav"]
-	]);
-}
-
-struct ListSettings
-{
-	string mode; // Режим списка: на добавление/ на удаление записей
-	string instanceName; // Название экземпляра компонента
-}
-
-JSONValue renderTouristPlainList(TouristListFilter filter, Navigation nav, ListSettings settings)
-{
-	import std.algorithm: canFind;
-
-	JSONValue callResult = touristPlainSearch(filter, nav);
-	JSONValue dataDict = [
-		"filter": filter.toStdJSON(),
-		"touristList": callResult["rs"],
-		"nav": callResult["nav"]
-	];
-
-	if( ["add", "remove"].canFind(settings.mode) ) {
-		dataDict["mode"] = settings.mode;
-	}
-
-	if( settings.instanceName.length > 0 ) {
-		dataDict["instanceName"] = settings.instanceName;
-	}
-
-	return dataDict;
+	return typeof(return)(
+		getCommonDB().query(query).getRecordSet(resultFormat),
+		nav
+	);
 }

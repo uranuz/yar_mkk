@@ -14,15 +14,15 @@ def PartyInfo {=
 		{=if not{=empty pohodInfo} {*
 		<div>
 			<span class="{=cls 'codeLabel'}">Код МКК:</span>
-			<span>{=rsGet pohodInfo "mkkCode" 0}</span>
+			<span>{=recGet pohodInfo "mkkCode"}</span>
 		</div>
 		<div>
 			<span class="{=cls 'bookNumLabel'}">Номер книги: </span>
-			<span>{=rsGet pohodInfo "bookNum" 0}</span>
+			<span>{=recGet pohodInfo "bookNum"}</span>
 		</div>
 		<div>
 			<span class="{=cls 'regionLabel'}">Район похода: </span>
-			<span>{=rsGet pohodInfo "pohodRegion" 0}</span>
+			<span>{=recGet pohodInfo "pohodRegion"}</span>
 		</div>
 		<hr/>
 		*}}

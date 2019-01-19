@@ -28,3 +28,5 @@ public import
 public import
 	mkk_site.main_service.service,
 	mkk_site.common.utils;
+
+public import std.typecons: tuple, Tuple;

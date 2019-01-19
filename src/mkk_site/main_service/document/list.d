@@ -1,12 +1,12 @@
-module mkk_site.main_service.document_list;
+module mkk_site.main_service.document.list;
 
 import mkk_site.main_service.devkit;
-import mkk_site.data_model.enums;
 import mkk_site.data_model.document;
 
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(getDocumentList)(`document.list`);
+
 	MainService.pageRouter.joinWebFormAPI!(getDocumentList)("/api/document/list");
 }
 
@@ -18,7 +18,11 @@ static immutable documentRecFormat = RecordFormat!(
 
 import std.typecons: Tuple;
 
-Tuple!(IBaseRecordSet, "documentList", Navigation, "nav", DocumentListFilter, "filter")
+Tuple!(
+	IBaseRecordSet, "documentList",
+	Navigation, "nav",
+	DocumentListFilter, "filter"
+)
 getDocumentList(HTTPContext ctx, DocumentListFilter filter, Navigation nav)
 {
 	import webtank.datctrl.record_set;

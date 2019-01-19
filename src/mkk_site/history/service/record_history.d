@@ -4,6 +4,7 @@ import webtank.common.std_json.to: toStdJSON;
 import webtank.net.utils: PGEscapeStr;
 import webtank.net.http.context: HTTPContext;
 import webtank.common.optional: Optional;
+import webtank.net.http.handler: joinWebFormAPI;
 
 import mkk_site.history.service.service;
 import mkk_site.common.utils;
@@ -12,8 +13,9 @@ import mkk_site.data_model.common: Navigation;
 
 shared static this()
 {
-	HistoryService.JSON_RPCRouter.join!(getPohodHistory)(`history.pohod`);
-	HistoryService.JSON_RPCRouter.join!(getTouristHistory)(`history.tourist`);
+	HistoryService.JSON_RPCRouter.join!(getRecordHistory)(`history.list`);
+
+	HistoryService.pageRouter.joinWebFormAPI!(getRecordHistory)("/history/api/{objectName}/history");
 }
 
 import webtank.datctrl.record_format;
@@ -37,8 +39,8 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 	import std.algorithm: canFind;
 	import std.exception: enforce;
 
-	enforce([`pohod`, `tourist`].canFind(filter.tableName), `Просмотр истории пока доступен только для походов или туристов`);
-	enforce(ctx.rights.hasRight(filter.tableName ~ `.history`, `read`),
+	enforce([`pohod`, `tourist`].canFind(filter.objectName), `Просмотр истории пока доступен только для походов или туристов`);
+	enforce(ctx.rights.hasRight(filter.objectName ~ `.history`, `read`),
 		`Недостаточно прав для просмотра истории изменений!`
 	);
 
@@ -49,13 +51,13 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 		data,
 		user_num,
 		time_stamp
-	from "_hc__` ~ filter.tableName ~ `"
-	where rec_num = ` ~ filter.recordNum.text ~ `
+	from "_hc__` ~ filter.objectName ~ `"
+	where rec_num = ` ~ filter.num.text ~ `
 	order by time_stamp, num
 	offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text ~ `
 	`).getRecordSet(historyRecFormat);
 
-	string[] allowedFields = (filter.tableName == `pohod`? [
+	string[] allowedFields = (filter.objectName == `pohod`? [
 		"num",
 		"kod_mkk",
 		"nomer_knigi",
@@ -156,17 +158,8 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 	
 	import std.range: retro;
 	import std.array: array;
-	return JSONValue(items.retro.array);
-}
-
-JSONValue getPohodHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigation nav)
-{
-	filter.tableName = "pohod";
-	return getRecordHistory(ctx, filter, nav);
-}
-
-JSONValue getTouristHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigation nav)
-{
-	filter.tableName = "tourist";
-	return getRecordHistory(ctx, filter, nav);
+	return JSONValue([
+		`history`: JSONValue(items.retro.array),
+		`objectName`: JSONValue(filter.objectName)
+	]);
 }

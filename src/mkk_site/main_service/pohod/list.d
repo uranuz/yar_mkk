@@ -1,25 +1,19 @@
-module mkk_site.main_service.pohod_list;
+module mkk_site.main_service.pohod.list;
 
 import mkk_site.main_service.devkit;
+
 import mkk_site.data_model.enums;
 import mkk_site.data_model.pohod_list;
 
-import webtank.common.std_json.to: toStdJSON;
 import webtank.common.optional_date;
 
 
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(recentPohodList)(`pohod.recentList`);
-	MainService.JSON_RPCRouter.join!(getPohodEnumTypes)(`pohod.enumTypes`);
 	MainService.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
-	MainService.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
-	MainService.JSON_RPCRouter.join!(partyInfo)(`pohod.partyInfo`);
-	MainService.JSON_RPCRouter.join!(pohodCsv)(`pohod.Csv`);
 
 	MainService.pageRouter.joinWebFormAPI!(getPohodList)("/api/pohod/list");
-	MainService.pageRouter.joinWebFormAPI!(partyInfo)("/api/pohod/partyInfo");
-	MainService.pageRouter.joinWebFormAPI!(renderPohodCsv)("/api/pohod.csv");
 }
 
 import std.datetime: Date;
@@ -59,7 +53,7 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	)
 );
 
-static immutable basePohodFieldSuquery =`
+static immutable basePohodFieldSubquery =`
 	poh.num "num",
 	kod_mkk "mkkCode",
 	nomer_knigi "bookNum",
@@ -81,7 +75,7 @@ static immutable basePohodFieldSuquery =`
 `;
 
 static immutable recentPohodQuery =
-`select ` ~ basePohodFieldSuquery ~ `
+`select ` ~ basePohodFieldSubquery ~ `
 	chef_coment "chiefComment"
 from pohod poh
 left join tourist chief
@@ -96,82 +90,6 @@ auto recentPohodList() {
 	return getCommonDB().query(recentPohodQuery).getRecordSet(recentPohodRecFormat);
 }
 
-import std.json: JSONValue;
-static immutable JSONValue pohodEnumTypes;
-shared static this()
-{
-	pohodEnumTypes = JSONValue([
-		`tourismKind`: видТуризма.toStdJSON(),
-		`complexity`: категорияСложности.toStdJSON(),
-		`progress`: готовностьПохода.toStdJSON(),
-		`claimState`: статусЗаявки.toStdJSON()
-	]);
-}
-
-/++ Возвращает JSON с перечислимыми типами, относящимися к походу +/
-JSONValue getPohodEnumTypes() {
-	return pohodEnumTypes;
-}
-
-static immutable participantInfoRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
-	string, "familyName",
-	string, "givenName",
-	string, "patronymic",
-	int, "birthYear"
-)();
-
-IBaseRecordSet getPartyList(Optional!size_t num)
-{
-	import webtank.datctrl.record_set;
-	import std.conv: text;
-	if( num.isNull ) {
-		return makeMemoryRecordSet(participantInfoRecFormat);
-	}
-
-	return getCommonDB().query(
-`with tourist_num as(
-	select unnest(unit_neim) as num
-	from pohod where pohod.num = ` ~ num.text ~ `
-)
-select
-	tourist.num,
-	tourist.family_name,
-	tourist.given_name,
-	tourist.patronymic,
-	tourist.birth_year
-from tourist_num
-join tourist
-	on tourist.num = tourist_num.num
-order by family_name, given_name`
-	).getRecordSet(participantInfoRecFormat);
-}
-
-static immutable briefPohodInfoRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
-	string, "mkkCode",
-	string, "bookNum",
-	string, "pohodRegion"
-)();
-
-JSONValue partyInfo(size_t num)
-{
-	import std.conv: text;
-	auto pohodInfo = getCommonDB().query(`
-select
-	pohod.num as num,
-	pohod.kod_mkk as "mkkCode",
-	pohod.nomer_knigi as "bookNum",
-	pohod.region_pohod as "pohodRegion"
-from pohod where pohod.num = ` ~ num.text ~ `
-	`).getRecordSet(briefPohodInfoRecFormat);
-
-	JSONValue jsonResult;
-	jsonResult["pohodInfo"] = pohodInfo.toStdJSON();
-	jsonResult["partyList"] = getPartyList(Optional!size_t(num)).toStdJSON();
-
-	return jsonResult;
-}
 
 import std.meta: AliasSeq;
 import std.typecons: tuple, Tuple;
@@ -345,7 +263,7 @@ IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 
-	string query = `select ` ~ basePohodFieldSuquery;
+	string query = `select ` ~ basePohodFieldSubquery;
 
 	if( filter.withDataCheck )
 		query ~= pohodListDataCheckSubquery;
@@ -365,157 +283,22 @@ IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 	return getCommonDB().query(query);
 }
 //---------------------------------------------------------------
-JSONValue getPohodList(PohodFilter filter, Navigation nav)
+import mkk_site.main_service.pohod.enums: getPohodEnumTypes;
+
+Tuple!(
+	IBaseRecordSet, "pohodList",
+	Navigation, "pohodNav",
+	PohodFilter, "filter",
+	typeof(getPohodEnumTypes()), "pohodEnums",
+	bool, "isForPrint"
+)
+getPohodList(PohodFilter filter, Navigation nav)
 {
 	filter.initializeDates();
 	nav.normalize(getPohodCount(filter));
 
-	return JSONValue([
-		"pohodList": PohodList(filter, nav).getRecordSet(pohodRecFormat).toStdJSON(),
-		"pohodNav": nav.toStdJSON(),
-		"filter": filter.toStdJSON(),
-		"pohodEnums": getPohodEnumTypes(),
-		"isForPrint": JSONValue(false)
-	]);
+	return typeof(return)(
+		PohodList(filter, nav).getRecordSet(pohodRecFormat),
+		nav, filter, getPohodEnumTypes(), false);
 }
 //---------------------------------------------------------------
-auto pohodCsv(HTTPContext context,PohodFilter filter)
-{
-	import std.string: translate;
-	import std.datetime.date;
-	import std.conv; 
-	import mkk_site.data_model.enums;
-
-	string[dchar] transTable1 = [',':" /",'\r':" ",'\n':" " ];
-
-	string pohod_csv = ",Походы\r\n";
-//--------------
-	import std.algorithm: map;
-	import std.string: join;
-		
-	string[] enumFields;
-	foreach( enumSpec; PohodEnumFields )
-	{
-		enumFields ~= `, ` ~ enumSpec[3] ~ `:, ` ~
-			__traits(getMember, filter, enumSpec[0]).map!( (it) => enumSpec[1].getName(it) ).join(",");
-	}
-
-	pohod_csv ~= "Фильтры походов\r\n" ~ enumFields.join("\r\n");
-	pohod_csv ~= ",,,\r\n";
-
-	if( filter.pohodRegion.length )
-		pohod_csv ~= ",Район, похода,"~filter.pohodRegion~",\r\n";
-
-	if( !filter.dates["beginRangeHead"].isNull )
-		pohod_csv ~= ",с,"  ~ dateRusFormatLetter ( filter.dates["beginRangeHead"])~",\r\n";
-
-	if( !filter.dates["endRangeTail"].isNull )
-		pohod_csv ~= ",по," ~ dateRusFormatLetter ( filter.dates["endRangeTail"]) ~ ",\r\n" ;
-
-	if( filter.withFiles )
-		pohod_csv ~= ",Походы с ,дополнительными, материалами,"~",\r\n";
-
-//--------------------------
-	pohod_csv ~= "№ в базе,код МКК,№ книги,Начало похода,Конец похода,Вид,Категория,с эл.,Район,Руков Ф,Руков И,Руков О,Руков ГР,Число участников,Организация,Город,Маршрут, Готовность похода,Статус заявки,\r\n";
-
-	Navigation nav;
-	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10000);
-
-	IDBQueryResult rs = PohodList(filter, nav);
-
-	string[][] for_all; //обобщённый массив данных 
-	for_all.length = rs.recordCount+1; //строк втаблице
-
-	foreach( recIndex; 0..rs.recordCount )
-	{
-		string[] data_array;
-		data_array.length = rs.fieldCount;
-
-		foreach( column_num; 0..rs.fieldCount ) {
-			data_array[column_num] = rs.get(column_num, recIndex);
-		}
-
-		for_all[][recIndex] = data_array;
-	}
-
-
-
-	foreach( str; for_all )
-	{
-		size_t columnNumberInQuery = 0;
-		size_t p = 0;
-
-		foreach( el; str )
-		{
-			switch(p)
-			{
-				case 3, 4:
-					if( el.length != 0 )
-					{
-						auto dt = Date.fromISOExtString(el);
-						pohod_csv ~= dt.day.to!string ~ `.` ~ (cast(int) dt.month).to!string ~ `.` ~ dt.year.to!string ~ ',';
-					}
-					else
-						pohod_csv ~= ',';
-					//преобразование формата даты
-				break;
-
-				case 6:
-					if( el.length != 0 )
-					{
-						pohod_csv ~= категорияСложности[el.to!int]~  ',';
-					}
-					else
-						pohod_csv ~= ',';
-				break;
-
-				case 5:
-					if( el.length != 0 )
-					{
-						pohod_csv ~= видТуризма[el.to!int] ~ ',';
-					}
-					else
-						pohod_csv ~= ',';
-				break;
-
-				case 19:
-					if( el.length != 0 )
-					{
-						pohod_csv ~= готовностьПохода[el.to!int]~  ',';
-					}
-					else
-						pohod_csv ~= ',';
-				break;
-
-				case 20:
-					if(el.length!=0)
-					{
-						pohod_csv ~= статусЗаявки[el.to!int]~  ',';
-					}
-					else
-						pohod_csv ~= ',';
-				break;
-
-				case 9, 18:
-				break;
-
-				default:
-					pohod_csv ~= translate(el , transTable1) ~ ',';
-				break;
-			}
-
-			p = p+1;
-		}
-		pohod_csv ~= "\r\n";
-	}
-
-	return pohod_csv;
-}
-
-void renderPohodCsv(HTTPContext ctx, PohodFilter filter)
-{
-	import std.conv: to;
-
-	ctx.response.headers["Content-Type"] = `text/csv; charset="utf-8`;
-	ctx.response.write(pohodCsv(ctx, filter).to!string);
-}

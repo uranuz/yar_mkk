@@ -1,4 +1,4 @@
-module mkk_site.main_service.stat;
+module mkk_site.main_service.pohod.stat;
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.enums;
 import mkk_site.data_model.stat;

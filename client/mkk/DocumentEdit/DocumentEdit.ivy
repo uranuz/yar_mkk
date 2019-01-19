@@ -11,7 +11,7 @@ def DocumentEdit {=
 	def.body {*
 	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}" title="Редактирование ссылки на документ">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<form class="{=cls 'docForm'}">
+		<form class="{=cls 'docForm'}" action="{{vpaths.siteDynamic}}/document/edit/results">
 		{=if document {*
 			<label class="form-row form-group">
 				<span>Название</span>

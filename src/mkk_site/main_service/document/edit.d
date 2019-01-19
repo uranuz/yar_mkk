@@ -1,19 +1,21 @@
-module mkk_site.main_service.document_edit;
+module mkk_site.main_service.document.edit;
 
 import mkk_site.main_service.devkit;
 import mkk_site.data_model.document;
 import webtank.security.right.common: GetSymbolAccessObject;
 
+import std.typecons: Tuple;
+
 shared static this()
 {
-	MainService.JSON_RPCRouter.join!(editDocument)(`document.edit`);
+	MainService.JSON_RPCRouter.join!(writeDocument)(`document.edit`);
 	MainService.JSON_RPCRouter.join!(deleteDocument)(`document.delete`);
 
-	MainService.pageRouter.joinWebFormAPI!(renderEditDocument)("/api/document/edit");
 	MainService.pageRouter.joinWebFormAPI!(writeDocument)("/api/document/edit/results");
 }
 
-auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
+Tuple!(Optional!size_t, "documentNum")
+writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 {
 	import webtank.net.utils: PGEscapeStr;
 	import std.conv: text, to;
@@ -46,6 +48,7 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 		}
 	}
 
+	auto res = typeof(return)(record.num);
 	if( fieldNames.length > 0 )
 	{
 		MainService.loger.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
@@ -60,12 +63,12 @@ auto editDocument(HTTPContext ctx, DocumentDataToWrite record)
 
 		auto writeQueryRes = getCommonDB().query(queryStr); // Собственно запрос на запись данных в БД
 		if( writeQueryRes && writeQueryRes.recordCount == 1 ) {
-			return writeQueryRes.get(0, 0, null).to!size_t;
+			res.documentNum = writeQueryRes.get(0, 0, null).to!size_t;
 		}
 	}
 
 	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение ссылки на документ");
-	return record.num;
+	return res;
 }
 
 /++ Простой, но опасный метод, который удаляет сылку на документ по ключу. +/
@@ -76,42 +79,4 @@ void deleteDocument(HTTPContext ctx, size_t num)
 	enforce(ctx.rights.hasRight(`document.item`, `delete`), `Недостаточно прав для удаления документа!`);
 
 	getCommonDB().query(`delete from file_link where num = ` ~ num.text);
-}
-
-
-import mkk_site.main_service.document_list: getDocumentList;
-
-import std.json: JSONValue;
-JSONValue renderEditDocument(HTTPContext ctx, Optional!size_t num)
-{
-	DocumentListFilter filter;
-	Navigation nav;
-	if( num.isSet ) {
-		filter.nums = [num.value];
-	}
-	auto callResult = getDocumentList(ctx, filter, nav);
-
-	return JSONValue([
-		"document": (
-			callResult.documentList && callResult.documentList.length?
-			callResult.documentList[0].toStdJSON():
-			JSONValue(null))
-	]);
-}
-
-JSONValue writeDocument(HTTPContext ctx, DocumentDataToWrite record, string instanceName)
-{
-	JSONValue result = [
-		"errorMsg": JSONValue(null),
-		"docNum": record.num.isSet? JSONValue(record.num.value): JSONValue(null),
-		"isUpdate": JSONValue(record.num.isSet),
-		"instanceName": JSONValue(instanceName)
-	];
-	try {
-		result["docNum"] = editDocument(ctx, record);
-	} catch(Exception ex) {
-		result["errorMsg"] = ex.msg; // Передаём сообщение об ошибке в шаблон
-	}
-
-	return result;
 }

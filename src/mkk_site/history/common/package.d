@@ -34,6 +34,6 @@ struct HistoryActionData
 
 struct RecordHistoryFilter
 {
-	size_t recordNum;
-	string tableName;
+	size_t num;
+	string objectName;
 }
