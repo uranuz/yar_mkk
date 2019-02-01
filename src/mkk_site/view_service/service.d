@@ -74,6 +74,10 @@ public:
 			runIvyModule("mkk.GeneralTemplate", ctx, payload).then(
 				(IvyData fullContent) {
 					super.renderResult(fullContent, ctx);
+				},
+				(Throwable error) {
+					import ivy.interpreter.data_node: errorToIvyData;
+					super.renderResult(errorToIvyData(error), ctx);
 				}
 			);
 		} else {

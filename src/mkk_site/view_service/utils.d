@@ -50,8 +50,8 @@ template join(alias Method)
 					(IvyData ivyRes) {
 						ViewService.renderResult(ivyRes, context);
 					},
-					(IvyData ivyRes) {
-						throw new Exception(ivyRes.toString());
+					(Throwable error) {
+						throw error;
 					}
 				);
 			} else {
@@ -59,8 +59,8 @@ template join(alias Method)
 					(IvyData ivyRes) {
 						ViewService.renderResult(ivyRes, context);
 					},
-					(IvyData ivyRes) {
-						throw new Exception(ivyRes.toString());
+					(Throwable error) {
+						throw error;
 					}
 				);
 			}
