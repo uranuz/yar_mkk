@@ -1,7 +1,6 @@
 define('mkk/Helpers/FilteredUpdateable', [], function() {
-	function FilteredUpdateable() {}
-
-	return new (__mixinProto(FilteredUpdateable, {
+return new (FirClass(
+	function FilteredUpdateable() {}, {
 		getFilter: function() {
 			return this._filter;
 		},

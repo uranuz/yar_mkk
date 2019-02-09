@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls;
-from mkk.TouristSearchArea import TouristSearchArea;
+from mkk.Tourist.SearchArea import TouristSearchArea;
 def ChiefEdit {=
 	def.kv
 		moduleName: 'mkk/Pohod/Edit/Chief/Edit/Edit'

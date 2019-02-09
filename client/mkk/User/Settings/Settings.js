@@ -4,8 +4,7 @@ define('mkk/User/Settings/Settings', [
 ], function(
 	FirControl, json_rpc
 ) {
-	__extends(UserSettings, FirControl);
-
+return FirClass(
 	function UserSettings(opts) {
 		FirControl.call(this, opts);
 		this._oldPasswordField = this._elems('oldPasswordField');
@@ -17,9 +16,7 @@ define('mkk/User/Settings/Settings', [
 
 		this._elems('initPohodHistory').on('click', this.initPohodHistory.bind(this));
 		this._elems('initTouristHistory').on('click', this.initTouristHistory.bind(this));
-	}
-
-	return __mixinProto(UserSettings, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 		},

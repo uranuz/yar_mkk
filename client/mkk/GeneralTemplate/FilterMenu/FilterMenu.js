@@ -2,8 +2,7 @@ define('mkk/GeneralTemplate/FilterMenu/FilterMenu', [
 	'fir/controls/FirControl',
 	'css!mkk/GeneralTemplate/FilterMenu/FilterMenu'
 ], function(FirControl) {
-	__extends(PohodFilterMenu, FirControl);
-
+return FirClass(
 	function PohodFilterMenu(opts) {
 		FirControl.call(this, opts);
 
@@ -13,9 +12,7 @@ define('mkk/GeneralTemplate/FilterMenu/FilterMenu', [
 		this._inputs = this._elems('filterInput');
 
 		this._itemLinks.on('click', this.onFilterItemClick.bind(this));
-	}
-
-	return __mixinProto(PohodFilterMenu, {
+	}, FirControl, {
 		onFilterItemClick: function(ev) {
 			var
 				itemPos = $(ev.currentTarget).attr('data-mkk-item_pos').split('/'),

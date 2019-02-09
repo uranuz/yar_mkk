@@ -5,11 +5,9 @@ define('mkk/Pohod/Read/Read', [
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Pohod/Read/Read'
 ], function(FirControl, DatctrlHelpers) {
-	__extends(PohodRead, FirControl);
-
+return FirClass(
 	//Инициализация блока редактирования похода
-	function PohodRead(opts)
-	{	
+	function PohodRead(opts) {
 		FirControl.call(this, opts);
 		var self = this;
 
@@ -19,8 +17,7 @@ define('mkk/Pohod/Read/Read', [
 		this._partyList.setFilter({
 			selectedKeys: this.getPartyNums()
 		});
-	}
-	return __mixinProto(PohodRead, {
+	}, FirControl, {
 		/** Получить идентификаторы участников группы */
 		getPartyNums: function() {
 			var selectedKeys = [], rec;
@@ -29,5 +26,6 @@ define('mkk/Pohod/Read/Read', [
 			}
 			return selectedKeys;
 		}
-	});
+	}
+);
 });

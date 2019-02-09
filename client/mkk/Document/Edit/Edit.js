@@ -2,8 +2,7 @@ define('mkk/Document/Edit/Edit', [
 	'fir/controls/FirControl',
 	'mkk/Helpers/FilteredUpdateableDialog'
 ], function (FirControl, FilteredUpdateableDialog) {
-	__extends(DocumentEdit, FirControl);
-
+return FirClass(
 	function DocumentEdit(opts) {
 		FirControl.call(this, opts);
 		this._filter = {};
@@ -18,8 +17,7 @@ define('mkk/Document/Edit/Edit', [
 			'num', 'name', 'link', 'action'
 		]);
 		this._updateControlState(opts);
-	}
-	return __mixinProto(DocumentEdit, [FilteredUpdateableDialog, {
+	}, FirControl, [FilteredUpdateableDialog], {
 		_subscribeInternal: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
@@ -53,5 +51,5 @@ define('mkk/Document/Edit/Edit', [
 				this._notify('documentChanged');
 			}
 		}
-	}]);
+	});
 });

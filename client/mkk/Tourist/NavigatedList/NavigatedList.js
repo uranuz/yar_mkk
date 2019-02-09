@@ -4,7 +4,7 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 	'fir/controls/Pagination/Pagination',
 	'css!mkk/Tourist/NavigatedList/NavigatedList'
 ], function (FirControl) {
-	__extends(TouristNavigatedList, FirControl);
+return FirClass(
 	function TouristNavigatedList(opts) {
 		FirControl.call(this, opts);
 		this._listView = this.getChildInstanceByName(this.instanceName() + 'View');
@@ -14,8 +14,7 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 		this._listView.subscribe('itemActivated', this._onTouristItemActivated.bind(this));
 		this._pagination = this.getChildInstanceByName(this.instanceName() + 'Pagination');
 		this._pagination.subscribe('onSetCurrentPage', this._onSetCurrentPage.bind(this));
-	}
-	return __mixinProto(TouristNavigatedList, {
+	}, FirControl, {
 		setFilter: function(filter) {
 			this._listView.setFilter(filter);
 		},

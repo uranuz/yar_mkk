@@ -9,18 +9,14 @@ define('mkk/Pohod/Edit/Party/Party', [
 	DatctrlHelpers,
 	MKKHelpers
 ) {
-	__extends(PartyEdit, FirControl);
-
-	//Инциализация блока редактирования списка участников
+return FirClass(
 	function PartyEdit(opts) {
 		FirControl.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
 
 		this._updateControlState(opts);
-	}
-	
-	return __mixinProto(PartyEdit, {
+	}, FirControl, {
 		_updateControlState: function(opts) {
 			this._panelsArea = this._elems("panelsArea");
 			this._searchPanel = this._elems("searchPanel");

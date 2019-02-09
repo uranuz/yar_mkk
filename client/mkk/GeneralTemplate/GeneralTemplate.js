@@ -4,11 +4,10 @@ define('mkk/GeneralTemplate/GeneralTemplate', [
 	'mkk/GeneralTemplate/FilterMenu/FilterMenu',
 	'css!mkk/GeneralTemplate/GeneralTemplate',
 	'css!mkk/page_styles'
-], function(FirControl, FilterMenu) {
-	__extends(GeneralTemplate, FirControl);
-
+], function(FirControl) {
+return FirClass(
 	function GeneralTemplate(opts) {
 		FirControl.call(this, opts);
-	}
-	return __mixinProto(GeneralTemplate, {});
+	}, FirControl
+)
 });

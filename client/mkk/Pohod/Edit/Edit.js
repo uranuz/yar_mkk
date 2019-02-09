@@ -22,11 +22,8 @@ define('mkk/Pohod/Edit/Edit', [
 	DatctrlHelpers,
 	MKKHelpers
 ) {
-	__extends(PohodEdit, FirControl);
-
-	//Инициализация блока редактирования похода
-	function PohodEdit(opts)
-	{	
+return FirClass(
+	function PohodEdit(opts) {
 		FirControl.call(this, opts);
 		var self = this;
 
@@ -73,9 +70,7 @@ define('mkk/Pohod/Edit/Edit', [
 		this._partyList.setFilter({
 			selectedKeys: this.getPartyNums()
 		});
-	}
-	
-	return __mixinProto(PohodEdit, {
+	}, FirControl, {
 		//Обработчик тыка по кнопке сохранения списка выбранных участников
 		onSaveSelectedParty: function(ev, selTouristsRS) {
 			this.saveParty(selTouristsRS);

@@ -1,8 +1,7 @@
 define('mkk/Pohod/Edit/Chief/AddToParty/AddToParty', [
 	'fir/controls/FirControl'
 ], function (FirControl) {
-	__extends(ChiefAddToParty, FirControl);
-
+return FirClass(
 	function ChiefAddToParty(opts) {
 		FirControl.call(this, opts);
 
@@ -12,9 +11,7 @@ define('mkk/Pohod/Edit/Chief/AddToParty/AddToParty', [
 
 		this._acceptBtn.on('click', this._onAcceptBtn_click.bind(this));
 		this._cancelBtn.on('click', this._onCancelBtn_click.bind(this));
-	}
-
-	return __mixinProto(ChiefAddToParty, {
+	}, FirControl, {
 		open: function(touristsCount) {
 			this._touristsCountField.text( (touristsCount || '[не задано]') + ' человек');
 			this._container.dialog({

@@ -2,8 +2,7 @@ define('mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn', [
 	'fir/controls/FirControl',
 	'css!mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn'
 ], function(FirControl) {
-	__extends(UserMenuBtn, FirControl);
-
+return FirClass(
 	function UserMenuBtn(opts) {
 		FirControl.call(this, opts);
 
@@ -11,9 +10,7 @@ define('mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn', [
 
 		this._outsideClickHdlInstance = this.addOutsideClickHandler.bind(this);
 		popdownBtn.on('click', this.onPopdownBtnClick.bind(this));
-	}
-
-	return __mixinProto(UserMenuBtn, {
+	}, FirControl, {
 		onPopdownBtnClick: function(ev) {
 			var popdownMenu = this._elems('popdownMenu');
 			if( popdownMenu.is(':visible') ) {

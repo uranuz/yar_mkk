@@ -3,11 +3,9 @@ define('mkk/GeneralTemplate/MainMenu/MainMenu', [
 	'mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn',
 	'css!mkk/GeneralTemplate/MainMenu/MainMenu'
 ], function(FirControl) {
-	__extends(MainMenu, FirControl);
-
+return FirClass(
 	function MainMenu(opts) {
 		FirControl.call(this, opts);
-	}
-
-	return __mixinProto(MainMenu, {});
+	}, FirControl
+);
 });

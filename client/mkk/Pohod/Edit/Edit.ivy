@@ -3,8 +3,8 @@ from fir.controls.utils import cls, recGet, recGetStr, enumWithNull, hasRight, i
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Pohod.Edit.DeleteArea import DeleteArea;
-from mkk.Pohod.Edit.PartyEdit import PartyEdit;
-from mkk.Pohod.Edit.ChiefEdit import ChiefEdit;
+from mkk.Pohod.Edit.Party import PartyEdit;
+from mkk.Pohod.Edit.Chief.Edit import ChiefEdit;
 from mkk.Pohod.Edit.Chief.AddToParty import ChiefAddToParty;
 from mkk.Tourist.NavigatedList import TouristNavigatedList;
 from mkk.Pohod.Edit.ExtraFileLinks import ExtraFileLinks;

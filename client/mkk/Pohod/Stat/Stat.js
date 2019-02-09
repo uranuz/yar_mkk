@@ -6,9 +6,8 @@ define('mkk/Pohod/Stat/Stat', [
 	'mkk/Stat/flot/jquery.flot.time',*/
 	'css!mkk/Pohod/Stat/Stat'
 ],
- function (FirControl, Flot, FlotTime) {
-	__extends(Stat, FirControl);
-
+function (FirControl, Flot, FlotTime) {
+return FirClass(
 	function Stat(opts) {
 		FirControl.call(this, opts);
 		this._elems('byYearBtn').on('click', this.reloadPage);
@@ -17,9 +16,7 @@ define('mkk/Pohod/Stat/Stat', [
 		this._opts = opts;
 		this._tooltipWindow = this._elems('plotTooltip');
 		this.doFlot();
-	};
-
-	return __mixinProto(Stat, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			var self = this;
 			this._elems('plot').on('plothover', this._onPlot_over.bind(this));

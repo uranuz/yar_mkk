@@ -3,11 +3,9 @@ define('mkk/User/Reg/Reg', [
 	'mkk/Tourist/Edit/Edit',
 	'css!mkk/User/Reg/Reg'
 ], function (FirControl) {
-	__extends(UserReg, FirControl);
+return FirClass(
 	function UserReg(opts) {
 		FirControl.call(this, opts);
-	}
-	return __mixinProto(UserReg, {
-
-	});
+	}, FirControl
+);
 });

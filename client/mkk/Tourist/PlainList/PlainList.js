@@ -3,19 +3,17 @@ define('mkk/Tourist/PlainList/PlainList', [
 	'fir/datctrl/helpers',
 	'css!mkk/Tourist/PlainList/PlainList'
 ], function (FirControl, DatctrlHelpers) {
-	__extends(TouristPlainList, FirControl);
 	var strParamNames = [
 		'familyName', 'givenName', 'patronymic', 'birthYear',
 		'region', 'city', 'street'
 	];
-
+return FirClass(
 	function TouristPlainList(opts) {
 		FirControl.call(this, opts);
 		this._filter = opts.filter;
 		this._mode = opts.mode;
 		this._updateControlState(opts);
-	}
-	return __mixinProto(TouristPlainList, {
+	}, FirControl, {
 		// В этой функции мы забираем опции пришедшие при первой загрузке или перезагрузке компонента,
 		// которые должны быть обновлены, если это требуется
 		_updateControlState: function(opts) {

@@ -4,16 +4,14 @@ define('mkk/Pohod/List/List', [
 	'mkk/Pohod/List/Navigation/Navigation',
 	'css!mkk/Pohod/List/List'
 ], function(FirControl) {
-	__extends(PohodList, FirControl);
-
+return FirClass(
 	function PohodList(opts) {
 		FirControl.call(this, opts);
 
 		this._elems("tableContentBody")
 			.on("click", this.onShowPartyBtn_click.bind(this));
 		this._partyInfo = this.getChildInstanceByName('partyInfo');
-	}
-	return __mixinProto(PohodList, {
+	}, FirControl, {
 		onShowPartyBtn_click: function(ev) {
 			var
 				el = $(ev.target).closest(this._elemClass('showPartyBtn')),
@@ -27,5 +25,6 @@ define('mkk/Pohod/List/List', [
 				this._partyInfo.openDialog({num: pohodNum});
 			}
 		}
-	});
+	}
+);
 });

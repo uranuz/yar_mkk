@@ -2,9 +2,7 @@ define('mkk/Pohod/Edit/Chief/Edit/Edit', [
 	'fir/controls/FirControl',
 	'mkk/Tourist/SearchArea/SearchArea'
 ], function (FirControl) {
-	__extends(ChiefEdit, FirControl);
-
-	//Инициализация блока редактирования руководителя и зам. руководителя похода
+return FirClass(
 	function ChiefEdit(opts) {
 		FirControl.call(this, opts);
 		var self = this;
@@ -13,9 +11,7 @@ define('mkk/Pohod/Edit/Chief/Edit/Edit', [
 		this._controlBar = this._elems('controlBar');
 		this._isAltChief = opts.isAltChief;
 		this._chiefRec = null;
-	}
-	
-	return __mixinProto(ChiefEdit, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
 

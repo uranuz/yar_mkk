@@ -2,14 +2,12 @@ define('mkk/User/List/List', [
 	'fir/controls/FirControl',
 	'css!mkk/User/List/List'
 ], function (FirControl) {
-	__extends(UserList, FirControl);
-
+return FirClass(
 	function UserList(opts) {
 		FirControl.call(this, opts);
 		this._listBlock = this._elems('list');
 		this._confirmDlg = this._elems('confirmDlg');
-	}
-	return __mixinProto(UserList, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			this._listBlock.on('click', this._onListBlock_click.bind(this));
 		},

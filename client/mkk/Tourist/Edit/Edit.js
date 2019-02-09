@@ -9,8 +9,7 @@ define('mkk/Tourist/Edit/Edit', [
 	'mkk/Pohod/Edit/DeleteArea/DeleteArea',
 	'css!mkk/Tourist/Edit/Edit'
 ], function(FirControl, MKKHelpers, FirHelpers, json_rpc) {
-	__extends(TouristEdit, FirControl);
-
+return FirClass(
 	function TouristEdit(opts) {
 		FirControl.call(this, opts);
 
@@ -35,9 +34,7 @@ define('mkk/Tourist/Edit/Edit', [
 		}
 
 		this._updateControlState(opts);
-	}
-
-	return __mixinProto(TouristEdit, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			this._similarsList.subscribe('onTouristListLoaded', this.processSimilarTourists.bind(this));
 			this._forceSubmitBtn.on('click', this._forcedSubmitForm.bind(this));
@@ -141,5 +138,5 @@ define('mkk/Tourist/Edit/Edit', [
 				}
 			});
 		}
-	});
+});
 });

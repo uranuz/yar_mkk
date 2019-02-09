@@ -12,8 +12,7 @@ define('mkk/Tourist/SearchArea/SearchArea', [
 	datctrl,
 	MKKHelpers
 ) {
-	__extends(TouristSearchArea, FirControl);
-
+return FirClass(
 	function TouristSearchArea(opts) {
 		FirControl.call(this, opts);
 		var self = this;
@@ -33,9 +32,7 @@ define('mkk/Tourist/SearchArea/SearchArea', [
 			self._notify('itemSelect', rec);
 		});
 		this.setAddrFiltersCollapsed(opts.addrFiltersCollapsed);
-	}
-
-	return __mixinProto(TouristSearchArea, {
+	}, FirControl, {
 		setAddrFiltersCollapsed: function(val) {
 			this._addrFilterContent.toggleClass('is-collapsed', val);
 			this._addrFilterArrow.toggleClass('is-collapsed', val);

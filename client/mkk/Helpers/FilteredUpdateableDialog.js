@@ -1,10 +1,8 @@
 define('mkk/Helpers/FilteredUpdateableDialog', [
 	'mkk/Helpers/FilteredUpdateable'
 ], function (FilteredUpdateable) {
-	__extends(FilteredUpdateableDialog, FilteredUpdateable);
-	function FilteredUpdateableDialog() {}
-
-	return new (__mixinProto(FilteredUpdateableDialog, {
+return new (FirClass(
+	function FilteredUpdateableDialog() {}, [FilteredUpdateable], {
 		openDialog: function(filter) {
 			if( filter != null ) {
 				this.setFilter(filter);

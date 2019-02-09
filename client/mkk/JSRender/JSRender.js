@@ -21,8 +21,7 @@ define('mkk/JSRender/JSRender', [
 	IvyUserIdentity,
 	ControlManager
 ) {
-	__extends(JSRender, FirControl);
-
+return FirClass(
 	function JSRender(opts) {
 		FirControl.call(this, opts);
 		var
@@ -96,6 +95,6 @@ define('mkk/JSRender/JSRender', [
 			}
 		});
 		return;
-	}
-	return __mixinProto(JSRender, {});
+	}, FirControl
+);
 });

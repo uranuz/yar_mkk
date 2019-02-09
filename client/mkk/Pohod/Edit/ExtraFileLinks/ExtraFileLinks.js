@@ -1,12 +1,10 @@
 define('mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks', [
 	'fir/controls/FirControl'
 ], function (FirControl) {
-	__extends(ExtraFileLinks, FirControl);
-
+return FirClass(
 	function ExtraFileLinks(opts) {
 		FirControl.call(this, opts);
-	}
-	return __mixinProto(ExtraFileLinks, {
+	}, FirControl, {
 		_subscribeInternal: function() {
 			this._elems("moreLinksBtn").on("click", this._reloadControl.bind(this, 'moreLinks'));
 		},

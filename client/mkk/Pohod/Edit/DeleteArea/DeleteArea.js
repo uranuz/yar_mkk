@@ -1,8 +1,7 @@
 define('mkk/Pohod/Edit/DeleteArea/DeleteArea', [
 	'fir/controls/FirControl'
 ], function (FirControl) {
-	__extends(DeleteArea, FirControl);
-
+return FirClass(
 	function DeleteArea(opts) {
 		FirControl.call(this, opts);
 		var self = this;
@@ -14,8 +13,7 @@ define('mkk/Pohod/Edit/DeleteArea/DeleteArea', [
 				$('<div title="Ошибка ввода">Удаление похода не подтверждено!</div>').dialog({modal: true});
 			}
 		});
-	}
-	return __mixinProto(DeleteArea, {
+	}, FirControl, {
 		showDialog: function() {
 			this._elems('block').dialog({modal: true});
 		}
