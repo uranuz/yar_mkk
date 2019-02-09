@@ -1,0 +1,133 @@
+expr
+{=
+from fir.controls.utils import recGet, recGetStr, cls, isInRoles;
+from fir.controls.Pagination import Pagination;
+from mkk.Helpers import RusDateFormat;
+from mkk.Helpers.EntityProperty import EntityProperty;
+def Experience {=
+	def.kv
+		moduleName: 'mkk/Tourist/Experience/Experience'
+		instanceName: 'experience'
+		cssBaseClass: "mkk-Experience"
+		tourist: null
+		pohodList: null
+		nav: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<div class="{=cls 'topButtons'}">
+			{=if {=isInRoles ['admin', 'moder']} {*
+			<a href="{{vpaths.siteDynamic}}tourist/history?num={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
+			<a href="{{vpaths.siteDynamic}}tourist/edit?num={=recGet tourist 'num'}"
+				class="btn btn-sm btn-secondary"
+				>Редактировать</a>
+			*}}
+		</div>
+		<!-- Раздел данные о туристе-->
+		<div class="{=cls 'touristInfo'}">
+			<h2>
+				{=recGet tourist "familyName"}
+				{=recGet tourist "givenName"}
+				{=recGet tourist "patronymic"}
+				{=recGet tourist "birthYear"} г.р.
+			</h2>
+			{%
+				EntityProperty
+					title: 'Туристский опыт'
+					value: {=recGet tourist "experience"};
+				EntityProperty
+					title: 'Спортивный разряд'
+					value: {=recGetStr tourist "sportsCategory"};
+				EntityProperty
+					title: 'Судейская категория'
+					value: {=recGetStr tourist "refereeCategory"};
+				EntityProperty
+					title: 'Телефон'
+					value: {=recGet tourist "phone"};
+				EntityProperty
+					title: 'Эл. почта'
+					value: {=recGet tourist "email"};
+				EntityProperty
+					title: 'Коментарий'
+					value: {=recGet tourist "comment"}
+					isWide: true;
+			}
+		</div>
+		<!-- конец Раздела данные о туристе-->
+		<div>
+			<!-- Раздел переход по страницам-->
+			<form method="post">
+				<div class="{=cls 'pagination'}">
+					{=Pagination
+						formField: 'offset'
+						offset: nav.offset
+						pageSize: nav.pageSize
+						recordCount: nav.recordCount
+					}
+				</div>
+			</form>
+			<!-- конец Раздела переход по страницам-->
+		</div>
+
+		<!-- Раздел таблица-->
+		<div class="{=cls 'tableBlock'} mkk-Table">
+			<div class="{=cls 'tableScroller'} mkk-Table">
+				<table class="{=cls 'table'} mkk-Table">
+					<tbody class="{=cls 'tableHeaderBody'} mkk-Table">
+						<tr class="{=cls 'tableHeaderRow'} mkk-Table">
+							<th>№ книги</th>
+							<th>Сроки похода</th>
+							<th>Вид, категория</th>
+							<th>Район</th>
+							<th>Должность</th>
+							<th>Город, организация</th>
+							<th>Статус похода</th>
+						</tr>
+					</tbody>
+					<!-- Основное тело таблицы-->
+					<tbody class="{=cls 'tableContentBody'} mkk-Table">
+					{=repeat rec in pohodList {*
+						<tr>
+							<td>
+								{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
+								<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
+									title="Номер маршрутной книжки не присвоен"
+									>{=if isBookNumSet
+										{*<div>{=recGet rec "mkkCode"}</div><div>{=recGet rec "bookNum"}</div>*} else "???"
+									}</a>
+							</td>
+							<td>
+								<div class="text-nowrap">{=RusDateFormat {=recGet rec "beginDate" } }</div>
+								<div class="text-nowrap">{=RusDateFormat {=recGet rec "finishDate" } }</div>
+							</td>
+							<td>
+								<div>{=recGetStr rec "tourismKind"}</div>
+								<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
+							</td>
+							<td>{=recGet rec "pohodRegion"}</td>
+							<td>{=if {=recGet rec "chiefNum"} == {=recGet tourist "num"} "Руков." else "Участ."}</td>
+							<td>
+								<div>{=recGet rec "organization"}</div>
+								<div>{=recGet rec "partyRegion"}</div>
+							</td>
+							<td>
+								<div>{=recGetStr rec "progress"}</div>
+								<div>{=recGetStr rec "claimState"}</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="{=cls 'routeCell'}"
+								colspan="100"
+								>Маршрут: {=recGet rec 'route'}</td>
+						</tr>
+					*}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- конец Раздела  таблица-->
+	</div>
+	*};
+};
+}

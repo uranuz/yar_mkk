@@ -1,0 +1,40 @@
+expr {=
+from fir.controls.utils import cls, recGet;
+def LinkItems {=
+	def.kv
+		instanceName: null
+		cssBaseClass: 'mkk-ExtraFileLinks'
+		linkList: null
+		portionSize: 5
+		minBlockCount: 1
+		disabled: null;
+	def.body {*
+		{=var
+				linkCount: {=if not{=empty linkList} {=len linkList} else 0}
+				remainder: linkCount % portionSize
+				inputCount: linkCount + portionSize - remainder;
+			if inputCount < minBlockCount * portionSize {=
+				set inputCount: minBlockCount * portionSize;
+			};
+		}
+		<tbody class="{=cls 'linksTableBody'}">
+		{=repeat i in {=range 0 inputCount} {*
+			<tr data-mkk-num="{=if i < linkCount {=recGet {=at linkList i} 'num'} }">
+				<td>
+					<input type="text"
+						class="form-control"
+						value="{=if i < linkCount {=recGet {=at linkList i} 'link'} }"
+						{=if disabled 'disabled'}/>
+				</td>
+				<td>
+					<input type="text"
+						class="form-control"
+						value="{=if i < linkCount {=recGet {=at linkList i} 'name'} }"
+						{=if disabled 'disabled'}/>
+				</td>
+			</tr>
+		*}}
+		</tbody>
+	*}
+};
+}

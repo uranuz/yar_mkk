@@ -1,0 +1,344 @@
+expr {=
+from fir.controls.utils import cls, recGet, recGetStr, enumWithNull, hasRight, isInRoles;
+from fir.controls.PlainDatePicker import PlainDatePicker;
+from fir.controls.PlainListBox import PlainListBox;
+from mkk.Pohod.Edit.DeleteArea import DeleteArea;
+from mkk.Pohod.Edit.PartyEdit import PartyEdit;
+from mkk.Pohod.Edit.ChiefEdit import ChiefEdit;
+from mkk.Pohod.Edit.Chief.AddToParty import ChiefAddToParty;
+from mkk.Tourist.NavigatedList import TouristNavigatedList;
+from mkk.Pohod.Edit.ExtraFileLinks import ExtraFileLinks;
+def PohodEdit {=
+	def.kv
+		moduleName: 'mkk/Pohod/Edit/Edit'
+		instanceName: 'pohodEdit'
+		cssBaseClass: 'mkk-PohodEdit'
+		accessObject: 'pohod.item'
+
+		pohod: null
+		partyList: null
+		extraFileLinks: null
+		authRedirectURI: null;
+	def.body {*
+		{=if not {=isInRoles ['admin', 'moder', 'new_user']} {=
+			return {*
+				<h4>
+					Для редактирования данных похода требуется
+					<a href="{{authRedirectURI}}" title="Аутентификация">выполнить вход</a>
+					на сайт
+				</h4>
+			*}
+		} }
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<div class="{=cls 'topButtons'}">
+			{=if {=isInRoles ['admin', 'moder']} {*
+			<a href="{{vpaths.siteDynamic}}pohod/history?num={=recGet pohod 'num'}"
+				class="btn btn-sm btn-secondary"
+				>История</a>
+			*}}
+			<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet pohod 'num'}"
+				class="btn btn-sm btn-secondary"
+				>Просмотр</a>
+		</div>
+		<form
+			class="{=cls 'mainForm'}"
+			method="POST"
+			action="{{vpaths.siteDynamic}}pohod/edit/results">
+		<h2>Редактирование данных похода</h2>
+		<input type="hidden" name="num" value="{=recGet pohod 'num'}"/>
+		<hr>
+		<h4>Маршрутная книжка</h4>
+		<table style="width: 100%">
+		<tr>
+			<td>
+				<label for="mkkCodeField">Код МКК</label>
+				<input type="text"
+					class="{=cls 'mkkCommentField'} form-control"
+					id="mkkCodeField"
+					name="mkkCode"
+					value="{=recGet pohod 'mkkCode'}"
+					{=if not{=hasRight subobj: 'book.mkkCode' kind: 'edit'} 'disabled'}>
+			</td>
+			<td>
+				<label for="bookNumField">Номер книжки</label>
+				<input type="text"
+					class="{=cls 'bookNumField'} form-control"
+					id="bookNumField"
+					name="bookNum"
+					value="{=recGet pohod 'bookNum'}"
+					{=if not{=hasRight subobj: 'book.bookNum' kind: 'edit'} 'disabled'}>
+			</td>
+			<td>
+				<label for="claimStateField">Статус заявки</label>
+				{=PlainListBox
+					instanceName: 'claimStateField'
+					formField: 'claimState'
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=at pohod.format 'claimState'} 'enum'} 'не задан'}
+					selectedId: {=recGet pohod 'claimState'}
+					disabled: not{=hasRight subobj: 'book.claimState' kind: 'edit'}
+				}
+			</td>
+		</tr>
+		</table>
+		<label for="mkkCommentField">Коментарий МКК</label>
+		<textarea
+			class="{=cls 'mkkCommentField'} form-control"
+			id="mkkCommentField"
+			name="mkkComment"
+			cols="40"
+			{=if not{=hasRight subobj: 'book.mkkComment' kind: 'edit'} 'disabled'}
+			>{=recGet pohod 'mkkComment'}</textarea>
+
+		<hr>
+		<h4>Поход</h4>
+		<table style="width: 100%">
+		<tr>
+			<td><label for="pohodRegionField">Район похода</label></td>
+			<td>
+				<input type="text"
+					class="{=cls 'pohodRegionField'} form-control"
+					id="pohodRegionField"
+					name="pohodRegion"
+					value="{=recGet pohod 'pohodRegion'}"
+					{=if not{=hasRight subobj: 'pohod.pohodRegion' kind: 'edit'} 'disabled'}/>
+			</td>
+		</tr>
+		<tr>
+			<td><label for="vid">Вид туризма</label></td>
+			<td>
+				{=PlainListBox
+					instanceName: 'tourismKindField'
+					formField: 'tourismKind'
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=at pohod.format 'tourismKind'} 'enum'} 'не задан'}
+					selectedId: {=recGet pohod 'tourismKind'}
+					disabled: not{=hasRight subobj: 'pohod.tourismKind' kind: 'edit'}
+				}
+			</td>
+		</tr>
+		<tr>
+			<td><label for="routeField">Нитка маршрута</label></td>
+			<td colspan="999">
+				<input type="text"
+					class="{=cls 'routeField'} form-control"
+					id="routeField"
+					name="route"
+					size="55"
+					value="{=recGet pohod 'route'}"
+					{=if not{=hasRight subobj: 'pohod.route' kind: 'edit'} 'disabled'}/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="complexityField">
+					<div>Категория сложности</div>
+					<div>(элементы к.с.)</div>
+				</label>
+			</td>
+			<td colspan="999">
+				{=PlainListBox
+					instanceName: 'complexityField'
+					formField: 'complexity'
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=at pohod.format 'complexity'} 'enum'} 'не задана'}
+					selectedId: {=recGet pohod 'complexity'}
+					disabled: not{=hasRight subobj: 'pohod.complexity' kind: 'edit'}
+				}
+				{=PlainListBox
+					instanceName: 'complexityElemsField'
+					formField: 'complexityElems'
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=at pohod.format 'complexityElems'} 'enum'} 'не задано'}
+					selectedId: {=recGet pohod 'complexityElems'}
+					disabled: not{=hasRight subobj: 'pohod.complexityElems' kind: 'edit'}
+				}
+			</td>
+		</tr>
+		<tr>
+			<td><label for="beginDateField">Сроки проведения</label></td>
+			<td colspan="999">
+				<label>
+					<span style="display: inline-block; width: 3ex;">с</span>
+					{=PlainDatePicker
+						instanceName: 'beginDateField'
+						formField: 'beginDate'
+						date: {=recGet pohod 'beginDate'}
+						disabled: not{=hasRight subobj: 'pohod.beginDate' kind: 'edit'}
+					}
+				</label>
+				<br/>
+				<label>
+					<span style="display: inline-block; width: 3ex;">по</span>
+					{=PlainDatePicker
+						instanceName: 'finishDateField'
+						formField: 'finishDate'
+						date: {=recGet pohod 'finishDate'}
+						disabled: not{=hasRight subobj: 'pohod.finishDate' kind: 'edit'}
+					}
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td><label for="progressField">Состояние подготовки</label></td>
+			<td colspan="999">
+				{=PlainListBox
+					instanceName: 'progressField'
+					formField: 'progress'
+					idField: 'v'
+					captionField: 'n'
+					items: {=enumWithNull
+						{=at {=at pohod.format 'progress'} 'enum'} 'не задано'}
+					selectedId: {=recGet pohod 'progress'}
+					disabled: not{=hasRight subobj: 'pohod.progress' kind: 'edit'}
+				}
+			</td>
+		</tr>
+		</table>
+		<label for="chiefComentField">Коментарий руководителя</label><br>
+		<textarea
+			id="chiefComentField"
+			name="chiefComment"
+			cols="40"
+			class="{=cls 'chiefComentField'} form-control"
+			{=if not{=hasRight subobj: 'pohod.chiefComment' kind: 'edit'} 'disabled'}
+			>{=recGet pohod 'chiefComment'}</textarea>
+
+		<hr>
+		<h4>Группа</h4>
+		<!--<div style="clear: both;"></div>Чтобы предыдущее содержимое не обтекалось-->
+		<!--Блок для вывода списка туристов при поиске-->
+		<!-- <div id="tourist_select_div"></div> -->
+		<div>
+			<table style="width: 100%">
+			<tr>
+				<td>Организация, клуб, команда</td>
+				<td>
+					<input type="text"
+						name="organization"
+						class="{=cls 'organizationField'} form-control"
+						value="{=recGet pohod 'organization'}"
+						{=if not{=hasRight subobj: 'group.organization' kind: 'edit'} 'disabled'}/>
+				</td>
+			</tr>
+			<tr>
+				<td>Область, город и т.д.</td>
+				<td>
+					<input type="text"
+						name="partyRegion"
+						class="form-control"
+						value="{=recGet pohod 'partyRegion'}"
+						{=if not{=hasRight subobj: 'group.partyRegion' kind: 'edit'} 'disabled'}/>
+				</td>
+			</tr>
+			<tr>
+				<td>Руководитель похода</td>
+				<td colspan="999">
+					<input type="hidden"
+						name="chiefNum"
+						class="{=cls 'chiefNumField'}"
+						value="{=recGet pohod 'chiefNum'}"
+						{=if not{=hasRight subobj: 'group.chiefNum' kind: 'edit'} 'disabled'}/>
+					<a href="#_NOLink"
+						class="{=cls 'chiefEditBtn'}"
+						>{=if {=recGet pohod 'chiefNum'}   
+							{=recGet pohod 'chiefName'} or '<Имя не задано>'
+							else 'Редактировать'
+						}</a>
+				</td>
+			</tr>
+			<tr>
+				<td>Заместитель руководителя</td>
+				<td colspan="999">
+					<input type="hidden"
+						name="altChiefNum"
+						class="{=cls 'altChiefNumField'}"
+						value="{=recGet pohod 'altChiefNum'}"
+						{=if not{=hasRight subobj: 'group.altChiefNum' kind: 'edit'} 'disabled'}/>
+					<a href="#_NOLink"
+						class="{=cls 'altChiefEditBtn'}"
+						>{=if {=recGet pohod 'altChiefNum'}
+							{=recGet pohod 'altChiefName'} or '<Имя не задано>'
+							else 'Редактировать'
+						}</a>
+				</td>
+			</tr>
+			<tr>
+				<td>Участники</td>
+				<td>
+					<input type="hidden"
+						name="partyNums"
+						class="{=cls 'partyNumsField'}"
+						{=if not{=hasRight subobj: 'group.partyNums' kind: 'edit'} 'disabled'}/>
+					<a href="#_NOLink"
+						class="{=cls 'partyEditBtn'}"
+						>Редактировать</a>
+				</td>
+			</tr>
+			<tr>
+				<td>Количество участников</td>
+				<td>
+					<input type="text"
+						size="4"
+						name="partySize"
+						class="{=cls 'partySizeField'} form-control"
+						style="width: 5em;"
+						value="{=recGet pohod 'partySize'}"
+						{=if not{=hasRight subobj: 'group.partySize' kind: 'edit'} 'disabled'}/>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="999">
+					<div class="{=cls 'partyList'}">
+						{=TouristNavigatedList
+							instanceName: 'partyList'
+							touristList: {=slice partyList 0 10}
+						}
+					</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+
+		<hr/>
+		{=ExtraFileLinks
+			linkList: extraFileLinks
+			disabled: {=if not{=hasRight subobj: 'extraFileLinks' kind: 'edit'} 'disabled'}
+		}
+
+		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
+		<hr/>
+
+		<input type="hidden" name="action" value="write"/><!-- Значение-команда на запись данных в БД -->
+		<span>
+			<button type="submit"
+				class="{=cls 'submitBtn'} btn btn-primary"
+				>Сохранить</button>
+		</span>
+		<span style="float: right;">
+			{=if {=hasRight kind: 'delete'} {*
+			<button type="button"
+				class="{=cls 'deleteDialogBtn'} btn btn-secondary"
+				>Удалить поход</button>
+			*}}
+		</span>
+		<div style="clear: both"></div>
+		</form>
+
+		{=DeleteArea deleteWhat: 'похода'}
+		{=PartyEdit}
+		{=ChiefEdit}
+		{=ChiefAddToParty}
+	</div>
+	*}
+};
+}

@@ -1,0 +1,43 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from mkk.Pohod.Edit.ExtraFileLinks.LinkItems import LinkItems;
+def ExtraFileLinks {=
+	def.kv
+		moduleName: 'mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks'
+		instanceName: 'extraFileLinksEdit'
+		cssBaseClass: 'mkk-ExtraFileLinks'
+		linkList: null,
+		portionSize: 5
+		disabled: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<h4>Ссылки на доп. материалы</h4>
+		<div class="{=cls 'linksTableWrapper'}">
+			<table class="{=cls 'linksTable'}">
+				<thead>
+					<tr><th>Ссылка</th><th>Название (комментарий)</th></tr>
+				</thead>
+				{=LinkItems
+					instanceName: instanceName
+					linkList: linkList
+					portionSize: portionSize
+					disabled: disabled
+				}
+				<tbody>
+					<tr><td>
+						<input type="hidden"
+							class="{=cls 'linksDataField'}"
+							name="extraFileLinks"
+							{=if disabled 'disabled'}/>
+						<button type="button" class="{=cls 'moreLinksBtn'} btn btn-primary btn-block">
+							Добавить ещё
+						</button>
+					</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	*}
+};
+}

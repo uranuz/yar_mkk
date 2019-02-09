@@ -1,0 +1,19 @@
+.mkk-PohodListNavigation {
+	&.e-enumHeader {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	&.e-dateRangeBegin, &.e-dateRangeEnd {
+		white-space: nowrap;
+	}
+	&.e-dateRangeBefore {
+		display: inline-block;
+		width: 3ex;
+	}
+	&.e-csvBtn {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+	}
+}

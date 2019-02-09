@@ -1,0 +1,21 @@
+expr {=
+def UserRegResults {=
+	def.kv
+		touristNum: null
+		errorMsg: null;
+	def.body {%
+		if {=empty errorMsg} {*
+			<h3>Регистрация пользователя выполнена успешно!!!</h3>
+			<div><a href="/dyn/tourist/experience?num={{touristNum}}">Перейти к информации о туристе</a></div>
+			<div><a href="/dyn/auth">Войти под пользователем</a></div>
+		*} else {*
+			<h3>Произошла ошибка при регистрации пользователя!!!</h3>
+			<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
+		*};
+		if not{=empty errorMsg} {*
+			<div>Текст ошибки:</div>
+			<div>{{errorMsg}}</div>
+		*};
+	}
+}
+}

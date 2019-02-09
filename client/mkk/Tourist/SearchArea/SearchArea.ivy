@@ -1,0 +1,104 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.Pagination import Pagination;
+from mkk.Tourist.PlainList import TouristPlainList;
+def LabeledInput {=
+	def.kv caption field placeholder;
+	def.body noscope{*
+	<label class="{=cls 'addrElementItem'} form-group row">
+		<span class="{=cls 'addrElementLabel'} col-sm-2 col-md-3 col-form-label">{{caption}}</span>
+		<div class="col-sm-10 col-md-9">
+			<input type="text"
+				placeholder="{{placeholder}}"
+				maxlength="15"
+				class="{=cls field ~ ' e-addrElementFilter'} form-control"/>
+		</div>
+	</label>
+	*}
+};
+def TouristSearchArea {=
+	def.kv
+		moduleName: 'mkk/Tourist/SearchArea/SearchArea'
+		instanceName: 'touristSearchArea'
+		cssBaseClass: 'mkk-TouristSearchArea'
+		visible: true
+		addrFiltersCollapsed: true;
+	def.body {*
+	<!-- Диалог поиска туристов -->
+	<div
+		class="{=cls 'block'}"
+		title="Поиск туристов"
+		data-fir-module="{{moduleName}}"
+		style="{=if visible == false 'display: none;'}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<label class="{=cls 'filterItem'} form-group row form-inline">
+			<span class="col-sm-2 col-md-3 col-form-label">ФИО</span>
+			<div class="col-sm-10 col-md-9">
+				<input type="text"
+					placeholder="Петечкин"
+					class="{=cls 'familyFilter'} form-control">
+				<input type="text"
+					placeholder="В"
+					size="1"
+					maxlength="1"
+					class="{=cls 'nameFilter'} form-control">
+				<input type="text"
+					placeholder="И"
+					size="1"
+					maxlength="1"
+					class="{=cls 'patronymicFilter'} form-control">
+			</div>
+		</label>
+		<label class="{=cls 'filterItem'} form-group row form-inline">
+			<span class="col-sm-2 col-md-3 col-form-label">Год рожд.</span>
+			<div class="col-sm-10 col-md-9">
+				<input type="text"
+					placeholder="1812"
+					size="4"
+					maxlength="4"
+					class="{=cls 'yearFilter'} form-control">
+			</div>
+		</label>
+
+		<fieldset class="{=cls 'addrFilterPanel'}">
+			<legend
+				title="Показать/ скрыть"
+				class="{=cls 'addrFilterToggleBtn'}"
+				>Доп. фильтры <span class="{=cls 'addrFilterArrow'} is-collapsed"></span></legend>
+			<div class="{=cls 'addrFilterContent'} is-collapsed">
+				{%
+					LabeledInput
+						caption: 'Область'
+						field: 'regionFilter'
+						placeholder: 'Ярославская';
+					LabeledInput
+						caption: 'Нас. пункт'
+						field: 'cityFilter'
+						placeholder: 'Рыбинск';
+					LabeledInput
+						caption: 'Улица'
+						field: 'streetFilter'
+						placeholder: 'Строителей';
+				}
+			</div>
+		</fieldset>
+		<button type="button" class="{=cls 'searchBtn'} btn btn-primary">Искать!</button>
+		<div class="{=cls 'searchResultsPanel'}">
+			<h5>Найденные туристы</h5>
+			<div class="{=cls 'touristsFoundSummary'}"></div>
+			<div class="{=cls 'pageNavigationBar'}">
+				{=Pagination
+					instanceName: instanceName ~ 'Pagination'
+				}
+			</div>
+			<div class="{=cls 'foundTourists'}">
+				{=TouristPlainList
+					instanceName: instanceName ~ 'List'
+					mode: 'add'
+				}
+			</div>
+		</div>
+	</div>
+	*}
+};
+}

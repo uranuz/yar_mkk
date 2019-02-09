@@ -1,0 +1,26 @@
+expr {=
+from fir.controls.utils import cls;
+from mkk.TouristSearchArea import TouristSearchArea;
+def ChiefEdit {=
+	def.kv
+		moduleName: 'mkk/Pohod/Edit/Chief/Edit/Edit'
+		instanceName: 'pohodChiefEdit'
+		cssBaseClass: 'mkk-PohodChiefEdit'
+		isAltChief: false;
+	def.body {*
+	<!--Диалог редактирования руководителя похода-->
+	<div class="{=cls 'block'}" style="display: none;" title="Выбор руководителя" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<div class="{=cls 'controlBar'}">
+			<button type="button" class="{=cls 'deleteBtn'} btn btn-secondary">
+				<div class="icon-small icon-removeItem"></div>
+				Без заместителя
+			</button>
+		</div>
+		<div class="{=cls 'searchBlock'}">
+			{=TouristSearchArea instanceName: instanceName ~ 'SearchArea'}
+		</div>
+	</div>
+	*}
+};
+}

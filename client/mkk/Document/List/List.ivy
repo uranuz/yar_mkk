@@ -1,0 +1,61 @@
+expr {=
+from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, hasRight;
+from fir.controls.Pagination import Pagination;
+from mkk.Document.Edit import DocumentEdit;
+
+def DocumentList {=
+	def.kv
+		moduleName: 'mkk/Document/List/List'
+		instanceName: 'documentList'
+		cssBaseClass: "mkk-DocumentList"
+		nav: null
+		documentList: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<h2>Статьи и документы</h2>
+		<div class="row">
+			<div class="col-auto">
+				{=Pagination
+					formField: 'offset'
+					offset: nav.offset
+					pageSize: nav.pageSize
+					recordCount: nav.recordCount
+				}
+			</div>
+			{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
+			<div class="col text-right">
+				<a href="javascript:void(0)"
+					class="{=cls 'addDocBtn'} btn btn-primary"
+					>Добавить документ</a>
+			</div>
+			*}}
+		</div>
+
+		<div class="{=cls 'linkList'}">
+		{=
+			var i: 0;
+			repeat it in documentList {*
+			{=set i: i + 1}
+			<div class="{=cls 'listItem'} row">
+				<div class="col">{{i}}.
+					<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
+				</div>
+				<div class="col-md-auto">
+					{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
+					<div class="{=cls 'linkEditBtn'} col mkk-Document e-itemEditBtn btn btn-secondary"
+						title="Изменить"
+						data-document-num="{=recGet it 'num'}"></div>
+					*}}
+				</div>
+			</div>
+			*}
+		}
+		</div>
+		<div class="{=cls 'addDocWrapper'}" style="display: none;">
+			{=DocumentEdit}
+		</div>
+	</div>
+	*};
+};
+}
