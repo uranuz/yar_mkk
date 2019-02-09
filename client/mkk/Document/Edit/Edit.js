@@ -4,7 +4,7 @@ define('mkk/Document/Edit/Edit', [
 ], function (FirControl, FilteredUpdateableDialog) {
 return FirClass(
 	function DocumentEdit(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._filter = {};
 		this._firstLoad = true;
 		this.setDialogOptions({

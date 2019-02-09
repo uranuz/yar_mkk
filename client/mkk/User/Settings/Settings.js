@@ -6,7 +6,7 @@ define('mkk/User/Settings/Settings', [
 ) {
 return FirClass(
 	function UserSettings(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._oldPasswordField = this._elems('oldPasswordField');
 		this._newPasswordField = this._elems('newPasswordField');
 		this._repeatPasswordField = this._elems('repeatPasswordField');

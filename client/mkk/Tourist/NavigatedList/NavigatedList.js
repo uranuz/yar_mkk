@@ -6,7 +6,7 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 ], function (FirControl) {
 return FirClass(
 	function TouristNavigatedList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._listView = this.getChildInstanceByName(this.instanceName() + 'View');
 		this.setFilter(opts.filter);
 		this.setMode(opts.mode);

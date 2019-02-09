@@ -6,7 +6,7 @@ define('mkk/Pohod/List/List', [
 ], function(FirControl) {
 return FirClass(
 	function PohodList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 
 		this._elems("tableContentBody")
 			.on("click", this.onShowPartyBtn_click.bind(this));

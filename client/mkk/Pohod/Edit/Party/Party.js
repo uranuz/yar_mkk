@@ -11,7 +11,7 @@ define('mkk/Pohod/Edit/Party/Party', [
 ) {
 return FirClass(
 	function PartyEdit(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
 		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
 

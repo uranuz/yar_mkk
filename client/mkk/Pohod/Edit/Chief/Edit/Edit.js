@@ -4,7 +4,7 @@ define('mkk/Pohod/Edit/Chief/Edit/Edit', [
 ], function (FirControl) {
 return FirClass(
 	function ChiefEdit(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var self = this;
 
 		this._searchBlock = this.getChildInstanceByName(this.instanceName() + 'SearchArea');

@@ -14,7 +14,7 @@ define('mkk/Tourist/SearchArea/SearchArea', [
 ) {
 return FirClass(
 	function TouristSearchArea(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var self = this;
 
 		this._resultsPanel = this._elems('searchResultsPanel');

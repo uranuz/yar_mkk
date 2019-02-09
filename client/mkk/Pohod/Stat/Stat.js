@@ -9,7 +9,7 @@ define('mkk/Pohod/Stat/Stat', [
 function (FirControl, Flot, FlotTime) {
 return FirClass(
 	function Stat(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._elems('byYearBtn').on('click', this.reloadPage);
 		this._elems('byComplexityBtn').on('click', this.reloadPage);
 		this._elems('csvBtn').on('click', this.reloadPage);

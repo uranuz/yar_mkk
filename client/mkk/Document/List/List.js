@@ -6,7 +6,7 @@ define('mkk/Document/List/List', [
 ], function (FirControl, DatctrlHelpers) {
 return FirClass(
 	function DocumentList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._documentEdit = this.getChildInstanceByName('documentEdit');
 		this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
 	}, FirControl, {

@@ -4,7 +4,7 @@ define('mkk/Right/ObjectRightList/ObjectRightList', [
 ], function (FirControl) {
 return FirClass(
 	function ObjectRightList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

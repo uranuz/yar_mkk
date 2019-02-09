@@ -5,7 +5,7 @@ define('mkk/User/Reg/Reg', [
 ], function (FirControl) {
 return FirClass(
 	function UserReg(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

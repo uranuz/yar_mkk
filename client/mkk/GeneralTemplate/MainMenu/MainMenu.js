@@ -5,7 +5,7 @@ define('mkk/GeneralTemplate/MainMenu/MainMenu', [
 ], function(FirControl) {
 return FirClass(
 	function MainMenu(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

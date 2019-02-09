@@ -24,7 +24,7 @@ define('mkk/Pohod/Edit/Edit', [
 ) {
 return FirClass(
 	function PohodEdit(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var self = this;
 
 		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); // RecordSet с участниками похода

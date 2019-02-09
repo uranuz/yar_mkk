@@ -5,7 +5,7 @@ define('mkk/User/Reg/FindTourist/FindTourist', [
 ], function(FirControl) {
 return FirClass(
 	function UserRegFindTourist(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._touristSelectArea = this.getChildInstanceByName('touristSelectArea');
 		this._touristSelectArea.subscribe('itemSelect', this._onTourist_itemSelect.bind(this));
 	}, FirControl, {

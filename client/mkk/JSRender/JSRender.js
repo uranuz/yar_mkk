@@ -23,7 +23,7 @@ define('mkk/JSRender/JSRender', [
 ) {
 return FirClass(
 	function JSRender(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var
 			self = this,
 			progCache = new IvyEngine(

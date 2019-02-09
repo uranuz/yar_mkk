@@ -11,7 +11,7 @@ define('mkk/Tourist/Edit/Edit', [
 ], function(FirControl, MKKHelpers, FirHelpers, json_rpc) {
 return FirClass(
 	function TouristEdit(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 
 		this._isEditDialog = opts.isEditDialog;
 		this._checkRights = opts.checkRights;

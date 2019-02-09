@@ -5,7 +5,7 @@ define('mkk/Tourist/List/List', [
 ], function (FirControl) {
 return FirClass(
 	function TouristList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

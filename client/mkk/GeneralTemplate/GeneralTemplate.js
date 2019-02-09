@@ -7,7 +7,7 @@ define('mkk/GeneralTemplate/GeneralTemplate', [
 ], function(FirControl) {
 return FirClass(
 	function GeneralTemplate(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 )
 });

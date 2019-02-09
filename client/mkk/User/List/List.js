@@ -4,7 +4,7 @@ define('mkk/User/List/List', [
 ], function (FirControl) {
 return FirClass(
 	function UserList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._listBlock = this._elems('list');
 		this._confirmDlg = this._elems('confirmDlg');
 	}, FirControl, {

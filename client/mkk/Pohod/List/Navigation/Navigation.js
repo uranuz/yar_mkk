@@ -5,7 +5,7 @@ define('mkk/Pohod/List/Navigation/Navigation', [
 ], function(FirControl) {
 return FirClass(
 	function PohodListNavigation(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var self = this;
 
 		this._elems().filter(".e-print_page_btn")

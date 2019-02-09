@@ -3,7 +3,7 @@ define('mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks', [
 ], function (FirControl) {
 return FirClass(
 	function ExtraFileLinks(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl, {
 		_subscribeInternal: function() {
 			this._elems("moreLinksBtn").on("click", this._reloadControl.bind(this, 'moreLinks'));

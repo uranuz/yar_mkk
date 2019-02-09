@@ -4,7 +4,7 @@ define('mkk/GeneralTemplate/FilterMenu/FilterMenu', [
 ], function(FirControl) {
 return FirClass(
 	function PohodFilterMenu(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 
 		this._filterSet = opts.pohodFilterSections;
 		this._form = this._elems('form');

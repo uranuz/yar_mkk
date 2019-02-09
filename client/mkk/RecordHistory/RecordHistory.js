@@ -5,7 +5,7 @@ define('mkk/RecordHistory/RecordHistory', [
 ], function (FirControl) {
 return FirClass(
 	function RecordHistory(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._elems('dataSpoilerBtn').on('click', this._onSpoilerToggle.bind(this))
 	}, FirControl, {
 		_onSpoilerToggle: function(ev) {

@@ -4,7 +4,7 @@ define('mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn', [
 ], function(FirControl) {
 return FirClass(
 	function UserMenuBtn(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 
 		var popdownBtn = this._elems('popdownBtn');
 

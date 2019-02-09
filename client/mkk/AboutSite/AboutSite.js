@@ -4,7 +4,7 @@ define('mkk/AboutSite/AboutSite', [
 ], function (FirControl) {
 return FirClass(
 	function AboutSite(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

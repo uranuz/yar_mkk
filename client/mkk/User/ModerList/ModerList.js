@@ -3,7 +3,7 @@ define('mkk/User/ModerList/ModerList', [
 ], function (FirControl) {
 return FirClass(
 	function ModerList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );
 });

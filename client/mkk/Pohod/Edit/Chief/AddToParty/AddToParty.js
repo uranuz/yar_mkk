@@ -3,7 +3,7 @@ define('mkk/Pohod/Edit/Chief/AddToParty/AddToParty', [
 ], function (FirControl) {
 return FirClass(
 	function ChiefAddToParty(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 
 		this._acceptBtn = this._elems("acceptBtn");
 		this._cancelBtn = this._elems("cancelBtn");

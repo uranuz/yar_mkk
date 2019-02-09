@@ -9,7 +9,7 @@ define('mkk/Tourist/PlainList/PlainList', [
 	];
 return FirClass(
 	function TouristPlainList(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this._filter = opts.filter;
 		this._mode = opts.mode;
 		this._updateControlState(opts);

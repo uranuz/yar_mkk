@@ -5,7 +5,7 @@ define('mkk/Pohod/List/PartyInfo/PartyInfo', [
 ], function(FirControl, FilteredUpdateableDialog) {
 return FirClass(
 	function PartyInfo(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		this.setDialogOptions({modal: true})
 	}, FirControl, [FilteredUpdateableDialog], {
 		_getRequestURI: function() {

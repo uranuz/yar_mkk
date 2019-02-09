@@ -3,7 +3,7 @@ define('mkk/Pohod/Edit/DeleteArea/DeleteArea', [
 ], function (FirControl) {
 return FirClass(
 	function DeleteArea(opts) {
-		FirControl.call(this, opts);
+		this.superproto.constructor.call(this, opts);
 		var self = this;
 		this._elems('deleteConfirmBtn').on('click', function() {
 			if( self._elems('deleteConfirmField').val() === 'удалить' ) {
