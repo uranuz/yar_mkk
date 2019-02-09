@@ -13,28 +13,28 @@ define('mkk/Helpers/FilteredUpdateable', [], function() {
 		},
 		_getQueryParams: function(areaName) {
 			var
-				params = [],
+				params = {
+					generalTemplate: (!this._useGeneralTemplate? 'no': undefined),
+					instanceName: this.instanceName()
+				},
 				allowed = this._allowedFilterParams;
 			if( this._filter ) {
 				if( allowed != null ) {
 					for( var i = 0; i < allowed.length; ++i ) {
-						if( this._filter[ allowed[i] ] ) {
-							params.push(allowed[i] + '=' + this._filter[ allowed[i] ]);
+						var field = allowed[i];
+						if( this._filter[field] ) {
+							params[field] = this._filter[field];
 						}
 					}
 				} else {
-					for( var key in this._filter ) {
-						if( this._filter.hasOwnProperty(key) ) {
-							params.push(key + '=' + this._filter[key]);
+					for( var field in this._filter ) {
+						if( this._filter.hasOwnProperty(field) ) {
+							params[field] = this._filter[field];
 						}
 					}
 				}
 			}
-			if( !this._useGeneralTemplate ) {
-				params.push('generalTemplate=no');
-			}
-			params.push('instanceName=' + this.instanceName());
-			return params.join('&');
+			return params;
 		}
 	}));
 });

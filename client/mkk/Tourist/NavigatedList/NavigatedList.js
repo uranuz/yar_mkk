@@ -1,6 +1,6 @@
 define('mkk/Tourist/NavigatedList/NavigatedList', [
 	'fir/controls/FirControl',
-	'mkk/TouristPlainList/TouristPlainList',
+	'mkk/Tourist/PlainList/PlainList',
 	'fir/controls/Pagination/Pagination',
 	'css!mkk/Tourist/NavigatedList/NavigatedList'
 ], function (FirControl) {

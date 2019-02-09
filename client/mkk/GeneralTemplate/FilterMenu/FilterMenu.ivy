@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls;
-from mkk.PohodList.Navigation import PohodListNavigation;
+from mkk.Pohod.List.Navigation import PohodListNavigation;
 def PohodFilterMenu {=
 	def.kv
 		moduleName: 'mkk/GeneralTemplate/FilterMenu/FilterMenu'
