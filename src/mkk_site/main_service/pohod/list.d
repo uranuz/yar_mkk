@@ -278,7 +278,8 @@ IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
 	//nav.normalize(getPohodCount(filter));//****************************************************
 
 	// Упорядочивание и страничный отбор уже делаем по готовым данным
-	query ~= ` order by "beginDate" desc offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
+	query ~= ` order by poh.last_edit_timestamp desc nulls last, poh.reg_timestamp desc nulls last, poh.num desc offset `
+		~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text;
 
 	return getCommonDB().query(query);
 }

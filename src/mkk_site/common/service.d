@@ -16,9 +16,5 @@ void Service(IWebService service) @property
 	_mkk_service = service;
 }
 
-string endpoint(string serviceName, string endpointName = `default`) {
-	return Service.endpoint(serviceName, endpointName);
-}
-
 // Service is process singleton object
 private __gshared IWebService _mkk_service;

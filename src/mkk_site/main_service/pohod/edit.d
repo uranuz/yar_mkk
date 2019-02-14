@@ -15,7 +15,7 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(editPohod)(`pohod.edit`);
 	MainService.JSON_RPCRouter.join!(pohodDelete)(`pohod.delete`);
 
-	MainService.pageRouter.joinWebFormAPI!(editPohod)("/api/pohod/edit/result");
+	MainService.pageRouter.joinWebFormAPI!(editPohod)("/api/pohod/edit/results");
 }
 
 Tuple!(Optional!size_t, `pohodNum`)

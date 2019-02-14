@@ -29,7 +29,7 @@ Tuple!(IBaseRecordSet, `partyList`) getPartyList(Optional!size_t num)
 
 	return typeof(return)(getCommonDB().query(
 `with tourist_num as(
-	select unnest(unit_neim) as num
+	select distinct unnest(unit_neim) as num
 	from pohod where pohod.num = ` ~ num.text ~ `
 )
 select

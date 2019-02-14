@@ -137,7 +137,6 @@ Tuple!(
 pohodRead(HTTPContext ctx, Optional!size_t num)
 {
 	import std.exception: enforce;
-	enforce(num.isSet, `Невозможно отобразить данные похода. Номер похода не задан или некорректен`);
 
 	return typeof(return)(
 		pohodReadBase(num).pohod,

@@ -1,10 +1,14 @@
 {
 	"services": {
 		"yarMKKMain": {
-			"URI": "//localhost/",
-			"endpoints": {
-				"default": "http://localhost/jsonrpc/"
+			"URI": "http://localhost",
+			"virtualPaths": {
+				"default": "jsonrpc/",
+				"siteRoot": "/",
+				"siteJSON_RPC": "jsonrpc/",
+				"siteWebFormAPI": "api/"
 			},
+			"historyService": "yarMKKHistory",
 			"databases": {
 				"commonDB": {
 					"host": "127.0.0.1",
@@ -24,14 +28,10 @@
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",
 				"siteLogs": "logs/"
-			},
-			"virtualPaths": {
-				"siteRoot": "/",
-				"siteJSON_RPC": "jsonrpc/",
-				"siteWebFormAPI": "api/"
 			}
 		},
 		"yarMKKView": {
+			"URI": "http://localhost",
 			"virtualPaths": {
 				"siteRoot": "/",
 				"siteJSON_RPC": "jsonrpc/",
@@ -47,6 +47,7 @@
 				"bootstrapJS": "pub/bootstrap/js/",
 				"bootstrapImg": "pub/bootstrap/img/"
 			},
+			"backendService": "yarMKKMain",
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk_site/",
 				"siteLogs": "logs/",
@@ -203,11 +204,9 @@
 			]
 		},
 		"yarMKKHistory": {
-			"URI": "//localhost/",
-			"endpoints": {
-				"default": "http://localhost/history/jsonrpc/"
-			},
+			"URI": "http://localhost",
 			"virtualPaths": {
+				"default": "history/jsonrpc",
 				"siteRoot": "/",
 				"siteJSON_RPC": "history/jsonrpc/",
 				"siteWebFormAPI": "history/api/"
