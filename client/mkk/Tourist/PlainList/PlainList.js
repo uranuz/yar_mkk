@@ -34,12 +34,23 @@ return FirClass(
 		_getRequestURI: function() {
 			return '/dyn/tourist/plainList';
 		},
-		_getQueryParams: function() {
-			var params = {
-				instanceName: this.instanceName(),
-				generalTemplate: 'no'
-			};
-
+		_getRPCMethod: function(areaName) {
+			return 'tourist.plainList';
+		},
+		_getNavParams: function() {
+			var params = {};
+			if( this._nav ) {
+				if( this._nav.offset != null ) {
+					params.offset = this._nav.offset;
+				}
+				if( this._nav.pageSize != null ) {
+					params.pageSize = this._nav.pageSize;
+				}
+			}
+			return params;
+		},
+		_getFilterParams: function(params) {
+			var params = {};
 			if( this._filter ) {
 				for( var i = 0; i < strParamNames.length; ++i ) {
 					var field = strParamNames[i];
@@ -48,19 +59,25 @@ return FirClass(
 					}
 				}
 				if( this._filter.selectedKeys ) {
-					params.nums = this._filter.selectedKeys.join(',');
+					params.nums = this._filter.selectedKeys;
 				}
 			}
+			return params;
+		},
+		_getQueryParams: function() {
+			return {
+				nav: this._getNavParams(),
+				filter: this._getFilterParams()
+			};
+		},
+		_getViewParams: function() {
+			var params = {
+				instanceName: this.instanceName(),
+				generalTemplate: 'no'
+			};
+
 			if( ['add', 'remove'].indexOf(this._mode) !== -1 ) {
 				params.mode = this._mode;
-			}
-			if( this._nav ) {
-				if( this._nav.offset != null ) {
-					params.offset = this._nav.offset;
-				}
-				if( this._nav.pageSize != null ) {
-					params.pageSize = this._nav.pageSize;
-				}
 			}
 			return params;
 		},

@@ -36,6 +36,9 @@ return FirClass(
 		_getRequestURI: function(areaName) {
 			return (areaName === 'results'? '/dyn/document/edit/results': '/dyn/document/edit');
 		},
+		_getRPCMethod: function(areaName) {
+			return 'document.read';
+		},
 		_onSaveBtn_click: function() {
 			var formData = this._docForm.serializeArray();
 			// Получаем данные из формы и запихиваем в фильтр

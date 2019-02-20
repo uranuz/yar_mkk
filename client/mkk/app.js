@@ -4,6 +4,9 @@ require.config({
 });
 
 define('mkk/app', [
+	"fir/controls/Loader/Manager",
+	"fir/controls/Loader/IvyServerFactory",
+	"fir/controls/Loader/IvyServerRender",
 	"fir/controls/ControlManager",
 	"fir/common/globals",
 	"fir/common/helpers",
@@ -19,7 +22,9 @@ define('mkk/app', [
 	"fir/controls/PlainListBox/PlainListBox",
 	"fir/controls/PlainDatePicker/PlainDatePicker",
 	"css!mkk/app"
-], function(ControlManager) {
+], function(LoaderManager, IvyServerFactory, IvyServerRender, ControlManager) {
+	LoaderManager.add(new IvyServerFactory());
+	LoaderManager.add(new IvyServerRender());
 	ControlManager.launchMarkup($('body'));
 });
 require(['mkk/app'], function() {});
