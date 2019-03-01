@@ -16,15 +16,15 @@ class MKKMainService: JSON_RPCService, IIvyServiceMixin
 
 	this(string serviceName)
 	{
-		super(serviceName,
-			new MKKMainAccessController(toDelegate(&getAuthDB)),
-			new AccessRightController(
-				new IvyAccessRuleFactory(this),
-				new RightDatabaseSource(toDelegate(&getAuthDB))
-			)
-		);
+		super(serviceName);
+
 		_startIvyLogging();
 		_initTemplateCache();
+
+		_rights = new AccessRightController(
+				new IvyAccessRuleFactory(this.ivyEngine),
+				new RightDatabaseSource(toDelegate(&getAuthDB)));
+		_accessController = new MKKMainAccessController(toDelegate(&getAuthDB));
 	}
 
 	override MKKMainAccessController accessController() @property

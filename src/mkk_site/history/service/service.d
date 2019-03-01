@@ -20,12 +20,11 @@ class MKKHistoryService: JSON_RPCService, IIvyServiceMixin
 		super(serviceName,
 			new MKKAccessControlClient(),
 			new AccessRightController(
-				new IvyAccessRuleFactory(this),
+				new IvyAccessRuleFactory(this.ivyEngine),
 				new RightRemoteSource(this, `yarMKKMain`, `accessRight.list`)
 			)
 		);
 		_startIvyLogging();
-		_initTemplateCache();
 	}
 
 	override MKKAccessControlClient accessController() @property

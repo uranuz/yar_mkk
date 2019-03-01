@@ -42,11 +42,12 @@ template join(alias Method)
 		static if( modAttr.length == 0 ) {
 			ViewService.renderResult(methodRes, context);
 		} else static if( modAttr.length == 1 ) {
+			import webtank.ivy.service_mixin: prepareIvyGlobals;
 			// Если есть аттрибут шаблона на методе, то используем этот шаблон для отображения
 			// результата выполнения метода
-
+			ExecutableProgramme ivyProg = ViewService.ivyEngine.getByModuleName(modAttr[0].moduleName);
 			if( modAttr[0].dirName.length == 0 ) {
-				ViewService.runIvyModule(modAttr[0].moduleName, context, methodRes).then(
+				ivyProg.run(methodRes, prepareIvyGlobals(context)).then(
 					(IvyData ivyRes) {
 						ViewService.renderResult(ivyRes, context);
 					},
@@ -55,7 +56,7 @@ template join(alias Method)
 					}
 				);
 			} else {
-				ViewService.runIvyMethod(modAttr[0].moduleName, modAttr[0].dirName, context, methodRes).then(
+				ivyProg.runMethod(modAttr[0].dirName, methodRes, prepareIvyGlobals(context)).then(
 					(IvyData ivyRes) {
 						ViewService.renderResult(ivyRes, context);
 					},

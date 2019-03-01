@@ -28,7 +28,8 @@ protected:
 public:
 	this(IDatabase delegate() getAuthDB)
 	{
-		assert(getAuthDB, `Auth DB method reference is null!!!`);
+		import std.exception: enforce;
+		enforce(getAuthDB !is null, `Auth DB method reference is null!!!`);
 		_getAuthDB = getAuthDB;
 	}
 
