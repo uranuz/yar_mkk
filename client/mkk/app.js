@@ -4,27 +4,32 @@ require.config({
 });
 
 define('mkk/app', [
+	'ivy/Engine',
+	'ivy/EngineConfig',
+	'ivy/RemoteModuleLoader',
 	"fir/controls/Loader/Manager",
 	"fir/controls/Loader/IvyServerFactory",
 	"fir/controls/Loader/IvyServerRender",
 	"fir/controls/ControlManager",
-	"fir/common/globals",
-	"fir/common/helpers",
-	"fir/common/text_encoder",
-	"fir/common/base64",
-	"fir/network/json_rpc",
-	"fir/datctrl/helpers",
-	"fir/datctrl/EnumFormat",
-	"fir/datctrl/RecordFormat",
-	"fir/datctrl/Record",
-	"fir/datctrl/RecordSet",
-	"fir/controls/CheckBoxList/CheckBoxList",
-	"fir/controls/PlainListBox/PlainListBox",
-	"fir/controls/PlainDatePicker/PlainDatePicker",
 	"css!mkk/app"
-], function(LoaderManager, IvyServerFactory, IvyServerRender, ControlManager) {
-	LoaderManager.add(new IvyServerFactory());
+], function(
+	IvyEngine,
+	IvyEngineConfig,
+	RemoteModuleLoader,
+	LoaderManager,
+	IvyServerFactory,
+	IvyServerRender,
+	ControlManager
+) {
+	window.ivyEngine = new IvyEngine(
+		new IvyEngineConfig(),
+		new RemoteModuleLoader('/dyn/server/template'));
+	LoaderManager.add(new IvyServerFactory(window.ivyEngine));
 	LoaderManager.add(new IvyServerRender());
 	ControlManager.launchMarkup($('body'));
 });
-require(['mkk/app'], function() {});
+define('mkk/init', ['fir/common/globals'], function() {
+	require(['mkk/app'], function() {});
+});
+
+require(['mkk/init'], function() {});
