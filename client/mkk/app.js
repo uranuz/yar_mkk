@@ -11,6 +11,11 @@ define('mkk/app', [
 	"fir/controls/Loader/IvyServerFactory",
 	"fir/controls/Loader/IvyServerRender",
 	"fir/controls/ControlManager",
+	"fir/security/right/IvyRuleFactory",
+	"fir/security/right/GlobalVarSource",
+	"fir/security/right/Controller",
+	"fir/security/right/UserIdentity",
+	"fir/security/right/UserRights",
 	"css!mkk/app"
 ], function(
 	IvyEngine,
@@ -19,12 +24,29 @@ define('mkk/app', [
 	LoaderManager,
 	IvyServerFactory,
 	IvyServerRender,
-	ControlManager
+	ControlManager,
+	IvyRuleFactory,
+	GlobalVarSource,
+	AccessController,
+	UserIdentity,
+	UserRights
 ) {
 	window.ivyEngine = new IvyEngine(
 		new IvyEngineConfig(),
 		new RemoteModuleLoader('/dyn/server/template'));
-	LoaderManager.add(new IvyServerFactory(window.ivyEngine));
+	window.ivyEngine.getByModuleName('mkk.AccessRules');
+
+	window.accessController = new AccessController(
+		new IvyRuleFactory(window.ivyEngine),
+		new GlobalVarSource());
+	window.userIdentity = new UserIdentity(window.userRightData.user)
+	window.userRights = new UserRights(window.userIdentity, window.accessController)
+	
+	LoaderManager.add(
+		new IvyServerFactory(
+			window.ivyEngine,
+			window.userIdentity,
+			window.userRights));
 	LoaderManager.add(new IvyServerRender());
 	ControlManager.launchMarkup($('body'));
 });

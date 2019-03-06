@@ -45,7 +45,7 @@ def TouristList {=
 			<div class="{=cls 'tableBar'} row">
 				<div class="{=cls 'pagination'} col-auto form-group">
 					{=Pagination
-						formField: 'offset'
+						instanceName: 'touristListPaging'
 						pageSizeFormField: 'pageSize'
 						offset: nav.offset
 						recordCount: nav.recordCount
@@ -79,38 +79,54 @@ def TouristList {=
 						</tr>
 					</tbody>
 					<!-- Основное тело таблицы -->
-					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-					{%
-						repeat it in touristList {*
-						<tr>
-						{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
-							<td>{=recGet it "num"}</td>
-						*}}
-							<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
-							<td>
-								<a href="/dyn/tourist/experience?num={=recGet it 'num'}"
-									>{{ {=recGet it "experience" } or "???"}}</a>
-							</td>
-							<td>
-								<div>{=recGetStr it "sportsCategory"}</div>
-								<div>{=recGetStr it "refereeCategory"}</div>
-							</td>
-							<td>{=recGet it "comment"}</td>
-						{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
-							<td>
-								<a href="/dyn/tourist/edit?num={=recGet it 'num'}"
-									class="mkk-Document e-itemEditBtn"
-									title="Изменить"></a>
-							</td>
-						*}}
-						</tr>
-						*};
+					{=TouristListTable
+						moduleName: moduleName
+						instanceName: instanceName
+						cssBaseClass: cssBaseClass
+						touristList: touristList
 					}
-					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
 	*};
+};
+
+def TouristListTable {=
+	def.kv
+		moduleName
+		instanceName
+		cssBaseClass
+		touristList;
+	def.body {*
+	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-method="{{__scopeName__}}">
+		{%
+			repeat it in touristList {*
+			<tr>
+			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
+				<td>{=recGet it "num"}</td>
+			*}}
+				<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
+				<td>
+					<a href="/dyn/tourist/experience?num={=recGet it 'num'}"
+						>{{ {=recGet it "experience" } or "???"}}</a>
+				</td>
+				<td>
+					<div>{=recGetStr it "sportsCategory"}</div>
+					<div>{=recGetStr it "refereeCategory"}</div>
+				</td>
+				<td>{=recGet it "comment"}</td>
+			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
+				<td>
+					<a href="/dyn/tourist/edit?num={=recGet it 'num'}"
+						class="mkk-Document e-itemEditBtn"
+						title="Изменить"></a>
+				</td>
+			*}}
+			</tr>
+			*};
+		}
+	</tbody>
+	*}
 };
 }

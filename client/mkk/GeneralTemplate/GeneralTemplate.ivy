@@ -71,6 +71,7 @@ expr {*
 	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require-css.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
+	<script type="text/javascript">window.userRightData = {{userRightData}};</script>
 </head>
 
 <body>
