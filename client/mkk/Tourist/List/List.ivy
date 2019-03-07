@@ -99,7 +99,7 @@ def TouristListTable {=
 		cssBaseClass
 		touristList;
 	def.body {*
-	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-method="{{__scopeName__}}">
+	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
 		{%
 			repeat it in touristList {*
 			<tr>

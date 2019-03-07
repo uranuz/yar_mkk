@@ -1,6 +1,7 @@
 define('mkk/Helpers/NavigationMixin', [
-	'fir/controls/Pagination/Pagination'
-], function(Pagination) {
+	'fir/controls/Pagination/Pagination',
+	'fir/controls/Loader/Serializer'
+], function(Pagination, LoaderSerializer) {
 return new (FirClass(
 	function FilteredUpdateable() {}, {
 		_subscribeInternal: function() {
@@ -36,6 +37,13 @@ return new (FirClass(
 				throw new Error('Expected navigated area name');
 			}
 			this._reloadControl(this._navigatedArea);
+		},
+		_onAfterLoad: function() {
+			this.superproto._onAfterLoad.apply(this, arguments);
+			if( window.history != null ) {
+				var flt = LoaderSerializer.serialize(this._getQueryParams());
+				window.history.replaceState(null, null, '?' + flt);
+			}
 		}
 	}));
 });

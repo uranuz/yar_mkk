@@ -81,7 +81,7 @@ public:
 					"id": JSONValue(ctx.user.id),
 					"name": JSONValue(ctx.user.name),
 					"accessRoles": JSONValue(accessRoles),
-					"sessionId": JSONValue("dummy")
+					"sessionId": (ctx.user.isAuthenticated()? JSONValue("dummy"): JSONValue())
 				]),
 				"right": (ctx.user.isAuthenticated()? rights: JSONValue())
 			]).toString();
