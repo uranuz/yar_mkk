@@ -5,10 +5,10 @@ return FirClass(
 	function ExtraFileLinks(opts) {
 		this.superproto.constructor.call(this, opts);
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._elems("moreLinksBtn").on("click", this._reloadControl.bind(this, 'moreLinks'));
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._elems("moreLinksBtn").off("click");
 		},
 		show: function() {

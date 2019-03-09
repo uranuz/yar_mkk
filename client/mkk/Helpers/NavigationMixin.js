@@ -4,13 +4,13 @@ define('mkk/Helpers/NavigationMixin', [
 ], function(Pagination, LoaderSerializer) {
 return new (FirClass(
 	function FilteredUpdateable() {}, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			if( this._onSetCurrentPageBinded == null ) {
 				this._onSetCurrentPageBinded = this._onSetCurrentPage.bind(this);
 			}
 			this._getPaging().subscribe('onSetCurrentPage', this._onSetCurrentPageBinded);
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._getPaging().unsubscribe('onSetCurrentPage', this._onSetCurrentPageBinded);
 		},
 		_getPaging: function() {

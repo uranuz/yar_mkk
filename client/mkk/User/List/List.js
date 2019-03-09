@@ -8,7 +8,7 @@ return FirClass(
 		this._listBlock = this._elems('list');
 		this._confirmDlg = this._elems('confirmDlg');
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._listBlock.on('click', this._onListBlock_click.bind(this));
 		},
 		_onListBlock_click: function(ev) {

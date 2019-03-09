@@ -10,11 +10,11 @@ return FirClass(
 		this._documentEdit = this.getChildInstanceByName('documentEdit');
 		this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._elems('addDocBtn').on('click', this._onAddDocBtn_click.bind(this));
 			this._elems('linkList').on('click', this._onLinkEditBtn_click.bind(this));
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._elems('addDocBtn').off('click');
 			this._elems('linkList').off('click');
 		},

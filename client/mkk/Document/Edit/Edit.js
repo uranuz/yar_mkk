@@ -18,11 +18,11 @@ return FirClass(
 		]);
 		this._updateControlState(opts);
 	}, FirControl, [FilteredUpdateableDialog], {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._saveBtn.off('click');
 		},
 		_updateControlState: function(opts) {

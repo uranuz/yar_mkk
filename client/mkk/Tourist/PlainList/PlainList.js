@@ -22,13 +22,13 @@ return FirClass(
 		},
 		// Здесь выполняем подписки на события вёрстки этого компонента, либо события дочерних компонентов
 		// Должно вызываться при загрузке и после перезагрузки компонента
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._elems('block').on('click', '.e-touristItem', this._onItemActivated.bind(this));
 		},
 		// Здесь отписываемся от событий вёрстки этого компонента, либо событий дочерних компонентов
 		// Должно вызываться перед перезагрузкой компонента, либо перед уничтожением компонента,
 		// чтобы избежать утечек памяти, и т.п. явлений
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._elems('block').off('click');
 		},
 		_getRequestURI: function() {

@@ -12,13 +12,13 @@ return FirClass(
 		this._isAltChief = opts.isAltChief;
 		this._chiefRec = null;
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
 
 			this._elems("deleteBtn").on("click", this._onDeleteChief.bind(this));
 			this._container.on("dialogclose", this._onDialogClose.bind(this));
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._searchBlock.unsubscribe('itemSelect');
 			this._elems("deleteBtn").off('click');
 			this._container.off('dialogclose');

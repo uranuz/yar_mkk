@@ -35,11 +35,11 @@ return FirClass(
 
 		this._updateControlState(opts);
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._similarsList.subscribe('onTouristListLoaded', this.processSimilarTourists.bind(this));
 			this._forceSubmitBtn.on('click', this._forcedSubmitForm.bind(this));
 		},
-		_unsubscibeInternal: function() {
+		_onUnsubscribe: function() {
 			this._similarsList.unsubscribe('onTouristListLoaded');
 			this._forceSubmitBtn.off('click');
 		},

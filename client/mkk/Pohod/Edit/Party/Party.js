@@ -23,7 +23,7 @@ return FirClass(
 			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
 			this._partyList = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с выбранными в поиске туристами
 		},
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			var self = this;
 			this._elems("acceptBtn").on("click", function() {
 				self._notify('saveData', self._partyList);
@@ -36,7 +36,7 @@ return FirClass(
 			this._container.on('dialogclose', this.onDialog_close.bind(this));
 			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._elems("acceptBtn").off();
 			this._elems("selectedTourists").off();
 			this._container.off('dialogclose');

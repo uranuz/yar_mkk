@@ -17,14 +17,14 @@ return FirClass(
 		this._tooltipWindow = this._elems('plotTooltip');
 		this.doFlot();
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			var self = this;
 			this._elems('plot').on('plothover', this._onPlot_over.bind(this));
 			// Сохраняем обработчик привязанный к классу, чтобы корректно отписаться от события
 			this._resizeBeginHandler = this._onWindow_ResizeBegin.bind(this);
 			$(window).on('resize', this._resizeBeginHandler);
 		},
-		_unsubscribeInternal: function() {
+		_onUnsubscribe: function() {
 			this._elems('plot').off();
 			$(window).off('resize', this._resizeBeginHandler);
 		},

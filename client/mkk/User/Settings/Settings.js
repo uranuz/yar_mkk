@@ -17,10 +17,10 @@ return FirClass(
 		this._elems('initPohodHistory').on('click', this.initPohodHistory.bind(this));
 		this._elems('initTouristHistory').on('click', this.initTouristHistory.bind(this));
 	}, FirControl, {
-		_subscribeInternal: function() {
+		_onSubscribe: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 		},
-		_unsubscibeInternal: function() {
+		_onUnsubscribe: function() {
 			this._saveBtn.off('click');
 		},
 		_onSaveBtn_click: function(ev) {
