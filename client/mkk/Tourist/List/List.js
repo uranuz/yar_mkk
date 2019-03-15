@@ -21,7 +21,7 @@ return FirClass(
 				field, val;
 			for( var i = 0; i < textFields.length; ++i ) {
 				field = textFields[i];
-				val = this._elems(field).val();
+				val = this._elems(field + 'Field').val();
 				if( val ) {
 					params[field] = val.trim();
 				}

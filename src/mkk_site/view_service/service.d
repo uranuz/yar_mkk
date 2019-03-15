@@ -83,7 +83,8 @@ public:
 					"accessRoles": JSONValue(accessRoles),
 					"sessionId": (ctx.user.isAuthenticated()? JSONValue("dummy"): JSONValue())
 				]),
-				"right": (ctx.user.isAuthenticated()? rights: JSONValue())
+				"right": (ctx.user.isAuthenticated()? rights: JSONValue()),
+				"vpaths": JSONValue(ctx.service.virtualPaths)
 			]).toString();
 			userRightData.escapeState = NodeEscapeState.Safe;
 			IvyData payload = [

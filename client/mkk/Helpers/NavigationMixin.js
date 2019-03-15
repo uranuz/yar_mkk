@@ -3,7 +3,7 @@ define('mkk/Helpers/NavigationMixin', [
 	'fir/controls/Loader/Serializer'
 ], function(Pagination, LoaderSerializer) {
 return new (FirClass(
-	function FilteredUpdateable() {}, {
+	function NavigationMixin() {}, {
 		_onSubscribe: function() {
 			if( this._onSetCurrentPageBinded == null ) {
 				this._onSetCurrentPageBinded = this._onSetCurrentPage.bind(this);
@@ -14,7 +14,7 @@ return new (FirClass(
 			this._getPaging().unsubscribe('onSetCurrentPage', this._onSetCurrentPageBinded);
 		},
 		_getPaging: function() {
-			var paging = this.getChildInstanceByName(this.instanceName() + 'Paging');
+			var paging = this.getChildByName(this.instanceName() + 'Paging');
 			if( !(paging instanceof Pagination) ) {
 				throw new Error('Expected instance of Pagination class');
 			}

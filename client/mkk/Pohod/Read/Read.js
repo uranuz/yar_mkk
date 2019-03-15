@@ -12,19 +12,15 @@ return FirClass(
 		var self = this;
 
 		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); // RecordSet с участниками похода
-		this._partyListProp = this.getChildInstanceByName('partyListProp');
-		this._partyList = this._partyListProp.getChildInstanceByName('partyList');
+		this._partyListProp = this.getChildByName('partyListProp');
+		this._partyList = this._partyListProp.getChildByName('partyList');
 		this._partyList.setFilter({
 			selectedKeys: this.getPartyNums()
 		});
 	}, FirControl, {
 		/** Получить идентификаторы участников группы */
 		getPartyNums: function() {
-			var selectedKeys = [], rec;
-			for( this._partyRS.rewind(); rec = this._partyRS.next(); ) {
-				selectedKeys.push( rec.getKey() );
-			}
-			return selectedKeys;
+			return this._partyRS.getKeys();
 		}
 	}
 );

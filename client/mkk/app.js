@@ -46,7 +46,8 @@ define('mkk/app', [
 		new IvyServerFactory(
 			window.ivyEngine,
 			window.userIdentity,
-			window.userRights));
+			window.userRights,
+			window.userRightData.vpaths));
 	LoaderManager.add(new IvyServerRender());
 	ControlManager.launchMarkup($('body'));
 });

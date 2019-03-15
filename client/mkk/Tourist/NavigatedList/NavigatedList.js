@@ -7,12 +7,12 @@ define('mkk/Tourist/NavigatedList/NavigatedList', [
 return FirClass(
 	function TouristNavigatedList(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._listView = this.getChildInstanceByName(this.instanceName() + 'View');
+		this._listView = this.getChildByName(this.instanceName() + 'View');
 		this.setFilter(opts.filter);
 		this.setMode(opts.mode);
 		this._listView.subscribe('onTouristListLoaded', this._onTouristListLoaded.bind(this));
 		this._listView.subscribe('itemActivated', this._onTouristItemActivated.bind(this));
-		this._pagination = this.getChildInstanceByName(this.instanceName() + 'Pagination');
+		this._pagination = this.getChildByName(this.instanceName() + 'Pagination');
 		this._pagination.subscribe('onSetCurrentPage', this._onSetCurrentPage.bind(this));
 	}, FirControl, {
 		setFilter: function(filter) {

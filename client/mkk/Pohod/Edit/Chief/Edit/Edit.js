@@ -7,7 +7,7 @@ return FirClass(
 		this.superproto.constructor.call(this, opts);
 		var self = this;
 
-		this._searchBlock = this.getChildInstanceByName(this.instanceName() + 'SearchArea');
+		this._searchBlock = this.getChildByName(this.instanceName() + 'SearchArea');
 		this._controlBar = this._elems('controlBar');
 		this._isAltChief = opts.isAltChief;
 		this._chiefRec = null;

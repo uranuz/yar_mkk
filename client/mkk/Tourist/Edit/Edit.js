@@ -18,15 +18,15 @@ return FirClass(
 
 		this._elems('submitBtn').click(this.sendButtonClick.bind(this));
 
-		this._birthDatePicker = this.getChildInstanceByName('birthDateField');
-		this._similarsList = this.getChildInstanceByName('similarsList');
+		this._birthDatePicker = this.getChildByName('birthDateField');
+		this._similarsList = this.getChildByName('similarsList');
 		this._touristForm = this._elems('touristForm');
 		this._similarsDlg = this._elems("similarsDlg");
 		this._forceSubmitBtn = this._elems("forceSubmitBtn");
-		this._touristDeleteArea = this.getChildInstanceByName('touristDeleteArea');
-		this._partyList = this.getChildInstanceByName('partyList');
-		this._extraFileLinks = this.getChildInstanceByName('extraFileLinksEdit');
-		this._chiefAddToParty = this.getChildInstanceByName('chiefAddToParty');
+		this._touristDeleteArea = this.getChildByName('touristDeleteArea');
+		this._partyList = this.getChildByName('partyList');
+		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
+		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
 
 		if( this._isEditDialog ) {
 			this._elems("deleteDialogBtn").on("click", this._touristDeleteArea.showDialog.bind(this));

@@ -12,8 +12,8 @@ define('mkk/Pohod/Edit/Party/Party', [
 return FirClass(
 	function PartyEdit(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._selectedTouristsCtrl = this.getChildInstanceByName('selectedTourists');
-		this._searchBlock = this.getChildInstanceByName('touristSearchArea');
+		this._selectedTouristsCtrl = this.getChildByName('selectedTourists');
+		this._searchBlock = this.getChildByName('touristSearchArea');
 
 		this._updateControlState(opts);
 	}, FirControl, {
@@ -92,15 +92,8 @@ return FirClass(
 		},
 
 		_reloadPartyList: function() {
-			var
-				selectedKeys = [],
-				rec;
-			this._partyList.rewind();
-			while( rec = this._partyList.next() ) {
-				selectedKeys.push(rec.getKey());
-			}
 			this._selectedTouristsCtrl.setFilter({
-				selectedKeys: selectedKeys
+				selectedKeys: this._partyList.getKeys()
 			});
 			this._selectedTouristsCtrl._reloadControl();
 		},

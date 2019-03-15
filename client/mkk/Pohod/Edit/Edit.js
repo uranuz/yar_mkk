@@ -32,14 +32,14 @@ return FirClass(
 		this._chiefRec = this._partyRS.getRecord(this._origPohodRec.get('chiefNum'));
 		this._altChiefRec = this._partyRS.getRecord(this._origPohodRec.get('altChiefNum'));
 
-		this._chiefEditBlock = this.getChildInstanceByName('pohodChiefEdit');
-		this._partyEditBlock = this.getChildInstanceByName('partyEdit');
-		this._beginDatePicker = this.getChildInstanceByName('beginDateField');
-		this._finishDatePicker = this.getChildInstanceByName('finishDateField');
-		this._pohodDeleteArea = this.getChildInstanceByName('pohodDeleteArea');
-		this._partyList = this.getChildInstanceByName('partyList');
-		this._extraFileLinks = this.getChildInstanceByName('extraFileLinksEdit');
-		this._chiefAddToParty = this.getChildInstanceByName('chiefAddToParty');
+		this._chiefEditBlock = this.getChildByName('pohodChiefEdit');
+		this._partyEditBlock = this.getChildByName('partyEdit');
+		this._beginDatePicker = this.getChildByName('beginDateField');
+		this._finishDatePicker = this.getChildByName('finishDateField');
+		this._pohodDeleteArea = this.getChildByName('pohodDeleteArea');
+		this._partyList = this.getChildByName('partyList');
+		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
+		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
 
 		this._elems("deleteDialogBtn").on("click", function() {
 			self._pohodDeleteArea.showDialog();
@@ -108,11 +108,7 @@ return FirClass(
 
 		/** Получить идентификаторы участников группы */
 		getPartyNums: function() {
-			var selectedKeys = [], rec;
-			for( this._partyRS.rewind(); rec = this._partyRS.next(); ) {
-				selectedKeys.push( rec.getKey() );
-			}
-			return selectedKeys;
+			return this._partyRS.getKeys();
 		},
 
 		/** Обновить отображение списка группы */
@@ -235,12 +231,7 @@ return FirClass(
 			}
 
 			if( this._partyRS ) {
-				this._partyRS.rewind();
-				while( rec = this._partyRS.next() ) {
-					touristKeys += ( touristKeys.length ? "," : "" ) + rec.getKey();
-				}
-
-				partyKeysField.val(touristKeys);
+				partyKeysField.val(this._partyRS.getKeys());
 			} else {
 				partyKeysField.val('null');
 			}

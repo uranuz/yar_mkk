@@ -82,7 +82,7 @@ return FirClass(
 			return params;
 		},
 		_onAfterLoad: function() {
-			FirControl.prototype._onAfterLoad.call(this, arguments);
+			this.superproto._onAfterLoad.apply(this, arguments);
 			this._notify('onTouristListLoaded', this._touristList, this._nav);
 		},
 		_onItemActivated: function(ev) {
