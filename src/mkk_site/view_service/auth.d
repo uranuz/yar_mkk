@@ -12,6 +12,7 @@ import ivy;
 import webtank.net.http.handler;
 import webtank.net.http.context;
 
+import ivy.interpreter.data_node: IvyData;
 @IvyModuleAttr(`mkk.Auth`)
 IvyData renderAuth(HTTPContext ctx)
 {

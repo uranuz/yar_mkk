@@ -28,10 +28,12 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 	import std.string: join;
 		
 	string[] enumFields;
-	foreach( enumSpec; PohodEnumFields )
+	static foreach( enum enumSpec; PohodEnumFields )
 	{
-		enumFields ~= `, ` ~ enumSpec[3] ~ `:, ` ~
-			__traits(getMember, filter, enumSpec[0]).map!( (it) => enumSpec[1].getName(it) ).join(",");
+		enumFields ~= `, ` ~ enumSpec[2] ~ `:, ` ~
+			__traits(getMember, filter, enumSpec[0]).map!((it) {
+				mixin(`return ` ~ enumSpec[0] ~ `.getName(it);`);
+			}).join(",");
 	}
 
 	pohod_csv ~= "Фильтры походов\r\n" ~ enumFields.join("\r\n");
@@ -97,7 +99,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 				case 6:
 					if( el.length != 0 )
 					{
-						pohod_csv ~= категорияСложности[el.to!int]~  ',';
+						pohod_csv ~= complexity[el.to!int]~  ',';
 					}
 					else
 						pohod_csv ~= ',';
@@ -106,7 +108,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 				case 5:
 					if( el.length != 0 )
 					{
-						pohod_csv ~= видТуризма[el.to!int] ~ ',';
+						pohod_csv ~= tourismKind[el.to!int] ~ ',';
 					}
 					else
 						pohod_csv ~= ',';
@@ -115,7 +117,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 				case 19:
 					if( el.length != 0 )
 					{
-						pohod_csv ~= готовностьПохода[el.to!int]~  ',';
+						pohod_csv ~= progress[el.to!int]~  ',';
 					}
 					else
 						pohod_csv ~= ',';
@@ -124,7 +126,7 @@ auto pohodCsv(HTTPContext context,PohodFilter filter)
 				case 20:
 					if(el.length!=0)
 					{
-						pohod_csv ~= статусЗаявки[el.to!int]~  ',';
+						pohod_csv ~= claimState[el.to!int]~  ',';
 					}
 					else
 						pohod_csv ~= ',';

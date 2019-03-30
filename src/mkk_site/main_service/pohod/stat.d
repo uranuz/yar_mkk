@@ -280,7 +280,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 							{
 								if(recIndex!=rs.recordCount-1 && column_num==0 )
 									data_array[column_num]=
-									видТуризма.getName(rs.get(column_num, recIndex).to!int);
+									tourismKind.getName(rs.get(column_num, recIndex).to!int);
 								else
 								data_array[column_num]=rs.get(column_num, recIndex);
 							}
@@ -456,7 +456,7 @@ auto statData //начало основной функции////////////////
 			foreach( col; graf_data )
 			{
 				
-				if( count(col, видТуризма.getName(v)) )
+				if( count(col, tourismKind.getName(v)) )
 				{
 					trans_graf_data ~= col[1..col.length-1];
 					p= 0;

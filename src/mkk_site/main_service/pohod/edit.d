@@ -38,11 +38,11 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	string[] fieldValues;
 
 	alias PohodEnums = AliasSeq!(
-		tuple("claimState", статусЗаявки),
-		tuple("tourismKind", видТуризма),
-		tuple("complexity", категорияСложности),
-		tuple("complexityElems", элементыКС),
-		tuple("progress", готовностьПохода)
+		tuple("claimState", claimState),
+		tuple("tourismKind", tourismKind),
+		tuple("complexity", complexity),
+		tuple("complexityElems", complexityElems),
+		tuple("progress", progress)
 	);
 	enum string GetFieldName(alias E) = E[0];
 	enum enumFieldNames = [staticMap!(GetFieldName, PohodEnums)];

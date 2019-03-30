@@ -12,15 +12,17 @@ MKKViewService ViewService() @property
 }
 
 import webtank.ivy.view_service: IvyViewService;
-import mkk_site.security.common.access_control_client: MKKAccessControlClient;
-import webtank.security.right.controller: AccessRightController;
-import webtank.security.right.remote_source: RightRemoteSource;
-import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
+
 class MKKViewService: IvyViewService
 {
+	import mkk_site.security.common.access_control_client: MKKAccessControlClient;
+	import webtank.security.right.controller: AccessRightController;
+	import webtank.security.right.remote_source: RightRemoteSource;
+	import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
+
 	import mkk_site.common.utils;
 
-	import ivy;
+	import ivy.interpreter.data_node: IvyData;
 	import ivy.interpreter.data_node_render: renderDataNode, DataRenderType;
 	import webtank.net.http.output: HTTPOutput;
 	import webtank.net.http.context: HTTPContext;
@@ -116,6 +118,8 @@ shared static this() {
 
 // TODO: Experimental functions
 debug {
+	import webtank.net.http.context: HTTPContext;
+	import ivy.interpreter.data_node: IvyData;
 	void stopServer(HTTPContext ctx)
 	{
 		import std.exception: enforce;
@@ -137,7 +141,7 @@ debug {
 	}
 
 	import ivy;
-	import webtank.net.http.json_rpc_handler;
+	import webtank.net.http.handler.json_rpc;
 	shared static this() {
 		ViewService.pageRouter.join!stopServer("/dyn/server/stop");
 		ViewService.rootRouter.join!getCompiledTemplate("/dyn/server/template");

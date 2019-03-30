@@ -38,8 +38,8 @@ editTourist(
 	string[] fieldValues; // значения полей для записи
 
 	alias TouristEnums = AliasSeq!(
-		tuple("sportsCategory", спортивныйРазряд),
-		tuple("refereeCategory", судейскаяКатегория)
+		tuple("sportsCategory", sportsCategory),
+		tuple("refereeCategory", refereeCategory)
 	);
 	enum string GetFieldName(alias E) = E[0];
 	enum enumFieldNames = [staticMap!(GetFieldName, TouristEnums)];

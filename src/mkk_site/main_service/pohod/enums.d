@@ -12,6 +12,6 @@ shared static this()
 /++ Возвращает JSON с перечислимыми типами, относящимися к походу +/
 auto getPohodEnumTypes() {
 	return tuple!(`tourismKind`, `complexity`, `progress`, `claimState`)(
-		видТуризма, категорияСложности, готовностьПохода, статусЗаявки
+		tourismKind, complexity, progress, claimState
 	);
 }

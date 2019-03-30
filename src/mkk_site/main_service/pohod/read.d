@@ -77,9 +77,9 @@ static immutable pohodRecFormat = RecordFormat!(
 	string, "partyRegion",
 	Date, "beginDate",
 	Date, "finishDate",
-	typeof(видТуризма), "tourismKind",
-	typeof(категорияСложности), "complexity",
-	typeof(элементыКС), "complexityElems",
+	typeof(tourismKind), "tourismKind",
+	typeof(complexity), "complexity",
+	typeof(complexityElems), "complexityElems",
 	string, "pohodRegion",
 	string, "route",
 	size_t, "partySize",
@@ -87,18 +87,18 @@ static immutable pohodRecFormat = RecordFormat!(
 	size_t, "altChiefNum",
 	string, "chiefName",
 	string, "altChiefName",
-	typeof(готовностьПохода), "progress",
-	typeof(статусЗаявки), "claimState",
+	typeof(progress), "progress",
+	typeof(claimState), "claimState",
 	string, "chiefComment",
 	string, "mkkComment"
 )(
 	null,
 	tuple(
-		видТуризма,
-		категорияСложности,
-		элементыКС,
-		готовностьПохода,
-		статусЗаявки
+		tourismKind,
+		complexity,
+		complexityElems,
+		progress,
+		claimState
 	)
 );
 

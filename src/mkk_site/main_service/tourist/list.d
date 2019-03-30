@@ -52,12 +52,12 @@ static immutable touristListRecFormat = RecordFormat!(
 	string, "experience",
 	string, "phone",
 	string, "email",
-	typeof(спортивныйРазряд), "sportsCategory",
-	typeof(судейскаяКатегория), "refereeCategory",
+	typeof(sportsCategory), "sportsCategory",
+	typeof(refereeCategory), "refereeCategory",
 	string, "comment"
 )(
 	null,
-	tuple(спортивныйРазряд, судейскаяКатегория)
+	tuple(sportsCategory, refereeCategory)
 );
 
 /// Возвращает список туристов в подробном варианте

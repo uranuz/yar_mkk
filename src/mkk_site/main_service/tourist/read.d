@@ -23,8 +23,8 @@ static immutable touristRecFormat = RecordFormat!(
 	ubyte, "birthDay",
 	string, "address",
 	string, "experience",
-	typeof(спортивныйРазряд), "sportsCategory",
-	typeof(судейскаяКатегория), "refereeCategory",
+	typeof(sportsCategory), "sportsCategory",
+	typeof(refereeCategory), "refereeCategory",
 	string, "phone",
 	bool, "showPhone",
 	string, "email",
@@ -33,8 +33,8 @@ static immutable touristRecFormat = RecordFormat!(
 )(
 	null,
 	tuple(
-		спортивныйРазряд,
-		судейскаяКатегория
+		sportsCategory,
+		refereeCategory
 	)
 );
 

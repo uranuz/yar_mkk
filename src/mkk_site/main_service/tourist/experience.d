@@ -20,24 +20,24 @@ static immutable pohodRecFormat = RecordFormat!(
 	string, "bookNum",
 	Date, "beginDate",
 	Date, "finishDate",
-	typeof(видТуризма), "tourismKind",
-	typeof(категорияСложности), "complexity",
-	typeof(элементыКС), "complexityElems",
+	typeof(tourismKind), "tourismKind",
+	typeof(complexity), "complexity",
+	typeof(complexityElems), "complexityElems",
 	size_t, "chiefNum",
 	string, "partyRegion",
 	string, "organization",
 	string, "pohodRegion",
 	string, "route",
-	typeof(готовностьПохода), "progress",
-	typeof(статусЗаявки), "claimState"
+	typeof(progress), "progress",
+	typeof(claimState), "claimState"
 )(
 	null,
 	tuple(
-		видТуризма,
-		категорияСложности,
-		элементыКС,
-		готовностьПохода,
-		статусЗаявки
+		tourismKind,
+		complexity,
+		complexityElems,
+		progress,
+		claimState
 	)
 );
 

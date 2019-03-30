@@ -1,23 +1,21 @@
 module mkk_site.view_service.utils;
 
-import std.json;
-import ivy;
-import ivy.json;
-
-public import webtank.net.http.context: HTTPContext;
-import webtank.net.http.handler: ICompositeHTTPHandler, URIPageRoute;
-import webtank.net.http.http;
+import webtank.net.http.context: HTTPContext;
+import ivy.interpreter.data_node: IvyData;
+import std.json: JSONValue;
 import webtank.net.uri_pattern: URIPattern;
-import webtank.net.std_json_rpc_client;
-import webtank.ivy.rpc_client;
-import mkk_site.view_service.service: ViewService;
-public import ivy.interpreter.data_node: IvyData, IvyDataType;
+import webtank.net.http.handler.uri_page_route: URIPageRoute;
+import webtank.net.http.handler.iface: ICompositeHTTPHandler;
+import webtank.net.std_json_rpc_client: endpoint, RemoteCallInfo, remoteCall;
+import webtank.ivy.rpc_client: remoteCall;
+
 
 // Перегрузка mainServiceCall для удобства, которая позволяет передать HTTP контекст для извлечения заголовков
 Result mainServiceCall(Result = IvyData, T...)(HTTPContext ctx, string rpcMethod, auto ref T paramsObj)
 	if( (is(Result == IvyData) || is(Result == JSONValue)) && T.length <= 1 )
 {
-	assert( ctx !is null, `HTTP context is null` );
+	import std.exception: enforce;
+	enforce(ctx !is null, `HTTP context is null`);
 	return ctx.endpoint(`yarMKKMain`).remoteCall!(Result)(rpcMethod, paramsObj);
 }
 
@@ -36,6 +34,8 @@ template join(alias Method)
 {
 	void _processRequest(HTTPContext context) {
 		import std.traits: getUDAs;
+		import ivy.programme: ExecutableProgramme;
+		import mkk_site.view_service.service: ViewService;
 		enum modAttr = getUDAs!(Method, IvyModuleAttr);
 		auto methodRes = Method(context);
 
@@ -71,7 +71,6 @@ template join(alias Method)
 	}
 
 	import std.functional: toDelegate;
-	import webtank.net.uri_pattern: URIPattern;
 	ICompositeHTTPHandler join(ICompositeHTTPHandler parentHdl, string uriPatternStr)
 	{
 		parentHdl.addHandler(new URIPageRoute(toDelegate(&_processRequest), uriPatternStr));

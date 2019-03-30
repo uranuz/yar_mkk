@@ -19,7 +19,6 @@ public import
 	webtank.db.database,
 	webtank.db.datctrl_joint,
 	webtank.net.http.context,
-	webtank.net.http.json_rpc_handler,
 	webtank.net.http.handler,
 	webtank.net.utils,
 	webtank.net.uri;

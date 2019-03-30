@@ -14,6 +14,7 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(getPohodList)(`pohod.list`);
 
 	MainService.pageRouter.joinWebFormAPI!(getPohodList)("/api/pohod/list");
+	MainService.pageRouter.joinWebFormAPI!(recentPohodList)("/api/pohod/recentList");
 }
 
 import std.datetime: Date;
@@ -26,9 +27,9 @@ alias BasePohodFields = AliasSeq!(
 	string, "bookNum",
 	Date, "beginDate",
 	Date, "finishDate",
-	typeof(видТуризма), "tourismKind",
-	typeof(категорияСложности), "complexity",
-	typeof(элементыКС), "complexityElems",
+	typeof(tourismKind), "tourismKind",
+	typeof(complexity), "complexity",
+	typeof(complexityElems), "complexityElems",
 	string, "pohodRegion",
 	size_t, "chiefNum",
 	string, "chiefFamilyName",
@@ -47,9 +48,9 @@ static immutable recentPohodRecFormat = RecordFormat!(
 )(
 	null,
 	tuple(
-		видТуризма,
-		категорияСложности,
-		элементыКС
+		tourismKind,
+		complexity,
+		complexityElems
 	)
 );
 
@@ -160,12 +161,12 @@ private static immutable string pohodListDataCheckSubquery =
 // 0: название поля фильтрации в параметрах метода
 // 1: формат перечислимого типа для этого параметра
 // 2: соответствующее название поля в структуре ФильтрПоходов
-alias PohodEnumFields = AliasSeq!(
-	tuple("tourismKind", видТуризма, "vid", "вид туризма"),
-	tuple("complexity", категорияСложности, "ks", "категория cложности"),
-	tuple("progress", готовностьПохода, "prepar", "готовность похода"),
-	tuple("claimState", статусЗаявки, "stat", "статус заявки")
-);
+static immutable PohodEnumFields = [
+	tuple("tourismKind", "vid", "вид туризма"),
+	tuple("complexity", "ks", "категория cложности"),
+	tuple("progress", "prepar", "готовность похода"),
+	tuple("claimState", "stat", "статус заявки")
+];
 
 //Формирует чать запроса по фильтрации походов (для SQL-секции where)
 string getPohodFilterQueryPart(ref PohodFilter filter)
@@ -174,10 +175,10 @@ string getPohodFilterQueryPart(ref PohodFilter filter)
 	import std.array: join;
 
 	string[] filters;
-	foreach( enumSpec; PohodEnumFields ) {
+	static foreach( enum enumSpec; PohodEnumFields ) {
 		mixin(`
 		if( filter.` ~ enumSpec[0] ~ `.length > 0 )
-			filters ~= "\"` ~ enumSpec[2] ~ `\" in(" ~ filter.` ~ enumSpec[0] ~ `.conv!(string[]).join(", ") ~ ")";
+			filters ~= "\"` ~ enumSpec[1] ~ `\" in(" ~ filter.` ~ enumSpec[0] ~ `.conv!(string[]).join(", ") ~ ")";
 		`);
 	}
 
@@ -223,16 +224,16 @@ string getPohodFilterQueryPart(ref PohodFilter filter)
 static immutable pohodRecFormat = RecordFormat!(
 	BasePohodFields,
 	string[], "problems",
-	typeof(готовностьПохода), "progress",
-	typeof(статусЗаявки), "claimState"
+	typeof(progress), "progress",
+	typeof(claimState), "claimState"
 )(
 	null,
 	tuple(
-		видТуризма,
-		категорияСложности,
-		элементыКС,
-		готовностьПохода,
-		статусЗаявки
+		tourismKind,
+		complexity,
+		complexityElems,
+		progress,
+		claimState
 	)
 );
 
