@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc;
+from fir.controls.utils import recGet, cls, firScopeOptsEnc;
 from mkk.Helpers import DateRangePrinter;
 def RecentPohodList {=
 	def.kv
@@ -12,9 +12,9 @@ def RecentPohodList {=
 			{=repeat pohod in pohodList {*
 				<div class="{=cls 'itemBlock'}">
 					<a class="{=cls 'titleLink'}" href="{{vpaths.siteDynamic}}pohod/read?num={=recGet pohod 'num'}">
-						{=recGetStr pohod "tourismKind"}
-						{=recGetStr pohod "complexity"}
-						{=recGetStr pohod "complexityElems"} к.с.
+						{{pohod.tourismKind.name}}
+						{{pohod.complexity.name}}
+						{{pohod.complexityElems.name}} к.с.
 						в районе {=recGet pohod "pohodRegion"}
 					</a>
 					<div class="{=cls 'itemDetails'}">

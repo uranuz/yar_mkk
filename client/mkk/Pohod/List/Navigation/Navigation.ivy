@@ -12,10 +12,16 @@ def PohodListNavigation {=
 		filter: {}
 		nav: {}
 		paginationSideContent: null
-		vpaths: {};
+		vpaths: {}
+		enumFields: [
+			{num: 'tourismKind', title: 'Вид туризма'},
+			{num: 'complexity', title: 'Категория сложности'},
+			{num: 'progress', title: 'Прохождение'},
+			{num: 'claimState', title: 'Заявка'}
+		];
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['enumFields']}"/>
 			<form method="post" class="{=cls 'form'}">
 				{=if false {*
 				<div style="text-align:right; position:absolute; top:0.5rem; right:0.5rem;">
@@ -31,23 +37,16 @@ def PohodListNavigation {=
 						<div class="col">
 							<input type="text"
 								name="pohodRegion"
-								class="form-control"
+								class="{=cls 'pohodRegionField'} form-control"
 								value="{{filter.pohodRegion}}"/>
 						</div>
 					</label>
 					<div class="{=cls 'enumFilterBlock'} row">
-						{=repeat item in [
-							{num: 'tourismKind', title: 'Вид туризма'},
-							{num: 'complexity', title: 'Категория сложности'},
-							{num: 'progress', title: 'Прохождение'},
-							{num: 'claimState', title: 'Заявка'}
-						] {*
+						{=repeat item in enumFields {*
 						<span class="{=cls 'enumFilter'} col-md-3 col-sm-6 pr-2 mb-2">
 							{=CheckBoxList
 								instanceName: item.num
 								items: {=at pohodEnums item.num}
-								keyField: "v"
-								captionField: "n"
 								formField: item.num
 								selectedKeys: {=at filter item.num}
 								masterSwitchTitle: {*<span class="{=cls 'enumHeader'}">{{item.title}}</span>*}
@@ -90,14 +89,14 @@ def PohodListNavigation {=
 								<input type="checkbox"
 									name="withFiles"
 									{=if filter.withFiles == true 'checked'}
-									class="checkbox mr-2"/>
+									class="{=cls 'withFilesFlag'} checkbox mr-2"/>
 								<span class="form-control-label">С доп. материалами</span>
 							</label>
 							<label class="col-md-auto justify-content-start">
 								<input type="checkbox"
 									name="withDataCheck"
 									{=if filter.withDataCheck == true 'checked'}
-									class="checkbox mr-2"/>
+									class="{=cls 'withDataCheckFlag'} checkbox mr-2"/>
 								<span class="form-control-label">Контроль данных</span>
 							</label>
 
@@ -118,7 +117,7 @@ def PohodListNavigation {=
 				<div class="{=cls 'bottomRow'} row">
 					<div class="{=cls 'pagination'} col-auto">
 					{=Pagination
-						formField: 'offset'
+						instanceName: 'pohodListPaging'
 						pageSizeFormField: 'pageSize'
 						offset: nav.offset
 						pageSize: nav.pageSize or 10

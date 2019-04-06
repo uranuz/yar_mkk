@@ -1,23 +1,18 @@
 define('mkk/Document/Edit/Edit', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/FilteredUpdateableDialog'
-], function (FirControl, FilteredUpdateableDialog) {
+	'mkk/Helpers/DialogMixin'
+], function (FirControl, DialogMixin) {
 return FirClass(
 	function DocumentEdit(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._filter = {};
-		this._firstLoad = true;
 		this.setDialogOptions({
 			modal: true,
 			minWidth: 500,
 			width: 850,
 			close: this._onDialogClose.bind(this)
 		});
-		this.setAllowedFilterParams([
-			'num', 'name', 'link', 'action'
-		]);
 		this._updateControlState(opts);
-	}, FirControl, [FilteredUpdateableDialog], {
+	}, FirControl, [DialogMixin], {
 		_onSubscribe: function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
@@ -31,23 +26,43 @@ return FirClass(
 			this._isResultStep = opts.__scopeName__ === 'Results';
 		},
 		_getHTTPMethod: function(areaName) {
-			return (areaName === 'results'? 'post': 'get');
+			return (areaName === 'Results'? 'post': 'get');
 		},
 		_getRequestURI: function(areaName) {
-			return (areaName === 'results'? '/dyn/document/edit/results': '/dyn/document/edit');
+			return (areaName === 'Results'? '/dyn/document/edit/results': '/dyn/document/edit');
 		},
 		_getRPCMethod: function(areaName) {
 			return 'document.read';
 		},
-		_onSaveBtn_click: function() {
-			var formData = this._docForm.serializeArray();
+		_getQueryParams: function(areaName) {
+			if( areaName === 'Results' ) {
+				return {record: this.getFilter()};
+			} else{
+				return {num: this._num};
+			}
+		},
+		getFilter: function() {
+			var
+				params = {},
+				formData = this._docForm.serializeArray();
 			// Получаем данные из формы и запихиваем в фильтр
 			if( formData ) {
 				for( var i = 0; i < formData.length; ++i ) {
-					this._filter[formData[i].name] = formData[i].value;
+					params[formData[i].name] = formData[i].value;
 				}
 			}
-			this._reloadControl('results');
+
+			if( params.num == null ) {
+				params.num = this._num;
+			}
+
+			return params;
+		},
+		setNum: function(num) {
+			this._num = num;
+		},
+		_onSaveBtn_click: function() {
+			this._reloadControl('Results');
 		},
 		_onDialogClose: function() {
 			if( this._isResultStep ) {

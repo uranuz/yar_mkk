@@ -1,6 +1,6 @@
 expr
 {=
-from fir.controls.utils import recGet, recGetStr, cls, isInRoles;
+from fir.controls.utils import recGet, cls, isInRoles;
 from fir.controls.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
@@ -38,10 +38,10 @@ def Experience {=
 					value: {=recGet tourist "experience"};
 				EntityProperty
 					title: 'Спортивный разряд'
-					value: {=recGetStr tourist "sportsCategory"};
+					value: tourist.sportsCategory.name;
 				EntityProperty
 					title: 'Судейская категория'
-					value: {=recGetStr tourist "refereeCategory"};
+					value: tourist.refereeCategory.name;
 				EntityProperty
 					title: 'Телефон'
 					value: {=recGet tourist "phone"};
@@ -102,8 +102,8 @@ def Experience {=
 								<div class="text-nowrap">{=RusDateFormat {=recGet rec "finishDate" } }</div>
 							</td>
 							<td>
-								<div>{=recGetStr rec "tourismKind"}</div>
-								<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
+								<div>{{rec.tourismKind.name}}</div>
+								<div>{{rec.complexity.name}} {{rec.complexityElems}}</div>
 							</td>
 							<td>{=recGet rec "pohodRegion"}</td>
 							<td>{=if {=recGet rec "chiefNum"} == {=recGet tourist "num"} "Руков." else "Участ."}</td>
@@ -112,8 +112,8 @@ def Experience {=
 								<div>{=recGet rec "partyRegion"}</div>
 							</td>
 							<td>
-								<div>{=recGetStr rec "progress"}</div>
-								<div>{=recGetStr rec "claimState"}</div>
+								<div>{{rec.progress}}</div>
+								<div>{{rec.claimState}}</div>
 							</td>
 						</tr>
 						<tr>

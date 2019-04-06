@@ -4,7 +4,6 @@ define('mkk/Pohod/Edit/Edit', [
 	'fir/network/json_rpc',
 	'fir/datctrl/Record',
 	'fir/datctrl/RecordSet',
-	'fir/datctrl/helpers',
 	'mkk/helpers',
 	'mkk/Pohod/Edit/DeleteArea/DeleteArea',
 	'mkk/Pohod/Edit/Party/Party',
@@ -19,7 +18,6 @@ define('mkk/Pohod/Edit/Edit', [
 	json_rpc,
 	Record,
 	RecordSet,
-	DatctrlHelpers,
 	MKKHelpers
 ) {
 return FirClass(
@@ -27,8 +25,8 @@ return FirClass(
 		this.superproto.constructor.call(this, opts);
 		var self = this;
 
-		this._partyRS = DatctrlHelpers.fromJSON(opts.partyList); // RecordSet с участниками похода
-		this._origPohodRec = DatctrlHelpers.fromJSON(opts.pohod); // Запись похода при загрузке компонента
+		this._partyRS = opts.partyList; // RecordSet с участниками похода
+		this._origPohodRec = opts.pohod; // Запись похода при загрузке компонента
 		this._chiefRec = this._partyRS.getRecord(this._origPohodRec.get('chiefNum'));
 		this._altChiefRec = this._partyRS.getRecord(this._origPohodRec.get('altChiefNum'));
 

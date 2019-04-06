@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, isInRoles;
+from fir.controls.utils import recGet, cls, firScopeOptsEnc, isInRoles;
 from mkk.Helpers import DateRangePrinter;
 from mkk.Helpers.EntityProperty import EntityProperty;
 from mkk.Tourist.NavigatedList import TouristNavigatedList;
@@ -43,10 +43,10 @@ def PohodRead {=
 				};
 			EntityProperty
 				title: 'Вид туризма'
-				value: {=recGetStr pohod 'tourismKind'};
+				value: pohod.tourismKind.name;
 			EntityProperty
 				title: 'Категория сложности'
-				value: {%recGetStr pohod 'complexity'; expr ' '; recGetStr pohod 'complexityElems'};
+				value: {*{{pohod.complexity.name}} {{pohod.complexityElems.name}}*};
 			EntityProperty
 				title: 'Район похода'
 				value: {=recGet pohod 'pohodRegion'};
@@ -78,10 +78,10 @@ def PohodRead {=
 				isWide: true;
 			EntityProperty
 				title: 'Готовность похода'
-				value: {=recGetStr pohod 'progress'};
+				value: pohod.progress.name;
 			EntityProperty
 				title: 'Статус заявки'
-				value: {=recGetStr pohod 'claimState'};
+				value: pohod.claimState.name;
 			EntityProperty
 				title: 'Комментарий руководителя'
 				value: {=recGet pohod 'chiefComment'}

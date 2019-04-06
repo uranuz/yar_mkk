@@ -1,8 +1,7 @@
 define('mkk/Tourist/PlainList/PlainList', [
 	'fir/controls/FirControl',
-	'fir/datctrl/helpers',
 	'css!mkk/Tourist/PlainList/PlainList'
-], function (FirControl, DatctrlHelpers) {
+], function (FirControl) {
 	var strParamNames = [
 		'familyName', 'givenName', 'patronymic', 'birthYear',
 		'region', 'city', 'street'
@@ -17,7 +16,7 @@ return FirClass(
 		// В этой функции мы забираем опции пришедшие при первой загрузке или перезагрузке компонента,
 		// которые должны быть обновлены, если это требуется
 		_updateControlState: function(opts) {
-			this._touristList = DatctrlHelpers.fromJSON(opts.touristList);
+			this._touristList = opts.touristList;
 			this._nav = opts.nav;
 		},
 		// Здесь выполняем подписки на события вёрстки этого компонента, либо события дочерних компонентов

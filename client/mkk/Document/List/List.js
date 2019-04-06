@@ -7,7 +7,7 @@ define('mkk/Document/List/List', [
 return FirClass(
 	function DocumentList(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._documentEdit = this.getChildInstanceByName('documentEdit');
+		this._documentEdit = this.getChildByName('documentEdit');
 		this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
 	}, FirControl, {
 		_onSubscribe: function() {
@@ -19,6 +19,7 @@ return FirClass(
 			this._elems('linkList').off('click');
 		},
 		_onAddDocBtn_click: function() {
+			this._documentEdit.setNum(null); // Нужно сбрасывать номер
 			this._documentEdit.openDialog();
 		},
 		_onLinkEditBtn_click: function(ev) {
@@ -28,7 +29,8 @@ return FirClass(
 			if( !el || !el.length ) {
 				return;
 			}
-			this._documentEdit.openDialog({num: el.data('documentNum')});
+			this._documentEdit.setNum(el.data('documentNum'));
+			this._documentEdit.openDialog();
 		},
 		_onDocumentChanged: function() {
 			location.reload();

@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
+from fir.controls.utils import recGet, cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;

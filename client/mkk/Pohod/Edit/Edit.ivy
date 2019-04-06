@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet, recGetStr, enumWithNull, hasRight, isInRoles;
+from fir.controls.utils import cls, recGet, enumWithNull, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Pohod.Edit.DeleteArea import DeleteArea;
@@ -77,7 +77,7 @@ def PohodEdit {=
 					idField: 'v'
 					captionField: 'n'
 					items: {=enumWithNull
-						{=at {=at pohod.format 'claimState'} 'enum'} 'не задан'}
+						{=at {=recGet pohod.format 'claimState'} 'enum'} 'не задан'}
 					selectedId: {=recGet pohod 'claimState'}
 					disabled: not{=hasRight subobj: 'book.claimState' kind: 'edit'}
 				}

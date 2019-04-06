@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr, cls, firScopeOptsEnc, hasRight;
+from fir.controls.utils import recGet, cls, firScopeOptsEnc, hasRight;
 from mkk.Pohod.List.Navigation import PohodListNavigation;
 from mkk.Pohod.List.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
@@ -54,78 +54,12 @@ def PohodList {=
 							*}}
 						</tr>
 					</tbody>
-					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-						{=repeat rec in pohodList {*
-							<tr>
-								{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*
-									<td>{=recGet rec "num"}</td>
-								*}}
-								<td>
-									{=var isBookNumSet: {=recGet rec "mkkCode"} or {=recGet rec "bookNum"} }
-									<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
-										title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
-										>{=if isBookNumSet
-											{*<div class="text-nowrap">{=recGet rec "mkkCode"}</div>
-											<div class="text-nowrap">{=recGet rec "bookNum"}</div>*}
-											else "???"
-										}</a>
-								</td>
-								<td>
-									<div class="text-nowrap">{=RusDateFormat {=recGet rec "beginDate"} }</div>
-									<div class="text-nowrap">{=RusDateFormat {=recGet rec "finishDate"} }</div>
-								</td>
-								<td>
-									<div>{=recGetStr rec "tourismKind"}</div>
-									<div>{=recGetStr rec "complexity"} {=recGetStr rec "complexityElems"}</div>
-								</td>
-								<td width="8%">{=recGet rec "pohodRegion"}</td>
-								<td>
-									<div>{=recGet rec "chiefFamilyName"}</div>
-									<div>{=recGet rec "chiefGivenName"}</div>
-									<div>{=recGet rec "chiefPatronymic"}</div>
-									<span>{=recGet rec "chiefBirthYear"}</span>
-								</td>
-								<td class="{=cls 'showPartyBtn'}"
-									data-pohod-num="{=recGet rec 'num'}"
-									title="Щелкните для просмотра списка участников">
-									<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
-										src="{{vpaths.siteImg}}icons/list_icon.png"
-									/>
-									<span class="{=cls 'showPartyBtnText'}" title="Количество участников">
-										{=recGet rec "partySize"}
-									</span>
-								</td>
-								<td>
-									<div>{=recGet rec "organization"}</div>
-									<div>{=recGet rec "partyRegion"}</div>
-								</td>
-								<td>
-									<div>{=recGetStr rec "progress"}</div>
-									<div>{=recGetStr rec "claimState"}</div>
-								</td>
-								{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*
-									<td>
-										<a href="{{vpaths.siteDynamic}}pohod/edit?num={=recGet rec 'num'}"
-											class="mkk-Document e-itemEditBtn"
-											title="Изменить"></a>
-									</td>
-								*}}
-							</tr>
-							<tr>
-								{=if filter.withDataCheck {*
-									<td class="{=cls 'problemsCell'}" colspan="100">
-										<ul>
-										{=repeat problem in {=recGet rec 'problems'} {*
-											<li class="{=cls 'problemItem'}">{{problem}}</li>
-										*}}
-										</ul>
-									</td>
-								*} else {*
-									<td class="{=cls 'routeCell'}" colspan="100">Маршрут: {=recGet rec 'route'}</td>
-								*}}
-							</tr>
-						*}}
-					</tbody>
+					{=PohodListTable
+						instanceName: instanceName
+						cssBaseClass: cssBaseClass
+						pohodList: pohodList
+						filter: filter
+					}
 				</table>
 			</div>
 		</div>
@@ -133,6 +67,88 @@ def PohodList {=
 			{=PartyInfo}
 		</div>
 	</div>
+	*}
+};
+
+def PohodListTable {=
+	def.kv
+		instanceName
+		cssBaseClass
+		pohodList
+		filter;
+	def.body {*
+		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+			{=repeat rec in pohodList {*
+				<tr>
+					{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*
+						<td>{{rec.num}}</td>
+					*}}
+					<td>
+						{=var isBookNumSet: rec.mkkCode or rec.bookNum}
+						<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
+							title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
+							>{=if isBookNumSet
+								{*<div class="text-nowrap">{{rec.mkkCode}}</div>
+								<div class="text-nowrap">{{rec.bookNum}}</div>*}
+								else "???"
+							}</a>
+					</td>
+					<td>
+						<div class="text-nowrap">{=RusDateFormat rec.beginDate}</div>
+						<div class="text-nowrap">{=RusDateFormat rec.finishDate}</div>
+					</td>
+					<td>
+						<div>{{rec.tourismKind.name}}</div>
+						<div>{{rec.complexity.name}} {{rec.complexityElems.name}}</div>
+					</td>
+					<td width="8%">{{rec.pohodRegion}}</td>
+					<td>
+						<div>{{rec.chiefFamilyName}}</div>
+						<div>{{rec.chiefGivenName}}</div>
+						<div>{{rec.chiefPatronymic}}</div>
+						<span>{{rec.chiefBirthYear}}</span>
+					</td>
+					<td class="{=cls 'showPartyBtn'}"
+						data-pohod-num="{{rec.num}}"
+						title="Щелкните для просмотра списка участников">
+						<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
+							src="{{vpaths.siteImg}}icons/list_icon.png"
+						/>
+						<span class="{=cls 'showPartyBtnText'}" title="Количество участников">
+							{{rec.partySize}}
+						</span>
+					</td>
+					<td>
+						<div>{{rec.organization}}</div>
+						<div>{{rec.partyRegion}}</div>
+					</td>
+					<td>
+						<div>{{rec.progress.name}}</div>
+						<div>{{rec.claimState.name}}</div>
+					</td>
+					{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*
+						<td>
+							<a href="{{vpaths.siteDynamic}}pohod/edit?num={{rec.num}}"
+								class="mkk-Document e-itemEditBtn"
+								title="Изменить"></a>
+						</td>
+					*}}
+				</tr>
+				<tr>
+					{=if filter.withDataCheck {*
+						<td class="{=cls 'problemsCell'}" colspan="100">
+							<ul>
+							{=repeat problem in rec.problems {*
+								<li class="{=cls 'problemItem'}">{{problem}}</li>
+							*}}
+							</ul>
+						</td>
+					*} else {*
+						<td class="{=cls 'routeCell'}" colspan="100">Маршрут: {{rec.route}}</td>
+					*}}
+				</tr>
+			*}}
+		</tbody>
 	*}
 };
 }

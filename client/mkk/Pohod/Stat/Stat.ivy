@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, recGetStr,cls;
+from fir.controls.utils import recGet, cls;
 from fir.controls.Pagination import Pagination;
 def Stat {=
 	def.kv

@@ -6,7 +6,6 @@ define('mkk/Pohod/Edit/Party/Party', [
 	'mkk/Tourist/PlainList/PlainList'
 ], function (
 	FirControl,
-	DatctrlHelpers,
 	MKKHelpers
 ) {
 return FirClass(
@@ -21,7 +20,7 @@ return FirClass(
 			this._panelsArea = this._elems("panelsArea");
 			this._searchPanel = this._elems("searchPanel");
 			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
-			this._partyList = DatctrlHelpers.fromJSON(opts.partyList); //RecordSet с выбранными в поиске туристами
+			this._partyList = opts.partyList; //RecordSet с выбранными в поиске туристами
 		},
 		_onSubscribe: function() {
 			var self = this;
