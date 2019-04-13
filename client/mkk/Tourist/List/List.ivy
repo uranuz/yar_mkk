@@ -1,11 +1,14 @@
 expr {=
 from fir.controls.utils import recGet, cls, firScopeOptsEnc, isInRoles, hasRight;
 from fir.controls.Pagination import Pagination;
+var
+	instanceName: 'touristList'
+	cssBaseClass: 'mkk-TouristList';
 def TouristList {=
 	def.kv
 		moduleName: 'mkk/Tourist/List/List'
-		instanceName: 'touristList'
-		cssBaseClass: 'mkk-TouristList'
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
 		touristList: null
 		nav: null
 		filter: null;
@@ -93,8 +96,8 @@ def TouristList {=
 
 def TouristListTable {=
 	def.kv
-		instanceName
-		cssBaseClass
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
 		touristList;
 	def.body {*
 	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">

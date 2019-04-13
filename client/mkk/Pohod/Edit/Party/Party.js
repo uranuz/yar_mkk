@@ -1,6 +1,5 @@
 define('mkk/Pohod/Edit/Party/Party', [
 	'fir/controls/FirControl',
-	'fir/datctrl/helpers',
 	'mkk/helpers',
 	'mkk/Tourist/SearchArea/SearchArea',
 	'mkk/Tourist/PlainList/PlainList'
@@ -104,7 +103,7 @@ return FirClass(
 
 			if( !this._partyList ) {
 				this._partyList = new webtank.datctrl.RecordSet({
-					format: rec.copyFormat()
+					format: rec.getFormat().copy()
 				});
 			}
 

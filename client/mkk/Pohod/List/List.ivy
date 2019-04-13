@@ -3,10 +3,13 @@ from fir.controls.utils import recGet, cls, firScopeOptsEnc, hasRight;
 from mkk.Pohod.List.Navigation import PohodListNavigation;
 from mkk.Pohod.List.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
+var
+	instanceName: 'pohodList'
+	cssBaseClass: "mkk-PohodList";
 def PohodList {=
 	def.kv
-		instanceName: 'pohodList'
-		cssBaseClass: "mkk-PohodList"
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
 		pohodEnums: null
 		filter: null
 		pohodList: null
@@ -59,6 +62,7 @@ def PohodList {=
 						cssBaseClass: cssBaseClass
 						pohodList: pohodList
 						filter: filter
+						isForPrint: isForPrint
 					}
 				</table>
 			</div>
@@ -72,10 +76,11 @@ def PohodList {=
 
 def PohodListTable {=
 	def.kv
-		instanceName
-		cssBaseClass
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
 		pohodList
-		filter;
+		filter
+		isForPrint: false;
 	def.body {*
 		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
 			{=repeat rec in pohodList {*

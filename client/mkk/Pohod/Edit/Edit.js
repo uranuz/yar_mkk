@@ -318,7 +318,7 @@ return FirClass(
 
 			if( self._partyRS == null ) {
 				self._partyRS = new dctl.RecordSet({
-					format: self._chiefRec.copyFormat()
+					format: self._chiefRec.getFormat().copy()
 				});
 			}
 

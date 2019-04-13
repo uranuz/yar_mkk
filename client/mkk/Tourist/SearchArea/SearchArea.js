@@ -1,17 +1,9 @@
 define('mkk/Tourist/SearchArea/SearchArea', [
 	'fir/controls/FirControl',
-	'fir/network/json_rpc',
-	'fir/datctrl/helpers',
-	'mkk/helpers',
 	'fir/controls/Pagination/Pagination',
 	'mkk/Tourist/PlainList/PlainList',
 	'css!mkk/Tourist/SearchArea/SearchArea'
-], function(
-	FirControl,
-	json_rpc,
-	datctrl,
-	MKKHelpers
-) {
+], function(FirControl) {
 return FirClass(
 	function TouristSearchArea(opts) {
 		this.superproto.constructor.call(this, opts);
