@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import rsGet, recGet, cls;
+from fir.controls.utils import cls;
 def TouristPlainList {=
 	def.kv
 		moduleName: 'mkk/Tourist/PlainList/PlainList'
@@ -25,7 +25,7 @@ def TouristPlainList {=
 			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 			{=if not{=empty touristList}
 				{=repeat rec in touristList {*
-					<div class="{=cls 'touristItem'}" data-num="{=recGet rec 'num'}">
+					<div class="{=cls 'touristItem'}" data-num="{{rec.num}}">
 						{=if not{=empty itemIcon} {*
 						<div class="{=cls 'iconWrapper'}">
 							<span class="icon-small {{itemIcon}}"></span>
@@ -34,10 +34,10 @@ def TouristPlainList {=
 						<{{itemTextTag}}
 							class="{=cls 'touristText'}"
 							href="#!">
-							{=recGet rec "familyName"}
-							{=recGet rec "givenName"}
-							{=recGet rec "patronymic"}
-							{=recGet rec "birthYear"}
+							{{rec.familyName}}
+							{{rec.givenName}}
+							{{rec.patronymic}}
+							{{rec.birthYear}}
 						</{{itemTextTag}}>
 					</div>
 					*}

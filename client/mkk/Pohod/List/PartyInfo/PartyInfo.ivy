@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import rsGet, recGet, cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 def PartyInfo {=
 	def.kv
@@ -14,15 +14,15 @@ def PartyInfo {=
 		{=if not{=empty pohodInfo} {*
 		<div>
 			<span class="{=cls 'codeLabel'}">Код МКК:</span>
-			<span>{=recGet pohodInfo "mkkCode"}</span>
+			<span>{{pohodInfo.mkkCode}}</span>
 		</div>
 		<div>
 			<span class="{=cls 'bookNumLabel'}">Номер книги: </span>
-			<span>{=recGet pohodInfo "bookNum"}</span>
+			<span>{{pohodInfo.bookNum}}</span>
 		</div>
 		<div>
 			<span class="{=cls 'regionLabel'}">Район похода: </span>
-			<span>{=recGet pohodInfo "pohodRegion"}</span>
+			<span>{{pohodInfo.pohodRegion}}</span>
 		</div>
 		<hr/>
 		*}}

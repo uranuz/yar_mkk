@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc, isInRoles, hasRight;
+from fir.controls.utils import cls, firScopeOptsEnc, isInRoles, hasRight;
 from fir.controls.Pagination import Pagination;
 var
 	instanceName: 'touristList'
@@ -105,21 +105,21 @@ def TouristListTable {=
 			repeat it in touristList {*
 			<tr>
 			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
-				<td>{=recGet it "num"}</td>
+				<td>{{it.num}}</td>
 			*}}
-				<td>{=recGet it "familyName"} {=recGet it "givenName"} {=recGet it "patronymic"}</td>
+				<td>{{it.familyName}} {{it.givenName}} {{it.patronymic}}</td>
 				<td>
-					<a href="/dyn/tourist/experience?num={=recGet it 'num'}"
-						>{{ {=recGet it "experience" } or "???"}}</a>
+					<a href="/dyn/tourist/experience?num={{it.num}}"
+						>{{it.experience or "???"}}</a>
 				</td>
 				<td>
 					<div>{{it.sportsCategory.name}}</div>
 					<div>{{it.refereeCategory.name}}</div>
 				</td>
-				<td>{=recGet it "comment"}</td>
+				<td>{{it.comment}}</td>
 			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
 				<td>
-					<a href="/dyn/tourist/edit?num={=recGet it 'num'}"
+					<a href="/dyn/tourist/edit?num={{it.num}}"
 						class="mkk-Document e-itemEditBtn"
 						title="Изменить"></a>
 				</td>

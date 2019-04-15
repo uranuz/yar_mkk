@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Pagination import Pagination;
 
 def DocumentEdit {=
@@ -13,13 +13,13 @@ def DocumentEdit {=
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<form class="{=cls 'docForm'}" method="post" action="{{vpaths.siteDynamic}}/document/edit/results">
 		{=if document {*
-			<input type="hidden" name="num" value="{=recGet document 'num'}"/>
+			<input type="hidden" name="num" value="{{document.num}}"/>
 			<label class="form-row form-group">
 				<span>Название</span>
 				<input type="text"
 					class="{=cls 'name'} form-control"
 					name="name"
-					value="{=recGet document 'name'}"
+					value="{{document.name}}"
 					placeholder="Введите отображаемое название"/>
 			</label>
 			<label class="form-row form-group">
@@ -27,7 +27,7 @@ def DocumentEdit {=
 				<input type="text"
 					class="{=cls 'link'} form-control"
 					name="link"
-					value="{=recGet document 'link'}"
+					value="{{document.link}}"
 					placeholder="Введите адрес ссылки"/>
 			</label>
 			<div class="form-row form-group">

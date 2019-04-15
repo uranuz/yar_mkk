@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, recGet;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def ObjectRightList {=
 	def.kv
 		moduleName: 'mkk/Right/ObjectRightList/ObjectRightList'
@@ -12,10 +12,10 @@ def ObjectRightList {=
 		<h2>Права доступа к объекту</h2>
 		{=repeat right in objectRightList {*
 			<div class="{=cls 'rightItem'}">
-				<div>Тип доступа: {=recGet right 'accessKind'}</div>
-				<div>Роль: {=recGet right 'roleName'}</div>
-				<div>Правило: {=recGet right 'ruleName'}</div>
-				<div>Дочерние объекты: {=if not{=recGet right 'inheritance'} 'не '} распространяется</div>
+				<div>Тип доступа: {{right.accessKind}}</div>
+				<div>Роль: {{right.roleName}}</div>
+				<div>Правило: {{right.ruleName}}</div>
+				<div>Дочерние объекты: {=if not right.inheritance 'не '} распространяется</div>
 			</div>
 		*}}
 	</div>

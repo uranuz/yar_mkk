@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, recGet;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def renderObject {=
 	def.kv
 		objKey: null
@@ -12,12 +12,12 @@ def renderObject {=
 			var obj: {=at objectList item.idx};
 		}
 		<div class="{=cls 'rightObject'}" style="margin-left: {{level*16}}px;">
-			<div>Номер: {=recGet obj 'num'}</div>
-			<div>Имя: {=recGet obj 'name'}</div>
-			<div>Описание: {=recGet obj 'description'}</div>
-			<div>Родитель: {=recGet obj 'parentNum'}</div>
+			<div>Номер: {{obj.num}}</div>
+			<div>Имя: {{obj.name}}</div>
+			<div>Описание: {{obj.description}}</div>
+			<div>Родитель: {{obj.parentNum}}</div>
 			<div>
-				<a href="/dyn/right/object/right/list?num={=recGet obj 'num'}">Права</a>
+				<a href="/dyn/right/object/right/list?num={{obj.num}}">Права</a>
 			</div>
 		</div>
 		{=repeat childKey in item.children {=renderObject
@@ -43,9 +43,9 @@ def ObjectList {=
 			var idxByKey: {};
 			var i: 0;
 			for obj in objectList {=
-				var parentNum: {=str {=recGet obj 'parentNum'} };
-				var num: {=str {=recGet obj 'num'} };
-				if not{=recGet obj 'parentNum'} {=
+				var parentNum: {=str obj.parentNum};
+				var num: {=str obj.num};
+				if not obj.parentNum {=
 					insert roots num null
 				} else {=
 					var dat: {=

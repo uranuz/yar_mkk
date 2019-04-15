@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
+from fir.controls.utils import cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
@@ -14,7 +14,7 @@ def LabeledInput {=
 			<input type="text"
 				name="{{field}}"
 				class="{=cls field} form-control"
-				value="{=recGet tourist field}"
+				value="{=at tourist field}"
 				id="{{field ~ 'Field'}}"
 				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
 		</div>
@@ -31,7 +31,7 @@ def ShowCheckBox {=
 				name="{{field}}"
 				class="{=cls field} form-check-input"
 				id="{{field ~ 'Field'}}"
-				{=if {=recGet tourist field} 'checked'}
+				{=if {=at tourist field} 'checked'}
 				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
 			<label class="form-check-label" for="{{field ~ 'Field'}}">{{caption}}</label>
 		</div>
@@ -51,7 +51,7 @@ def ListBoxRow {=
 					captionField: 'n'
 					items: {=enumWithNull
 						{=at {=at tourist.format field} 'enum'} 'не задано'}
-					selectedId: {=recGet tourist field}
+					selectedId: {=at tourist field}
 					disabled: not{=hasRight subobj: field kind: 'edit'} and checkRights
 				}
 			</div>
@@ -83,11 +83,11 @@ def TouristEdit {=
 		<div class="{=cls 'topButtons'}">
 			{=if isEditDialog {*
 			{=if {=isInRoles ['admin', 'moder']} {*
-			<a href="{{vpaths.siteDynamic}}tourist/history?num={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/history?num={{tourist.num}}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
 			*}}
-			<a href="{{vpaths.siteDynamic}}tourist/experience?num={=recGet tourist 'num'}"
+			<a href="{{vpaths.siteDynamic}}tourist/experience?num={{tourist.num}}"
 				class="btn btn-sm btn-secondary"
 				>Просмотр</a>
 			*} }
@@ -99,7 +99,7 @@ def TouristEdit {=
 			action="{{vpaths.siteDynamic}}tourist/edit/results">*}
 		}
 			{=if isEditDialog {*<h2>Редактирование данных туриста</h2>*} }
-			<input type="hidden" name="num" value="{=recGet tourist 'num'}"/>
+			<input type="hidden" name="num" value="{{tourist.num}}"/>
 			{%
 				LabeledInput caption: 'Фамилия' field: 'familyName';
 				LabeledInput caption: 'Имя' field: 'givenName';
@@ -113,9 +113,9 @@ def TouristEdit {=
 						dayFormField: 'birthDay'
 						monthFormField: 'birthMonth'
 						yearFormField: 'birthYear'
-						day: {=recGet tourist 'birthDay'}
-						month: {=recGet tourist 'birthMonth'}
-						year: {=recGet tourist 'birthYear'}
+						day: tourist.birthDay
+						month: tourist.birthMonth
+						year: tourist.birthYear
 						disabled: not{=hasRight subobj: 'birthDate' kind: 'edit'} and checkRights
 					}
 				</div>
@@ -139,7 +139,7 @@ def TouristEdit {=
 						class="form-control"
 						id="commentField"
 						{=if not{=hasRight subobj: 'comment' kind: 'edit'} and checkRights 'disabled'}
-						>{=recGet tourist 'comment'}</textarea>
+						>{{tourist.comment}}</textarea>
 				</div>
 			</div>
 			{%

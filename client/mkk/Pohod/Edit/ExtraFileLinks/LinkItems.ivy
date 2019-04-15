@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, recGet;
+from fir.controls.utils import cls;
 def LinkItems {=
 	def.kv
 		instanceName: null
@@ -19,17 +19,17 @@ def LinkItems {=
 		}
 		<tbody class="{=cls 'linksTableBody'}">
 		{=repeat i in {=range 0 inputCount} {*
-			<tr data-mkk-num="{=if i < linkCount {=recGet {=at linkList i} 'num'} }">
+			<tr data-mkk-num="{=if i < linkCount {=at {=at linkList i} 'num'} }">
 				<td>
 					<input type="text"
 						class="form-control"
-						value="{=if i < linkCount {=recGet {=at linkList i} 'link'} }"
+						value="{=if i < linkCount {=at {=at linkList i} 'link'} }"
 						{=if disabled 'disabled'}/>
 				</td>
 				<td>
 					<input type="text"
 						class="form-control"
-						value="{=if i < linkCount {=recGet {=at linkList i} 'name'} }"
+						value="{=if i < linkCount {=at {=at linkList i} 'name'} }"
 						{=if disabled 'disabled'}/>
 				</td>
 			</tr>

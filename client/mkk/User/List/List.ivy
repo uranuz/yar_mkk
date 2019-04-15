@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def UserList {=
 	def.kv
 		moduleName: 'mkk/User/List/List'
@@ -12,13 +12,13 @@ def UserList {=
 		<h2>Пользователи сайта</h2>
 		<div class="{=cls 'list'}">
 		{=repeat user in userList {*
-			<div class="{=cls 'listItem'}" data-mkk-num="{=recGet user 'num'}">
-				<span class="col-md-2">{=recGet user 'name'}</span>
-				<span class="col-md-2">{=recGet user 'login'}</span>
+			<div class="{=cls 'listItem'}" data-mkk-num="{{user.num}}">
+				<span class="col-md-2">{{user.name}}</span>
+				<span class="col-md-2">{{user.login}}</span>
 				<span class="col-md-2">
 					{=var
-						emailConfirmed: {=recGet user 'is_email_confirmed'}
-						isBlocked: {=recGet user 'is_blocked'}
+						emailConfirmed: {{user.is_email_confirmed}}
+						isBlocked: {{user.is_blocked}}
 					}
 					<span
 						title="Адрес электронной почты{=if not emailConfirmed ' не'} подтвержден"

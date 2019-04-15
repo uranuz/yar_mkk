@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc, hasRight;
+from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from mkk.Pohod.List.Navigation import PohodListNavigation;
 from mkk.Pohod.List.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
@@ -90,7 +90,7 @@ def PohodListTable {=
 					*}}
 					<td>
 						{=var isBookNumSet: rec.mkkCode or rec.bookNum}
-						<a href="{{vpaths.siteDynamic}}pohod/read?num={=recGet rec 'num'}"
+						<a href="{{vpaths.siteDynamic}}pohod/read?num={{rec.num}}"
 							title="{=if not isBookNumSet 'Номер маршрутной книжки не присвоен'}"
 							>{=if isBookNumSet
 								{*<div class="text-nowrap">{{rec.mkkCode}}</div>

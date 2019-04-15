@@ -1,5 +1,5 @@
 expr {
-from fir.controls.utils import recGet, cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def ModerList {=
 	def.kv
 		moduleName: "mkk/User/ModerList/ModerList"
@@ -25,18 +25,18 @@ def ModerList {=
 							<tr>
 								<td>
 								{=
-									var touristKey: {=recGet moderRec "tourist_num"};
-									if touristKey == null {=
-										recGet moderRec "name"
-									} else {*
+									var touristKey: {{moderRec.tourist_num}};
+									if touristKey == null
+										moderRec.name
+									else {*
 										<a href="/dyn/tourist/experience?num={{touristKey}}">
-											{=recGet moderRec "name"}
+											{{moderRec.name}}
 										</a>
 									*}
 								}
 								</td>
-								<td>{=recGet moderRec "email" }</td>
-								<td>{=recGet moderRec "status" }</td>
+								<td>{{moderRec.email}}</td>
+								<td>{{moderRec.status}}</td>
 							</tr>
 						*}}
 						</tbody>

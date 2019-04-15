@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc, isInRoles;
+from fir.controls.utils import cls, firScopeOptsEnc, isInRoles;
 from mkk.Helpers import DateRangePrinter;
 from mkk.Helpers.EntityProperty import EntityProperty;
 from mkk.Tourist.NavigatedList import TouristNavigatedList;
@@ -17,10 +17,10 @@ def PohodRead {=
 		<h2>Данные похода</h2>
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
-			<a href="{{vpaths.siteDynamic}}pohod/history?num={=recGet pohod 'num'}"
+			<a href="{{vpaths.siteDynamic}}pohod/history?num={{pohod.num}}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
-			<a href="{{vpaths.siteDynamic}}pohod/edit?num={=recGet pohod 'num'}"
+			<a href="{{vpaths.siteDynamic}}pohod/edit?num={{pohod.num}}"
 				class="btn btn-sm btn-secondary"
 				>Редактировать</a>
 			*}}
@@ -28,18 +28,18 @@ def PohodRead {=
 		{%
 			EntityProperty
 				title: 'Код МКК'
-				value: {=recGet pohod 'mkkCode'};
+				value: pohod.mkkCode;
 			EntityProperty
 				title: 'Маршрутная книжка'
-				value: {=recGet pohod 'bookNum'};
+				value: pohod.bookNum;
 			EntityProperty
 				title: 'Группа туристов'
-				value: {%recGet pohod 'organization'; expr ' '; recGet pohod 'partyRegion'};
+				value: {%at pohod 'organization'; expr ' '; at pohod 'partyRegion'};
 			EntityProperty
 				title: 'Сроки похода'
 				value: {=DateRangePrinter
-					begin: {=recGet pohod 'beginDate'}
-					end: {=recGet pohod 'finishDate'}
+					begin: pohod.beginDate
+					end: pohod.finishDate
 				};
 			EntityProperty
 				title: 'Вид туризма'
@@ -49,20 +49,20 @@ def PohodRead {=
 				value: {*{{pohod.complexity.name}} {{pohod.complexityElems.name}}*};
 			EntityProperty
 				title: 'Район похода'
-				value: {=recGet pohod 'pohodRegion'};
+				value: pohod.pohodRegion;
 			EntityProperty
 				title: 'Маршрут'
-				value: {=recGet pohod 'route'}
+				value: pohod.route
 				isWide: true;
 			EntityProperty
 				title: 'В составе'
-				value: {=recGet pohod 'partySize'};
+				value: pohod.partySize;
 			EntityProperty
 				title: 'Руководитель группы'
-				value: {=recGet pohod 'chiefName'};
+				value: pohod.chiefName;
 			EntityProperty
 				title: 'Зам. руководителя группы'
-				value: {=recGet pohod 'altChiefName'};
+				value: pohod.altChiefName;
 			EntityProperty
 				instanceName: 'partyListProp'
 				title: 'Состав группы'
@@ -84,11 +84,11 @@ def PohodRead {=
 				value: pohod.claimState.name;
 			EntityProperty
 				title: 'Комментарий руководителя'
-				value: {=recGet pohod 'chiefComment'}
+				value: pohod.chiefComment
 				isWide: true;
 			EntityProperty
 				title: 'Комментарий МКК'
-				value: {=recGet pohod 'mkkComment'}
+				value: pohod.mkkComment
 				isWide: true;
 			EntityProperty
 				title: 'Дополнительные материалы'
@@ -96,10 +96,10 @@ def PohodRead {=
 				<ol class="{=cls 'extraFileLinksList'}">
 					{=repeat linkData in extraFileLinks {*
 					<li>
-						<a href="{=recGet linkData 'link'}"
+						<a href="{{linkData.link}}"
 							target="__blank"
-							title="{=recGet linkData 'name'}"
-							>{{ {=recGet linkData 'name'} or {=recGet linkData 'link'} }}</a>
+							title="{{linkData.name}}"
+							>{{linkData.name or linkData.link}}</a>
 					</li>
 					*}}
 				</ol>

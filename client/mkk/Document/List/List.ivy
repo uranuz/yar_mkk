@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import recGet, cls, firScopeOptsEnc, hasRight;
+from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from fir.controls.Pagination import Pagination;
 from mkk.Document.Edit import DocumentEdit;
 
@@ -39,13 +39,13 @@ def DocumentList {=
 			{=set i: i + 1}
 			<div class="{=cls 'listItem'} row">
 				<div class="col">{{i}}.
-					<a class="{=cls 'listLink'}" href="{=recGet it 'link'}">{=recGet it 'name'}</a>
+					<a class="{=cls 'listLink'}" href="{{it.link}}">{{it.name}}</a>
 				</div>
 				<div class="col-md-auto">
 					{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
 					<div class="{=cls 'linkEditBtn'} col mkk-Document e-itemEditBtn btn btn-secondary"
 						title="Изменить"
-						data-document-num="{=recGet it 'num'}"></div>
+						data-document-num="{{it.num}}"></div>
 					*}}
 				</div>
 			</div>
