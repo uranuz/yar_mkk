@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, enumWithNull, firScopeOptsEnc, hasRight, isInRoles;
+from fir.controls.utils import cls, enumFormatWithNull, firScopeOptsEnc, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
@@ -40,18 +40,20 @@ def ShowCheckBox {=
 
 def ListBoxRow {=
 	def.kv caption field;
-	def.body noscope{*
+	def.body noscope {*
+		{=var
+			enum: {=at tourist field}
+		}
 		<div class="form-group row">
 			<label class="col-md-3 col-form-label">{{caption}}</label>
 			<div class="col-md-6">
 				{=PlainListBox
 					instanceName: field ~ 'Field'
 					formField: field
-					idField: 'v'
-					captionField: 'n'
-					items: {=enumWithNull
-						{=at {=at tourist.format field} 'enum'} 'не задано'}
-					selectedId: {=at tourist field}
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull enum.format 'не задано'}
+					selectedKey: enum.value
 					disabled: not{=hasRight subobj: field kind: 'edit'} and checkRights
 				}
 			</div>

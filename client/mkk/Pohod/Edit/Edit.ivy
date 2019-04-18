@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, enumWithNull, hasRight, isInRoles;
+from fir.controls.utils import cls, enumFormatWithNull, hasRight, isInRoles;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Pohod.Edit.DeleteArea import DeleteArea;
@@ -74,11 +74,10 @@ def PohodEdit {=
 				{=PlainListBox
 					instanceName: 'claimStateField'
 					formField: 'claimState'
-					idField: 'v'
-					captionField: 'n'
-					items: {=enumWithNull
-						{=at {=at pohod.format 'claimState'} 'enum'} 'не задан'}
-					selectedId: pohod.claimState.value
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull pohod.claimState.format 'не задан'}
+					selectedKey: pohod.claimState.value
 					disabled: not{=hasRight subobj: 'book.claimState' kind: 'edit'}
 				}
 			</td>
@@ -113,11 +112,10 @@ def PohodEdit {=
 				{=PlainListBox
 					instanceName: 'tourismKindField'
 					formField: 'tourismKind'
-					idField: 'value'
-					captionField: 'name'
-					items: {=enumWithNull
-						{=at {=at pohod.format 'tourismKind'} 'enum'} 'не задан'}
-					selectedId: {{pohod.tourismKind.value}}
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull pohod.tourismKind.format 'не задан'}
+					selectedKey: pohod.tourismKind.value
 					disabled: not{=hasRight subobj: 'pohod.tourismKind' kind: 'edit'}
 				}
 			</td>
@@ -145,21 +143,19 @@ def PohodEdit {=
 				{=PlainListBox
 					instanceName: 'complexityField'
 					formField: 'complexity'
-					idField: 'value'
-					captionField: 'name'
-					items: {=enumWithNull
-						{=at {=at pohod.format 'complexity'} 'enum'} 'не задана'}
-					selectedId: pohod.complexity.value
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull pohod.complexity.format 'не задана'}
+					selectedKey: pohod.complexity.value
 					disabled: not{=hasRight subobj: 'pohod.complexity' kind: 'edit'}
 				}
 				{=PlainListBox
 					instanceName: 'complexityElemsField'
 					formField: 'complexityElems'
-					idField: 'value'
-					captionField: 'name'
-					items: {=enumWithNull
-						{=at {=at pohod.format 'complexityElems'} 'enum'} 'не задано'}
-					selectedId: pohod.complexityElems.value
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull pohod.complexityElems.format 'не задано'}
+					selectedKey: pohod.complexityElems.value
 					disabled: not{=hasRight subobj: 'pohod.complexityElems' kind: 'edit'}
 				}
 			</td>
@@ -194,11 +190,10 @@ def PohodEdit {=
 				{=PlainListBox
 					instanceName: 'progressField'
 					formField: 'progress'
-					idField: 'value'
-					captionField: 'name'
-					items: {=enumWithNull
-						{=at {=at pohod.format 'progress'} 'enum'} 'не задано'}
-					selectedId: pohod.progress
+					keyField: 'value'
+					displayField: 'name'
+					items: {=enumFormatWithNull pohod.progress.format 'не задано'}
+					selectedKey: pohod.progress.value
 					disabled: not{=hasRight subobj: 'pohod.progress' kind: 'edit'}
 				}
 			</td>
