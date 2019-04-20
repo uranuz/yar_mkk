@@ -48,7 +48,7 @@ def TouristList {=
 			<div class="{=cls 'tableBar'} row">
 				<div class="{=cls 'pagination'} col-auto form-group">
 					{=Pagination
-						instanceName: 'touristListPaging'
+						instanceName: instanceName ~ 'Paging'
 						pageSizeFormField: 'pageSize'
 						offset: nav.offset
 						recordCount: nav.recordCount

@@ -37,7 +37,7 @@ return FirClass(
 			}
 		},
 		_getPaging: function() {
-			return this._navigation.getChildByName(this.instanceName() + 'Paging')
+			return this._navigation.getChildByName(this._navigation.instanceName() + 'Paging')
 		},
 		_getRPCMethod: function() {
 			return 'pohod.list';

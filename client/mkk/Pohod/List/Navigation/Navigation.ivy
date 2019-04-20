@@ -117,7 +117,7 @@ def PohodListNavigation {=
 				<div class="{=cls 'bottomRow'} row">
 					<div class="{=cls 'pagination'} col-auto">
 					{=Pagination
-						instanceName: 'pohodListPaging'
+						instanceName: instanceName ~ 'Paging'
 						pageSizeFormField: 'pageSize'
 						offset: nav.offset
 						pageSize: nav.pageSize or 10

@@ -12,7 +12,7 @@ return FirClass(
 		this.setMode(opts.mode);
 		this._listView.subscribe('onTouristListLoaded', this._onTouristListLoaded.bind(this));
 		this._listView.subscribe('itemActivated', this._onTouristItemActivated.bind(this));
-		this._pagination = this.getChildByName(this.instanceName() + 'Pagination');
+		this._pagination = this.getChildByName(this.instanceName() + 'Paging');
 		this._pagination.subscribe('onSetCurrentPage', this._onSetCurrentPage.bind(this));
 	}, FirControl, {
 		setFilter: function(filter) {

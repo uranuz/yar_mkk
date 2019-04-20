@@ -4,7 +4,7 @@ define('mkk/Tourist/List/List', [
 	'fir/controls/Pagination/Pagination',
 	'css!mkk/Tourist/List/List'
 ], function (FirControl, NavigationMixin) {
-var aaa = FirClass(
+return FirClass(
 	function TouristList(opts) {
 		this.superproto.constructor.call(this, opts);
 		this._navigatedArea = 'tableContentBody';
@@ -40,5 +40,4 @@ var aaa = FirClass(
 		}
 	}
 );
-return aaa;
 });

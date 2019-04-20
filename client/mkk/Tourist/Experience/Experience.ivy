@@ -1,19 +1,23 @@
 expr
 {=
-from fir.controls.utils import cls, isInRoles;
+from fir.controls.utils import cls, isInRoles, firScopeOptsEnc;
 from fir.controls.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
+var
+	instanceName: 'experience'
+	cssBaseClass: "mkk-Experience";
 def Experience {=
 	def.kv
 		moduleName: 'mkk/Tourist/Experience/Experience'
-		instanceName: 'experience'
-		cssBaseClass: "mkk-Experience"
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
 		tourist: null
 		pohodList: null
 		nav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['tourist']}"/>
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?num={{tourist.num}}"
@@ -60,7 +64,7 @@ def Experience {=
 			<form method="post">
 				<div class="{=cls 'pagination'}">
 					{=Pagination
-						formField: 'offset'
+						instanceName: instanceName ~ 'Paging'
 						offset: nav.offset
 						pageSize: nav.pageSize
 						recordCount: nav.recordCount
@@ -85,49 +89,63 @@ def Experience {=
 							<th>Статус похода</th>
 						</tr>
 					</tbody>
-					<!-- Основное тело таблицы-->
-					<tbody class="{=cls 'tableContentBody'} mkk-Table">
-					{=repeat rec in pohodList {*
-						<tr>
-							<td>
-								{=var isBookNumSet: rec.mkkCode or rec.bookNum}
-								<a href="{{vpaths.siteDynamic}}pohod/read?num={{rec.num}}"
-									title="Номер маршрутной книжки не присвоен"
-									>{=if isBookNumSet
-										{*<div>{{rec.mkkCode}}</div><div>{{rec.bookNum}}</div>*} else "???"
-									}</a>
-							</td>
-							<td>
-								<div class="text-nowrap">{=RusDateFormat rec.beginDate}</div>
-								<div class="text-nowrap">{=RusDateFormat rec.finishDate}</div>
-							</td>
-							<td>
-								<div>{{rec.tourismKind.name}}</div>
-								<div>{{rec.complexity.name}} {{rec.complexityElems.name}}</div>
-							</td>
-							<td>{{rec.pohodRegion}}</td>
-							<td>{=if rec.chiefNum == tourist.num "Руков." else "Участ."}</td>
-							<td>
-								<div>{{rec.organization}}</div>
-								<div>{{rec.partyRegion}}</div>
-							</td>
-							<td>
-								<div>{{rec.progress.name}}</div>
-								<div>{{rec.claimState.name}}</div>
-							</td>
-						</tr>
-						<tr>
-							<td class="{=cls 'routeCell'}"
-								colspan="100"
-								>Маршрут: {{rec.route}}</td>
-						</tr>
-					*}}
-					</tbody>
+					{=TouristPohodsList
+						instanceName: instanceName
+						cssBaseClass: cssBaseClass
+						tourist: tourist
+						pohodList: pohodList
+					}
 				</table>
 			</div>
 		</div>
 		<!-- конец Раздела  таблица-->
 	</div>
 	*};
+};
+def TouristPohodsList {=
+	def.kv
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		tourist: null
+		pohodList: null;
+	def.body {*
+	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+	{=repeat rec in pohodList {*
+		<tr>
+			<td>
+				{=var isBookNumSet: rec.mkkCode or rec.bookNum}
+				<a href="{{vpaths.siteDynamic}}pohod/read?num={{rec.num}}"
+					title="Номер маршрутной книжки не присвоен"
+					>{=if isBookNumSet
+						{*<div>{{rec.mkkCode}}</div><div>{{rec.bookNum}}</div>*} else "???"
+					}</a>
+			</td>
+			<td>
+				<div class="text-nowrap">{=RusDateFormat rec.beginDate}</div>
+				<div class="text-nowrap">{=RusDateFormat rec.finishDate}</div>
+			</td>
+			<td>
+				<div>{{rec.tourismKind.name}}</div>
+				<div>{{rec.complexity.name}} {{rec.complexityElems.name}}</div>
+			</td>
+			<td>{{rec.pohodRegion}}</td>
+			<td>{=if rec.chiefNum == tourist.num "Руков." else "Участ."}</td>
+			<td>
+				<div>{{rec.organization}}</div>
+				<div>{{rec.partyRegion}}</div>
+			</td>
+			<td>
+				<div>{{rec.progress.name}}</div>
+				<div>{{rec.claimState.name}}</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="{=cls 'routeCell'}"
+				colspan="100"
+				>Маршрут: {{rec.route}}</td>
+		</tr>
+	*}}
+	</tbody>
+	*}
 };
 }

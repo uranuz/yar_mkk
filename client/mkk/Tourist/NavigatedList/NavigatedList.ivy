@@ -19,7 +19,7 @@ def TouristNavigatedList {=
 			}"/>
 		<div class="{=cls 'navBar'}">
 			{=Pagination
-				instanceName: instanceName ~ 'Pagination'
+				instanceName: instanceName ~ 'Paging'
 			}
 		</div>
 		{=TouristPlainList
