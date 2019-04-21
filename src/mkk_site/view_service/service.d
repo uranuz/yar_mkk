@@ -112,39 +112,26 @@ public:
 	}
 }
 
-shared static this() {
-	Service(new MKKViewService("yarMKKView", "/dyn/{remainder}"));
+void stopServer(HTTPContext ctx)
+{
+	import std.exception: enforce;
+	enforce(ctx.user.isInRole(`admin`), `Requested URL is not found!`);
+	ctx.service.stop();
+	ctx.server.stop();
 }
 
-// TODO: Experimental functions
-debug {
-	import webtank.net.http.context: HTTPContext;
-	import ivy.interpreter.data_node: IvyData;
-	void stopServer(HTTPContext ctx)
-	{
-		import std.exception: enforce;
-		enforce(ctx.user.isInRole(`admin`), `Requested URL is not found!`);
-		ctx.service.stop();
-		ctx.server.stop();
-	}
-
-	import std.json: JSONValue;
-	void getCompiledTemplate(HTTPContext ctx) {
-		return ctx.response.write(
-			ViewService.ivyEngine.getByModuleName(
-				ctx.request.form[`moduleName`]).toStdJSON().toString());
-	}
-
-	@IvyModuleAttr("mkk.JSRender")
-	IvyData templatePlayground(HTTPContext ctx) {
-		return IvyData();
-	}
-
-	import ivy;
+void getCompiledTemplate(HTTPContext ctx)
+{
 	import webtank.net.http.handler.json_rpc;
-	shared static this() {
-		ViewService.pageRouter.join!stopServer("/dyn/server/stop");
-		ViewService.rootRouter.join!getCompiledTemplate("/dyn/server/template");
-		ViewService.pageRouter.join!templatePlayground("/dyn/server/jsrender");
-	}
+	return ctx.response.write(
+		ViewService.ivyEngine.getByModuleName(
+			ctx.request.form[`moduleName`]).toStdJSON().toString());
+}
+
+shared static this() {
+	Service(new MKKViewService("yarMKKView", "/dyn/{remainder}"));
+
+	//ViewService.pageRouter.join!stopServer("/dyn/server/stop");
+
+	ViewService.rootRouter.join!getCompiledTemplate("/dyn/server/template");
 }
