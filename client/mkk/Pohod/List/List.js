@@ -1,6 +1,6 @@
 define('mkk/Pohod/List/List', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/NavigationMixin',
+	'fir/controls/Mixins/Navigation',
 	'mkk/Pohod/List/PartyInfo/PartyInfo',
 	'mkk/Pohod/List/Navigation/Navigation',
 	'css!mkk/Pohod/List/List'

@@ -1,6 +1,6 @@
 define('mkk/Tourist/PlainList/PlainList', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/NavigationMixin',
+	'fir/controls/Mixins/Navigation',
 	'css!mkk/Tourist/PlainList/PlainList'
 ], function (FirControl, NavigationMixin) {
 	var strParamNames = [

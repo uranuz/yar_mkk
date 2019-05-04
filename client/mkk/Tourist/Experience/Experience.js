@@ -1,6 +1,6 @@
 define('mkk/Tourist/Experience/Experience', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/NavigationMixin',
+	'fir/controls/Mixins/Navigation',
 	'fir/controls/Pagination/Pagination',
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Tourist/Experience/Experience'
