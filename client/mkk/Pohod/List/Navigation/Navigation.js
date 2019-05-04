@@ -6,13 +6,34 @@ define('mkk/Pohod/List/Navigation/Navigation', [
 return FirClass(
 	function PohodListNavigation(opts) {
 		this.superproto.constructor.call(this, opts);
-
-		this._elems().filter(".e-print_page_btn").on("click", this.onPrintPageBtnClick.bind(this));
 		this._enumFields = opts.enumFields;
+		this._elems('searchBtn')
 	}, FirControl, {
-		onPrintPageBtnClick: function () {
-			this._elems().filter(".e-for_print_input").val("on");
-			this._elems().filter(".e-form")[0].submit();
+		/** Стандартное место для подписки на события */
+		_onSubscribe: function() {
+			this.superproto._onSubscribe.apply(this, arguments);
+			this._elems('searchBtn').on('click', this._onSearchBtnClick.bind(this));
+			if( this._elems('printModeBtn').length ) {
+				this._elems('printModeBtn').on('click', this._onPrintBtnClick.bind(this));
+			}
+		},
+
+		/** Стандартное место для отписки от событий */
+		_onUnsubscribe: function() {
+			this.superproto._onUnsubscribe.apply(this, arguments);
+			this._elems('printModeBtn').off();
+			this._elems('searchBtn').off();
+		},
+
+		/** Нажатие на кнопку печати */
+		_onPrintBtnClick: function () {
+			this._elems('isForPrintField').val("on");
+			this._notify('onPrintBtnClick');
+		},
+
+		/** Нажатие на кнопку поиска */
+		_onSearchBtnClick: function() {
+			this._notify('onSearchBtnClick');
 		},
 
 		getFilter: function() {
@@ -22,6 +43,9 @@ return FirClass(
 			this._fetchEnumFilters(params);
 			params['withFiles'] = this._elems('withFilesFlag').prop('checked');
 			params['withDataCheck'] = this._elems('withDataCheckFlag').prop('checked');
+			if( this._elems('isForPrintField').length ) {
+				params['isForPrint'] = this._elems('isForPrintField').val() === 'on';
+			}
 
 			return params;
 		},

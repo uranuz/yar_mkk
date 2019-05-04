@@ -111,6 +111,7 @@ expr {*
 				{=PohodFilterMenu
 					pohodFilterFields: pohodFilterFields
 					pohodFilterSections: pohodFilterSections
+					vpaths: vpaths
 				}
 				{=if {=hasRight obj: 'right.object.list' kind: 'read'}
 					{=AdminSideMenu}

@@ -168,7 +168,7 @@ static immutable PohodEnumFields = [
 	tuple("claimState", "stat", "статус заявки")
 ];
 
-//Формирует чать запроса по фильтрации походов (для SQL-секции where)
+//Формирует часть запроса по фильтрации походов (для SQL-секции where)
 string getPohodFilterQueryPart(ref PohodFilter filter)
 {
 	import std.datetime: Date;

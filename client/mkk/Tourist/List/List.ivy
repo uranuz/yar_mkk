@@ -3,7 +3,8 @@ from fir.controls.utils import cls, firScopeOptsEnc, isInRoles, hasRight;
 from fir.controls.Pagination import Pagination;
 var
 	instanceName: 'touristList'
-	cssBaseClass: 'mkk-TouristList';
+	cssBaseClass: 'mkk-TouristList'
+	fieldsToSend: ['touristList', 'nav'];
 def TouristList {=
 	def.kv
 		moduleName: 'mkk/Tourist/List/List'
@@ -14,57 +15,56 @@ def TouristList {=
 		filter: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{=set isAuthorized: {=isInRoles ['admin', 'moder']} }
 		<h2>Туристы</h2>
-		<form method="post">
-			<div class="{=cls 'filter'} row align-items-end">
-				<label class="col-auto form-group">
-					<span class="mr-2">Фамилия И. О.</span>
-					<div class="form-inline flex-nowrap d-sm-inline-flex">
-						<input type="text"
-							name="familyName"
-							class="{=cls 'familyNameField' 'form-control'}"
-							value="{{filter.familyName}}"
-							placeholder="Смирнов"/>
-						<input type="text"
-							name="givenName"
-							maxlength="1"
-							class="{=cls 'givenNameField' 'form-control'}"
-							value="{{filter.givenName}}"
-							placeholder="И"/>
-						<input type="text"
-							name="patronymic"
-							maxlength="1"
-							class="{=cls 'patronymicField' 'form-control'}"
-							value="{{filter.patronymic}}"
-							placeholder="П"/>
-					</div>
-				</label>
-				<div class="col form-group">
-					<button type="submit" name="act" class="btn btn-block btn-primary">Найти</button>
+		<div class="{=cls 'filter'} row align-items-end">
+			<label class="col-auto form-group">
+				<span class="mr-2">Фамилия И. О.</span>
+				<div class="form-inline flex-nowrap d-sm-inline-flex">
+					<input type="text"
+						name="familyName"
+						class="{=cls 'familyNameField' 'form-control'}"
+						value="{{filter.familyName}}"
+						placeholder="Смирнов"/>
+					<input type="text"
+						name="givenName"
+						maxlength="1"
+						class="{=cls 'givenNameField' 'form-control'}"
+						value="{{filter.givenName}}"
+						placeholder="И"/>
+					<input type="text"
+						name="patronymic"
+						maxlength="1"
+						class="{=cls 'patronymicField' 'form-control'}"
+						value="{{filter.patronymic}}"
+						placeholder="П"/>
 				</div>
+			</label>
+			<div class="col form-group">
+				<button type="button"
+					class="{=cls 'searchBtn'} btn btn-block btn-primary"
+					>Найти</button>
 			</div>
-			<div class="{=cls 'tableBar'} row">
-				<div class="{=cls 'pagination'} col-auto form-group">
-					{=Pagination
-						instanceName: instanceName ~ 'Paging'
-						pageSizeFormField: 'pageSize'
-						offset: nav.offset
-						recordCount: nav.recordCount
-						pageSize: nav.pageSize or 10
-					}
-				</div>
-				{=if {=hasRight obj: 'tourist.item' kind: 'add'} {*
-				<div class="col form-group text-right">
-					<a href="{{vpaths.siteDynamic}}tourist/edit"
-						class="btn btn-primary"
-						>Добавить туриста</a>
-				</div>
-				*}}
+		</div>
+		<div class="{=cls 'tableBar'} row">
+			<div class="{=cls 'pagination'} col-auto form-group">
+				{=Pagination
+					instanceName: instanceName ~ 'Paging'
+					pageSizeFormField: 'pageSize'
+					offset: nav.offset
+					recordCount: nav.recordCount
+					pageSize: nav.pageSize or 10
+				}
 			</div>
-			
-		</form>
+			{=if {=hasRight obj: 'tourist.item' kind: 'add'} {*
+			<div class="col form-group text-right">
+				<a href="{{vpaths.siteDynamic}}tourist/edit"
+					class="btn btn-primary"
+					>Добавить туриста</a>
+			</div>
+			*}}
+		</div>
 		<div class="{=cls 'tableBlock'} mkk-Table">
 			<div class="{=cls 'tableScroller'} mkk-Table">
 				<table class="{=cls 'table'} mkk-Table">
@@ -86,6 +86,7 @@ def TouristList {=
 						instanceName: instanceName
 						cssBaseClass: cssBaseClass
 						touristList: touristList
+						nav: nav
 					}
 				</table>
 			</div>
@@ -98,9 +99,11 @@ def TouristListTable {=
 	def.kv
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
-		touristList;
+		touristList
+		nav;
 	def.body {*
 	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{%
 			repeat it in touristList {*
 			<tr>

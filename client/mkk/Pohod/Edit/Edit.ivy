@@ -14,9 +14,9 @@ def PohodEdit {=
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
 		accessObject: 'pohod.item'
-
 		pohod: null
 		partyList: null
+		partyNav: null
 		extraFileLinks: null
 		authRedirectURI: null;
 	def.body {*
@@ -297,6 +297,7 @@ def PohodEdit {=
 						{=TouristNavigatedList
 							instanceName: 'partyList'
 							touristList: {=slice partyList 0 10}
+							nav: partyNav
 						}
 					</div>
 				</td>
@@ -330,7 +331,10 @@ def PohodEdit {=
 		</form>
 
 		{=DeleteArea deleteWhat: 'похода'}
-		{=PartyEdit}
+		{=PartyEdit
+			partyList: partyList
+			partyNav: partyNav
+		}
 		{=ChiefEdit}
 		{=ChiefAddToParty}
 	</div>

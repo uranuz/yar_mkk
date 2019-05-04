@@ -2,6 +2,8 @@ module mkk_site.main_service.pohod.party;
 
 import mkk_site.main_service.devkit;
 
+import mkk_site.data_model.common: Navigation;
+
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(getPartyList)(`pohod.partyList`);
@@ -19,30 +21,52 @@ static immutable participantInfoRecFormat = RecordFormat!(
 	int, "birthYear"
 )();
 
-Tuple!(IBaseRecordSet, `partyList`) getPartyList(Optional!size_t num)
+
+static immutable partyQueryFormat =
+`select
+	%s
+from(
+	select distinct unnest(unit_neim) as num
+	from pohod where pohod.num = $1
+) as tourist_num
+join tourist
+	on tourist.num = tourist_num.num
+%s
+`;
+
+Tuple!(
+	IBaseRecordSet, `partyList`,
+	Navigation, `partyNav`
+) getPartyList(Optional!size_t num, Navigation nav)
 {
 	import webtank.datctrl.record_set;
 	import std.conv: text;
-	if( num.isNull ) {
-		return typeof(return)(makeMemoryRecordSet(participantInfoRecFormat));
-	}
+	import std.format: format;
 
-	return typeof(return)(getCommonDB().query(
-`with tourist_num as(
-	select distinct unnest(unit_neim) as num
-	from pohod where pohod.num = ` ~ num.text ~ `
-)
-select
-	tourist.num,
+	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10);
+
+	if( num.isNull ) {
+		return typeof(return)(makeMemoryRecordSet(participantInfoRecFormat), nav);
+	}
+	string mainQuery = partyQueryFormat.format(
+`tourist.num,
 	tourist.family_name,
 	tourist.given_name,
 	tourist.patronymic,
-	tourist.birth_year
-from tourist_num
-join tourist
-	on tourist.num = tourist_num.num
-order by family_name, given_name`
-	).getRecordSet(participantInfoRecFormat));
+	tourist.birth_year`,
+`order by family_name, given_name
+offset $2 limit $3`);
+
+	string countQuery = partyQueryFormat.format(`count(1)`, ``);
+
+	nav.recordCount = getCommonDB().queryParams(countQuery, num).getScalar!size_t();
+
+	return typeof(return)(
+		getCommonDB().queryParams(
+			mainQuery, num, nav.offset, nav.recordCount
+		).getRecordSet(participantInfoRecFormat),
+		nav
+	);
 }
 
 static immutable briefPohodInfoRecFormat = RecordFormat!(
@@ -54,7 +78,8 @@ static immutable briefPohodInfoRecFormat = RecordFormat!(
 
 Tuple!(
 	IBaseRecord, `pohodInfo`,
-	IBaseRecordSet, `partyList`
+	IBaseRecordSet, `partyList`,
+	Navigation, `partyNav`
 )
 partyInfo(Optional!size_t num)
 {
@@ -72,8 +97,10 @@ select
 from pohod where pohod.num = ` ~ num.text ~ `
 	`).getRecordSet(briefPohodInfoRecFormat);
 
+	auto party = getPartyList(num, Navigation());
 	return typeof(return)(
 		(pohodInfo && pohodInfo.length? pohodInfo[0]: null),
-		getPartyList(num).partyList
+		party.partyList,
+		party.partyNav
 	);
 }

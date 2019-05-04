@@ -8,11 +8,13 @@ define('mkk/Pohod/List/List', [
 return FirClass(
 	function PohodList(opts) {
 		this.superproto.constructor.call(this, opts);
-
-		
+		this._navigatedArea = 'tableContentBody';
+		this._navProperty = 'pohodNav';
 		this._partyInfo = this.getChildByName('partyInfo');
 		this._navigation = this.getChildByName('pohodListNavigation');
-		this._navigatedArea = 'tableContentBody';
+		
+		this._navigation.subscribe('onSearchBtnClick', this._onSetCurrentPage.bind(this));
+		
 	}, FirControl, [NavigationMixin], {
 		_onSubscribe: function() {
 			NavigationMixin._onSubscribe.apply(this, arguments);
@@ -20,7 +22,7 @@ return FirClass(
 		},
 		_onUnsubscribe: function() {
 			NavigationMixin._onUnsubscribe.apply(this, arguments);
-			this._elems("tableContentBody").off("click");
+			this._elems("tableContentBody").off();
 		},
 		onShowPartyBtn_click: function(ev) {
 			var

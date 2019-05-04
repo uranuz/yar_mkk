@@ -126,22 +126,27 @@ import mkk_site.common.utils: getAuthRedirectURI;
 import std.json: JSONValue;
 
 import mkk_site.main_service.pohod.party: getPartyList;
+import mkk_site.data_model.common: Navigation;
+
 import std.typecons: Tuple;
 
 Tuple!(
 	IBaseRecord, "pohod",
 	IBaseRecordSet, "extraFileLinks",
 	IBaseRecordSet, "partyList",
+	Navigation, "partyNav",
 	string, "authRedirectURI"
 )
 pohodRead(HTTPContext ctx, Optional!size_t num)
 {
 	import std.exception: enforce;
 
+	auto party = getPartyList(num, Navigation());
 	return typeof(return)(
 		pohodReadBase(num).pohod,
 		getExtraFileLinks(num),
-		getPartyList(num).partyList,
+		party.partyList,
+		party.partyNav,
 		getAuthRedirectURI(ctx)
 	);
 }

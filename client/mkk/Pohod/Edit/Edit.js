@@ -200,7 +200,7 @@ return FirClass(
 			}
 
 			if( listCount > inputCount ) {
-				self.showErrorDialog('Количество участников в списке '  + listCount + ' больше заявленного числа '
+				self.showErrorDialog('Количество участников в списке ' + listCount + ' больше заявленного числа '
 					+ inputCount + '. Пожалуйста, исправьте введенное значение');
 				return false;
 			}

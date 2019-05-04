@@ -5,9 +5,11 @@ from mkk.Pohod.List.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
 var
 	instanceName: 'pohodList'
-	cssBaseClass: "mkk-PohodList";
+	cssBaseClass: "mkk-PohodList"
+	fieldsToSend: ['pohodList', 'pohodNav'];
 def PohodList {=
 	def.kv
+		moduleName: 'mkk/Pohod/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		pohodEnums: null
@@ -16,8 +18,8 @@ def PohodList {=
 		pohodNav: null
 		isForPrint: false;
 	def.body {*
-	<div class="{=cls 'block'}" data-fir-module="mkk/Pohod/List/List">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Походы</h2>
 		<div class="{=cls 'navigation'}">
 			{=PohodListNavigation
@@ -79,10 +81,12 @@ def PohodListTable {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		pohodList
+		pohodNav
 		filter
 		isForPrint: false;
 	def.body {*
 		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			{=repeat rec in pohodList {*
 				<tr>
 					{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*

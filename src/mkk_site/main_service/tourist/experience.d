@@ -69,13 +69,13 @@ getExperience(
 	}
 
 	// Получаем количество походов туриста
-	size_t pohodCount = getCommonDB().query(
-		`select count(1) from pohod where `~ num.text ~ ` = any(unit_neim)`
-	).get(0, 0, "0").to!size_t;
+	size_t pohodCount = getCommonDB().queryParams(
+		`select count(1) from pohod where $1 = any(unit_neim)`, num
+	).getScalar!size_t();
 
 	nav.normalize(pohodCount);
 
-	auto pohodList = getCommonDB().query(
+	auto pohodList = getCommonDB().queryParams(
 `select
 	num,
 	kod_mkk "mkkCode",
@@ -93,9 +93,10 @@ getExperience(
 	prepar "progress",
 	stat "claimState"
 from pohod
-where ` ~ num.text ~ ` = any(unit_neim)
+where $1 = any(unit_neim)
 order by begin_date desc
-offset ` ~ nav.offset.text ~ ` limit ` ~ nav.pageSize.text
+offset $2 limit $3`,
+	num, nav.offset, nav.pageSize
 	).getRecordSet(pohodRecFormat);
 
 	return typeof(return)(touristRes.tourist, pohodList, nav);

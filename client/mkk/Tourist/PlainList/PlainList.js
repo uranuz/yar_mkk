@@ -1,7 +1,8 @@
 define('mkk/Tourist/PlainList/PlainList', [
 	'fir/controls/FirControl',
+	'mkk/Helpers/NavigationMixin',
 	'css!mkk/Tourist/PlainList/PlainList'
-], function (FirControl) {
+], function (FirControl, NavigationMixin) {
 	var strParamNames = [
 		'familyName', 'givenName', 'patronymic', 'birthYear',
 		'region', 'city', 'street'
@@ -12,7 +13,7 @@ return FirClass(
 		this._filter = opts.filter;
 		this._mode = opts.mode;
 		this._updateControlState(opts);
-	}, FirControl, {
+	}, FirControl, [NavigationMixin], {
 		// В этой функции мы забираем опции пришедшие при первой загрузке или перезагрузке компонента,
 		// которые должны быть обновлены, если это требуется
 		_updateControlState: function(opts) {
@@ -53,7 +54,7 @@ return FirClass(
 			if( this._filter ) {
 				for( var i = 0; i < strParamNames.length; ++i ) {
 					var field = strParamNames[i];
-					if(  this._filter[field] ) {
+					if( this._filter[field] ) {
 						params[field] = this._filter[field];
 					}
 				}

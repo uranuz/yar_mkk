@@ -3,7 +3,10 @@ define('mkk/Helpers/NavigationMixin', [
 	'fir/controls/Loader/Serializer'
 ], function(Pagination, LoaderSerializer) {
 return new (FirClass(
-	function NavigationMixin() {}, {
+	function NavigationMixin() {
+		// Название свойста, в которое приходит навигационная информация при постраничном переходе
+		this._navProperty = 'nav';
+	}, {
 		_onSubscribe: function() {
 			if( this._onSetCurrentPageBinded == null ) {
 				this._onSetCurrentPageBinded = this._onSetCurrentPage.bind(this);
@@ -38,12 +41,17 @@ return new (FirClass(
 			}
 			this._reloadControl(this._navigatedArea);
 		},
-		_onAfterLoad: function() {
+		_onAfterLoad: function(state) {
 			this.superproto._onAfterLoad.apply(this, arguments);
 			if( window.history != null ) {
 				var flt = LoaderSerializer.serialize(this._getQueryParams());
 				window.history.replaceState(null, null, '?' + flt);
 			}
+			var navData = state.opts[this._navProperty];
+			if( !navData ) {
+				console.warn('No navigation data is provided or navigation property name is incorrect');
+			}
+			this._getPaging().setNavigation(navData || {});
 		}
 	}));
 });

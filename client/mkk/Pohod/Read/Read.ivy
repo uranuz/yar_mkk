@@ -10,7 +10,8 @@ def PohodRead {=
 		cssBaseClass: 'mkk-PohodRead'
 		pohod: null
 		extraFileLinks: null
-		partyList: null;
+		partyList: null
+		partyNav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['partyList']}"/>
@@ -73,6 +74,7 @@ def PohodRead {=
 						TouristNavigatedList
 							instanceName: 'partyList'
 							touristList: {=slice partyList 0 sliceLen}
+							nav: partyNav;
 					}
 				}
 				isWide: true;

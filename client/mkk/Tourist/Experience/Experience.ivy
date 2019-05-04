@@ -6,7 +6,8 @@ from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
 var
 	instanceName: 'experience'
-	cssBaseClass: "mkk-Experience";
+	cssBaseClass: "mkk-Experience"
+	fieldsToSend: ['tourist', 'pohodList', 'nav'];
 def Experience {=
 	def.kv
 		moduleName: 'mkk/Tourist/Experience/Experience'
@@ -17,7 +18,7 @@ def Experience {=
 		nav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['tourist']}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<div class="{=cls 'topButtons'}">
 			{=if {=isInRoles ['admin', 'moder']} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?num={{tourist.num}}"
@@ -28,7 +29,6 @@ def Experience {=
 				>Редактировать</a>
 			*}}
 		</div>
-		<!-- Раздел данные о туристе-->
 		<div class="{=cls 'touristInfo'}">
 			<h2>
 				{{tourist.familyName}}
@@ -58,23 +58,14 @@ def Experience {=
 					isWide: true;
 			}
 		</div>
-		<!-- конец Раздела данные о туристе-->
-		<div>
-			<!-- Раздел переход по страницам-->
-			<form method="post">
-				<div class="{=cls 'pagination'}">
-					{=Pagination
-						instanceName: instanceName ~ 'Paging'
-						offset: nav.offset
-						pageSize: nav.pageSize
-						recordCount: nav.recordCount
-					}
-				</div>
-			</form>
-			<!-- конец Раздела переход по страницам-->
+		<div class="{=cls 'pagination'}">
+			{=Pagination
+				instanceName: instanceName ~ 'Paging'
+				offset: nav.offset
+				pageSize: nav.pageSize
+				recordCount: nav.recordCount
+			}
 		</div>
-
-		<!-- Раздел таблица-->
 		<div class="{=cls 'tableBlock'} mkk-Table">
 			<div class="{=cls 'tableScroller'} mkk-Table">
 				<table class="{=cls 'table'} mkk-Table">
@@ -94,11 +85,11 @@ def Experience {=
 						cssBaseClass: cssBaseClass
 						tourist: tourist
 						pohodList: pohodList
+						nav: nav
 					}
 				</table>
 			</div>
 		</div>
-		<!-- конец Раздела  таблица-->
 	</div>
 	*};
 };
@@ -107,9 +98,11 @@ def TouristPohodsList {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		tourist: null
-		pohodList: null;
+		pohodList: null
+		nav;
 	def.body {*
 	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+	<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 	{=repeat rec in pohodList {*
 		<tr>
 			<td>

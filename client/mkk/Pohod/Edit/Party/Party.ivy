@@ -7,7 +7,8 @@ def PartyEdit {=
 		moduleName: 'mkk/Pohod/Edit/Party/Party'
 		instanceName: 'partyEdit'
 		cssBaseClass: 'mkk-PartyEdit'
-		partyList: null;
+		partyList: null
+		partyNav: null;
 	def.body {*
 	<!--Диалог редактирования участников похода-->
 	<div class="{=cls 'block'}" style="display: none;" title="Список участников" data-fir-module="{{moduleName}}">
@@ -30,6 +31,7 @@ def PartyEdit {=
 						{=TouristNavigatedList
 							instanceName: 'selectedTourists'
 							touristList: partyList
+							nav: partyNav
 							mode: 'remove'
 						}
 					</div>

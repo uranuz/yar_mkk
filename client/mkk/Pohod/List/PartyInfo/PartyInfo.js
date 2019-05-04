@@ -16,7 +16,10 @@ return FirClass(
 			this._num = num;
 		},
 		_getQueryParams: function() {
-			return {num: this._num};
+			return {
+				num: this._num,
+				generalTemplate: 'no'
+			};
 		}
 	}
 );

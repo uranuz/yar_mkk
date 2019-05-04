@@ -24,7 +24,6 @@ def TouristSearchArea {=
 		visible: true
 		addrFiltersCollapsed: true;
 	def.body {*
-	<!-- Диалог поиска туристов -->
 	<div
 		class="{=cls 'block'}"
 		title="Поиск туристов"
