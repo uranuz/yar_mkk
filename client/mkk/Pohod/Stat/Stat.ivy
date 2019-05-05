@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls;
-from fir.controls.Pagination import Pagination;
+
 def Stat {=
 	def.kv
 		moduleName: 'mkk/Pohod/Stat/Stat'

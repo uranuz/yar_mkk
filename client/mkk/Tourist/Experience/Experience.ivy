@@ -61,9 +61,7 @@ def Experience {=
 		<div class="{=cls 'pagination'}">
 			{=Pagination
 				instanceName: instanceName ~ 'Paging'
-				offset: nav.offset
-				pageSize: nav.pageSize
-				recordCount: nav.recordCount
+				nav: nav
 			}
 		</div>
 		<div class="{=cls 'tableBlock'} mkk-Table">

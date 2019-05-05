@@ -20,9 +20,7 @@ def TouristNavigatedList {=
 		<div class="{=cls 'navBar'}">
 			{=Pagination
 				instanceName: instanceName ~ 'Paging'
-				offset: nav.offset
-				pageSize: nav.pageSize
-				recordCount: nav.recordCount
+				nav: nav
 			}
 		</div>
 		{=TouristPlainList

@@ -52,9 +52,7 @@ def TouristList {=
 				{=Pagination
 					instanceName: instanceName ~ 'Paging'
 					pageSizeFormField: 'pageSize'
-					offset: nav.offset
-					recordCount: nav.recordCount
-					pageSize: nav.pageSize or 10
+					nav: nav
 				}
 			</div>
 			{=if {=hasRight obj: 'tourist.item' kind: 'add'} {*

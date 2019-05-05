@@ -118,9 +118,7 @@ def PohodListNavigation {=
 				{=Pagination
 					instanceName: instanceName ~ 'Paging'
 					pageSizeFormField: 'pageSize'
-					offset: nav.offset
-					pageSize: nav.pageSize or 10
-					recordCount: nav.recordCount
+					nav: nav
 				}
 				</div>
 				{{paginationSideContent}}

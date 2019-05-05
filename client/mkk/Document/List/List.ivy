@@ -18,9 +18,7 @@ def DocumentList {=
 			<div class="col-auto">
 				{=Pagination
 					formField: 'offset'
-					offset: nav.offset
-					pageSize: nav.pageSize
-					recordCount: nav.recordCount
+					nav: nav
 				}
 			</div>
 			{=if {=hasRight obj: 'document.item' kind: 'edit'} {*

@@ -1,6 +1,5 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
-from fir.controls.Pagination import Pagination;
 
 def DocumentEdit {=
 	def.kv
