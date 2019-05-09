@@ -127,11 +127,11 @@ private static immutable pohodDataCheckFilters = [
 		`begin_date is null`,
 		`Не указана дата начала похода`
 	),
-		DCTuple(
+	DCTuple(
 		`finish_date is null`,
 		`Не указана дата окончания похода`
 	),
-		DCTuple(
+	DCTuple(
 		`unit is null`,
 		`Не указано число участников`
 	),
@@ -212,11 +212,19 @@ string getPohodFilterQueryPart(ref PohodFilter filter)
 	import std.string: strip;
 	filter.pohodRegion = filter.pohodRegion.strip();
 	if( filter.pohodRegion.length > 0 )
-		filters ~= `region_pohod ILIKE '%` ~ PGEscapeStr(filter.pohodRegion) ~ `%'`;
+	{
+		filters ~= `exists(
+			select 1 from(
+				select region_pohod
+				union all
+				select marchrut
+			) srch(field)
+			where srch.field ilike '%` ~ PGEscapeStr(filter.pohodRegion) ~ `%'
+		)`;
+	}
 
 	if( filter.withDataCheck )
 		filters ~= dataCheckFilterQuery;
-	
 
 	return ( filters.length > 0? " ( " ~ filters.join(" ) and ( ") ~ " ) ": null );
 }

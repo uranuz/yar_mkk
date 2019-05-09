@@ -121,20 +121,25 @@
 					"ivyModule": "mkk.User.List",
 					"ivyMethod": "UserList"
 				}, {
-					"pageURI": "/dyn/user/reg/find_tourist",
-					"apiURI": "/api/user/reg/find_tourist",
-					"ivyModule": "mkk.User.List",
-					"ivyMethod": "UserList"
+					"pageURI": "/dyn/user/reg/card",
+					"apiURI": "/api/tourist/read",
+					"ivyModule": "mkk.User.Reg.Card",
+					"ivyMethod": "UserRegCard"
+				}, {
+					"pageURI": "/dyn/user/reg/result",
+					"apiURI": "/api/user/reg/result",
+					"ivyModule": "mkk.User.Reg.Result",
+					"ivyMethod": "UserRegResult"
 				}, {
 					"pageURI": "/dyn/user/reg/email_confirm",
 					"apiURI": "/api/user/reg/email_confirm",
-					"ivyModule": "mkk.User.List",
-					"ivyMethod": "UserList"
+					"ivyModule": "mkk.User.Reg.EmailConfirm",
+					"ivyMethod": "EmailConfirm",
+					"ivyMethodError": "EmailConfirm"
 				}, {
 					"pageURI": "/dyn/user/reg",
-					"apiURI": "/api/user/reg",
 					"ivyModule": "mkk.User.Reg",
-					"ivyMethod": "UserList"
+					"ivyMethod": "UserReg"
 				}, {
 					"pageURI": "/dyn/stat",
 					"apiURI": "/api/stat",

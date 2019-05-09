@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, isInRoles;
+from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from mkk.Helpers import DateRangePrinter;
 from mkk.Helpers.EntityProperty import EntityProperty;
 from mkk.Tourist.NavigatedList import TouristNavigatedList;
@@ -17,7 +17,7 @@ def PohodRead {=
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['partyList']}"/>
 		<h2>Данные похода</h2>
 		<div class="{=cls 'topButtons'}">
-			{=if {=isInRoles ['admin', 'moder']} {*
+			{=if {=hasRight obj: 'pohod.item' kind: 'edit'} {*
 			<a href="{{vpaths.siteDynamic}}pohod/history?num={{pohod.num}}"
 				class="btn btn-sm btn-secondary"
 				>История</a>

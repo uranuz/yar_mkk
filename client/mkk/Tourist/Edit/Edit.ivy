@@ -1,13 +1,13 @@
 expr {=
-from fir.controls.utils import cls, enumFormatWithNull, firScopeOptsEnc, hasRight, isInRoles;
+from fir.controls.utils import cls, enumFormatWithNull, firScopeOptsEnc, hasRight;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
 from mkk.Pohod.Edit.DeleteArea import DeleteArea;
 
 def LabeledInput {=
-	def.kv caption field appendix: null;
-	def.body noscope{*
+	def.kv caption field appendix: null forceNoCheck: null;
+	def.body noscope {*
 	<div class="form-group row align-items-center">
 		<label class="col-md-3 col-form-label" for="{{field ~ 'Field'}}">{{caption}}</label>
 		<div class="col-md-6">
@@ -16,7 +16,7 @@ def LabeledInput {=
 				class="{=cls field} form-control"
 				value="{=at tourist field}"
 				id="{{field ~ 'Field'}}"
-				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
+				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights and not forceNoCheck 'disabled'}/>
 		</div>
 		<div class="col-auto px-1">{{appendix}}</div>
 	</div>
@@ -68,23 +68,29 @@ def TouristEdit {=
 		cssBaseClass: 'mkk-TouristEdit'
 		accessObject: 'tourist.item'
 		tourist: null
-		isEditDialog: true
-		checkRights: true;
+		isEditDialog: true;
 	def.body {*
-		{=if not {=isInRoles ['admin', 'moder', 'new_user']} {=
-			return {*
-				<h4>
-					Для редактирования данных туриста требуется
-					<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
-					на сайт
-				</h4>
-			*}
+		{=if isEditDialog {=
+			if userIdentity.isAuthenticated {=
+				return {*
+					<h4>
+						Для редактирования данных туриста требуется
+						<a href="/dyn/auth" title="Аутентификация">выполнить вход</a>
+						на сайт
+					</h4>
+				*}
+			} elif {=hasRight kind: 'edit'} {=
+				return {*
+					<h4>У вас недостаточно прав для редактирования данных туриста</h4>
+				*}
+			}
 		} }
+		{=var checkRights: isEditDialog or (not{=empty tourist} and not{=empty tourist.num})}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['isEditDialog', 'checkRights'] }"/>
 		<div class="{=cls 'topButtons'}">
 			{=if isEditDialog {*
-			{=if {=isInRoles ['admin', 'moder']} {*
+			{=if {=hasRight kind: 'edit'} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?num={{tourist.num}}"
 				class="btn btn-sm btn-secondary"
 				>История</a>
@@ -130,7 +136,8 @@ def TouristEdit {=
 			} }
 			{=LabeledInput
 				caption: 'Электронная почта' field: 'email'
-				appendix: {=ShowCheckBox field: 'showEmail'};
+				appendix: {=ShowCheckBox field: 'showEmail'}
+				forceNoCheck: not isEditDialog;
 			}
 			{=if isEditDialog {=LabeledInput caption: 'Туристский опыт' field: 'experience'} }
 			<div class="form-group row">

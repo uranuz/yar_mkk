@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, isInRoles, hasRight;
+from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from fir.controls.Pagination import Pagination;
 var
 	instanceName: 'touristList'
@@ -16,7 +16,6 @@ def TouristList {=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
-		{=set isAuthorized: {=isInRoles ['admin', 'moder']} }
 		<h2>Туристы</h2>
 		<div class="{=cls 'filter'} row align-items-end">
 			<label class="col-auto form-group">

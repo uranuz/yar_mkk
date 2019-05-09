@@ -17,28 +17,78 @@ shared static this()
 	MainService.JSON_RPCRouter.join!(regUser)(`user.register`);
 	MainService.JSON_RPCRouter.join!(confirmEmail)(`user.confirmEmail`);
 
-	MainService.pageRouter.joinWebFormAPI!(findTourist)("/api/user/reg/find_tourist");
-	MainService.pageRouter.joinWebFormAPI!(emailConfirm)("/api/user/reg/email_confirm");
-	MainService.pageRouter.joinWebFormAPI!(userReg)("/api/user/reg/results");
-	MainService.pageRouter.joinWebFormAPI!(renderUserReg)("/api/user/reg");
+	MainService.pageRouter.joinWebFormAPI!(regUser)("/api/user/reg/result");
+	MainService.pageRouter.joinWebFormAPI!(confirmEmail)("/api/user/reg/email_confirm");
 }
 
-import std.json: JSONValue;
-JSONValue regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
+import std.typecons: Tuple;
+
+Tuple!(
+	size_t, `touristNum`,
+	size_t, `userNum`
+)
+regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 {
 	import webtank.db.transaction: makeTransaction;
 	import std.exception: enforce;
-
 	import std.array: join;
-	string[] nameParts; // Склеиваем имя пользователя
-	if( touristData.familyName.isSet ) {
-		nameParts ~= touristData.familyName.value;
+	import std.range: empty;
+
+	static immutable touristRegRecFormat = RecordFormat!(
+		PrimaryKey!(size_t), "num",
+		string, "familyName",
+		string, "givenName",
+		string, "patronymic",
+		string, "email"
+	)();
+
+	string[] nameParts; // СОбираем сюда полное имя пользователя
+	string userEmail;
+	if( touristData.num.isSet )
+	{
+		// Если мы работаем в режиме использования существующей записи туриста,
+		// то: во-первых, не доверяем вводу и берем данные из БД (если кто-то вызовет вручную)
+		// во-вторых данные нам и не будут присланы (кроме номера, в нормальном сценарии),
+		// т.к. поля в интерфейсе "задисейблены"
+		auto touristDBRec = getCommonDB().queryParams(
+`select
+	num,
+	family_name,
+	given_name,
+	patronymic,
+	email
+from tourist
+where tourist.num = $1::integer`,
+		touristData.num).getRecord(touristRegRecFormat);
+		enforce(touristDBRec !is null, `Не удалось прочитать информацию о туристе из БД`);
+
+		string val;
+		static foreach( field; [`familyName`, `givenName`, `patronymic`] )
+		{
+			val = touristDBRec.getStr!(field)();
+			if( !val.empty ) {
+				nameParts ~= val;
+			}
+		}
+
+		// Письмо нам надо отослать в любом случае на правильный email...
+		// Может быть ситуация, что у записи пользователя не задан email, либо запрещен его показ кому-угодно по правам...
+		// Либо там записан устаревший бред, который уже ничему не соответствует.
+		// Разрешим пользователю передать актуальный адрес из формы... Если нет, то возьмем уже из БД
+		userEmail = (touristData.email.isSet && !touristData.email.value.empty)? touristData.email.value: touristDBRec.getStr!(`email`)();
 	}
-	if( touristData.givenName.isSet ) {
-		nameParts ~= touristData.givenName.value;
-	}
-	if( touristData.patronymic.isSet ) {
-		nameParts ~= touristData.patronymic.value;
+	else
+	{
+		if( touristData.familyName.isSet ) {
+			nameParts ~= touristData.familyName.value;
+		}
+		if( touristData.givenName.isSet ) {
+			nameParts ~= touristData.givenName.value;
+		}
+		if( touristData.patronymic.isSet ) {
+			nameParts ~= touristData.patronymic.value;
+		}
+		userEmail = touristData.email.value;
 	}
 
 	RegUserResult regUserRes;
@@ -49,48 +99,56 @@ JSONValue regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData u
 		regUserRes = registerUser!(getAuthDB)(
 			userData.login,
 			userData.password,
-			nameParts.join(` `),
-			touristData.email
-		);
+			nameParts.join(` `), // Склеиваем полное имя пользователя из частей
+			userEmail);
 
 		addUserRoles!(getAuthDB)(regUserRes.userNum, [`new_user`]);
 	}
 
+	/**
 	scope(exit)
 	{
 		// Убираем права и блокируем пользователя до подтверждения регистрации
 		// при выходе из области успешно или с ошибкой
-		getAuthDB().query(`with
+		getAuthDB().queryParams(`with
 		bbb(status) as(
 			update site_user as su set is_blocked = true
-			where su.num = ` ~ regUserRes.userNum.text ~ `
+			where su.num = $1
 			returning 'blocked'
 		),
 		rrr(status) as(
 			delete from user_access_role uar
-			where uar.user_num = ` ~ regUserRes.userNum.text ~ `
+			where uar.user_num = $1
 			returning 'no_rights'
 		)
 		select status from bbb
 		union all
-		select status from rrr`);
+		select status from rrr`, regUserRes.userNum);
 	}
+	*/
 
 	MainService.accessController.authenticateByPassword(ctx, userData.login, userData.password);
 	enforce(ctx.user.isAuthenticated, `Не удалось создать временную сессию для регистрации пользователя!`);
 
-	// Отправим письмо на подтверждение пароля
-	sendConfirmEmail(touristData.email, regUserRes.confirmUUID);
+	size_t touristNum;
+	if( !touristData.num.isSet ) {
+		// Нужно создать новую запись туриста под этого пользователя
+		touristNum = editTourist(ctx, touristData).touristNum;
+	} else {
+		// Если запись туриста есть, то вызывать ее редактирование нельзя, иначе кто угодно сможет редактировать...
+		touristNum = touristData.num.value;
+	}
 
-	auto jResult = JSONValue([
-		"touristNum":  editTourist(ctx, touristData).touristNum,
-		"userNum": regUserRes.userNum
-	]);
+	// Отправим письмо на подтверждение электронной почты
+	sendConfirmEmail(userEmail, regUserRes.confirmUUID);
 
-	return jResult;
+	return typeof(return)(touristNum, regUserRes.userNum);
 }
 
-JSONValue confirmEmail(HTTPContext ctx, string confirmUUID)
+Tuple!(
+	size_t, `userNum`
+)
+confirmEmail(HTTPContext ctx, string confirmUUID)
 {
 	import std.conv: text;
 	static immutable confirmRecFormat = RecordFormat!(
@@ -98,14 +156,14 @@ JSONValue confirmEmail(HTTPContext ctx, string confirmUUID)
 		bool, "expired",
 		bool, "already_confirmed"
 	)();
-	auto confirm_rs = getAuthDB().query(
+	auto confirm_rs = getAuthDB().queryParams(
 `with reg_user as(
 	select
 		num,
-		current_timestamp at time zone 'UTC' > (reg_timestamp + interval '` ~ emailConfirmDaysLimit.text ~ ` days') "expired",
+		current_timestamp at time zone 'UTC' > (reg_timestamp + ($1 || ' days')::interval) "expired",
 		su.is_email_confirmed "already_confirmed"
 	from site_user su
-	where su.email_confirm_uuid = '` ~ PGEscapeStr(confirmUUID) ~ `'::uuid
+	where su.email_confirm_uuid = $2::uuid
 ),
 upd_res as(
 	update site_user as su
@@ -121,30 +179,27 @@ union all
 select * from reg_user
 where
 	reg_user.expired
-	or reg_user.already_confirmed`
+	or reg_user.already_confirmed`,
+	emailConfirmDaysLimit, confirmUUID
 	).getRecordSet(confirmRecFormat);
 
-	JSONValue res = [`num`: JSONValue()];
 	if( confirm_rs.length == 0 ) {
-		res[`message`] = `Не удалось обнаружить пользователя по коду подтверждения`;
-	} else if( confirm_rs.length == 1 ) {
-		auto confirm_rec = confirm_rs.front;
-		res[`num`] = confirm_rec.get!`num`();
-		if ( confirm_rec.get!"already_confirmed"(false) ) {
-			res[`message`] = `Подверждение электронной почты уже было выполнено ранее`;
-		} else if( confirm_rec.get!"expired"(false) ) {
-			res[`message`] = `Срок действия кода подтверждения истек`;
-		} else {
-			res[`message`] = `Подтверждение электронной почты успешно выполнено`;
-		}
-	} else {
+		throw new Exception(`Не удалось обнаружить пользователя по коду подтверждения.`);
+	} else if( confirm_rs.length != 1 ) {
 		import std.algorithm: map;
 		import std.array: join;
-		res[`message`] = `Найдено несколько записей по коду подтверждения: ` ~ confirm_rs[].map!(
-				(rec) => rec.get!"num"().text
-			).join(", ");
+		string multipleNums = confirm_rs[].map!( (rec) => rec.get!"num"().text ).join(", ");
+		throw new Exception(`Найдено несколько записей по коду подтверждения: ` ~ multipleNums);
 	}
-	return res;
+
+	auto confirm_rec = confirm_rs.front;
+
+	if ( confirm_rec.get!"already_confirmed"(false) ) {
+		throw new Exception(`Подверждение электронной почты уже было выполнено`);
+	} else if( confirm_rec.get!"expired"(false) ) {
+		throw new Exception(`Срок действия кода подтверждения истек. Необходимо повторить регистрацию...`);
+	}
+	return typeof(return)(confirm_rec.get!`num`());
 }
 
 private __gshared string _senderAddress;
@@ -182,15 +237,18 @@ shared static this()
 	}
 }
 
-import std.net.curl: SMTP;
 
-import std.conv: text;
-import std.array: join;
 import std.uuid: UUID;
-
 void sendConfirmEmail(string userEmail, UUID confirmUUID)
 {
 	import webtank.net.utils: HTMLEscapeValue;
+	import std.net.curl: SMTP;
+
+	import std.conv: text;
+	import std.array: join;
+	import mkk_site.security.core.register_user: checkEmailAddress;
+
+	checkEmailAddress(userEmail);
 
 	// Send an email with SMTPS
 	auto smtp = SMTP(_senderAddress);
@@ -217,7 +275,7 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 		используя данный адрес эл. почты: ` ~ HTMLEscapeValue(userEmail) ~ `.
 		Если вы регистрировались на сайте, пройдите по ссылке ниже для продолжения регистрации.
 	<div>
-	<a href="` ~ site_addr ~ `/dyn/user/reg/email_confirm?uuid=` ~ HTMLEscapeValue(confirmUUID.toString()) ~ `"
+	<a href="` ~ site_addr ~ `/dyn/user/reg/email_confirm?confirmUUID=` ~ HTMLEscapeValue(confirmUUID.toString()) ~ `"
 		>Подтвердить адрес эл. почты</a>
 	<div>Если же вы не совершали этих действий, то просто проигнорируйте сообщение.</div>
 	<div>
@@ -230,41 +288,4 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 	smtp.verifyHost = false;
 	smtp.verifyPeer = false;
 	smtp.perform();
-}
-
-import mkk_site.data_model.tourist_edit;
-JSONValue findTourist(HTTPContext ctx)
-{
-	auto req = ctx.request;
-
-	return JSONValue();
-}
-
-JSONValue userReg(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
-{
-	import webtank.common.std_json.to: toStdJSON;
-
-	JSONValue writeRes;
-	try {
-		writeRes = regUser(ctx, touristData, userData).toStdJSON();
-		writeRes[`errorMsg`] = JSONValue();
-	} catch(Exception ex) {
-		writeRes[`errorMsg`] = ex.msg;
-	}
-	return writeRes;
-}
-
-import mkk_site.main_service.tourist.read: readTourist;
-JSONValue renderUserReg(HTTPContext ctx, Optional!size_t num)
-{
-	return JSONValue([
-		"tourist": readTourist(ctx, num).tourist.toStdJSON()
-	]);
-}
-
-JSONValue emailConfirm(HTTPContext ctx, string uuid)
-{
-	return JSONValue([
-		`confirmUUID`: confirmEmail(ctx, uuid)
-	]);
 }

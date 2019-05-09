@@ -1,6 +1,6 @@
 expr
 {=
-from fir.controls.utils import cls, isInRoles, firScopeOptsEnc;
+from fir.controls.utils import cls, hasRight, firScopeOptsEnc;
 from fir.controls.Pagination import Pagination;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
@@ -20,7 +20,7 @@ def Experience {=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<div class="{=cls 'topButtons'}">
-			{=if {=isInRoles ['admin', 'moder']} {*
+			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
 			<a href="{{vpaths.siteDynamic}}tourist/history?num={{tourist.num}}"
 				class="btn btn-sm btn-secondary"
 				>История</a>

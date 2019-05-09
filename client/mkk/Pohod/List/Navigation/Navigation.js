@@ -3,6 +3,7 @@ define('mkk/Pohod/List/Navigation/Navigation', [
 	'fir/controls/Pagination/Pagination',
 	'css!mkk/Pohod/List/Navigation/Navigation'
 ], function(FirControl) {
+var ENTER_KEY_CODE = 13;
 return FirClass(
 	function PohodListNavigation(opts) {
 		this.superproto.constructor.call(this, opts);
@@ -12,7 +13,13 @@ return FirClass(
 		/** Стандартное место для подписки на события */
 		_onSubscribe: function() {
 			this.superproto._onSubscribe.apply(this, arguments);
-			this._elems('searchBtn').on('click', this._onSearchBtnClick.bind(this));
+			var self = this
+			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
+			this._elems('pohodRegionField').on('keyup', function(ev) {
+				if( ev.keyCode === ENTER_KEY_CODE ) {
+					self._onSearch_start();
+				}
+			});
 			if( this._elems('printModeBtn').length ) {
 				this._elems('printModeBtn').on('click', this._onPrintBtnClick.bind(this));
 			}
@@ -23,6 +30,7 @@ return FirClass(
 			this.superproto._onUnsubscribe.apply(this, arguments);
 			this._elems('printModeBtn').off();
 			this._elems('searchBtn').off();
+			this._elems('pohodRegionField').off('keyup');
 		},
 
 		/** Нажатие на кнопку печати */
@@ -31,9 +39,9 @@ return FirClass(
 			this._notify('onPrintBtnClick');
 		},
 
-		/** Нажатие на кнопку поиска */
-		_onSearchBtnClick: function() {
-			this._notify('onSearchBtnClick');
+		/** При старте поиска (при нажатии на кнопку поиска, либо нажатии на Enter в поисковой строке) */
+		_onSearch_start: function() {
+			this._notify('onSearchStart');
 		},
 
 		getFilter: function() {

@@ -19,14 +19,13 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 {
 	import std.utf: count;
 	import std.conv: text;
+	import std.exception: enforce;
+	import std.range: empty;
 
-	if( !login.length || !name.length || !password.length ) {
-		throw new Exception("Один или несколько обязательных параметров профиля пользователя пусты");
-	}
-
-	if( login.count < minLoginLength ) {
-		throw new Exception("Длина логина меньше минимально допустимой (" ~ minLoginLength.text ~ " символов)");
-	}
+	enforce(!login.empty, `Не задан логин пользователя`);
+	enforce(
+		login.count >= minLoginLength,
+		"Длина логина меньше минимально допустимой (" ~ minLoginLength.text ~ " символов)");
 
 	if(
 		getAuthDB().query(
@@ -36,9 +35,17 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 		throw new Exception("Пользователь с заданным логином уже зарегистрирован");
 	}
 
-	if( password.count < minPasswordLength ) {
-		throw new Exception("Длина пароля меньше минимально допустимой (" ~ minPasswordLength.text ~ " символов)");
-	}
+	enforce(!name.empty, `Не задано имя пользователя`);
+	enforce(
+		name.count >= minLoginLength,
+		"Длина имени пользователя меньше минимально допустимой (" ~ minLoginLength.text ~ " символов)");
+
+	enforce(!password.empty, `Не задан пароль пользователя`);
+	enforce(
+		password.count >= minPasswordLength,
+		"Длина пароля меньше минимально допустимой (" ~ minPasswordLength.text ~ " символов)");
+
+	checkEmailAddress(email);
 
 	static immutable addUserResultFmt = RecordFormat!(
 		PrimaryKey!(size_t), "num",
@@ -61,7 +68,6 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 	
 	fieldNames ~= `reg_timestamp`;
 	fieldValues ~= `current_timestamp at time zone 'UTC'`;
-
 
 	// Сначала устанавливаем общую информацию о пользователе,
 	// и заставляем БД саму установить дату регистрации, чтобы не иметь проблем с временными зонами
@@ -93,6 +99,16 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 
 	// Возвращаем идентификатор нового пользователя народу
 	return RegUserResult(setPasswordResult.front.get!"num"(), confirmUUID);
+}
+
+void checkEmailAddress(string emailAddress)
+{
+	import std.range: empty;
+	import std.algorithm: canFind;
+	import std.exception: enforce;
+	enforce(!emailAddress.empty, `Адрес электронной почты не должен быть пустым`);
+	// Почему 5?: a@b.c
+	enforce(emailAddress.canFind('@') && emailAddress.length >= 5, `Некорректный адрес электронной почты`);
 }
 
 void addUserRoles(alias getAuthDB)(size_t userId, string[] roles, bool overwrite = false)

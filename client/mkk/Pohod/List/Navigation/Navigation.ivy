@@ -31,8 +31,10 @@ def PohodListNavigation {=
 			</div>
 			*}}
 			<div class="{=cls 'filtersWrapper'}">
-				<label class="row form-group">
-					<span class="col-auto col-form-label mr-2">Район похода</span>
+				<label
+					class="row form-group"
+					title="Поиск по району похода или нитке маршрута">
+					<span class="col-auto col-form-label mr-2">Поиск</span>
 					<div class="col">
 						<input type="text"
 							name="pohodRegion"

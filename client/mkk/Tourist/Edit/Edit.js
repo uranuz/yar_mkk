@@ -14,7 +14,7 @@ return FirClass(
 		this.superproto.constructor.call(this, opts);
 
 		this._isEditDialog = opts.isEditDialog;
-		this._checkRights = opts.checkRights;
+		this._isNewUser = opts.isNewUser;
 
 		this._elems('submitBtn').click(this.sendButtonClick.bind(this));
 

@@ -29,6 +29,12 @@ def UserMenuBtn {=
 					>Войти</a>
 			</li>
 			<li>
+				<a href="{{vpaths.siteDynamic}}user/reg"
+					class="{=cls 'regBtn'} {{authStateCls}}"
+					title="Перейти на страницу регистрации пользователя"
+					>Регистрация</a>
+			</li>
+			<li>
 				<a href="{{authRedirectURI}}&logout=true"
 					class="{=cls 'logoutBtn'} {{authStateCls}}"
 					title="Завершить сеанс работы под пользователем"

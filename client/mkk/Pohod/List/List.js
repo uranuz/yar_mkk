@@ -13,7 +13,7 @@ return FirClass(
 		this._partyInfo = this.getChildByName('partyInfo');
 		this._navigation = this.getChildByName('pohodListNavigation');
 		
-		this._navigation.subscribe('onSearchBtnClick', this._onSetCurrentPage.bind(this));
+		this._navigation.subscribe('onSearchStart', this._onSetCurrentPage.bind(this));
 		
 	}, FirControl, [NavigationMixin], {
 		_onSubscribe: function() {
