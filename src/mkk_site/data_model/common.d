@@ -69,3 +69,83 @@ struct Navigation
 		}
 	}
 }
+
+import webtank.net.http.context: HTTPContext;
+private void _checkItemRights(DataStruct, string fieldName)(HTTPContext ctx, string accessKind)
+{
+	import mkk_site.security.common.exception: SecurityException;
+	import webtank.security.right.common: GetSymbolAccessObject;
+	import std.exception: enforce;
+	string accessObj = GetSymbolAccessObject!(DataStruct, fieldName)();
+	enforce!SecurityException(
+		ctx.rights.hasRight(accessObj, accessKind),
+		`Недостаточно прав для редактирования поля: ` ~ fieldName);
+}
+
+void checkStructEditRights(DataStruct)(auto ref DataStruct record, HTTPContext ctx, string accessKind = `edit`)
+{
+	import mkk_site.security.common.exception: SecurityException;
+	import webtank.security.right.common: RightObjAttr;
+	import std.meta: AliasSeq;
+	import std.traits: getUDAs;
+	import webtank.common.optional: isUndefable;
+	foreach( fieldName; AliasSeq!(__traits(allMembers, DataStruct)) )
+	{
+		alias FieldType = typeof(__traits(getMember, record, fieldName));
+		alias RightObjAttrs = getUDAs!(__traits(getMember, record, fieldName), RightObjAttr);
+		static if( isUndefable!FieldType )
+		{
+			auto field = __traits(getMember, record, fieldName);
+			if( field.isUndef )
+				continue; // Если поле не изменилось, то права на него не проверяем
+			_checkItemRights!(DataStruct, fieldName)(ctx, accessKind);
+		} else static if( RightObjAttrs.length > 0 ) {
+			_checkItemRights!(DataStruct, fieldName)(ctx, accessKind);
+		}
+	}
+}
+
+/++
+	Шаблон, который генерирует код, выполняющий обход полей типа Undefable для переменной c именем recordVar.
+	Поля со значением isUndef = true игнорируются при этом.
+	Для каждого из указанных полей, выполняется код, переданный в параметре payload
+	`Миксин` определяет ряд символов для использования:
+		fieldName - имя поля
+		FieldSymbol - `символ` поля. Символ - это не тип и не значение
+		FieldType - тип поля
+		dbFieldName - имя поля в базе данных (если задано через аттрибут DBName)
+		field - значение поля
++/
+template WalkFields(string recordVar, string payload)
+{
+	import std.format: format;
+	enum string WalkFields = (q{
+		import std.meta: AliasSeq;
+		import std.traits: getUDAs;
+		import webtank.common.optional: isUndefable;
+		
+		foreach( fieldName; AliasSeq!(__traits(allMembers, typeof(%1$s))) )
+		{
+			alias FieldSymbol = __traits(getMember, %1$s, fieldName);
+			alias FieldType = typeof(FieldSymbol);
+			static if( isUndefable!FieldType )
+			{
+				alias DBNameAttrs = getUDAs!(FieldSymbol, DBName);
+				static assert(
+					DBNameAttrs.length < 2,
+					`Expected one or zero DBName attrs on struct field`);
+				static if( DBNameAttrs.length ) {
+					enum string dbFieldName = DBNameAttrs[0].dbName;
+				} else {
+					enum string dbFieldName = null;
+				}
+
+				auto field = __traits(getMember, record, fieldName);
+				if( field.isUndef )
+					continue;
+
+				%2$s
+			}
+		}
+	}).format(recordVar, payload);
+}
