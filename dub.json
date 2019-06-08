@@ -16,12 +16,11 @@
 				"pq"
 			],
 			"sourcePaths": [
-				"src/mkk_site/common",
-				"src/mkk_site/security",
-				"src/mkk_site/data_model",
-				"src/mkk_site/main_service",
-				"src/mkk_site/history/common",
-				"src/mkk_site/history/client"
+				"src/mkk/common",
+				"src/mkk/security",
+				"src/mkk/main",
+				"src/mkk/history/common",
+				"src/mkk/history/client"
 			],
 			"dependencies": {
 				"webtank": ">=0.0.0"
@@ -47,11 +46,10 @@
 				"webtank": ">=0.0.0"
 			},
 			"sourcePaths": [
-				"src/mkk_site/common",
-				"src/mkk_site/security/common",
-				"src/mkk_site/data_model",
-				"src/mkk_site/view_service",
-				"src/mkk_site/history/common"
+				"src/mkk/common",
+				"src/mkk/security/common",
+				"src/mkk/view",
+				"src/mkk/history/common"
 			],
 			"sourceFiles": [],
 			"buildRequirements": [
@@ -70,11 +68,10 @@
 				"pq"
 			],
 			"sourcePaths": [
-				"src/mkk_site/common",
-				"src/mkk_site/data_model",
-				"src/mkk_site/security/common",
-				"src/mkk_site/history/common",
-				"src/mkk_site/history/service"
+				"src/mkk/common",
+				"src/mkk/security/common",
+				"src/mkk/history/common",
+				"src/mkk/history/service"
 			],
 			"dependencies": {
 				"webtank": ">=0.0.0"
@@ -99,13 +96,12 @@
 				"lib/libtarsnap.a"
 			],
 			"sourcePaths": [
-				"src/mkk_site/common",
-				"src/mkk_site/data_model",
-				"src/mkk_site/security"
+				"src/mkk/common",
+				"src/mkk/security"
 			],
 			"sourceFiles": [
-				"src/mkk_site/tools/auth_db",
-				"src/mkk_site/tools/add_user"
+				"src/mkk/tools/auth_db",
+				"src/mkk/tools/add_user"
 			],
 			"buildRequirements": [
 				"allowWarnings"
@@ -126,13 +122,12 @@
 				"lib/libtarsnap.a"
 			],
 			"sourcePaths": [
-				"src/mkk_site/common",
-				"src/mkk_site/data_model",
-				"src/mkk_site/security"
+				"src/mkk/common",
+				"src/mkk/security"
 			],
 			"sourceFiles": [
-				"src/mkk_site/tools/auth_db",
-				"src/mkk_site/tools/set_user_password"
+				"src/mkk/tools/auth_db",
+				"src/mkk/tools/set_user_password"
 			],
 			"buildRequirements": [
 				"allowWarnings"
@@ -151,8 +146,8 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/security/core/crypto",
-				"src/mkk_site/tools/gen_pw_hash"
+				"src/mkk/security/core/crypto",
+				"src/mkk/tools/gen_pw_hash"
 			]
 		},
 		{
@@ -168,8 +163,8 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/security/core/crypto",
-				"src/mkk_site/tools/gen_session_id"
+				"src/mkk/security/core/crypto",
+				"src/mkk/tools/gen_session_id"
 			]
 		},
 		{
@@ -178,7 +173,7 @@
 			"targetPath": "bin",
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/tools/server_runner.d"
+				"src/mkk/tools/server_runner.d"
 			]
 		},
 		{
@@ -190,7 +185,7 @@
 			},
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/tools/dispatcher.d"
+				"src/mkk/tools/dispatcher.d"
 			]
 		},
 		{
@@ -199,7 +194,7 @@
 			"targetPath": "bin",
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk_site/tools/deploy.d"
+				"src/mkk/tools/deploy.d"
 			]
 		}
 	]

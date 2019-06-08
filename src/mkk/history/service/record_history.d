@@ -1,15 +1,14 @@
 module mkk.history.service.record_history;
 
 import webtank.common.std_json.to: toStdJSON;
-import webtank.net.utils: PGEscapeStr;
 import webtank.net.http.context: HTTPContext;
 import webtank.common.optional: Optional;
 import webtank.net.http.handler.web_form_api_page_route: joinWebFormAPI;
+import webtank.datctrl.navigation: Navigation;
 
 import mkk.history.service.service;
 import mkk.common.utils;
 import mkk.history.common;
-import mkk.data_model.common: Navigation;
 
 shared static this()
 {

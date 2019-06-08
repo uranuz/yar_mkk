@@ -38,7 +38,7 @@ void main(string[] args)
 
 	// Удаляем всё, что нужно в каталоге развертывания сайта (на всякий случай)
 	string[] toRemove = dubConfigs.map!( (confName) {
-		return `bin/mkk_site_` ~ confName;
+		return `bin/mkk_` ~ confName;
 	}).array;
 
 	// Добавляем скрипт дампирования БД

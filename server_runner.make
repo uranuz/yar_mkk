@@ -1,1 +1,1 @@
-rdmd --build-only --force "-Isrc/" -ofserver_runner src/mkk_site/server_runner.d
+rdmd --build-only --force "-Isrc/" -ofserver_runner src/mkk/server_runner.d
