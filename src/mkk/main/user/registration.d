@@ -33,7 +33,6 @@ Tuple!(
 regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 {
 	import webtank.db.transaction: makeTransaction;
-	import std.exception: enforce;
 	import std.array: join;
 	import std.range: empty;
 
@@ -215,7 +214,6 @@ shared static this()
 	import std.file: exists, read, isFile;
 	import std.path: expandTilde, buildNormalizedPath;
 	import std.json: JSONValue, parseJSON, JSON_TYPE;
-	import std.exception: enforce;
 	string emailSenderConfigPath = expandTilde(`~/sites/mkk_site/email_sender_config.json`);
 	enforce(exists(emailSenderConfigPath) && isFile(emailSenderConfigPath), `Expected email sender config file!`);
 

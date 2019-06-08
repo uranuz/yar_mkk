@@ -1,8 +1,8 @@
-///Комплект модулей для разработки страниц сайта.
-///Импортирует основные модули, которые могут быть полезны для созданиия страниц сайта
+/// Комплект модулей для разработки страниц сайта.
+/// Импортирует основные модули, которые могут быть полезны для созданиия страниц сайта
 module mkk.main.devkit;
 
-//Импортируем модули библиотеки
+// Импортируем модули библиотеки
 public import
 	webtank.common.conv,
 	webtank.common.optional,
@@ -35,4 +35,7 @@ public import
 	mkk.main.service,
 	mkk.common.utils;
 
+// Очень частые импорты
 public import std.typecons: tuple, Tuple;
+public import std.exception: enforce;
+public import std.range: empty, front;

@@ -14,10 +14,6 @@ shared static this()
 Tuple!(Optional!size_t, "documentNum")
 writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 {
-	import std.exception: enforce;
-	import webtank.db.postgresql: toPGString;
-	import std.range: empty;
-
 	enforce(ctx.rights.hasRight(`document.item`, `edit`), `Недостаточно прав для редактирования ссылки на документ!`);
 	checkStructEditRights(record, ctx);
 
@@ -43,9 +39,7 @@ writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 /++ Простой, но опасный метод, который удаляет сылку на документ по ключу. +/
 void deleteDocument(HTTPContext ctx, size_t num)
 {
-	import std.conv: text;
-	import std.exception: enforce;
 	enforce(ctx.rights.hasRight(`document.item`, `delete`), `Недостаточно прав для удаления документа!`);
 
-	getCommonDB().query(`delete from file_link where num = ` ~ num.text);
+	getCommonDB().queryParams(`delete from file_link where num = $1`, num);
 }

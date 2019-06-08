@@ -26,8 +26,6 @@ struct RightObjData
 Tuple!(size_t, `num`)
 readObject(HTTPContext ctx, RightObjData record)
 {
-	import std.exception: enforce;
-	import std.range: empty;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 	checkStructEditRights(record, ctx);
 	string[] fieldNames;

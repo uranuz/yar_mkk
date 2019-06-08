@@ -81,19 +81,16 @@ Tuple!(
 )
 partyInfo(Optional!size_t num)
 {
-	import std.conv: text;
-	import std.exception: enforce;
-
 	enforce(num.isSet, `Невозможно получить данные, т.к. не задан номер похода`);
 
-	auto pohodInfo = getCommonDB().query(`
+	auto pohodInfo = getCommonDB().queryParams(`
 select
 	pohod.num as num,
 	pohod.kod_mkk as "mkkCode",
 	pohod.nomer_knigi as "bookNum",
 	pohod.region_pohod as "pohodRegion"
-from pohod where pohod.num = ` ~ num.text ~ `
-	`).getRecordSet(briefPohodInfoRecFormat);
+from pohod where pohod.num = $1
+	`, num).getRecordSet(briefPohodInfoRecFormat);
 
 	auto party = getPartyList(num, Navigation());
 	return typeof(return)(

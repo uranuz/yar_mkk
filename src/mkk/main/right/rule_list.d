@@ -24,7 +24,6 @@ Tuple!(
 )
 getRightRuleList(HTTPContext ctx, string name, Navigation nav)
 {
-	import std.exception: enforce;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
@@ -53,8 +52,6 @@ getRightRuleList(HTTPContext ctx, string name, Navigation nav)
 Tuple!(IBaseRecord, `ruleRec`)
 readRightRule(HTTPContext ctx, Optional!size_t num)
 {
-	import std.exception: enforce;
-	import webtank.datctrl.detatched_record: makeMemoryRecord;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 
 	if( num.isNull ) {

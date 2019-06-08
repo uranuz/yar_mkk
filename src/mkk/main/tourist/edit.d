@@ -25,11 +25,8 @@ editTourist(
 	import std.meta: AliasSeq, staticMap;
 	import std.algorithm: canFind, countUntil;
 	import std.conv: to, text, ConvException;
-	import std.typecons: tuple;
 	import mkk.main.enums;
 	import std.json: JSONValue;
-	import std.exception: enforce;
-	import std.range: empty;
 
 	enforce(ctx.rights.hasRight(`tourist.item`, `edit`), `Недостаточно прав для редактирования туриста!`);
 	checkStructEditRights(record, ctx); // Проверка прав
@@ -140,8 +137,6 @@ editTourist(
 /++ Простой, но опасный метод, который удаляет туриста по ключу. Требует прав админа! +/
 void touristDelete(HTTPContext ctx, size_t num)
 {
-	import std.conv: text;
-	import std.exception: enforce;
 	enforce(ctx.rights.hasRight(`tourist.item`, `delete`), `Недостаточно прав для удаления туриста!`);
 
 	HistoryRecordData historyData = {
@@ -150,5 +145,5 @@ void touristDelete(HTTPContext ctx, size_t num)
 		recordKind: HistoryRecordKind.Delete
 	};
 	sendToHistory(ctx, `Удаление туриста`, historyData);
-	getCommonDB().query(`delete from tourist where num = ` ~ num.text);
+	getCommonDB().queryParams(`delete from tourist where num = $1`, num);
 }

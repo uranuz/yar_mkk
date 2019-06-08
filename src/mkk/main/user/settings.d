@@ -17,8 +17,6 @@ void changePassword(
 	string newPassword,
 	string repeatPassword
 ) {
-	import std.exception: enforce;
-
 	enforce!SecurityException(
 		ctx.user.isAuthenticated,
 		`Изменение пароля пользователя требует аутентификации на сайте!`

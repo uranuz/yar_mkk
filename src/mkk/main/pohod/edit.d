@@ -23,11 +23,8 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import std.meta: AliasSeq, staticMap;
 	import std.algorithm: canFind, countUntil;
 	import std.conv: to, text, ConvException;
-	import std.typecons: tuple;
 	import std.json: JSONValue;
 	import mkk.main.enums;
-	import std.exception: enforce;
-	import std.range: empty;
 
 	enforce(ctx.rights.hasRight(`pohod.item`, `edit`), `Недостаточно прав для редактирования похода!`);
 	checkStructEditRights(record, ctx); // Проверка прав на изменение полей
@@ -171,8 +168,6 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 /++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/
 void pohodDelete(HTTPContext ctx, size_t num)
 {
-	import std.conv: text;
-	import std.exception: enforce;
 	enforce(ctx.rights.hasRight(`pohod.item`, `delete`), `Недостаточно прав для удаления похода!`);
 
 	HistoryRecordData historyData = {
@@ -181,5 +176,5 @@ void pohodDelete(HTTPContext ctx, size_t num)
 		recordKind: HistoryRecordKind.Delete
 	};
 	sendToHistory(ctx, `Удаление похода`, historyData);
-	getCommonDB().query(`delete from pohod where num = ` ~ num.text);
+	getCommonDB().queryParams(`delete from pohod where num = $1`, num);
 }

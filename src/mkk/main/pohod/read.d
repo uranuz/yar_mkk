@@ -134,8 +134,6 @@ Tuple!(
 )
 pohodRead(HTTPContext ctx, Optional!size_t num)
 {
-	import std.exception: enforce;
-
 	auto party = getPartyList(num, Navigation());
 	return typeof(return)(
 		pohodReadBase(num).pohod,

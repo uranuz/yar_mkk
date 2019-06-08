@@ -39,7 +39,6 @@ void initPohodTouristData(Fmt, FmtExt)(
 	string query,
 	string tableName)
 {
-	import std.exception: enforce;
 	enforce(ctx.rights.hasRight(tableName ~ `.history`, `init`),
 		`Недостаточно прав для инициализации истории!!!`
 	);

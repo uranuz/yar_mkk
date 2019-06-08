@@ -52,8 +52,6 @@ getExperience(
 	Navigation nav
 ) {
 	import mkk.main.tourist.read: readTourist;
-	import std.conv: to, text;
-	import std.exception: enforce;
 	enforce(num.isSet, `Невозможно отобразить данные туриста. Номер туриста не задан`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию

@@ -24,8 +24,6 @@ struct RightRuleData
 Tuple!(size_t, `num`)
 editRule(HTTPContext ctx, RightRuleData record)
 {
-	import std.exception: enforce;
-	import std.range: empty;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 	//checkStructEditRights(record, ctx);
 	string[] fieldNames;
@@ -50,7 +48,6 @@ editRule(HTTPContext ctx, RightRuleData record)
 
 void deleteRule(HTTPContext ctx, size_t num)
 {
-	import std.exception: enforce;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 
 	MainService.loger.info("Формирование и выполнение запроса к БД", "Удаление правила доступа");

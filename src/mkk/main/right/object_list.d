@@ -72,7 +72,6 @@ static immutable rightObjectParentFieldsSub = `
 Tuple!(IBaseRecordSet, `objectList`)
 getObjectList(HTTPContext ctx)
 {
-	import std.exception: enforce;
 	import std.format: format;
 
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
@@ -90,7 +89,6 @@ readObject(
 	Optional!size_t num = Optional!size_t(),
 	Optional!size_t parentNum = Optional!size_t()
 ) {
-	import std.exception: enforce;
 	import std.format: format;
 	import webtank.datctrl.detatched_record: makeMemoryRecord;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
@@ -135,7 +133,6 @@ static immutable objRightRecFormat = RecordFormat!(
 Tuple!(IBaseRecordSet, `objectRightList`)
 getObjectRightList(HTTPContext ctx, Optional!size_t num)
 {
-	import std.exception: enforce;
 	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
 	return typeof(return)(getAuthDB().queryParams(`
 	select
