@@ -6,7 +6,7 @@ define('mkk/Tourist/Edit/Edit', [
 	'fir/controls/PlainDatePicker/PlainDatePicker',
 	'fir/controls/PlainListBox/PlainListBox',
 	'mkk/Tourist/PlainList/PlainList',
-	'mkk/Pohod/Edit/DeleteArea/DeleteArea',
+	'mkk/Helpers/DeleteConfirm/DeleteConfirm',
 	'css!mkk/Tourist/Edit/Edit'
 ], function(FirControl, MKKHelpers, FirHelpers, json_rpc) {
 return FirClass(
@@ -16,33 +16,36 @@ return FirClass(
 		this._isEditDialog = opts.isEditDialog;
 		this._isNewUser = opts.isNewUser;
 
-		this._elems('submitBtn').click(this.sendButtonClick.bind(this));
-
 		this._birthDatePicker = this.getChildByName('birthDateField');
 		this._similarsList = this.getChildByName('similarsList');
 		this._touristForm = this._elems('touristForm');
 		this._similarsDlg = this._elems("similarsDlg");
 		this._forceSubmitBtn = this._elems("forceSubmitBtn");
-		this._touristDeleteArea = this.getChildByName('touristDeleteArea');
+		this._touristDeleteConfirm = this.getChildByName('touristDeleteConfirm');
 		this._partyList = this.getChildByName('partyList');
 		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
 		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
 
-		if( this._isEditDialog ) {
-			this._elems("deleteDialogBtn").on("click", this._touristDeleteArea.showDialog.bind(this));
-			this._touristDeleteArea.subscribe('onDeleteConfirm', this.onDeleteConfirm.bind(this));
-		}
-
-		this._updateControlState(opts);
-	}, FirControl, {
-		_onSubscribe: function() {
+		this._subscr(function() {
 			this._similarsList.subscribe('onTouristListLoaded', this.processSimilarTourists.bind(this));
 			this._forceSubmitBtn.on('click', this._forcedSubmitForm.bind(this));
-		},
-		_onUnsubscribe: function() {
+			this._elems('submitBtn').on('click', this.sendButtonClick.bind(this));
+			if( this._isEditDialog ) {
+				this._elems("deleteDialogBtn").on("click", this._touristDeleteConfirm.showDialog.bind(this));
+				this._touristDeleteConfirm.subscribe('onDeleteConfirm', this.onDeleteConfirm.bind(this));
+			}
+		});
+
+		this._unsubscr(function() {
 			this._similarsList.unsubscribe('onTouristListLoaded');
 			this._forceSubmitBtn.off('click');
-		},
+			this._elems('submitBtn').off('click');
+			if( this._isEditDialog ) {
+				this._elems("deleteDialogBtn").off('click');
+				this._touristDeleteConfirm.unsubscribe('onDeleteConfirm');
+			}
+		});
+	}, FirControl, {
 		_forcedSubmitForm: function() {
 			this._touristForm.submit();
 		},

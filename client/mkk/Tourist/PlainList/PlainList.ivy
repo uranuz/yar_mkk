@@ -14,11 +14,11 @@ def TouristPlainList {=
 		{=if mode == 'add' {=
 				set
 					itemTextTag: 'a'
-					itemIcon: 'icon-addItem'
+					itemIcon: 'g-icon-small g-icon-editItem'
 			} elif mode == 'remove' {=
 				set
 					itemTextTag: 'a'
-					itemIcon: 'icon-removeItem'
+					itemIcon: 'g-icon-small g-icon-removeItem'
 			}
 		}
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">

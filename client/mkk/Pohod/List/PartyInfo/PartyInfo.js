@@ -1,14 +1,12 @@
 define('mkk/Pohod/List/PartyInfo/PartyInfo', [
 	'fir/controls/FirControl',
-	'mkk/Helpers/DialogMixin',
 	'mkk/Tourist/PlainList/PlainList'
 ], function(FirControl, DialogMixin) {
 return FirClass(
 	function PartyInfo(opts) {
 		this.superproto.constructor.call(this, opts);
 		this._num = null;
-		this.setDialogOptions({modal: true})
-	}, FirControl, [DialogMixin], {
+	}, FirControl, {
 		_getRequestURI: function() {
 			return '/dyn/pohod/partyInfo';
 		},

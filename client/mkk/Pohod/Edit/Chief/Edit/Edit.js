@@ -5,24 +5,24 @@ define('mkk/Pohod/Edit/Chief/Edit/Edit', [
 return FirClass(
 	function ChiefEdit(opts) {
 		this.superproto.constructor.call(this, opts);
-		var self = this;
+		this._subscr(function() {
+			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
+
+			this._elems("deleteBtn").on("click", this._onDeleteChief.bind(this));
+			this._getContainer().on("dialogclose", this._onDialogClose.bind(this));
+		});
+
+		this._unsubscr(function() {
+			this._searchBlock.unsubscribe('itemSelect');
+			this._elems("deleteBtn").off('click');
+			this._getContainer().off('dialogclose');
+		});
 
 		this._searchBlock = this.getChildByName(this.instanceName() + 'SearchArea');
 		this._controlBar = this._elems('controlBar');
 		this._isAltChief = opts.isAltChief;
 		this._chiefRec = null;
 	}, FirControl, {
-		_onSubscribe: function() {
-			this._searchBlock.subscribe('itemSelect', this._onSelectChief.bind(this));
-
-			this._elems("deleteBtn").on("click", this._onDeleteChief.bind(this));
-			this._container.on("dialogclose", this._onDialogClose.bind(this));
-		},
-		_onUnsubscribe: function() {
-			this._searchBlock.unsubscribe('itemSelect');
-			this._elems("deleteBtn").off('click');
-			this._container.off('dialogclose');
-		},
 		//"Тык" по кнопке выбора руководителя или зама похода
 		_onSelectChief: function(ev, rec) {
 			this._chiefRec = rec;
@@ -52,11 +52,11 @@ return FirClass(
 				dlgTitle = 'Выбор руководителя';
 			}
 			this._searchBlock.activate(this._elems("searchBlock"));
-			this._container.dialog({modal: true, minWidth: 500, title: dlgTitle});
+			this._getContainer().dialog({modal: true, minWidth: 500, title: dlgTitle});
 		},
 
 		closeDialog: function() {
-			this._container.dialog('close');
+			this._getContainer().dialog('close');
 		},
 
 		_onDialogClose: function() {

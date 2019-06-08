@@ -1,7 +1,7 @@
 expr
 {=
 from fir.controls.utils import cls, hasRight, firScopeOptsEnc;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 from mkk.Helpers import RusDateFormat;
 from mkk.Helpers.EntityProperty import EntityProperty;
 var
@@ -59,7 +59,7 @@ def Experience {=
 			}
 		</div>
 		<div class="{=cls 'pagination'}">
-			{=Pagination
+			{=Paging
 				instanceName: instanceName ~ 'Paging'
 				nav: nav
 			}

@@ -5,11 +5,15 @@ def ObjectRightList {=
 		moduleName: 'mkk/Right/ObjectRightList/ObjectRightList'
 		instanceName: 'objectRightList'
 		cssBaseClass: 'mkk-ObjectRightList'
-		objectRightList: null;
+		objectRightList: null
+		objectNum: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Права доступа к объекту</h2>
+		<a href="/dyn/right/edit?objectNum={{objectNum}}"
+			class="{=cls 'addRight'} btn btn-primary"
+			>Добавить права</a>
 		{=repeat right in objectRightList {*
 			<div class="{=cls 'rightItem'}">
 				<div>Тип доступа: {{right.accessKind}}</div>

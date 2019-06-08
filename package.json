@@ -18,7 +18,7 @@
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^6.3.4",
-    "bootstrap": "^4.1.1",
+    "bootstrap": "^4.3",
     "css-loader": "^0.28.11",
     "csso": "^3.5.1",
     "expand-tilde": "^2.0.2",

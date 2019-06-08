@@ -9,28 +9,21 @@ define('mkk/Tourist/PlainList/PlainList', [
 	];
 return FirClass(
 	function TouristPlainList(opts) {
-		this.superproto.constructor.call(this, opts);
+		this.superctor(TouristPlainList, opts);
 		this._filter = opts.filter;
 		this._mode = opts.mode;
-		this._updateControlState(opts);
-	}, FirControl, [NavigationMixin], {
-		// В этой функции мы забираем опции пришедшие при первой загрузке или перезагрузке компонента,
-		// которые должны быть обновлены, если это требуется
-		_updateControlState: function(opts) {
+		this._subscr(function() {
+			this._elems('block').on('click', '.e-touristItem', this._onItemActivated.bind(this));
+		});
+		this._unsubscr(function() {
+			this._elems('block').off('click');
+		});
+		this.subscribe('onAfterLoad', function() {
 			this._touristList = opts.touristList;
 			this._nav = opts.nav;
-		},
-		// Здесь выполняем подписки на события вёрстки этого компонента, либо события дочерних компонентов
-		// Должно вызываться при загрузке и после перезагрузки компонента
-		_onSubscribe: function() {
-			this._elems('block').on('click', '.e-touristItem', this._onItemActivated.bind(this));
-		},
-		// Здесь отписываемся от событий вёрстки этого компонента, либо событий дочерних компонентов
-		// Должно вызываться перед перезагрузкой компонента, либо перед уничтожением компонента,
-		// чтобы избежать утечек памяти, и т.п. явлений
-		_onUnsubscribe: function() {
-			this._elems('block').off('click');
-		},
+			this._notify('onTouristListLoaded', this._touristList, this._nav);
+		});
+	}, FirControl, [NavigationMixin], {
 		_getRequestURI: function() {
 			return '/dyn/tourist/plainList';
 		},
@@ -80,10 +73,6 @@ return FirClass(
 				params.mode = this._mode;
 			}
 			return params;
-		},
-		_onAfterLoad: function() {
-			this.superproto._onAfterLoad.apply(this, arguments);
-			this._notify('onTouristListLoaded', this._touristList, this._nav);
 		},
 		_onItemActivated: function(ev) {
 			var

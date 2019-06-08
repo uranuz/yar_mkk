@@ -2,7 +2,7 @@ expr {=
 from fir.controls.CheckBoxList import CheckBoxList;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.utils import cls, firScopeOptsEnc;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 def PohodListNavigation {=
 	def.kv
 		moduleName: "mkk/Pohod/List/Navigation/Navigation"
@@ -117,7 +117,7 @@ def PohodListNavigation {=
 			</div>
 			<div class="{=cls 'bottomRow'} row">
 				<div class="{=cls 'pagination'} col-auto">
-				{=Pagination
+				{=Paging
 					instanceName: instanceName ~ 'Paging'
 					pageSizeFormField: 'pageSize'
 					nav: nav

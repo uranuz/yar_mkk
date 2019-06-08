@@ -1,30 +1,22 @@
 define('mkk/Document/Edit/Edit', [
-	'fir/controls/FirControl',
-	'mkk/Helpers/DialogMixin'
-], function (FirControl, DialogMixin) {
+	'fir/controls/FirControl'
+], function (FirControl) {
 return FirClass(
 	function DocumentEdit(opts) {
 		this.superproto.constructor.call(this, opts);
-		this.setDialogOptions({
-			modal: true,
-			minWidth: 500,
-			width: 850,
-			close: this._onDialogClose.bind(this)
-		});
-		this._updateControlState(opts);
-	}, FirControl, [DialogMixin], {
-		_onSubscribe: function() {
+		this._subscr(function(ev) {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
 			this._elems('continueBtn').on('click', this._onDialogClose.bind(this));
-		},
-		_onUnsubscribe: function() {
+		});
+		this._unsubscr(function(ev) {
 			this._saveBtn.off('click');
-		},
-		_updateControlState: function(opts) {
+		});
+		this.subscribe('onAfterLoad', function(ev, opts) {
 			this._docForm = this._elems('docForm');
 			this._saveBtn = this._elems('saveBtn');
 			this._isResultStep = opts.__scopeName__ === 'Results';
-		},
+		});
+	}, FirControl, {
 		_getHTTPMethod: function(areaName) {
 			return (areaName === 'Results'? 'post': 'get');
 		},

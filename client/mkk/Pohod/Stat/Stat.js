@@ -1,33 +1,30 @@
 define('mkk/Pohod/Stat/Stat', [
 	// Подключение зависимостей: библиотек, стилей и т.п.
 	'fir/controls/FirControl',
-	/*'mkk/Stat/flot/jquery.js',
-	'mkk/Stat/flot/jquery.flot',
-	'mkk/Stat/flot/jquery.flot.time',*/
 	'css!mkk/Pohod/Stat/Stat'
 ],
 function (FirControl, Flot, FlotTime) {
 return FirClass(
 	function Stat(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._elems('byYearBtn').on('click', this.reloadPage);
-		this._elems('byComplexityBtn').on('click', this.reloadPage);
-		this._elems('csvBtn').on('click', this.reloadPage);
+		
 		this._opts = opts;
 		this._tooltipWindow = this._elems('plotTooltip');
 		this.doFlot();
-	}, FirControl, {
-		_onSubscribe: function() {
-			var self = this;
+		this._subscr(function() {
+			this._elems('byYearBtn').on('click', this.reloadPage);
+			this._elems('byComplexityBtn').on('click', this.reloadPage);
+			this._elems('csvBtn').on('click', this.reloadPage);
 			this._elems('plot').on('plothover', this._onPlot_over.bind(this));
 			// Сохраняем обработчик привязанный к классу, чтобы корректно отписаться от события
 			this._resizeBeginHandler = this._onWindow_ResizeBegin.bind(this);
 			$(window).on('resize', this._resizeBeginHandler);
-		},
-		_onUnsubscribe: function() {
+		});
+		this._unsubscr(function() {
 			this._elems('plot').off();
 			$(window).off('resize', this._resizeBeginHandler);
-		},
+		});
+	}, FirControl, {
 		getName: function() {
 			return this._name;
 		},

@@ -5,7 +5,7 @@ define('mkk/Pohod/Edit/Edit', [
 	'fir/datctrl/Record',
 	'fir/datctrl/RecordSet',
 	'mkk/helpers',
-	'mkk/Pohod/Edit/DeleteArea/DeleteArea',
+	'mkk/Helpers/DeleteConfirm/DeleteConfirm',
 	'mkk/Pohod/Edit/Party/Party',
 	'mkk/Pohod/Edit/Chief/Edit/Edit',
 	'mkk/Pohod/Edit/Chief/AddToParty/AddToParty',
@@ -34,16 +34,16 @@ return FirClass(
 		this._partyEditBlock = this.getChildByName('partyEdit');
 		this._beginDatePicker = this.getChildByName('beginDateField');
 		this._finishDatePicker = this.getChildByName('finishDateField');
-		this._pohodDeleteArea = this.getChildByName('pohodDeleteArea');
+		this._deleteConfirm = this.getChildByName('deleteConfirm');
 		this._partyList = this.getChildByName('partyList');
 		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
 		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
 
 		this._elems("deleteDialogBtn").on("click", function() {
-			self._pohodDeleteArea.showDialog();
+			self._deleteConfirm.showDialog();
 		});
 
-		this._pohodDeleteArea.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
+		this._deleteConfirm.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
 
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
 		this._elems("partyEditBtn").on("click", function() {

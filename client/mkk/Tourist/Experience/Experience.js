@@ -1,13 +1,12 @@
 define('mkk/Tourist/Experience/Experience', [
 	'fir/controls/FirControl',
 	'fir/controls/Mixins/Navigation',
-	'fir/controls/Pagination/Pagination',
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Tourist/Experience/Experience'
 ], function (FirControl, NavigationMixin) {
 return FirClass(
 	function TouristExperience(opts) {
-		this.superproto.constructor.call(this, opts);
+		this.superctor(TouristExperience, opts);
 		this._tourist = opts.tourist;
 		this._navigatedArea = 'tableContentBody';
 	}, FirControl, [NavigationMixin], {

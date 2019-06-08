@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 from mkk.Tourist.PlainList import TouristPlainList;
 def LabeledInput {=
 	def.kv caption field placeholder;
@@ -86,8 +86,8 @@ def TouristSearchArea {=
 			<h5>Найденные туристы</h5>
 			<div class="{=cls 'touristsFoundSummary'}"></div>
 			<div class="{=cls 'pageNavigationBar'}">
-				{=Pagination
-					instanceName: instanceName ~ 'Pagination'
+				{=Paging
+					instanceName: instanceName ~ 'Paging'
 				}
 			</div>
 			<div class="{=cls 'foundTourists'}">

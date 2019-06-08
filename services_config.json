@@ -186,15 +186,36 @@
 					"ivyModule": "mkk.User.Settings",
 					"ivyMethod": "UserSettings"
 				}, {
+					"pageURI": "/dyn/right/edit",
+					"apiURI": "/api/right/read",
+					"ivyModule": "mkk.Right.Edit",
+					"ivyMethod": "RightEdit"
+				}, {
+					"pageURI": "/dyn/right/rule/edit",
+					"apiURI": "/api/right/rule/read",
+					"ivyModule": "mkk.Right.RuleEdit",
+					"ivyMethod": "RightRuleEdit"
+				}, {
+					"pageURI": "/dyn/right/rule/list",
+					"apiURI": "/api/right/rule/list",
+					"ivyModule": "mkk.Right.RuleList",
+					"ivyMethod": "RightRuleList"
+				}, {
 					"pageURI": "/dyn/right/object/list",
 					"apiURI": "/api/right/object/list",
 					"ivyModule": "mkk.Right.ObjectList",
 					"ivyMethod": "ObjectList"
 				}, {
+					"pageURI": "/dyn/right/object/edit",
+					"apiURI": "/api/right/object/readWithRights",
+					"ivyModule": "mkk.Right.ObjectEdit",
+					"ivyMethod": "RightObjectEdit"
+				}, {
 					"pageURI": "/dyn/right/object/right/list",
 					"apiURI": "/api/right/object/right/list",
 					"ivyModule": "mkk.Right.ObjectRightList",
-					"ivyMethod": "ObjectRightList"
+					"ivyMethod": "ObjectRightList",
+					"ivyParams": ["objectNum"]
 				}, {
 					"pageURI": "/dyn/tourist/history",
 					"apiURI": "/history/api/tourist/history",
@@ -211,7 +232,7 @@
 		"yarMKKHistory": {
 			"URI": "http://localhost",
 			"virtualPaths": {
-				"default": "history/jsonrpc",
+				"default": "history/jsonrpc/",
 				"siteRoot": "/",
 				"siteJSON_RPC": "history/jsonrpc/",
 				"siteWebFormAPI": "history/api/"

@@ -12,33 +12,33 @@ return FirClass(
 		this.superproto.constructor.call(this, opts);
 		this._selectedTouristsCtrl = this.getChildByName('selectedTourists');
 		this._searchBlock = this.getChildByName('touristSearchArea');
+		this._subscr(function() {
+			this._elems("acceptBtn").on("click", this._acceptBtn_click.bind(this));
+			this._getContainer().on('dialogclose', this.onDialog_close.bind(this));
 
-		this._updateControlState(opts);
-	}, FirControl, {
-		_updateControlState: function(opts) {
+			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
+			// После загрузки списка обновляем состояние отображения
+			this._selectedTouristsCtrl.subscribe("onTouristListLoaded", this._onDialog_resize.bind(this));			
+			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
+		});
+
+		this._unsubscr(function() {
+			this._elems("acceptBtn").off();
+			this._elems("selectedTourists").off();
+			this._getContainer().off('dialogclose');
+			this._searchBlock.unsubscribe('itemSelect');
+		});
+
+		this.subscribe('onAfterLoad', function(ev, opts) {
 			this._panelsArea = this._elems("panelsArea");
 			this._searchPanel = this._elems("searchPanel");
 			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
 			this._partyList = opts.partyList; //RecordSet с выбранными в поиске туристами
-		},
-		_onSubscribe: function() {
-			var self = this;
-			this._elems("acceptBtn").on("click", function() {
-				self._notify('saveData', self._partyList);
-				self.closeDialog();
-			});
-
-			this._selectedTouristsCtrl.subscribe("itemActivated", this._onTouristDeselect.bind(this));
-			// После загрузки списка обновляем состояние отображения
-			this._selectedTouristsCtrl.subscribe("onTouristListLoaded", this._onDialog_resize.bind(this));
-			this._container.on('dialogclose', this.onDialog_close.bind(this));
-			this._searchBlock.subscribe('itemSelect', this._onSelectTourist.bind(this));
-		},
-		_onUnsubscribe: function() {
-			this._elems("acceptBtn").off();
-			this._elems("selectedTourists").off();
-			this._container.off('dialogclose');
-			this._searchBlock.unsubscribe('itemSelect');
+		});
+	}, FirControl, {
+		_acceptBtn_click: function() {
+			this._notify('saveData', self._partyList);
+			this.closeDialog();
 		},
 
 		openDialog: function(rs) {
@@ -46,7 +46,7 @@ return FirClass(
 			this._partyList = rs;
 			this._reloadPartyList();
 			this._searchBlock.activate(this._elems("searchBlock"));
-			this._container.dialog({
+			this._getContainer().dialog({
 				modal: true,
 				minWidth: 500,
 				width: 1000,
@@ -58,7 +58,7 @@ return FirClass(
 
 		_onDialog_resize: function() {
 			if( this._partyList && this._partyList.getLength() ) {
-				if( this._container.innerWidth() < 999 ) {
+				if( this._getContainer().innerWidth() < 999 ) {
 					this._panelsArea.css("display", "block");
 					this._searchPanel.css("display", "block");
 					this._searchPanel.css("width", "100%");
@@ -82,7 +82,7 @@ return FirClass(
 		},
 		
 		closeDialog: function() {
-			this._container.dialog('close');
+			this._getContainer().dialog('close');
 		},
 		
 		onDialog_close: function() {

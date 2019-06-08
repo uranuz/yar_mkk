@@ -2,7 +2,7 @@ expr {=
 from fir.controls.utils import cls, enumFormatWithNull, hasRight;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
-from mkk.Pohod.Edit.DeleteArea import DeleteArea;
+from mkk.Helpers.DeleteConfirm import DeleteConfirm;
 from mkk.Pohod.Edit.Party import PartyEdit;
 from mkk.Pohod.Edit.Chief.Edit import ChiefEdit;
 from mkk.Pohod.Edit.Chief.AddToParty import ChiefAddToParty;
@@ -330,7 +330,7 @@ def PohodEdit {=
 		<div style="clear: both"></div>
 		</form>
 
-		{=DeleteArea deleteWhat: 'похода'}
+		{=DeleteConfirm deleteWhat: 'похода'}
 		{=PartyEdit
 			partyList: partyList
 			partyNav: partyNav

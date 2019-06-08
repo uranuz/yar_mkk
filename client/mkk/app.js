@@ -49,7 +49,7 @@ define('mkk/app', [
 			window.userRights,
 			window.userRightData.vpaths));
 	LoaderManager.add(new IvyServerRender());
-	ControlManager.launchMarkup($('body'));
+	ControlManager.reviveMarkup($('body'));
 });
 define('mkk/init', ['fir/common/globals'], function() {
 	require(['mkk/app'], function() {});

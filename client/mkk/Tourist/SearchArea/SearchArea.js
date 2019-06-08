@@ -1,11 +1,10 @@
 define('mkk/Tourist/SearchArea/SearchArea', [
 	'fir/controls/FirControl',
-	'fir/controls/Pagination/Pagination',
+	'fir/common/helpers',
 	'mkk/Tourist/PlainList/PlainList',
 	'css!mkk/Tourist/SearchArea/SearchArea'
-], function(FirControl) {
+], function(FirControl, helpers) {
 var
-	ENTER_KEY_CODE = 13,
 	searchOnEnterFields = [
 		'familyFilter',
 		'nameFilter',
@@ -24,47 +23,35 @@ return FirClass(
 		this._resultsPanel = this._elems('searchResultsPanel');
 		this._addrFilterContent = this._elems('addrFilterContent');
 		this._addrFilterArrow = this._elems('addrFilterArrow');
-		this._pagination = this.findInstanceByName(this.instanceName() + 'Pagination');
+		this._pagination = this.findInstanceByName(this.instanceName() + 'Paging');
 		this._touristList = this.findInstanceByName(this.instanceName() + 'List');
 
 		this._pagination.subscribe('onSetCurrentPage', this._onSearchTourists.bind(this));
 		this._touristList.subscribe('onTouristListLoaded', this._onTouristLoaded.bind(this));
-		this._touristList.subscribe('itemActivated', function(ev, rec) {
-			self._notify('itemSelect', rec);
-		});
+		this._touristList.subscribe('itemActivated', this._onTourist_itemActivate.bind(this));
 		this.setAddrFiltersCollapsed(opts.addrFiltersCollapsed);
-	}, FirControl, {
-		_onSubscribe: function() {
-			this.superproto._onSubscribe.apply(this, arguments);
-			var
-				self = this,
-				bindedHandler = this._onFilterInput_KeyUp.bind(this);
+		this._subscr(function() {
 			searchOnEnterFields.forEach(function(fieldName) {
-				self._elems(fieldName).on('keyup', bindedHandler);
-			});
+				helpers.doOnEnter(this._elems(fieldName), this._onSearch_start.bind(this));
+			}.bind(this));
 			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
 			this._elems('addrFilterToggleBtn').on('click', this.setAddrFiltersCollapsed.bind(this, null));
-		},
-
-		_onUnsubscribe: function() {
-			this.superproto._onUnsubscribe.apply(this, arguments);
-			this._elems('addrFilterToggleBtn').off('click');
-			var self = this;
+		});
+		this._unsubscr(function() {
 			searchOnEnterFields.forEach(function(fieldName) {
-				self._elems(fieldName).off('keyup');
-			});
+				this._elems(fieldName).off('keyup');
+			}.bind(this));
 			this._elems('searchBtn').off('click');
+			this._elems('addrFilterToggleBtn').off('click');
+		});
+	}, FirControl, {
+		_onTourist_itemActivate: function(ev, rec) {
+			this._notify('itemSelect', rec);
 		},
 
 		setAddrFiltersCollapsed: function(val) {
 			this._addrFilterContent.toggleClass('is-collapsed', val);
 			this._addrFilterArrow.toggleClass('is-collapsed', val);
-		},
-
-		_onFilterInput_KeyUp: function(ev) {
-			if( ev.keyCode === ENTER_KEY_CODE ) {
-				this._onSearch_start(); // Запускаем поиск при нажатии на кнопку Enter на поле ввода
-			}
 		},
 
 		/** Тык по кнопке поиска туристов */
@@ -99,7 +86,7 @@ return FirClass(
 		},
 
 		activate: function(place) {
-			this._container.detach().appendTo(place).show();
+			this._getContainer().detach().appendTo(place).show();
 			if( this.recordSet && this.recordSet.getLength() )
 				this._resultsPanel.show();
 			else
@@ -107,7 +94,7 @@ return FirClass(
 		},
 
 		deactivate: function(place) {
-			this._container.detach().appendTo('body').hide();
+			this._getContainer().detach().appendTo('body').hide();
 		}
 	});
 });

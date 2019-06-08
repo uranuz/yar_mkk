@@ -14,7 +14,7 @@ return FirClass(
 	}, FirControl, {
 		open: function(touristsCount) {
 			this._touristsCountField.text( (touristsCount || '[не задано]') + ' человек');
-			this._container.dialog({
+			this._getContainer().dialog({
 				modal: true,
 				width: 400,
 				close: this._onDialog_close.bind(this)
@@ -24,7 +24,7 @@ return FirClass(
 			this._notify('ok');
 		},
 		_onCancelBtn_click: function() {
-			this._container.dialog('close');
+			this._getContainer().dialog('close');
 		},
 		_onDialog_close: function() {
 			this._notify('cancel');

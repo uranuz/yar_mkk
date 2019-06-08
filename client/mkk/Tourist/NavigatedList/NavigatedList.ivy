@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 def TouristNavigatedList {=
 	def.kv
 		moduleName: 'mkk/Tourist/NavigatedList/NavigatedList'
@@ -18,7 +18,7 @@ def TouristNavigatedList {=
 				fields: ['touristList', 'nav', 'mode']
 			}"/>
 		<div class="{=cls 'navBar'}">
-			{=Pagination
+			{=Paging
 				instanceName: instanceName ~ 'Paging'
 				nav: nav
 			}

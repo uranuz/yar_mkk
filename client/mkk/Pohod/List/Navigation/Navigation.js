@@ -1,38 +1,25 @@
 define('mkk/Pohod/List/Navigation/Navigation', [
 	'fir/controls/FirControl',
-	'fir/controls/Pagination/Pagination',
+	'fir/common/helpers',
 	'css!mkk/Pohod/List/Navigation/Navigation'
-], function(FirControl) {
-var ENTER_KEY_CODE = 13;
+], function(FirControl, helpers) {
 return FirClass(
 	function PohodListNavigation(opts) {
 		this.superproto.constructor.call(this, opts);
 		this._enumFields = opts.enumFields;
-		this._elems('searchBtn')
-	}, FirControl, {
-		/** Стандартное место для подписки на события */
-		_onSubscribe: function() {
-			this.superproto._onSubscribe.apply(this, arguments);
-			var self = this
+		this._subscr(function() {
 			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
-			this._elems('pohodRegionField').on('keyup', function(ev) {
-				if( ev.keyCode === ENTER_KEY_CODE ) {
-					self._onSearch_start();
-				}
-			});
+			helpers.doOnEnter(this._elems('pohodRegionField'), this._onSearch_start.bind(this));
 			if( this._elems('printModeBtn').length ) {
 				this._elems('printModeBtn').on('click', this._onPrintBtnClick.bind(this));
 			}
-		},
-
-		/** Стандартное место для отписки от событий */
-		_onUnsubscribe: function() {
-			this.superproto._onUnsubscribe.apply(this, arguments);
+		});
+		this._unsubscr(function() {
 			this._elems('printModeBtn').off();
 			this._elems('searchBtn').off();
 			this._elems('pohodRegionField').off('keyup');
-		},
-
+		});
+	}, FirControl, {
 		/** Нажатие на кнопку печати */
 		_onPrintBtnClick: function () {
 			this._elems('isForPrintField').val("on");

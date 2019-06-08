@@ -16,13 +16,13 @@ return FirClass(
 
 		this._elems('initPohodHistory').on('click', this.initPohodHistory.bind(this));
 		this._elems('initTouristHistory').on('click', this.initTouristHistory.bind(this));
-	}, FirControl, {
-		_onSubscribe: function() {
+		this._subscr(function() {
 			this._saveBtn.on('click', this._onSaveBtn_click.bind(this));
-		},
-		_onUnsubscribe: function() {
+		});
+		this._unsubscr(function() {
 			this._saveBtn.off('click');
-		},
+		});
+	}, FirControl, {
 		_onSaveBtn_click: function(ev) {
 			var
 				oldPassword = this._oldPasswordField.val(),

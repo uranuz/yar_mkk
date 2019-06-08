@@ -10,5 +10,17 @@ def CheckNewUser {=
 	def.body {=
 		return {=has identity.data 'touristNum'} and {=empty identity.data.touristNum};
 	}
-}
+};
+def EditOwnPohod {=
+	def.kv identity data;
+	def.body {=
+		return
+			not{=empty identity.data.touristNum}
+			and(
+				identity.data.touristNum == data.chiefNum
+				or
+				identity.data.touristNum == data.altChiefNum
+			)
+	}
+};
 }

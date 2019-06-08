@@ -138,7 +138,7 @@ def PohodListTable {=
 					{=if {=hasRight obj: 'pohod.item' kind: 'edit'} and not isForPrint {*
 						<td>
 							<a href="{{vpaths.siteDynamic}}pohod/edit?num={{rec.num}}"
-								class="mkk-Document e-itemEditBtn"
+								class="g-icon-small g-icon-editItem"
 								title="Изменить"></a>
 						</td>
 					*}}

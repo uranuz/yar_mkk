@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 from mkk.Document.Edit import DocumentEdit;
 
 def DocumentList {=
@@ -16,7 +16,7 @@ def DocumentList {=
 		<h2>Статьи и документы</h2>
 		<div class="row">
 			<div class="col-auto">
-				{=Pagination
+				{=Paging
 					formField: 'offset'
 					nav: nav
 				}
@@ -41,7 +41,7 @@ def DocumentList {=
 				</div>
 				<div class="col-md-auto">
 					{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
-					<div class="{=cls 'linkEditBtn'} col mkk-Document e-itemEditBtn btn btn-secondary"
+					<div class="{=cls 'linkEditBtn'} col g-icon-small g-icon-editItem btn btn-secondary"
 						title="Изменить"
 						data-document-num="{{it.num}}"></div>
 					*}}

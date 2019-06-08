@@ -1,11 +1,10 @@
 define('mkk/Tourist/List/List', [
 	'fir/controls/FirControl',
 	'fir/controls/Mixins/Navigation',
-	'fir/controls/Pagination/Pagination',
+	'fir/common/helpers',
 	'css!mkk/Tourist/List/List'
-], function (FirControl, NavigationMixin) {
+], function (FirControl, NavigationMixin, helpers) {
 var
-	ENTER_KEY_CODE = 13,
 	searchOnEnterFields = [
 		'familyNameField',
 		'givenNameField',
@@ -13,35 +12,21 @@ var
 	];
 return FirClass(
 	function TouristList(opts) {
-		this.superproto.constructor.call(this, opts);
+		this.superctor(TouristList, opts);
 		this._navigatedArea = 'tableContentBody';
-	}, FirControl, [NavigationMixin], {
-		_onSubscribe: function() {
-			NavigationMixin._onSubscribe.apply(this, arguments);
+		this._subscr(function() {
 			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
-
-			var
-				self = this,
-				bindedHandler = this._onFilterInput_KeyUp.bind(this);
 			searchOnEnterFields.forEach(function(fieldName) {
-				self._elems(fieldName).on('keyup', bindedHandler);
+				helpers.doOnEnter(this._elems(fieldName), this._onSearch_start.bind(this));
 			});
-		},
-
-		_onUnsubscribe: function() {
-			NavigationMixin._onUnsubscribe.apply(this, arguments);
+		});
+		this._unsubscr(function() {
 			this._elems('searchBtn').off();
-			var self = this;
 			searchOnEnterFields.forEach(function(fieldName) {
-				self._elems(fieldName).off('keyup');
-			});
-		},
-
-		_onFilterInput_KeyUp: function(ev) {
-			if( ev.keyCode === ENTER_KEY_CODE ) {
-				this._onSearch_start(); // Запускаем поиск при нажатии на кнопку Enter на поле ввода
-			}
-		},
+				this._elems(fieldName).off('keyup');
+			}.bind(this));
+		});
+	}, FirControl, [NavigationMixin], {
 
 		_onSearch_start: function() {
 			this._onSetCurrentPage();

@@ -47,13 +47,31 @@
 	&.e-listLink {
 		margin-left: 8px;
 	}
-	&.e-itemEditBtn {
-		background-image: url('/pub/mkk/img/icons/pencil_4076.png');
-		background-repeat: no-repeat;
-		background-size: 24px 24px;
-		width: 24px;
-		height: 24px;
-		display: inline-block;
-		opacity: 0.8;
-	}
+}
+
+// Классы иконок для всяких кнопок
+
+// Базовый класс для блока с иконкой
+.g-icon-small {
+	background-repeat: no-repeat;
+	background-size: 24px 24px;
+	width: 24px;
+	height: 24px;
+	display: inline-block;
+	opacity: 0.8;
+}
+
+// Добавление элемента
+.g-icon-addItem {
+	background-image: url("/pub/mkk/img/icons/add_icon.png");
+}
+
+// Редактирование элемента
+.g-icon-editItem {
+	background-image: url('/pub/mkk/img/icons/pencil_4076.png');
+}
+
+// Удаление элемента
+.g-icon-removeItem {
+	background-image: url("/pub/mkk/img/icons/remove_icon.png");
 }

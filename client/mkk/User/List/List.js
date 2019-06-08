@@ -7,10 +7,13 @@ return FirClass(
 		this.superproto.constructor.call(this, opts);
 		this._listBlock = this._elems('list');
 		this._confirmDlg = this._elems('confirmDlg');
-	}, FirControl, {
-		_onSubscribe: function() {
+		this._subscr(function() {
 			this._listBlock.on('click', this._onListBlock_click.bind(this));
-		},
+		});
+		this._unsubscr(function() {
+			this._listBlock.off('click');
+		});
+	}, FirControl, {
 		_onListBlock_click: function(ev) {
 			if ( $(ev.target).is(this._elemClass('confirmRegBtn')) ) {
 				var

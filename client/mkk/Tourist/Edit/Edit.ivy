@@ -3,7 +3,7 @@ from fir.controls.utils import cls, enumFormatWithNull, firScopeOptsEnc, hasRigh
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
-from mkk.Pohod.Edit.DeleteArea import DeleteArea;
+from mkk.Helpers.DeleteConfirm import DeleteConfirm;
 
 def LabeledInput {=
 	def.kv caption field appendix: null forceNoCheck: null;
@@ -34,6 +34,7 @@ def ShowCheckBox {=
 				{=if {=at tourist field} 'checked'}
 				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
 			<label class="form-check-label" for="{{field ~ 'Field'}}">{{caption}}</label>
+			<input type="hidden" name="{{field}}" value=""/>
 		</div>
 	*};
 };
@@ -71,7 +72,7 @@ def TouristEdit {=
 		isEditDialog: true;
 	def.body {*
 		{=if isEditDialog {=
-			if userIdentity.isAuthenticated {=
+			if not userIdentity.isAuthenticated {=
 				return {*
 					<h4>
 						Для редактирования данных туриста требуется
@@ -79,7 +80,7 @@ def TouristEdit {=
 						на сайт
 					</h4>
 				*}
-			} elif {=hasRight kind: 'edit'} {=
+			} elif not {=hasRight kind: 'edit'} {=
 				return {*
 					<h4>У вас недостаточно прав для редактирования данных туриста</h4>
 				*}
@@ -176,8 +177,8 @@ def TouristEdit {=
 		{=if isEditDialog {*</form>*} }
 
 	{=if isEditDialog {*
-		{=DeleteArea
-			instanceName: 'touristDeleteArea'
+		{=DeleteConfirm
+			instanceName: 'touristDeleteConfirm'
 			deleteWhat: 'туриста'
 		}
 		<div class="{=cls 'similarsDlg'}">

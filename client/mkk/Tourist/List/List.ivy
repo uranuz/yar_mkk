@@ -1,6 +1,6 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
-from fir.controls.Pagination import Pagination;
+from fir.controls.Paging import Paging;
 var
 	instanceName: 'touristList'
 	cssBaseClass: 'mkk-TouristList'
@@ -17,8 +17,8 @@ def TouristList {=
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Туристы</h2>
-		<div class="{=cls 'filter'} row align-items-end">
-			<label class="col-auto form-group">
+		<div class="{=cls 'filter'} row form-group align-items-end">
+			<label class="col-auto">
 				<span class="mr-2">Фамилия И. О.</span>
 				<div class="form-inline flex-nowrap d-sm-inline-flex">
 					<input type="text"
@@ -40,22 +40,22 @@ def TouristList {=
 						placeholder="П"/>
 				</div>
 			</label>
-			<div class="col form-group">
+			<div class="col">
 				<button type="button"
 					class="{=cls 'searchBtn'} btn btn-block btn-primary"
 					>Найти</button>
 			</div>
 		</div>
-		<div class="{=cls 'tableBar'} row">
-			<div class="{=cls 'pagination'} col-auto form-group">
-				{=Pagination
+		<div class="{=cls 'tableBar'} row form-group">
+			<div class="{=cls 'pagination'} col-auto">
+				{=Paging
 					instanceName: instanceName ~ 'Paging'
 					pageSizeFormField: 'pageSize'
 					nav: nav
 				}
 			</div>
 			{=if {=hasRight obj: 'tourist.item' kind: 'add'} {*
-			<div class="col form-group text-right">
+			<div class="col text-right">
 				<a href="{{vpaths.siteDynamic}}tourist/edit"
 					class="btn btn-primary"
 					>Добавить туриста</a>
@@ -120,7 +120,7 @@ def TouristListTable {=
 			{=if {=hasRight obj: 'tourist.item' kind: 'edit'} {*
 				<td>
 					<a href="/dyn/tourist/edit?num={{it.num}}"
-						class="mkk-Document e-itemEditBtn"
+						class="g-icon-small g-icon-editItem"
 						title="Изменить"></a>
 				</td>
 			*}}

@@ -8,7 +8,6 @@ return FirClass(
 	//Инициализация блока редактирования похода
 	function PohodRead(opts) {
 		this.superproto.constructor.call(this, opts);
-		var self = this;
 
 		this._partyRS = opts.partyList; // RecordSet с участниками похода
 		this._partyListProp = this.getChildByName('partyListProp');
