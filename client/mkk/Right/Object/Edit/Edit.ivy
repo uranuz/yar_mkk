@@ -1,0 +1,53 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from mkk.Right.List import RightList;
+def RightObjectEdit {=
+	def.kv
+		moduleName: 'mkk/Right/Object/Edit/Edit'
+		instanceName: 'rightObjectEdit'
+		cssBaseClass: 'mkk-RightObjectEdit'
+		rightObj: null
+		rightList: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" value="{{rightObj.num}}"/>
+		<input type="hidden" value="{{rightObj.parentNum}}"/>
+		<div class="form-group row">
+			<label class="col-md-3 col-form-label">Путь к объекту</label>
+			<div class="col-md-8">
+				<input type="text"
+					class="{=cls 'fullNameField'} form-control"
+					value="{{rightObj.folderName}}"
+					disabled/>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-md-3 col-form-label">Название</label>
+			<div class="col-md-8">
+				<input type="text"
+					class="{=cls 'nameField'} form-control"
+					value="{{rightObj.name}}"/>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col-md-3 col-form-label">Описание</label>
+			<div class="col-md-8">
+				<input type="text"
+					class="{=cls 'descriptionField'} form-control"
+					value="{{rightObj.description}}"/>
+			</div>
+		</div>
+		<button type="button"
+			class="{=cls 'saveBtn'} btn btn-primary"
+			>Сохранить</button>
+		<div>
+			{=RightList
+				rightList: rightList
+				objectNum: rightObj.num
+			}
+		</div>
+	</div>
+	*}
+}
+}

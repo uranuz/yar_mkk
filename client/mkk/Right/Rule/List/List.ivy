@@ -1,0 +1,120 @@
+expr {
+from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.Paging import Paging;
+from fir.controls.OpenDialog import OpenDialog;
+var
+	cssBaseClass: "mkk-RightRuleList"
+	instanceName: "rightRuleList"
+	RPCMethod: 'right.rule.list'
+	fieldsToSend: ['ruleList', 'nav', 'isSelect'];
+def RightRuleList {=
+	def.kv
+		moduleName: "mkk/Right/Rule/List/List"
+		cssBaseClass: cssBaseClass
+		instanceName: instanceName
+		RPCMethod: RPCMethod
+		ruleList: null
+		nav: null
+		isSelect: false;
+	def.body {*
+		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
+			<h2>Правила доступа</h2>
+			<div class="form-group row">
+				<label class="col d-flex align-items-center">
+					<span class="mr-2">Найти</span>
+					<input type="text"
+						class="{=cls 'nameField'} form-control"
+						name="name"/>
+				</label>
+				<div class="col-auto">
+					<button type="button"
+						class="{=cls 'searchBtn'} btn btn-primary"
+						>Искать</button>
+				</div>
+			</div>
+			<div class="form-group">
+				{=Paging
+					instanceName: instanceName ~ 'Paging'
+					nav: nav
+				}
+			</div>
+			{=if not isSelect {*
+			<div class="form-group">
+				<button type="button"
+					class="{=cls 'addRuleBtn'} btn btn-primary"
+					>Добавить</button>
+			</div>
+			*} }
+			{=RightRuleListView
+				cssBaseClass: cssBaseClass
+				instanceName: instanceName
+				RPCMethod: RPCMethod
+				ruleList: ruleList
+				nav: nav
+				isSelect: isSelect
+			}
+			{=OpenDialog
+				instanceName: 'rightRuleEditDlg'
+				config: {
+					ivyModule: 'mkk.Right.Rule.Edit',
+					ivyMethod: 'RightRuleEdit'
+				}
+			}
+			{=OpenDialog
+				instanceName: 'rightRuleDeleteDlg'
+				config: {
+					ivyModule: 'mkk.Helpers.DeleteConfirm',
+					ivyMethod: 'DeleteConfirm'
+				}
+			}
+		</div>
+	*}
+};
+def RightRuleListView {=
+	def.kv
+		cssBaseClass: cssBaseClass
+		instanceName: instanceName
+		RPCMethod: RPCMethod
+		ruleList: null
+		nav: null
+		isSelect: false;
+	def.body {*
+		<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
+			<div class="{=cls 'ruleList'}">
+			{=repeat rec in ruleList {*
+				<div class="row">
+					<div class="col">{{rec.name}}</div>
+					{=if isSelect {*
+					<div class="col-auto">
+						<div
+							class="{=cls 'itemActionBtn'} g-icon-small g-icon-addItem"
+							title="Выбрать"
+							data-mkk-action="selectRule"
+							data-record-num="{{rec.num}}"></div>
+					</div>
+					*} else {*
+					<div class="col-auto">
+						<div
+							class="{=cls 'itemActionBtn'} g-icon-small g-icon-removeItem"
+							title="Удалить"
+							data-mkk-action="removeRule"
+							data-record-num="{{rec.num}}"></div>
+					</div>
+					<div class="col-auto">
+						<div
+							class="{=cls 'itemActionBtn'} g-icon-small g-icon-editItem"
+							title="Изменить"
+							data-mkk-action="editRule"
+							data-record-num="{{rec.num}}"></div>
+					</div>
+					*}}
+					
+				</div>
+			*} }
+			</div>
+		</div>
+	*}
+};
+}

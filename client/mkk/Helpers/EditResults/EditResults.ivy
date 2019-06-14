@@ -1,0 +1,68 @@
+expr {=
+from fir.controls.utils import cls;
+def EditResults {=
+	def.kv
+		instanceName
+		cssBaseClass
+		whatObject
+		listLink: null
+		editLink: null
+		errorMsg: null
+		num
+		recordNum;
+	def.body {*
+	<div class="{=cls 'block'}">{%
+		if {=empty num} {=
+			if {=empty errorMsg} {*
+				<h3>Данные о {{whatObject}}е успешно добавлены!</h3>
+			*} else {*
+				<h3>Произошла ошибка при добавлении данных {{whatObject}}а!</h3>
+				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
+			*}
+		} else {=
+			if {=empty errorMsg} {*
+				<h3>Данные о {{whatObject}}е успешно обновлены!</h3>
+			*} else {*
+				<h3>Произошла ошибка при обновлении данных {{whatObject}}а!</h3>
+				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
+			*}
+		};
+		if not{=empty errorMsg} {*
+			<div>Текст ошибки:</div>
+			<div>{{errorMsg}}</div>
+		*};
+		call YouCan {=scope};
+	}
+	</div>
+	*}
+};
+def YouCan {=
+	def.kv
+		whatObject
+		listLink: null
+		editLink: null
+		errorMsg: null
+		num;
+	def.body {*
+	<div>
+		{=if not{=empty editLink} or not{=empty listLink} {*
+		<div>{=if {=empty errorMsg} {*Вы можете*} else {*Однако вы можете*} }:</div>
+		<ul>
+		{=if not{=empty editLink} {%
+			if not{=empty errorMsg} {*
+			<li><a href="/dyn/tourist/edit{=if not{=empty num} {*?num={{num}}*} }">попробовать ещё раз...</a></li>
+			*} elif not{=empty num} {*
+			<li><a href="{{editLink}}?num={{num}}">продолжить редактирование</a> этой же записи</li>
+			*} else {*
+			<li><a href="{{editLink}}">добавить еще...</a></li>
+			*};
+			if not{=empty listLink} {*
+			<li>перейти <a href="{{listLink}}">к списку {{whatObject}}ов</a></li>
+			*}
+		} }
+		</ul>
+		*} }
+	</div>
+	*}
+};
+}

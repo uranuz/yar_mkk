@@ -1,0 +1,47 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.OpenDialog import OpenDialog;
+def RightList {=
+	def.kv
+		moduleName: 'mkk/Right/List/List'
+		instanceName: 'RightList'
+		cssBaseClass: 'mkk-RightList'
+		rightList: null
+		objectNum: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectNum']}"/>
+		<h2>Права доступа к объекту</h2>
+		<button type="button"
+			class="{=cls 'addRight'} btn btn-primary"
+			>Добавить права</button>
+		<div class="{=cls 'rightList'}">
+		{=repeat right in rightList {*
+			<div class="{=cls 'rightItem'}">
+				<div>Тип доступа: {{right.accessKind}}</div>
+				<div>Роль: {{right.roleName}}</div>
+				<div>Правило: {{right.ruleName}}</div>
+				<div>Дочерние объекты: {=if not right.inheritance 'не '} распространяется</div>
+				<div
+					class="{=cls 'itemActionBtn'} g-icon-small g-icon-editItem"
+					title="Изменить"
+					data-mkk-action="editRule"
+					data-record-num="{{right.num}}"></div>
+			</div>
+		*}}
+		</div>
+		{=OpenDialog
+			instanceName: 'rightEditDlg'
+			config: {
+				ivyModule: 'mkk.Right.Edit',
+				ivyMethod: 'RightEdit',
+				dialogOpts: {
+					width: 600,
+					height: 600
+				}
+			}
+		}
+	</div>
+	*}
+};
+}
