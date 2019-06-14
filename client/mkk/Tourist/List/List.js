@@ -27,14 +27,8 @@ return FirClass(
 			}.bind(this));
 		});
 	}, FirControl, [NavigationMixin], {
-
 		_onSearch_start: function() {
 			this._onSetCurrentPage();
-		},
-
-		/** Имя RPC-метода. Если указано, то запрос идет через RPC-протокол */
-		_getRPCMethod: function(areaName) {
-			return 'tourist.list';
 		},
 
 		getFilter: function() {

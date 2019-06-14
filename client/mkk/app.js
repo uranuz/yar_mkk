@@ -10,6 +10,8 @@ define('mkk/app', [
 	"fir/controls/Loader/Manager",
 	"fir/controls/Loader/IvyServerFactory",
 	"fir/controls/Loader/IvyServerRender",
+	'ivy/directive/StandardFactory',
+	'fir/ivy/RemoteCall',
 	"fir/controls/ControlManager",
 	"fir/security/right/IvyRuleFactory",
 	"fir/security/right/GlobalVarSource",
@@ -24,6 +26,8 @@ define('mkk/app', [
 	LoaderManager,
 	IvyServerFactory,
 	IvyServerRender,
+	StandardFactory,
+	RemoteCallInterpreter,
 	ControlManager,
 	IvyRuleFactory,
 	GlobalVarSource,
@@ -31,8 +35,11 @@ define('mkk/app', [
 	UserIdentity,
 	UserRights
 ) {
+	var ivyConfig = new IvyEngineConfig();
+	ivyConfig.directiveFactory = StandardFactory();
+	ivyConfig.directiveFactory.add(new RemoteCallInterpreter());
 	window.ivyEngine = new IvyEngine(
-		new IvyEngineConfig(),
+		ivyConfig,
 		new RemoteModuleLoader('/dyn/server/template'));
 	window.ivyEngine.getByModuleName('mkk.AccessRules');
 

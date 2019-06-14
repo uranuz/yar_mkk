@@ -29,7 +29,7 @@ return FirClass(
 			this._searchBlock.unsubscribe('itemSelect');
 		});
 
-		this.subscribe('onAfterLoad', function(ev, opts) {
+		this.subscribe('onAfterLoad', function(ev, areaName, opts) {
 			this._panelsArea = this._elems("panelsArea");
 			this._searchPanel = this._elems("searchPanel");
 			this._selectedTouristsPanel = this._elems("selectedTouristsPanel");
@@ -90,10 +90,13 @@ return FirClass(
 		},
 
 		_reloadPartyList: function() {
-			this._selectedTouristsCtrl.setFilter({
-				selectedKeys: this._partyList.getKeys()
+			this._selectedTouristsCtrl._reloadControl(null, {
+				queryParams: {
+					filter: {
+						selectedKeys: this._partyList.getKeys()
+					}
+				}
 			});
-			this._selectedTouristsCtrl._reloadControl();
 		},
 		//Обработчик добавления найденной записи о туристе
 		_onSelectTourist: function(ev, rec) {

@@ -1,10 +1,14 @@
 define('mkk/Document/List/List', [
 	'fir/controls/FirControl',
+	'fir/controls/Mixins/Navigation',
 	'css!mkk/Document/List/List'
-], function (FirControl) {
+], function (FirControl, NavigationMixin) {
 return FirClass(
 	function DocumentList(opts) {
-		this.superproto.constructor.call(this, opts);
+		this.superctor(DocumentList, opts);
+		this._navigatedArea = 'linkList'
+		this._documentEditDlg = this.getChildByName('documentEditDlg');
+		this._documentEditDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
 
 		this._subscr(function() {
 			this._elems('addDocBtn').on('click', this._onAddDocBtn_click.bind(this));
@@ -14,25 +18,26 @@ return FirClass(
 			this._elems('addDocBtn').off('click');
 			this._elems('linkList').off('click');
 		});
-		this.subscribe('onAfterLoad', function() {
-			this._documentEdit = this.getChildByName('documentEdit');
-			this._documentEdit.subscribe('documentChanged', this._onDocumentChanged.bind(this));
-		});
-	}, FirControl, {
+	}, FirControl, [NavigationMixin], {
 		_onAddDocBtn_click: function() {
-			this._documentEdit.setNum(null); // Нужно сбрасывать номер
-			this._documentEdit.openDialog();
+			this._documentEditDlg.open({});
 		},
 		_onLinkEditBtn_click: function(ev) {
 			var el = $(ev.target).closest(this._elemClass('linkEditBtn'));
 			if( !el || !el.length ) {
 				return;
 			}
-			this._documentEdit.setNum(el.data('documentNum'));
-			this._documentEdit.openDialog();
+			this._documentEditDlg.open({
+				queryParams: {
+					num: parseInt(el.data('document-num'), 10) || null
+				}
+			});
 		},
-		_onDocumentChanged: function() {
-			location.reload();
+		_getQueryParams: function() {
+			return {
+				filter: {},
+				nav: this.getNavParams()
+			};
 		}
 	});
 });

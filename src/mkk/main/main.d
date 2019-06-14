@@ -14,7 +14,7 @@ import mkk.main.pohod.filters;
 import mkk.main.pohod.edit;
 import mkk.main.pohod.stat;
 
-import mkk.main.right.object_list;
+import mkk.main.right.object.list;
 
 import mkk.main.tourist.read;
 import mkk.main.tourist.experience;

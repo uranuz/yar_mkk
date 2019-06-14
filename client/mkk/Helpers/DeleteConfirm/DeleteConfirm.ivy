@@ -1,0 +1,43 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+var
+	instanceName: 'deleteConfirm'
+	cssBaseClass: 'mkk-DeleteConfirm'
+	deleteWhat: 'объекта';
+def DeleteConfirm {=
+	def.kv
+		moduleName: 'mkk/Helpers/DeleteConfirm/DeleteConfirm'
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		deleteWhat: deleteWhat
+		confirmWord: 'удалить';
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['deleteWhat', 'confirmWord']}"/>
+		<div class="{=cls 'confirmForm'}">
+			<p>Для подтверждения удаления {{deleteWhat}} введите слово "{{confirmWord}}" (без кавычек) и нажмите на кнопку</p>
+
+			<div class="form-inline">
+				<input type="text" class="{=cls 'deleteConfirmField'} form-control"/>
+				<input type="button" class="{=cls 'deleteConfirmBtn'} btn btn-danger" value="OK"/>
+			</div>
+		</div>
+		<div
+			class="{=cls 'Results'}"
+			data-ivy-method="ConfirmFail"></div>
+	</div>
+	*}
+};
+def ConfirmFail {=
+	def.kv
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		deleteWhat: deleteWhat;
+	def.body {*
+	<div class="{=cls 'Results'}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<div>Удаление {{deleteWhat}} не подтверждено!</div>
+	</div>
+	*}
+};
+}

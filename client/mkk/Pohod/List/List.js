@@ -37,14 +37,11 @@ return FirClass(
 			}
 		},
 		_getPaging: function() {
-			return this._navigation.getChildByName(this._navigation.instanceName() + 'Paging')
-		},
-		_getRPCMethod: function() {
-			return 'pohod.list';
+			return this._navigation._getPaging();
 		},
 		_getQueryParams: function() {
 			return {
-				nav: this.getNavParams(),
+				nav: this._getPaging.getNavParams(),
 				filter: this._navigation.getFilter()
 			}
 		}

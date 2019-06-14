@@ -193,27 +193,32 @@
 				}, {
 					"pageURI": "/dyn/right/rule/edit",
 					"apiURI": "/api/right/rule/read",
-					"ivyModule": "mkk.Right.RuleEdit",
+					"ivyModule": "mkk.Right.Rule.Edit",
 					"ivyMethod": "RightRuleEdit"
 				}, {
 					"pageURI": "/dyn/right/rule/list",
 					"apiURI": "/api/right/rule/list",
-					"ivyModule": "mkk.Right.RuleList",
+					"ivyModule": "mkk.Right.Rule.List",
 					"ivyMethod": "RightRuleList"
+				}, {
+					"pageURI": "/dyn/right/role/list",
+					"apiURI": "/api/right/role/list",
+					"ivyModule": "mkk.Right.Role.List",
+					"ivyMethod": "RightRoleList"
 				}, {
 					"pageURI": "/dyn/right/object/list",
 					"apiURI": "/api/right/object/list",
-					"ivyModule": "mkk.Right.ObjectList",
+					"ivyModule": "mkk.Right.Object.List",
 					"ivyMethod": "ObjectList"
 				}, {
 					"pageURI": "/dyn/right/object/edit",
 					"apiURI": "/api/right/object/readWithRights",
-					"ivyModule": "mkk.Right.ObjectEdit",
+					"ivyModule": "mkk.Right.Object.Edit",
 					"ivyMethod": "RightObjectEdit"
 				}, {
-					"pageURI": "/dyn/right/object/right/list",
-					"apiURI": "/api/right/object/right/list",
-					"ivyModule": "mkk.Right.ObjectRightList",
+					"pageURI": "/dyn/right/list",
+					"apiURI": "/api/right/list",
+					"ivyModule": "mkk.Right.List",
 					"ivyMethod": "ObjectRightList",
 					"ivyParams": ["objectNum"]
 				}, {

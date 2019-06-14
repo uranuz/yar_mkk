@@ -23,10 +23,8 @@ return FirClass(
 		this._resultsPanel = this._elems('searchResultsPanel');
 		this._addrFilterContent = this._elems('addrFilterContent');
 		this._addrFilterArrow = this._elems('addrFilterArrow');
-		this._pagination = this.findInstanceByName(this.instanceName() + 'Paging');
 		this._touristList = this.findInstanceByName(this.instanceName() + 'List');
 
-		this._pagination.subscribe('onSetCurrentPage', this._onSearchTourists.bind(this));
 		this._touristList.subscribe('onTouristListLoaded', this._onTouristLoaded.bind(this));
 		this._touristList.subscribe('itemActivated', this._onTourist_itemActivate.bind(this));
 		this.setAddrFiltersCollapsed(opts.addrFiltersCollapsed);
@@ -56,13 +54,15 @@ return FirClass(
 
 		/** Тык по кнопке поиска туристов */
 		_onSearch_start: function() {
-			this._pagination.setCurrentPage(0);
-			//this._onSearchTourists(); //Переход к действию по кнопке Искать
+			this._touristList._reloadControl(null, {
+				queryParams: {
+					filter: this.getFilterParams()
+				}
+			});
 		},
 
-		/** Поиск туристов и отображение результата в диалоге */
-		_onSearchTourists: function() {
-			this._touristList.setFilter({
+		getFilterParams: function() {
+			return {
 				familyName: this._elems("familyFilter").val() || undefined, 
 				givenName: this._elems("nameFilter").val() || undefined,
 				patronymic: this._elems("patronymicFilter").val() || undefined,
@@ -70,31 +70,11 @@ return FirClass(
 				region: this._elems("regionFilter").val() || undefined,
 				city: this._elems("cityFilter").val() || undefined,
 				street: this._elems("streetFilter").val() || undefined
-			});
-			this._touristList.setNavigation({
-				offset: this._pagination.getOffset(),
-				pageSize: this._pagination.getPageSize() || 10
-			});
-			this._touristList._reloadControl();
+			};
 		},
 
 		_onTouristLoaded: function(ev, rs, nav) {
-			var self = this;
-
-			self._resultsPanel.show();
-			self._pagination.setNavigation(nav);
-		},
-
-		activate: function(place) {
-			this._getContainer().detach().appendTo(place).show();
-			if( this.recordSet && this.recordSet.getLength() )
-				this._resultsPanel.show();
-			else
-				this._resultsPanel.hide()
-		},
-
-		deactivate: function(place) {
-			this._getContainer().detach().appendTo('body').hide();
+			this._resultsPanel.show();
 		}
 	});
 });

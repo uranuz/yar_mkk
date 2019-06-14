@@ -13,9 +13,6 @@ return FirClass(
 	function TouristEdit(opts) {
 		this.superproto.constructor.call(this, opts);
 
-		this._isEditDialog = opts.isEditDialog;
-		this._isNewUser = opts.isNewUser;
-
 		this._birthDatePicker = this.getChildByName('birthDateField');
 		this._similarsList = this.getChildByName('similarsList');
 		this._touristForm = this._elems('touristForm');

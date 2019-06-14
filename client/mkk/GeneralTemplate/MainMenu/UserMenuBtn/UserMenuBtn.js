@@ -6,10 +6,8 @@ return FirClass(
 	function UserMenuBtn(opts) {
 		this.superproto.constructor.call(this, opts);
 
-		var popdownBtn = this._elems('popdownBtn');
-
 		this._outsideClickHdlInstance = this.addOutsideClickHandler.bind(this);
-		popdownBtn.on('click', this.onPopdownBtnClick.bind(this));
+		this._elems('popdownBtn').on('click', this.onPopdownBtnClick.bind(this));
 	}, FirControl, {
 		onPopdownBtnClick: function(ev) {
 			var popdownMenu = this._elems('popdownMenu');
@@ -23,8 +21,7 @@ return FirClass(
 		addOutsideClickHandler: function(ev) {
 			var
 				block = this._elems('block'),
-				popdownMenu = this._elems('popdownMenu'),
-				popdownBtn = this._elems('popdownBtn');
+				popdownMenu = this._elems('popdownMenu');
 			if( !$(ev.target).closest(block).length ) {
 				$('html').off('click', this._outsideClickHdlInstance);
 				popdownMenu.hide();

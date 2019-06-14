@@ -1,15 +1,20 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from fir.controls.Paging import Paging;
-from mkk.Document.Edit import DocumentEdit;
+from fir.controls.OpenDialog import OpenDialog;
 
+var
+	instanceName: 'documentList'
+	cssBaseClass: "mkk-DocumentList"
+	RPCMethod: 'document.list';
 def DocumentList {=
 	def.kv
 		moduleName: 'mkk/Document/List/List'
-		instanceName: 'documentList'
-		cssBaseClass: "mkk-DocumentList"
-		nav: null
-		documentList: null;
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		RPCMethod: RPCMethod
+		documentList: null
+		nav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
@@ -17,6 +22,7 @@ def DocumentList {=
 		<div class="row">
 			<div class="col-auto">
 				{=Paging
+					instanceName: instanceName ~ 'Paging'
 					formField: 'offset'
 					nav: nav
 				}
@@ -30,29 +36,54 @@ def DocumentList {=
 			*}}
 		</div>
 
-		<div class="{=cls 'linkList'}">
-		{=
-			var i: 0;
-			repeat it in documentList {*
-			{=set i: i + 1}
-			<div class="{=cls 'listItem'} row">
-				<div class="col">{{i}}.
-					<a class="{=cls 'listLink'}" href="{{it.link}}">{{it.name}}</a>
-				</div>
-				<div class="col-md-auto">
-					{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
-					<div class="{=cls 'linkEditBtn'} col g-icon-small g-icon-editItem btn btn-secondary"
-						title="Изменить"
-						data-document-num="{{it.num}}"></div>
-					*}}
-				</div>
-			</div>
-			*}
+		{=DocumentLinkList
+			instanceName: instanceName
+			cssBaseClass: cssBaseClass
+			RPCMethod: RPCMethod
+			documentList: documentList
+			nav: nav
 		}
+		{=OpenDialog
+			instanceName: 'documentEditDlg'
+			config: {
+				ivyModule: 'mkk.Document.Edit',
+				ivyMethod: 'DocumentEdit',
+				queryParams: {
+					num: null
+				}
+			}
+		}
+	</div>
+	*};
+};
+
+def DocumentLinkList {=
+	def.kv
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		RPCMethod: RPCMethod
+		documentList: null
+		nav: null;
+	def.body {*
+	<div class="{=cls 'linkList'}" data-ivy-method="{{_ivyMethod}}">
+	{=
+		var i: 0;
+		repeat it in documentList {*
+		{=set i: i + 1}
+		<div class="{=cls 'listItem'} row">
+			<div class="col">{{i}}.
+				<a class="{=cls 'listLink'}" href="{{it.link}}">{{it.name}}</a>
+			</div>
+			<div class="col-md-auto">
+				{=if {=hasRight obj: 'document.item' kind: 'edit'} {*
+				<div class="{=cls 'linkEditBtn'} col g-icon-small g-icon-editItem btn btn-secondary"
+					title="Изменить"
+					data-document-num="{{it.num}}"></div>
+				*}}
+			</div>
 		</div>
-		<div class="{=cls 'addDocWrapper'}" style="display: none;">
-			{=DocumentEdit}
-		</div>
+		*}
+	}
 	</div>
 	*};
 };

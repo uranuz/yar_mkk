@@ -13,6 +13,7 @@ def Experience {=
 		moduleName: 'mkk/Tourist/Experience/Experience'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
+		RPCMethod: 'tourist.experience'
 		tourist: null
 		pohodList: null
 		nav: null;
@@ -99,7 +100,7 @@ def TouristPohodsList {=
 		pohodList: null
 		nav;
 	def.body {*
-	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 	<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 	{=repeat rec in pohodList {*
 		<tr>

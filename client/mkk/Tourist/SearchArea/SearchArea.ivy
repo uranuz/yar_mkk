@@ -1,10 +1,10 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Paging import Paging;
-from mkk.Tourist.PlainList import TouristPlainList;
+from mkk.Tourist.NavigatedList import TouristNavigatedList;
 def LabeledInput {=
 	def.kv caption field placeholder;
-	def.body noscope{*
+	def.body noscope {*
 	<label class="{=cls 'addrElementItem'} form-group row">
 		<span class="{=cls 'addrElementLabel'} col-sm-2 col-md-3 col-form-label">{{caption}}</span>
 		<div class="col-sm-10 col-md-9">
@@ -84,12 +84,6 @@ def TouristSearchArea {=
 		<button type="button" class="{=cls 'searchBtn'} btn btn-primary">Искать!</button>
 		<div class="{=cls 'searchResultsPanel'}">
 			<h5>Найденные туристы</h5>
-			<div class="{=cls 'touristsFoundSummary'}"></div>
-			<div class="{=cls 'pageNavigationBar'}">
-				{=Paging
-					instanceName: instanceName ~ 'Paging'
-				}
-			</div>
 			<div class="{=cls 'foundTourists'}">
 				{=TouristPlainList
 					instanceName: instanceName ~ 'List'

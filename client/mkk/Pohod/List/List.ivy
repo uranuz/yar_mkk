@@ -12,6 +12,7 @@ def PohodList {=
 		moduleName: 'mkk/Pohod/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
+		RPCMethod: 'pohod.list',
 		pohodEnums: null
 		filter: null
 		pohodList: null
@@ -85,7 +86,7 @@ def PohodListTable {=
 		filter
 		isForPrint: false;
 	def.body {*
-		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			{=repeat rec in pohodList {*
 				<tr>

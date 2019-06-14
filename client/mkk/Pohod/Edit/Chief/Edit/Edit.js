@@ -20,8 +20,6 @@ return FirClass(
 
 		this._searchBlock = this.getChildByName(this.instanceName() + 'SearchArea');
 		this._controlBar = this._elems('controlBar');
-		this._isAltChief = opts.isAltChief;
-		this._chiefRec = null;
 	}, FirControl, {
 		//"Тык" по кнопке выбора руководителя или зама похода
 		_onSelectChief: function(ev, rec) {

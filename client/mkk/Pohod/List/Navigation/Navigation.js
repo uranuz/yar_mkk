@@ -6,7 +6,6 @@ define('mkk/Pohod/List/Navigation/Navigation', [
 return FirClass(
 	function PohodListNavigation(opts) {
 		this.superproto.constructor.call(this, opts);
-		this._enumFields = opts.enumFields;
 		this._subscr(function() {
 			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
 			helpers.doOnEnter(this._elems('pohodRegionField'), this._onSearch_start.bind(this));
@@ -72,6 +71,9 @@ return FirClass(
 				params[field.num] = control.getSelectedKeys();
 			}
 			return params;
+		},
+		_getPaging: function() {
+			return this.getChildByName(this.instanceName() + 'Paging');
 		}
 	}
 );

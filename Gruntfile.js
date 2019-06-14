@@ -25,8 +25,8 @@ module.exports = function (grunt) {
 		"mkk/User/Settings/Settings",
 		"mkk/AboutSite/AboutSite",
 		"mkk/RecordHistory/RecordHistory",
-		"mkk/Right/ObjectRightList/ObjectRightList",
-		"mkk/Right/ObjectList/ObjectList",
+		"mkk/Right/List/List",
+		"mkk/Right/Object/List/List",
 		"mkk/Registration/Registration",
 		"mkk/app"
 	], rJSBuildConfig = {

@@ -10,6 +10,7 @@ def TouristList {=
 		moduleName: 'mkk/Tourist/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
+		RPCMethod: 'tourist.list'
 		touristList: null
 		nav: null
 		filter: null;
@@ -99,7 +100,7 @@ def TouristListTable {=
 		touristList
 		nav;
 	def.body {*
-	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-fir-view-method="{{__scopeName__}}">
+	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{%
 			repeat it in touristList {*

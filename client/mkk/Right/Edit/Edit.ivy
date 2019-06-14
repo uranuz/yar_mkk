@@ -1,0 +1,105 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.SelectorField import SelectorField;
+def RightEdit {=
+	def.kv
+		moduleName: 'mkk/Right/Edit/Edit'
+		instanceName: 'rightEdit'
+		cssBaseClass: 'mkk-RightEdit'
+		RPCMethod: 'right.read'
+		right: null
+		object: null
+		role: null
+		rule: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<div class="{=cls 'editForm'}">
+			<input type="hidden"
+				class="{=cls 'numField'}"
+				value="{{right.num}}"/>
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label">Объект доступа</label>
+				<div class="col-md-8">
+					{{object.folderName}}.{{object.name}}
+				</div>
+				<input type="hidden" value="{{right.objectNum}}"/>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label">Тип доступа</label>
+				<div class="col-md-8">
+					<input type="text"
+						class="{=cls 'accessKindField'} form-control"
+						value="{{right.accessKind}}"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label">Роль доступа</label>
+				<div class="col-md-8">
+					{=SelectorField
+						instanceName: 'roleField',
+						selectEventName: 'onRoleSelect'
+						record: role,
+						dialogConfig: {
+							ivyModule: 'mkk.Right.Role.List',
+							ivyMethod: 'RightRoleList',
+							dialogOpts: {
+								width: 600,
+								height: 600
+							},
+							queryParams: {
+								name: null,
+								nav: {}
+							},
+							viewParams: {
+								isSelect: true
+							}
+						}
+					}
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 col-form-label">Правило доступа</label>
+				<div class="col-md-8">
+					{=SelectorField
+						instanceName: 'ruleField',
+						selectEventName: 'onRuleSelect'
+						record: rule,
+						dialogConfig: {
+							ivyModule: 'mkk.Right.Rule.List',
+							ivyMethod: 'RightRuleList',
+							dialogOpts: {
+								width: 600,
+								height: 600
+							},
+							queryParams: {
+								name: null,
+								nav: {}
+							},
+							viewParams: {
+								isSelect: true
+							}
+						}
+					}
+				</div>
+			</div>
+			<label class="form-group form-check">
+				<input type="checkbox"
+					class="{=cls 'inheritanceField'} form-check-input"
+					{=if right.inheritance 'checked'}
+					/>
+				<span class="form-check-label">Дочерние объекты наследуют права</span>
+			</label>
+			<button type="button"
+				class="{=cls 'saveBtn'} btn btn-primary"
+				>Сохранить</button>
+		</div>
+
+		<div
+			class="{=cls 'EditResults'}"
+			data-ivy-module="mkk.Helpers.EditResults"
+			data-ivy-method="EditResults"></div>
+	</div>
+	*}
+}
+}

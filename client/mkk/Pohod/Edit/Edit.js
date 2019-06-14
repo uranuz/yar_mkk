@@ -64,10 +64,6 @@ return FirClass(
 		
 		this._chiefEditBlock.subscribe("selectChief", this.onSelectChief.bind(this));
 		this._chiefEditBlock.subscribe("deleteChief", this.onDeleteChief.bind(this));
-
-		this._partyList.setFilter({
-			selectedKeys: this.getPartyNums()
-		});
 	}, FirControl, {
 		//Обработчик тыка по кнопке сохранения списка выбранных участников
 		onSaveSelectedParty: function(ev, selTouristsRS) {
@@ -111,12 +107,13 @@ return FirClass(
 
 		/** Обновить отображение списка группы */
 		updatePartyList: function() {
-			// Передаём список идентификаторов туристов в фильтр компонента отображения списка туристов...
-			this._partyList.setFilter({
-				selectedKeys: this.getPartyNums()
+			this._partyList._reloadControl(null, {
+				queryParams: {
+					filter: {
+						selectedKeys: this.getPartyNums()
+					}
+				}
 			});
-			// ...и обновляем компонент
-			this._partyList._reloadControl();
 		},
 		
 		//Сохраняет список участников группы и выводит его в главное окно

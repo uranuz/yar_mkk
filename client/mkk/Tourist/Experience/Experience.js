@@ -7,14 +7,8 @@ define('mkk/Tourist/Experience/Experience', [
 return FirClass(
 	function TouristExperience(opts) {
 		this.superctor(TouristExperience, opts);
-		this._tourist = opts.tourist;
 		this._navigatedArea = 'tableContentBody';
 	}, FirControl, [NavigationMixin], {
-		/** Имя RPC-метода. Если указано, то запрос идет через RPC-протокол */
-		_getRPCMethod: function(areaName) {
-			return 'tourist.experience';
-		},
-
 		/**
 		 * Параметры, передаваемые на основной сервис, предпочтительно через адресную строку (для REST-запросов)
 		 * Но для RPC-вызовов эти параметры добавляются к параметрам метода

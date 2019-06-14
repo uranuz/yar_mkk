@@ -6,13 +6,16 @@ def DocumentEdit {=
 		moduleName: 'mkk/Document/Edit/Edit'
 		instanceName: 'documentEdit'
 		cssBaseClass: "mkk-DocumentEdit"
+		RPCMethod: 'document.read'
 		document: null;
 	def.body {*
-	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}" title="Редактирование ссылки на документ">
+	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		<form class="{=cls 'docForm'}" method="post" action="{{vpaths.siteDynamic}}/document/edit/results">
-		{=if document {*
-			<input type="hidden" name="num" value="{{document.num}}"/>
+		<form class="{=cls 'docForm'}">
+			<input type="hidden"
+				class="{=cls 'num'}"
+				name="num"
+				value="{{document.num}}"/>
 			<label class="form-row form-group">
 				<span>Название</span>
 				<input type="text"
@@ -34,10 +37,10 @@ def DocumentEdit {=
 					class="{=cls 'saveBtn'} btn btn-primary"
 					>Сохранить</button>
 			</div>
-		*} else {*
-			<h4>Не удалось найти документ с заданным идентификатором</h4>
-		*}}
 		</form>
+		<div class="{=cls 'EditResults'}"
+			data-ivy-module="mkk.Helpers.EditResults"
+			data-ivy-method="EditResults"></div>
 	</div>
 	*};
 };
