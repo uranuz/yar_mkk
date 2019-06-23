@@ -4,12 +4,12 @@ import std.base64: Base64URL;
 import std.conv: to;
 
 import deimos.openssl.sha;
-import webtank.crypto.scrypt;
+import mkk.security.core.old.scrypt;
 import mkk.security.common.session_id;
 
-enum uint pwHashByteLength = 72; //Количество байт в хэше пароля
-enum uint pwHashStrLength = pwHashByteLength * 8 / 6; //Длина в символах в виде base64 - строки
-//alias ubyte[pwHashByteLength] PasswordHash;
+enum uint pwHashScryptByteLength = 72; //Количество байт в хэше пароля
+
+enum uint pwHashSha384ByteLength = 48; // Количество байт в хэше пароля SHA-384: 384 / 8 = 48
 
 enum scryptN = 1024;
 enum scryptR = 8;
@@ -18,7 +18,7 @@ enum scryptP = 1;
 //Служебная функция для генерации Ид сессии
 SessionId generateSessionId(const(char)[] login, const(char)[] rolesStr, const(char)[] dateString)
 {
-    auto idSource = login ~ "::" ~ dateString ~ "::" ~ rolesStr; //Создаём исходную строку
+	auto idSource = login ~ "::" ~ dateString ~ "::" ~ rolesStr; //Создаём исходную строку
 	SessionId sessionId;
 	SHA384( cast(const(ubyte)*) idSource.ptr, idSource.length, sessionId.ptr );
 	return sessionId; //Возвращаем идентификатор сессии
@@ -27,11 +27,11 @@ SessionId generateSessionId(const(char)[] login, const(char)[] rolesStr, const(c
 import std.datetime, std.random, core.thread;
 
 ///Генерирует хэш для пароля с "солью" и "перцем"
-ubyte[] makePasswordHash(
+ubyte[] makeScryptPasswordHash(
 	const(char)[] password,
 	const(char)[] salt,
 	const(char)[] pepper,
-	size_t hashByteLength = pwHashByteLength,
+	size_t hashByteLength = pwHashScryptByteLength,
 	ulong N = scryptN,
 	uint r = scryptR,
 	uint p = scryptP
@@ -53,34 +53,105 @@ ubyte[] makePasswordHash(
 	return pwHash;
 }
 
+ubyte[] makePasswordHash(
+	const(char)[] password,
+	const(char)[] salt,
+	const(char)[] pepper
+) {
+	// Создаем хэш первого уровня из самого пароля и соли
+	ubyte[] passWithSalt = cast(ubyte[])(password ~ salt);
+	ubyte[] innerHash = new ubyte[pwHashSha384ByteLength];
+	SHA384( passWithSalt.ptr, passWithSalt.length, innerHash.ptr );
+
+	// Создаем результирующий хэш из хэша первого уровня и "перца"
+	ubyte[] innerHashWithPepper = cast(ubyte[])(innerHash ~ cast(ubyte[])(pepper));
+	ubyte[] pwHash = new ubyte[pwHashSha384ByteLength];
+	SHA384( innerHashWithPepper.ptr, innerHashWithPepper.length, pwHash.ptr );
+	return pwHash;
+}
+
 ///Кодирует хэш пароля для хранения в виде строки
-string encodePasswordHash( const(ubyte[]) pwHash, ulong N = scryptN, uint r = scryptR, uint p = scryptP )
+string encodeScryptPasswordHash( const(ubyte[]) pwHash, ulong N = scryptN, uint r = scryptR, uint p = scryptP )
 {
 	return ( "scr$" ~ Base64URL.encode(pwHash) ~ "$" ~ pwHash.length.to!string
 		~ "$" ~ N.to!string ~ "$" ~ r.to!string ~ "$" ~ p.to!string ).idup;
 }
 
-import std.array;
+/// Кодирует хэш пароля для хранения в виде строки
+string encodePasswordHash( const(ubyte[]) pwHash ) {
+	return ("sha384$" ~ Base64URL.encode(pwHash)).idup;
+}
+
+import std.typecons: Tuple;
+Tuple!(
+	ubyte[], `pwHash`,
+	string, `pwHashStr`
+)
+makePasswordHashCompat(
+	const(char)[] password,
+	const(char)[] salt,
+	const(char)[] pepper,
+	bool useScr = false
+) {
+	typeof(return) res;
+
+	if( useScr )
+	{
+		res.pwHash = makeScryptPasswordHash(password, salt, pepper);
+		res.pwHashStr = encodeScryptPasswordHash(res.pwHash);
+	}
+	else
+	{
+		res.pwHash = makePasswordHash(password, salt, pepper);
+		res.pwHashStr = encodePasswordHash(res.pwHash);
+	}
+	return res;
+}
 
 ///Проверяет пароль на соответствие закодированному хэшу с заданной солью и перцем
 bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(char)[] salt, const(char)[] pepper)
 {
+	import std.conv: to;
+	import std.array: split;
+
 	auto params = encodedPwHash.split("$");
 
-	if( params.length != 6 || params[0] != "scr" )
+	// Ожидаем по крайней мере тип хэша и его значение
+	if( params.length < 2 )
 		return false;
 
+	// По соглашению в 0 элементе хранится условный идентификатор типа хэша, а в 1 - сам хэш в Base64URL
 	ubyte[] pwHash = Base64URL.decode(params[1]);
-	if( pwHash.length != params[2].to!size_t )
-		return false;
+	switch( params[0] )
+	{
+		case "sha384":
+		{
+			// Текущий формат хэша
+			if( params.length != 2 )
+				return false;
 
-	return pwHash == makePasswordHash(
-		password,
-		salt,
-		pepper,
-		params[2].to!size_t,
-		params[3].to!ulong,
-		params[4].to!uint,
-		params[5].to!uint
-	);
+			return pwHash == makePasswordHash(password, salt, pepper);
+		}
+		case "scr":
+		{
+			// Старый формат хэша
+			if( params.length != 6 )
+				return false;
+
+			size_t hashLen = params[2].to!size_t;
+			ulong scryptN = params[3].to!ulong;
+			uint scryptR = params[4].to!uint;
+			uint scryptP = params[5].to!uint;
+
+			if( hashLen != pwHash.length )
+				return false;
+
+			return pwHash == makeScryptPasswordHash(
+				password, salt, pepper, hashLen,
+				scryptN, scryptR, scryptP
+			);
+		}
+		default: break;
+	}
+	return false;
 }

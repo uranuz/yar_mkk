@@ -6,20 +6,22 @@ import std.stdio: writeln;
 import std.getopt: getopt;
 import std.datetime: Clock;
 
-import mkk.security.core.crypto: makePasswordHash, encodePasswordHash;
+import mkk.security.core.crypto: makePasswordHashCompat;
 
 void main(string[] progAgs)
 {
 	string timestamp;
 	string password;
 	string salt;
+	bool useScr;
 	bool isHelp;
 	
 	getopt(progAgs,
 		"timestamp", &timestamp,
 		"pw", &password,
 		"salt", &salt,
-		"help", &isHelp
+		"help", &isHelp,
+		"scr", &scr
 	);
 
 	if( !timestamp.length || !password.length || !salt.length )
@@ -43,7 +45,7 @@ void main(string[] progAgs)
 	}
 
 	auto time = Clock.currTime();
-	auto pwHash = makePasswordHash(timestamp, password, salt);
+	auto hashRes = makePasswordHashCompat(timestamp, password, salt, useScr);
 	writeln( "Время вычисления хэша пароля: ", Clock.currTime() - time, ". Закодированный в Base64URL хэш с параметрами алгоритма:" );
-	writeln( encodePasswordHash( pwHash ) );
+	writeln( hashRes.pwHashStr );
 } 

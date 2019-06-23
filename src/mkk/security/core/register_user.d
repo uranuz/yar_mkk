@@ -5,18 +5,25 @@ import std.algorithm: endsWith;
 import std.uuid: randomUUID;
 
 import mkk.security.core.access_control: minLoginLength, minPasswordLength;
-import mkk.security.core.crypto: makePasswordHash, encodePasswordHash;
+import mkk.security.core.crypto: makePasswordHashCompat;
 import webtank.common.conv: fromPGTimestamp;
 import webtank.net.utils: PGEscapeStr;
 import webtank.db.datctrl_joint: getRecordSet;
+import webtank.db.database: queryParams;
 import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 import std.typecons: Tuple;
 import std.uuid: randomUUID, sha1UUID, UUID;
 
 alias RegUserResult = Tuple!(size_t, `userNum`, UUID, `confirmUUID`);
 
-RegUserResult registerUser(alias getAuthDB)(string login, string password, string name, string email)
-{
+// useScr = true использовать старый формат, оставлено для отладки возможных проблем совместимости
+RegUserResult registerUser(alias getAuthDB)(
+	string login,
+	string password,
+	string name,
+	string email,
+	bool useScr = false
+) {
 	import std.utf: count;
 	import std.conv: text;
 	import std.exception: enforce;
@@ -28,8 +35,8 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 		"Длина логина меньше минимально допустимой (" ~ minLoginLength.text ~ " символов)");
 
 	if(
-		getAuthDB().query(
-			`select 1 from site_user where login='` ~ PGEscapeStr(login) ~ `';`
+		getAuthDB().queryParams(
+			`select 1 from site_user where login = $1 limit 1`, login
 		).recordCount != 0
 	) {
 		throw new Exception("Пользователь с заданным логином уже зарегистрирован");
@@ -83,14 +90,15 @@ RegUserResult registerUser(alias getAuthDB)(string login, string password, strin
 
 	// Генерируем случайную соль для пароля, и используем дату регистрации из базы для сотворения хэша пароля
 	string pwSaltStr = randomUUID().toString();
-	ubyte[] pwHash = makePasswordHash(password, pwSaltStr, addUserResult.front.get!"regTimestamp"().toISOExtString());
-	string pwHashStr = encodePasswordHash(pwHash);
+	string pwPepperStr = addUserResult.front.get!"regTimestamp"().toISOExtString();
+	string pwHashStr = makePasswordHashCompat(password, pwSaltStr, pwPepperStr, useScr).pwHashStr;
 
 	// Прописываем хэш пароля в БД
-	auto setPasswordResult = getAuthDB().query(
-		`update site_user set pw_hash = '` ~ PGEscapeStr(pwHashStr) ~ `', pw_salt = '` ~ PGEscapeStr(pwSaltStr) ~ `' `
-		~ `where num = ` ~ addUserResult.front.getStr!"num"()
-		~ ` returning num, 'user upd' "status", reg_timestamp`
+	auto setPasswordResult = getAuthDB().queryParams(
+`update site_user set pw_hash = $1, pw_salt = $2
+where num = $3
+returning num, 'user upd' "status", reg_timestamp`,
+		pwHashStr, pwSaltStr, addUserResult.front.get!"num"()
 	).getRecordSet(addUserResultFmt);
 
 	if( setPasswordResult.length != 1 || setPasswordResult.front.get!"status"() != `user upd` ) {

@@ -9,7 +9,6 @@ import std.algorithm: endsWith;
 import std.uuid: randomUUID;
 
 import mkk.security.core.access_control: minLoginLength, minPasswordLength;
-import mkk.security.core.crypto: makePasswordHash, encodePasswordHash;
 import mkk.tools.auth_db: getAuthDB;
 import webtank.common.conv: fromPGTimestamp;
 import mkk.security.core.register_user: registerUser;
@@ -34,6 +33,7 @@ void main(string[] progAgs) {
 	string name;
 	string group;
 	string email;
+	bool scr;
 	bool isHelp;
 	
 	//Получаем порт из параметров командной строки
@@ -41,6 +41,7 @@ void main(string[] progAgs) {
 		"login", &login,
 		"name", &name,
 		"email", &email,
+		"scr", &scr,
 		"help", &isHelp
 	);
 

@@ -324,10 +324,10 @@ bool changeUserPassword(bool doPwCheck = true)(
 
 	// SiteLoger.info( `Подключаемся к базе данных аутентификации`, `Смена пароля пользователя` );
 	// SiteLoger.info( `Получаем данные о пользователе из БД`, `Смена пароля пользователя` );
-	auto userQueryRes = _getAuthDB().query(
+	auto userQueryRes = _getAuthDB().queryParams(
 `select num, pw_hash, pw_salt, reg_timestamp
 from site_user
-where login = '` ~ PGEscapeStr( login ) ~ `';`
+where login = $1`, login
 	);
 	// SiteLoger.info( `Запрос данных о пользователе успешно завершен`, `Смена пароля пользователя` );
 
@@ -356,10 +356,11 @@ where login = '` ~ PGEscapeStr( login ) ~ `';`
 	string pwHashStr = encodePasswordHash(pwHash);
 
 	// SiteLoger.info( `Выполняем запрос на смену пароля`, `Смена пароля пользователя` );
-	auto changePwQueryRes = _getAuthDB().query(
-`update site_user set pw_hash = '` ~ PGEscapeStr(pwHashStr) ~ `', pw_salt = '` ~ PGEscapeStr(pwSaltStr) ~ `'
-where login = '` ~ PGEscapeStr(login) ~ `'
-returning 'pw_changed';`
+	auto changePwQueryRes = _getAuthDB().queryParams(
+`update site_user set pw_hash = $1, pw_salt = $2
+where login = $3
+returning 'pw_changed';`,
+		pwHashStr, pwSaltStr, login
 	);
 
 	// SiteLoger.info( `Проверка успешности выполнения запроса смены пароля`, `Смена пароля пользователя` );
