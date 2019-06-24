@@ -13,10 +13,12 @@ import mkk.tools.auth_db: getAuthDB;
 void main(string[] progAgs)
 {
 	string login;
+	bool useScr;
 	bool isHelp;
 
 	getopt(progAgs,
 		"login", &login,
+		"scr", &useScr,
 		"help", &isHelp
 	);
 
@@ -38,6 +40,7 @@ void main(string[] progAgs)
 			"Утилита для изменения пароля пользователя сайта МКК.\r\n",
 			"Опции:\r\n",
 			"  --login=ЛОГИН         Минимум " ~ minLoginLength.to!string ~ " символов\r\n",
+			"  --scr   Использовать старый формат хэша пароля\r\n",
 			"  --help - эта справка"
 		);
 		return;
@@ -68,7 +71,8 @@ void main(string[] progAgs)
 	}
 
 	import std.functional: toDelegate;
-	if( changeUserPassword!(false)(toDelegate(&getAuthDB), login, null, password) ) {
+	// Поскольку это у нас админский инструмент, то старый пароль не проверяем
+	if( changeUserPassword!(/*doPwCheck=*/false)(toDelegate(&getAuthDB), login, null, password, useScr) ) {
 		writeln(`Установлен новый пароль для пользователя с логином "`, login, `"!`);
 	} else {
 		writeln(`При запросе на установку пароля пользователя произошла ошибка!`);

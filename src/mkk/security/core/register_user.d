@@ -91,14 +91,14 @@ RegUserResult registerUser(alias getAuthDB)(
 	// Генерируем случайную соль для пароля, и используем дату регистрации из базы для сотворения хэша пароля
 	string pwSaltStr = randomUUID().toString();
 	string pwPepperStr = addUserResult.front.get!"regTimestamp"().toISOExtString();
-	string pwHashStr = makePasswordHashCompat(password, pwSaltStr, pwPepperStr, useScr).pwHashStr;
+	auto hashRes = makePasswordHashCompat(password, pwSaltStr, pwPepperStr, useScr);
 
 	// Прописываем хэш пароля в БД
 	auto setPasswordResult = getAuthDB().queryParams(
 `update site_user set pw_hash = $1, pw_salt = $2
 where num = $3
 returning num, 'user upd' "status", reg_timestamp`,
-		pwHashStr, pwSaltStr, addUserResult.front.get!"num"()
+		hashRes.pwHashStr, pwSaltStr, addUserResult.front.get!"num"()
 	).getRecordSet(addUserResultFmt);
 
 	if( setPasswordResult.length != 1 || setPasswordResult.front.get!"status"() != `user upd` ) {

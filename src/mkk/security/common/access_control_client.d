@@ -16,15 +16,11 @@ public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{
-		//debug import std.stdio: writeln;
 		auto httpCtx = cast(HTTPContext) context;
 
-		//debug writeln(`TRACE authenticate 1`);
 		if( httpCtx !is null ) {
-			//debug writeln(`TRACE authenticate 2`);
 			return authenticateSession(httpCtx);
 		}
-		//debug writeln(`TRACE authenticate 3`);
 		return new AnonymousUser;
 	}
 
@@ -44,7 +40,7 @@ public:
 		enforce(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
 
 		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSON_TYPE.INTEGER ) {
-			return new AnonymousUser();
+			return new AnonymousUser;
 		}
 		//debug writeln(`TRACE authenticateSession 2`);
 

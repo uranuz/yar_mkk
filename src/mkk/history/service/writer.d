@@ -158,16 +158,28 @@ size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 	string insertActionQuery = `
 		insert into "_history_action"
 		(description, time_stamp, user_num, uuid_num, parent_num)
-		values
-		( '` ~ PGEscapeStr(data.description) ~ `', '` 
-		~ data.time_stamp.toISOExtString() ~ `'::timestamp without time zone, ` 
-		~ (data.userNum.isSet? data.userNum.text: `null::bigint`) ~ `, '` 
-		~ data.uuid ~ `'::uuid, (select num from _history_action ha where ha.uuid_num = '` 
-		~ data.parentUUID ~ `'::uuid limit 1)::bigint )
+		values(
+			$1::text,
+			$2::timestamp without time zone,
+			$3::bigint,
+			$4::uuid,
+			(
+				select num from _history_action ha
+				where ha.uuid_num = $5::uuid
+				limit 1
+			)::bigint
+		)
 		returning num
 	`;
 	Optional!size_t actionNum;
-	auto numResult = db.query(insertActionQuery);
+	auto numResult = db.queryParams(
+		insertActionQuery,
+		data.description,
+		data.time_stamp.toISOExtString(),
+		data.userNum,
+		data.uuid,
+		data.parentUUID
+	);
 	if( numResult.recordCount > 0 && numResult.fieldCount > 0 ) {
 		actionNum = numResult.get(0, 0, "0").to!size_t;
 	}

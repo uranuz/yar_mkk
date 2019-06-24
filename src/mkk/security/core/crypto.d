@@ -108,17 +108,36 @@ makePasswordHashCompat(
 	return res;
 }
 
+
+bool checkPassword(
+	const(char)[] encodedPwHash,
+	const(char)[] password,
+	const(char)[] salt,
+	const(char)[] pepper
+) {
+	return checkPasswordExt(encodedPwHash, password, salt, pepper).checkResult;
+}
+
 ///Проверяет пароль на соответствие закодированному хэшу с заданной солью и перцем
-bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(char)[] salt, const(char)[] pepper)
-{
+Tuple!(
+	bool, `checkResult`,
+	bool, `isOldHash`
+)
+checkPasswordExt(
+	const(char)[] encodedPwHash,
+	const(char)[] password,
+	const(char)[] salt,
+	const(char)[] pepper
+) {
 	import std.conv: to;
 	import std.array: split;
+	auto res = typeof(return)(false, false);
 
 	auto params = encodedPwHash.split("$");
 
 	// Ожидаем по крайней мере тип хэша и его значение
 	if( params.length < 2 )
-		return false;
+		return res;
 
 	// По соглашению в 0 элементе хранится условный идентификатор типа хэша, а в 1 - сам хэш в Base64URL
 	ubyte[] pwHash = Base64URL.decode(params[1]);
@@ -126,17 +145,18 @@ bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(ch
 	{
 		case "sha384":
 		{
-			// Текущий формат хэша
+			// Текущий формат хэша пароля
 			if( params.length != 2 )
-				return false;
+				break;
 
-			return pwHash == makePasswordHash(password, salt, pepper);
+			res.checkResult = pwHash == makePasswordHash(password, salt, pepper);
+			break;
 		}
 		case "scr":
 		{
-			// Старый формат хэша
+			// Старый формат хэша пароля
 			if( params.length != 6 )
-				return false;
+				break;
 
 			size_t hashLen = params[2].to!size_t;
 			ulong scryptN = params[3].to!ulong;
@@ -144,14 +164,17 @@ bool checkPassword(const(char)[] encodedPwHash, const(char)[] password, const(ch
 			uint scryptP = params[5].to!uint;
 
 			if( hashLen != pwHash.length )
-				return false;
+				break;
 
-			return pwHash == makeScryptPasswordHash(
+			res.checkResult = pwHash == makeScryptPasswordHash(
 				password, salt, pepper, hashLen,
 				scryptN, scryptR, scryptP
 			);
+			// Хэш старый и его надо "апгрейдить"
+			res.isOldHash = true;
+			break;
 		}
 		default: break;
 	}
-	return false;
+	return res;
 }

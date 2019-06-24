@@ -20,8 +20,8 @@ void main(string[] progAgs)
 		"timestamp", &timestamp,
 		"pw", &password,
 		"salt", &salt,
+		"scr", &useScr,
 		"help", &isHelp,
-		"scr", &scr
 	);
 
 	if( !timestamp.length || !password.length || !salt.length )
@@ -39,6 +39,7 @@ void main(string[] progAgs)
 			"  --timestamp=ДАТА_ВРЕМЯ\r\n",
 			"  --pw=ПАРОЛЬ\r\n",
 			"  --salt=СОЛЬ_ХЭША\r\n",
+			"  --scr   Использовать старый формат хэша пароля\r\n",
 			"  --help - эта справка"
 		);
 		return;

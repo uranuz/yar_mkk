@@ -31,7 +31,8 @@ void changePassword(
 	);
 	import std.functional: toDelegate;
 	enforce!SecurityException(
-		changeUserPassword!(true)( toDelegate(&getAuthDB), ctx.user.id, oldPassword, newPassword ),
+		// Здесь, естественно, необходимо проверять старый пароль перед тем как его сменить, иначе будет пичально...
+		changeUserPassword!(/*doPwCheck=*/true)(toDelegate(&getAuthDB), ctx.user.id, oldPassword, newPassword),
 		`Произошла ошибка при попытке смены пароля! Возможно, введен неверный старый пароль`
 	);
 }

@@ -50,11 +50,12 @@ baseUserInfo(HTTPContext context)
 
 string authByPassword(HTTPContext context, string login, string password)
 {
+	import std.exception: enforce;
 	auto userIdentity = cast(MKKUserIdentity) MainService.accessController.authenticateByPassword(context, login, password);
 
-	if( !userIdentity || !userIdentity.isAuthenticated ) {
-		throw new SecurityException(`Failed to authenticate user by login and password`);
-	}
+	enforce!SecurityException(
+		userIdentity && userIdentity.isAuthenticated,
+		`Failed to authenticate user by login and password`);
 
 	return context.request.cookies.get(`__sid__`);
 }

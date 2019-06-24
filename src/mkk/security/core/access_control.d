@@ -26,9 +26,10 @@ protected:
 	IDatabase delegate() _getAuthDB;
 
 public:
+	import std.exception: enforce;
+
 	this(IDatabase delegate() getAuthDB)
 	{
-		import std.exception: enforce;
 		enforce(getAuthDB !is null, `Auth DB method reference is null!!!`);
 		_getAuthDB = getAuthDB;
 	}
@@ -36,37 +37,36 @@ public:
 	///Реализация метода аутентификации контролёра доступа
 	override IUserIdentity authenticate(Object context)
 	{
-		//debug import std.stdio: writeln;
-		//debug writeln(`TRACE authenticate 1`);
-		if( auto httpCtx = cast(HTTPContext) context )
-		{
-			//debug writeln(`TRACE authenticate 2`);
+		if( auto httpCtx = cast(HTTPContext) context ) {
 			return authenticateSession(httpCtx);
 		}
-		//debug writeln(`TRACE authenticate 2`);
+		return new AnonymousUser;
+	}
+
+	IUserIdentity authenticateSession(HTTPContext context)
+	{
+		try {
+			return authenticateSessionImpl(context);
+		} catch(SecurityException) {
+			// Add debug code here
+		}
 		return new AnonymousUser;
 	}
 
 	///Метод выполняет аутентификацию сессии для HTTP контекста
 	///Возвращает удостоверение пользователя
-	IUserIdentity authenticateSession(HTTPContext context)
+	IUserIdentity authenticateSessionImpl(HTTPContext context)
 	{
-		//debug import std.stdio: writeln;
 		import std.conv: text;
 		auto req = context.request;
 		string SIDString = req.cookies.get("__sid__", null);
 
-		//debug writeln(`TRACE authenticateSession 1`);
-		if( SIDString.length != sessionIdStrLength )
-			return new AnonymousUser;
-		//debug writeln(`TRACE authenticateSession 2`);
+		enforce!SecurityException(SIDString.length == sessionIdStrLength, `Incorrect length of sid string`);
 
 		SessionId sessionId;
 		Base64URL.decode(SIDString, sessionId[]);
 
-		if( sessionId == SessionId.init )
-			return new AnonymousUser;
-		//debug writeln(`TRACE authenticateSession 3`);
+		enforce!SecurityException(sessionId != SessionId.init, `Empty sid`);
 
 		//Делаем запрос к БД за информацией о сессии
 		auto sidQueryRes = _getAuthDB().query(
@@ -78,18 +78,16 @@ where
 	and current_timestamp at time zone 'UTC' <= (created + '` ~ sessionLifetime.text ~ ` minutes')`
 		);
 
-		if( sidQueryRes.recordCount != 1 || sidQueryRes.fieldCount != 2 )
-			return new AnonymousUser;
-		//debug writeln(`TRACE authenticateSession 4`);
+		enforce!SecurityException(sidQueryRes.recordCount == 1, `Unable to find sid`);
+		enforce!SecurityException(sidQueryRes.fieldCount == 2, `Expected 2 field in sid search result`);
 
 		//Проверяем адрес и клиентскую программу с имеющимися при создании сессии
-		if(
-			req.headers.get("x-real-ip", null) != sidQueryRes.get(0, 0, null) ||
-			req.headers.get("user-agent", null) != sidQueryRes.get(1, 0, null)
-		) {
-			return new AnonymousUser;
-		}
-		//debug writeln(`TRACE authenticateSession 5`);
+		enforce!SecurityException(
+			req.headers.get("x-real-ip", null) == sidQueryRes.get(0, 0, null),
+			`User IP-address mismatch`);
+		enforce!SecurityException(
+			req.headers.get("user-agent", null) == sidQueryRes.get(1, 0, null),
+			`User agent mismatch`);
 
 		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
@@ -102,7 +100,7 @@ where
 		)();
 
 		//Делаем запрос к БД за информацией о пользователе
-		auto userRS = _getAuthDB().query(
+		auto userRS = _getAuthDB().queryParams(
 `select
 	su.num, su.email, su.login, su.name,
 	to_json(coalesce(
@@ -115,16 +113,14 @@ left join user_access_role UR
 	on UR.user_num = su.num
 left join access_role R
 	on R.num = UR.role_num
-where session.sid = '` ~ Base64URL.encode(sessionId) ~ `'
+where session.sid = $1::text
 	and su.is_blocked is not true
-group by su.num, su.email, su.login, su.name`
+group by su.num, su.email, su.login, su.name`, Base64URL.encode(sessionId)
 		).getRecordSet(userDataRecFormat);
 
-		if( !userRS.length )
-			return new AnonymousUser;
-		//debug writeln(`TRACE authenticateSession 6`);
-		auto userRec = userRS.front;
+		enforce!SecurityException(userRS.length > 0, `Unable to get info about user`);
 
+		auto userRec = userRS.front;
 		string[string] userData = [
 			"userNum": userRec.getStr!"num",
 			"email": userRec.getStr!"email"
@@ -141,19 +137,36 @@ group by su.num, su.email, su.login, su.name`
 		);
 	}
 
-	//Функция выполняет вход пользователя с логином и паролем,
-	//происходит генерация Ид сессии, сохранение его в БД
+	import mkk.security.common.exception: SecurityException;
+
 	IUserIdentity authenticateByPassword(
 		string login,
 		string password,
 		string clientAddress,
 		string userAgent
 	) {
-		if( login.count < minLoginLength || password.count < minPasswordLength )
-			return new AnonymousUser;
+		try {
+			return authenticateByPasswordImpl(login, password, clientAddress, userAgent);
+		} catch(SecurityException) {
+			// Add debug code here
+		}
+		return new AnonymousUser;
+	};
+
+	//Функция выполняет вход пользователя с логином и паролем,
+	//происходит генерация Ид сессии, сохранение его в БД
+	IUserIdentity authenticateByPasswordImpl(
+		string login,
+		string password,
+		string clientAddress,
+		string userAgent
+	) {
+		enforce!SecurityException(login.count >= minLoginLength, `Login length is too short`);
+		enforce!SecurityException(password.count >= minPasswordLength, `Password length is too short`);
 
 		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
+		import mkk.security.core.access_control: changeUserPassword;
 		static immutable userPwDataRecFormat = RecordFormat!(
 			PrimaryKey!(size_t), "num",
 			string, "pwHash",
@@ -166,7 +179,7 @@ group by su.num, su.email, su.login, su.name`
 		)();
 
 		//Делаем запрос к БД за информацией о пользователе
-		auto userRS = _getAuthDB().query(
+		auto userRS = _getAuthDB().queryParams(
 `select
 	su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email,
 	to_json(coalesce(
@@ -178,16 +191,14 @@ left join user_access_role UR
 	on UR.user_num = su.num
 left join access_role R
 	on R.num = UR.role_num
-where login = '` ~ PGEscapeStr(login) ~ `'
+where login = $1::text
 	and su.is_blocked is not true
-group by su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email`
+group by su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email`, login
 		).getRecordSet(userPwDataRecFormat);
 
-		if( !userRS.length )
-			return new AnonymousUser;
+		enforce!SecurityException(userRS.length > 0, `Unable to find user by login`);
 
 		auto userRec = userRS.front;
-
 
 		string userNum = userRec.getStr!"num";
 		string validEncodedPwHash = userRec.getStr!"pwHash";
@@ -200,43 +211,54 @@ group by su.num, su.pw_hash, su.pw_salt, su.reg_timestamp, su.name, su.email`
 		string email = userRec.getStr!"email";
 		string touristNum = userRec.getStr!"tourist_num";
 
-		bool isValidPassword = checkPassword(validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString());
+		auto passStatus = checkPasswordExt(validEncodedPwHash, password, pwSalt, regDateTime.toISOExtString());
 
-		if( isValidPassword )
+		enforce!SecurityException(passStatus.checkResult, `Password check failed`);
+
+		if( passStatus.isOldHash )
 		{
-			SessionId sid = generateSessionId(login, rolesStr, Clock.currTime().toISOString());
+			// Делаем апгрейд хэша пароля пользователя при его входе в систему
+			// Здесь уже проверили пароль. Второй раз проверять не надо
+			enforce!SecurityException(
+				changeUserPassword!(/*doPwCheck=*/false)(_getAuthDB, login, null, password),
+				`Unable to update password hash`);
+		}
 
-			auto newSIDStatusRes = _getAuthDB().query(
+		SessionId sid = generateSessionId(login, rolesStr, Clock.currTime().toISOString());
+
+		auto newSIDStatusRes = _getAuthDB().queryParams(
 `insert into "session" (
 	"sid", "site_user_num", "created", "client_address", "user_agent"
 )
 values(
-	'` ~ Base64URL.encode(sid) ~ `',
-	`  ~ PGEscapeStr(userNum) ~ `,
+	$1::text,
+	$2::integer,
 	current_timestamp at time zone 'UTC',
-	'` ~ PGEscapeStr(clientAddress) ~ `',
-	'` ~ PGEscapeStr(userAgent) ~ `'
+	$3::text,
+	$4::text
 )
-returning 'authenticated'`
-			);
+returning 'authenticated'`,
+			Base64URL.encode(sid),
+			userNum,
+			clientAddress,
+			userAgent
+		);
 
-			if( newSIDStatusRes.recordCount != 1 )
-				return new AnonymousUser;
+		enforce!SecurityException(
+			newSIDStatusRes.recordCount == 1,
+			`Expected one record in sid write result`);
+		enforce!SecurityException(
+			newSIDStatusRes.get(0, 0, null) == "authenticated",
+			`Expected "authenticated" message is sid write result`);
 
-			if( newSIDStatusRes.get(0, 0, null) == "authenticated" )
-			{
-				string[string] userData = [
-					"userNum": userNum,
-					"roles": rolesStr,
-					"email": email,
-					"touristNum": touristNum
-				];
-				//Аутентификация завершена успешно
-				return new MKKUserIdentity(login, name, userRec.get!"roles"(), userData, sid);
-			}
-		}
-
-		return new AnonymousUser;
+		string[string] userData = [
+			"userNum": userNum,
+			"roles": rolesStr,
+			"email": email,
+			"touristNum": touristNum
+		];
+		//Аутентификация завершена успешно
+		return new MKKUserIdentity(login, name, userRec.get!"roles"(), userData, sid);
 	}
 
 	// Эта обертка над authenticateByPassword получает некоторые параметры из контекста.
@@ -310,7 +332,8 @@ bool changeUserPassword(bool doPwCheck = true)(
 	IDatabase delegate() _getAuthDB,
 	string login,
 	string oldPassword,
-	string newPassword
+	string newPassword,
+	bool useScr = false
 ) {
 	assert(_getAuthDB, `getAuthDB method is not specified!`);
 	// import mkk.logging: SiteLoger; TODO: Устаревшая вещь - нужно переделать
@@ -351,16 +374,14 @@ where login = $1`, login
 
 	import std.uuid : randomUUID;
 	string pwSaltStr = randomUUID().toString();
-
-	ubyte[] pwHash = makePasswordHash(newPassword, pwSaltStr, regTimestampStr);
-	string pwHashStr = encodePasswordHash(pwHash);
+	auto hashRes = makePasswordHashCompat(newPassword, pwSaltStr, regTimestampStr, useScr);
 
 	// SiteLoger.info( `Выполняем запрос на смену пароля`, `Смена пароля пользователя` );
 	auto changePwQueryRes = _getAuthDB().queryParams(
 `update site_user set pw_hash = $1, pw_salt = $2
 where login = $3
 returning 'pw_changed';`,
-		pwHashStr, pwSaltStr, login
+		hashRes.pwHashStr, pwSaltStr, login
 	);
 
 	// SiteLoger.info( `Проверка успешности выполнения запроса смены пароля`, `Смена пароля пользователя` );
