@@ -5,6 +5,7 @@ import mkk.common.utils;
 import mkk.history.common;
 
 import webtank.db.transaction: makeTransaction;
+import webtank.db.database: queryParams;
 import webtank.net.utils: PGEscapeStr;
 import webtank.net.http.context: HTTPContext;
 import webtank.common.optional: Optional;
@@ -178,8 +179,7 @@ size_t saveActionToHistory(HTTPContext ctx, HistoryActionData data)
 		data.time_stamp.toISOExtString(),
 		data.userNum,
 		data.uuid,
-		data.parentUUID
-	);
+		data.parentUUID);
 	if( numResult.recordCount > 0 && numResult.fieldCount > 0 ) {
 		actionNum = numResult.get(0, 0, "0").to!size_t;
 	}

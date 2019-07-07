@@ -7,7 +7,7 @@ import webtank.common.optional: Optional, Undefable;
 import mkk.history.common;
 import mkk.common.service;
 import std.uuid;
-import std.json: JSONValue, JSON_TYPE;
+import std.json: JSONValue, JSONType;
 import webtank.common.std_json.to: toStdJSON;
 
 /// Добавить запись о совершаемом действии в историю

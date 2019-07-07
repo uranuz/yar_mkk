@@ -213,27 +213,27 @@ shared static this()
 {
 	import std.file: exists, read, isFile;
 	import std.path: expandTilde, buildNormalizedPath;
-	import std.json: JSONValue, parseJSON, JSON_TYPE;
+	import std.json: JSONValue, parseJSON, JSONType;
 	string emailSenderConfigPath = expandTilde(`~/sites/mkk_site/email_sender_config.json`);
 	enforce(exists(emailSenderConfigPath) && isFile(emailSenderConfigPath), `Expected email sender config file!`);
 
 	string strConfig = cast(string) read(emailSenderConfigPath);
 	JSONValue jConfig = parseJSON(strConfig);
-	enforce(jConfig.type == JSON_TYPE.OBJECT, `Expected object as root of email sender config`);
+	enforce(jConfig.type == JSONType.object, `Expected object as root of email sender config`);
 	auto jAddress = `address` in jConfig;
-	if( jAddress && jAddress.type == JSON_TYPE.STRING ) {
+	if( jAddress && jAddress.type == JSONType.string ) {
 		_senderAddress = jAddress.str;
 	}
 	auto jEmail = `email` in jConfig;
-	if( jEmail && jEmail.type == JSON_TYPE.STRING ) {
+	if( jEmail && jEmail.type == JSONType.string ) {
 		_senderEmail = jEmail.str;
 	}
 	auto jLogin = `login` in jConfig;
-	if( jLogin && jLogin.type == JSON_TYPE.STRING ) {
+	if( jLogin && jLogin.type == JSONType.string ) {
 		_senderLogin = jLogin.str;
 	}
 	auto jPassword = `password` in jConfig;
-	if( jPassword && jPassword.type == JSON_TYPE.STRING ) {
+	if( jPassword && jPassword.type == JSONType.string ) {
 		_senderPassword = jPassword.str;
 	}
 }

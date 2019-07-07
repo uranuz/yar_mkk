@@ -29,7 +29,7 @@ static immutable historyRecFormat = RecordFormat!(
 	DateTime, "time_stamp"
 )();
 
-import std.json: JSONValue, parseJSON, JSON_TYPE;
+import std.json: JSONValue, parseJSON, JSONType;
 JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigation nav)
 {
 	import webtank.datctrl.record_set;
@@ -117,9 +117,9 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 		];
 		JSONValue data = rec.getStr!`data`().parseJSON();
 		JSONValue changes = (JSONValue[string]).init;
-		if( data.type == JSON_TYPE.OBJECT )
+		if( data.type == JSONType.object )
 		{
-			if( prevData.type == JSON_TYPE.OBJECT )
+			if( prevData.type == JSONType.object )
 			{
 				foreach( string num, JSONValue val; data )
 				{
@@ -127,13 +127,13 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 					{
 						if( *prevVal != val )
 							changes[num] = val;
-					} else if( val.type != JSON_TYPE.NULL ) {
+					} else if( val.type != JSONType.null_ ) {
 						changes[num] = null;
 					}
 				}
 				foreach( string num, JSONValue val; prevData )
 				{
-					if( num !in data && val.type != JSON_TYPE.NULL )
+					if( num !in data && val.type != JSONType.null_ )
 						changes[num] = null;
 				}
 				foreach( string num, JSONValue val; changes )

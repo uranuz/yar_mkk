@@ -30,16 +30,16 @@ public:
 	{
 		//debug import std.stdio: writeln;
 		//debug writeln(`TRACE authenticateSession 1`);
-		import std.json: JSON_TYPE, JSONValue;
+		import std.json: JSONType, JSONValue;
 		// Запрос получает минимальную информацию о пользователе по Ид. сессии в контексте
 		auto jUserInfo = ctx.endpoint(`yarMKKMain`).remoteCall!JSONValue(`auth.baseUserInfo`);
 
 		//debug writeln(`TRACE authenticateSession jUserInfo: `, jUserInfo);
 
 		import std.exception: enforce;
-		enforce(jUserInfo.type == JSON_TYPE.OBJECT, `Base user info expected to be object!`);
+		enforce(jUserInfo.type == JSONType.object, `Base user info expected to be object!`);
 
-		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSON_TYPE.INTEGER ) {
+		if( `userNum` !in jUserInfo || jUserInfo[`userNum`].type != JSONType.integer ) {
 			return new AnonymousUser;
 		}
 		//debug writeln(`TRACE authenticateSession 2`);
@@ -54,13 +54,13 @@ public:
 		//Получаем информацию о пользователе из результата запроса: логин, имя, роли доступа
 		string login; string name; string[] accessRoles;
 		if( auto it = `login` in jUserInfo ) {
-			login = it.type == JSON_TYPE.STRING? it.str: null;
+			login = it.type == JSONType.string? it.str: null;
 		}
 		if( auto it = `name` in jUserInfo ) {
-			name = it.type == JSON_TYPE.STRING? it.str: null;
+			name = it.type == JSONType.string? it.str: null;
 		}
 		if( auto it = `accessRoles` in jUserInfo ) {
-			accessRoles = it.type == JSON_TYPE.STRING? it.str.splitter(`;`).filter!( (it) => it.length > 0 ).array: null;
+			accessRoles = it.type == JSONType.string? it.str.splitter(`;`).filter!( (it) => it.length > 0 ).array: null;
 		}
 		//debug writeln(`TRACE authenticateSession 3`);
 		return new MKKUserIdentity(login, name, accessRoles, /*data=*/null, sid);

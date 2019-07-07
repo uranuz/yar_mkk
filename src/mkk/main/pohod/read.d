@@ -162,7 +162,7 @@ import std.json: JSONValue;
 
 JSONValue renderExtraFileLinks(Optional!size_t num, string extraFileLinks, string instanceName)
 {
-	import std.json: JSONValue, JSON_TYPE, parseJSON;
+	import std.json: JSONValue, JSONType, parseJSON;
 	import std.conv: to;
 	import std.base64: Base64;
 	import webtank.common.optional: Optional;
@@ -175,26 +175,26 @@ JSONValue renderExtraFileLinks(Optional!size_t num, string extraFileLinks, strin
 		// Иначе отрисуем список ссылок, который нам передали
 		string decodedExtraFileLinks = cast(string) Base64.decode(extraFileLinks);
 		JSONValue jExtraFileLinks = parseJSON(decodedExtraFileLinks);
-		if( jExtraFileLinks.type != JSON_TYPE.ARRAY && jExtraFileLinks.type != JSON_TYPE.NULL  ) {
+		if( jExtraFileLinks.type != JSONType.array && jExtraFileLinks.type != JSONType.null_  ) {
 			throw new Exception(`Некорректный формат списка ссылок на доп. материалы`);
 		}
 
 		JSONValue[] linkList;
-		if( jExtraFileLinks.type == JSON_TYPE.ARRAY ) {
+		if( jExtraFileLinks.type == JSONType.array ) {
 			linkList.length = jExtraFileLinks.array.length;
 			foreach( size_t i, ref JSONValue entry; jExtraFileLinks ) {
-				if( entry.type != JSON_TYPE.ARRAY || entry.array.length < 2) {
+				if( entry.type != JSONType.array || entry.array.length < 2) {
 					throw new Exception(`Некорректный формат элемента списка ссылок на доп. материалы`);
 				}
-				if( entry[0].type != JSON_TYPE.STRING && entry[0].type != JSON_TYPE.NULL ) {
+				if( entry[0].type != JSONType.string && entry[0].type != JSONType.null_ ) {
 					throw new Exception(`Некорректный формат описания ссылки на доп. материалы`);
 				}
-				if( entry[1].type != JSON_TYPE.STRING && entry[1].type != JSON_TYPE.NULL ) {
+				if( entry[1].type != JSONType.string && entry[1].type != JSONType.null_ ) {
 					throw new Exception(`Некорректный формат ссылки на доп. материалы`);
 				}
 				linkList[i] = [
-					(entry[0].type == JSON_TYPE.STRING? entry[0].str : null),
-					(entry[1].type == JSON_TYPE.STRING? entry[1].str : null)
+					(entry[0].type == JSONType.string? entry[0].str : null),
+					(entry[1].type == JSONType.string? entry[1].str : null)
 				];
 			}
 		}

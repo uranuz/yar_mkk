@@ -50,7 +50,7 @@ IvyData renderAuth(HTTPContext ctx)
 			]);
 		} catch(Exception) {}
 
-		if( jResult.type == JSON_TYPE.STRING )
+		if( jResult.type == JSONType.string )
 		{
 			resp.cookies["__sid__"] = jResult.str;
 			resp.cookies["user_login"] = req.bodyForm["userLogin"];

@@ -2,7 +2,7 @@ module mkk.main.pohod.filters;
 
 import mkk.main.service;
 
-import std.json: JSONValue, JSON_TYPE;
+import std.json: JSONValue, JSONType;
 static immutable JSONValue pohodFiltersJSON;
 
 /// Публичный метод сервиса для получения списка избранных фильтров по походам.
@@ -72,12 +72,12 @@ shared static this()
 
 	foreach( ref section; pohodFilters["sections"].array )
 	{
-		if( section.type != JSON_TYPE.OBJECT )
+		if( section.type != JSONType.object )
 			continue;
 
 		foreach( ref item; section["items"].array )
 		{
-			if( item.type != JSON_TYPE.OBJECT )
+			if( item.type != JSONType.object )
 				continue;
 
 			foreach( num, val; item["fields"].object )
