@@ -2,11 +2,13 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 from fir.controls.Paging import Paging;
-def TouristNavigatedList {=
+def TouristNavList {=
 	def.kv
-		moduleName: 'mkk/Tourist/NavigatedList/NavigatedList'
-		instanceName: 'touristNavigatedList'
-		cssBaseClass: 'mkk-TouristNavigatedList'
+		moduleName: 'mkk/Tourist/NavList/NavList'
+		instanceName: 'touristNavList'
+		cssBaseClass: 'mkk-TouristNavList'
+		RPCMethod: 'tourist.plainList'
+		requestURI: '/api/tourist/plainList'
 		touristList: null
 		nav: null
 		itemTextTag: 'div'
@@ -26,7 +28,6 @@ def TouristNavigatedList {=
 		{=TouristPlainList
 			instanceName: instanceName ~ 'View'
 			touristList: touristList
-			nav: nav
 			itemTextTag: itemTextTag
 			itemIcon: itemIcon
 			mode: mode

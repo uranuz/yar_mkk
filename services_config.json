@@ -58,7 +58,6 @@
 			"pageRouting": [
 				{
 					"pageURI": "/dyn/index",
-					"requestURI": "/api/index",
 					"ivyModule": "mkk.IndexPage",
 					"ivyMethod": "IndexPage"
 				}, {
@@ -67,62 +66,40 @@
 					"ivyMethod": "AboutSite"
 				}, {
 					"pageURI": "/dyn/document/list",
-					"requestURI": "/api/document/list",
 					"ivyModule": "mkk.Document.List",
 					"ivyMethod": "DocumentList"
 				}, {
-					"pageURI": "/dyn/document/read",
-					"requestURI": "/api/document/read",
-					"ivyModule": "mkk.Document.Edit",
-					"ivyMethod": "DocumentEdit"
-				}, {
-					"pageURI": "/dyn/document/edit/results",
-					"requestURI": "/api/document/edit/results",
-					"ivyModule": "mkk.Document.Edit.Results",
-					"ivyMethod": "Results",
-					"HTTPMethod": "POST",
-					"ivyParams": ["num"]
-				}, {
 					"pageURI": "/dyn/document/edit",
-					"requestURI": "/api/document/read",
 					"ivyModule": "mkk.Document.Edit",
 					"ivyMethod": "DocumentEdit"
 				}, {
 					"pageURI": "/dyn/tourist/plainList",
-					"requestURI": "/api/tourist/plainList",
 					"ivyModule": "mkk.Tourist.PlainList",
-					"ivyMethod": "TouristPlainList",
-					"ivyParams": ["mode"]
+					"ivyMethod": "TouristPlainList"
 				}, {
 					"pageURI": "/dyn/tourist/list",
-					"requestURI": "/api/tourist/list",
 					"ivyModule": "mkk.Tourist.List",
 					"ivyMethod": "TouristList"
 				}, {
 					"pageURI": "/dyn/tourist/edit/results",
 					"requestURI": "/api/tourist/edit/results",
-					"ivyModule": "mkk.Tourist.Edit.Results",
-					"ivyMethod": "Results",
-					"HTTPMethod": "POST",
-					"ivyParams": ["num"]
+					"ivyModule": "mkk.Helpers.EditResults",
+					"ivyMethod": "EditResults",
+					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/tourist/edit",
-					"requestURI": "/api/tourist/read",
 					"ivyModule": "mkk.Tourist.Edit",
 					"ivyMethod": "TouristEdit"
 				}, {
 					"pageURI": "/dyn/tourist/experience",
-					"requestURI": "/api/tourist/experience",
 					"ivyModule": "mkk.Tourist.Experience",
 					"ivyMethod": "Experience"
 				}, {
 					"pageURI": "/dyn/user/list",
-					"requestURI": "/api/user/list",
 					"ivyModule": "mkk.User.List",
 					"ivyMethod": "UserList"
 				}, {
 					"pageURI": "/dyn/user/reg/card",
-					"requestURI": "/api/tourist/read",
 					"ivyModule": "mkk.User.Reg.Card",
 					"ivyMethod": "UserRegCard"
 				}, {
@@ -142,39 +119,32 @@
 					"ivyMethod": "UserReg"
 				}, {
 					"pageURI": "/dyn/stat",
-					"requestURI": "/api/stat",
 					"ivyModule": "mkk.Pohod.Stat",
 					"ivyMethod": "Stat"
 				}, {
 					"pageURI": "/dyn/moder/list",
-					"requestURI": "/api/moder/list",
 					"ivyModule": "mkk.User.ModerList",
 					"ivyMethod": "ModerList"
 				}, {
 					"pageURI": "/dyn/pohod/list",
-					"requestURI": "/api/pohod/list",
 					"ivyModule": "mkk.Pohod.List",
 					"ivyMethod": "PohodList"
 				}, {
 					"pageURI": "/dyn/pohod/read",
-					"requestURI": "/api/pohod/read",
 					"ivyModule": "mkk.Pohod.Read",
 					"ivyMethod": "PohodRead"
 				}, {
 					"pageURI": "/dyn/pohod/partyInfo",
-					"requestURI": "/api/pohod/partyInfo",
 					"ivyModule": "mkk.Pohod.List.PartyInfo",
 					"ivyMethod": "PartyInfo"
 				}, {
 					"pageURI": "/dyn/pohod/edit/results",
 					"requestURI": "/api/pohod/edit/results",
-					"ivyModule": "mkk.Pohod.Edit.Results",
-					"ivyMethod": "Results",
-					"HTTPMethod": "POST",
-					"ivyParams": ["num"]
+					"ivyModule": "mkk.Helpers.EditResults",
+					"ivyMethod": "EditResults",
+					"HTTPMethod": "POST"
 				}, {
 					"pageURI": "/dyn/pohod/edit",
-					"requestURI": "/api/pohod/read",
 					"ivyModule": "mkk.Pohod.Edit",
 					"ivyMethod": "PohodEdit"
 				}, {
@@ -182,45 +152,36 @@
 					"ivyModule": "mkk.Pohod.Edit.ExtraFileLinks.LinkItems"
 				}, {
 					"pageURI": "/dyn/user/settings",
-					"requestURI": "/api/user/settings",
 					"ivyModule": "mkk.User.Settings",
 					"ivyMethod": "UserSettings"
 				}, {
 					"pageURI": "/dyn/right/edit",
-					"requestURI": "/api/right/read",
 					"ivyModule": "mkk.Right.Edit",
 					"ivyMethod": "RightEdit"
 				}, {
 					"pageURI": "/dyn/right/rule/edit",
-					"requestURI": "/api/right/rule/read",
 					"ivyModule": "mkk.Right.Rule.Edit",
 					"ivyMethod": "RightRuleEdit"
 				}, {
 					"pageURI": "/dyn/right/rule/list",
-					"requestURI": "/api/right/rule/list",
 					"ivyModule": "mkk.Right.Rule.List",
 					"ivyMethod": "RightRuleList"
 				}, {
 					"pageURI": "/dyn/right/role/list",
-					"requestURI": "/api/right/role/list",
 					"ivyModule": "mkk.Right.Role.List",
 					"ivyMethod": "RightRoleList"
 				}, {
 					"pageURI": "/dyn/right/object/list",
-					"requestURI": "/api/right/object/list",
 					"ivyModule": "mkk.Right.Object.List",
-					"ivyMethod": "ObjectList"
+					"ivyMethod": "RightObjectList"
 				}, {
 					"pageURI": "/dyn/right/object/edit",
-					"requestURI": "/api/right/object/readWithRights",
 					"ivyModule": "mkk.Right.Object.Edit",
 					"ivyMethod": "RightObjectEdit"
 				}, {
 					"pageURI": "/dyn/right/list",
-					"requestURI": "/api/right/list",
 					"ivyModule": "mkk.Right.List",
-					"ivyMethod": "ObjectRightList",
-					"ivyParams": ["objectNum"]
+					"ivyMethod": "ObjectRightList"
 				}, {
 					"pageURI": "/dyn/tourist/history",
 					"requestURI": "/history/api/tourist/history",

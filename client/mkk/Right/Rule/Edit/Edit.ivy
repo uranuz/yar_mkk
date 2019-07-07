@@ -6,6 +6,7 @@ def RightRuleEdit {=
 		instanceName: 'rightRuleEdit'
 		moduleName: "mkk/Right/Rule/Edit/Edit"
 		RPCMethod: 'right.rule.read'
+		requestURI: "/api/right/rule/read"
 		ruleRec: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}" title="Редактировать правило доступа">

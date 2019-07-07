@@ -1,24 +1,24 @@
 define('mkk/Right/Role/List/List', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
-	'fir/network/json_rpc',
 	'fir/common/helpers',
+	'fir/network/json_rpc',
 	'css!mkk/Right/Role/List/List'
-], function (FirControl, NavigationMixin, json_rpc, helpers) {
+], function (FirControl, FirHelpers, json_rpc) {
 return FirClass(
 	function RightRoleList(opts) {
 		this.superctor(RightRoleList, opts);
 		this._navigatedArea = 'listView';
 		this.rightRoleEditDlg = this.getChildByName('rightRoleEditDlg');
 		this.rightRoleDeleteDlg = this.getChildByName('rightRoleDeleteDlg');
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
+		this._reloadList = this._reloadControl.bind(this, 'linkList');
+		FirHelpers.doOnEnter(this, 'nameField', this._reloadList);
 		this._subscr(function() {
-			helpers.doOnEnter(this._elems('nameField'), this._onStartSearchBtn_click.bind(this));
-			this._elems('searchBtn').on('click', this._onStartSearchBtn_click.bind(this));
+			this._elems('searchBtn').on('click', this._reloadList);
 			this._elems('addRoleBtn').on('click', this._onAddRoleBtn_click.bind(this));
 			this._elems('roleList').on('click', this._onEditRoleBtn_click.bind(this));
 		});
 		this._unsubscr(function() {
-			this._elems('nameField').off('keyup');
 			this._elems('searchBtn').off('click');
 			this._elems('addRoleBtn').off('click');
 			this._elems('roleList').off('click');
@@ -26,13 +26,16 @@ return FirClass(
 		this.subscribe('onAfterLoad', function(ev, areaName, opts) {
 			this._roleList = opts.roleList;
 		});
-		this.rightRoleEditDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
-		this.rightRoleDeleteDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
-	}, FirControl, [NavigationMixin], {
-		_onStartSearchBtn_click: function() {
-			this._reloadControl(this._navigatedArea);
-		},
+		this.rightRoleEditDlg.subscribe('dialogControlDestroy', this._reloadList);
+		this.rightRoleDeleteDlg.subscribe('dialogControlDestroy', this._reloadList);
 
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: 'linkList',
+			replaceURIState: true
+		});
+	}, FirControl, {
 		/** Нажатие по кнопке "Добавить" */
 		_onAddRoleBtn_click: function() {
 			this.rightRoleEditDlg.open({

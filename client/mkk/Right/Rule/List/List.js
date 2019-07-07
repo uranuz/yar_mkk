@@ -1,24 +1,24 @@
 define('mkk/Right/Rule/List/List', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
-	'fir/network/json_rpc',
 	'fir/common/helpers',
+	'fir/network/json_rpc',
 	'css!mkk/Right/Rule/List/List'
-], function (FirControl, NavigationMixin, json_rpc, helpers) {
+], function (FirControl, FirHelpers, json_rpc) {
 return FirClass(
 	function RightRuleList(opts) {
 		this.superctor(RightRuleList, opts);
 		this._navigatedArea = 'listView';
 		this.rightRuleEditDlg = this.getChildByName('rightRuleEditDlg');
 		this.rightRuleDeleteDlg = this.getChildByName('rightRuleDeleteDlg');
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
+		this._reloadList = this._reloadControl.bind(this, 'listView');
+		FirHelpers.doOnEnter(this, 'nameField', this._reloadList);
 		this._subscr(function() {
-			helpers.doOnEnter(this._elems('nameField'), this._onStartSearchBtn_click.bind(this));
-			this._elems('searchBtn').on('click', this._onStartSearchBtn_click.bind(this));
+			this._elems('searchBtn').on('click', this._reloadList);
 			this._elems('addRuleBtn').on('click', this._onAddRuleBtn_click.bind(this));
 			this._elems('ruleList').on('click', this._onEditRuleBtn_click.bind(this));
 		});
 		this._unsubscr(function() {
-			this._elems('nameField').off('keyup');
 			this._elems('searchBtn').off('click');
 			this._elems('addRuleBtn').off('click');
 			this._elems('ruleList').off('click');
@@ -26,13 +26,15 @@ return FirClass(
 		this.subscribe('onAfterLoad', function(ev, areaName, opts) {
 			this._ruleList = opts.ruleList;
 		});
-		this.rightRuleEditDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
-		this.rightRuleDeleteDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
-	}, FirControl, [NavigationMixin], {
-		_onStartSearchBtn_click: function() {
-			this._reloadControl(this._navigatedArea);
-		},
+		this.rightRuleEditDlg.subscribe('dialogControlDestroy', this._reloadList);
+		this.rightRuleDeleteDlg.subscribe('dialogControlDestroy', this._reloadList);
 
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: 'listView'
+		});
+	}, FirControl, {
 		/** Нажатие по кнопке "Добавить" */
 		_onAddRuleBtn_click: function() {
 			this.rightRuleEditDlg.open({
@@ -99,7 +101,7 @@ return FirClass(
 		_getQueryParams: function(areaName) {
 			return {
 				name: this._elems('nameField').val(),
-				nav: this.getNavParams()
+				nav: this._paging.getNavParams()
 			};
 		},
 		_getViewParams: function() {

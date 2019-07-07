@@ -5,6 +5,7 @@ def UserSettings {=
 		moduleName: 'mkk/User/Settings/Settings'
 		instanceName: 'userSettings'
 		cssBaseClass: 'mkk-UserSettings'
+		requestURI: "/api/user/settings"
 		userFullName: null
 		userLogin: null
 		pwChangeMessage: null;

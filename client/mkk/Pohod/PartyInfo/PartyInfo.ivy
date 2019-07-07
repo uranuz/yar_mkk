@@ -3,15 +3,16 @@ from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 def PartyInfo {=
 	def.kv
-		moduleName: 'mkk/Pohod/List/PartyInfo/PartyInfo'
+		moduleName: 'mkk/Pohod/PartyInfo/PartyInfo'
 		cssBaseClass: "mkk-PartyInfo"
 		instanceName: "partyInfo"
+		RPCMethod: 'pohod.partyInfo'
+		requestURI: '/api/pohod/partyInfo'
 		pohodInfo: null
 		partyList: null;
 	def.body {*
-	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}" title="Участники похода">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-		{=if not{=empty pohodInfo} {*
 		<div>
 			<span class="{=cls 'codeLabel'}">Код МКК:</span>
 			<span>{{pohodInfo.mkkCode}}</span>
@@ -25,7 +26,6 @@ def PartyInfo {=
 			<span>{{pohodInfo.pohodRegion}}</span>
 		</div>
 		<hr/>
-		*}}
 		<div>
 			{=TouristPlainList
 				touristList: partyList

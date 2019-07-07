@@ -6,6 +6,7 @@ def Stat {=
 		moduleName: 'mkk/Pohod/Stat/Stat'
 		instanceName: 'stat'
 		cssBaseClass: "mkk-Stat",
+		requestURI: "/api/stat"
 		data: null
 		select: null;
 	def.body {*

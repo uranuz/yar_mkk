@@ -1,22 +1,25 @@
 define('mkk/Tourist/Experience/Experience', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
+	'fir/common/helpers',
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Tourist/Experience/Experience'
-], function (FirControl, NavigationMixin) {
+], function (FirControl, FirHelpers) {
 return FirClass(
 	function TouristExperience(opts) {
 		this.superctor(TouristExperience, opts);
-		this._navigatedArea = 'tableContentBody';
-	}, FirControl, [NavigationMixin], {
-		/**
-		 * Параметры, передаваемые на основной сервис, предпочтительно через адресную строку (для REST-запросов)
-		 * Но для RPC-вызовов эти параметры добавляются к параметрам метода
-		 */
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: 'tableContentBody',
+			navOpt: 'nav',
+			replaceURIState: true
+		});
+	}, FirControl, {
 		_getQueryParams: function(areaName) {
 			return {
 				num: this._tourist.get('num'),
-				nav: this.getNavParams()
+				nav: this._paging.getNavParams()
 			};
 		}
 	}

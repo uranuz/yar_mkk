@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Paging import Paging;
-from mkk.Tourist.NavigatedList import TouristNavigatedList;
+from mkk.Tourist.NavList import TouristNavList;
 def LabeledInput {=
 	def.kv caption field placeholder;
 	def.body noscope {*
@@ -21,15 +21,10 @@ def TouristSearchArea {=
 		moduleName: 'mkk/Tourist/SearchArea/SearchArea'
 		instanceName: 'touristSearchArea'
 		cssBaseClass: 'mkk-TouristSearchArea'
-		visible: true
 		addrFiltersCollapsed: true;
 	def.body {*
-	<div
-		class="{=cls 'block'}"
-		title="Поиск туристов"
-		data-fir-module="{{moduleName}}"
-		style="{=if visible == false 'display: none;'}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['addrFiltersCollapsed']}"/>
 		<label class="{=cls 'filterItem'} form-group row form-inline">
 			<span class="col-sm-2 col-md-3 col-form-label">ФИО</span>
 			<div class="col-sm-10 col-md-9">
@@ -48,16 +43,7 @@ def TouristSearchArea {=
 					class="{=cls 'patronymicFilter'} form-control">
 			</div>
 		</label>
-		<label class="{=cls 'filterItem'} form-group row form-inline">
-			<span class="col-sm-2 col-md-3 col-form-label">Год рожд.</span>
-			<div class="col-sm-10 col-md-9">
-				<input type="text"
-					placeholder="1812"
-					size="4"
-					maxlength="4"
-					class="{=cls 'yearFilter'} form-control">
-			</div>
-		</label>
+		
 
 		<fieldset class="{=cls 'addrFilterPanel'}">
 			<legend
@@ -65,6 +51,16 @@ def TouristSearchArea {=
 				class="{=cls 'addrFilterToggleBtn'}"
 				>Доп. фильтры <span class="{=cls 'addrFilterArrow'} is-collapsed"></span></legend>
 			<div class="{=cls 'addrFilterContent'} is-collapsed">
+				<label class="{=cls 'filterItem'} form-group row form-inline">
+					<span class="col-sm-2 col-md-3 col-form-label">Год рожд.</span>
+					<div class="col-sm-10 col-md-9">
+						<input type="text"
+							placeholder="1812"
+							size="4"
+							maxlength="4"
+							class="{=cls 'yearFilter'} form-control">
+					</div>
+				</label>
 				{%
 					LabeledInput
 						caption: 'Область'
@@ -85,7 +81,7 @@ def TouristSearchArea {=
 		<div class="{=cls 'searchResultsPanel'}">
 			<h5>Найденные туристы</h5>
 			<div class="{=cls 'foundTourists'}">
-				{=TouristPlainList
+				{=TouristNavList
 					instanceName: instanceName ~ 'List'
 					mode: 'add'
 				}

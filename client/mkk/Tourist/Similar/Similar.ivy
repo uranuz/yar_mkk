@@ -1,0 +1,31 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from mkk.Tourist.PlainList import TouristPlainList;
+def TouristSimilar {=
+	def.kv
+		instanceName: 'touristSimilar'
+		cssBaseClass: 'mkk-TouristSimilar'
+		moduleName: 'mkk/Tourist/Similar/Similar'
+		touristList: null;
+	def.body {*
+	<div class="{=cls 'similarsDlg'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<div class="{=cls 'similarsMsg'}">
+			В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе.
+			Если это так, можно перейти к его редактированию. Если новый турист ещё не существует,
+			можно продолжить добавление.
+		</div>
+		<div class="{=cls 'similarsBlock'}">
+			{=TouristPlainList
+				instanceName: 'similarsList'
+				touristList: touristList
+				mode: null
+			}
+		</div>
+		<button type="button"
+			class="{=cls 'forceSubmitBtn'} btn btn-primary"
+			>Продолжить добавление</button>
+	</div>
+	*}
+};
+}

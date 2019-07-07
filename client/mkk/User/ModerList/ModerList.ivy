@@ -5,6 +5,7 @@ def ModerList {=
 		moduleName: "mkk/User/ModerList/ModerList"
 		cssBaseClass: "mkk-ModerList"
 		instanceName: "moderList"
+		requestURI: "/api/moder/list"
 		moderList: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">

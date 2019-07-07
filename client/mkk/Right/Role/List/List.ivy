@@ -13,6 +13,7 @@ def RightRoleList {=
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
 		RPCMethod: RPCMethod
+		requestURI: "/api/right/role/list"
 		roleList: null
 		nav: null
 		isSelect: false;

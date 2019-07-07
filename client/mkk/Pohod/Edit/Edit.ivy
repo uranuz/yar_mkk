@@ -2,17 +2,16 @@ expr {=
 from fir.controls.utils import cls, enumFormatWithNull, hasRight;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
-from mkk.Helpers.DeleteConfirm import DeleteConfirm;
-from mkk.Pohod.Edit.Party import PartyEdit;
-from mkk.Pohod.Edit.Chief.Edit import ChiefEdit;
+from fir.controls.OpenDialog import OpenDialog;
 from mkk.Pohod.Edit.Chief.AddToParty import ChiefAddToParty;
-from mkk.Tourist.NavigatedList import TouristNavigatedList;
+from mkk.Tourist.NavList import TouristNavList;
 from mkk.Pohod.Edit.ExtraFileLinks import ExtraFileLinks;
 def PohodEdit {=
 	def.kv
 		moduleName: 'mkk/Pohod/Edit/Edit'
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
+		requestURI: "/api/pohod/read"
 		accessObject: 'pohod.item'
 		pohod: null
 		partyList: null
@@ -294,7 +293,7 @@ def PohodEdit {=
 			<tr>
 				<td colspan="999">
 					<div class="{=cls 'partyList'}">
-						{=TouristNavigatedList
+						{=TouristNavList
 							instanceName: 'partyList'
 							touristList: {=slice partyList 0 10}
 							nav: partyNav
@@ -330,12 +329,46 @@ def PohodEdit {=
 		<div style="clear: both"></div>
 		</form>
 
-		{=DeleteConfirm deleteWhat: 'похода'}
-		{=PartyEdit
-			partyList: partyList
-			partyNav: partyNav
+		{=OpenDialog
+			instanceName: 'deleteConfirmDlg'
+			config: {
+				ivyModule: 'mkk.Helpers.DeleteConfirm',
+				ivyMethod: 'DeleteConfirm',
+				viewParams: {
+					deleteWhat: 'похода'
+				},
+				dialogOpts: {
+					width: 600,
+					height: 600,
+					title: 'Удаление похода'
+				}
+			}
 		}
-		{=ChiefEdit}
+		{=OpenDialog
+			instanceName: 'partyEditDlg'
+			config: {
+				ivyModule: 'mkk.Pohod.Edit.Party',
+				ivyMethod: 'PartyEdit',
+				dialogOpts: {
+					width: 1100,
+					height: 600,
+					title: 'Редактирование группы'
+				}
+			}
+			
+		}
+		{=OpenDialog
+			instanceName: 'chiefEditDlg'
+			config: {
+				ivyModule: 'mkk.Pohod.Edit.Chief.Edit',
+				ivyMethod: 'ChiefEdit',
+				dialogOpts: {
+					width: 600,
+					height: 600
+				}
+			}
+		}
+
 		{=ChiefAddToParty}
 	</div>
 	*}

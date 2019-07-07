@@ -36,7 +36,7 @@ def RecentPohodList {=
 								{{pohod.chiefPatronymic}}
 							</a>
 							<p class="{=cls 'dateInterval'}"
-								>Сроки похода:	{=DateRangePrinter
+								>Сроки похода: {=DateRangePrinter
 									begin: {{pohod.beginDate}}
 									end: {{pohod.finishDate}}
 								}</p>
@@ -60,6 +60,7 @@ def IndexPage {=
 		moduleName: "mkk/IndexPage/IndexPage"
 		cssBaseClass: "mkk-IndexPage"
 		instanceName: 'indexPage'
+		requestURI: '/api/index'
 		pohodList: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">

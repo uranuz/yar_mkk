@@ -5,3 +5,7 @@ body label {
 body legend {
 	font-size: 1rem;
 }
+
+body ol, body ul, body dl {
+	list-style-position: inside;
+}

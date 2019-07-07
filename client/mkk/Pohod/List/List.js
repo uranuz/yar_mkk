@@ -1,19 +1,25 @@
 define('mkk/Pohod/List/List', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
-	'mkk/Pohod/List/PartyInfo/PartyInfo',
+	'fir/common/helpers',
+	'mkk/Pohod/PartyInfo/PartyInfo',
 	'mkk/Pohod/List/Navigation/Navigation',
 	'css!mkk/Pohod/List/List'
-], function(FirControl, NavigationMixin) {
+], function(FirControl, FirHelpers) {
 return FirClass(
 	function PohodList(opts) {
 		this.superctor(PohodList, opts);
-		this._navigatedArea = 'tableContentBody';
-		this._navProperty = 'pohodNav';
-		this._partyInfo = this.getChildByName('partyInfo');
+		this._partyInfoDlg = this.getChildByName('partyInfoDlg');
 		this._navigation = this.getChildByName('pohodListNavigation');
+
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._navigation._getPaging(),
+			areaName: 'tableContentBody',
+			navOpt: 'pohodNav',
+			replaceURIState: true
+		});
 		
-		this._navigation.subscribe('onSearchStart', this._onSetCurrentPage.bind(this));
+		this._navigation.subscribe('onSearchStart', this._reloadControl.bind(this, 'tableContentBody'));
 		this._subscr(function() {
 			this._elems("tableContentBody").on("click", this.onShowPartyBtn_click.bind(this));
 		});
@@ -21,27 +27,23 @@ return FirClass(
 		this._unsubscr(function() {
 			this._elems("tableContentBody").off();
 		});
-	}, FirControl, [NavigationMixin], {
+	}, FirControl, {
 		onShowPartyBtn_click: function(ev) {
-			var
-				el = $(ev.target).closest(this._elemClass('showPartyBtn')),
-				self = this;
+			var el = $(ev.target).closest(this._elemClass('showPartyBtn'));
 			if( !el || !el.length ) {
 				return;
 			}
 
-			var pohodNum = parseInt(el.data("pohodNum"), 10)
-			if( !isNaN(pohodNum)) {
-				this._partyInfo.setNum(pohodNum);
-				this._partyInfo.openDialog();
-			}
-		},
-		_getPaging: function() {
-			return this._navigation._getPaging();
+			var pohodNum = parseInt(el.data("pohod-num"), 10);
+			this._partyInfoDlg.open({
+				queryParams: {
+					num: pohodNum
+				}
+			});
 		},
 		_getQueryParams: function() {
 			return {
-				nav: this._getPaging.getNavParams(),
+				nav: this._navigation._getPaging().getNavParams(),
 				filter: this._navigation.getFilter()
 			}
 		}

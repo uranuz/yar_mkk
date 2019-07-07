@@ -11,6 +11,7 @@ def TouristList {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: 'tourist.list'
+		requestURI: "/api/tourist/list"
 		touristList: null
 		nav: null
 		filter: null;

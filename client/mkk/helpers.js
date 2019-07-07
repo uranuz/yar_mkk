@@ -5,7 +5,7 @@ define('mkk/helpers', [], function () {
 		 * то проверяет, что проверяет, что low <= value <= high
 		 */
 		checkInt: function(value, low, high) {
-			value = parseInt(value);
+			value = parseInt(value, 10);
 
 			if (isNaN(value) || value % 1 != 0)
 				return false;

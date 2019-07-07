@@ -7,6 +7,7 @@ def DocumentEdit {=
 		instanceName: 'documentEdit'
 		cssBaseClass: "mkk-DocumentEdit"
 		RPCMethod: 'document.read'
+		requestURI: "/api/document/read"
 		document: null;
 	def.body {*
 	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}">

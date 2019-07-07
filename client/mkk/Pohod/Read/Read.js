@@ -1,24 +1,22 @@
 define('mkk/Pohod/Read/Read', [
 	'fir/controls/FirControl',
-	'mkk/Tourist/NavigatedList/NavigatedList',
+	'mkk/Tourist/NavList/NavList',
 	'mkk/Helpers/EntityProperty/EntityProperty',
 	'css!mkk/Pohod/Read/Read'
 ], function(FirControl) {
+'use strict';
 return FirClass(
-	//Инициализация блока редактирования похода
 	function PohodRead(opts) {
 		this.superproto.constructor.call(this, opts);
-
-		this._partyRS = opts.partyList; // RecordSet с участниками похода
 		this._partyListProp = this.getChildByName('partyListProp');
-		this._partyList = this._partyListProp.getChildByName('partyList');
-		this._partyList.setFilter({
-			selectedKeys: this.getPartyNums()
-		});
+		this._partyListProp
+			.getChildByName('partyList')
+			.setFilterGetter(this.getPartyListFilter.bind(this));
 	}, FirControl, {
-		/** Получить идентификаторы участников группы */
-		getPartyNums: function() {
-			return this._partyRS.getKeys();
+		getPartyListFilter: function() {
+			return {
+				nums: this._partyList.getKeys()
+			};
 		}
 	}
 );

@@ -6,8 +6,8 @@ def ChiefAddToParty {=
 		instanceName: 'chiefAddToParty'
 		cssBaseClass: 'mkk-ChiefAddToParty';
 	def.body {*
-	<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
-	<div class="{=cls 'block'}" title="Подтвердите операцию" style="display: none;" data-fir-module="{{moduleName}}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div class="{=cls 'msg'}">
 			Обнаружено, что руководитель или заместитель отсутствует в списке участников похода.

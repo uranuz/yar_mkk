@@ -15,17 +15,6 @@ return FirClass(
 			this._reloadControl();
 		},
 
-		_getRequestURI: function(areaName) {
-			return '/dyn/pohod/extraFileLinks';
-		},
-
-		_getQueryParams: function(areaName) {
-			return {
-				instanceName: this.instanceName(),
-				generalTemplate: 'no'
-			};
-		},
-
 		_updateControlMarkup: function(state) {
 			if (state.areaName === 'moreLinks') {
 				this._elems('linksTableBody').append(state.controlTag.children());

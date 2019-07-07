@@ -1,17 +1,18 @@
 expr {=
 from fir.controls.utils import cls;
 from mkk.Tourist.SearchArea import TouristSearchArea;
-from mkk.Tourist.NavigatedList import TouristNavigatedList;
+from mkk.Tourist.NavList import TouristNavList;
 def PartyEdit {=
 	def.kv
 		moduleName: 'mkk/Pohod/Edit/Party/Party'
 		instanceName: 'partyEdit'
 		cssBaseClass: 'mkk-PartyEdit'
-		partyList: null
-		partyNav: null;
+		RPCMethod: 'tourist.plainList'
+		touristList: null
+		nav: null;
 	def.body {*
-	<!--Диалог редактирования участников похода-->
-	<div class="{=cls 'block'}" style="display: none;" title="Список участников" data-fir-module="{{moduleName}}">
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<!--Диалог редактирования участников похода-->
 		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
 		<div class="{=cls 'dlgContent'}">
 			<div class="{=cls 'controlBar'}">
@@ -22,16 +23,18 @@ def PartyEdit {=
 				<div class="{=cls 'searchPanel'}">
 					<h5>Поиск туристов</h5>
 					<div class="{=cls 'searchBlock'}">
-						{=TouristSearchArea instanceName: 'touristSearchArea'}
+						{=TouristSearchArea
+							instanceName: 'touristSearchArea'
+						}
 					</div>
 				</div>
 				<div class="{=cls 'selectedTouristsPanel'}">
 					<h5>Участники похода</h5>
 					<div class="{=cls 'selectedTourists'}">
-						{=TouristNavigatedList
+						{=TouristNavList
 							instanceName: 'selectedTourists'
-							touristList: partyList
-							nav: partyNav
+							touristList: touristList
+							nav: nav
 							mode: 'remove'
 						}
 					</div>

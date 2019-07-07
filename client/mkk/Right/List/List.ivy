@@ -6,6 +6,7 @@ def RightList {=
 		moduleName: 'mkk/Right/List/List'
 		instanceName: 'RightList'
 		cssBaseClass: 'mkk-RightList'
+		requestURI: "/api/right/list"
 		rightList: null
 		objectNum: null;
 	def.body {*

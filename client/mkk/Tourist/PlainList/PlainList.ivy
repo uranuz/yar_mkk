@@ -21,7 +21,7 @@ def TouristPlainList {=
 			}
 		}
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['touristList', 'mode'] }"/>
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['touristList', 'itemIcon', 'mode'] }"/>
 			{=if not{=empty touristList}
 				{=repeat rec in touristList {*
 					<div class="{=cls 'touristItem'}" data-num="{{rec.num}}">

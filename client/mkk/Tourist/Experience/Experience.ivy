@@ -14,6 +14,7 @@ def Experience {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: 'tourist.experience'
+		requestURI: "/api/tourist/experience"
 		tourist: null
 		pohodList: null
 		nav: null;

@@ -4,6 +4,7 @@ from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
 from mkk.Helpers.DeleteConfirm import DeleteConfirm;
+from fir.controls.OpenDialog import OpenDialog;
 
 def LabeledInput {=
 	def.kv caption field appendix: null forceNoCheck: null;
@@ -67,6 +68,7 @@ def TouristEdit {=
 		moduleName: 'mkk/Tourist/Edit/Edit'
 		instanceName: 'touristEdit'
 		cssBaseClass: 'mkk-TouristEdit'
+		requestURI: "/api/tourist/read"
 		accessObject: 'tourist.item'
 		tourist: null
 		isEditDialog: true;
@@ -108,7 +110,19 @@ def TouristEdit {=
 			action="{{vpaths.siteDynamic}}tourist/edit/results">*}
 		}
 			{=if isEditDialog {*<h2>Редактирование данных туриста</h2>*} }
-			<input type="hidden" name="num" value="{{tourist.num}}"/>
+			<input type="hidden"
+				class="{=cls 'numField'}"
+				name="num"
+				value="{{tourist.num}}"/>
+			<input type="hidden"
+				name="whatObject"
+				value="турист"/>
+			<input type="hidden"
+				name="listLink"
+				value="{{vpaths.siteDynamic}}tourist/list"/>
+			<input type="hidden"
+				name="editLink"
+				value="{{vpaths.siteDynamic}}tourist/edit"/>
 			{%
 				LabeledInput caption: 'Фамилия' field: 'familyName';
 				LabeledInput caption: 'Имя' field: 'givenName';
@@ -166,7 +180,7 @@ def TouristEdit {=
 						>Сохранить</button>
 				</span>
 				<span class="col-auto">
-					{=if {=hasRight kind: 'delete'} {*
+					{=if {=hasRight kind: 'delete'} and not{=empty tourist.num} {*
 					<button type="button"
 						class="{=cls 'deleteDialogBtn'} btn btn-secondary"
 						>Удалить туриста</button>
@@ -177,27 +191,33 @@ def TouristEdit {=
 		{=if isEditDialog {*</form>*} }
 
 	{=if isEditDialog {*
-		{=DeleteConfirm
-			instanceName: 'touristDeleteConfirm'
-			deleteWhat: 'туриста'
-		}
-		<div class="{=cls 'similarsDlg'}">
-			<div class="{=cls 'similarsMsg'}">
-				В базе данных найдены похожие туристы. Возможно, добавляемый турист уже имеется в базе.
-				Если это так, можно перейти к его редактированию. Если новый турист ещё не существует,
-				можно продолжить добавление.
-			</div>
-			<div class="{=cls 'similarsBlock'}">
-				{=TouristPlainList
-					instanceName: 'similarsList'
-					touristList: []
-					mode: null
+		{=OpenDialog
+			instanceName: 'deleteConfirmDlg'
+			config: {
+				ivyModule: 'mkk.Helpers.DeleteConfirm',
+				ivyMethod: 'DeleteConfirm',
+				viewParams: {
+					deleteWhat: 'туриста'
+				},
+				dialogOpts: {
+					width: 600,
+					height: 600,
+					title: 'Удаление туриста'
 				}
-			</div>
-			<button type="button"
-				class="{=cls 'forceSubmitBtn'} btn btn-primary"
-				>Продолжить добавление</button>
-		</div>
+			}
+		}
+		{=OpenDialog
+			instanceName: 'touristSimilarDlg'
+			config: {
+				ivyModule: 'mkk.Tourist.Similar',
+				ivyMethod: 'TouristSimilar',
+				dialogOpts: {
+					width: 600,
+					height: 600,
+					title: 'Похожие туристы'
+				}
+			}
+		}
 	*}}
 	</div>
 	*}

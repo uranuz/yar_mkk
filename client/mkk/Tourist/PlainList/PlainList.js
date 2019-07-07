@@ -29,6 +29,12 @@ return FirClass(
 		},
 		getTouristList: function() {
 			return this._touristList;
+		},
+		_getViewParams: function(val) {
+			return {
+				itemIcon: this._itemIcon,
+				mode: this._mode
+			};
 		}
 	});
 });

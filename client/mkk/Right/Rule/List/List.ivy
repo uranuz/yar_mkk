@@ -13,6 +13,7 @@ def RightRuleList {=
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
 		RPCMethod: RPCMethod
+		requestURI: "/api/right/rule/list"
 		ruleList: null
 		nav: null
 		isSelect: false;

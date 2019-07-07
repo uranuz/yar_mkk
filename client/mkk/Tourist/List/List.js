@@ -1,9 +1,8 @@
 define('mkk/Tourist/List/List', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
 	'fir/common/helpers',
 	'css!mkk/Tourist/List/List'
-], function (FirControl, NavigationMixin, helpers) {
+], function (FirControl, FirHelpers) {
 var
 	searchOnEnterFields = [
 		'familyNameField',
@@ -13,24 +12,24 @@ var
 return FirClass(
 	function TouristList(opts) {
 		this.superctor(TouristList, opts);
-		this._navigatedArea = 'tableContentBody';
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
+		this._reloadList = this._reloadControl.bind(this, 'tableContentBody');
+		FirHelpers.doOnEnter(this, searchOnEnterFields, this._reloadList);
 		this._subscr(function() {
-			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
-			searchOnEnterFields.forEach(function(fieldName) {
-				helpers.doOnEnter(this._elems(fieldName), this._onSearch_start.bind(this));
-			});
+			this._elems('searchBtn').on('click', this._reloadList);
 		});
 		this._unsubscr(function() {
 			this._elems('searchBtn').off();
-			searchOnEnterFields.forEach(function(fieldName) {
-				this._elems(fieldName).off('keyup');
-			}.bind(this));
 		});
-	}, FirControl, [NavigationMixin], {
-		_onSearch_start: function() {
-			this._onSetCurrentPage();
-		},
 
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: 'tableContentBody',
+			navOpt: 'nav',
+			replaceURIState: true
+		});
+	}, FirControl, {
 		getFilter: function() {
 			var
 				textFields = ['familyName', 'givenName', 'patronymic'],
@@ -52,7 +51,7 @@ return FirClass(
 		_getQueryParams: function(areaName) {
 			return {
 				filter: this.getFilter(),
-				nav: this.getNavParams()
+				nav: this._paging.getNavParams()
 			};
 		}
 	}

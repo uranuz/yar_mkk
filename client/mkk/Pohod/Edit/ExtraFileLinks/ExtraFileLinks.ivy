@@ -6,6 +6,7 @@ def ExtraFileLinks {=
 		moduleName: 'mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks'
 		instanceName: 'extraFileLinksEdit'
 		cssBaseClass: 'mkk-ExtraFileLinks'
+		requestURI: '/dyn/pohod/extraFileLinks'
 		linkList: null,
 		portionSize: 5
 		disabled: null;

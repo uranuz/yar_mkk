@@ -1,14 +1,21 @@
 define('mkk/Document/List/List', [
 	'fir/controls/FirControl',
-	'fir/controls/Mixins/Navigation',
+	'fir/common/helpers',
 	'css!mkk/Document/List/List'
-], function (FirControl, NavigationMixin) {
+], function (FirControl, FirHelpers) {
 return FirClass(
 	function DocumentList(opts) {
 		this.superctor(DocumentList, opts);
-		this._navigatedArea = 'linkList'
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
 		this._documentEditDlg = this.getChildByName('documentEditDlg');
-		this._documentEditDlg.subscribe('dialogControlDestroy', this._onSetCurrentPage.bind(this));
+		this._documentEditDlg.subscribe('dialogControlDestroy', this._reloadControl.bind(this, 'linkList'));
+
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: 'linkList',
+			replaceURIState: true
+		});
 
 		this._subscr(function() {
 			this._elems('addDocBtn').on('click', this._onAddDocBtn_click.bind(this));
@@ -18,7 +25,7 @@ return FirClass(
 			this._elems('addDocBtn').off('click');
 			this._elems('linkList').off('click');
 		});
-	}, FirControl, [NavigationMixin], {
+	}, FirControl, {
 		_onAddDocBtn_click: function() {
 			this._documentEditDlg.open({});
 		},
@@ -36,7 +43,7 @@ return FirClass(
 		_getQueryParams: function() {
 			return {
 				filter: {},
-				nav: this.getNavParams()
+				nav: this._paging.getNavParams()
 			};
 		}
 	});

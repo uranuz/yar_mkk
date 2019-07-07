@@ -6,13 +6,15 @@ from fir.controls.OpenDialog import OpenDialog;
 var
 	instanceName: 'documentList'
 	cssBaseClass: "mkk-DocumentList"
-	RPCMethod: 'document.list';
+	RPCMethod: 'document.list'
+	requestURI: "/api/document/list";
 def DocumentList {=
 	def.kv
 		moduleName: 'mkk/Document/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: RPCMethod
+		requestURI: requestURI
 		documentList: null
 		nav: null;
 	def.body {*

@@ -38,6 +38,7 @@ def RightObjectList {=
 		moduleName: 'mkk/Right/Object/List/List'
 		instanceName: 'rightObjectList'
 		cssBaseClass: 'mkk-RightObjectList'
+		requestURI: "/api/right/object/list"
 		objectList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">

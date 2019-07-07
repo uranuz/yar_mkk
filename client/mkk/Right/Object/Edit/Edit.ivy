@@ -6,6 +6,7 @@ def RightObjectEdit {=
 		moduleName: 'mkk/Right/Object/Edit/Edit'
 		instanceName: 'rightObjectEdit'
 		cssBaseClass: 'mkk-RightObjectEdit'
+		requestURI: "/api/right/object/readWithRights"
 		rightObj: null
 		rightList: null;
 	def.body {*

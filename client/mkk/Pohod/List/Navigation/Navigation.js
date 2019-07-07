@@ -6,9 +6,10 @@ define('mkk/Pohod/List/Navigation/Navigation', [
 return FirClass(
 	function PohodListNavigation(opts) {
 		this.superproto.constructor.call(this, opts);
+		helpers.doOnEnter(this, 'pohodRegionField', this._onSearch_start);
 		this._subscr(function() {
 			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
-			helpers.doOnEnter(this._elems('pohodRegionField'), this._onSearch_start.bind(this));
+			
 			if( this._elems('printModeBtn').length ) {
 				this._elems('printModeBtn').on('click', this._onPrintBtnClick.bind(this));
 			}
@@ -16,7 +17,6 @@ return FirClass(
 		this._unsubscr(function() {
 			this._elems('printModeBtn').off();
 			this._elems('searchBtn').off();
-			this._elems('pohodRegionField').off('keyup');
 		});
 	}, FirControl, {
 		/** Нажатие на кнопку печати */

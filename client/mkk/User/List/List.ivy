@@ -5,6 +5,7 @@ def UserList {=
 		moduleName: 'mkk/User/List/List'
 		instanceName: 'userList'
 		cssBaseClass: 'mkk-UserList'
+		requestURI: "/api/user/list"
 		userList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">

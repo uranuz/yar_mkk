@@ -2,72 +2,84 @@ define('mkk/Pohod/Edit/Edit', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
 	'fir/network/json_rpc',
-	'fir/datctrl/Record',
-	'fir/datctrl/RecordSet',
 	'mkk/helpers',
 	'mkk/Helpers/DeleteConfirm/DeleteConfirm',
 	'mkk/Pohod/Edit/Party/Party',
 	'mkk/Pohod/Edit/Chief/Edit/Edit',
 	'mkk/Pohod/Edit/Chief/AddToParty/AddToParty',
-	'mkk/Tourist/NavigatedList/NavigatedList',
+	'mkk/Tourist/NavList/NavList',
 	'mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks',
 	'css!mkk/Pohod/Edit/Edit'
 ], function (
 	FirControl,
 	FirHelpers,
 	json_rpc,
-	Record,
-	RecordSet,
 	MKKHelpers
 ) {
 return FirClass(
 	function PohodEdit(opts) {
 		this.superproto.constructor.call(this, opts);
 		var self = this;
+		this._chiefRec = this._partyList.getRecord(this._pohod.get('chiefNum'));
+		this._altChiefRec = this._partyList.getRecord(this._pohod.get('altChiefNum'));
 
-		this._partyRS = opts.partyList; // RecordSet с участниками похода
-		this._origPohodRec = opts.pohod; // Запись похода при загрузке компонента
-		this._chiefRec = this._partyRS.getRecord(this._origPohodRec.get('chiefNum'));
-		this._altChiefRec = this._partyRS.getRecord(this._origPohodRec.get('altChiefNum'));
-
-		this._chiefEditBlock = this.getChildByName('pohodChiefEdit');
-		this._partyEditBlock = this.getChildByName('partyEdit');
+		this._chiefEditDlg = this.getChildByName('chiefEditDlg');
+		this._partyEditDlg = this.getChildByName('partyEditDlg');
 		this._beginDatePicker = this.getChildByName('beginDateField');
 		this._finishDatePicker = this.getChildByName('finishDateField');
-		this._deleteConfirm = this.getChildByName('deleteConfirm');
-		this._partyList = this.getChildByName('partyList');
+		this._deleteConfirmDlg = this.getChildByName('deleteConfirmDlg');
+		this._partyListCtrl = this.getChildByName('partyList');
 		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
 		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
 
+		this._partyListCtrl.setFilterGetter(this.getPartyListFilter.bind(this));
+
 		this._elems("deleteDialogBtn").on("click", function() {
-			self._deleteConfirm.showDialog();
+			self._deleteConfirmDlg.open({});
 		});
 
-		this._deleteConfirm.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
+		this._deleteConfirmDlg.subscribe('dialogControlLoad', function(ev, control) {
+			control.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
+		});
 
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
-		this._elems("partyEditBtn").on("click", function() {
-			//Отдаем копию списка участников!
-			var rs = self._partyRS? self._partyRS.copy() : new RecordSet();
-			self._partyEditBlock.openDialog(rs); 
-		});
-		
-		this._partyEditBlock.subscribe('saveData', this.onSaveSelectedParty.bind(this));
 
-		this._elems("chiefEditBtn").on('click', function() {
-			self._chiefEditBlock.openDialog(self._chiefRec, false);
+		this._partyEditDlg.subscribe('dialogControlLoad', function(ev, control) {
+			control.subscribe('saveData', self.onSaveSelectedParty.bind(self));
 		});
-		
-		this._elems("altChiefEditBtn").on('click', function() {
-			self._chiefEditBlock.openDialog(self._altChiefRec, true);
+		this._elems("partyEditBtn").on("click", function() {
+			self._partyEditDlg.open({
+				queryParams: {
+					filter: {
+						nums: (self._partyList? self._partyList.getKeys(): [])
+					},
+					nav: {}
+				}
+			}); 
 		});
-		
-		this._chiefEditBlock.subscribe("selectChief", this.onSelectChief.bind(this));
-		this._chiefEditBlock.subscribe("deleteChief", this.onDeleteChief.bind(this));
+
+		this._chiefEditDlg.subscribe('dialogControlLoad', function(ev, control) {
+			control.subscribe("selectChief", this.onSelectChief.bind(this));
+			control.subscribe("deleteChief", this.onDeleteChief.bind(this));
+		}.bind(this));
+
+		this._elems("chiefEditBtn").on('click', this.onChiefEditBtn_click.bind(this, false));
+		this._elems("altChiefEditBtn").on('click', this.onChiefEditBtn_click.bind(this, true));
 	}, FirControl, {
 		//Обработчик тыка по кнопке сохранения списка выбранных участников
 		onSaveSelectedParty: function(ev, selTouristsRS) {
 			this.saveParty(selTouristsRS);
+		},
+
+		onChiefEditBtn_click: function(isAltChief) {
+			this._chiefEditDlg.open({
+				viewParams: {
+					isAltChief: isAltChief
+				},
+				dialogOpts: {
+					title: (isAltChief? 'Выбор зам. руководителя': 'Выбор руководителя')
+				}
+			});
 		},
 		
 		onSelectChief: function(ev, rec, isAltChief) {
@@ -100,26 +112,17 @@ return FirClass(
 			chiefBtn.text("Редактировать");
 		},
 
-		/** Получить идентификаторы участников группы */
-		getPartyNums: function() {
-			return this._partyRS.getKeys();
-		},
-
-		/** Обновить отображение списка группы */
-		updatePartyList: function() {
-			this._partyList._reloadControl(null, {
-				queryParams: {
-					filter: {
-						selectedKeys: this.getPartyNums()
-					}
-				}
-			});
+		/** Возвращает параметры фильтрации для списка участников */
+		getPartyListFilter: function() {
+			return {
+				nums: this._partyList.getKeys()
+			};
 		},
 		
 		//Сохраняет список участников группы и выводит его в главное окно
 		saveParty: function(rs) {
-			this._partyRS = rs;
-			this.updatePartyList();
+			this._partyList = rs;
+			this._partyListCtrl._reloadControl();
 		},
 
 		showErrorDialog: function(errorMsg) {
@@ -140,7 +143,7 @@ return FirClass(
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
 				countInput = self._elems("partySizeField")
 				inputCount = parseInt(countInput.val()),
-				listCount = this._partyRS.getLength();
+				listCount = this._partyList.getLength();
 
 			if( !beginDateEmpty && (!beginDay.length || !beginMonth.length || !beginYear.length) ) {
 				self.showErrorDialog('Нужно заполнить все поля даты начала, либо оставить их все пустыми');
@@ -225,8 +228,8 @@ return FirClass(
 				altChiefKeyField.val('null');
 			}
 
-			if( this._partyRS ) {
-				partyKeysField.val(this._partyRS.getKeys());
+			if( this._partyList ) {
+				partyKeysField.val(this._partyList.getKeys());
 			} else {
 				partyKeysField.val('null');
 			}
@@ -236,12 +239,12 @@ return FirClass(
 
 		// Вернёт true, если нужно добавить руководителя в список участников
 		shouldAddChiefToParty: function() {
-			return !!this._chiefRec && !this._partyRS.hasKey( this._chiefRec.get('num') );
+			return !!this._chiefRec && !this._partyList.hasKey( this._chiefRec.get('num') );
 		},
 
 		// Вернёт true, если нужно добавить зама в список участников
 		shouldAddAltChiefToParty: function() {
-			return !!this._altChiefRec && !this._partyRS.hasKey( this._altChiefRec.get('num') );
+			return !!this._altChiefRec && !this._partyList.hasKey( this._altChiefRec.get('num') );
 		},
 
 		getPartySizeFromInput: function() {
@@ -251,7 +254,7 @@ return FirClass(
 		// Функция корректировки значения количества участников для поля ввода
 		getNewPartySizeForInput: function() {
 			var
-				rsCount = this._partyRS ? this._partyRS.getLength() : 0,
+				rsCount = this._partyList ? this._partyList.getLength() : 0,
 				inpCount = this.getPartySizeFromInput();
 				newRSCount = rsCount,
 				newInpCount = inpCount;
@@ -277,11 +280,11 @@ return FirClass(
 		onSavePohod: function() {
 			// Добавляем к списку участников руководителя и зама
 			if( this.shouldAddChiefToParty() ) {
-				this._partyRS.append( this._chiefRec );
+				this._partyList.append( this._chiefRec );
 			}
 
 			if( this.shouldAddAltChiefToParty() ) {
-				this._partyRS.append( this._altChiefRec );
+				this._partyList.append( this._altChiefRec );
 			}
 
 			// Устанавливаем новое количество участников, если оно было не пустым
@@ -313,8 +316,8 @@ return FirClass(
 				return;
 			}
 
-			if( self._partyRS == null ) {
-				self._partyRS = new dctl.RecordSet({
+			if( self._partyList == null ) {
+				self._partyList = new dctl.RecordSet({
 					format: self._chiefRec.getFormat().copy()
 				});
 			}

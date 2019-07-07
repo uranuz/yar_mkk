@@ -1,8 +1,8 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc, hasRight;
 from mkk.Pohod.List.Navigation import PohodListNavigation;
-from mkk.Pohod.List.PartyInfo import PartyInfo;
 from mkk.Helpers import RusDateFormat;
+from fir.controls.OpenDialog import OpenDialog;
 var
 	instanceName: 'pohodList'
 	cssBaseClass: "mkk-PohodList"
@@ -13,6 +13,7 @@ def PohodList {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: 'pohod.list',
+		requestURI: "/api/pohod/list"
 		pohodEnums: null
 		filter: null
 		pohodList: null
@@ -70,9 +71,16 @@ def PohodList {=
 				</table>
 			</div>
 		</div>
-		<div style="display: none;">
-			{=PartyInfo}
-		</div>
+		{=OpenDialog
+			instanceName: 'partyInfoDlg'
+			config: {
+				ivyModule: 'mkk.Pohod.PartyInfo',
+				ivyMethod: 'PartyInfo',
+				dialogOpts: {
+					title: 'Участники похода'
+				}
+			}
+		}
 	</div>
 	*}
 };
