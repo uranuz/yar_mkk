@@ -4,7 +4,8 @@ def ChiefAddToParty {=
 	def.kv
 		moduleName: 'mkk/Pohod/Edit/Chief/AddToParty/AddToParty'
 		instanceName: 'chiefAddToParty'
-		cssBaseClass: 'mkk-ChiefAddToParty';
+		cssBaseClass: 'mkk-ChiefAddToParty'
+		touristCount: null as 'int';
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
@@ -12,7 +13,7 @@ def ChiefAddToParty {=
 		<div class="{=cls 'msg'}">
 			Обнаружено, что руководитель или заместитель отсутствует в списке участников похода.
 			Нажмите "Продолжить", чтобы добавить их автоматически. Число участников составит
-			<span class="{=cls 'touristCount'}"></span>
+			<span class="{=cls 'touristCount'}">{{touristCount or '[не задано]'}}</span>
 		</div>
 		<div class="{=cls 'msg'}">
 			Нажмите "Отмена", чтобы прервать операцию и вернуться к редактированию похода.

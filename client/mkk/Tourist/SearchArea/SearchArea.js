@@ -21,14 +21,15 @@ return FirClass(
 		this._resultsPanel = this._elems('searchResultsPanel');
 		this._addrFilterContent = this._elems('addrFilterContent');
 		this._addrFilterArrow = this._elems('addrFilterArrow');
-		this._touristList = this.findInstanceByName(this.instanceName() + 'List');
+		this._touristList = this.getChildByName(this.instanceName() + 'List');
 		this._touristList.setFilterGetter(this.getListFilterParams.bind(this));
 		this._touristList.subscribe('onTouristListLoaded', this._onTouristLoaded.bind(this));
 		this._touristList.subscribe('itemActivated', this._onTourist_itemActivate.bind(this));
 		this.setAddrFiltersCollapsed(opts.addrFiltersCollapsed);
-		helpers.doOnEnter(this, searchOnEnterFields, this._onSearch_start.bind(this));
+		this._reloadList = this._reloadControl.bind(this, null);
+		helpers.doOnEnter(this, searchOnEnterFields, this._reloadList);
 		this._subscr(function() {
-			this._elems('searchBtn').on('click', this._onSearch_start.bind(this));
+			this._elems('searchBtn').on('click', this._reloadList);
 			this._elems('addrFilterToggleBtn').on('click', this.setAddrFiltersCollapsed.bind(this, null));
 		});
 		this._unsubscr(function() {
@@ -36,12 +37,12 @@ return FirClass(
 			this._elems('addrFilterToggleBtn').off('click');
 		});
 	}, FirControl, {
-		_onSearch_start: function() {
-			this._touristList._onSetCurrentPage();
-		},
-
 		_onTourist_itemActivate: function(ev, rec) {
 			this._notify('itemSelect', rec);
+		},
+
+		_reloadControl: function() {
+			this._touristList._reloadControl();
 		},
 
 		setAddrFiltersCollapsed: function(val) {

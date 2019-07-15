@@ -16,10 +16,11 @@ define('mkk/Pohod/Edit/Edit', [
 	json_rpc,
 	MKKHelpers
 ) {
+'use strict';
 return FirClass(
 	function PohodEdit(opts) {
 		this.superproto.constructor.call(this, opts);
-		var self = this;
+
 		this._chiefRec = this._partyList.getRecord(this._pohod.get('chiefNum'));
 		this._altChiefRec = this._partyList.getRecord(this._pohod.get('altChiefNum'));
 
@@ -30,33 +31,37 @@ return FirClass(
 		this._deleteConfirmDlg = this.getChildByName('deleteConfirmDlg');
 		this._partyListCtrl = this.getChildByName('partyList');
 		this._extraFileLinks = this.getChildByName('extraFileLinksEdit');
-		this._chiefAddToParty = this.getChildByName('chiefAddToParty');
+		this._chiefAddToPartyDlg = this.getChildByName('chiefAddToPartyDlg');
+
+		this._chiefAddToPartyDlg.subscribe('dialogControlLoad', function(ev, control) {
+			control.once('ok', this.onPohod_save.bind(this));
+		}.bind(this));
 
 		this._partyListCtrl.setFilterGetter(this.getPartyListFilter.bind(this));
 
 		this._elems("deleteDialogBtn").on("click", function() {
-			self._deleteConfirmDlg.open({});
-		});
+			this._deleteConfirmDlg.open({});
+		}.bind(this));
 
 		this._deleteConfirmDlg.subscribe('dialogControlLoad', function(ev, control) {
-			control.subscribe('onDeleteConfirm', self.onDeleteConfirm.bind(this));
-		});
+			control.subscribe('onDeleteConfirm', this.onDeleteConfirm.bind(this));
+		}.bind(this));
 
 		this._elems("submitBtn").on("click", this.onSubmitBtn_click.bind(this));
 
 		this._partyEditDlg.subscribe('dialogControlLoad', function(ev, control) {
-			control.subscribe('saveData', self.onSaveSelectedParty.bind(self));
-		});
+			control.subscribe('saveData', this.onSaveSelectedParty.bind(this));
+		}.bind(this));
 		this._elems("partyEditBtn").on("click", function() {
-			self._partyEditDlg.open({
+			this._partyEditDlg.open({
 				queryParams: {
 					filter: {
-						nums: (self._partyList? self._partyList.getKeys(): [])
+						nums: (this._partyList? this._partyList.getKeys(): [])
 					},
 					nav: {}
 				}
 			}); 
-		});
+		}.bind(this));
 
 		this._chiefEditDlg.subscribe('dialogControlLoad', function(ev, control) {
 			control.subscribe("selectChief", this.onSelectChief.bind(this));
@@ -141,8 +146,8 @@ return FirClass(
 				finishYear = self._finishDatePicker.rawYear(),
 				beginDateEmpty = !beginDay.length && !beginMonth.length && !beginYear.length,
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
-				countInput = self._elems("partySizeField")
-				inputCount = parseInt(countInput.val()),
+				countInput = self._elems("partySizeField"),
+				inputCount = parseInt(countInput.val(), 10),
 				listCount = this._partyList.getLength();
 
 			if( !beginDateEmpty && (!beginDay.length || !beginMonth.length || !beginYear.length) ) {
@@ -213,8 +218,7 @@ return FirClass(
 			var
 				chiefKeyField = this._elems('chiefNumField'),
 				altChiefKeyField = this._elems('altChiefNumField'),
-				partyKeysField = this._elems('partyNumsField'),
-				touristKeys = '';
+				partyKeysField = this._elems('partyNumsField');
 
 			if( this._chiefRec ) {
 				chiefKeyField.val(this._chiefRec.get('num'));
@@ -248,14 +252,14 @@ return FirClass(
 		},
 
 		getPartySizeFromInput: function() {
-			return parseInt( this._elems('partySize').val() ) || null;
+			return parseInt( this._elems('partySizeField').val() ) || null;
 		},
 
 		// Функция корректировки значения количества участников для поля ввода
 		getNewPartySizeForInput: function() {
 			var
-				rsCount = this._partyList ? this._partyList.getLength() : 0,
-				inpCount = this.getPartySizeFromInput();
+				rsCount = this._partyList? this._partyList.getLength(): 0,
+				inpCount = this.getPartySizeFromInput(),
 				newRSCount = rsCount,
 				newInpCount = inpCount;
 
@@ -277,18 +281,18 @@ return FirClass(
 
 		// Выполняет проверку данных. Записывает данные о походе из JS-класса в форму.
 		// Отправляет данные на сервер после проверки
-		onSavePohod: function() {
+		onPohod_save: function() {
 			// Добавляем к списку участников руководителя и зама
 			if( this.shouldAddChiefToParty() ) {
-				this._partyList.append( this._chiefRec );
+				this._partyList.append(this._chiefRec);
 			}
 
 			if( this.shouldAddAltChiefToParty() ) {
-				this._partyList.append( this._altChiefRec );
+				this._partyList.append(this._altChiefRec);
 			}
 
 			// Устанавливаем новое количество участников, если оно было не пустым
-			this._elems('partySize').val( this.getNewPartySizeForInput() );
+			this._elems('partySizeField').val( this.getNewPartySizeForInput() );
 
 			if( this.validateFormData() ) {
 				this.fillFormFields(); // Пишем данные в поля формы
@@ -302,10 +306,7 @@ return FirClass(
 				self = this,
 				newTouristsCount = this.getNewPartySizeForInput(),
 				shouldAddChief = this.shouldAddChiefToParty(),
-				shouldAddAltChief = this.shouldAddAltChiefToParty(),
-				cancelHandler = function() {
-					ev.preventDefault();
-				};
+				shouldAddAltChief = this.shouldAddAltChiefToParty();
 
 			// Сами отправим форму, когда нужно
 			ev.preventDefault();
@@ -325,12 +326,14 @@ return FirClass(
 			if( shouldAddChief || shouldAddAltChief ) {
 				// Если есть записи руководителя и зама, но их нет в списке
 				// участников, то открываем диалог подтверждения их добавления
-				this._chiefAddToParty.once('ok', this.onSavePohod.bind(this));
-				this._chiefAddToParty.once('ok', cancelHandler);
-				this._chiefAddToParty.open(newTouristsCount);
+				this._chiefAddToPartyDlg.open({
+					viewParams: {
+						touristCount: newTouristsCount
+					}
+				});
 			} else {
 				// Если руководитель и зам есть, то сразу продолжаем
-				this.onSavePohod();
+				this.onPohod_save();
 			}
 		},
 
@@ -339,7 +342,9 @@ return FirClass(
 			json_rpc.invoke({
 				uri: "/jsonrpc/",
 				method: "pohod.delete",
-				params: { "num": parseInt(FirHelpers.parseGetParams()["num"], 10) },
+				params: {
+					num: parseInt(this._elems('numField'), 10) || null
+				},
 				success: function() {
 					document.location.replace("/dyn/pohod/list");
 				},

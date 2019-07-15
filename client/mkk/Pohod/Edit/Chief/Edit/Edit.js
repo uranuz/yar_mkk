@@ -20,6 +20,7 @@ return FirClass(
 		_onSelectChief: function(ev, rec) {
 			this._chiefRec = rec;
 			this._notify("selectChief", rec, this._isAltChief);
+			this.destroy();
 		},
 
 		//Тык по кнопке удаления зам. руководителя похода
@@ -27,6 +28,7 @@ return FirClass(
 			var rec = this._chiefRec;
 			this._chiefRec = null;
 			this._notify("deleteChief", rec, this._isAltChief);
+			this.destroy();
 		}
 	});
 });

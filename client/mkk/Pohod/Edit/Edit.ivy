@@ -3,7 +3,6 @@ from fir.controls.utils import cls, enumFormatWithNull, hasRight;
 from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.PlainListBox import PlainListBox;
 from fir.controls.OpenDialog import OpenDialog;
-from mkk.Pohod.Edit.Chief.AddToParty import ChiefAddToParty;
 from mkk.Tourist.NavList import TouristNavList;
 from mkk.Pohod.Edit.ExtraFileLinks import ExtraFileLinks;
 def PohodEdit {=
@@ -45,7 +44,19 @@ def PohodEdit {=
 			method="POST"
 			action="{{vpaths.siteDynamic}}pohod/edit/results">
 		<h2>Редактирование данных похода</h2>
-		<input type="hidden" name="num" value="{{pohod.num}}"/>
+		<input type="hidden"
+			class="{=cls 'numField'}"
+			name="num"
+			value="{{pohod.num}}"/>
+		<input type="hidden"
+				name="whatObject"
+				value="поход"/>
+		<input type="hidden"
+			name="listLink"
+			value="{{vpaths.siteDynamic}}pohod/list"/>
+		<input type="hidden"
+			name="editLink"
+			value="{{vpaths.siteDynamic}}pohod/edit"/>
 		<hr>
 		<h4>Маршрутная книжка</h4>
 		<table style="width: 100%">
@@ -209,9 +220,6 @@ def PohodEdit {=
 
 		<hr>
 		<h4>Группа</h4>
-		<!--<div style="clear: both;"></div>Чтобы предыдущее содержимое не обтекалось-->
-		<!--Блок для вывода списка туристов при поиске-->
-		<!-- <div id="tourist_select_div"></div> -->
 		<div>
 			<table style="width: 100%">
 			<tr>
@@ -313,7 +321,6 @@ def PohodEdit {=
 		<div style="clear: both;">&nbsp;</div><!--Чтобы родительский div не схлопывался, когда правая колонка больше-->
 		<hr/>
 
-		<input type="hidden" name="action" value="write"/><!-- Значение-команда на запись данных в БД -->
 		<span>
 			<button type="submit"
 				class="{=cls 'submitBtn'} btn btn-primary"
@@ -368,8 +375,17 @@ def PohodEdit {=
 				}
 			}
 		}
-
-		{=ChiefAddToParty}
+		{=OpenDialog
+			instanceName: 'chiefAddToPartyDlg'
+			config: {
+				ivyModule: 'mkk.Pohod.Edit.Chief.AddToParty',
+				ivyMethod: 'ChiefAddToParty',
+				dialogOpts: {
+					width: 600,
+					height: 600
+				}
+			}
+		}
 	</div>
 	*}
 };

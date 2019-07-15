@@ -9,6 +9,7 @@ define('mkk/Pohod/Edit/Party/Party', [
 	MKKHelpers,
 	RecordSet
 ) {
+'use strict';
 return FirClass(
 	function PartyEdit(opts) {
 		this.superproto.constructor.call(this, opts);
@@ -36,7 +37,7 @@ return FirClass(
 		});
 	}, FirControl, {
 		_acceptBtn_click: function() {
-			this._notify('saveData', self._touristList);
+			this._notify('saveData', this._touristList);
 			this.destroy(); // Уничтожаем компонент, когда выбор завершен
 		},
 
