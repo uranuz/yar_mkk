@@ -5,6 +5,7 @@ from fir.controls.PlainListBox import PlainListBox;
 from mkk.Tourist.PlainList import TouristPlainList;
 from mkk.Helpers.DeleteConfirm import DeleteConfirm;
 from fir.controls.OpenDialog import OpenDialog;
+from fir.controls.Validation.Controller import ValidationController;
 
 def LabeledInput {=
 	def.kv caption field appendix: null forceNoCheck: null;
@@ -187,6 +188,9 @@ def TouristEdit {=
 				</span>
 			</div>
 			*}}
+		{=ValidationController
+			instanceName: instanceName ~ 'Validation'
+		}
 		{=if isEditDialog {*</form>*} }
 
 	{=if isEditDialog {*

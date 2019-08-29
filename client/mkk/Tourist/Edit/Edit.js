@@ -48,6 +48,15 @@ return FirClass(
 				this._elems("deleteDialogBtn").off('click');
 			}
 		});
+
+		this.getValidation().addValidators([{
+			elem: 'familyName', fn: this._checkNonEmpty
+		}, {
+			elem: 'givenName', fn: this._checkNonEmpty
+		}, {
+			elem: 'patronymic', fn: this._checkNonEmpty
+		}]);
+
 	}, FirControl, {
 		_forcedSubmitForm: function() {
 			this._touristForm.submit();
@@ -59,6 +68,13 @@ return FirClass(
 				this._forcedSubmitForm();
 			}
 		},
+		_checkNonEmpty: function(vld) {
+			return !!vld.elem.val().trim().length || 'Поле обязательно для заполнения';
+		},
+		
+		getValidation: function() {
+			return this.getChildByName(this.instanceName() + 'Validation');
+		},
 
 		showErrorDialog: function( errorMsg ) {
 			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
@@ -66,6 +82,7 @@ return FirClass(
 
 		/** Проверка данных формы */
 		validateFormData: function() {
+			/*
 			var
 				self = this,
 				familyName = this._elems('familyName').val(),
@@ -89,6 +106,11 @@ return FirClass(
 			}
 
 			return true;
+			*/
+
+			this.getValidation().validate();
+
+			return false;
 		},
 
 		// Возвращает идентификатор текущего туриста
@@ -140,6 +162,7 @@ return FirClass(
 				this._forcedSubmitForm();
 			}
 		},
+
 
 		// Обработчик тыка по кнопке подтверждения удаления туриста
 		onDeleteConfirm: function() {
