@@ -49,7 +49,7 @@ module.exports = function (grunt) {
 				if (moduleName.startsWith('fir/') && !this.name.startsWith('mkk/app')) {
 					return ''; // Exclude library modules via dropping it's contents
 				} else {
-					return contents;	
+					return contents;
 				}
 			},
 			exclude: [
@@ -69,8 +69,11 @@ module.exports = function (grunt) {
 		reports: '<%= deployPath %>pub/reports',
 		robots: '<%= deployPath %>pub/robots.txt',
 		bootstrap: '<%= deployPath %>pub/bootstrap/**/*',
+		jquery: '<%= deployPath %>pub/jquery-2.2.4.min.js',
+		jqueryCookie: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
 		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*',
-		reports: '<%= deployPath %>pub/flot',
+		popper: '<%= deployPath %>pub/popper-1.12.5.min.js',
+		reports: '<%= deployPath %>pub/flot'
 	},
 	cleanConfig = {};
 
@@ -126,17 +129,17 @@ module.exports = function (grunt) {
 			imgFolder: {
 				src: 'client/mkk/img',
 				dest: '<%= deployPath %>pub/mkk/img',
-				filter: 'isDirectory',
+				filter: 'isDirectory'
 			},
 			stati_dokument: {
 				src: 'client/stati_dokument/',
 				dest: '<%= deployPath %>pub/stati_dokument',
-				filter: 'isDirectory',
+				filter: 'isDirectory'
 			},
 			reports: {
 				src: 'client/reports/',
 				dest: '<%= deployPath %>pub/reports',
-				filter: 'isDirectory',
+				filter: 'isDirectory'
 			},
 			robots: {
 				src: 'client/robots.txt',
@@ -151,6 +154,16 @@ module.exports = function (grunt) {
 				filter: 'isFile',
 				overwrite: true
 			},
+			jquery: {
+				src: 'client/jquery-2.2.4.min.js',
+				dest: '<%= deployPath %>pub/jquery-2.2.4.min.js',
+				filter: 'isFile'
+			},
+			jqueryCookie: {
+				src: 'client/jquery.cookie-1.4.1.min.js',
+				dest: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
+				filter: 'isFile'
+			},
 			jqueryui: {
 				expand: true,
 				cwd: 'client/jquery-ui-1.12.1.custom/',
@@ -159,17 +172,22 @@ module.exports = function (grunt) {
 				filter: 'isFile',
 				overwrite: true
 			},
+			popper: {
+				src: 'client/popper-1.12.5.min.js',
+				dest: '<%= deployPath %>pub/popper-1.12.5.min.js',
+				filter: 'isFile'
+			},
 			reports: {
 				src: 'client/flot/',
 				dest: '<%= deployPath %>pub/flot',
-				filter: 'isDirectory',
-			},
+				filter: 'isDirectory'
+			}
 		},
 		sass: {
 			options: {
 				includePaths: [
 					'client/bootstrap/scss',
-					'node_modules/bootstrap/scss',
+					'node_modules/bootstrap/scss'
 				],
 				precision: 6,
 				sourceComments: false,
@@ -206,9 +224,9 @@ module.exports = function (grunt) {
 				files: ['client/mkk/**/*.scss'],
 				tasks: ['sass:mkk'],
 				options: {
-					spawn: false,
-				},
-			},
+					spawn: false
+				}
+			}
 		}
 	});
 
