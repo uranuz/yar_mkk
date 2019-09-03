@@ -49,12 +49,17 @@ return FirClass(
 			}
 		});
 
+		// Настройка проверок формы перед сохранением данных
 		this.getValidation().addValidators([{
 			elem: 'familyName', fn: this._checkNonEmpty
 		}, {
 			elem: 'givenName', fn: this._checkNonEmpty
 		}, {
 			elem: 'patronymic', fn: this._checkNonEmpty
+		}, {
+			control: this.getChildByName('birthDateField'),
+			elem: 'yearField',
+			fn: this._checkBirthYear
 		}]);
 
 	}, FirControl, {
@@ -71,6 +76,14 @@ return FirClass(
 		_checkNonEmpty: function(vld) {
 			return !!vld.elem.val().trim().length || 'Поле обязательно для заполнения';
 		},
+
+		_checkBirthYear: function(vld) {
+			var birthYear = vld.control.getYear();
+			return (
+				(birthYear == null || MKKHelpers.checkInt(birthYear, 1000, 9999))
+				|| 'Год рождения должен быть целым четырехзначным числом'
+			);
+		},
 		
 		getValidation: function() {
 			return this.getChildByName(this.instanceName() + 'Validation');
@@ -80,38 +93,6 @@ return FirClass(
 			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
 		},
 
-		/** Проверка данных формы */
-		validateFormData: function() {
-			/*
-			var
-				self = this,
-				familyName = this._elems('familyName').val(),
-				givenName = this._elems('givenName').val(),
-				birthYear = this._birthDatePicker.getYear(),
-				birthDay = this._birthDatePicker.getDay();
-
-			if( !givenName.trim() || !familyName.trim() ) {
-				self.showErrorDialog('Необходимо ввести фамилию и имя туриста!');
-				return false;
-			}
-
-			if( birthDay != null && !MKKHelpers.checkInt(birthDay, 1, 31) ) {
-				self.showErrorDialog('День рождения должен быть целым числом в диапазоне [1, 31]');
-				return false;
-			}
-
-			if( birthYear != null && !MKKHelpers.checkInt(birthYear, 1000, 9999) ) {
-				self.showErrorDialog('Год рождения похода должен быть четырехзначным целым числом');
-				return false;
-			}
-
-			return true;
-			*/
-
-			this.getValidation().validate();
-
-			return false;
-		},
 
 		// Возвращает идентификатор текущего туриста
 		getNum: function() {
@@ -125,7 +106,7 @@ return FirClass(
 				birthYear = null;
 			}
 
-			if( !this.validateFormData() ) {
+			if( !this.getValidation().validate() ) {
 				ev.preventDefault();
 				return;
 			}
