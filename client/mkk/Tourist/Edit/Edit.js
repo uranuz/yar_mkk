@@ -55,8 +55,6 @@ return FirClass(
 		}, {
 			elem: 'givenName', fn: this._checkNonEmpty
 		}, {
-			elem: 'patronymic', fn: this._checkNonEmpty
-		}, {
 			control: this.getChildByName('birthDateField'),
 			elem: 'yearField',
 			fn: this._checkBirthYear
