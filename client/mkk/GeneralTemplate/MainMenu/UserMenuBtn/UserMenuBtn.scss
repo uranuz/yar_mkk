@@ -31,4 +31,8 @@
 	&.e-popdownMenu > li > a {
 		color: #2b3f3d;
 	}
+	&.e-popdownMenu > li:hover {
+		border-radius: 4px;
+		background-color: rgba(70,200,50,200);
+	}
 }

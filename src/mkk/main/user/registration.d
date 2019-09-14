@@ -6,24 +6,74 @@ import mkk.history.client;
 import mkk.history.common;
 
 import mkk.main.tourist.model;
-import mkk.main.tourist.edit: editTourist;
+import mkk.main.tourist.edit: editTourist, requireFieldsForReg;
+import mkk.main.user.consts: NEW_USER_ROLE, USER_ROLE;
+import mkk.main.tourist.read: readTourist;
 
 import mkk.security.core.register_user: registerUser, addUserRoles, RegUserResult;
-import mkk.security.core.access_control: emailConfirmDaysLimit;
+import mkk.security.core.access_control: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
 
 shared static this()
 {
+	MainService.JSON_RPCRouter.join!(readForReg)(`tourist.readForReg`);
 	MainService.JSON_RPCRouter.join!(regUser)(`user.register`);
 	MainService.JSON_RPCRouter.join!(confirmEmail)(`user.confirmEmail`);
+	MainService.JSON_RPCRouter.join!(confirmReg)(`user.confirmReg`);
+	MainService.JSON_RPCRouter.join!(lockUser)(`user.lock`);
+	MainService.JSON_RPCRouter.join!(unlockUser)(`user.unlock`);
 
+	MainService.pageRouter.joinWebFormAPI!(readForReg)("/api/tourist/readForReg");
 	MainService.pageRouter.joinWebFormAPI!(regUser)("/api/user/reg/result");
 	MainService.pageRouter.joinWebFormAPI!(confirmEmail)("/api/user/reg/email_confirm");
+}
+
+Tuple!(
+	IBaseRecord, "tourist",
+	Tuple!(
+		uint, "minLoginLength",
+		uint, "minPasswordLength"
+	), "settings",
+	bool, "isConfirmedUser"
+)
+readForReg(HTTPContext ctx, Optional!size_t num)
+{
+	typeof(return) res;
+	res.tourist = readTourist(ctx, num).tourist;
+	res.settings = typeof(res.settings)(minLoginLength, minPasswordLength);
+	res.isConfirmedUser = _isUserConfirmedForTourist(num);
+	return res;
 }
 
 struct UserRegData
 {
 	string login;
 	string password;
+}
+
+static immutable _checkConfirmedQueryFmt = `
+select exists(
+	select 1
+	from site_user su
+	join user_access_role uar
+		on uar.user_num = su.num
+	join access_role a_role
+		on a_role.num = uar.role_num
+	where
+		%s = $1::integer
+		and
+		a_role.name != $2::text
+	limit 1
+)`;
+
+// Проверяет есть ли у туриста уже подтвержденный связанный пользователь
+bool _isUserConfirmedForTourist(Optional!size_t num)
+{
+	import std.format: format;
+	return getAuthDB().queryParams(
+		_checkConfirmedQueryFmt.format(
+			`su.tourist_num`
+		), num, NEW_USER_ROLE
+	).getScalar!bool();
 }
 
 Tuple!(
@@ -44,7 +94,7 @@ regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 		string, "email"
 	)();
 
-	string[] nameParts; // СОбираем сюда полное имя пользователя
+	string[] nameParts; // Собираем сюда полное имя пользователя
 	string userEmail;
 	if( touristData.num.isSet )
 	{
@@ -62,7 +112,12 @@ regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 from tourist
 where tourist.num = $1::integer`,
 		touristData.num).getRecord(touristRegRecFormat);
-		enforce(touristDBRec !is null, `Не удалось прочитать информацию о туристе из БД`);
+		enforce(
+			touristDBRec !is null,
+			`Не удалось прочитать информацию о туристе из БД`);
+		enforce(
+			!_isUserConfirmedForTourist(touristData.num),
+			`Регистрация пользователя, связанного с данным туристом, уже подтверждена`);
 
 		string val;
 		static foreach( field; [`familyName`, `givenName`, `patronymic`] )
@@ -81,12 +136,12 @@ where tourist.num = $1::integer`,
 	}
 	else
 	{
-		if( touristData.familyName.isSet ) {
-			nameParts ~= touristData.familyName.value;
-		}
-		if( touristData.givenName.isSet ) {
-			nameParts ~= touristData.givenName.value;
-		}
+		requireFieldsForReg(touristData);
+
+		nameParts ~= touristData.familyName.value;
+		nameParts ~= touristData.givenName.value;
+
+		// Отчество не обязательно, т.к. у некоторых человеков его нет
 		if( touristData.patronymic.isSet ) {
 			nameParts ~= touristData.patronymic.value;
 		}
@@ -104,41 +159,19 @@ where tourist.num = $1::integer`,
 			nameParts.join(` `), // Склеиваем полное имя пользователя из частей
 			userEmail);
 
-		addUserRoles!(getAuthDB)(regUserRes.userNum, [`new_user`]);
+		addUserRoles!(getAuthDB)(regUserRes.userNum, [NEW_USER_ROLE]);
 	}
-
-	/**
-	scope(exit)
-	{
-		// Убираем права и блокируем пользователя до подтверждения регистрации
-		// при выходе из области успешно или с ошибкой
-		getAuthDB().queryParams(`with
-		bbb(status) as(
-			update site_user as su set is_blocked = true
-			where su.num = $1
-			returning 'blocked'
-		),
-		rrr(status) as(
-			delete from user_access_role uar
-			where uar.user_num = $1
-			returning 'no_rights'
-		)
-		select status from bbb
-		union all
-		select status from rrr`, regUserRes.userNum);
-	}
-	*/
 
 	MainService.accessController.authenticateByPassword(ctx, userData.login, userData.password);
 	enforce(ctx.user.isAuthenticated, `Не удалось создать временную сессию для регистрации пользователя!`);
 
 	size_t touristNum;
-	if( !touristData.num.isSet ) {
+	if( touristData.num.isSet ) {
+		// Используется существующая запись туриста, которую не редактируем в ходе регистрации
+		touristNum = touristData.num.value;
+	} else {
 		// Нужно создать новую запись туриста под этого пользователя
 		touristNum = editTourist(ctx, touristData).touristNum;
-	} else {
-		// Если запись туриста есть, то вызывать ее редактирование нельзя, иначе кто угодно сможет редактировать...
-		touristNum = touristData.num.value;
 	}
 
 	// Отправим письмо на подтверждение электронной почты
@@ -150,7 +183,7 @@ where tourist.num = $1::integer`,
 Tuple!(
 	size_t, `userNum`
 )
-confirmEmail(HTTPContext ctx, string confirmUUID)
+confirmEmail(string confirmUUID)
 {
 	import std.conv: text;
 	static immutable confirmRecFormat = RecordFormat!(
@@ -255,7 +288,7 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 	auto smtp = SMTP(_senderAddress);
 	smtp.setAuthentication(_senderLogin, _senderPassword);
 	smtp.mailFrom = _senderEmail;
-	smtp.mailTo = ["neuranuz@gmail.com"];
+	smtp.mailTo = [userEmail];
 
 	string[] headers = [
 		`To: ` ~ userEmail,
@@ -289,4 +322,53 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 	smtp.verifyHost = false;
 	smtp.verifyPeer = false;
 	smtp.perform();
+}
+
+// Подтверждение регистрации пользователя. Наделяет его доп. правами по сравнению с пользователем только подавшим заявку
+void confirmReg(HTTPContext ctx, Optional!size_t userNum)
+{
+	import std.format: format;
+	enforce(ctx.user.isInRole(`admin`), `Для подтверждения регистрации пользователя вы должны быть администратором`);
+	enforce(userNum.isSet, `Ожидался идентификатор пользователя`);
+
+	bool alreadyConfirmed = getAuthDB().queryParams(
+		_checkConfirmedQueryFmt.format(
+			`su.num`
+		), userNum, NEW_USER_ROLE
+	).getScalar!bool();
+	enforce(!alreadyConfirmed, `Регистрация пользователя уже подтверждена`);
+
+	addUserRoles!(getAuthDB)(userNum, [USER_ROLE]);
+}
+
+// Блокировка пользователя. Пользователь не сможет выполнять действия, требующие доп. прав
+void lockUser(HTTPContext ctx, Optional!size_t userNum)
+{
+	enforce(ctx.user.isInRole(`admin`), `Для блокировки пользователя вы должны быть администратором`);
+	enforce(userNum.isSet, `Ожидался идентификатор пользователя`);
+	// Ставим флаг заблокированности пользователя
+	getAuthDB().queryParams(
+`update site_user as su
+set is_blocked = true
+where su.num = $1
+`, userNum);
+
+	// На всякий случай сессии тоже удаляем
+	getAuthDB().queryParams(
+`delete from session as sess
+where sess.site_user_num = $1
+`, userNum);
+}
+
+// Разблокировка пользователя. После разблокировки потребуется повторная аутентификация
+void unlockUser(HTTPContext ctx, Optional!size_t userNum)
+{
+	enforce(ctx.user.isInRole(`admin`), `Для блокировки пользователя вы должны быть администратором`);
+	enforce(userNum.isSet, `Ожидался идентификатор пользователя`);
+	// Ставим флаг заблокированности пользователя
+	getAuthDB().queryParams(
+`update site_user as su
+set is_blocked = false
+where su.num = $1
+`, userNum);
 }

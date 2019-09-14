@@ -40,6 +40,10 @@ return FirClass(
 					this._deleteConfirmDlg.open();
 				}.bind(this));
 			}
+			this.getValidation().subscribe('onValidate', function(ev, isValid) {
+				//this._elems('submitBtn').toggleClass('btn-primary', isValid);
+				this._elems('submitBtn').toggleClass('btn-outline-danger', !isValid);
+			}.bind(this));
 		});
 
 		this._unsubscr(function() {
@@ -49,16 +53,27 @@ return FirClass(
 			}
 		});
 
-		// Настройка проверок формы перед сохранением данных
+		// Базовые валидаторы, общие для редактирования и регистрации пользователя
 		this.getValidation().addValidators([{
-			elem: 'familyName', fn: this._checkNonEmpty
-		}, {
-			elem: 'givenName', fn: this._checkNonEmpty
-		}, {
-			control: this.getChildByName('birthDateField'),
-			elem: 'yearField',
-			fn: this._checkBirthYear
+				control: this.getChildByName('birthDateField'),
+				elem: 'yearField',
+				fn: this._checkBirthYear
 		}]);
+
+		if( !this._isEditDialog ) {
+			// При регистрации пользователя нужно выполнять валидацию основных полей
+			this.getValidation().addValidators([{
+				elem: 'familyNameField', fn: this._checkNonEmpty
+			}, {
+				elem: 'givenNameField', fn: this._checkNonEmpty
+			}, {
+				elem: 'emailField', fn: this._checkEmail
+			}, {
+				control: this.getChildByName('birthDateField'),
+				elem: 'block',
+				fn: this._checkBirthDate
+			}]);
+		}
 
 	}, FirControl, {
 		_forcedSubmitForm: function() {
@@ -75,6 +90,13 @@ return FirClass(
 			return !!vld.elem.val().trim().length || 'Поле обязательно для заполнения';
 		},
 
+		_checkBirthDate: function(vld) {
+			var ctrl = vld.control;
+			if( ctrl.getDate() == null ) {
+				return 'Требуется указать вашу дату рождения';
+			}
+		},
+
 		_checkBirthYear: function(vld) {
 			var birthYear = vld.control.getYear();
 			return (
@@ -82,15 +104,17 @@ return FirClass(
 				|| 'Год рождения должен быть целым четырехзначным числом'
 			);
 		},
+
+		_checkEmail: function(vld) {
+			var val = vld.elem.val().trim();
+			if( !val.length || !val.match(/^.+@.+\..+$/) ) {
+				return 'Необходимо указать действительный адрес электронной почты';
+			}
+		},
 		
 		getValidation: function() {
 			return this.getChildByName(this.instanceName() + 'Validation');
 		},
-
-		showErrorDialog: function( errorMsg ) {
-			$('<div title="Ошибка ввода">' + errorMsg + '</div>').dialog({ modal: true, width: 350 });
-		},
-
 
 		// Возвращает идентификатор текущего туриста
 		getNum: function() {
@@ -116,9 +140,9 @@ return FirClass(
 					method: "tourist.plainList",
 					params: {
 						filter: {
-							familyName: this._elems('familyName').val() || undefined,
-							givenName: this._elems('givenName').val() || undefined,
-							patronymic: this._elems('patronymic').val() || undefined,
+							familyName: this._elems('familyNameField').val() || undefined,
+							givenName: this._elems('givenNameField').val() || undefined,
+							patronymic: this._elems('patronymicField').val() || undefined,
 							birthYear: birthYear || undefined
 						},
 						nav: {}

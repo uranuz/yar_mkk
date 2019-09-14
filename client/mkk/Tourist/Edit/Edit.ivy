@@ -15,7 +15,7 @@ def LabeledInput {=
 		<div class="col-md-6">
 			<input type="text"
 				name="{{field}}"
-				class="{=cls field} form-control"
+				class="{=cls field ~ 'Field'} form-control"
 				value="{=at tourist field}"
 				id="{{field ~ 'Field'}}"
 				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights and not forceNoCheck 'disabled'}/>
@@ -26,12 +26,14 @@ def LabeledInput {=
 };
 
 def ShowCheckBox {=
-	def.kv caption: 'Показать всем' field;
+	def.kv
+		caption: 'Показать всем'
+		field;
 	def.body noscope{*
 		<div class="form-check">
 			<input type="checkbox"
 				name="{{field}}"
-				class="{=cls field} form-check-input"
+				class="{=cls field ~ 'Field'} form-check-input"
 				id="{{field ~ 'Field'}}"
 				{=if {=at tourist field} 'checked'}
 				{=if not{=hasRight subobj: field kind: 'edit'} and checkRights 'disabled'}/>
@@ -125,9 +127,15 @@ def TouristEdit {=
 				name="editLink"
 				value="{{vpaths.siteDynamic}}tourist/edit"/>
 			{%
-				LabeledInput caption: 'Фамилия' field: 'familyName';
-				LabeledInput caption: 'Имя' field: 'givenName';
-				LabeledInput caption: 'Отчество' field: 'patronymic';
+				LabeledInput
+					caption: 'Фамилия'
+					field: 'familyName';
+				LabeledInput
+					caption: 'Имя'
+					field: 'givenName';
+				LabeledInput
+					caption: 'Отчество'
+					field: 'patronymic';
 			}
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Дата рождения</label>
@@ -144,23 +152,38 @@ def TouristEdit {=
 					}
 				</div>
 			</div>
-			{=if isEditDialog {=LabeledInput caption: 'Адрес проживания' field: 'address'} }
 			{=if isEditDialog {=
 				LabeledInput
-					caption: 'Номер телефона' field: 'phone'
-					appendix: {=ShowCheckBox field: 'showPhone'};
+					caption: 'Адрес проживания'
+					field: 'address'
+			} }
+			{=if isEditDialog {=
+				LabeledInput
+					caption: 'Номер телефона'
+					field: 'phone'
+					appendix: {=
+						ShowCheckBox
+							field: 'showPhone'
+					};
 			} }
 			{=LabeledInput
 				caption: 'Электронная почта' field: 'email'
-				appendix: {=ShowCheckBox field: 'showEmail'}
+				appendix: {=
+					ShowCheckBox
+						field: 'showEmail'
+				}
 				forceNoCheck: not isEditDialog;
 			}
-			{=if isEditDialog {=LabeledInput caption: 'Туристский опыт' field: 'experience'} }
+			{=if isEditDialog {=
+				LabeledInput
+					caption: 'Туристский опыт'
+					field: 'experience'
+			} }
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label" for="commentField">Комментарий</label>
 				<div class="col-md-9">
 					<textarea
-						name="comment"
+						name="commentField"
 						class="form-control"
 						id="commentField"
 						{=if not{=hasRight subobj: 'comment' kind: 'edit'} and checkRights 'disabled'}
@@ -168,8 +191,12 @@ def TouristEdit {=
 				</div>
 			</div>
 			{%
-				ListBoxRow caption: 'Спортивный разряд' field: 'sportsCategory';
-				ListBoxRow caption: 'Судейская категория' field: 'refereeCategory'
+				ListBoxRow
+					caption: 'Спортивный разряд'
+					field: 'sportsCategory';
+				ListBoxRow
+					caption: 'Судейская категория'
+					field: 'refereeCategory';
 			}
 			<hr/>
 			{=if isEditDialog {*

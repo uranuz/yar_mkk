@@ -1,50 +1,82 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc, isInRoles;
+from mkk.Helpers import RusDateFormat;
+from fir.controls.OpenDialog import OpenDialog;
 def UserList {=
 	def.kv
 		moduleName: 'mkk/User/List/List'
 		instanceName: 'userList'
 		cssBaseClass: 'mkk-UserList'
+		RPCMethod: 'user.list'
 		requestURI: "/api/user/list"
 		userList: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Пользователи сайта</h2>
+		<div class="row font-weight-bold">
+			<span class="col-md-4">Имя пользователя</span>
+			<span class="col-md-1">Статус</span>
+			<span class="col-md-3">Логин</span>
+			<span class="col-md-2">Добавлен</span>
+			{=if {=isInRoles ['admin']} {*
+			<span class="col-md-2">Действия</span>
+			*}}
+		</div>
 		<div class="{=cls 'list'}">
 		{=repeat user in userList {*
-			<div class="{=cls 'listItem'}" data-mkk-num="{{user.num}}">
-				<span class="col-md-2">{{user.name}}</span>
-				<span class="col-md-2">{{user.login}}</span>
-				<span class="col-md-2">
-					{=var
-						emailConfirmed: {{user.is_email_confirmed}}
-						isBlocked: {{user.is_blocked}}
-					}
+			<div class="{=cls 'listItem'} row" data-mkk-num="{{user.num}}">
+				<span class="col-md-4">{{user.name}}</span>
+				<span class="col-md-1">
 					<span
-						title="Адрес электронной почты{=if not emailConfirmed ' не'} подтвержден"
-						class="{=cls 'emailConfirmIcon'} {=if emailConfirmed 'text-success'}"
-						>@</span>
-					<span
-						title="Пользователь{=if not isBlocked ' не'} заблокирован"
-						class="{=cls 'blockedIcon'} {=if not isBlocked 'text-warning'}"
+						title="Пользователь {=if not user.is_blocked 'не '}заблокирован"
+						class="{=cls 'blockedIcon'} {=if user.is_blocked 'text-danger'}"
 						>&#x1F512;</span>
 					<span
-						title="Подтвердить регистрацию пользователя"
-						class="{=cls 'confirmRegBtn'} btn btn-outline-primary btn-sm"
-						>+</span>
+						title="Адрес эл. почты {=if not user.is_email_confirmed 'не '}подтвержден"
+						class="{=cls 'emailConfirmIcon'} {=if user.is_email_confirmed 'text-success'}"
+						>@</span>
+					<span
+						title="Регистрация {=if not user.is_confirmed 'не '}подтверждена"
+						class="{=cls 'blockedIcon'} {=if user.is_confirmed 'text-success'}"
+						>&#x2713;</span>
+				</span>
+				<span class="col-md-3">{{user.login}}</span>
+				<span class="col-md-2">{=RusDateFormat user.reg_timestamp}</span>
+				<span class="col-md-2">
+					{=if not user.is_blocked and {=isInRoles ['admin']} {*
+					<span
+						title="Заблокировать пользователя"
+						class="{=cls 'lockUserBtn'} btn btn-outline-danger btn-xs"
+						>&#x1F512;</span>
+					*}}
+					{=if user.is_blocked and {=isInRoles ['admin']} {*
+					<span
+						title="Разблокировать пользователя"
+						class="{=cls 'unlockUserBtn'} btn btn-outline-primary btn-xs"
+						>&#x1F512;</span>
+					*}}
+					{=if not user.is_confirmed and {=isInRoles ['admin']} {*
+					<span
+						title="Подтвердить регистрацию"
+						class="{=cls 'confirmRegBtn'} btn btn-outline-primary btn-xs"
+						>&#x2713;</span>
+					*}}
 				</span>
 			</div>
 		*}}
 		</div>
-		<div
-			class="{=cls 'confirmDlg'}"
-			title="Подтверждение регистрации пользователя">
-			<div class="{=cls 'confirmDlgMsg'}"></div>
-			<button type="button"
-				class="{=cls 'confirmDialogBtn'}"
-				>Подтвердить</button>
-		</div>
+		{=OpenDialog
+			instanceName: instanceName ~ 'ItemActionConfirmDlg'
+			config: {
+				ivyModule: 'mkk.Helpers.ConfirmDialog.ConfirmDialog',
+				ivyMethod: 'ConfirmDialog',
+				dialogOpts: {
+					width: 400,
+					height: 200
+				}
+			}
+		}
 	</div>
 	*}
 };

@@ -2,51 +2,89 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.SearchArea import TouristSearchArea;
 from mkk.Tourist.Edit import TouristEdit;
+from fir.controls.Validation.Controller import ValidationController;
 def UserRegCard {=
 	def.kv
-		moduleName: "mkk/User/Reg/Reg"
-		instanceName: 'userReg'
-		cssBaseClass: 'mkk-UserReg'
-		requestURI: "/api/tourist/read"
+		moduleName: "mkk/User/Reg/Card/Card"
+		instanceName: 'userRegCard'
+		cssBaseClass: 'mkk-UserRegCard'
+		requestURI: "/api/tourist/readForReg"
 		accessObject: 'pohod.item'
-		tourist: null;
+		tourist: null
+		settings: {}
+		isConfirmedUser: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
+			'tourist', 'settings', 'isConfirmedUser'
+		]}"/>
 		<h2>Регистрация пользователя</h2>
-		<form method="post" action="/dyn/user/reg/result" class="form">
+		{=if isConfirmedUser {*
+			<div>
+				<div>
+					Для туриста
+					<a href="/dyn/tourist/experience?num={{tourist.num}}"
+						title="Нажмите, чтобы перейти к странице туриста"
+						>{{tourist.familyName}} {{tourist.givenName}} {{tourist.patronymic}} {{tourist.birthYear}}</a>
+					уже есть подтверженная связанная учетная запись пользователя.
+					Повторная регистрация учетной записи невозможна
+				</div>
+				<div>
+					Если вы считаете, что кто-то другой зарегистрировал учетную запись с вашими данными вместо вас,
+					либо произошла ошибка, то просим сообщить об этом по адресу электронной почты: mkk-yar@mail.ru
+				</div>
+			</div>
+		*}}
+		<form method="post"
+			action="/dyn/user/reg/result"
+			class="{=cls 'regForm'} form {=if isConfirmedUser 'd-none'}"
+			>
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label" for="loginField">Логин</label>
 				<div class="col-md-6">
 					<input type="text"
 						name="login"
 						value="{{userIdentity.id}}"
-						class="form-control"
+						class="{=cls 'loginField'} form-control"
 						id="loginField"/>
 				</div>
 			</div>
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label" for="passwordField">Пароль</label>
 				<div class="col-md-6">
-					<input name="password" type="password" class="form-control" id="passwordField"/>
+					<input type="password"
+						name="password"
+						class="{=cls 'passwordField'} form-control"
+						id="passwordField"
+					/>
 				</div>
 			</div>
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label" for="passwordConfirmField">Подтверждение пароля</label>
 				<div class="col-md-6">
-					<input name="passwordConfirm" type="password" class="form-control" id="passwordConfirmField"/>
+					<input type="password"
+						name="passwordConfirm"
+						class="{=cls 'passwordConfirmField'} form-control"
+						id="passwordConfirmField"
+					/>
 				</div>
 			</div>
 			{=TouristEdit
+				instanceName: 'regTouristEdit'
 				tourist: tourist
 				isEditDialog: false
+			}
+			{=ValidationController
+				instanceName: instanceName ~ 'Validation'
 			}
 			<div class="form-group row">
 				<div class="col-md-3">
 					<input type="hidden" name="action" value="write"/>
 				</div>
 				<div class="col-md-6">
-					<button type="submit" class="btn btn-primary btn-block">Регистрация</button>
+					<button type="button"
+						class="{=cls 'regBtn'} btn btn-primary btn-block"
+						>Регистрация</button>
 				</div>
 			</div>
 		</form>

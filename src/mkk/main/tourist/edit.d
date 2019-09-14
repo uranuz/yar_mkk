@@ -17,6 +17,33 @@ shared static this()
 
 import std.typecons: Tuple;
 
+void _checkRequired(string field)(ref TouristDataToWrite record, string what)
+{
+	import std.string: strip;
+	import std.range: empty;
+	import std.traits: isSomeString;
+
+	auto val = __traits(getMember, record, field);
+	static if( isSomeString!(typeof(val.value)) ) {
+		bool res = val.isSet && !val.value.strip.empty;
+	} else {
+		bool res = val.isSet;
+	}
+	enforce(res, "Необходимо указать " ~ what);
+}
+
+void requireFieldsForReg(TouristDataToWrite record)
+{
+	// При регистрации нового пользователя данные поля обязательны.
+	// Считаем, что пользователь должен их знать о себе
+	_checkRequired!"familyName"(record, "фамилию");
+	_checkRequired!"givenName"(record, "имя");
+	_checkRequired!"email"(record, "эл. почту");
+	_checkRequired!"birthYear"(record, "год рождения");
+	_checkRequired!"birthMonth"(record, "месяц рождения");
+	_checkRequired!"birthDay"(record, "день рождения");
+}
+
 Tuple!(Optional!size_t, `touristNum`)
 editTourist(
 	HTTPContext ctx,
@@ -24,12 +51,42 @@ editTourist(
 ) {
 	import std.meta: AliasSeq, staticMap;
 	import std.algorithm: canFind, countUntil;
-	import std.conv: to, text, ConvException;
-	import mkk.main.enums;
+	import std.conv: text, ConvException;
+	import mkk.main.enums: sportsCategory, refereeCategory;
 	import std.json: JSONValue;
 
-	enforce(ctx.rights.hasRight(`tourist.item`, `edit`), `Недостаточно прав для редактирования туриста!`);
-	checkStructEditRights(record, ctx); // Проверка прав
+	bool allowEdit = ctx.rights.hasRight(`tourist.item`, `edit`);
+	bool allowRegUser = ctx.rights.hasRight(`tourist.item`, `reg_user`);
+	auto userNumPtr = "userNum" in ctx.user.data;
+	enforce(userNumPtr !is null, "Не удаётся определить идентификатор пользователя");
+
+	static immutable NO_RIGHTS = `Недостаточно прав для редактирования туриста!`;
+	enforce(allowEdit || allowRegUser, NO_RIGHTS);
+	if( allowRegUser && !allowEdit ) {
+		// Выданы права для добавления записи в процедуре регистрации, но не выданы права на редактирования
+		// Кто-то пытается изменить существущую запись туриста без соответствующих прав
+		enforce(!record.num.isSet, NO_RIGHTS);
+
+		requireFieldsForReg(record);
+
+		// Добавление записи туриста при регистрации пользователя происходит уже под сессией этого нового пользователя
+		// Разрешаем зарегистрировать только одного туриста, который будет привязан к пользователю
+		// Повторные попытки расцениваем как попытки регистрации туристов под неподтвержденым пользователем и запрещаем
+		bool alreadyRegSmth = getCommonDB().queryParams(`
+select exists(
+	select 1
+	from tourist tour
+	where
+		tour.registrator_num = $1::integer
+		or
+		tour.last_editor_num = $1::integer
+	limit 1
+)
+`, *userNumPtr).getScalar!bool();
+		enforce(!alreadyRegSmth, `Неподтвержденный пользователь не может добавлять новых туристов`);
+	}
+	checkStructEditRights(record, ctx, [`edit`, `reg_user`]); // Проверка прав
+
 
 	string[] fieldNames; // имена полей для записи
 	string[] fieldValues; // значения полей для записи
@@ -55,11 +112,11 @@ editTourist(
 		{
 			fieldNames ~= dbFieldName;
 			enforce(
-				!field.isSet || (1 <= field && field <= 12),
-				"Номер месяца должен быть числом от 1 до 12!");
-			enforce(
-				!field.isSet || (1 <= field && field <= 31),
+				!record.birthDay.isSet || (1 <= record.birthDay && record.birthDay <= 31),
 				"День месяца должен быть числом от 1 до 31!");
+			enforce(
+				!record.birthMonth.isSet || (1 <= record.birthMonth && record.birthMonth <= 12),
+				"Номер месяца должен быть числом от 1 до 12!");
 
 			if( record.birthDay.isNull && record.birthMonth.isNull ) {
 				fieldValues ~= "NULL";
@@ -80,10 +137,9 @@ editTourist(
 		return res;
 	}
 
-	enforce("userNum" in ctx.user.data, "Не удаётся определить идентификатор пользователя");
 	//Запись автора последних изменений и даты этих изменений
 	fieldNames ~= "last_editor_num";
-	fieldValues ~= ctx.user.data["userNum"];
+	fieldValues ~= *userNumPtr;
 
 	// Это постоянные, которые НЕ экранируются в запросе
 	string[] safeFieldNames = ["last_edit_timestamp"];
@@ -93,7 +149,7 @@ editTourist(
 	{
 		// При создании записи сохраняем - кто и когда ее создал
 		fieldNames ~= "registrator_num";
-		fieldValues ~= ctx.user.data["userNum"];
+		fieldValues ~= *userNumPtr;
 
 		safeFieldNames ~= "reg_timestamp";
 		safeFieldValues ~= "current_timestamp";

@@ -19,3 +19,12 @@ a.btn {
     }
   }
 }
+
+$btn-padding-y-xs: .12rem !default;
+$btn-padding-x-xs: .20rem !default;
+$input-btn-line-height-xs: 1.1 !default;
+$btn-line-height: $input-btn-line-height-xs;
+
+.btn-xs {
+  @include button-size($btn-padding-y-xs, $btn-padding-x-xs, $font-size-sm, $btn-line-height, $border-radius)
+}

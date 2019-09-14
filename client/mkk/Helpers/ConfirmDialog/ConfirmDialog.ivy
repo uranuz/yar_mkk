@@ -1,0 +1,39 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+def ConfirmDialog {=
+	def.kv
+		moduleName: 'mkk/Helpers/ConfirmDialog/ConfirmDialog'
+		instanceName: 'confirmDialog'
+		cssBaseClass: 'mkk-ConfirmDialog'
+		text: null
+		withYesButton: true
+		withNoButton: true
+		withCancelButton: true
+		yesButtonText: 'Да'
+		noButtonText: 'Нет'
+		cancelButtonText: 'Отмена';
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['deleteWhat', 'confirmWord']}"/>
+		<div class="{=cls 'text'}">{{text}}</div>
+		<div class="{=cls 'btnBlock'}">
+		{=if withYesButton {*
+			<button type="button btn"
+				class="{=cls 'yesBtn'} btn btn-primary">{{yesButtonText}}</button>
+		*}
+		}
+		{=if withNoButton {*
+			<button type="button"
+				class="{=cls 'noBtn'} btn btn-secondary">{{noButtonText}}</button>
+		*}
+		}
+		{=if withCancelButton {*
+			<button type="button"
+				class="{=cls 'cancelBtn'} btn btn-secondary">{{cancelButtonText}}</button>
+		*}
+		}
+		</div>
+	</div>
+	*}
+}
+}

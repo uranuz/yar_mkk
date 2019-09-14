@@ -1,12 +1,15 @@
 .mkk-UserList {
 	&.e-emailConfirmIcon,
 	&.e-blockedIcon,
-	&.e-confirmRegBtn {
+	&.e-confirmRegBtn,
+	&.e-lockUserBtn,
+	&.e-unlockUserBtn {
 		font-size: 1.2rem;
 		font-weight: bold;
+		font-family: 'Ubuntu Mono', 'Courier New', Courier, monospace;
 		cursor: default;
 	}
-	&.e-confirmRegBtn {
+	&.e-confirmRegBtn, &.e-lockUserBtn, &.e-unlockUserBtn {
 		cursor: pointer;
 	}
 }
