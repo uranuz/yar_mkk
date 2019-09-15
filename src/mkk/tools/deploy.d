@@ -1,12 +1,23 @@
 module mkk.tools.deploy;
+/++
+Модуль содержит реализациию утилиты для развертывания сайта МКК
+
++/
+
+static immutable PG_VERSION = `11`; // Используемая версия PostgreSQL
+static immutable NODE_JS_VERSION = `12.x`; // Используемая версия NodeJS
+
+// Путь к файлу со списком источников пакетов для PostgreSQL
+static immutable PG_SOURCES_LIST_PATH = `/etc/apt/sources.list.d/pgdg.list`;
 
 import std.getopt;
 import std.file: exists, read, write, isFile, mkdirRecurse, remove, copy, symlink, getcwd;
-import std.path: buildNormalizedPath, dirName;
+import std.path: buildNormalizedPath, dirName, baseName;
 import std.algorithm: map;
-import std.process: spawnProcess, wait;
+import std.process: spawnProcess, wait, spawnShell, pipe;
 import std.array: array;
 import std.stdio;
+import std.exception: enforce;
 
 static immutable dubConfigs = [
 	`main_service`,
@@ -22,18 +33,49 @@ static immutable dubConfigs = [
 
 void main(string[] args)
 {
+	string cmd;
 	string userName = "yar_mkk";
 	bool makeUnitFiles = false;
 
 	getopt(args,
+		`cmd`, &cmd,
 		`user`, &userName,
 		`makeUnit`, &makeUnitFiles
 	);
 	
+	switch(cmd)
+	{
+		case `req`: {
+			installRequirements();
+			break;
+		}
+		case `site`: {
+			deploySite(userName);
+			break;
+		}
+		default: {
+			writeln(
+`Утилита развертывания сайта МКК.
+Для запуска необходимо задать команду опцией --cmd...
+Опции:
+--cmd Команда развертывания. Возможные значения
+	"req" - Установка основных зависимостей в систему
+	"site" - Собственно разворот сайта
+--user Имя пользователя, в каталог которого выполняется разворот. По-умолчанию yar_mkk. Пользователь должен существовать
+`
+			);
+		}
+	}
+	
+}
+
+/++ Развертывание сайта +/
+void deploySite(string userName)
+{
 	compileAll(); // Собираем все бинарники проекта
 
 	string siteRoot = buildNormalizedPath("/home/", userName, "sites/mkk_site/");
-	writeln(`Deploy to path: `, siteRoot);
+	writeln(`Развертывание сайта в каталог: `, siteRoot);
 	mkdirRecurse(siteRoot);
 
 	// Удаляем всё, что нужно в каталоге развертывания сайта (на всякий случай)
@@ -80,6 +122,8 @@ void main(string[] args)
 			copy(sourceFile, destFile);
 		}
 	}
+
+	addSiteToNginx();
 }
 
 /// Компиляция всех нужных бинарей сайта
@@ -95,9 +139,224 @@ void compileAll()
 
 string readUnitTemplate(string serviceName)
 {
-	string fileName = "./mkk_site_" ~ serviceName ~ ".service";
-	if( exists(fileName) && isFile(fileName) ) {
-		return cast(string) read(fileName);
+	string fileName = "./config/systemd/mkk_site_" ~ serviceName ~ ".service";
+	enforce(
+		exists(fileName) && isFile(fileName),
+		`Unit template for service doesn't exists: ` ~ fileName
+	);
+	return cast(string) read(fileName);
+}
+
+static immutable NPM_FOLDERS = [`ivy`, `fir`, `yar_mkk`];
+void npmInstall()
+{
+	foreach( folder; NPM_FOLDERS )
+	{
+		{
+			writeln(`Установка/ обновление npm пакетов для: ` ~ folder);
+			auto pid = spawnShell(`npm install`);
+			scope(exit) {
+				enforce(wait(pid) == 0, `Произошла ошибка при установке/ обновление npm пакетов для: ` ~ folder);
+			}
+		}
+		
+		{
+			writeln(`Запуск задач grunt для: ` ~ folder);
+			auto pid = spawnShell(`grunt`);
+			scope(exit) {
+				enforce(wait(pid) == 0, `Произошла ошибка при выполнении задач grunt для: ` ~ folder);
+			}
+		}
+
 	}
-	throw new Exception(`Unit template for service doesn't exists: ` ~ fileName);
+}
+
+static immutable NGINX_CONF_FILE = `config/nginx/yar-mkk.ru`;
+void addSiteToNginx()
+{
+	writeln(`Добавляем конфиг сайта в nginx...`);
+	enforce(
+		exists(`/etc/nginx/sites-available`),
+		`Не найден каталог sites-available. Проверьте установку nginx`);
+	enforce(
+		exists(`/etc/nginx/sites-enabled`),
+		`Не найден каталог sites-enabled. Проверьте установку nginx`);
+
+	writeln(`Копирование конфига сайта в nginx...`);
+	string workDir = getcwd();
+	immutable string sourceFile = buildNormalizedPath(workDir, NGINX_CONF_FILE);
+	immutable string availableFile = buildNormalizedPath(`/etc/nginx/sites-available`, baseName(NGINX_CONF_FILE));
+	copy(sourceFile, availableFile);
+
+	writeln(`Добавление ссылки на конфиг сайта nginx в sites-enabled`);
+	immutable string enabledFile = buildNormalizedPath(`/etc/nginx/sites-enabled`, baseName(NGINX_CONF_FILE));
+	symlink(availableFile, enabledFile);
+
+	{
+		writeln(`Применение конфигурации nginx...`);
+		auto pid = spawnShell(`sudo systemctl restart nginx`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при применении конфигурации nginx`);
+		}
+	}
+}
+
+import std.algorithm: startsWith;
+import std.string: strip;
+/++ Получить кодовое имя дистрибутива Ubuntu +/
+string getLinuxCodeName()
+{
+	writeln(`Определяю кодовое имя дистрибутива Linux...`);
+	auto p = pipe();
+	auto pid = spawnProcess([`lsb_release`, `-a`], std.stdio.stdin, p.writeEnd);
+	scope(exit) {
+		enforce(wait(pid) == 0, `Произошла ошибка при попытке получить кодовое имя дистрибутива Linux`);
+	}
+	foreach( line; p.readEnd.byLine )
+	{
+		if( line.startsWith(`Codename:`) ) {
+			string codeName = (cast(string) line).strip(); // Избавляемся от пробелов вокруг
+			writeln(`Кодовое имя дистрибутива Linux "` ~ codeName ~ `"`);
+			return codeName;
+		}
+	}
+	enforce(false, `Не удалось получить кодовое имя дистрибутива Linux`);
+	assert(false);
+}
+
+void installBasicUtils()
+{
+	// Установка полезных программ таких как htop, mc, curl...
+	writeln(`Устанавливаем основные утилиты Linux...`);
+	auto pid = spawnShell(`sudo apt install -y htop mc curl wget`);
+	scope(exit) {
+		enforce(wait(pid) == 0, `Произошла ошибка при попытке установить основные утилиты Linux`);
+	}
+}
+
+/++ Установка nodejs +/
+void installNodeJS()
+{
+	// Инструкция для установки nodejs из репозитория лежит здеся:
+	// https://github.com/nodesource/distributions/blob/master/README.md
+	{
+		writeln(`Добавляем репозиторий для nodejs...`);
+		auto pid = spawnShell(`curl -sL https://deb.nodesource.com/setup_` ~ NODE_JS_VERSION ~ ` | sudo -E bash -`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при добавлении репозитория nodejs`);
+		}
+	}
+
+	{
+		writeln(`Устанавливаем nodejs...`);
+		aptUpdate();
+		auto pid = spawnShell(`sudo apt install -y nodejs`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке nodejs`);
+		}
+	}
+}
+
+void aptUpdate()
+{
+	writeln(`Выполняю apt update...`);
+	auto pid = spawnShell(`sudo apt update`);
+	scope(exit) {
+		enforce(wait(pid) == 0, `Произошла ошибка при apt update`);
+	}
+}
+
+
+void installPostgres()
+{
+	writeln(`Добавляем репозиторий для postgres...`);
+	immutable string linuxCodeName = getLinuxCodeName();
+	immutable string sourcesDir = dirName(PG_SOURCES_LIST_PATH);
+	if( !exists(sourcesDir) ) {
+		mkdirRecurse(sourcesDir);
+	}
+	if( !exists(PG_SOURCES_LIST_PATH) ) {
+		write(PG_SOURCES_LIST_PATH, `deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main`);
+	}
+
+	{
+		writeln(`Импортируем подпись репозитория postgres...`);
+		auto pid = spawnShell(`wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке nodejs`);
+		}
+	}
+
+	{
+		writeln(`Устанавливаем postgres...`);
+		aptUpdate();
+		auto pid = spawnShell(`sudo apt install -y postgresql-11 libpq-dev`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке nodejs`);
+		}
+	}
+}
+
+void installNginx()
+{
+	{
+		writeln(`Устанавливаю nginx...`);
+		auto pid = spawnShell(`sudo apt install -y nginx`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке nginx`);
+		}
+	}
+}
+
+void installCertBot()
+{
+	// Инструкция по установке CertBot где-то здесь...
+	// https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
+	writeln(`Устанавливаю CertBot...`);
+	aptUpdate();
+
+	{
+		writeln(`Устанавливаю software-properties-common...`);
+		auto pid = spawnShell(`sudo apt-get install software-properties-common`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке software-properties-common`);
+		}
+	}
+
+	{
+		writeln(`Добавление репозитория universe...`);
+		auto pid = spawnShell(`sudo add-apt-repository universe`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при добавлении репозитория universe`);
+		}
+	}
+	
+	{
+		writeln(`Добавление PPA для CertBot...`);
+		auto pid = spawnShell(`sudo add-apt-repository universe`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при добавлении PPA для CertBot`);
+		}
+	}
+
+	aptUpdate();
+
+	{
+		writeln(`Собственно установка CertBot...`);
+		auto pid = spawnShell(`sudo apt-get install certbot python-certbot-nginx`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке CertBot`);
+		}
+	}
+}
+
+/++ Установка всех основных требований для сайта +/
+void installRequirements()
+{
+	aptUpdate();
+	installBasicUtils();
+	installNodeJS();
+	installPostgres();
+	installNginx();
+	//installCertBot();
 }
