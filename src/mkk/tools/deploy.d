@@ -172,15 +172,15 @@ void buildTarsnap()
 		}
 	}
 
-	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
 	{
 		writeln(`Разархивирование исходников для tarsnap...`);
-		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, tarsnapDir);
+		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, sourcesDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось разархивирование исходников для tarsnap`);
 		}
 	}
 
+	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
 	{
 		writeln(`Конфигурирование tarsnap...`);
 		auto pid = spawnProcess([`configure`], null, Config.none, tarsnapDir);
