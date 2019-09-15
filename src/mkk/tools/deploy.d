@@ -176,7 +176,7 @@ void buildTarsnap()
 	if( exists(tarsnapDir) )
 	{
 		writeln(`Удаление старой сборки tarsnap...`);
-		auto pid = spawnProcess([`rm`, `-rf`, `*`], null, Config.none, tarsnapDir);
+		auto pid = spawnShell([`rm -rf *`], null, Config.none, tarsnapDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось удалить старую сборку tarsnap`);
 		}
