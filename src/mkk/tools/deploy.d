@@ -158,7 +158,7 @@ void buildTarsnap()
 
 	{
 		writeln(`Установка зависимостей для сборки tarsnap...`);
-		auto pid = spawnShell(`sudo apt-get install gcc libc6-dev make libssl-dev zlib1g-dev e2fslibs-dev`);
+		auto pid = spawnShell(`sudo apt-get install -y gcc libc6-dev make libssl-dev zlib1g-dev e2fslibs-dev`);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалась установка зависимостей для сборки tarsnap`);
 		}
@@ -172,9 +172,10 @@ void buildTarsnap()
 		}
 	}
 
+	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
 	{
 		writeln(`Разархивирование исходников для tarsnap...`);
-		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, sourcesDir);
+		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, tarsnapDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось разархивирование исходников для tarsnap`);
 		}
@@ -182,7 +183,7 @@ void buildTarsnap()
 
 	{
 		writeln(`Конфигурирование tarsnap...`);
-		auto pid = spawnProcess([`configure`], null, Config.none, sourcesDir);
+		auto pid = spawnProcess([`configure`], null, Config.none, tarsnapDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось конфигурирование tarsnap`);
 		}
@@ -190,7 +191,7 @@ void buildTarsnap()
 
 	{
 		writeln(`Сборка tarsnap...`);
-		auto pid = spawnProcess([`make`, `all`], null, Config.none, sourcesDir);
+		auto pid = spawnProcess([`make`, `all`], null, Config.none, tarsnapDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалась сборка tarsnap`);
 		}
@@ -201,7 +202,7 @@ void buildTarsnap()
 	foreach( libName; [`libtarsnap_sse2.a`, `libtarsnap.a`] )
 	{
 		copy(
-			buildNormalizedPath(sourcesDir, tarsnapFolder, libName),
+			buildNormalizedPath(tarsnapDir, libName),
 			buildNormalizedPath(workDir, `lib`, libName)
 		);
 	}
