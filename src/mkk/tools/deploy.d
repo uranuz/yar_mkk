@@ -155,6 +155,7 @@ void buildTarsnap()
 {
 	immutable string workDir = getcwd();
 	immutable string sourcesDir = buildNormalizedPath(workDir, `..`);
+	immutable tarsnapBaseName = baseName(TARSNAP_URL, `.tgz`);
 
 	{
 		writeln(`Установка зависимостей для сборки tarsnap...`);
@@ -181,11 +182,13 @@ void buildTarsnap()
 		}
 	}
 
-	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
+	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, tarsnapBaseName);
 	if( exists(tarsnapDir) )
 	{
 		writeln(`Удаление старой сборки tarsnap...`);
-		auto pid = spawnShell(`rm -rf * && rmdir .`, null, Config.none, tarsnapDir);
+		auto pid = spawnShell(
+			`rm -rf ` ~ tarsnapBaseName ~ `/* && rmdir ` ~ tarsnapBaseName ~ ` `,
+			null, Config.none, sourcesDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось удалить старую сборку tarsnap`);
 		}
@@ -202,7 +205,7 @@ void buildTarsnap()
 	
 	{
 		writeln(`Конфигурирование tarsnap...`);
-		auto pid = spawnProcess([`configure`], null, Config.none, tarsnapDir);
+		auto pid = spawnShell(`./configure`, null, Config.none, tarsnapDir);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Не удалось конфигурирование tarsnap`);
 		}
@@ -217,7 +220,6 @@ void buildTarsnap()
 	}
 
 	writeln(`Копирование библиотек tarsnap...`);
-	immutable tarsnapFolder = baseName(TARSNAP_URL, `.tgz`);
 	foreach( libName; [`libtarsnap_sse2.a`, `libtarsnap.a`] )
 	{
 		copy(
