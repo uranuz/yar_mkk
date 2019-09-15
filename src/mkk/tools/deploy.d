@@ -172,6 +172,16 @@ void buildTarsnap()
 		}
 	}
 
+	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
+	if( exists(tarsnapDir) )
+	{
+		writeln(`Удаление старой сборки tarsnap...`);
+		auto pid = spawnProcess([`rm`, `-rf`], null, Config.none, tarsnapDir);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалось удалить старую сборку tarsnap`);
+		}
+	}
+
 	{
 		writeln(`Разархивирование исходников для tarsnap...`);
 		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, sourcesDir);
@@ -180,7 +190,7 @@ void buildTarsnap()
 		}
 	}
 
-	immutable string tarsnapDir = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL, `.tgz`));
+	
 	{
 		writeln(`Конфигурирование tarsnap...`);
 		auto pid = spawnProcess([`configure`], null, Config.none, tarsnapDir);
