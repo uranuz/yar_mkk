@@ -163,6 +163,15 @@ void buildTarsnap()
 			enforce(wait(pid) == 0, `Не удалась установка зависимостей для сборки tarsnap`);
 		}
 	}
+
+	immutable string tarsnapArchivePath = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL));
+	{
+		writeln(`Удаление старого архива tarsnap...`);
+		auto pid = spawnProcess([`rm`, tarsnapArchivePath]);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалось удалить старый архив tarsnap`);
+		}
+	}
 	
 	{
 		writeln(`Скачивание исходников для tarsnap...`);
