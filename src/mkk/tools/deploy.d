@@ -135,7 +135,7 @@ void compileAll()
 		immutable string sourceFolder = buildNormalizedPath(workDir, `..`, folder);
 		auto pid = spawnProcess([`dub`, `add-local`, sourceFolder]);
 		scope(exit) {
-			enforce(pid, `Failed to add dub package: ` ~ folder);
+			enforce(wait(pid) == 0, `Failed to add dub package: ` ~ folder);
 		}
 	}
 	
@@ -143,7 +143,7 @@ void compileAll()
 	{
 		auto pid = spawnProcess([`dub`, `build`, `:` ~ confName, `--build=release`]);
 		scope(exit) {
-			enforce(pid, `Compilition failed for configuration: ` ~ confName);
+			enforce(wait(pid) == 0, `Compilition failed for configuration: ` ~ confName);
 		}
 	}
 }
