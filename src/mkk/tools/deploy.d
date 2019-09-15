@@ -223,7 +223,7 @@ void buildTarsnap()
 	foreach( libName; [`libtarsnap_sse2.a`, `libtarsnap.a`] )
 	{
 		copy(
-			buildNormalizedPath(tarsnapDir, libName),
+			buildNormalizedPath(tarsnapDir, `lib`, libName),
 			buildNormalizedPath(workDir, `lib`, libName)
 		);
 	}
