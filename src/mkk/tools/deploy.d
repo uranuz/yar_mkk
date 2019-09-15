@@ -129,10 +129,21 @@ void deploySite(string userName)
 /// Компиляция всех нужных бинарей сайта
 void compileAll()
 {
-	foreach( string confName; dubConfigs ) {
-		auto dubPid = spawnProcess([`dub`, `build`, `:` ~ confName, `--build=release`]);
-		if( wait(dubPid) != 0 ) {
-			throw new Exception( `Compilition failed for configuration: ` ~ confName );
+	string workDir = getcwd();
+	foreach( folder; [`ivy`, `webtank`, `yar_mkk`] )
+	{
+		immutable string sourceFolder = buildNormalizedPath(workDir, `..`, folder);
+		auto pid = spawnProcess([`dub`, `add-local`, sourceFolder]);
+		scope(exit) {
+			enforce(pid, `Failed to add dub package: ` ~ folder);
+		}
+	}
+	
+	foreach( string confName; dubConfigs )
+	{
+		auto pid = spawnProcess([`dub`, `build`, `:` ~ confName, `--build=release`]);
+		scope(exit) {
+			enforce(pid, `Compilition failed for configuration: ` ~ confName);
 		}
 	}
 }
