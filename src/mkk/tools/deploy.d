@@ -14,7 +14,7 @@ import std.getopt;
 import std.file: exists, read, write, isFile, mkdirRecurse, remove, copy, symlink, getcwd;
 import std.path: buildNormalizedPath, dirName, baseName;
 import std.algorithm: map;
-import std.process: spawnProcess, wait, spawnShell, pipe;
+import std.process: spawnProcess, wait, spawnShell, pipe, Config;
 import std.array: array;
 import std.stdio;
 import std.exception: enforce;
@@ -129,6 +129,8 @@ void deploySite(string userName)
 /// Компиляция всех нужных бинарей сайта
 void compileAll()
 {
+	buildTarsnap();
+	
 	string workDir = getcwd();
 	foreach( folder; [`ivy`, `webtank`, `yar_mkk`] )
 	{
@@ -145,6 +147,63 @@ void compileAll()
 		scope(exit) {
 			enforce(wait(pid) == 0, `Compilition failed for configuration: ` ~ confName);
 		}
+	}
+}
+
+static immutable TARSNAP_URL = `https://www.tarsnap.com/download/tarsnap-autoconf-1.0.39.tgz`;
+void buildTarsnap()
+{
+	immutable string workDir = getcwd();
+	immutable string sourcesDir = buildNormalizedPath(workDir, `..`);
+
+	{
+		writeln(`Установка зависимостей для сборки tarsnap...`);
+		auto pid = spawnShell(`sudo apt-get install gcc libc6-dev make libssl-dev zlib1g-dev e2fslibs-dev`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалась установка зависимостей для сборки tarsnap`);
+		}
+	}
+	
+	{
+		writeln(`Скачивание исходников для tarsnap...`);
+		auto pid = spawnProcess([`wget`, TARSNAP_URL], null, Config.none, sourcesDir);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалось скачивание исходников для tarsnap`);
+		}
+	}
+
+	{
+		writeln(`Разархивирование исходников для tarsnap...`);
+		auto pid = spawnProcess([`unar`, baseName(TARSNAP_URL)], null, Config.none, sourcesDir);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалось разархивирование исходников для tarsnap`);
+		}
+	}
+
+	{
+		writeln(`Конфигурирование tarsnap...`);
+		auto pid = spawnProcess([`configure`], null, Config.none, sourcesDir);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалось конфигурирование tarsnap`);
+		}
+	}
+
+	{
+		writeln(`Сборка tarsnap...`);
+		auto pid = spawnProcess([`make`, `all`], null, Config.none, sourcesDir);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Не удалась сборка tarsnap`);
+		}
+	}
+
+	writeln(`Копирование библиотек tarsnap...`);
+	immutable tarsnapFolder = baseName(TARSNAP_URL, `.tgz`);
+	foreach( libName; [`libtarsnap_sse2.a`, `libtarsnap.a`] )
+	{
+		copy(
+			buildNormalizedPath(sourcesDir, tarsnapFolder, libName),
+			buildNormalizedPath(workDir, `lib`, libName)
+		);
 	}
 }
 
@@ -239,7 +298,7 @@ void installBasicUtils()
 {
 	// Установка полезных программ таких как htop, mc, curl...
 	writeln(`Устанавливаем основные утилиты Linux...`);
-	auto pid = spawnShell(`sudo apt install -y htop mc curl wget`);
+	auto pid = spawnShell(`sudo apt install -y htop mc curl wget unar`);
 	scope(exit) {
 		enforce(wait(pid) == 0, `Произошла ошибка при попытке установить основные утилиты Linux`);
 	}
