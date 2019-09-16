@@ -59,7 +59,7 @@ void main(string[] progAgs) {
 
 	size_t userId;
 	try {
-		userId = registerUser(login, name, email);
+		userId = registerUser!(getAuthDB)(login, password, name, email).userNum;
 	} catch(Exception ex) {
 		writeln(ex.msg);
 		showHelp();
