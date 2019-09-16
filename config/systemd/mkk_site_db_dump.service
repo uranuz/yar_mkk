@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/home/yar_mkk/sites/mkk_site/dump_databases.py
+ExecStart=/home/yar_mkk/sites/mkk/dump_databases.py
 User=yar_mkk
 Group=yar_mkk
 

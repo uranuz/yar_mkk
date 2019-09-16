@@ -74,7 +74,7 @@ void deploySite(string userName)
 {
 	compileAll(); // Собираем все бинарники проекта
 
-	string siteRoot = buildNormalizedPath("/home/", userName, "sites/mkk_site/");
+	string siteRoot = buildNormalizedPath("/home/", userName, "sites/mkk/");
 	writeln(`Развертывание сайта в каталог: `, siteRoot);
 	mkdirRecurse(siteRoot);
 
@@ -231,7 +231,7 @@ void buildTarsnap()
 
 string readUnitTemplate(string serviceName)
 {
-	string fileName = "./config/systemd/mkk_site_" ~ serviceName ~ ".service";
+	string fileName = "./config/systemd/mkk_" ~ serviceName ~ ".service";
 	enforce(
 		exists(fileName) && isFile(fileName),
 		`Unit template for service doesn't exists: ` ~ fileName

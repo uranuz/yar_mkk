@@ -5,9 +5,9 @@ After=nginx.target
 After=postgresql-9.6.target
 
 [Service]
-WorkingDirectory=/home/yar_mkk/sites/mkk_site/
-ExecStart=/home/yar_mkk/sites/mkk_site/bin/mkk_site_dispatcher --workerPath=./bin/mkk_site_history_service --port=8084
-PIDFile=/var/run/mkk_site_history_service.pid
+WorkingDirectory=/home/yar_mkk/sites/mkk/
+ExecStart=/home/yar_mkk/sites/mkk/bin/mkk_dispatcher --workerPath=./bin/mkk_history_service --port=8084
+PIDFile=/var/run/mkk_history_service.pid
 
 User=yar_mkk
 Group=yar_mkk

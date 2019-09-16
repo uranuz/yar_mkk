@@ -197,17 +197,17 @@ I. ОБЩАЯ НАСТРОЙКА СЕРВЕРА:
 		Должно быть там следующее:
 			server {
 				listen       80;
-				root /home/yar_mkk/sites/mkk_site/pub/;
+				root /home/yar_mkk/sites/mkk/pub/;
 				
 				server_name new.yar-mkk.ru www.new.yar-mkk.ru;
 				
 				location /pub/ {
-						root   /home/yar_mkk/sites/mkk_site/;
+						root   /home/yar_mkk/sites/mkk/;
 						index  index.html index.htm;
 				}
 
 				location /robots.txt {
-					root   /home/yar_mkk/sites/mkk_site/pub/;
+					root   /home/yar_mkk/sites/mkk/pub/;
 				}
 
 				location /jsonrpc/ {
@@ -284,14 +284,14 @@ I. ОБЩАЯ НАСТРОЙКА СЕРВЕРА:
 
 		Все локальные репозитории нужно обновить до нужной версии!!!
 
-	3. Разворот ресурсов сайта в каталог ~/sites/mkk_site/
+	3. Разворот ресурсов сайта в каталог ~/sites/mkk/
 	
 		Переходим в fir:
 			cd ~/sources/fir
 
 		Нужно установить JavaScript-зависимости через npm:
 			npm install
-		Если установка прошла успешно, то запускаем разворот (он идёт по-умолчанию в ~/sites/mkk_site/):
+		Если установка прошла успешно, то запускаем разворот (он идёт по-умолчанию в ~/sites/mkk/):
 			grunt
 
 
@@ -305,8 +305,8 @@ I. ОБЩАЯ НАСТРОЙКА СЕРВЕРА:
 		Для релиза:
 			grunt dist
 		
-		Идём в ~/sites/mkk_site им проверяем, что есть папки pub и res
-			ls ~/sites/mkk_site
+		Идём в ~/sites/mkk им проверяем, что есть папки pub и res
+			ls ~/sites/mkk
 
 
 СБОРКА И НАСТРОЙКА ЗАПУСКА СЕРВИСОВ САЙТА МКК:

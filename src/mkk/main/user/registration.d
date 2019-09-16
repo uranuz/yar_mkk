@@ -247,7 +247,7 @@ shared static this()
 	import std.file: exists, read, isFile;
 	import std.path: expandTilde, buildNormalizedPath;
 	import std.json: JSONValue, parseJSON, JSONType;
-	string emailSenderConfigPath = expandTilde(`~/sites/mkk_site/email_sender_config.json`);
+	string emailSenderConfigPath = expandTilde(`~/sites/mkk/email_sender_config.json`);
 	enforce(exists(emailSenderConfigPath) && isFile(emailSenderConfigPath), `Expected email sender config file!`);
 
 	string strConfig = cast(string) read(emailSenderConfigPath);

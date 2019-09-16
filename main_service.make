@@ -1,2 +1,2 @@
 dub build :main_service
-dub run :dispatcher -- --workerPath=./bin/mkk_site_main_service --port=8083
+dub run :dispatcher -- --workerPath=./bin/mkk_main_service --port=8083

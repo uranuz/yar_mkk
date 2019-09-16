@@ -6,7 +6,7 @@ syntax: regexp
 syntax: glob
 ./**/node_modules
 pub_src/dist/
-mkk_site_devel
-mkk_site_release
+mkk_devel
+mkk_release
 .dub/**
 bin/**

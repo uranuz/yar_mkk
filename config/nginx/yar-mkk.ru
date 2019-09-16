@@ -8,7 +8,7 @@ server {
 	proxy_set_header X-Forwarded-Port $server_port;
 
 	location /pub/ {
-		root /home/uranuz/sites/mkk_site/;
+		root /home/uranuz/sites/mkk/;
 		index index.html index.htm;
 	}
 
