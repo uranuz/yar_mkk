@@ -278,11 +278,34 @@ void addSiteToNginx()
 	string workDir = getcwd();
 	immutable string sourceFile = buildNormalizedPath(workDir, NGINX_CONF_FILE);
 	immutable string availableFile = buildNormalizedPath(`/etc/nginx/sites-available`, baseName(NGINX_CONF_FILE));
-	copy(sourceFile, availableFile);
+	//copy(sourceFile, availableFile);
+
+	{
+		auto pid = spawnShell(`sudo cp "` ~ sourceFile ~ `" "` ~ availableFile ~ `"`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка копировании конфига сайта в nginx`);
+		}
+	}
 
 	writeln(`Добавление ссылки на конфиг сайта nginx в sites-enabled`);
 	immutable string enabledFile = buildNormalizedPath(`/etc/nginx/sites-enabled`, baseName(NGINX_CONF_FILE));
-	symlink(availableFile, enabledFile);
+	//symlink(availableFile, enabledFile);
+
+	if( exists(enabledFile) )
+	{
+		writeln(`Удаление старой ссылки в sites-enabled`);
+		auto pid = spawnShell(`sudo unlink "` ~ enabledFile ~ `"`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при удалении старой ссылки в sites-enabled`);
+		}
+	}
+
+	{
+		auto pid = spawnShell(`sudo ln -s "` ~ availableFile ~ `" "` ~ enabledFile ~ `"`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при добавлении ссылки на конфиг сайта nginx в sites-enabled`);
+		}
+	}
 
 	{
 		writeln(`Применение конфигурации nginx...`);
