@@ -27,7 +27,7 @@
 			},
 			"lflags": [
 				"lib/libtarsnap.a",
-				"lib/libscrypt_sse2.a",
+				"lib/libtarsnap_sse2.a",
 				"--demangle=dlang"
 			],
 			"buildRequirements": [
@@ -94,7 +94,7 @@
 			],
 			"lflags": [
 				"lib/libtarsnap.a",
-				"lib/libscrypt_sse2.a"
+				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [
 				"src/mkk/common",
@@ -121,7 +121,7 @@
 			],
 			"lflags": [
 				"lib/libtarsnap.a",
-				"lib/libscrypt_sse2.a"
+				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [
 				"src/mkk/common",
@@ -145,7 +145,7 @@
 			},
 			"lflags-posix": [
 				"lib/libtarsnap.a",
-				"lib/libscrypt_sse2.a"
+				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
@@ -163,7 +163,7 @@
 			},
 			"lflags-posix": [
 				"lib/libtarsnap.a",
-				"lib/libscrypt_sse2.a"
+				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
