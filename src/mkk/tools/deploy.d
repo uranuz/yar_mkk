@@ -124,7 +124,7 @@ void deploySite(string userName)
 	}
 
 	addSiteToNginx();
-	npmInstall();
+	runNpmGrunt();
 }
 
 /// Компиляция всех нужных бинарей сайта
@@ -241,7 +241,7 @@ string readUnitTemplate(string serviceName)
 }
 
 static immutable NPM_FOLDERS = [`ivy`, `fir`, `yar_mkk`];
-void npmInstall()
+void runNpmGrunt()
 {
 	foreach( folder; NPM_FOLDERS )
 	{
@@ -371,6 +371,15 @@ void installNodeJS()
 			enforce(wait(pid) == 0, `Произошла ошибка при установке nodejs`);
 		}
 	}
+
+	{
+		writeln(`Устанавливаем Grunt command line interface...`);
+		aptUpdate();
+		auto pid = spawnShell(`sudo npm install -g grunt-cli`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при Grunt command line interface`);
+		}
+	}
 }
 
 void aptUpdate()
@@ -466,6 +475,7 @@ void installCertBot()
 	}
 }
 
+
 /++ Установка всех основных требований для сайта +/
 void installRequirements()
 {
@@ -474,5 +484,6 @@ void installRequirements()
 	installNodeJS();
 	installPostgres();
 	installNginx();
+
 	//installCertBot();
 }
