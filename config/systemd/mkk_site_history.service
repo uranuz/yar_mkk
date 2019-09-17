@@ -2,7 +2,7 @@
 Description=MKK site history service
 After=network.target
 After=nginx.target
-After=postgresql-9.6.target
+After=postgresql-11.target
 
 [Service]
 WorkingDirectory=/home/yar_mkk/sites/mkk/

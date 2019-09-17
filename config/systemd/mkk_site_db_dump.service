@@ -1,6 +1,6 @@
 [Unit]
-Description=Backup of yar-mkk.ru site databases
-After=postgresql-9.6.target
+Description=Backup of MKK site databases
+After=postgresql-11.target
 After=network.target
 
 [Service]

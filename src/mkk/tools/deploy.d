@@ -125,6 +125,7 @@ void deploySite(string userName)
 
 	addSiteToNginx();
 	runNpmGrunt();
+	installSystemdUnits();
 }
 
 /// Компиляция всех нужных бинарей сайта
@@ -230,6 +231,51 @@ void buildTarsnap()
 	}
 }
 
+static immutable string[] MKK_SERVICES = [`main`, `view`, `history`];
+static immutable string SYSTEMD_UNITS_DIR = `/etc/systemd/system`;
+void installSystemdUnits()
+{
+	string workDir = getcwd();
+	foreach( srvName; MKK_SERVICES )
+	{
+		immutable string sourcePath = buildNormalizedPath(workDir, `config/systemd`, `mkk_` ~ srvName ~ `.service`);
+		writeln(`Установка systemd юнита для: ` ~ srvName);
+		auto pid = spawnShell(`sudo cp "` ~ sourcePath ~ `" "` ~ SYSTEMD_UNITS_DIR ~ `"`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при установке systemd юнита для: ` ~ srvName);
+		}
+	}
+
+	{
+		writeln(`Перезагрузка демона systemd...`);
+		auto pid = spawnShell(`sudo systemctl daemon-reload`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при перезагрузке демона systemd`);
+		}
+	}
+
+	foreach( srvName; MKK_SERVICES )
+	{
+		immutable string unitName = `mkk_` ~ srvName ~ `.service`;
+		writeln(`Запуск systemd юнита для: ` ~ srvName);
+		auto pid = spawnShell(`sudo systemctl restart ` ~ unitName);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при запуске systemd юнита для: ` ~ srvName);
+		}
+	}
+
+	foreach( srvName; MKK_SERVICES )
+	{
+		immutable string unitName = `mkk_` ~ srvName ~ `.service`;
+		writeln(`Включение systemd юнита для: ` ~ srvName);
+		auto pid = spawnShell(`sudo systemctl restart ` ~ unitName);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при включении systemd юнита для: ` ~ srvName);
+		}
+	}
+}
+
+/++
 string readUnitTemplate(string serviceName)
 {
 	string fileName = "./config/systemd/mkk_" ~ serviceName ~ ".service";
@@ -239,6 +285,7 @@ string readUnitTemplate(string serviceName)
 	);
 	return cast(string) read(fileName);
 }
++/
 
 static immutable NPM_FOLDERS = [`ivy`, `fir`, `yar_mkk`];
 void runNpmGrunt()

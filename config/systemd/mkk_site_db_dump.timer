@@ -1,5 +1,5 @@
 [Unit]
-Description=Execute backup of yar-mkk.ru databases once a day
+Description=Execute backup of MKK databases once a day
 
 [Timer]
 OnCalendar=*-*-* 16:48:00
