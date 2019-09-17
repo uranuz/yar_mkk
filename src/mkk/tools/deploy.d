@@ -124,6 +124,7 @@ void deploySite(string userName)
 	}
 
 	addSiteToNginx();
+	npmInstall();
 }
 
 /// Компиляция всех нужных бинарей сайта
