@@ -352,7 +352,7 @@ void addSiteToNginx()
 	if( exists(nginxDefaultSite) )
 	{
 		writeln(`Удаление default сайта nginx из sites-enabled`);
-		auto pid = spawnShell(`sudo unlink "` ~ enabledFile ~ `"`);
+		auto pid = spawnShell(`sudo unlink "` ~ nginxDefaultSite ~ `"`);
 		scope(exit) {
 			enforce(wait(pid) == 0, `Произошла ошибка при удалении default сайта nginx из sites-enabled`);
 		}
