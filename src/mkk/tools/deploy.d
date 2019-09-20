@@ -348,6 +348,16 @@ void addSiteToNginx()
 		}
 	}
 
+	immutable string nginxDefaultSite = `/etc/nginx/sites-enabled/default`;
+	if( exists(nginxDefaultSite) )
+	{
+		writeln(`Удаление default сайта nginx из sites-enabled`);
+		auto pid = spawnShell(`sudo unlink "` ~ enabledFile ~ `"`);
+		scope(exit) {
+			enforce(wait(pid) == 0, `Произошла ошибка при удалении default сайта nginx из sites-enabled`);
+		}
+	}
+
 	{
 		auto pid = spawnShell(`sudo ln -s "` ~ availableFile ~ `" "` ~ enabledFile ~ `"`);
 		scope(exit) {
