@@ -217,8 +217,12 @@ void installPostgres()
 	}
 	if( !exists(PG_SOURCES_LIST_PATH) )
 	{
-		writeln(`Добавление репозитория пакетов PostgreSQL в систему`);
-		write(PG_SOURCES_LIST_PATH, `deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main`);
+		//writeln(`Добавление репозитория пакетов PostgreSQL в систему`);
+		_waitProc(
+			spawnShell(
+				`sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main" >> ` ~ PG_SOURCES_LIST_PATH),
+			`Добавление репозитория пакетов PostgreSQL в систему`);
+		//write(PG_SOURCES_LIST_PATH, `deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main`);
 
 		_waitProc(
 			spawnShell(`wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -`),
