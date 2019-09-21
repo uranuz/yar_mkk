@@ -74,7 +74,7 @@ void _waitProc(Pid pid, string action)
 {
 	writeln(action, `...`);
 	scope(exit) {
-		enforce(wait(pid) == 0, `Ошибка операции: `, action);
+		enforce(wait(pid) == 0, `Ошибка операции: ` ~ action);
 	}
 }
 
@@ -220,7 +220,8 @@ void installPostgres()
 		//writeln(`Добавление репозитория пакетов PostgreSQL в систему`);
 		_waitProc(
 			spawnShell(
-				`sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main" >> ` ~ PG_SOURCES_LIST_PATH),
+				`echo "deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main" `
+				~ `| sudo tee "` ~ PG_SOURCES_LIST_PATH ~ `"`),
 			`Добавление репозитория пакетов PostgreSQL в систему`);
 		//write(PG_SOURCES_LIST_PATH, `deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main`);
 
