@@ -19,7 +19,7 @@ I. ОБЩАЯ НАСТРОЙКА СЕРВЕРА:
 		sudo apt install nano
 		sudo apt install mc
 		sudo apt install curl
-	6. Открываем через nano (или чререз другой редактор)
+	6. Открываем через nano (или через другой редактор)
 		sudo nano /etc/ssh/sshd_config
 		
 		Пропишем на данном этапе параметры:

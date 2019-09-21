@@ -81,8 +81,8 @@ void _waitProc(Pid pid, string action)
 /++ Установка всех основных требований для сайта +/
 void installRequirements()
 {
-	aptUpdate();
 	setRussianLocale();
+	aptUpdate();
 	installBasicUtils();
 	installNodeJS();
 	installPostgres();
@@ -152,6 +152,23 @@ void deploySite(string userName)
 
 //----- Установка основных системных зависимостей
 
+/++ Хотим чтобы система имела русскую локаль, и программы устанавливались в ней +/
+void setRussianLocale()
+{
+	writeln(`Установка системной локали`);
+	
+	foreach( localeName; [`ru_RU.UTF-8`, `en_US.UTF-8`] )
+	{
+		_waitProc(
+			spawnShell(`sudo locale-gen ` ~ localeName),
+			`Генерация локали: ` ~ localeName);
+	}
+
+	_waitProc(
+		spawnShell(`sudo update-locale LANG=ru_RU.UTF-8`),
+		`Установка локали по-умолчанию ru_RU.UTF-8`);
+}
+
 /++ Обновление списка пакетов +/
 void aptUpdate()
 {
@@ -160,10 +177,6 @@ void aptUpdate()
 		`Выполнение apt update`);
 }
 
-void setRussianLocale()
-{
-	
-}
 
 void installBasicUtils()
 {
@@ -202,8 +215,9 @@ void installPostgres()
 	if( !exists(sourcesDir) ) {
 		mkdirRecurse(sourcesDir);
 	}
-	if( !exists(PG_SOURCES_LIST_PATH) ) {
-		writeln(`Добавление репозитория пакетов в систему`);
+	if( !exists(PG_SOURCES_LIST_PATH) )
+	{
+		writeln(`Добавление репозитория пакетов PostgreSQL в систему`);
 		write(PG_SOURCES_LIST_PATH, `deb http://apt.postgresql.org/pub/repos/apt/ ` ~ linuxCodeName ~ `-pgdg main`);
 
 		_waitProc(
