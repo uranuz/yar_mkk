@@ -339,9 +339,12 @@ void buildTarsnap()
 		`Установка зависимостей для сборки tarsnap`);
 
 	immutable string tarsnapArchivePath = buildNormalizedPath(sourcesDir, baseName(TARSNAP_URL));
-	_waitProc(
-		spawnProcess([`rm`, tarsnapArchivePath]),
-		`Удаление старого архива tarsnap`);
+	if( exists(tarsnapArchivePath) )
+	{
+		_waitProc(
+			spawnProcess([`rm`, tarsnapArchivePath]),
+			`Удаление старого архива tarsnap`);
+	}
 
 	_waitProc(
 		spawnProcess([`wget`, TARSNAP_URL], null, Config.none, sourcesDir),
