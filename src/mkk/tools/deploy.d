@@ -247,10 +247,11 @@ string getLinuxCodeName()
 		spawnProcess([`lsb_release`, `-a`], std.stdio.stdin, p.writeEnd),
 		`Определяем кодовое имя дистрибутива Linux`);
 
+	static immutable string PREFIX = `Codename:`;
 	foreach( line; p.readEnd.byLine )
 	{
-		if( line.startsWith(`Codename:`) ) {
-			string codeName = (cast(string) line).strip(); // Избавляемся от пробелов вокруг
+		if( line.startsWith(PREFIX) ) {
+			string codeName = (cast(string) line)[PREFIX.length..$].strip(); // Избавляемся от пробелов вокруг
 			writeln(`Кодовое имя дистрибутива Linux "` ~ codeName ~ `"`);
 			return codeName;
 		}
