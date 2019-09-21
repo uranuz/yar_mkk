@@ -254,13 +254,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('default', ['deploy']);
 	grunt.registerTask('dist', [
 		'cleanAll',
-		'symlink:templates',
-		'symlink:imgFolder',
-		'symlink:stati_dokument',
-		'symlink:reports',
-		'symlink:robots',
-		'symlink:bootstrap',
-		'symlink:jqueryui',
+		'symlink',
 		'sass:bootstrap',
 		'requirejs'
 	]);
