@@ -48,11 +48,13 @@ module.exports = function (grunt) {
 			},
 			separateCSS: true,
 			onBuildRead: function (moduleName, path, contents) {
-				if (moduleName.startsWith('fir/') && !this.name.startsWith('mkk/app')) {
-					return ''; // Exclude library modules via dropping it's contents
-				} else {
+				if( this.name.startsWith('mkk/app') ) {
 					return contents;
 				}
+				if (moduleName.startsWith('fir/') || moduleName.startsWith('ivy/') ) {
+					return ''; // Exclude library modules via dropping it's contents
+				}
+				return contents;
 			},
 			exclude: [
 				'mkk/normalize',
