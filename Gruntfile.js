@@ -39,7 +39,7 @@ module.exports = function (grunt) {
 			fileExclusionRegExp: /^(?!(?:.+\.js|[^.]*|\.\.)$)/, // Хотим только js файлы. Условие [^.]* для папок
 			paths: {
 				fir: "../../fir",
-				ivy: "../../ivy"
+				ivy: "../../ivy/ivy"
 			},
 			map: {
 				"*": {
