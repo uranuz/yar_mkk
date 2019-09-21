@@ -435,7 +435,7 @@ void runNpmGrunt()
 			`Установка/ обновление npm пакетов для: ` ~ folder);
 
 		_waitProc(
-			spawnShell(`grunt`, null, Config.none, folderPath),
+			spawnShell(`grunt dist`, null, Config.none, folderPath),
 			`Запуск задач grunt для: ` ~ folder);
 	}
 }
