@@ -459,8 +459,8 @@ void installSystemdUnits()
 	{
 		immutable string unitName = `mkk_` ~ srvName ~ `.service`;
 		_waitProc(
-			spawnShell(`sudo systemctl restart ` ~ unitName),
-			`Запуск systemd юнита для: ` ~ srvName);
+			spawnShell(`sudo systemctl enable ` ~ unitName),
+			`Включение автозапуска systemd юнита для: ` ~ srvName);
 	}
 
 	foreach( srvName; MKK_SERVICES )
@@ -468,7 +468,7 @@ void installSystemdUnits()
 		immutable string unitName = `mkk_` ~ srvName ~ `.service`;
 		_waitProc(
 			spawnShell(`sudo systemctl restart ` ~ unitName),
-			`Включение systemd юнита для: ` ~ srvName);
+			`Запуск systemd юнита для: ` ~ srvName);
 	}
 }
 
