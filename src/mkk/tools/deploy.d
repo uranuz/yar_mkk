@@ -425,14 +425,17 @@ void addSiteToNginx()
 static immutable NPM_FOLDERS = [`ivy`, `fir`, `yar_mkk`];
 void runNpmGrunt()
 {
+	immutable string workDir = getcwd();
+	immutable string sourcesDir = buildNormalizedPath(workDir, `..`);
 	foreach( folder; NPM_FOLDERS )
 	{
+		immutable string folderPath = buildNormalizedPath(sourcesDir, folder);
 		_waitProc(
-			spawnShell(`npm install`),
+			spawnShell(`npm install`, null, Config.none, folderPath),
 			`Установка/ обновление npm пакетов для: ` ~ folder);
 
 		_waitProc(
-			spawnShell(`grunt`),
+			spawnShell(`grunt`, null, Config.none, folderPath),
 			`Запуск задач grunt для: ` ~ folder);
 	}
 }
