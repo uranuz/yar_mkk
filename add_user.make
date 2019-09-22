@@ -1,1 +1,0 @@
-rdmd -gc -g --build-only --force -version=devel "-L-l:libpq.so" "-L-l:libssl.so"  "-L/usr/local/lib/libtarsnap.a" "-L-l:libcrypto.so" "-Isrc/" "-I../webtank/src/" "-I../yar_mkk/" "-I../openssl/" "-I../" -ofadd_user src/mkk/utilities/add_user.d
