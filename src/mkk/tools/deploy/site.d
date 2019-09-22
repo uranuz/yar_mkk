@@ -107,6 +107,7 @@ void deploySite(string userName)
 	addSiteToNginx();
 	runNpmGrunt();
 	installSystemdUnits();
+	enableCertbot();
 }
 
 /// Компиляция всех нужных бинарей сайта
@@ -290,3 +291,10 @@ string readUnitTemplate(string serviceName)
 	return cast(string) read(fileName);
 }
 +/
+
+void enableCertbot()
+{
+	_waitProc(
+		spawnShell(`sudo certbot --nginx ` ~ unitName),
+		`Добавление/ обновление автозапуска Certbot для nginx`);
+}
