@@ -295,6 +295,6 @@ string readUnitTemplate(string serviceName)
 void enableCertbot()
 {
 	_waitProc(
-		spawnShell(`sudo certbot --nginx ` ~ unitName),
+		spawnShell(`sudo certbot --nginx`),
 		`Добавление/ обновление автозапуска Certbot для nginx`);
 }
