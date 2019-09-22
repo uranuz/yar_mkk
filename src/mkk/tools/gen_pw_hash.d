@@ -21,7 +21,7 @@ void main(string[] progAgs)
 		"pw", &password,
 		"salt", &salt,
 		"scr", &useScr,
-		"help", &isHelp,
+		"help|h", &isHelp,
 	);
 
 	if( !timestamp.length || !password.length || !salt.length )

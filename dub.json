@@ -193,12 +193,37 @@
 			]
 		},
 		{
-			"name": "deploy",
+			"name": "deploy_site",
 			"targetType": "executable",
 			"targetPath": "bin",
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk/tools/deploy.d"
+				"src/mkk/tools/deploy/common.d",
+				"src/mkk/tools/deploy/site.d"
+			]
+		}, {
+			"name": "deploy_sys_req",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"sourcePaths": [],
+			"sourceFiles": [
+				"src/mkk/tools/deploy/common.d",
+				"src/mkk/tools/deploy/sys_req.d"
+			]
+		}, {
+			"name": "deploy_db",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"sourcePaths": [],
+			"dependencies": {
+				"webtank": ">=0.0.0"
+			},
+			"libs-posix": [
+				"pq"
+			],
+			"sourceFiles": [
+				"src/mkk/tools/auth_db",
+				"src/mkk/tools/deploy/db.d"
 			]
 		}
 	]

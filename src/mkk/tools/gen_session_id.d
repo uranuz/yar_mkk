@@ -19,7 +19,7 @@ void main(string[] progAgs)
 		"login", &login,
 		"group", &group,
 		"timestamp", &timestamp,
-		"help", &isHelp
+		"help|h", &isHelp
 	);
 
 	if( !login.length || !group.length || !timestamp.length )

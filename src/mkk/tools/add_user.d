@@ -42,11 +42,12 @@ void main(string[] progAgs) {
 		"name", &name,
 		"email", &email,
 		"scr", &scr,
-		"help", &isHelp
+		"help|h", &isHelp
 	);
 
 	if( isHelp ) {
 		showHelp();
+		return;
 	}
 
 	writeln("Введите пароль нового пользователя сайта. Выбирайте сложный пароль (минимум ", minPasswordLength, " символов)");

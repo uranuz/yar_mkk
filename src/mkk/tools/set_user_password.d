@@ -19,7 +19,7 @@ void main(string[] progAgs)
 	getopt(progAgs,
 		"login", &login,
 		"scr", &useScr,
-		"help", &isHelp
+		"help|h", &isHelp
 	);
 
 	if( !login.length )
