@@ -183,7 +183,7 @@ void installCertBot()
 	aptUpdate();
 
 	_waitProc(
-		spawnShell(`sudo apt-get install software-properties-common`),
+		spawnShell(`sudo apt -y install software-properties-common`),
 		`Установка software-properties-common`);
 	_waitProc(
 		spawnShell(`sudo add-apt-repository universe`),
@@ -195,6 +195,6 @@ void installCertBot()
 	aptUpdate();
 
 	_waitProc(
-		spawnShell(`sudo apt-get install certbot python-certbot-nginx`),
+		spawnShell(`sudo apt -y install certbot python-certbot-nginx`),
 		`Собственно установка CertBot`);
 }
