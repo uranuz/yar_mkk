@@ -231,7 +231,8 @@ void addSiteToNginx(string siteName)
 		`sudo tee "` ~ availableFile ~ `"`,
 		confPipe.readEnd);
 	confPipe.writeEnd.writeln(resultConf);
-	pipe.close(); // Закрываем pipe, чтобы акститься и остановицца...
+	confPipe.writeEnd.flush();
+	//pipe.close(); // Закрываем pipe, чтобы акститься и остановицца...
 
 	_waitProc(teePid, `Запись конфига сайта в nginx для сайта: ` ~ siteName);
 
