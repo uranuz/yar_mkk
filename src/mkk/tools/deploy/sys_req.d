@@ -41,8 +41,7 @@ void installRequirements()
 	installNodeJS();
 	installPostgres();
 	installNginx();
-
-	//installCertBot();
+	installCertBot();
 }
 
 
@@ -71,12 +70,15 @@ void aptUpdate()
 		`Выполнение apt update`);
 }
 
-
+/++ Установка базовых программ +/
 void installBasicUtils()
 {
 	_waitProc(
 		spawnShell(`sudo apt install -y htop mc curl wget unar nano`),
 		`Установка основных утилиты Linux`);
+	_waitProc(
+		spawnShell(`sudo apt install -y git mercurial`),
+		`Установка систем контроля версий`);
 }
 
 /++ Установка nodejs +/
