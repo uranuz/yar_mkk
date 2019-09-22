@@ -31,7 +31,8 @@ I. НАСТРОЙКА ДОСТУПА К СЕРВЕРУ:
 		Перезапустим сервер SSH
 		sudo systemctl restart sshd
 	7. Создаём файлы ключей (команда запускается из под того пользователя, для которого настраивается вход)
-		ssh-keygen -t rsa -b 4096
+		ssh-keygen -t rsa -b 4096 -C "yar_mkk.ru@yar-mkk.ru (92.63.96.97) from 22.09.2019"
+		После опции -С идет комментарий. Лучше задать, чтобы потом понимать, что ето за ключ
 		Нужно задать пароль для закрытого ключа для пущей безопасности (и запомнить)
 
 		Забираем (через копирование текста) себе закрытый ключ (и открытый ключ тоже):
@@ -51,17 +52,17 @@ I. НАСТРОЙКА ДОСТУПА К СЕРВЕРУ:
 		chown yar_mkk:yar_mkk authorized_keys
 		
 		Собственно скопируем данные:
-		cat id_rsa.pub >>> authorized_keys
+		cat ~/.ssh/id_rsa.pub >> authorized_keys
 
 		Установка прав на файл и папку:
 		chmod 0700 ~/.ssh/
 		chmod 0600 ~/.ssh/authorized_keys
 		
 		Проверим, что текст скопировался:
-		cat /home/yar_mkk/.ssh/authorized_keys
+		cat ~/.ssh/authorized_keys
 
 		Удаляем открытый ключ из начального расположения:
-		rm /home/yar_mkk/.ssh/id_rsa.pub
+		rm ~/.ssh/id_rsa.pub
 
 	11. Настраиваем заход через ключ (нужно подредактировать конфиг-файл демона SSH):
 		sudo nano /etc/ssh/sshd_config

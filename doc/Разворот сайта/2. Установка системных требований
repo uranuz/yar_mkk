@@ -3,7 +3,7 @@ II. УСТАНОВКА СИСТЕМНЫХ ТРЕБОВАНИЙ
 		Для его скачивания установим систему контроля версий mercurual (hg). Заодно и гит поставим тоже...
 		sudo apt -y install mercurial git
 	2. Скачиваем репозиторий МКК в папку ~/sources/yar_mkk
-		cd ~ && mkdir sources
+		cd ~ && mkdir sources && cd sources
 
 		hg clone https://bitbucket.org/uranuz/yar_mkk
 	3. Нужно переключиться на ветку той версии, которую разворачиваем
