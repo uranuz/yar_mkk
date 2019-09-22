@@ -31,27 +31,36 @@ void main(string[] args)
 {
 	bool isHelp = false;
 	string userName = "yar_mkk";
+	string siteName;
 
 	getopt(args,
 		`help|h`, &isHelp,
-		`user`, &userName
+		`user`, &userName,
+		`site`, &siteName
 	);
+	bool isError = false;
 
-	if( isHelp ) {
+	if( !siteName.length ) {
+		isError = true;
+		writeln(`Требуется указать сайт через опцию --site`);
+	}
+
+	if( isHelp || isError ) {
 		writeln(
 `Утилита развертывания сайта МКК.
 Опции:
 --help|h Эта справка
 --user Имя пользователя, в каталог которого выполняется разворот. По-умолчанию yar_mkk. Пользователь должен существовать
+--site Адрес сайта
 `);
 		return;
 	}
 
-	deploySite(userName);
+	deploySite(userName, siteName);
 }
 
 /++ Развертывание сайта +/
-void deploySite(string userName)
+void deploySite(string userName, string siteName)
 {
 	compileAll(); // Собираем все бинарники проекта
 
@@ -104,10 +113,10 @@ void deploySite(string userName)
 		}
 	}
 
-	addSiteToNginx();
+	addSiteToNginx(siteName);
 	runNpmGrunt();
 	installSystemdUnits();
-	enableCertbot();
+	enableCertbot(siteName);
 }
 
 /// Компиляция всех нужных бинарей сайта
@@ -188,8 +197,10 @@ void buildTarsnap()
 }
 
 static immutable NGINX_CONF_FILE = `config/nginx/yar-mkk.ru`;
-void addSiteToNginx()
+static immutable NGINX_DEFAULT_SITE = `yar-mkk.ru`;
+void addSiteToNginx(string siteName)
 {
+	import std.array: replace, join;
 	writeln(`Добавляем конфиг сайта в nginx...`);
 	enforce(
 		exists(`/etc/nginx/sites-available`),
@@ -203,9 +214,25 @@ void addSiteToNginx()
 	immutable string availableFile = buildNormalizedPath(`/etc/nginx/sites-available`, baseName(NGINX_CONF_FILE));
 	//copy(sourceFile, availableFile);
 
+	//_waitProc(
+	//	spawnShell(`sudo cp "` ~ sourceFile ~ `" "` ~ availableFile ~ `"`),
+	//	`Копирование конфига сайта в nginx`);
+
+	auto sourceConfFile = File(sourceFile);
+	string resultConf;
+	foreach( confLine; sourceConfFile.byLine )
+	{
+		// Тупо заменяем дефолтный сает на другой...
+		resultConf ~= confLine.replace(NGINX_DEFAULT_SITE, siteName);
+	}
+
+	auto confPipe = pipe();
+	confPipe.writeEnd.writeln(resultConf);
 	_waitProc(
-		spawnShell(`sudo cp "` ~ sourceFile ~ `" "` ~ availableFile ~ `"`),
-		`Копирование конфига сайта в nginx`);
+		spawnShell(
+			`sudo tee "` ~ availableFile ~ `"`,
+			confPipe.readEnd),
+		`Запись конфига сайта в nginx для сайта: ` ~ siteName);
 
 	writeln(`Добавление ссылки на конфиг сайта nginx в sites-enabled`);
 	immutable string enabledFile = buildNormalizedPath(`/etc/nginx/sites-enabled`, baseName(NGINX_CONF_FILE));
@@ -293,9 +320,14 @@ string readUnitTemplate(string serviceName)
 +/
 
 static immutable string HOSTMASTER_EMAIL = `hostmaster@yar-mkk.ru`;
-void enableCertbot()
+void enableCertbot(string siteName)
 {
+	// Ключ -m - емайил для связи. Я х3 зачем он им
+	// Ключ --non-interactive - неинтерактивный режим
+	// --force-renewal форсировать обновление сертификата
+	// --rsa-key-size размер ключа (по дефолту 2048)
 	_waitProc(
-		spawnShell(`sudo certbot --nginx -m "` ~ HOSTMASTER_EMAIL ~ `" --agree-tos`),
+		spawnShell(`sudo certbot --nginx -D "` ~ siteName ~ `" -m "` ~ HOSTMASTER_EMAIL 
+			~ `" --agree-tos --non-interactive --rsa-key-size=4096`),
 		`Добавление/ обновление автозапуска Certbot для nginx`);
 }
