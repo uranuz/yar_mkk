@@ -220,7 +220,7 @@ void addSiteToNginx(string siteName)
 
 	auto sourceConfFile = File(sourceFile);
 	string resultConf;
-	foreach( confLine; sourceConfFile.byLine )
+	foreach( confLine; sourceConfFile.byLine(KeepTerminator.yes) )
 	{
 		// Тупо заменяем дефолтный сает на другой...
 		resultConf ~= confLine.replace(NGINX_DEFAULT_SITE, siteName);
