@@ -288,10 +288,7 @@ void installSystemdUnits()
 			`Установка systemd юнита для: ` ~ srvName);
 	}
 
-	writeln(`Перезагрузка демона systemd...`);
-	_waitProc(
-		spawnShell(`sudo systemctl daemon-reload`),
-		`Перезагрузка демона systemd`);
+	systemdDaemonReload();
 
 	foreach( srvName; MKK_SERVICES )
 	{
@@ -308,6 +305,40 @@ void installSystemdUnits()
 			spawnShell(`sudo systemctl restart ` ~ unitName),
 			`Запуск systemd юнита для: ` ~ srvName);
 	}
+
+	installDumpUnit();
+}
+
+void systemdDaemonReload()
+{
+	_waitProc(
+		spawnShell(`sudo systemctl daemon-reload`),
+		`Перезагрузка демона systemd`);
+}
+
+void installDumpUnit()
+{
+	string workDir = getcwd();
+	immutable string sourcePath = buildNormalizedPath(workDir, `config/systemd`, `mkk_db_dump.service`);
+	immutable string sourcePathTimer = buildNormalizedPath(workDir, `config/systemd`, `mkk_db_dump.timer`);
+
+	_waitProc(
+		spawnShell(`sudo cp "` ~ sourcePath ~ `" "` ~ SYSTEMD_UNITS_DIR ~ `"`),
+		`Установка systemd юнита дампирования БД`);
+	_waitProc(
+		spawnShell(`sudo cp "` ~ sourcePathTimer ~ `" "` ~ SYSTEMD_UNITS_DIR ~ `"`),
+		`Установка systemd таймер дампирования БД`);
+
+	systemdDaemonReload();
+
+	_waitProc(
+		spawnShell(`sudo systemctl start ` ~ sourcePath),
+		`Пробный запуск дампирования БД`);
+
+	_waitProc(
+		spawnShell(`sudo systemctl enable ` ~ sourcePathTimer),
+		`Включение автозапуска systemd таймера дампирования БД`);
+	
 }
 
 /++
