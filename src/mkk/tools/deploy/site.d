@@ -332,11 +332,11 @@ void installDumpUnit()
 	systemdDaemonReload();
 
 	_waitProc(
-		spawnShell(`sudo systemctl start ` ~ sourcePath),
+		spawnShell(`sudo systemctl start mkk_db_dump.service`),
 		`Пробный запуск дампирования БД`);
 
 	_waitProc(
-		spawnShell(`sudo systemctl enable ` ~ sourcePathTimer),
+		spawnShell(`sudo systemctl enable mkk_db_dump.timer`),
 		`Включение автозапуска systemd таймера дампирования БД`);
 	
 }
