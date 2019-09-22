@@ -232,6 +232,7 @@ void addSiteToNginx(string siteName)
 		confPipe.readEnd);
 	confPipe.writeEnd.writeln(resultConf);
 	confPipe.writeEnd.flush();
+	confPipe.writeEnd.close();
 	//pipe.close(); // Закрываем pipe, чтобы акститься и остановицца...
 
 	_waitProc(teePid, `Запись конфига сайта в nginx для сайта: ` ~ siteName);
