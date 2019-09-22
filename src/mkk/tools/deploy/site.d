@@ -327,7 +327,7 @@ void enableCertbot(string siteName)
 	// --force-renewal форсировать обновление сертификата
 	// --rsa-key-size размер ключа (по дефолту 2048)
 	_waitProc(
-		spawnShell(`sudo certbot --nginx -D "` ~ siteName ~ `" -m "` ~ HOSTMASTER_EMAIL 
+		spawnShell(`sudo certbot --nginx -d "` ~ siteName ~ `" -m "` ~ HOSTMASTER_EMAIL 
 			~ `" --agree-tos --non-interactive --rsa-key-size=4096`),
 		`Добавление/ обновление автозапуска Certbot для nginx`);
 }
