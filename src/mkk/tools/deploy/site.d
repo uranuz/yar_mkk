@@ -227,12 +227,13 @@ void addSiteToNginx(string siteName)
 	}
 
 	auto confPipe = pipe();
+	auto teePid = spawnShell(
+		`sudo tee "` ~ availableFile ~ `"`,
+		confPipe.readEnd);
 	confPipe.writeEnd.writeln(resultConf);
-	_waitProc(
-		spawnShell(
-			`sudo tee "` ~ availableFile ~ `"`,
-			confPipe.readEnd),
-		`Запись конфига сайта в nginx для сайта: ` ~ siteName);
+	pipe.close(); // Закрываем pipe, чтобы акститься и остановицца...
+
+	_waitProc(teePid, `Запись конфига сайта в nginx для сайта: ` ~ siteName);
 
 	writeln(`Добавление ссылки на конфиг сайта nginx в sites-enabled`);
 	immutable string enabledFile = buildNormalizedPath(`/etc/nginx/sites-enabled`, baseName(NGINX_CONF_FILE));
