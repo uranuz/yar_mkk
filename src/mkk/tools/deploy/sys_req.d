@@ -79,6 +79,9 @@ void installBasicUtils()
 	_waitProc(
 		spawnShell(`sudo apt install -y git mercurial`),
 		`Установка систем контроля версий`);
+	_waitProc(
+		spawnShell(`sudo apt install -y python3`),
+		`Установка интерпретатора python3`);
 }
 
 /++ Установка nodejs +/
