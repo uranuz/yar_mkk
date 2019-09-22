@@ -296,6 +296,6 @@ static immutable string HOSTMASTER_EMAIL = `hostmaster@yar-mkk.ru`;
 void enableCertbot()
 {
 	_waitProc(
-		spawnShell(`sudo certbot --nginx -m "` ~ HOSTMASTER_EMAIL ~ `"`),
+		spawnShell(`sudo certbot --nginx -m "` ~ HOSTMASTER_EMAIL ~ `" --agree-tos`),
 		`Добавление/ обновление автозапуска Certbot для nginx`);
 }
