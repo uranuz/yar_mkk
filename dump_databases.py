@@ -110,6 +110,9 @@ if __name__ == "__main__":
 	#upload_file('/home/uranuz/popka.txt', '/copy_of_popka2.txt', True)
 	dumps_per_base = 20
 
+	if not os.path.exists(local_dumps_dir):
+		os.makedirs(local_dumps_dir) # Создай папку, если нет
+
 	db_names = [ 'baza_MKK', 'MKK_site_base' ]
 
 	files_to_leave = dumps_per_base * len(db_names)
