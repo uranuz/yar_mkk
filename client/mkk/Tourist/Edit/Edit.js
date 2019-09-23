@@ -135,6 +135,8 @@ return FirClass(
 
 			// Если ключ не передан (новый турист), и находимся в разделе
 			if( this._isEditDialog && this.getNum() == null ) {
+				// Проверяем - нет ли в базе похожих туристов.
+				// Возможно, что турист уже действительно есть, и добавлять его не надо тогда...
 				json_rpc.invoke({
 					uri: "/jsonrpc/",
 					method: "tourist.plainList",
@@ -147,21 +149,26 @@ return FirClass(
 						},
 						nav: {}
 					},
-					success: function(rawData) {
-						var data = IvyDeserializer.deserialize(rawData);
-						if( data.touristList.getLength() ) {
-							self._touristSimilarDlg.open({
-								RPCMethod: null, // Не зови метод
-								viewParams: data
-							});
-						}
-					},
+					success: this._onSimilarTourists_load.bind(this),
 					error: function(res) {
 						$('<div title="Ошибка операции">' + res.message + '</div>').dialog({modal: true});
 					}
 				});
 			} else {
 				//Редактирование существующего
+				this._forcedSubmitForm();
+			}
+		},
+
+		/** Загрузка списка похожих туристов. Список может быть и пустой. То значит, что похожих нет... */
+		_onSimilarTourists_load: function(rawData) {
+			var data = IvyDeserializer.deserialize(rawData);
+			if( data.touristList.getLength() ) {
+				this._touristSimilarDlg.open({
+					RPCMethod: null, // Не зови метод
+					viewParams: data
+				});
+			} else {
 				this._forcedSubmitForm();
 			}
 		},
