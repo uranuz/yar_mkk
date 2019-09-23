@@ -113,7 +113,7 @@ if __name__ == "__main__":
 	if not os.path.exists(local_dumps_dir):
 		os.makedirs(local_dumps_dir) # Создай папку, если нет
 
-	db_names = [ 'baza_MKK', 'MKK_site_base' ]
+	db_names = [ 'baza_MKK', 'MKK_site_base', 'mkk_history' ]
 
 	files_to_leave = dumps_per_base * len(db_names)
 
