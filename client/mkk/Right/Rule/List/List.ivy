@@ -59,7 +59,11 @@ def RightRuleList {=
 				instanceName: 'rightRuleEditDlg'
 				config: {
 					ivyModule: 'mkk.Right.Rule.Edit',
-					ivyMethod: 'RightRuleEdit'
+					ivyMethod: 'RightRuleEdit',
+					dialogOpts: {
+						title: 'Редактировать правило доступа',
+						width: 400
+					}
 				}
 			}
 			{=OpenDialog

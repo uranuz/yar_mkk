@@ -24,7 +24,7 @@ struct RightRuleData
 Tuple!(size_t, `num`)
 editRule(HTTPContext ctx, RightRuleData record)
 {
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 	//checkStructEditRights(record, ctx);
 	string[] fieldNames;
 	string[] fieldValues;
@@ -48,7 +48,7 @@ editRule(HTTPContext ctx, RightRuleData record)
 
 void deleteRule(HTTPContext ctx, size_t num)
 {
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
 	MainService.loger.info("Формирование и выполнение запроса к БД", "Удаление правила доступа");
 	getAuthDB().queryParams(`delete from access_rule a_rule where a_rule.num = $1::integer`, num);

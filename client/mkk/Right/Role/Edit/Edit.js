@@ -1,9 +1,9 @@
-define('mkk/Right/Rule/Edit/Edit', [
+define('mkk/Right/Role/Edit/Edit', [
 	'fir/controls/FirControl',
-	'css!mkk/Right/Rule/Edit/Edit'
+	'css!mkk/Right/Role/Edit/Edit'
 ], function (FirControl) {
 return FirClass(
-	function RightRuleEdit(opts) {
+	function RightRoleEdit(opts) {
 		this.superproto.constructor.call(this, opts);
 		this._subscr(function() {
 			this._elems('saveBtn').on('click', this._onSaveBtn_click.bind(this));
@@ -28,7 +28,8 @@ return FirClass(
 		getRecord: function() {
 			return {
 				name: this._elems('nameField').val(),
-				num: parseInt(this._elems('numField').val(), 10) || null
+				num: parseInt(this._elems('numField').val(), 10) || null,
+				description: this._elems('descriptionField').val()
 			}
 		}
 	}

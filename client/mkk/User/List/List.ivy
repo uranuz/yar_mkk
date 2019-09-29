@@ -1,71 +1,66 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc, isInRoles;
+from fir.controls.utils import cls, firScopeOptsEnc, isInRoles, hasRight;
 from mkk.Helpers import RusDateFormat;
 from fir.controls.OpenDialog import OpenDialog;
+from fir.controls.Paging import Paging;
+var
+	instanceName: 'userList'
+	cssBaseClass: 'mkk-UserList'
+	RPCMethod: 'user.list'
+	requestURI: "/api/user/list"
+	fieldsToSend: ['userList', 'nav'];
 def UserList {=
 	def.kv
 		moduleName: 'mkk/User/List/List'
-		instanceName: 'userList'
-		cssBaseClass: 'mkk-UserList'
-		RPCMethod: 'user.list'
-		requestURI: "/api/user/list"
-		userList: null;
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		RPCMethod: RPCMethod
+		requestURI: requestURI
+		userList: null
+		nav: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Пользователи сайта</h2>
+		<div class="form-group row">
+			<label class="col d-flex align-items-center">
+				<span class="mr-2">Найти</span>
+				<input type="text"
+					class="{=cls 'nameField'} form-control"
+					name="name"/>
+			</label>
+			<div class="col-auto">
+				<button type="button"
+					class="{=cls 'searchBtn'} btn btn-primary"
+					>Искать</button>
+			</div>
+		</div>
+		<div class="form-group">
+			{=Paging
+				instanceName: instanceName ~ 'Paging'
+				nav: nav
+			}
+		</div>
 		<div class="row font-weight-bold">
-			<span class="col-md-4">Имя пользователя</span>
+			<span class="col-md">Имя пользователя</span>
 			<span class="col-md-1">Статус</span>
 			<span class="col-md-3">Логин</span>
 			<span class="col-md-2">Добавлен</span>
+			{=if {=hasRight obj: 'user.item.email' kind: 'read'} {*
+			<span class="col-md-2">email</span>
+			*}}
 			{=if {=isInRoles ['admin']} {*
 			<span class="col-md-2">Действия</span>
 			*}}
 		</div>
-		<div class="{=cls 'list'}">
-		{=repeat user in userList {*
-			<div class="{=cls 'listItem'} row" data-mkk-num="{{user.num}}">
-				<span class="col-md-4">{{user.name}}</span>
-				<span class="col-md-1">
-					<span
-						title="Пользователь {=if not user.is_blocked 'не '}заблокирован"
-						class="{=cls 'blockedIcon'} {=if user.is_blocked 'text-danger'}"
-						>&#x1F512;</span>
-					<span
-						title="Адрес эл. почты {=if not user.is_email_confirmed 'не '}подтвержден"
-						class="{=cls 'emailConfirmIcon'} {=if user.is_email_confirmed 'text-success'}"
-						>@</span>
-					<span
-						title="Регистрация {=if not user.is_confirmed 'не '}подтверждена"
-						class="{=cls 'blockedIcon'} {=if user.is_confirmed 'text-success'}"
-						>&#x2713;</span>
-				</span>
-				<span class="col-md-3">{{user.login}}</span>
-				<span class="col-md-2">{=RusDateFormat user.reg_timestamp}</span>
-				<span class="col-md-2">
-					{=if not user.is_blocked and {=isInRoles ['admin']} {*
-					<span
-						title="Заблокировать пользователя"
-						class="{=cls 'lockUserBtn'} btn btn-outline-danger btn-xs"
-						>&#x1F512;</span>
-					*}}
-					{=if user.is_blocked and {=isInRoles ['admin']} {*
-					<span
-						title="Разблокировать пользователя"
-						class="{=cls 'unlockUserBtn'} btn btn-outline-primary btn-xs"
-						>&#x1F512;</span>
-					*}}
-					{=if not user.is_confirmed and {=isInRoles ['admin']} {*
-					<span
-						title="Подтвердить регистрацию"
-						class="{=cls 'confirmRegBtn'} btn btn-outline-primary btn-xs"
-						>&#x2713;</span>
-					*}}
-				</span>
-			</div>
-		*}}
-		</div>
+		{=UserListView
+			instanceName: instanceName
+			cssBaseClass: cssBaseClass
+			RPCMethod: RPCMethod
+			requestURI: requestURI
+			userList: userList
+		}
+
 		{=OpenDialog
 			instanceName: instanceName ~ 'ItemActionConfirmDlg'
 			config: {
@@ -77,6 +72,68 @@ def UserList {=
 				}
 			}
 		}
+	</div>
+	*}
+};
+
+def UserListView {=
+	def.kv
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		RPCMethod: RPCMethod
+		requestURI: requestURI
+		userList: null
+		nav: null;
+	def.body {*
+	<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
+		{=var showEmail: {=hasRight obj: 'user.item.email' kind: 'read'} }
+	{=repeat user in userList {*
+		<div class="{=cls 'listItem'} row" data-mkk-num="{{user.num}}">
+			<span class="col-md">{{user.name}}</span>
+			<span class="col-md-1">
+				<span
+					title="Пользователь {=if not user.is_blocked 'не '}заблокирован"
+					class="{=cls 'blockedIcon'} {=if user.is_blocked 'text-danger'}"
+					>&#x1F512;</span>
+				<span
+					title="Адрес эл. почты {=if not user.is_email_confirmed 'не '}подтвержден"
+					class="{=cls 'emailConfirmIcon'} {=if user.is_email_confirmed 'text-success'}"
+					>@</span>
+				<span
+					title="Регистрация {=if not user.is_confirmed 'не '}подтверждена"
+					class="{=cls 'blockedIcon'} {=if user.is_confirmed 'text-success'}"
+					>&#x2713;</span>
+			</span>
+			<span class="col-md-3">{{user.login}}</span>
+			<span class="col-md-2">{=RusDateFormat user.reg_timestamp}</span>
+			{=if showEmail {*
+			<span class="col-md-2">{{user.email}}</span>
+			*}}
+			{=if {=isInRoles ['admin']} {*
+			<span class="col-md-2">
+				{=if not user.is_blocked {*
+				<span
+					title="Заблокировать пользователя"
+					class="{=cls 'lockUserBtn'} btn btn-outline-danger btn-xs"
+					>&#x1F512;</span>
+				*}}
+				{=if user.is_blocked {*
+				<span
+					title="Разблокировать пользователя"
+					class="{=cls 'unlockUserBtn'} btn btn-outline-primary btn-xs"
+					>&#x1F512;</span>
+				*}}
+				{=if not user.is_confirmed {*
+				<span
+					title="Подтвердить регистрацию"
+					class="{=cls 'confirmRegBtn'} btn btn-outline-primary btn-xs"
+					>&#x2713;</span>
+				*}}
+			</span>
+			*}}
+		</div>
+	*}}
 	</div>
 	*}
 };

@@ -58,8 +58,12 @@ def RightRoleList {=
 			{=OpenDialog
 				instanceName: 'rightRoleEditDlg'
 				config: {
-					ivyModule: 'mkk.Right.RoleEdit',
-					ivyMethod: 'RightRoleEdit'
+					ivyModule: 'mkk.Right.Role.Edit',
+					ivyMethod: 'RightRoleEdit',
+					dialogOpts: {
+						title: 'Редактировать роль доступа',
+						width: 400
+					}
 				}
 			}
 			{=OpenDialog

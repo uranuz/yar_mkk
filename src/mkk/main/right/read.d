@@ -21,7 +21,7 @@ readBaseRight(HTTPContext ctx, Optional!size_t num = Optional!size_t())
 {
 	import std.format: format;
 
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 	if( num.isNull ) {
 		return typeof(return)(makeMemoryRecord(objRightRecFormat));
 	}

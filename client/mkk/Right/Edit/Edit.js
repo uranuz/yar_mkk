@@ -32,7 +32,7 @@ return FirClass(
 			}
 		},
 
-		_getViewParams: function() {
+		_getViewParams: function(areaName) {
 			if( areaName === 'EditResults' ) {
 				return {
 					whatObject: 'правил',

@@ -1,27 +1,35 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.LazyArea import LazyArea;
-def RightRuleEdit {=
+def RightRoleEdit {=
 	def.kv
-		cssBaseClass: 'mkk-RightRuleEdit'
-		instanceName: 'rightRuleEdit'
-		moduleName: "mkk/Right/Rule/Edit/Edit"
-		RPCMethod: 'right.rule.read'
-		requestURI: "/api/right/rule/read"
-		ruleRec: null;
+		cssBaseClass: 'mkk-RightRoleEdit'
+		instanceName: 'rightRoleEdit'
+		moduleName: "mkk/Right/Role/Edit/Edit"
+		RPCMethod: 'right.role.read'
+		requestURI: "/api/right/role/read"
+		role: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			<div class="{=cls 'editForm'}">
 				<input type="hidden"
 					class="{=cls 'numField'}"
-					value="{{ruleRec.num}}"/>
+					value="{{role.num}}"/>
 				<div class="form-group">
 					<label class="d-flex align-items-center">
 						<span class="mr-2">Название</span>
 						<input type="text"
 							class="{=cls 'nameField'} form-control"
-							value="{{ruleRec.name}}"/>
+							value="{{role.name}}"/>
+					</label>
+				</div>
+				<div class="form-group">
+					<label class="d-flex align-items-center">
+						<span class="mr-2">Описание</span>
+						<input type="text"
+							class="{=cls 'descriptionField'} form-control"
+							value="{{role.description}}"/>
 					</label>
 				</div>
 				<div class="form-group">
@@ -36,9 +44,9 @@ def RightRuleEdit {=
 					ivyModule: 'mkk.Helpers.EditResults',
 					ivyMethod: 'EditResults',
 					viewParams: {
-						whatObject: 'правила доступа'
+						whatObject: 'роли доступа'
 					},
-					RPCMethod: 'right.rule.edit'
+					RPCMethod: 'right.role.edit'
 				}
 			}
 		</div>

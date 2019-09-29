@@ -1,8 +1,9 @@
 define('mkk/User/List/List', [
 	'fir/controls/FirControl',
 	'fir/network/json_rpc',
+	'fir/common/helpers',
 	'css!mkk/User/List/List'
-], function (FirControl, json_rpc) {
+], function (FirControl, json_rpc, FirHelpers) {
 var ACTION_BTNS = {
 	confirmRegBtn: {
 		method: 'user.confirmReg',
@@ -19,15 +20,24 @@ var ACTION_BTNS = {
 		title: 'Разблокировка пользователя',
 		text: 'Вы действительно хотите разблокировать пользователя?'
 	}
-};
+}, LIST_AREA = 'listView';
 return FirClass(
 	function UserList(opts) {
 		this.superproto.constructor.call(this, opts);
+		this._paging = this.getChildByName(this.instanceName() + 'Paging');
+		this._reloadList = this._reloadControl.bind(this, LIST_AREA);
+		FirHelpers.doOnEnter(this, 'nameField', this._reloadList);
 		this._subscr(function() {
-			this._elems('list').on('click', this._onListBlock_click.bind(this));
+			this._elems(LIST_AREA).on('click', this._onListBlock_click.bind(this));
 		});
 		this._unsubscr(function() {
-			this._elems('list').off('click');
+			this._elems(LIST_AREA).off('click');
+		});
+
+		FirHelpers.managePaging({
+			control: this,
+			paging: this._paging,
+			areaName: LIST_AREA
 		});
 	}, FirControl, {
 		_onListBlock_click: function(ev) {
@@ -74,6 +84,12 @@ return FirClass(
 					$('<div title="Ошибка операции">' + res.message + '</div>').dialog({modal: true});
 				}
 			});
-		}
+		},
+		_getQueryParams: function() {
+			return {
+				name: this._elems('nameField').val(),
+				nav: this._paging.getNavParams()
+			};
+		},
 	});
 });

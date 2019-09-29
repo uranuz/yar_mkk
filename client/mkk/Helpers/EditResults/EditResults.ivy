@@ -1,29 +1,32 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
 def EditResults {=
 	def.kv
+		moduleName: 'fir/controls/FirControl'
 		instanceName
 		cssBaseClass
-		whatObject
+		whatObject: "записи"
 		listLink: null
 		editLink: null
 		errorMsg: null
 		num
 		recordNum;
 	def.body {*
-	<div class="{=cls 'block'}">{%
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+	{%
 		if {=empty num} {=
 			if {=empty errorMsg} {*
-				<h3>Данные о {{whatObject}}е успешно добавлены!</h3>
+				<h3>Данные {{whatObject}} успешно добавлены!</h3>
 			*} else {*
-				<h3>Произошла ошибка при добавлении данных {{whatObject}}а!</h3>
+				<h3>Произошла ошибка при добавлении данных {{whatObject}}!</h3>
 				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
 			*}
 		} else {=
 			if {=empty errorMsg} {*
-				<h3>Данные о {{whatObject}}е успешно обновлены!</h3>
+				<h3>Данные {{whatObject}} успешно обновлены!</h3>
 			*} else {*
-				<h3>Произошла ошибка при обновлении данных {{whatObject}}а!</h3>
+				<h3>Произошла ошибка при обновлении данных {{whatObject}}!</h3>
 				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
 			*}
 		};
@@ -50,7 +53,7 @@ def YouCan {=
 		<ul>
 		{=if not{=empty editLink} {%
 			if not{=empty errorMsg} {*
-			<li><a href="/dyn/tourist/edit{=if not{=empty num} {*?num={{num}}*} }">попробовать ещё раз...</a></li>
+			<li><a href="{{editLink}}{=if not{=empty num} {*?num={{num}}*} }">попробовать ещё раз...</a></li>
 			*} elif not{=empty num} {*
 			<li><a href="{{editLink}}?num={{num}}">продолжить редактирование</a> этой же записи</li>
 			*} else {*

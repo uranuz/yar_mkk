@@ -1,7 +1,14 @@
 server {
 	listen 80;
 	listen 443 ssl;
-	server_name yar-mkk.ru;
+	server_name yar-mkk.ru localhost;
+
+	# Форсируем перенаправление на HTTPS тех пользователей, что зашли по имени сайта.
+	# При обращении через локальный адрес пускаем по обычному HTTP, т.к. необходимо внутренних вызовов
+	set $scheme_with_host $scheme://$host;
+	if ($scheme_with_host ~* "^http://yar-mkk.ru") {
+		return 301 https://yar-mkk.ru$request_uri;
+	}
 
 	proxy_set_header Host $host;
 	proxy_set_header X-Real-IP $remote_addr;

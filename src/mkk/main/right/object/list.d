@@ -72,7 +72,7 @@ getObjectList(HTTPContext ctx)
 {
 	import std.format: format;
 
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
 	return typeof(return)(
 		getAuthDB().query(
@@ -88,7 +88,7 @@ readObject(
 	Optional!size_t parentNum = Optional!size_t()
 ) {
 	import std.format: format;
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
 	if( num.isNull && parentNum.isNull ) {
 		return typeof(return)(makeMemoryRecord(rightObjectRecFormat));

@@ -46,7 +46,7 @@ getRightList(HTTPContext ctx, Optional!size_t num)
 {
 	import std.format: format;
 
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 	return typeof(return)(
 		getAuthDB().queryParams(
 			rightQueryBase.format(

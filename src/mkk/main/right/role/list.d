@@ -23,7 +23,7 @@ Tuple!(
 )
 getRightRoleList(HTTPContext ctx, string name, Navigation nav)
 {
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 
@@ -49,7 +49,7 @@ getRightRoleList(HTTPContext ctx, string name, Navigation nav)
 Tuple!(IBaseRecord, `role`)
 readRole(HTTPContext ctx, Optional!size_t num)
 {
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
 	if( num.isNull ) {
 		return typeof(return)(makeMemoryRecord(rightRoleRecFormat));

@@ -28,7 +28,7 @@ struct RightRuleData
 Tuple!(size_t, `num`)
 editRight(HTTPContext ctx, RightRuleData record)
 {
-	enforce(ctx.user.isInRole(`admin`), `Недостаточно прав для вызова метода`);
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 	//checkStructEditRights(record, ctx);
 	string[] fieldNames;
 	string[] fieldValues;

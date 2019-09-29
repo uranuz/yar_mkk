@@ -4,14 +4,14 @@ define('mkk/Right/Role/List/List', [
 	'fir/network/json_rpc',
 	'css!mkk/Right/Role/List/List'
 ], function (FirControl, FirHelpers, json_rpc) {
+var LIST_AREA = 'listView';
 return FirClass(
 	function RightRoleList(opts) {
 		this.superctor(RightRoleList, opts);
-		this._navigatedArea = 'listView';
 		this.rightRoleEditDlg = this.getChildByName('rightRoleEditDlg');
 		this.rightRoleDeleteDlg = this.getChildByName('rightRoleDeleteDlg');
 		this._paging = this.getChildByName(this.instanceName() + 'Paging');
-		this._reloadList = this._reloadControl.bind(this, 'linkList');
+		this._reloadList = this._reloadControl.bind(this, LIST_AREA);
 		FirHelpers.doOnEnter(this, 'nameField', this._reloadList);
 		this._subscr(function() {
 			this._elems('searchBtn').on('click', this._reloadList);
@@ -32,8 +32,7 @@ return FirClass(
 		FirHelpers.managePaging({
 			control: this,
 			paging: this._paging,
-			areaName: 'linkList',
-			replaceURIState: true
+			areaName: LIST_AREA
 		});
 	}, FirControl, {
 		/** Нажатие по кнопке "Добавить" */
@@ -102,7 +101,7 @@ return FirClass(
 		_getQueryParams: function(areaName) {
 			return {
 				name: this._elems('nameField').val(),
-				nav: this.getNavParams()
+				nav: this._paging.getNavParams()
 			};
 		},
 		_getViewParams: function() {

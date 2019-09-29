@@ -41,7 +41,13 @@ expr {*
 					<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
 				</li>
 				<li class="{=cls 'listItem'}">
+					<a href="{{vpaths.siteDynamic}}right/role/list">Роли пользователей</a>
+				</li>
+				<li class="{=cls 'listItem'}">
 					<a href="{{vpaths.siteDynamic}}user/list">Пользователи</a>
+				</li>
+				<li class="{=cls 'listItem'}">
+					<a href="{{vpaths.siteDynamic}}right/rule/list">Правила доступа</a>
 				</li>
 			</ul>
 		</div>
