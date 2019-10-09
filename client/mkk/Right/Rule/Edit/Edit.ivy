@@ -10,39 +10,38 @@ def RightRuleEdit {=
 		requestURI: "/api/right/rule/read"
 		ruleRec: null;
 	def.body {*
-		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
-			<div class="{=cls 'editForm'}">
-				<input type="hidden"
-					class="{=cls 'numField'}"
-					value="{{ruleRec.num}}"/>
-				<div class="form-group">
-					<label class="d-flex align-items-center">
-						<span class="mr-2">Название</span>
-						<input type="text"
-							class="{=cls 'nameField'} form-control"
-							value="{{ruleRec.name}}"/>
-					</label>
-				</div>
-				<div class="form-group">
-					<button type="button"
-						class="{=cls 'saveBtn'} btn btn-primary"
-						>Сохранить</button>
-				</div>
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<div class="{=cls 'editForm'}">
+			<input type="hidden"
+				class="{=cls 'numField'}"
+				value="{{ruleRec.num}}"/>
+			<div class="form-group">
+				<label class="d-flex align-items-center">
+					<span class="mr-2">Название</span>
+					<input type="text"
+						class="{=cls 'nameField'} form-control"
+						value="{{ruleRec.name}}"/>
+				</label>
 			</div>
-			{=LazyArea
-				instanceName: instanceName ~ "ResultsArea"
-				config: {
-					ivyModule: 'mkk.Helpers.EditResults',
-					ivyMethod: 'EditResults',
-					viewParams: {
-						whatObject: 'правила доступа'
-					},
-					RPCMethod: 'right.rule.edit'
-				}
-			}
+			<div class="form-group">
+				<button type="button"
+					class="{=cls 'saveBtn'} btn btn-primary"
+					>Сохранить</button>
+			</div>
 		</div>
-		
+		{=LazyArea
+			instanceName: instanceName ~ "ResultsArea"
+			config: {
+				ivyModule: 'mkk.Helpers.EditResults',
+				ivyMethod: 'EditResults',
+				viewParams: {
+					whatObject: 'правила доступа'
+				},
+				RPCMethod: 'right.rule.edit'
+			}
+		}
+	</div>
 	*}
 };
 }

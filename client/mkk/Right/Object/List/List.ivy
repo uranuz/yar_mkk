@@ -5,13 +5,16 @@ def renderObject {=
 		objKey: null
 		idxByKey: {}
 		objectList: null
-		level: 0;
+		level: 0
+		isSelect: null;
 	def.body noscope {*
 		{=
 			var item: {=at idxByKey objKey};
 			var obj: {=at objectList item.idx};
 		}
-		<div class="{=cls 'rightObject'}" style="margin-left: {{level*16}}px;">
+		<div class="{=cls 'rightObject'}"
+			style="margin-left: {{level*16}}px;"
+			data-record-num="{{obj.num}}">
 			<div class="{=cls 'objTitle'}">
 				<a href="/dyn/right/object/edit?num={{obj.num}}"
 					class="{=cls 'editLink'}"
@@ -30,6 +33,7 @@ def renderObject {=
 			idxByKey: idxByKey
 			objectList: objectList
 			level: level + 1
+			isSelect: isSelect
 		} }
 	*}
 };
@@ -39,10 +43,12 @@ def RightObjectList {=
 		instanceName: 'rightObjectList'
 		cssBaseClass: 'mkk-RightObjectList'
 		requestURI: "/api/right/object/list"
-		objectList: null;
+		RPCMethod: 'right.object.list'
+		objectList: null
+		isSelect: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectList']}"/>
 		<h2>Объекты доступа</h2>
 		{=
 			var roots: [];
@@ -73,12 +79,17 @@ def RightObjectList {=
 				setat idxByKey dat2 num;
 				set i: i + 1;
 			};
+		}
+		<div class="{=cls 'listView'}">
+		{=
 			repeat root in roots {=renderObject
 				objKey: root
 				idxByKey: idxByKey
 				objectList: objectList
+				isSelect: isSelect
 			};
 		}
+		</div>
 	</div>
 	*}
 };

@@ -38,7 +38,8 @@ def RightList {=
 				ivyMethod: 'RightEdit',
 				dialogOpts: {
 					width: 600,
-					height: 600
+					height: 600,
+					title: 'Редактирование прав доступа'
 				}
 			}
 		}

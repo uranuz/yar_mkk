@@ -1,0 +1,150 @@
+expr {=
+from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.OpenDialog import OpenDialog;
+var
+	instanceName: 'roleRightList'
+	cssBaseClass: 'mkk-RoleRightList'
+	requestURI: '/api/right/role/rights'
+	RPCMethod: 'right.role.rights'
+	fieldsToSend: ['rightList', 'role']
+	
+	AccessObject: 1
+	AccessRight: 3;
+
+def RoleRightList {=
+	def.kv
+		moduleName: 'mkk/Right/Role/RightList/RightList'
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		requestURI: requestURI
+		RPCMethod: RPCMethod
+		rightList: null
+		role: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
+		<h2>Права доступа для роли</h2>
+		<div class="row form-group">
+			<div class="col-md-4">Название</div>
+			<div class="col-md">{{role.name}}</div>
+		</div>
+		<div class="row form-group">
+			<div class="col-md-4">Описание</div>
+			<div class="col-md">{{role.description}}</div>
+		</div>
+		<div class="form-group">
+			<button type="button"
+				class="{=cls 'addRuleBtn'} btn btn-primary"
+				>Добавить</button>
+		</div>
+		<div class="row font-weight-bold">
+			<div class="col-md-4">Название объекта<br/>Правила доступа</div>
+			<div class="col-md-4">Описание</div>
+			<div class="col-md">Наследуется?<br/>Тип доступа</div>
+			<div class="col-md-1" title="Удалить">X</div>
+		</div>
+
+		{=RoleRightListView
+			instanceName: instanceName
+			cssBaseClass: cssBaseClass
+			requestURI: requestURI
+			RPCMethod: RPCMethod
+			rightList: rightList
+		}
+
+		{=OpenDialog
+			instanceName: 'rightEditDlg'
+			config: {
+				ivyModule: 'mkk.Right.Edit',
+				ivyMethod: 'RightEdit',
+				dialogOpts: {
+					width: 600,
+					height: 600,
+					title: 'Редактирование прав доступа'
+				}
+			}
+		}
+		{=OpenDialog
+			instanceName: 'rightDeleteDlg'
+			config: {
+				ivyModule: 'mkk.Helpers.DeleteConfirm',
+				ivyMethod: 'DeleteConfirm'
+			}
+		}
+	</div>
+	*}
+};
+
+def RoleRightListView {=
+	def.kv
+		instanceName: instanceName
+		cssBaseClass: cssBaseClass
+		requestURI: requestURI
+		RPCMethod: RPCMethod
+		rightList: null;
+	def.body {*
+	<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
+		{=
+			var
+				hierGroups: {},
+				hierOrder: [],
+				idxByKey: {},
+				i: 0;
+			for right in rightList {=
+				setat idxByKey i right.surr_num;
+
+				if right.surr_type == AccessObject {=
+					insert hierOrder right.surr_num null;
+				} elif right.surr_type == AccessRight {=
+					if not {=has hierGroups right.surr_parent} {=
+						setat hierGroups [right.surr_num] right.surr_parent
+					} else {=
+						insert {=at hierGroups right.surr_parent} right.surr_num null
+					}
+				};
+
+				set i: i + 1;
+			}
+		}
+		{=repeat objSurrNum in hierOrder {*
+			{=var
+				itemIdx: {=at idxByKey objSurrNum}
+				item: {=at rightList itemIdx}
+				childs: {=at hierGroups objSurrNum}
+			}
+			<div class="row">
+				<span class="col-md-4">{{item.folderName}}.{{item.name}}</span>
+				<span class="col-md">{{item.description}}</span>
+			</div>
+			{=repeat childSurrNum in childs {*
+			<div class="row">
+				{=var
+					childItemIdx: {=at idxByKey childSurrNum}
+					childItem: {=at rightList childItemIdx}
+				}
+				<div class="col-md-4">{{childItem.name}}</div>
+				<div class="col-md-4">{{childItem.description}}</div>
+				<div class="col-md">
+					<span class="col-md-1 {=if childItem.inheritance 'text-warning'}"
+						title="Права {=if not childItem.inheritance 'не '}наследуются дочерними объектами"
+						>&forall;</span>
+					<span>{{childItem.access_kind}}</span>
+				</div>
+				<div class="col-md-1">
+					<div
+						class="{=cls 'itemActionBtn'} g-icon-small g-icon-removeItem"
+						title="Удалить"
+						data-mkk-action="removeRule"
+						data-record-num="{{childItem.num}}"></div>
+				</div>
+			</div>
+			*} }
+			
+			<hr/>
+		*} }
+	</div>
+	*}
+}
+
+}

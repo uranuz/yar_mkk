@@ -90,7 +90,9 @@ def RightRoleListView {=
 			<div class="{=cls 'roleList'}">
 			{=repeat rec in roleList {*
 				<div class="row">
-					<div class="col">{{rec.name}}</div>
+					<div class="col">
+						<a href="{{vpaths.siteDynamic}}right/role/rights?num={{rec.num}}">{{rec.name}}</a>
+					</div>
 					<div class="col">{{rec.description}}</div>
 					{=if isSelect {*
 					<div class="col-auto">

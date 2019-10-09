@@ -42,8 +42,11 @@ static immutable objRightRecFormat = RecordFormat!(
 )();
 
 Tuple!(IBaseRecordSet, `rightList`)
-getRightList(HTTPContext ctx, Optional!size_t num)
-{
+getRightList(
+	HTTPContext ctx,
+	Optional!size_t objectNum = null,
+	Optional!size_t roleNum = null
+) {
 	import std.format: format;
 
 	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
@@ -51,6 +54,6 @@ getRightList(HTTPContext ctx, Optional!size_t num)
 		getAuthDB().queryParams(
 			rightQueryBase.format(
 `where rgh.object_num = $1::integer
-order by a_obj.name, rgh.access_kind`), num
+order by a_obj.name, rgh.access_kind`), roleNum
 	).getRecordSet(objRightRecFormat));
 }

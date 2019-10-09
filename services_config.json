@@ -192,6 +192,10 @@
 					"requestURI": "/history/api/pohod/history",
 					"ivyModule": "mkk.RecordHistory",
 					"ivyMethod": "RecordHistory"
+				}, {
+					"pageURI": "/dyn/right/role/rights",
+					"ivyModule": "mkk.Right.Role.RightList",
+					"ivyMethod": "RoleRightList"
 				}
 			]
 		},

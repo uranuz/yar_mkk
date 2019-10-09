@@ -1,6 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.SelectorField import SelectorField;
+from fir.controls.LazyArea import LazyArea;
 def RightEdit {=
 	def.kv
 		moduleName: 'mkk/Right/Edit/Edit'
@@ -22,7 +23,29 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Объект доступа</label>
 				<div class="col-md-8">
-					{{object.folderName}}.{{object.name}}
+					{=if {=empty right.num} and not {=empty object.num} {*
+						{{object.folderName}}.{{object.name}}
+					*} else {=
+						SelectorField
+							instanceName: 'objectField',
+							selectEventName: 'onObjectSelect'
+							record: object,
+							dialogConfig: {
+								ivyModule: 'mkk.Right.Object.List',
+								ivyMethod: 'RightObjectList',
+								dialogOpts: {
+									width: 600,
+									height: 600
+								},
+								queryParams: {
+									name: null,
+									nav: {}
+								},
+								viewParams: {
+									isSelect: true
+								}
+							}
+					} }
 				</div>
 				<input type="hidden" value="{{right.objectNum}}"/>
 			</div>
@@ -37,26 +60,29 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Роль доступа</label>
 				<div class="col-md-8">
-					{=SelectorField
-						instanceName: 'roleField',
-						selectEventName: 'onRoleSelect'
-						record: role,
-						dialogConfig: {
-							ivyModule: 'mkk.Right.Role.List',
-							ivyMethod: 'RightRoleList',
-							dialogOpts: {
-								width: 600,
-								height: 600
-							},
-							queryParams: {
-								name: null,
-								nav: {}
-							},
-							viewParams: {
-								isSelect: true
+					{=if {=empty right.num} and not {=empty role.num} {*
+						{{role.name}}
+					*} else {=
+						SelectorField
+							instanceName: 'roleField',
+							selectEventName: 'onRoleSelect'
+							record: role,
+							dialogConfig: {
+								ivyModule: 'mkk.Right.Role.List',
+								ivyMethod: 'RightRoleList',
+								dialogOpts: {
+									width: 600,
+									height: 600
+								},
+								queryParams: {
+									name: null,
+									nav: {}
+								},
+								viewParams: {
+									isSelect: true
+								}
 							}
-						}
-					}
+					} }
 				</div>
 			</div>
 			<div class="form-group row">
@@ -96,10 +122,17 @@ def RightEdit {=
 				>Сохранить</button>
 		</div>
 
-		<div
-			class="{=cls 'EditResults'}"
-			data-ivy-module="mkk.Helpers.EditResults"
-			data-ivy-method="EditResults"></div>
+		{=LazyArea
+			instanceName: instanceName ~ "ResultsArea"
+			config: {
+				ivyModule: 'mkk.Helpers.EditResults',
+				ivyMethod: 'EditResults',
+				viewParams: {
+					whatObject: 'прав доступа'
+				},
+				RPCMethod: 'right.rule.edit'
+			}
+		}
 	</div>
 	*}
 }

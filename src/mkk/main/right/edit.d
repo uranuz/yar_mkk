@@ -5,6 +5,7 @@ import mkk.main.devkit;
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editRight)(`right.edit`);
+	MainService.JSON_RPCRouter.join!(editRight)(`right.delete`);
 
 	MainService.pageRouter.joinWebFormAPI!(editRight)("/api/right/edit");
 }
@@ -48,4 +49,14 @@ editRight(HTTPContext ctx, RightRuleData record)
 	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение права доступа");
 
 	return res;
+}
+
+
+void deleteRight(HTTPContext ctx, size_t num)
+{
+	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
+
+	MainService.loger.info("Формирование и выполнение запроса к БД", "Удаление права доступа");
+	getAuthDB().queryParams(`delete from access_right a_right where a_right.num = $1::integer`, num);
+	MainService.loger.info("Выполнение запроса к БД завершено", "Удаление права доступа");
 }

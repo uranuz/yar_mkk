@@ -17,19 +17,23 @@ return FirClass(
 	}, FirControl, {
 		_getQueryParams: function(areaName) {
 			if( areaName === 'EditResults' ) {
-				var
-					roleRec = this._roleField.getRecord(),
-					ruleRec = this._ruleField.getRecord();
 				return {
-					record: {
-						num: (parseInt(this._elems('numField').val(), 10) || null),
-						accessKind: (this._elems('accessKindField').val() + ''),
-						roleNum: (roleRec? roleRec.getKey(): null),
-						ruleNum: (ruleRec? ruleRec.getKey(): null),
-						inheritance: !!this._elems('inheritanceField').prop('checked')
-					}
+					record: this.getRecord()
 				};
 			}
+		},
+
+		getRecord: function() {
+			var
+				roleRec = this._roleField.getRecord(),
+				ruleRec = this._ruleField.getRecord();
+			return {
+				num: (parseInt(this._elems('numField').val(), 10) || null),
+				accessKind: (this._elems('accessKindField').val() + ''),
+				roleNum: (roleRec? roleRec.getKey(): null),
+				ruleNum: (ruleRec? ruleRec.getKey(): null),
+				inheritance: !!this._elems('inheritanceField').prop('checked')
+			};
 		},
 
 		_getViewParams: function(areaName) {

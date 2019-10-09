@@ -40,12 +40,22 @@ Tuple!(
 )
 readRight(
 	HTTPContext ctx,
-	Optional!size_t num = Optional!size_t(),
-	Optional!size_t objectNum = Optional!size_t()
+	Optional!size_t num = null,
+	Optional!size_t objectNum = null,
+	Optional!size_t roleNum = null
 ) {
-	enforce(
-		!num.isSet || !objectNum.isSet,
-		`Одновременно можно указать либо идентификатор права, либо объекта прав`);
+	size_t fieldCount = 0;
+	if( num.isSet ) {
+		++fieldCount;
+	}
+	if( objectNum.isSet ) {
+		++fieldCount;
+	}
+	if( roleNum.isSet ) {
+		++fieldCount;
+	}
+
+	enforce(fieldCount <= 1, `Нельзя задачть одновременно больше одного из параметров: num, objectNum, roleNum`);
 
 	typeof(return) res;
 	res.right = readBaseRight(ctx, num).right;
@@ -53,15 +63,19 @@ readRight(
 	auto baseRec = TypedRecord!(typeof(objRightRecFormat), IBaseRecord)(res.right);
 
 	if( !baseRec.isNull(`objectNum`) ) {
-		Optional!size_t objNum = baseRec.get!"objectNum"();
-		res.object = readObject(ctx, objNum).rightObj;
-	} else if(objectNum.isSet) {
+		objectNum = baseRec.get!"objectNum"();
+	}
+	if(objectNum.isSet) {
 		res.object = readObject(ctx, objectNum).rightObj;
 	}
+
 	if( !baseRec.isNull(`roleNum`) ) {
-		Optional!size_t roleNum = baseRec.get!"roleNum"();
+		roleNum = baseRec.get!"roleNum"();
+	}
+	if( roleNum.isSet ) {
 		res.role = readRole(ctx, roleNum).role;
 	}
+
 	if( !baseRec.isNull(`ruleNum`) ) {
 		Optional!size_t ruleNum = baseRec.get!"ruleNum"();
 		res.rule = readRightRule(ctx, ruleNum).ruleRec;
