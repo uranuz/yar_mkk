@@ -1,5 +1,39 @@
 expr {=
-from fir.controls.utils import cls, firScopeOptsEnc;
+from fir.controls.utils import cls, firScopeOptsEnc, treeMetaInfo;
+
+def RightObjectList {=
+	def.kv
+		moduleName: 'mkk/Right/Object/List/List'
+		instanceName: 'rightObjectList'
+		cssBaseClass: 'mkk-RightObjectList'
+		requestURI: "/api/right/object/list"
+		RPCMethod: 'right.object.list'
+		objectList: null
+		isSelect: null;
+	def.body {*
+	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectList']}"/>
+		<h2>Объекты доступа</h2>
+		{=var treeMeta: {=
+			treeMetaInfo
+				rs: objectList
+				keyProperty: 'num'
+				parentProperty: 'parentNum'
+		} }
+		<div class="{=cls 'listView'}">
+		{=
+			repeat root in treeMeta.roots {=renderObject
+				objKey: root
+				idxByKey: treeMeta.idxByKey
+				objectList: objectList
+				isSelect: isSelect
+			};
+		}
+		</div>
+	</div>
+	*}
+};
+
 def renderObject {=
 	def.kv
 		objKey: null
@@ -22,9 +56,11 @@ def renderObject {=
 					<span>#{{obj.num}}</span>
 					<span>{{obj.name}}</span>
 				</a>
+				{=if not isSelect {*
 				<a href="/dyn/right/object/edit?parentNum={{obj.parentNum}}"
 					class="{=cls 'addLink'} btn btn-primary btn-sm"
 					>+</a>
+				*}}
 			</div>
 			<div>{{obj.description}}</div>
 		</div>
@@ -35,62 +71,6 @@ def renderObject {=
 			level: level + 1
 			isSelect: isSelect
 		} }
-	*}
-};
-def RightObjectList {=
-	def.kv
-		moduleName: 'mkk/Right/Object/List/List'
-		instanceName: 'rightObjectList'
-		cssBaseClass: 'mkk-RightObjectList'
-		requestURI: "/api/right/object/list"
-		RPCMethod: 'right.object.list'
-		objectList: null
-		isSelect: null;
-	def.body {*
-	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectList']}"/>
-		<h2>Объекты доступа</h2>
-		{=
-			var roots: [];
-			var idxByKey: {};
-			var i: 0;
-			for obj in objectList {=
-				var parentNum: {=str obj.parentNum};
-				var num: {=str obj.num};
-				if not obj.parentNum {=
-					insert roots num null
-				} else {=
-					var dat: {=
-						if {=has idxByKey parentNum}
-							{=at idxByKey parentNum}
-						else
-							{idx: null, children: []}
-					};
-					insert dat.children num null;
-					setat idxByKey dat parentNum;
-				};
-				var dat2: {=
-					if {=has idxByKey num}
-						{=at idxByKey num}
-					else
-						{idx: i, children: []}
-				};
-				set dat2.idx: i;
-				setat idxByKey dat2 num;
-				set i: i + 1;
-			};
-		}
-		<div class="{=cls 'listView'}">
-		{=
-			repeat root in roots {=renderObject
-				objKey: root
-				idxByKey: idxByKey
-				objectList: objectList
-				isSelect: isSelect
-			};
-		}
-		</div>
-	</div>
 	*}
 };
 }
