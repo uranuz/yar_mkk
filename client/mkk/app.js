@@ -12,6 +12,7 @@ define('mkk/app', [
 	"fir/controls/Loader/IvyServerRender",
 	'ivy/directive/StandardFactory',
 	'fir/ivy/RemoteCall',
+	'fir/ivy/OptStorage',
 	"fir/controls/ControlManager",
 	"fir/security/right/IvyRuleFactory",
 	"fir/security/right/GlobalVarSource",
@@ -28,6 +29,7 @@ define('mkk/app', [
 	IvyServerRender,
 	StandardFactory,
 	RemoteCallInterpreter,
+	OptStorageInterpreter,
 	ControlManager,
 	IvyRuleFactory,
 	GlobalVarSource,
@@ -38,6 +40,7 @@ define('mkk/app', [
 	var ivyConfig = new IvyEngineConfig();
 	ivyConfig.directiveFactory = StandardFactory();
 	ivyConfig.directiveFactory.add(new RemoteCallInterpreter());
+	ivyConfig.directiveFactory.add(new OptStorageInterpreter());
 	window.ivyEngine = new IvyEngine(
 		ivyConfig,
 		new RemoteModuleLoader('/dyn/server/template'));

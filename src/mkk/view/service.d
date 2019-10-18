@@ -90,7 +90,7 @@ public:
 			]).toString();
 			userRightData.escapeState = NodeEscapeState.Safe;
 			IvyData payload = [
-				"content":  content,
+				"content": content,
 				"authRedirectURI": IvyData(getAuthRedirectURI(ctx)),
 				"pohodFilterFields": favouriteFilters["allFields"],
 				"pohodFilterSections": favouriteFilters["sections"],
