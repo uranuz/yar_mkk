@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.SearchArea import TouristSearchArea;
 from mkk.Tourist.NavList import TouristNavList;
 def PartyEdit {=
@@ -13,7 +13,9 @@ def PartyEdit {=
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<!--Диалог редактирования участников похода-->
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
+			'touristList', 'nav'
+		] }"/>
 		<div class="{=cls 'dlgContent'}">
 			<div class="{=cls 'controlBar'}">
 				<button type="button" class="{=cls 'acceptBtn'} btn btn-primary btn-secondary">Сохранить</button>

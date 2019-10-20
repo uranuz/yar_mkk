@@ -14,7 +14,7 @@ def EntityProperty {=
 			set instanceName: instanceName ~ '-' ~ {=str mega_counter};
 			set mega_counter: mega_counter + 1;
 		};
-		if not{=empty value} {*
+		if value {*
 		<div class="{=cls {=if isWide 'wideProp' else 'prop'} } row" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			<label

@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Pohod.List.Navigation import PohodListNavigation;
 def PohodFilterMenu {=
 	def.kv
@@ -11,7 +11,9 @@ def PohodFilterMenu {=
 		vpaths: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-			<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
+				'pohodFilterFields', 'pohodFilterSections'
+			] }"/>
 			<form action="{{vpaths.siteDynamic}}pohod/list" method="post" class="{=cls 'form'}">
 				{= repeat fieldName in pohodFilterFields {*
 				<input type="hidden"

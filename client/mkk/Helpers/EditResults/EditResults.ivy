@@ -30,7 +30,7 @@ def EditResults {=
 				<div>Если эта ошибка повторяется, обратитесь к администратору сайта.</div>
 			*}
 		};
-		if not{=empty errorMsg} {*
+		if errorMsg {*
 			<div>Текст ошибки:</div>
 			<div>{{errorMsg}}</div>
 		*};
@@ -48,18 +48,18 @@ def YouCan {=
 		num;
 	def.body {*
 	<div>
-		{=if not{=empty editLink} or not{=empty listLink} {*
+		{=if editLink or listLink {*
 		<div>{=if {=empty errorMsg} {*Вы можете*} else {*Однако вы можете*} }:</div>
 		<ul>
-		{=if not{=empty editLink} {%
-			if not{=empty errorMsg} {*
-			<li><a href="{{editLink}}{=if not{=empty num} {*?num={{num}}*} }">попробовать ещё раз...</a></li>
-			*} elif not{=empty num} {*
+		{=if editLink {%
+			if errorMsg {*
+			<li><a href="{{editLink}}{=if num {*?num={{num}}*} }">попробовать ещё раз...</a></li>
+			*} elif num {*
 			<li><a href="{{editLink}}?num={{num}}">продолжить редактирование</a> этой же записи</li>
 			*} else {*
 			<li><a href="{{editLink}}">добавить еще...</a></li>
 			*};
-			if not{=empty listLink} {*
+			if listLink {*
 			<li>перейти <a href="{{listLink}}">к списку {{whatObject}}ов</a></li>
 			*}
 		} }

@@ -15,12 +15,14 @@ def EditOwnPohod {=
 	def.kv identity data;
 	def.body {=
 		return
-			not{=empty identity.data.touristNum}
-			and(
-				identity.data.touristNum == data.chiefNum
-				or
-				identity.data.touristNum == data.altChiefNum
-			)
+			{=bool
+				identity.data.touristNum
+				and(
+					identity.data.touristNum == data.chiefNum
+					or
+					identity.data.touristNum == data.altChiefNum
+				)
+			}
 	}
 };
 }

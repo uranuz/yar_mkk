@@ -10,7 +10,7 @@ def LinkItems {=
 		disabled: null;
 	def.body {*
 		{=var
-				linkCount: {=if not{=empty linkList} {=len linkList} else 0}
+				linkCount: {=if linkList {=len linkList} else 0}
 				remainder: linkCount % portionSize
 				inputCount: linkCount + portionSize - remainder;
 			if inputCount < minBlockCount * portionSize {=

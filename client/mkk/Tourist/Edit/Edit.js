@@ -1,6 +1,5 @@
 define('mkk/Tourist/Edit/Edit', [
 	'fir/controls/FirControl',
-	'fir/common/helpers',
 	'mkk/helpers',
 	'fir/network/json_rpc',
 	'fir/datctrl/ivy/Deserializer',
@@ -11,7 +10,6 @@ define('mkk/Tourist/Edit/Edit', [
 	'css!mkk/Tourist/Edit/Edit'
 ], function(
 	FirControl,
-	FirHelpers,
 	MKKHelpers,
 	json_rpc,
 	IvyDeserializer

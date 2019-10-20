@@ -91,7 +91,7 @@ def TouristEdit {=
 				*}
 			}
 		} }
-		{=var checkRights: isEditDialog or (not{=empty tourist} and not{=empty tourist.num})}
+		{=var checkRights: isEditDialog or (tourist and tourist.num)}
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['isEditDialog', 'checkRights'] }"/>
 		<div class="{=cls 'topButtons'}">
@@ -207,7 +207,7 @@ def TouristEdit {=
 						>Сохранить</button>
 				</span>
 				<span class="col-auto">
-					{=if {=hasRight kind: 'delete'} and not{=empty tourist.num} {*
+					{=if {=hasRight kind: 'delete'} and tourist.num {*
 					<button type="button"
 						class="{=cls 'deleteDialogBtn'} btn btn-secondary"
 						>Удалить туриста</button>

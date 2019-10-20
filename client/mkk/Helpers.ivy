@@ -16,7 +16,7 @@ def DateRangePrinter {=
 			str fromStr; dtGet begin 'day';
 			if {=dtGet begin 'month'} != {=dtGet end 'month'} {%
 				str partSep;
-				if not{=empty monthNames} {=at monthNames ({=dtGet begin 'month'} or 0) - 1}
+				if monthNames {=at monthNames ({=dtGet begin 'month'} or 0) - 1}
 					else {=dtGet begin 'month'};
 			};
 			if {=dtGet begin 'year'} != {=dtGet end 'year'} {%
@@ -26,7 +26,7 @@ def DateRangePrinter {=
 		if end {%
 			str toStr; dtGet end 'day';
 			str partSep;
-			if not{=empty monthNames} {=at monthNames ({=dtGet end 'month'} or 0) - 1}
+			if monthNames {=at monthNames ({=dtGet end 'month'} or 0) - 1}
 				else {=dtGet end 'month'};
 			str partSep; dtGet end 'year'; str yearSuffix;
 		}
@@ -36,7 +36,7 @@ def RusDateFormat {=
 	def.pos
 		date;
 	def.body {%
-		if not{=empty date} {%
+		if date {%
 			dtGet date 'day'; expr '.';
 			dtGet date 'month'; expr '.';
 			dtGet date 'year';

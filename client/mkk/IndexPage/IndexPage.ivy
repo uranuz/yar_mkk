@@ -45,7 +45,7 @@ def RecentPohodList {=
 					<div class="{=cls 'chiefCommentRow'}">
 						{=
 							var chiefComment: {{pohod.chiefComment}};
-							if not {=empty chiefComment} "Описание: " ~ chiefComment
+							if chiefComment "Описание: " ~ chiefComment
 						}
 					</div>
 				</div>

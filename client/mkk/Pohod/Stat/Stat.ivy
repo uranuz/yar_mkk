@@ -1,5 +1,5 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, firScopeOptsEnc;
 
 def Stat {=
 	def.kv
@@ -14,7 +14,9 @@ def Stat {=
 	<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.time.js" defer></script>
 
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=toJSONBase64 {=scope} }"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
+			'data', 'select'
+		] }"/>
 		<form id="main_form" method="post">
 			<h2>Статистика</h2>
 			<button type="submit"

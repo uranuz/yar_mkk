@@ -2,6 +2,22 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.SelectorField import SelectorField;
 from fir.controls.LazyArea import LazyArea;
+
+def fullObjectNameTmpl {=
+	def.kv
+		record
+		displayField
+		emptyText;
+	def.body noscope {*
+	<a href="#!"
+		class="{=cls 'selectBtn'}"
+		>{=if record.folderName and record.name {*{{record.folderName}}.{{record.name}}*}
+			elif record.name record.name
+			else emptyText
+		}</a>
+	*}
+};
+
 def RightEdit {=
 	def.kv
 		moduleName: 'mkk/Right/Edit/Edit'
@@ -23,13 +39,14 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Объект доступа</label>
 				<div class="col-md-8">
-					{=if {=empty right.num} and not {=empty object.num} {*
+					{=if not right.num and object.num {*
 						{{object.folderName}}.{{object.name}}
 					*} else {=
 						SelectorField
 							instanceName: 'objectField',
 							selectEventName: 'onObjectSelect'
 							record: object,
+							itemTemplate: fullObjectNameTmpl
 							dialogConfig: {
 								ivyModule: 'mkk.Right.Object.List',
 								ivyMethod: 'RightObjectList',
@@ -60,7 +77,7 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Роль доступа</label>
 				<div class="col-md-8">
-					{=if {=empty right.num} and not {=empty role.num} {*
+					{=if not right.num and role.num {*
 						{{role.name}}
 					*} else {=
 						SelectorField
