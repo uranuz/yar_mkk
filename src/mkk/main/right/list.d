@@ -30,7 +30,7 @@ left join access_rule a_rule
 %s`;
 
 static immutable objRightRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	size_t, "objectNum",
 	size_t, "roleNum",
 	size_t, "ruleNum",

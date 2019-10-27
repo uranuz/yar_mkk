@@ -16,7 +16,7 @@ shared static this()
 import std.meta: AliasSeq;
 
 static immutable rightObjectRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "description",
 	size_t, "parentNum",

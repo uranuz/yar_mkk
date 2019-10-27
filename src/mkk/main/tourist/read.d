@@ -12,7 +12,7 @@ shared static this()
 
 //получаем данные о ФИО и г.р. туриста
 static immutable touristRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "familyName",
 	string, "givenName",
 	string, "patronymic",

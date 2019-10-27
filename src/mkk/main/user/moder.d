@@ -10,7 +10,7 @@ shared static this()
 
 /// Формат записи для списка модераторов сайта
 static immutable moderListRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "status",
 	string, "region",

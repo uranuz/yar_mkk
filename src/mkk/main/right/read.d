@@ -55,7 +55,7 @@ readRight(
 		++fieldCount;
 	}
 
-	enforce(fieldCount <= 1, `Нельзя задачть одновременно больше одного из параметров: num, objectNum, roleNum`);
+	enforce(fieldCount <= 1, `Нельзя задать одновременно больше одного из параметров: num, objectNum, roleNum`);
 
 	typeof(return) res;
 	res.right = readBaseRight(ctx, num).right;

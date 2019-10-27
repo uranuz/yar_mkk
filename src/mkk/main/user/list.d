@@ -14,7 +14,7 @@ import std.datetime: DateTime;
 
 /// Формат записи для списка пользователей сайта
 static immutable userListRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "login",
 	DateTime, "reg_timestamp",

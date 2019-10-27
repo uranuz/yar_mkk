@@ -23,7 +23,7 @@ import webtank.db.datctrl_joint;
 
 import std.datetime: DateTime;
 static immutable historyRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "data",
 	size_t, "userNum",
 	DateTime, "time_stamp"

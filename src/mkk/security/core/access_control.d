@@ -92,7 +92,7 @@ where
 		import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
 		import webtank.db.datctrl_joint: getRecordSet;
 		static immutable userDataRecFormat = RecordFormat!(
-			PrimaryKey!(size_t), "num",
+			PrimaryKey!(size_t, "num"),
 			string, "email",
 			string, "login",
 			string, "name",
@@ -168,7 +168,7 @@ group by su.num, su.email, su.login, su.name`, Base64URL.encode(sessionId)
 		import webtank.db.datctrl_joint: getRecordSet;
 		import mkk.security.core.access_control: changeUserPassword;
 		static immutable userPwDataRecFormat = RecordFormat!(
-			PrimaryKey!(size_t), "num",
+			PrimaryKey!(size_t, "num"),
 			string, "pwHash",
 			string, "pwSalt",
 			DateTime, "regTimestamp",

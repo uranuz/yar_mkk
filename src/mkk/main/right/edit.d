@@ -5,7 +5,7 @@ import mkk.main.devkit;
 shared static this()
 {
 	MainService.JSON_RPCRouter.join!(editRight)(`right.edit`);
-	MainService.JSON_RPCRouter.join!(editRight)(`right.delete`);
+	MainService.JSON_RPCRouter.join!(deleteRight)(`right.delete`);
 
 	MainService.pageRouter.joinWebFormAPI!(editRight)("/api/right/edit");
 }

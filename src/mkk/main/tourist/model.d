@@ -39,7 +39,7 @@ import std.meta: AliasSeq;
 import std.datetime: Date, DateTime;
 
 alias TouristFullFormatBase = AliasSeq!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "family_name",
 	string, "given_name",
 	string, "patronymic",

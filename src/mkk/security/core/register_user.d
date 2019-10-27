@@ -10,7 +10,7 @@ import webtank.common.conv: fromPGTimestamp;
 import webtank.net.utils: PGEscapeStr;
 import webtank.db.datctrl_joint: getRecordSet;
 import webtank.db.database: queryParams;
-import webtank.datctrl.record_format: RecordFormat, PrimaryKey;
+import webtank.datctrl.record_format: RecordFormat, PrimaryKey, Writeable;
 import std.typecons: Tuple;
 import std.uuid: randomUUID, sha1UUID, UUID;
 
@@ -55,7 +55,7 @@ RegUserResult registerUser(alias getAuthDB)(
 	checkEmailAddress(email);
 
 	static immutable addUserResultFmt = RecordFormat!(
-		PrimaryKey!(size_t), "num",
+		PrimaryKey!(size_t, "num"),
 		string, "status",
 		DateTime, "regTimestamp"
 	)();

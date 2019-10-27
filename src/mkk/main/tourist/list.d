@@ -31,7 +31,7 @@ struct TouristListFilter
 import std.typecons: tuple, Tuple;
 
 static immutable shortTouristRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "familyName",
 	string, "givenName",
 	string, "patronymic",
@@ -55,7 +55,7 @@ plainListTourist(TouristListFilter filter, Navigation nav)
 }
 
 static immutable touristListRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "familyName",
 	string, "givenName",
 	string, "patronymic",

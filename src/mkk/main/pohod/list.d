@@ -22,7 +22,7 @@ import std.typecons: tuple;
 import std.meta: AliasSeq;
 
 alias BasePohodFields = AliasSeq!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "mkkCode",
 	string, "bookNum",
 	Date, "beginDate",
@@ -37,7 +37,7 @@ alias BasePohodFields = AliasSeq!(
 	string, "chiefPatronymic",
 	string, "chiefBirthYear",
 	size_t, "partySize",
-	string, "organization",
+	Writeable(string, "organization"),
 	string, "partyRegion",
 	string, "route"
 );

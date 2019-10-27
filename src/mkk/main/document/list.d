@@ -11,7 +11,7 @@ shared static this()
 }
 
 static immutable documentRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "link"
 )();

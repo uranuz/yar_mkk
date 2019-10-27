@@ -12,7 +12,7 @@ shared static this()
 }
 
 static immutable rightRoleRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "description"
 )();

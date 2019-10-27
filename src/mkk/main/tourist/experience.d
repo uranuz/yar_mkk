@@ -15,7 +15,7 @@ import std.datetime: Date;
 
 // данные о походах туриста
 static immutable pohodRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "mkkCode",
 	string, "bookNum",
 	Date, "beginDate",

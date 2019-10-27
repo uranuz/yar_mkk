@@ -87,7 +87,7 @@ regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
 	import std.range: empty;
 
 	static immutable touristRegRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "num",
+		PrimaryKey!(size_t, "num"),
 		string, "familyName",
 		string, "givenName",
 		string, "patronymic",
@@ -187,7 +187,7 @@ confirmEmail(string confirmUUID)
 {
 	import std.conv: text;
 	static immutable confirmRecFormat = RecordFormat!(
-		PrimaryKey!(size_t), "num",
+		PrimaryKey!(size_t, "num"),
 		bool, "expired",
 		bool, "already_confirmed"
 	)();

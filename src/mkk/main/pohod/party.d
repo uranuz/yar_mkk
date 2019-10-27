@@ -12,7 +12,7 @@ shared static this()
 }
 
 static immutable participantInfoRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "familyName",
 	string, "givenName",
 	string, "patronymic",
@@ -68,7 +68,7 @@ offset $2 limit $3`);
 }
 
 static immutable briefPohodInfoRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "mkkCode",
 	string, "bookNum",
 	string, "pohodRegion"

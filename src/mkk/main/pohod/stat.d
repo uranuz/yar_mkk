@@ -46,7 +46,7 @@ auto first_reading(HTTPContext context,StatSelect select)
 		);
 	}
 	alias GeneralFormat(size_t count, string keyField) = RecordFormat!(
-		PrimaryKey!(string), keyField,
+		PrimaryKey!(string, keyField),
 		staticMap!(FieldPairFormat, aliasSeqOf!(iota(count)))
 	);
 	//-- формальные шаблоны данных

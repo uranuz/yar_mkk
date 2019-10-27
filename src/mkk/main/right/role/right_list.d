@@ -82,7 +82,7 @@ static immutable roleRightsRecFormat = RecordFormat!(
 	size_t, "parent_num",
 	string, "name",
 	string, "description",
-	PrimaryKey!string, "surr_num",
+	PrimaryKey!(string, "surr_num"),
 	string, "surr_parent",
 	ubyte, "surr_type",
 	bool, "inheritance",

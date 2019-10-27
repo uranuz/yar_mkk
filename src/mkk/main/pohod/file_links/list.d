@@ -10,7 +10,7 @@ shared static this()
 }
 
 static immutable pohodFileLinkRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "link"
 )();

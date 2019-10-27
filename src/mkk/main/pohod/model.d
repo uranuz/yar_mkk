@@ -78,7 +78,7 @@ import std.meta: AliasSeq;
 import std.datetime: Date, DateTime;
 
 alias PohodFullFormatBase = AliasSeq!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "kod_mkk",
 	string, "nomer_knigi",
 	string, "region_pohod",

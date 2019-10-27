@@ -12,7 +12,7 @@ shared static this()
 }
 
 static immutable rightRuleRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	size_t[], "children",
 	ubyte, "relation"

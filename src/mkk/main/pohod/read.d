@@ -70,7 +70,7 @@ import std.typecons: tuple;
 import std.datetime: Date;
 
 static immutable pohodRecFormat = RecordFormat!(
-	PrimaryKey!(size_t), "num",
+	PrimaryKey!(size_t, "num"),
 	string, "mkkCode",
 	string, "bookNum",
 	string, "organization",
@@ -145,7 +145,7 @@ pohodRead(HTTPContext ctx, Optional!size_t num)
 }
 
 static immutable pohodFileLinkRecFormat = RecordFormat!(
-	PrimaryKey!size_t, "num",
+	PrimaryKey!(size_t, "num"),
 	string, "name",
 	string, "link"
 )();
