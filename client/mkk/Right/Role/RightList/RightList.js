@@ -1,20 +1,25 @@
 define('mkk/Right/Role/RightList/RightList', [
 	'fir/controls/FirControl',
+	'fir/network/json_rpc',
 	'css!mkk/Right/Role/RightList/RightList'
-], function (FirControl) {
+], function (FirControl, json_rpc) {
+var LIST_AREA = 'listView';
 return FirClass(
 	function RoleRightList(opts) {
 		this.superproto.constructor.call(this, opts);
 		this._rightEditDlg = this.getChildByName('rightEditDlg');
-		this._rightDeleteDlg = this.getChildByName('rightRuleDeleteDlg');
+		this._rightDeleteDlg = this.getChildByName('rightDeleteDlg');
+		this._reloadList = this._reloadControl.bind(this, LIST_AREA);
 		this._subscr(function() {
 			this._elems('addRuleBtn').on('click', this._onAddRuleBtn_click.bind(this));
-			this._elems('rightList').on('click', this._onListItem_click.bind(this));
+			this._elems('listView').on('click', this._onListItem_click.bind(this));
 		});
 		this._unsubscr(function() {
 			this._elems('addRuleBtn').off('click');
-			this._elems('rightList').off('click');
+			this._elems('listView').off('click');
 		});
+		this._rightEditDlg.subscribe('dialogControlDestroy', this._reloadList);
+		this._rightDeleteDlg.subscribe('dialogControlDestroy', this._reloadList);
 	}, FirControl, {
 		_onAddRuleBtn_click: function() {
 			this._rightEditDlg.open({
@@ -32,7 +37,7 @@ return FirClass(
 				action = el.data('mkkAction'),
 				recordNum = parseInt(el.data('recordNum'), 10) || null;
 			switch( action ) {
-				case 'removeRole': {
+				case 'removeRight': {
 					this._rightDeleteDlg.open({
 						viewParams: {
 							deleteWhat: 'право доступа'
@@ -61,6 +66,12 @@ return FirClass(
 				}
 			});
 		},
+
+		_getQueryParams: function(areaName) {
+			return {
+				num: this._role.get('num')
+			};
+		}
 	}
 );
 });

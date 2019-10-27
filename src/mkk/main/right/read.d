@@ -76,9 +76,24 @@ readRight(
 		res.role = readRole(ctx, roleNum).role;
 	}
 
+	Optional!size_t ruleNum;
 	if( !baseRec.isNull(`ruleNum`) ) {
-		Optional!size_t ruleNum = baseRec.get!"ruleNum"();
+		ruleNum = baseRec.get!"ruleNum"();
+	}
+	if( ruleNum.isSet ) {
 		res.rule = readRightRule(ctx, ruleNum).ruleRec;
+	}
+
+	if( baseRec.isNull(`num`) ) {
+		if( objectNum.isSet ) {
+			baseRec.set!`objectNum`(objectNum.value);
+		}
+		if( roleNum.isSet ) {
+			baseRec.set!`roleNum`(roleNum.value);
+		}
+		if( ruleNum.isSet ) {
+			baseRec.set!`ruleNum`(ruleNum.value);
+		}
 	}
 	return res;
 }

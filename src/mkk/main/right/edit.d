@@ -31,6 +31,12 @@ editRight(HTTPContext ctx, RightRuleData record)
 {
 	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 	//checkStructEditRights(record, ctx);
+
+	enforce(
+		record.objectNum.isSet
+		&& record.roleNum.isSet
+		&& record.ruleNum.isSet,
+		`Заполнены не все обязательные поля`);
 	string[] fieldNames;
 	string[] fieldValues;
 

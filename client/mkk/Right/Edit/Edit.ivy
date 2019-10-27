@@ -2,6 +2,7 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.SelectorField import SelectorField;
 from fir.controls.LazyArea import LazyArea;
+from fir.controls.Validation.Controller import ValidationController;
 
 def fullObjectNameTmpl {=
 	def.kv
@@ -31,7 +32,7 @@ def RightEdit {=
 		rule: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
-		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
+		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['right']}"/>
 		<div class="{=cls 'editForm'}">
 			<input type="hidden"
 				class="{=cls 'numField'}"
@@ -147,8 +148,11 @@ def RightEdit {=
 				viewParams: {
 					whatObject: 'прав доступа'
 				},
-				RPCMethod: 'right.rule.edit'
+				RPCMethod: 'right.edit'
 			}
+		}
+		{=ValidationController
+			instanceName: instanceName ~ 'Validation'
 		}
 	</div>
 	*}

@@ -37,7 +37,7 @@ alias BasePohodFields = AliasSeq!(
 	string, "chiefPatronymic",
 	string, "chiefBirthYear",
 	size_t, "partySize",
-	Writeable(string, "organization"),
+	string, "organization",
 	string, "partyRegion",
 	string, "route"
 );

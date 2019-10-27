@@ -135,7 +135,7 @@ def RoleRightListView {=
 					<div
 						class="{=cls 'itemActionBtn'} g-icon-small g-icon-removeItem"
 						title="Удалить"
-						data-mkk-action="removeRule"
+						data-mkk-action="removeRight"
 						data-record-num="{{childItem.num}}"></div>
 				</div>
 			</div>
