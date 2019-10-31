@@ -92,7 +92,6 @@ alias PohodFullFormatBase = AliasSeq!(
 	size_t, "unit",
 	string, "chef_coment",
 	string, "MKK_coment",
-	size_t[], "unit_neim",
 	size_t, "vid",
 	size_t, "ks",
 	size_t, "elem",

@@ -4,7 +4,7 @@ import std.getopt: getopt;
 import std.stdio: writeln;
 import std.exception: enforce;
 
-import mkk.tools.auth_db: getAuthDB;
+import mkk.tools.auth_db: getAuthDB, getCommonDB;
 import webtank.db.datctrl_joint: getScalar;
 
 void main(string[] args)
@@ -29,45 +29,67 @@ void main(string[] args)
 
 void convertDB()
 {
-	writeln(`Версия конвертера v0.5`);
+	writeln(`Версия конвертера v0.5.1`);
 	// Нужна хотя бы тупая, минимальная проверка на сконвертированность
-	bool alreadyConverted = getAuthDB().query(`
-select exists(
+	bool alreadyConverted = getCommonDB().query(`
+select not exists(
 	select column_name
 	from information_schema.columns
 	where
-		table_name = 'site_user'
+		table_name = 'pohod'
 		and
-		column_name = 'is_blocked'
+		column_name = 'unit_neim'
 )
 	`).getScalar!bool();
 	enforce(!alreadyConverted, `База данных уже сконвертирована!`);
 
-	writeln(`Изменение таблицы site_user`);
-	getAuthDB().query(`
-ALTER TABLE public.site_user
-	ADD COLUMN email_confirm_uuid uuid;
-COMMENT ON COLUMN public.site_user.email_confirm_uuid
-	IS 'Уникальный идентификатор, используемый для подтверждения адреса эл. почты пользователя';
+	writeln(`Добавление таблицы pohod_party`);
+	getCommonDB().query(`
+CREATE SEQUENCE public.pohod_party_num_seq;
 
-ALTER TABLE public.site_user
-	ADD COLUMN is_blocked boolean;
-COMMENT ON COLUMN public.site_user.is_blocked
-	IS 'Признак, что пользователь заблокирован, и вход под ним запрещен';
+CREATE TABLE public.pohod_party
+(
+	num integer NOT NULL DEFAULT nextval('pohod_party_num_seq'::regclass),
+	pohod_num integer,
+	tourist_num integer,
+	CONSTRAINT pohod_party_num PRIMARY KEY (num)
+)
+WITH (
+	OIDS = FALSE
+)
+TABLESPACE pg_default;
 
-ALTER TABLE public.site_user
-	ADD COLUMN is_email_confirmed boolean;
-COMMENT ON COLUMN public.site_user.is_email_confirmed
-	IS 'Признак подтверждения адреса эл. почты пользователем';
+ALTER TABLE public.pohod_party
+	OWNER to postgres;
+COMMENT ON TABLE public.pohod_party
+	IS 'Группа туристов похода';
+
+COMMENT ON COLUMN public.pohod_party.num
+	IS 'Первичный ключ';
+
+COMMENT ON COLUMN public.pohod_party.pohod_num
+	IS 'Идентификатор похода, к которому относятся группа и, соответственно, участники';
+
+COMMENT ON COLUMN public.pohod_party.tourist_num
+	IS 'Идентификатор туриста';
+
+ALTER SEQUENCE pohod_party_num_seq OWNED BY public.pohod_party.num;
 	`);
 
-	writeln(`Изменение таблицы session`);
-	getAuthDB().query(`
-ALTER TABLE public.session
-	ADD COLUMN created timestamp without time zone;
-COMMENT ON COLUMN public.session.created
-	IS 'Дата создания сессии пользователя';
---Удаляем старую колонку
-ALTER TABLE public.session DROP COLUMN expires;
+
+	writeln(`Перемещение данных из pohod.unit_neim в pohod_party`);
+	getCommonDB.query(`
+with party(pohod_num, tourist_num) as(
+	select
+		ph.num, unnest(ph.unit_neim)
+	from pohod ph
+)
+insert into pohod_party(pohod_num, tourist_num)
+select * from party
+	`);
+
+	writeln(`Удаление колонки pohod.unit_neim`);
+	getCommonDB().query(`
+ALTER TABLE public.pohod DROP COLUMN unit_neim
 	`);
 }

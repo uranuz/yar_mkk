@@ -23,12 +23,10 @@ static immutable participantInfoRecFormat = RecordFormat!(
 static immutable partyQueryFormat =
 `select
 	%s
-from(
-	select distinct unnest(unit_neim) as num
-	from pohod where pohod.num = $1
-) as tourist_num
-join tourist
-	on tourist.num = tourist_num.num
+from pohod_party php
+join tourist tr
+	on tr.num = php.tourist_num
+where php.pohod_num = $1::integer
 %s
 `;
 
@@ -47,11 +45,11 @@ Tuple!(
 		return typeof(return)(makeMemoryRecordSet(participantInfoRecFormat), nav);
 	}
 	string mainQuery = partyQueryFormat.format(
-`tourist.num,
-	tourist.family_name,
-	tourist.given_name,
-	tourist.patronymic,
-	tourist.birth_year`,
+`tr.num,
+	tr.family_name,
+	tr.given_name,
+	tr.patronymic,
+	tr.birth_year`,
 `order by family_name, given_name
 offset $2 limit $3`);
 

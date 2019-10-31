@@ -22,7 +22,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 {
 	import std.meta: AliasSeq, staticMap;
 	import std.algorithm: canFind, countUntil;
-	import std.conv: to, text, ConvException;
+	import std.conv: text, ConvException;
 	import std.json: JSONValue;
 	import mkk.main.enums;
 
@@ -48,55 +48,27 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	MainService.loger.info("Формируем набор строковых полей и значений", "Изменение данных похода");
 	mixin(WalkFields!(`record`, q{
-		static if( fieldName != "extraFileLinks" )
+		// Поля, которые не хранятся в самой записи похода, а поэтому записываются отдельно
+		enum bool externField = ["extraFileLinks", "partyNums"].canFind(fieldName);
+
+		// Проверка данных на здравый смысл
+		static if( enumFieldNames.canFind(fieldName) )
+		{
+			auto enumFormat = PohodEnums[enumFieldNames.countUntil(fieldName)][1];
+			enforce!ConvException(
+				!field.isSet || field.value in enumFormat,
+				`Выражение "` ~ field.value.text ~ `" не является значением типа "` ~ fieldName ~ `"!`);
+		}
+		else static if( ["chiefNum", "altChiefNum"].canFind(fieldName) )
+		{
+			enforce(
+				!record.partyNums.isSet || !field.isSet || record.partyNums.value.canFind(field),
+				(fieldName == "chiefNum"? "Руководитель": "Заместитель руководителя") ~ " похода должен быть в списке участников!");
+		}
+		
+		static if( !externField )
 		{
 			fieldNames ~= dbFieldName;
-
-			// Проверка данных на здравый смысл
-			static if( enumFieldNames.canFind(fieldName) )
-			{
-				auto enumFormat = PohodEnums[enumFieldNames.countUntil(fieldName)][1];
-				enforce!ConvException(
-					!field.isSet || field.value in enumFormat,
-					`Выражение "` ~ field.value.text ~ `" не является значением типа "` ~ fieldName ~ `"!`);
-			}
-			else static if( ["chiefNum", "altChiefNum"].canFind(fieldName) )
-			{
-				enforce(
-					!record.partyNums.isSet || !field.isSet || record.partyNums.value.canFind(field),
-					(fieldName == "chiefNum"? "Руководитель": "Заместитель руководителя") ~ " похода должен быть в списке участников!");
-			}
-			else static if( fieldName == "partyNums" )
-			{
-				if( !field.isSet ) {
-					continue;
-				}
-				enforce(
-					!record.partySize.isSet || !field.isSet || field.length <= record.partySize,
-					"Указанное количество участников похода меньше количества добавленных в список!!!");
-
-				if( field.length )
-				{
-					// Если переданы номера туристов - то проверяем, что они есть в базе
-					auto nonExistingNumsResult = getCommonDB().queryParams(
-						`select n from (
-							select distinct unnest($1::integer[])
-						) as nums(n)
-						where nums.n not in(select num from tourist)`,
-						field);
-					enforce(nonExistingNumsResult.fieldCount == 1, "Ошибка при запросе существущих в БД туристах!");
-
-					size_t[] nonExistentNums;
-					nonExistentNums.length = nonExistingNumsResult.recordCount;
-					foreach( i; 0..nonExistingNumsResult.recordCount ) {
-						nonExistentNums[i] = nonExistingNumsResult.get(0, i).to!size_t;
-					}
-					enforce(
-						nonExistentNums.empty,
-						"Туристы с номерами: " ~ nonExistentNums.to!string ~ " не найдены в базе данных");
-				}
-			}
-
 			// Добавление данных на запись в БД
 			fieldValues ~= field.toPGString();
 		}
@@ -137,6 +109,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	// Собственно запрос на запись данных в БД
 	res.pohodNum = getCommonDB().insertOrUpdateTableByNum(`pohod`,
 		fieldNames, fieldValues, record.num, safeFieldNames, safeFieldValues);
+
 	if( !res.pohodNum.isSet ) {
 		return res;
 	}
@@ -158,10 +131,86 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	};
 	sendToHistory(ctx, (record.num.isSet? `Редактирование похода`: `Добавление похода`), historyData);
 
+	writePohodParty(record, res.pohodNum.value);
+
 	writePohodFileLinks(record.extraFileLinks, res.pohodNum.value);
 
 	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение данных похода");
 	return res;
+}
+
+void writePohodParty(ref PohodDataToWrite record, size_t pohodNum)
+{
+	import std.conv: text;
+
+	if( record.partyNums.isUndef )
+		return;
+
+	enforce(
+		!record.partySize.isSet || !record.partyNums.isSet || record.partyNums.length <= record.partySize,
+		"Указанное количество участников похода меньше количества добавленных в список!!!");
+
+	if( record.partyNums.isSet && record.partyNums.length )
+	{
+		// Если переданы номера туристов - то проверяем, что они есть в базе
+		auto nonExisting = getCommonDB().queryParams(
+			`select array_agg(tr.num)
+			from (
+				select unnest($1::integer[])
+			) as nums(num)
+			left join tourist tr
+				on tr.num = nums.num
+			where tr.num is null`,
+			record.partyNums
+		).getScalar!(size_t[]);
+
+		enforce(nonExisting.empty, "Туристы с номерами: " ~ nonExisting.text ~ " не найдены в базе данных");
+	}
+
+	getCommonDB().queryParams(
+`with inp(num) as(
+	select unnest($1::integer[])
+),
+-- Участники для добавления в базу
+new_parts as(
+	select $2::integer, inp.num
+	from inp
+	left join pohod_party php
+		on
+			php.tourist_num = inp.num
+			and
+			php.pohod_num = $2::integer
+	where
+		php.num is null -- Новые записи, которых нет в базе, но есть во вводе
+),
+-- Участники для удаления из базы
+del_parts as(
+	select php.num
+	from pohod_party php
+	left join inp
+		on
+			inp.num = php.tourist_num
+			and
+			php.pohod_num = $2::integer
+	where
+		inp.num is null -- Записи для удаления, которых нет во вводе, но есть в базе
+),
+deleted as(
+	-- Удаляем...
+	delete from pohod_party as del_php
+	where del_php.num in(select dp.num from del_parts dp)
+	returning del_php.num, false "new"
+),
+inserted as(
+	-- Добавляем
+	insert into pohod_party as ins_php(pohod_num, tourist_num)
+	select * from new_parts
+	returning ins_php.num, true "new"
+)
+select * from deleted
+union all
+select * from inserted
+`, record.partyNums, pohodNum);
 }
 
 

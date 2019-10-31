@@ -64,30 +64,32 @@ getExperience(
 
 	// Получаем количество походов туриста
 	size_t pohodCount = getCommonDB().queryParams(
-		`select count(1) from pohod where $1 = any(unit_neim)`, num
+		`select count(1) from pohod_party php where php.tourist_num = $1::integer`, num
 	).getScalar!size_t();
 
 	nav.normalize(pohodCount);
 
 	auto pohodList = getCommonDB().queryParams(
 `select
-	num,
-	kod_mkk "mkkCode",
-	nomer_knigi "bookNum",
-	begin_date "beginDate",
-	finish_date "finishDate",
-	vid as "tourismKind",
-	ks as "complexity",
-	elem as "complexityElems",
-	chef_grupp "chiefNum",
-	region_group "partyRegion",
-	organization,
-	region_pohod "pohodRegion",
-	marchrut "route",
-	prepar "progress",
-	stat "claimState"
-from pohod
-where $1 = any(unit_neim)
+	ph.num,
+	ph.kod_mkk "mkkCode",
+	ph.nomer_knigi "bookNum",
+	ph.begin_date "beginDate",
+	ph.finish_date "finishDate",
+	ph.vid as "tourismKind",
+	ph.ks as "complexity",
+	ph.elem as "complexityElems",
+	ph.chef_grupp "chiefNum",
+	ph.region_group "partyRegion",
+	ph.organization,
+	ph.region_pohod "pohodRegion",
+	ph.marchrut "route",
+	ph.prepar "progress",
+	ph.stat "claimState"
+from pohod_party php
+join pohod ph
+	on ph.num = php.pohod_num
+where php.tourist_num = $1::integer
 order by begin_date desc
 offset $2 limit $3`,
 	num, nav.offset, nav.pageSize

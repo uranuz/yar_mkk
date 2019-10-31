@@ -71,7 +71,6 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 		"unit",
 		"chef_coment",
 		"MKK_coment",
-		"unit_neim",
 		"vid",
 		"ks",
 		"elem",
