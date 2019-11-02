@@ -44,12 +44,15 @@ return FirClass(
 			return params;
 		},
 		_fetchDateFilters: function(params) {
-			var dtFields = [
-				'beginRangeHead',
-				'beginRangeTail',
-				'endRangeHead',
-				'endRangeTail'
-			];
+			params.dates = {};
+			var
+				dates = params.dates,
+				dtFields = [
+					'beginRangeHead',
+					'beginRangeTail',
+					'endRangeHead',
+					'endRangeTail'
+				];
 			for( var i = 0; i < dtFields.length; ++i ) {
 				var
 					dtField = dtFields[i],
@@ -57,9 +60,7 @@ return FirClass(
 				if( dtControl == null ) {
 					continue;
 				}
-				params[dtField + '__year'] = dtControl.getYear();
-				params[dtField + '__month'] = dtControl.getMonth();
-				params[dtField + '__day'] = dtControl.getDay();
+				dates[dtField] = dtControl.getOptDate();
 			}
 			return params;
 		},

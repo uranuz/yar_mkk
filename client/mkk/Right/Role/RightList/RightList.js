@@ -38,14 +38,19 @@ return FirClass(
 				recordNum = parseInt(el.data('recordNum'), 10) || null;
 			switch( action ) {
 				case 'removeRight': {
-					this._rightDeleteDlg.open({
-						viewParams: {
-							deleteWhat: 'право доступа'
+					this._rightDeleteDlg.open()
+						.then(function(control) {
+							control.once('onDeleteConfirm', this._onDelete_confirmed.bind(this, recordNum));
+						}.bind(this), function(err) {
+							console.log(err);
+						});
+					break;
+				}
+				case 'editRight': {
+					this._rightEditDlg.open({
+						queryParams: {
+							num: recordNum
 						}
-					}).then(function(control) {
-						control.once('onDeleteConfirm', this._onDelete_confirmed.bind(this, recordNum));
-					}.bind(this), function(err) {
-						console.log(err);
 					});
 					break;
 				}

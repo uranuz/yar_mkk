@@ -29,7 +29,8 @@ def RightEdit {=
 		right: null
 		object: null
 		role: null
-		rule: null;
+		rule: null
+		bindParam: null;
 	def.body {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['right']}"/>
@@ -40,7 +41,7 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Объект доступа</label>
 				<div class="col-md-8">
-					{=if not right.num and object.num {*
+					{=if bindParam == 'object' {*
 						{{object.folderName}}.{{object.name}}
 					*} else {=
 						SelectorField
@@ -78,7 +79,7 @@ def RightEdit {=
 			<div class="form-group row">
 				<label class="col-md-3 col-form-label">Роль доступа</label>
 				<div class="col-md-8">
-					{=if not right.num and role.num {*
+					{=if bindParam == 'role' {*
 						{{role.name}}
 					*} else {=
 						SelectorField

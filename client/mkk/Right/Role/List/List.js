@@ -53,14 +53,15 @@ return FirClass(
 				recordNum = parseInt(el.data('recordNum'), 10) || null;
 			switch( action ) {
 				case 'removeRole': {
-					this.rightRoleDeleteDlg.once(
-						'dialogControlLoad',
-						this._onDeleteConfirmDlg_load.bind(this, recordNum));
-					this.rightRoleDeleteDlg.open({
-						viewParams: {
-							deleteWhat: 'роли доступа'
-						}
-					});
+					this.rightRoleDeleteDlg.open()
+						.then(function(control) {
+							control.once(
+								'onDeleteConfirm',
+								this._onDelete_confirmed.bind(this, recordNum));
+						}.bind(this),
+						function(err) {
+							console.log(err);
+						});
 					break;
 				}
 				case 'editRole': {
@@ -73,13 +74,6 @@ return FirClass(
 					this._notify('onRoleSelect', this._roleList.getRecord(recordNum));
 				}
 			}
-		},
-
-		/** Загрузка диалога подтверждения удаления записи */
-		_onDeleteConfirmDlg_load: function(recordNum, ev, confirmControl) {
-			confirmControl.once(
-				'onDeleteConfirm',
-				this._onDelete_confirmed.bind(this, recordNum));
 		},
 
 		/** Удаление записи подтверждено пользователем */

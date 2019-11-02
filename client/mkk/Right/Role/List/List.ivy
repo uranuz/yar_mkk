@@ -70,7 +70,13 @@ def RightRoleList {=
 				instanceName: 'rightRoleDeleteDlg'
 				config: {
 					ivyModule: 'mkk.Helpers.DeleteConfirm',
-					ivyMethod: 'DeleteConfirm'
+					ivyMethod: 'DeleteConfirm',
+					viewParams: {
+						deleteWhat: 'роли доступа'
+					},
+					dialogOpts: {
+						title: 'Удаление роли доступа'
+					}
 				}
 			}
 		</div>
