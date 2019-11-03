@@ -63,23 +63,157 @@ module.exports = function (grunt) {
 			skipModuleInsertion: true // Don't want empty modules to be put
 		}
 	},
+	cleanPathsBase = {
+		bootstrap: '<%= deployPath %>pub/bootstrap/**/*',
+		jquery: '<%= deployPath %>pub/jquery-2.2.4.min.js',
+		jqueryCookie: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
+		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*',
+		popper: '<%= deployPath %>pub/popper-1.12.5.min.js',
+	}
 	// Extra object for making clean configuration less verbose
 	cleanPaths = {
 		templates: '<%= deployPath %>res/templates/mkk/**/*.ivy',
+		templates_films: '<%= deployPath %>res/templates/films/**/*.ivy',
 		scripts: '<%= deployPath %>pub/mkk/**/*.js',
 		styles: '<%= deployPath %>pub/mkk/**/*.css',
 		imgFolder: '<%= deployPath %>pub/mkk/img',
 		stati_dokument: '<%= deployPath %>pub/stati_dokument',
 		reports: '<%= deployPath %>pub/reports',
 		robots: '<%= deployPath %>pub/robots.txt',
-		bootstrap: '<%= deployPath %>pub/bootstrap/**/*',
-		jquery: '<%= deployPath %>pub/jquery-2.2.4.min.js',
-		jqueryCookie: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
-		jqueryui: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/**/*',
-		popper: '<%= deployPath %>pub/popper-1.12.5.min.js',
 		reports: '<%= deployPath %>pub/flot'
 	},
-	cleanConfig = {};
+	cleanConfig = {},
+	symlink_base = {
+		bootstrap: {
+			expand: true,
+			cwd: 'node_modules/bootstrap/dist/',
+			src: './**/*.js',
+			dest: '<%= deployPath %>pub/bootstrap/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		jquery: {
+			src: 'client/jquery-2.2.4.min.js',
+			dest: '<%= deployPath %>pub/jquery-2.2.4.min.js',
+			filter: 'isFile'
+		},
+		jqueryCookie: {
+			src: 'client/jquery.cookie-1.4.1.min.js',
+			dest: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
+			filter: 'isFile'
+		},
+		jqueryui: {
+			expand: true,
+			cwd: 'client/jquery-ui-1.12.1.custom/',
+			src: './**/*.*',
+			dest: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		popper: {
+			src: 'client/popper-1.12.5.min.js',
+			dest: '<%= deployPath %>pub/popper-1.12.5.min.js',
+			filter: 'isFile'
+		}
+	},
+	symlink = {
+		templates: {
+			expand: true,
+			cwd: 'client/mkk',
+			src: './**/*.ivy',
+			dest: '<%= deployPath %>res/templates/mkk/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		templates_films: {
+			expand: true,
+			cwd: 'client/films',
+			src: './**/*.ivy',
+			dest: '<%= deployPath %>res/templates/films/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		scripts: {
+			expand: true,
+			cwd: 'client/mkk',
+			src: './**/*.js',
+			dest: '<%= deployPath %>pub/mkk/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		scripts_films: {
+			expand: true,
+			cwd: 'client/films',
+			src: './**/*.js',
+			dest: '<%= deployPath %>pub/films/',
+			filter: 'isFile',
+			overwrite: true
+		},
+		imgFolder: {
+			src: 'client/mkk/img',
+			dest: '<%= deployPath %>pub/mkk/img',
+			filter: 'isDirectory'
+		},
+		stati_dokument: {
+			src: 'client/stati_dokument/',
+			dest: '<%= deployPath %>pub/stati_dokument',
+			filter: 'isDirectory'
+		},
+		reports: {
+			src: 'client/reports/',
+			dest: '<%= deployPath %>pub/reports',
+			filter: 'isDirectory'
+		},
+		robots: {
+			src: 'client/robots.txt',
+			dest: '<%= deployPath %>pub/robots.txt',
+			filter: 'isFile'
+		},
+		flot: {
+			src: 'client/flot/',
+			dest: '<%= deployPath %>pub/flot',
+			filter: 'isDirectory'
+		}
+	},
+	sass = {
+		options: {
+			includePaths: [
+				'client/bootstrap/scss',
+				'node_modules/bootstrap/scss'
+			],
+			precision: 6,
+			sourceComments: false,
+			sourceMap: true,
+			outputStyle: 'expanded',
+			// Обход бага: https://github.com/sourcey/spectacle/issues/156
+			implementation: sass
+		},
+		mkk: {
+			files: [
+				{
+					expand: true,
+					cwd: 'client/mkk',
+					src: ['./**/*.scss'],
+					dest: '<%= deployPath %>pub/mkk/',
+					ext: '.css',
+					overwrite: true
+				}
+			]
+		},
+		films: {
+			files: [
+				{
+					expand: true,
+					cwd: 'client/films',
+					src: ['./**/*.scss'],
+					dest: '<%= deployPath %>pub/films/',
+					ext: '.css',
+					overwrite: true
+				}
+			]
+		}
+	},
+	sites = ['mkk', 'films'];
 
 	var path = require('path');
 
@@ -102,6 +236,32 @@ module.exports = function (grunt) {
 		}
 	}
 
+	for( var i = 0; i < sites.length; ++i ) {
+		var site = sites[i];
+		for( var name in symlink_base ) {
+			if( !symlink_base.hasOwnProperty(name) ) {
+				continue;
+			}
+			symlink[name + '_' + site] = symlink_base[name];
+		}
+
+		for( var name in cleanPathsBase ) {
+			if( !cleanPathsBase.hasOwnProperty(name) ) {
+				continue;
+			}
+			cleanPaths[name + '_' + site] = cleanPathsBase[name];
+		}
+		
+		sass.bootstrap = {
+			files: [
+				{
+					src: 'client/bootstrap/scss/app.scss',
+					dest: '<%= deployPath %>pub/bootstrap/css/app.css'
+				}
+			]
+		}
+	}
+
 	grunt.initConfig({
 		deployPath: (function() {
 			// Используем путь для разворота, указанный у сервиса представления,
@@ -113,114 +273,8 @@ module.exports = function (grunt) {
 			return expandTilde(config.services.yarMKKView.fileSystemPaths.siteRoot);
 		})(),
 
-		symlink: {
-			templates: {
-				expand: true,
-				cwd: 'client/mkk',
-				src: './**/*.ivy',
-				dest: '<%= deployPath %>res/templates/mkk/',
-				filter: 'isFile',
-				overwrite: true
-			},
-			scripts: {
-				expand: true,
-				cwd: 'client/mkk',
-				src: './**/*.js',
-				dest: '<%= deployPath %>pub/mkk/',
-				filter: 'isFile',
-				overwrite: true
-			},
-			imgFolder: {
-				src: 'client/mkk/img',
-				dest: '<%= deployPath %>pub/mkk/img',
-				filter: 'isDirectory'
-			},
-			stati_dokument: {
-				src: 'client/stati_dokument/',
-				dest: '<%= deployPath %>pub/stati_dokument',
-				filter: 'isDirectory'
-			},
-			reports: {
-				src: 'client/reports/',
-				dest: '<%= deployPath %>pub/reports',
-				filter: 'isDirectory'
-			},
-			robots: {
-				src: 'client/robots.txt',
-				dest: '<%= deployPath %>pub/robots.txt',
-				filter: 'isFile'
-			},
-			bootstrap: {
-				expand: true,
-				cwd: 'node_modules/bootstrap/dist/',
-				src: './**/*.js',
-				dest: '<%= deployPath %>pub/bootstrap/',
-				filter: 'isFile',
-				overwrite: true
-			},
-			jquery: {
-				src: 'client/jquery-2.2.4.min.js',
-				dest: '<%= deployPath %>pub/jquery-2.2.4.min.js',
-				filter: 'isFile'
-			},
-			jqueryCookie: {
-				src: 'client/jquery.cookie-1.4.1.min.js',
-				dest: '<%= deployPath %>pub/jquery.cookie-1.4.1.min.js',
-				filter: 'isFile'
-			},
-			jqueryui: {
-				expand: true,
-				cwd: 'client/jquery-ui-1.12.1.custom/',
-				src: './**/*.*',
-				dest: '<%= deployPath %>pub/jquery-ui-1.12.1.custom/',
-				filter: 'isFile',
-				overwrite: true
-			},
-			popper: {
-				src: 'client/popper-1.12.5.min.js',
-				dest: '<%= deployPath %>pub/popper-1.12.5.min.js',
-				filter: 'isFile'
-			},
-			reports: {
-				src: 'client/flot/',
-				dest: '<%= deployPath %>pub/flot',
-				filter: 'isDirectory'
-			}
-		},
-		sass: {
-			options: {
-				includePaths: [
-					'client/bootstrap/scss',
-					'node_modules/bootstrap/scss'
-				],
-				precision: 6,
-				sourceComments: false,
-				sourceMap: true,
-				outputStyle: 'expanded',
-				// Обход бага: https://github.com/sourcey/spectacle/issues/156
-				implementation: sass
-			},
-			bootstrap: {
-				files: [
-					{
-						src: 'client/bootstrap/scss/app.scss',
-						dest: '<%= deployPath %>pub/bootstrap/css/app.css'
-					}
-				]
-			},
-			mkk: {
-				files: [
-					{
-						expand: true,
-						cwd: 'client/mkk',
-						src: ['./**/*.scss'],
-						dest: '<%= deployPath %>pub/mkk/',
-						ext: '.css',
-						overwrite: true
-					}
-				]
-			}
-		},
+		symlink: symlink,
+		sass: sass,
 		clean: cleanConfig,
 		requirejs: rJSBuildConfig,
 		watch: {

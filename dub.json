@@ -91,6 +91,57 @@
 			"versions": ["devel"]
 		},
 		{
+			"name": "films_view",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"dependencies": {
+				"webtank": ">=0.0.0"
+			},
+			"sourcePaths": [
+				"src/mkk/common",
+				"src/films/view"
+			],
+			"sourceFiles": [],
+			"buildRequirements": [
+				"allowWarnings"
+			],
+			"dflags": [
+				"-lowmem"
+			],
+			"subConfigurations": {
+				"webtank": "with_ivy"
+			},
+			"versions": ["devel"]
+		},
+		{
+			"name": "films_main",
+			"targetType": "executable",
+			"targetPath": "bin",
+			"libs-posix": [
+				"pq"
+			],
+			"sourcePaths": [
+				"src/mkk/common",
+				"src/films/main"
+			],
+			"dependencies": {
+				"webtank": ">=0.0.0"
+			},
+			"lflags": [
+				"--demangle=dlang"
+			],
+			"dflags": [
+				"-lowmem"
+			],
+			"buildRequirements": [
+				"allowWarnings"
+			],
+			"subConfigurations": {
+				"webtank": "with_ivy_and_db"
+			},
+			"versions": ["devel"]
+		},
+		{
 			"name": "add_user",
 			"targetType": "executable",
 			"targetPath": "bin",

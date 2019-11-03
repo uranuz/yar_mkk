@@ -1,0 +1,96 @@
+expr {*
+{=from fir.controls.utils import cls, hasRight;}
+<!doctype html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
+	<link rel="stylesheet" href="{{vpaths.bootstrapCSS}}app.css">
+	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.css">
+	<link rel="stylesheet" href="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="{{vpaths.sitePublic}}mkk/GeneralTemplate/GeneralTemplate.css">
+	<link rel="shortcut icon" href="{{vpaths.siteImg}}znak.png" type="image/png">
+
+	<script type="text/javascript" src="{{vpaths.sitePublic}}jquery-2.2.4.min.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}jquery.cookie-1.4.1.min.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}popper-1.12.5.min.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.bootstrapJS}}bootstrap.min.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/require-css.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
+	<script type="text/javascript">window.userRightData = {{userRightData}};</script>
+</head>
+
+<body>
+	<div id="page" data-fir-module="mkk/GeneralTemplate/GeneralTemplate">
+		<div id="page_bg"></div>
+		<div id="top">
+			<div id="header">
+				<div id="pic_frame_left"></div>
+				<div id="pic_frame_right"></div>
+				<div id="header_pics">
+					<img src="{{vpaths.siteImg}}pic/1.jpg">
+					<img src="{{vpaths.siteImg}}pic/2.png">
+					<img src="{{vpaths.siteImg}}pic/3.jpg">
+					<img src="{{vpaths.siteImg}}pic/4.jpg">
+					<img src="{{vpaths.siteImg}}pic/5.jpg">
+					<img src="{{vpaths.siteImg}}pic/6.jpg">
+					<img src="{{vpaths.siteImg}}pic/7.jpg">
+					<img src="{{vpaths.siteImg}}pic/8.jpg">
+					<img src="{{vpaths.siteImg}}pic/9.jpg">
+					<img src="{{vpaths.siteImg}}pic/10.jpg">
+					<img src="{{vpaths.siteImg}}pic/11.jpg">
+				</div>
+				<div id="pic_frame_bottom"></div>
+				<div id="site_title">
+					<h1>Маршрутно-квалификационная комиссия Ярославской области</h1>
+				</div>
+				{=MainMenu authRedirectURI: authRedirectURI}
+			</div>
+			<!-- #header -->
+		</div>
+		<!-- #top -->
+
+		<div id="middle">
+			<div id="sidebar">
+				<!--СЮДА ДОБАВЛЯТЬ ССЫЛКИ НА ВНЕШНИЕ САЙТЫ-->
+				{=UsefulLinksMenu}
+				{=PohodFilterMenu
+					pohodFilterFields: pohodFilterFields
+					pohodFilterSections: pohodFilterSections
+					vpaths: vpaths
+				}
+				{=if {=hasRight obj: 'right.object.list' kind: 'read'}
+					{=AdminSideMenu}
+				}
+			</div>
+			<!-- #sidebar -->
+
+			<div id="content_column">
+				<div id="content">
+					<!-- основное содержание страницы -->
+					{{content}}
+				</div>
+				<!-- #content -->
+				<div id="footer_pusher"></div>
+				<!-- Толкатель footer'а -->
+			</div>
+			<!-- #content_column -->
+		</div>
+		<!-- #middle -->
+	</div>
+	<!-- #page -->
+	<div id="footer_framing">
+		<div id="footer">
+			Все ходы записаны!!! г. Ярославль, 2013-2016 г.
+		</div>
+	</div>
+	<!-- #footer_framing -->
+</body>
+
+</html>
+*};
