@@ -1,8 +1,0 @@
-expr {
-def IndexPage {=
-    def.kv;
-    def.body {*
-    жопа
-    *}
-}
-}

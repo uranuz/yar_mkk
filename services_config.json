@@ -196,13 +196,7 @@
 					"pageURI": "/dyn/right/role/rights",
 					"ivyModule": "mkk.Right.Role.RightList",
 					"ivyMethod": "RoleRightList"
-				}, {
-					"pageURI": "/dyn/films/index",					
-					"ivyModule": "films.IndexPage",
-					"ivyMethod": "IndexPage"
 				}
-
-
 			]
 		},
 		"yarMKKHistory": {
@@ -228,61 +222,6 @@
 					"user": "postgres",
 					"password": "postgres"
 				}
-			}
-		},
-		"filmsView": {
-			"URI": "http://localhost",
-			"virtualPaths": {
-				"siteRoot": "/",
-				"siteJSON_RPC": "jsonrpc/",
-				"siteDynamic": "dyn/",
-				"siteWebFormAPI": "api/",
-				"sitePublic": "pub/",
-				"siteImg": "pub/mkk/img/",
-
-				"siteAuthPage": "dyn/auth",
-
-				"bootstrapPublic": "pub/bootstrap/",
-				"bootstrapCSS": "pub/bootstrap/css/",
-				"bootstrapJS": "pub/bootstrap/js/",
-				"bootstrapImg": "pub/bootstrap/img/"
-			},
-			"backendService": "yarMKKMain",
-			"fileSystemPaths": {
-				"siteRoot": "~/sites/films/",
-				"siteLogs": "logs/",
-				"sitePublic": "pub/",
-
-				"siteIvyTemplates": "res/templates/"
-			},
-			"pageRouting": [
-				{
-					"pageURI": "/dyn/index",
-					"ivyModule": "films.IndexPage",
-					"ivyMethod": "IndexPage"
-				}
-			]
-		},
-		"filmsMain": {
-			"URI": "http://localhost",
-			"virtualPaths": {
-				"default": "jsonrpc/",
-				"siteRoot": "/",
-				"siteJSON_RPC": "jsonrpc/",
-				"siteWebFormAPI": "api/"
-			},
-			"databases": {
-				"commonDB": {
-					"host": "127.0.0.1",
-					"port": 5432,
-					"dbname": "turist_film",
-					"user": "postgres",
-					"password": "postgres"
-				}
-			},
-			"fileSystemPaths": {
-				"siteRoot": "~/sites/films/",
-				"siteLogs": "logs/"
 			}
 		}
 	}
