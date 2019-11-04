@@ -30,9 +30,6 @@
 				"lib/libtarsnap_sse2.a",
 				"--demangle=dlang"
 			],
-			"dflags": [
-				"-lowmem"
-			],
 			"buildRequirements": [
 				"allowWarnings"
 			],
@@ -58,9 +55,6 @@
 			"buildRequirements": [
 				"allowWarnings"
 			],
-			"dflags": [
-				"-lowmem"
-			],
 			"subConfigurations": {
 				"webtank": "with_ivy"
 			},
@@ -72,9 +66,6 @@
 			"targetPath": "bin",
 			"libs-posix": [
 				"pq"
-			],
-			"dflags": [
-				"-lowmem"
 			],
 			"sourcePaths": [
 				"src/mkk/common",
@@ -280,9 +271,6 @@
 			},
 			"libs-posix": [
 				"pq"
-			],
-			"dflags": [
-				"-lowmem"
 			],
 			"sourceFiles": [
 				"src/mkk/tools/auth_db",
