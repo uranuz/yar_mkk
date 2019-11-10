@@ -1,7 +1,7 @@
 define('mkk/User/Reg/Card/Card', [
 	'fir/controls/FirControl',
 	'mkk/Tourist/Edit/Edit',
-	'css!mkk/User/Reg/Card/Card'
+	'mkk/User/Reg/Card/Card.scss'
 ], function (FirControl) {
 return FirClass(
 	function UserRegCard(opts) {

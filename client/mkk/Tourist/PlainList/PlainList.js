@@ -1,6 +1,6 @@
 define('mkk/Tourist/PlainList/PlainList', [
 	'fir/controls/FirControl',
-	'css!mkk/Tourist/PlainList/PlainList'
+	'mkk/Tourist/PlainList/PlainList.scss'
 ], function (FirControl) {
 return FirClass(
 	function TouristPlainList(opts) {

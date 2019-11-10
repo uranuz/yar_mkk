@@ -9,7 +9,7 @@ define('mkk/Pohod/Edit/Edit', [
 	'mkk/Pohod/Edit/Chief/AddToParty/AddToParty',
 	'mkk/Tourist/NavList/NavList',
 	'mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks',
-	'css!mkk/Pohod/Edit/Edit'
+	'mkk/Pohod/Edit/Edit.scss'
 ], function (
 	FirControl,
 	FirHelpers,

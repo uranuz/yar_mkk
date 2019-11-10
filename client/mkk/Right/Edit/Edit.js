@@ -1,6 +1,6 @@
 define('mkk/Right/Edit/Edit', [
 	'fir/controls/FirControl',
-	'css!mkk/Right/Edit/Edit'
+	'mkk/Right/Edit/Edit.scss'
 ], function (FirControl, json_rpc) {
 return FirClass(
 	function RightEdit(opts) {

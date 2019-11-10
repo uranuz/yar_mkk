@@ -2,7 +2,7 @@ define('mkk/Pohod/Read/Read', [
 	'fir/controls/FirControl',
 	'mkk/Tourist/NavList/NavList',
 	'mkk/Helpers/EntityProperty/EntityProperty',
-	'css!mkk/Pohod/Read/Read'
+	'mkk/Pohod/Read/Read.scss'
 ], function(FirControl) {
 'use strict';
 return FirClass(

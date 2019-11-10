@@ -1,6 +1,6 @@
 define('mkk/Helpers/EntityProperty/EntityProperty', [
 	'fir/controls/FirControl',
-	'css!mkk/Helpers/EntityProperty/EntityProperty'
+	'mkk/Helpers/EntityProperty/EntityProperty.scss'
 ], function (FirControl) {
 	return FirControl;
 });

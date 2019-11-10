@@ -1,6 +1,6 @@
 define('mkk/AboutSite/AboutSite', [
 	'fir/controls/FirControl',
-	'css!mkk/AboutSite/AboutSite'
+	'mkk/AboutSite/AboutSite.scss'
 ], function (FirControl) {
 return FirClass(
 	function AboutSite(opts) {

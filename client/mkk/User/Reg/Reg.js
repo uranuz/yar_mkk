@@ -1,7 +1,7 @@
 define('mkk/User/Reg/Reg', [
 	'fir/controls/FirControl',
-	'mkk/Tourist/SearchArea/SearchArea',
-	'css!mkk/User/Reg/Reg'
+	'mkk/Tourist/SearchArea/SearchArea.scss',
+	'mkk/User/Reg/Reg'
 ], function(FirControl) {
 return FirClass(
 	function UserRegFindTourist(opts) {

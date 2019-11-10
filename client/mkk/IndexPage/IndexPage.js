@@ -1,6 +1,6 @@
 define('mkk/IndexPage/IndexPage', [
 	'fir/controls/FirControl',
-	'css!mkk/IndexPage/IndexPage'
+	'mkk/IndexPage/IndexPage.scss'
 ], function(FirControl) {
 return FirClass(
 	function IndexPage(opts) {

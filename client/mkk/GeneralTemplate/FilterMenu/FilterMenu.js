@@ -1,6 +1,6 @@
 define('mkk/GeneralTemplate/FilterMenu/FilterMenu', [
 	'fir/controls/FirControl',
-	'css!mkk/GeneralTemplate/FilterMenu/FilterMenu'
+	'mkk/GeneralTemplate/FilterMenu/FilterMenu.scss'
 ], function(FirControl) {
 return FirClass(
 	function PohodFilterMenu(opts) {

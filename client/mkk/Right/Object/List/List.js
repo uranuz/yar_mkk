@@ -1,6 +1,6 @@
 define('mkk/Right/Object/List/List', [
 	'fir/controls/FirControl',
-	'css!mkk/Right/Object/List/List'
+	'mkk/Right/Object/List/List.scss'
 ], function (FirControl) {
 return FirClass(
 	function RightObjectList(opts) {

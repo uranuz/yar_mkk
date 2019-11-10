@@ -1,7 +1,7 @@
 define('mkk/Pohod/Stat/Stat', [
 	// Подключение зависимостей: библиотек, стилей и т.п.
 	'fir/controls/FirControl',
-	'css!mkk/Pohod/Stat/Stat'
+	'mkk/Pohod/Stat/Stat.scss'
 ],
 function (FirControl, Flot, FlotTime) {
 return FirClass(

@@ -1,7 +1,7 @@
 define('mkk/RecordHistory/RecordHistory', [
 	'fir/controls/FirControl',
 	'mkk/Helpers/EntityProperty/EntityProperty',
-	'css!mkk/RecordHistory/RecordHistory'
+	'mkk/RecordHistory/RecordHistory.scss'
 ], function (FirControl) {
 return FirClass(
 	function RecordHistory(opts) {

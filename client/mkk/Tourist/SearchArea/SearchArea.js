@@ -2,7 +2,7 @@ define('mkk/Tourist/SearchArea/SearchArea', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
 	'mkk/Tourist/PlainList/PlainList',
-	'css!mkk/Tourist/SearchArea/SearchArea'
+	'mkk/Tourist/SearchArea/SearchArea.scss'
 ], function(FirControl, helpers) {
 var
 	searchOnEnterFields = [
