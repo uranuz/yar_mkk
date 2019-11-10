@@ -1,7 +1,7 @@
 define('mkk/Document/List/List', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
-	'css!mkk/Document/List/List'
+	'mkk/Document/List/List.scss'
 ], function (FirControl, FirHelpers) {
 return FirClass(
 	function DocumentList(opts) {

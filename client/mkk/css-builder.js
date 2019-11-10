@@ -208,7 +208,7 @@ define(['require', './normalize'], function(req, normalize) {
 
     if (config.separateCSS) {
       var outPath = data.path.replace(/(\.js)?$/, '.css');
-      console.log('Writing CSS! file: ' + outPath + '\n');
+      console.log('Writing  file: ' + outPath + '\n');
 
       var css = layerBuffer.join('');
 

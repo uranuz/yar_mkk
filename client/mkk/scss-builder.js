@@ -130,7 +130,7 @@ define(['require', './normalize'], function(req, normalize) {
 		}
 
 		if (config.name !== moduleName) {
-			write.asModule('css!' + moduleName, 'define(function(){})');
+			write.asModule('' + moduleName, 'define(function(){})');
 		}
 	};
 	
@@ -140,7 +140,7 @@ define(['require', './normalize'], function(req, normalize) {
 		var css = layerBuffer.join('');
 	
 		if (config.separateCSS) {
-			console.log('Writing CSS! file: ' + data.name + '\n');
+			console.log('Writing  file: ' + data.name + '\n');
 		
 			var outPath = config.dir ? path.resolve(config.dir, config.baseUrl, data.name + '.css') : config.out.replace(/(\.js)?$/, '.css');
 			outPath = normalizeWinPath(outPath);

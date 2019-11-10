@@ -2,7 +2,7 @@ define('mkk/Right/Role/List/List', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
 	'fir/network/json_rpc',
-	'css!mkk/Right/Role/List/List'
+	'mkk/Right/Role/List/List.scss'
 ], function (FirControl, FirHelpers, json_rpc) {
 var LIST_AREA = 'listView';
 return FirClass(

@@ -1,6 +1,6 @@
 define('mkk/Tourist/Similar/Similar', [
 	'fir/controls/FirControl',
-	'css!mkk/Tourist/Similar/Similar'
+	'mkk/Tourist/Similar/Similar.scss'
 ], function (FirControl, FirHelpers) {
 return FirClass(
 	function TouristSimilar(opts) {

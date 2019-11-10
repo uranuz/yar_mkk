@@ -2,7 +2,7 @@ define('mkk/Tourist/NavList/NavList', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
 	'mkk/Tourist/PlainList/PlainList',
-	'css!mkk/Tourist/NavList/NavList'
+	'mkk/Tourist/NavList/NavList.scss'
 ], function (FirControl, FirHelpers) {
 return FirClass(
 	function TouristNavList(opts) {

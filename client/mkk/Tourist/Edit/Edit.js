@@ -7,7 +7,7 @@ define('mkk/Tourist/Edit/Edit', [
 	'fir/controls/PlainListBox/PlainListBox',
 	'mkk/Tourist/PlainList/PlainList',
 	'mkk/Helpers/DeleteConfirm/DeleteConfirm',
-	'css!mkk/Tourist/Edit/Edit'
+	'mkk/Tourist/Edit/Edit.scss'
 ], function(
 	FirControl,
 	MKKHelpers,

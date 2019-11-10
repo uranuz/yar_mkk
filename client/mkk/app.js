@@ -19,7 +19,7 @@ define('mkk/app', [
 	"fir/security/right/Controller",
 	"fir/security/right/UserIdentity",
 	"fir/security/right/UserRights",
-	"css!mkk/app"
+	"mkk/app.scss"
 ], function(
 	IvyEngine,
 	IvyEngineConfig,

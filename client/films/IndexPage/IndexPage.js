@@ -1,9 +1,9 @@
-define('mkk/User/Reg/EmailConfirm/EmailConfirm', [
+define('films/IndexPage/IndexPage', [
 	'fir/controls/FirControl',
-	'mkk/User/Reg/EmailConfirm/EmailConfirm.scss'
+	'films/IndexPage/IndexPage.scss'
 ], function(FirControl) {
 return FirClass(
-	function EmailConfirm(opts) {
+	function IndexPage(opts) {
 		this.superproto.constructor.call(this, opts);
 	}, FirControl
 );

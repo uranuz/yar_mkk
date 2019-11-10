@@ -1,7 +1,7 @@
 define('mkk/Pohod/List/Navigation/Navigation', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
-	'css!mkk/Pohod/List/Navigation/Navigation'
+	'mkk/Pohod/List/Navigation/Navigation.scss'
 ], function(FirControl, helpers) {
 return FirClass(
 	function PohodListNavigation(opts) {

@@ -1,5 +1,5 @@
 /*
- * Require-CSS RequireJS css! loader plugin
+ * Require-CSS RequireJS  loader plugin
  * 0.1.10
  * Guy Bedford 2014
  * MIT
@@ -8,7 +8,7 @@
 /*
  *
  * Usage:
- *  require(['css!./mycssFile']);
+ *  require(['./mycssFile']);
  *
  * Tested and working in (up to latest versions as of March 2013):
  * Android

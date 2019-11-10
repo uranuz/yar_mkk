@@ -1,7 +1,7 @@
 define('mkk/Right/Role/RightList/RightList', [
 	'fir/controls/FirControl',
 	'fir/network/json_rpc',
-	'css!mkk/Right/Role/RightList/RightList'
+	'mkk/Right/Role/RightList/RightList.scss'
 ], function (FirControl, json_rpc) {
 var LIST_AREA = 'listView';
 return FirClass(

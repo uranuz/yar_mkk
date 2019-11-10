@@ -2,7 +2,7 @@ define('mkk/Tourist/Experience/Experience', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
 	'mkk/Helpers/EntityProperty/EntityProperty',
-	'css!mkk/Tourist/Experience/Experience'
+	'mkk/Tourist/Experience/Experience.scss'
 ], function (FirControl, FirHelpers) {
 return FirClass(
 	function TouristExperience(opts) {

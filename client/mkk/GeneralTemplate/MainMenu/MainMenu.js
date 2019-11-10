@@ -1,7 +1,7 @@
 define('mkk/GeneralTemplate/MainMenu/MainMenu', [
 	'fir/controls/FirControl',
 	'mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn',
-	'css!mkk/GeneralTemplate/MainMenu/MainMenu'
+	'mkk/GeneralTemplate/MainMenu/MainMenu.scss'
 ], function(FirControl) {
 return FirClass(
 	function MainMenu(opts) {

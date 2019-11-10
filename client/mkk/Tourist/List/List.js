@@ -1,7 +1,7 @@
 define('mkk/Tourist/List/List', [
 	'fir/controls/FirControl',
 	'fir/common/helpers',
-	'css!mkk/Tourist/List/List'
+	'mkk/Tourist/List/List.scss'
 ], function (FirControl, FirHelpers) {
 var
 	searchOnEnterFields = [

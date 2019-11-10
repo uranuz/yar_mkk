@@ -2,8 +2,8 @@ define('mkk/GeneralTemplate/GeneralTemplate', [
 	'fir/controls/FirControl',
 	'mkk/GeneralTemplate/MainMenu/MainMenu',
 	'mkk/GeneralTemplate/FilterMenu/FilterMenu',
-	'css!mkk/GeneralTemplate/GeneralTemplate',
-	'css!mkk/page_styles'
+	'mkk/GeneralTemplate/GeneralTemplate.scss',
+	'mkk/page_styles.scss'
 ], function(FirControl) {
 return FirClass(
 	function GeneralTemplate(opts) {

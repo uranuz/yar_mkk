@@ -1,6 +1,6 @@
 define('mkk/Right/Rule/Edit/Edit', [
 	'fir/controls/FirControl',
-	'css!mkk/Right/Rule/Edit/Edit'
+	'mkk/Right/Rule/Edit/Edit.scss'
 ], function (FirControl) {
 return FirClass(
 	function RightRuleEdit(opts) {

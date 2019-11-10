@@ -3,7 +3,7 @@ define('mkk/Pohod/List/List', [
 	'fir/common/helpers',
 	'mkk/Pohod/PartyInfo/PartyInfo',
 	'mkk/Pohod/List/Navigation/Navigation',
-	'css!mkk/Pohod/List/List'
+	'mkk/Pohod/List/List.scss'
 ], function(FirControl, FirHelpers) {
 return FirClass(
 	function PohodList(opts) {

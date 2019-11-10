@@ -2,7 +2,7 @@ define('mkk/User/List/List', [
 	'fir/controls/FirControl',
 	'fir/network/json_rpc',
 	'fir/common/helpers',
-	'css!mkk/User/List/List'
+	'mkk/User/List/List.scss'
 ], function (FirControl, json_rpc, FirHelpers) {
 var ACTION_BTNS = {
 	confirmRegBtn: {
