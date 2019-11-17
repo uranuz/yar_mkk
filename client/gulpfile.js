@@ -8,12 +8,18 @@ var
 	nodeExternals = require('webpack-node-externals'),
 	gutil = require("gulp-util"),
 	MiniCssExtractPlugin = require('mini-css-extract-plugin'),
-	vfs = require('vinyl-fs');
+	vfs = require('vinyl-fs'),
+	shell = require('gulp-shell'),
+	yargs = require('yargs'),
+	argv = yargs.argv,
+	expandTilde = require('expand-tilde'),
+	gulpDebug = require('gulp-debug');
 
 var
 	sites = {
 		mkk: {
 			entry: [
+				"bootstrap/app.scss",
 				"mkk/Tourist/Experience/Experience",
 				"mkk/GeneralTemplate/GeneralTemplate",
 				"mkk/IndexPage/IndexPage",
@@ -34,18 +40,31 @@ var
 				"mkk/User/Reg/Reg",
 				"mkk/User/Reg/Card/Card",
 				"mkk/app"
-			],
-			outPub: '/home/uranuz/sites/mkk/new_pub/',
-			outTemplates: '/home/uranuz/sites/mkk/new_templates/'
+			]
 		},
 		films: {
 			entry: [
 				"films/IndexPage/IndexPage"
-			],
-			outPub: '/home/uranuz/sites/films/new_pub/',
-			outTemplates: '/home/uranuz/sites/films/new_templates/'
+			]
 		}
 	};
+
+(function resolveConfig() {
+	var outSites = argv.outSites;
+	if( !outSites ) {
+		outSites = expandTilde('~/sites/');
+		console.warn('--outSites option is not set so using default path inside user folder: ' + outSites);
+	}
+	for( var site in sites ) {
+		if( !sites.hasOwnProperty(site) ) {
+			continue;
+		}
+		var config = sites[site];
+		config.outSite = path.resolve(outSites, site);
+		config.outPub = path.resolve(config.outSite, 'pub');
+		config.outTemplates = path.resolve(config.outSite, 'res/templates');
+	}
+})();
 
 
 function buildSite(config, callback) {
@@ -57,8 +76,8 @@ function buildSite(config, callback) {
 
 	// run webpack
 	webpack({
-		context: path.resolve(__dirname),
-		mode: 'production',
+		context: __dirname,
+		mode: (devMode? 'development': 'production'),
 		entry: entryMap,
 		externals: [
 			nodeExternals(),
@@ -67,7 +86,7 @@ function buildSite(config, callback) {
 		],
 		resolve: {
 			modules: [
-				path.resolve(__dirname)
+				__dirname
 			],
 			extensions: ['.js']
 		},
@@ -78,9 +97,19 @@ function buildSite(config, callback) {
 					use: [
 						MiniCssExtractPlugin.loader,
 						// Translates CSS into CommonJS
-						'css-loader',
+						{
+							loader: 'css-loader',
+							options: {
+								sourceMap: true
+							}
+						},
 						// Compiles Sass to CSS
-						'sass-loader',
+						{
+							loader: 'sass-loader',
+							options: {
+								sourceMap: true
+							}
+						}
 					]
 				},
 				{
@@ -89,8 +118,7 @@ function buildSite(config, callback) {
 						{
 							loader: 'file-loader',
 							options: {
-								name: '[path][name].[ext]',
-								//outputPath: '/home/uranuz/sites/mkk/new_pub/'
+								name: '[path][name].[ext]'
 							}
 						}
 					]
@@ -106,16 +134,19 @@ function buildSite(config, callback) {
 			})
 		],
 		optimization: {
-			namedModules: true
+			runtimeChunk: {
+				name: "manifest",
+			}
 		},
+		devtool: 'cheap-source-map',
 		output: {
 			path: config.outPub
 		}
 	}, function(err, stats) {
 		if(err) throw new gutil.PluginError("webpack", err);
-		gutil.log("[webpack]", stats.toString({
+		//gutil.log("[webpack]", stats.toString({
 			// output options
-		}));
+		//}));
 		callback();
 	});
 }
@@ -125,30 +156,53 @@ gulp.task("mkk-webpack", function(callback) {
 });
 
 gulp.task("mkk-symlink-templates", function() {
-	return gulp.src([
-		'mkk/**/*.ivy'
-	]).pipe(vfs.symlink(sites.mkk.outTemplates));
+	return gulp.src(['mkk/**/*.ivy'], {base: './'})
+		.pipe(vfs.symlink(sites.mkk.outTemplates));
 });
 
 gulp.task("mkk-symlink-js", function() {
-	return gulp.src([
-		'mkk/**/*.js'
-	]).pipe(vfs.symlink(sites.mkk.outPub));
+	return gulp.src(['mkk/**/*.js'], {base: './'})
+		/*
+		.pipe(gulpDebug({
+			showFiles: true,
+			minimal: false
+		}))
+		*/
+		.pipe(gulp.symlink(sites.mkk.outPub));
 });
 
 gulp.task("mkk-symlink-files", function() {
 	return gulp.src([
-		'flot',
-		'reports',
-		'stati_dokument',
-		'jquery-2.2.4.min.js',
-		'jquery-2.2.4.min.js',
-		'popper-1.12.5.min.js',
-		'robots.txt'
-	]).pipe(vfs.symlink(sites.mkk.outPub));
+			'flot',
+			'reports',
+			'stati_dokument',
+			'ext',
+			'robots.txt'
+		], {base: './'})
+		.pipe(vfs.symlink(sites.mkk.outPub));
 });
 
-gulp.task("mkk", gulp.parallel(["mkk-webpack", "mkk-symlink-templates", 'mkk-symlink-files']));
+gulp.task("mkk-ivy", shell.task(
+	'gulp --outPub=' + sites.mkk.outPub,
+	{
+		cwd: path.resolve('../../ivy/') // Set current working dir
+	}
+));
+
+gulp.task("mkk-fir", shell.task(
+	'gulp --outPub=' + sites.mkk.outPub + ' --outTemplates=' + sites.mkk.outTemplates,
+	{
+		cwd: path.resolve('../../fir/') // Set current working dir
+	}
+));
+
+gulp.task("mkk", gulp.parallel([
+	"mkk-webpack",
+	"mkk-ivy",
+	"mkk-fir",
+	"mkk-symlink-templates",
+	"mkk-symlink-files"
+]));
 
 /*** FILMS tasks */
 gulp.task("films-webpack", function(callback) {
