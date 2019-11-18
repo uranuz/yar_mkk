@@ -19,7 +19,7 @@ var
 	sites = {
 		mkk: {
 			entry: [
-				"bootstrap/app.scss",
+				"bootstrap/scss/app",
 				"mkk/Tourist/Experience/Experience",
 				"mkk/GeneralTemplate/GeneralTemplate",
 				"mkk/IndexPage/IndexPage",
@@ -67,6 +67,9 @@ var
 })();
 
 
+var bootstrapSass = path.resolve(__dirname, '../node_modules/bootstrap/scss');
+
+
 function buildSite(config, callback) {
 	var entryMap = {};
 
@@ -88,7 +91,7 @@ function buildSite(config, callback) {
 			modules: [
 				__dirname
 			],
-			extensions: ['.js']
+			extensions: ['.js', '.scss']
 		},
 		module: {
 			rules: [
@@ -107,7 +110,12 @@ function buildSite(config, callback) {
 						{
 							loader: 'sass-loader',
 							options: {
-								sourceMap: true
+								implementation: require('node-sass'),
+								sourceMap: true,
+								sassOptions: {
+									indentWidth: 4,
+									includePaths: [bootstrapSass, __dirname],
+								}
 							}
 						}
 					]
@@ -118,7 +126,8 @@ function buildSite(config, callback) {
 						{
 							loader: 'file-loader',
 							options: {
-								name: '[path][name].[ext]'
+								name: '[path][name].[ext]',
+								publicPath: '/pub/'
 							}
 						}
 					]
@@ -143,10 +152,12 @@ function buildSite(config, callback) {
 			path: config.outPub
 		}
 	}, function(err, stats) {
-		if(err) throw new gutil.PluginError("webpack", err);
-		//gutil.log("[webpack]", stats.toString({
+		if(err) {
+			throw new gutil.PluginError("webpack", err);
+		}
+		gutil.log("[webpack]", stats.toString({
 			// output options
-		//}));
+		}));
 		callback();
 	});
 }
@@ -182,6 +193,13 @@ gulp.task("mkk-symlink-files", function() {
 		.pipe(vfs.symlink(sites.mkk.outPub));
 });
 
+gulp.task("mkk-symlink-modules", function() {
+	return gulp.src([
+			'../node_modules/bootstrap/dist/**/*.js'
+		], {base: '../node_modules/'})
+		.pipe(vfs.symlink(sites.mkk.outPub));
+});
+
 gulp.task("mkk-ivy", shell.task(
 	'gulp --outPub=' + sites.mkk.outPub,
 	{
@@ -201,7 +219,8 @@ gulp.task("mkk", gulp.parallel([
 	"mkk-ivy",
 	"mkk-fir",
 	"mkk-symlink-templates",
-	"mkk-symlink-files"
+	"mkk-symlink-files",
+	"mkk-symlink-modules"
 ]));
 
 /*** FILMS tasks */

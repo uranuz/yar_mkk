@@ -40,12 +40,7 @@
 				"sitePublic": "pub/",
 				"siteImg": "pub/mkk/img/",
 
-				"siteAuthPage": "dyn/auth",
-
-				"bootstrapPublic": "pub/bootstrap/",
-				"bootstrapCSS": "pub/bootstrap/css/",
-				"bootstrapJS": "pub/bootstrap/js/",
-				"bootstrapImg": "pub/bootstrap/img/"
+				"siteAuthPage": "dyn/auth"
 			},
 			"backendService": "yarMKKMain",
 			"fileSystemPaths": {
