@@ -76,6 +76,7 @@ public:
 			AccessRightController rightController = cast(AccessRightController) ctx.service.rightController;
 			assert(rightController !is null, `rightController is not of type AccessRightController or null`);
 			auto rights = getAccessRightList(rightController.rightSource).toStdJSON();
+			string webpackLib = getWebpackLibPath(ctx.junk.get(`moduleName`, null));
 			string[] accessRoles = ctx.user.data.get("accessRoles", null)
 				.splitter(';').map!(strip).filter!((it) => it.length).array;
 			IvyData userRightData = JSONValue([
@@ -94,7 +95,8 @@ public:
 				"authRedirectURI": IvyData(getAuthRedirectURI(ctx)),
 				"pohodFilterFields": favouriteFilters["allFields"],
 				"pohodFilterSections": favouriteFilters["sections"],
-				"userRightData": userRightData
+				"userRightData": userRightData,
+				"webpackLib": IvyData(webpackLib)
 			];
 
 			ivyEngine.getByModuleName("mkk.GeneralTemplate").run(payload, prepareIvyGlobals(ctx)).then(

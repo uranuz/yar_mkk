@@ -226,4 +226,5 @@ void pohodDelete(HTTPContext ctx, size_t num)
 	};
 	sendToHistory(ctx, `Удаление похода`, historyData);
 	getCommonDB().queryParams(`delete from pohod where num = $1`, num);
+	getCommonDB().queryParams(`delete from pohod_party where pohod_num = $1`, num);
 }

@@ -75,11 +75,15 @@ expr {*
 	<script type="text/javascript" src="{{vpaths.sitePublic}}bootstrap/dist/js/bootstrap.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
 	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/require.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}manifest.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}fir.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ivy.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
 	<script type="text/javascript">window.userRightData = {{userRightData}};</script>
+	<!--<script type="text/javascript" src="{{vpaths.sitePublic}}manifest.js" defer></script>-->
+	<script type="text/javascript" src="{{vpaths.sitePublic}}fir_globals.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/run_globals.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}ivy.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}fir.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}{{webpackLib}}" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
+	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/run_app.js" defer></script>
 </head>
 
 <body>

@@ -1,0 +1,1 @@
+window.MKKApp = new window.mkk_app('./mkk/app.js');

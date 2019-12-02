@@ -202,4 +202,5 @@ void touristDelete(HTTPContext ctx, size_t num)
 	};
 	sendToHistory(ctx, `Удаление туриста`, historyData);
 	getCommonDB().queryParams(`delete from tourist where num = $1`, num);
+	getCommonDB().queryParams(`delete from pohod_party where tourist_num = $1`, num);
 }

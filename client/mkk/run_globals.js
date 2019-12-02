@@ -1,0 +1,1 @@
+window.fir_globals_lib('./fir/common/globals.js');

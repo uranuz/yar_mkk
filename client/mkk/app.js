@@ -1,18 +1,11 @@
-require.config({
-	waitSeconds: 120,
-	baseUrl: "/pub"
-});
-
 define('mkk/app', [
 	'ivy/Engine',
 	'ivy/EngineConfig',
-	'ivy/RemoteModuleLoader',
+	'fir/ivy/RemoteModuleLoader',
 	"fir/controls/Loader/Manager",
 	"fir/controls/Loader/IvyServerFactory",
 	"fir/controls/Loader/IvyServerRender",
-	'ivy/directive/StandardFactory',
-	'fir/ivy/RemoteCall',
-	'fir/ivy/OptStorage',
+	'fir/ivy/directive/StandardFactory',
 	"fir/controls/ControlManager",
 	"fir/security/right/IvyRuleFactory",
 	"fir/security/right/GlobalVarSource",
@@ -28,8 +21,6 @@ define('mkk/app', [
 	IvyServerFactory,
 	IvyServerRender,
 	StandardFactory,
-	RemoteCallInterpreter,
-	OptStorageInterpreter,
 	ControlManager,
 	IvyRuleFactory,
 	GlobalVarSource,
@@ -37,32 +28,29 @@ define('mkk/app', [
 	UserIdentity,
 	UserRights
 ) {
-	var ivyConfig = new IvyEngineConfig();
-	ivyConfig.directiveFactory = StandardFactory();
-	ivyConfig.directiveFactory.add(new RemoteCallInterpreter());
-	ivyConfig.directiveFactory.add(new OptStorageInterpreter());
-	window.ivyEngine = new IvyEngine(
-		ivyConfig,
-		new RemoteModuleLoader('/dyn/server/template'));
-	window.ivyEngine.getByModuleName('mkk.AccessRules');
+return FirClass(
+	function MKKApp() {
+		var
+			ivyConfig = new IvyEngineConfig(),
+			ivyModuleLoader = new RemoteModuleLoader('/dyn/server/template');
+		ivyConfig.directiveFactory = StandardFactory();
 
-	window.accessController = new AccessController(
-		new IvyRuleFactory(window.ivyEngine),
-		new GlobalVarSource());
-	window.userIdentity = new UserIdentity(window.userRightData.user)
-	window.userRights = new UserRights(window.userIdentity, window.accessController)
+		this._ivyEngine = new IvyEngine(ivyConfig, ivyModuleLoader);
+		this._ivyEngine.getByModuleName('mkk.AccessRules');
+
+		this._accessController = new AccessController(
+			new IvyRuleFactory(this._ivyEngine), new GlobalVarSource());
+		this._userIdentity = new UserIdentity(window.userRightData.user);
+		this._userRights = new UserRights(this._userIdentity, this._accessController);
 	
-	LoaderManager.add(
-		new IvyServerFactory(
-			window.ivyEngine,
-			window.userIdentity,
-			window.userRights,
-			window.userRightData.vpaths));
-	LoaderManager.add(new IvyServerRender());
-	ControlManager.reviveMarkup($('body'));
+		LoaderManager.add(
+			new IvyServerFactory(
+				this._ivyEngine,
+				this._userIdentity,
+				this._userRights,
+				window.userRightData.vpaths));
+		LoaderManager.add(new IvyServerRender());
+		ControlManager.reviveMarkup($('body'));
+	}
+);
 });
-define('mkk/init', ['fir/common/globals'], function() {
-	require(['mkk/app'], function() {});
-});
-
-require(['mkk/init'], function() {});
