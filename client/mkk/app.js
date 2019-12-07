@@ -12,6 +12,7 @@ define('mkk/app', [
 	"fir/security/right/Controller",
 	"fir/security/right/UserIdentity",
 	"fir/security/right/UserRights",
+	"mkk/ModuleLoader",
 	"mkk/app.scss"
 ], function(
 	IvyEngine,
@@ -26,7 +27,8 @@ define('mkk/app', [
 	GlobalVarSource,
 	AccessController,
 	UserIdentity,
-	UserRights
+	UserRights,
+	ModuleLoader
 ) {
 return FirClass(
 	function MKKApp() {
@@ -50,6 +52,17 @@ return FirClass(
 				this._userRights,
 				window.userRightData.vpaths));
 		LoaderManager.add(new IvyServerRender());
+		this._moduleLoader = new ModuleLoader([
+			{
+				rule: /mkk\//,
+				lib: 'mkk_lib'
+			},
+			{
+				rule: /fir\//,
+				lib: 'fir_lib'
+			}
+		]);
+		ControlManager.setModuleLoader(this._moduleLoader);
 		ControlManager.reviveMarkup($('body'));
 	}
 );

@@ -1,6 +1,5 @@
 define('films/IndexPage/IndexPage', [
-	'fir/controls/FirControl',
-	'films/IndexPage/IndexPage.scss'
+	'fir/controls/FirControl'
 ], function(FirControl) {
 return FirClass(
 	function IndexPage(opts) {

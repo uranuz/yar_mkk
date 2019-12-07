@@ -2,12 +2,8 @@
   "name": "yar_mkk",
   "version": "1.0.0",
   "description": "Yar MKK site",
-  "main": "Gruntfile.js",
   "directories": {
     "doc": "doc"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "yar",
@@ -23,6 +19,7 @@
     "file-loader": "^4.2.0",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
+    "gulp-copy": "^4.0.1",
     "gulp-shell": "^0.7.1",
     "gulp-util": "^3.0.8",
     "mini-css-extract-plugin": "^0.8.0",
