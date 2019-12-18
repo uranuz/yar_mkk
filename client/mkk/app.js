@@ -13,6 +13,7 @@ define('mkk/app', [
 	"fir/security/right/UserIdentity",
 	"fir/security/right/UserRights",
 	"mkk/ModuleLoader",
+	"mkk/GeneralTemplate/GeneralTemplate",
 	"mkk/app.scss"
 ], function(
 	IvyEngine,
@@ -52,16 +53,7 @@ return FirClass(
 				this._userRights,
 				window.userRightData.vpaths));
 		LoaderManager.add(new IvyServerRender());
-		this._moduleLoader = new ModuleLoader([
-			{
-				rule: /mkk\//,
-				lib: 'mkk_lib'
-			},
-			{
-				rule: /fir\//,
-				lib: 'fir_lib'
-			}
-		]);
+		this._moduleLoader = new ModuleLoader(window.webpackLibs);
 		ControlManager.setModuleLoader(this._moduleLoader);
 		ControlManager.reviveMarkup($('body'));
 	}

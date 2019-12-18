@@ -1,1 +1,1 @@
-window.fir_globals_lib('./fir/common/globals.js');
+window.fir_globals('./fir/common/globals.js');

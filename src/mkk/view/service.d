@@ -60,43 +60,53 @@ public:
 
 		if( ctx.request.queryForm.get("generalTemplate", null).toLower() != "no" )
 		{
-			auto favouriteFilters = ctx.mainServiceCall(`pohod.favoriteFilters`);
-			assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
-			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
-
 			import webtank.security.right.source_method: getAccessRightList;
 			import webtank.security.right.controller: AccessRightController;
 			import webtank.common.std_json.to: toStdJSON;
 			import webtank.ivy.service_mixin: prepareIvyGlobals;
 			import ivy.interpreter.data_node: NodeEscapeState;
-			import std.json: JSONValue;
 			import std.algorithm: splitter, map, filter;
 			import std.string: strip;
 			import std.array: array;
+			import ivy.json: toIvyJSON;
+
+			auto favouriteFilters = ctx.mainServiceCall(`pohod.favoriteFilters`);
+			assert("sections" in favouriteFilters, `There is no "sections" property in pohod.favoriteFilters response`);
+			assert("allFields" in favouriteFilters, `There is no "allFields" property in pohod.favoriteFilters response`);
+
 			AccessRightController rightController = cast(AccessRightController) ctx.service.rightController;
 			assert(rightController !is null, `rightController is not of type AccessRightController or null`);
-			auto rights = getAccessRightList(rightController.rightSource).toStdJSON();
-			string webpackLib = getWebpackLibPath(ctx.junk.get(`moduleName`, null));
+			auto rights = getAccessRightList(rightController.rightSource);
+			IvyData ivyRights;
+			if( ctx.user.isAuthenticated() ) {
+				foreach( name, val; rights ) {
+					auto jVal = val.toStdJSON();
+					ivyRights[name] = jVal.toIvyJSON();
+				}
+			}
+			
 			string[] accessRoles = ctx.user.data.get("accessRoles", null)
-				.splitter(';').map!(strip).filter!((it) => it.length).array;
-			IvyData userRightData = JSONValue([
-				"user": JSONValue([
-					"id": JSONValue(ctx.user.id),
-					"name": JSONValue(ctx.user.name),
-					"accessRoles": JSONValue(accessRoles),
-					"sessionId": (ctx.user.isAuthenticated()? JSONValue("dummy"): JSONValue())
-				]),
-				"right": (ctx.user.isAuthenticated()? rights: JSONValue()),
-				"vpaths": JSONValue(ctx.service.virtualPaths)
-			]).toString();
-			userRightData.escapeState = NodeEscapeState.Safe;
+				.splitter(';')
+				.map!(strip)
+				.filter!((it) => it.length)
+				.array;
+
 			IvyData payload = [
 				"content": content,
 				"authRedirectURI": IvyData(getAuthRedirectURI(ctx)),
 				"pohodFilterFields": favouriteFilters["allFields"],
 				"pohodFilterSections": favouriteFilters["sections"],
-				"userRightData": userRightData,
-				"webpackLib": IvyData(webpackLib)
+				"userRightData": IvyData([
+					"user": IvyData([
+						"id": IvyData(ctx.user.id),
+						"name": IvyData(ctx.user.name),
+						"accessRoles": IvyData(accessRoles),
+						"sessionId": (ctx.user.isAuthenticated()? IvyData("dummy"): IvyData())
+					]),
+					"right": ivyRights,
+					"vpaths": IvyData(ctx.service.virtualPaths)
+				]),
+				"webpackLib": IvyData(getWebpackLibPath(ctx.junk.get(`moduleName`, null)))
 			];
 
 			ivyEngine.getByModuleName("mkk.GeneralTemplate").run(payload, prepareIvyGlobals(ctx)).then(

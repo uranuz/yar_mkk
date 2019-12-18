@@ -1,1 +1,1 @@
-window.MKKApp = new (window.mkk_app('./mkk/app.js'))();
+window.MKKApp = new (window['mkk/app']('./mkk/app.js'))();
