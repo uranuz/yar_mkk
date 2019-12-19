@@ -94,12 +94,12 @@ def upload_file(source_file_name, dest_file_name, overwrite):
 		conn.request("PUT", upload_href, body=file_content)
 		assure_http_code(conn.getresponse(), 'Не удалось загрузить файл на Яндекс.Диск', codes=(FILE_UPLOADED, FILE_ACCEPTED))
 
-
+FILE_ENTRIES_LIMIT = 200
 def get_nested_files_list(dir_name):
 	"""Получает список файлов в папке, сортированный по убываннию даты изменения"""
 	request_uri = '/v1/disk/resources?' + urlencode({
 		'path': dir_name,
-		'limit': 0,
+		'limit': FILE_ENTRIES_LIMIT,
 		'sort': '-modified'
 	})
 	resp_str = None
