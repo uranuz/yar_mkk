@@ -10,8 +10,8 @@ import mkk.main.tourist.edit: editTourist, requireFieldsForReg;
 import mkk.main.user.consts: NEW_USER_ROLE, USER_ROLE;
 import mkk.main.tourist.read: readTourist;
 
-import mkk.security.core.register_user: registerUser, addUserRoles, RegUserResult;
-import mkk.security.core.access_control: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
+import webtank.security.auth.core.register_user: registerUser, addUserRoles, RegUserResult;
+import webtank.security.auth.core.controller: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
 
 shared static this()
 {
@@ -280,7 +280,7 @@ void sendConfirmEmail(string userEmail, UUID confirmUUID)
 
 	import std.conv: text;
 	import std.array: join;
-	import mkk.security.core.register_user: checkEmailAddress;
+	import webtank.security.auth.core.register_user: checkEmailAddress;
 
 	checkEmailAddress(userEmail);
 

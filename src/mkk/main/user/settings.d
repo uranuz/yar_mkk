@@ -1,8 +1,8 @@
 module mkk.main.user.settings;
 
 import mkk.main.devkit;
-import mkk.security.core.access_control: changeUserPassword;
-import mkk.security.common.exception: SecurityException;
+import webtank.security.auth.core.controller: changeUserPassword;
+import webtank.security.auth.common.exception: AuthException;
 
 shared static this()
 {
@@ -17,20 +17,20 @@ void changePassword(
 	string newPassword,
 	string repeatPassword
 ) {
-	enforce!SecurityException(
+	enforce!AuthException(
 		ctx.user.isAuthenticated,
 		`Изменение пароля пользователя требует аутентификации на сайте!`
 	);
-	enforce!SecurityException(
+	enforce!AuthException(
 		oldPassword.length > 0 && newPassword.length > 0 && repeatPassword.length > 0,
 		`Некоторые параметры не заданы!`
 	);
-	enforce!SecurityException(
+	enforce!AuthException(
 		newPassword == repeatPassword,
 		`Смена пароля не произведена. Новый пароль и подтверждение пароля не совпадают!`
 	);
 	import std.functional: toDelegate;
-	enforce!SecurityException(
+	enforce!AuthException(
 		// Здесь, естественно, необходимо проверять старый пароль перед тем как его сменить, иначе будет пичально...
 		changeUserPassword!(/*doPwCheck=*/true)(toDelegate(&getAuthDB), ctx.user.id, oldPassword, newPassword),
 		`Произошла ошибка при попытке смены пароля! Возможно, введен неверный старый пароль`

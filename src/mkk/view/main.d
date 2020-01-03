@@ -1,10 +1,13 @@
 module mkk.view.main;
 
 import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
-import mkk.view.service;
+import webtank.ivy.view_service: IvyViewService;
 
-// Подключение разделов сервиса
-import mkk.view.auth;
+public import mkk.common.service: Service;
+
+shared static this() {
+	Service(new IvyViewService("yarMKKView", "/dyn/{remainder}", /*isSecured=*/true));
+}
 
 void main(string[] progArgs)
 {

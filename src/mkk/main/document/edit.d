@@ -14,7 +14,11 @@ shared static this()
 Tuple!(Optional!size_t, "documentNum")
 writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 {
-	enforce(ctx.rights.hasRight(`document.item`, `edit`), `Недостаточно прав для редактирования ссылки на документ!`);
+	import webtank.security.right.access_exception: AccessException;
+
+	enforce!AccessException(
+		ctx.rights.hasRight(`document.item`, `edit`),
+		`Недостаточно прав для редактирования ссылки на документ!`);
 	checkStructEditRights(record, ctx);
 
 	string[] fieldNames;
@@ -39,7 +43,11 @@ writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 /++ Простой, но опасный метод, который удаляет сылку на документ по ключу. +/
 void deleteDocument(HTTPContext ctx, size_t num)
 {
-	enforce(ctx.rights.hasRight(`document.item`, `delete`), `Недостаточно прав для удаления документа!`);
+	import webtank.security.right.access_exception: AccessException;
+
+	enforce!AccessException(
+		ctx.rights.hasRight(`document.item`, `delete`),
+		`Недостаточно прав для удаления документа!`);
 
 	getCommonDB().queryParams(`delete from file_link where num = $1`, num);
 }

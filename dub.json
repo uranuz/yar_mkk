@@ -17,7 +17,6 @@
 			],
 			"sourcePaths": [
 				"src/mkk/common",
-				"src/mkk/security",
 				"src/mkk/main",
 				"src/mkk/history/common",
 				"src/mkk/history/client"
@@ -47,7 +46,6 @@
 			},
 			"sourcePaths": [
 				"src/mkk/common",
-				"src/mkk/security/common",
 				"src/mkk/view",
 				"src/mkk/history/common"
 			],
@@ -69,7 +67,6 @@
 			],
 			"sourcePaths": [
 				"src/mkk/common",
-				"src/mkk/security/common",
 				"src/mkk/history/common",
 				"src/mkk/history/service"
 			],
@@ -97,8 +94,7 @@
 				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [
-				"src/mkk/common",
-				"src/mkk/security"
+				"src/mkk/common"
 			],
 			"sourceFiles": [
 				"src/mkk/tools/auth_db",
@@ -124,8 +120,7 @@
 				"lib/libtarsnap_sse2.a"
 			],
 			"sourcePaths": [
-				"src/mkk/common",
-				"src/mkk/security"
+				"src/mkk/common"
 			],
 			"sourceFiles": [
 				"src/mkk/tools/auth_db",
@@ -149,7 +144,6 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk/security/core/crypto",
 				"src/mkk/tools/gen_pw_hash"
 			]
 		},
@@ -167,7 +161,6 @@
 			],
 			"sourcePaths": [],
 			"sourceFiles": [
-				"src/mkk/security/core/crypto",
 				"src/mkk/tools/gen_session_id"
 			]
 		},

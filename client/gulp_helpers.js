@@ -29,6 +29,7 @@ var
 				"mkk/Right/Object/List/List",
 				"mkk/User/Reg/Reg",
 				"mkk/User/Reg/Card/Card",
+				"mkk/User/Auth/Auth",
 				"mkk/app"
 			]
 		},

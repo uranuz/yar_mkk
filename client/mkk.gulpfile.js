@@ -21,12 +21,10 @@ var
 var bootstrapSass = path.resolve(__dirname, 'node_modules/bootstrap/scss');
 
 
-function buildEntry(config, entry, callback) {
+function buildEntries(config, entryMap, callback) {
 	var
-		entryMap = {},
 		libraryTarget = 'window',
 		manifestsPath = path.join(config.outPub, `manifest/`);
-	entryMap[entry] = [entry];
 	
 	// run webpack
 	webpack({
@@ -83,12 +81,10 @@ function buildEntry(config, entry, callback) {
 		},
 		plugins: [
 			new webpack.DllReferencePlugin({
-				//context: path.resolve(__dirname, '../../ivy'),
 				manifest: require(path.join(manifestsPath, 'ivy.manifest.json')),
 				sourceType: libraryTarget
 			}),
 			new webpack.DllReferencePlugin({
-				//context: path.resolve(__dirname, '../../fir'),
 				manifest: require(path.join(manifestsPath, 'fir.manifest.json')),
 				sourceType: libraryTarget
 			}),
@@ -103,13 +99,6 @@ function buildEntry(config, entry, callback) {
 				chunkFilename: '[id].css',
 			})
 		],
-		/*
-		optimization: {
-			runtimeChunk: {
-				name: "manifest",
-			}
-		},
-		*/
 		devtool: 'cheap-source-map',
 		output: {
 			path: config.outPub,
@@ -122,21 +111,19 @@ function buildEntry(config, entry, callback) {
 }
 
 function buildSite(config, callback) {
-	var counter = config.entry.length;
+	var entryMap = {};
 
 	config.entry.forEach(function(it) {
-		buildEntry(config, it, function(err, stats) {
-			if(err) {
-				throw new gutil.PluginError("webpack", err);
-			}
-			gutil.log("[webpack]", stats.toString({
-				// output options
-			}));
-			counter--;
-			if( counter <= 0 ) {
-				callback(); // сообщаем gulp'у, что точки входа собраны
-			}
-		});
+		entryMap[it] = [it];
+	});
+	buildEntries(config, entryMap, function(err, stats) {
+		if(err) {
+			throw new gutil.PluginError("webpack", err);
+		}
+		gutil.log("[webpack]", stats.toString({
+			// output options
+		}));
+		callback(); // сообщаем gulp'у, что точки входа собраны
 	});
 }
 
@@ -173,8 +160,8 @@ gulp.task("mkk-symlink-files", function() {
 
 gulp.task("mkk-symlink-bootstrap", function() {
 	return gulp.src([
-			'../node_modules/bootstrap/dist/**/*.js'
-		], {base: '../node_modules/'})
+			'node_modules/bootstrap/dist/**/*.js'
+		], {base: 'node_modules/'})
 		.pipe(vfs.symlink(sites.mkk.outPub));
 });
 
@@ -184,8 +171,6 @@ gulp.task("mkk-ivy", shell.task(
 		cwd: path.resolve('./') // Set current working dir
 	}
 ));
-
-console.log('DEBUGG: ' + path.resolve('./'));
 
 gulp.task("mkk-fir", shell.task(
 	'gulp --gulpfile="' + path.resolve('./fir.gulpfile.js') + '" --outPub="' + sites.mkk.outPub + '" --outTemplates="' + sites.mkk.outTemplates + '"' ,

@@ -7,7 +7,7 @@ import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 
 class MKKHistoryService: JSON_RPCService, IIvyServiceMixin
 {
-	import mkk.security.common.access_control_client: MKKAccessControlClient;
+	import webtank.security.auth.client_controller: AuthClientController;
 	import webtank.security.right.controller: AccessRightController;
 	import webtank.security.right.remote_source: RightRemoteSource;
 	import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
@@ -25,12 +25,12 @@ class MKKHistoryService: JSON_RPCService, IIvyServiceMixin
 		_rights = new AccessRightController(
 			new IvyAccessRuleFactory(this.ivyEngine),
 			new RightRemoteSource(this, `yarMKKMain`, `accessRight.list`));
-		_accessController = new MKKAccessControlClient();
+		_accessController = new AuthClientController();
 	}
 
-	override MKKAccessControlClient accessController() @property
+	override AuthClientController accessController() @property
 	{
-		auto controller = cast(MKKAccessControlClient) _accessController;
+		auto controller = cast(AuthClientController) _accessController;
 		assert(controller, `MKK access controller is null`);
 		return controller;
 	}

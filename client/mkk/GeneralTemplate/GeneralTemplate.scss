@@ -216,12 +216,6 @@ body {
 	height: 100%;
 }
 
-.pohod {
-	border-collapse: collapse;
-}
-
-.last_pohod_comment {font-size: 80%;}
-
 .mkk-UsefulLinksMenu, .mkk-AdminSideMenu {
 	&.e-block {
 		padding: 0.5rem;
@@ -246,4 +240,23 @@ body .ui-dialog-content.ui-widget-content {
 
 /*конец: Для jQuery UI*/
 
+
+
+.mkk-GeneralTemplate {
+	&.e-headerImg {
+		background-repeat: no-repeat;
+		display: inline-block;
+		width: 125px;
+		height: 125px;
+	}
+	&.e-headerImgTSSR {
+		background-image: url('../img/pic/tssr.png');
+	}
+
+	@for $num from 1 through 31 {
+		&.e-headerImg#{$num} {
+			background-image: url('../img/pic/#{$num}.jpg');
+		}
+	}
+}
 

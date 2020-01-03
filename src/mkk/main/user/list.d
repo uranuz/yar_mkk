@@ -42,8 +42,11 @@ Tuple!(
 userList(HTTPContext ctx, string name, Navigation nav)
 {
 	import std.format: format;
+	import webtank.security.right.access_exception: AccessException;
 
-	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
+	enforce!AccessException(
+		ctx.user.isInRole(`admin`),
+		`Нет разрешения на выполнение операции`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 	

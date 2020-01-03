@@ -39,9 +39,11 @@ void initPohodTouristData(Fmt, FmtExt)(
 	string query,
 	string tableName)
 {
-	enforce(ctx.rights.hasRight(tableName ~ `.history`, `init`),
-		`Недостаточно прав для инициализации истории!!!`
-	);
+	import webtank.security.right.access_exception: AccessException;
+
+	enforce!AccessException(
+		ctx.rights.hasRight(tableName ~ `.history`, `init`),
+		`Недостаточно прав для инициализации истории!!!`);
 
 	auto rs = getCommonDB().query(query).getRecordSet(formatExt);
 

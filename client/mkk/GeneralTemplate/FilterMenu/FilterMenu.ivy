@@ -7,8 +7,7 @@ def PohodFilterMenu {=
 		instanceName: 'pohodFilterMenu'
 		cssBaseClass: "mkk-PohodFilterMenu"
 		pohodFilterFields: null
-		pohodFilterSections: null
-		vpaths: null;
+		pohodFilterSections: null;
 	def.body {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [

@@ -54,6 +54,7 @@ editTourist(
 	import std.conv: text, ConvException;
 	import mkk.main.enums: sportsCategory, refereeCategory;
 	import std.json: JSONValue;
+	import webtank.security.right.access_exception: AccessException;
 
 	bool allowEdit = ctx.rights.hasRight(`tourist.item`, `edit`);
 	bool allowRegUser = ctx.rights.hasRight(`tourist.item`, `reg_user`);
@@ -61,11 +62,11 @@ editTourist(
 	enforce(userNumPtr !is null, "Не удаётся определить идентификатор пользователя");
 
 	static immutable NO_RIGHTS = `Недостаточно прав для редактирования туриста!`;
-	enforce(allowEdit || allowRegUser, NO_RIGHTS);
+	enforce!AccessException(allowEdit || allowRegUser, NO_RIGHTS);
 	if( allowRegUser && !allowEdit ) {
 		// Выданы права для добавления записи в процедуре регистрации, но не выданы права на редактирования
 		// Кто-то пытается изменить существущую запись туриста без соответствующих прав
-		enforce(!record.num.isSet, NO_RIGHTS);
+		enforce!AccessException(!record.num.isSet, NO_RIGHTS);
 
 		requireFieldsForReg(record);
 
@@ -193,7 +194,11 @@ select exists(
 /++ Простой, но опасный метод, который удаляет туриста по ключу. Требует прав админа! +/
 void touristDelete(HTTPContext ctx, size_t num)
 {
-	enforce(ctx.rights.hasRight(`tourist.item`, `delete`), `Недостаточно прав для удаления туриста!`);
+	import webtank.security.right.access_exception: AccessException;
+
+	enforce!AccessException(
+		ctx.rights.hasRight(`tourist.item`, `delete`),
+		`Недостаточно прав для удаления туриста!`);
 
 	HistoryRecordData historyData = {
 		tableName: `tourist`,

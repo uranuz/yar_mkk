@@ -114,7 +114,7 @@ void deploySite(string userName, string siteName)
 	}
 
 	addSiteToNginx(siteName);
-	runNpmGrunt();
+	runNpmGulp();
 	installSystemdUnits();
 	enableCertbot(siteName);
 }
@@ -258,7 +258,7 @@ void addSiteToNginx(string siteName)
 }
 
 static immutable NPM_FOLDERS = [`ivy`, `fir`, `yar_mkk`];
-void runNpmGrunt()
+void runNpmGulp()
 {
 	immutable string workDir = getcwd();
 	immutable string sourcesDir = buildNormalizedPath(workDir, `..`);
@@ -268,11 +268,11 @@ void runNpmGrunt()
 		_waitProc(
 			spawnShell(`npm install`, null, Config.none, folderPath),
 			`Установка/ обновление npm пакетов для: ` ~ folder);
-
-		_waitProc(
-			spawnShell(`grunt dist`, null, Config.none, folderPath),
-			`Запуск задач grunt для: ` ~ folder);
 	}
+
+	_waitProc(
+		spawnShell(`gulp dist`, null, Config.none, folderPath),
+		`Запуск задач gulp для: ` ~ folder);
 }
 
 static immutable string[] MKK_SERVICES = [`main`, `view`, `history`];

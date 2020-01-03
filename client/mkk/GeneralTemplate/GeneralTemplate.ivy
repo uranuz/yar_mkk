@@ -1,120 +1,80 @@
-expr {*
-{=
-	from mkk.GeneralTemplate.MainMenu import MainMenu;
-	from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
-	from fir.controls.utils import cls, hasRight;
-	def UsefulLinksMenu {=
-		def.kv
-			cssBaseClass: 'mkk-UsefulLinksMenu'
-			instanceName: 'usefulLinksMenu';
-		def.body {*
-		<div class="{=cls 'block'}">
-			<h4>Полезные ссылки:</h4>
-			<ul class="{=cls 'linkList'}">
-				<li class="{=cls 'listItem'}">
-					<a href="http://tssr.ru">Туристско-спортивный союз России</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="http://tkirbis.ru">Турклуб "Ирбис"</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="http://turclub-kostroma.ru">Костромская областная федерация туризма</a>
-				</li>
-			</ul>
-			<h5>Эл. почта МКК:</h5>
-			<div style="margin-left: 0.5rem">mkk-yar@mail.ru</div>
-		</div>
-		*}
-	};
-	def AdminSideMenu {=
-		def.kv
-			cssBaseClass: 'mkk-AdminSideMenu'
-			instanceName: 'adminSideMenu';
-		def.body {*
-		<div class="{=cls 'block'}">
-			<h4>Администрирование:</h4>
-			<ul class="{=cls 'cls'}">
-				<li class="{=cls 'listItem'}">
-					<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="{{vpaths.siteDynamic}}right/role/list">Роли пользователей</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="{{vpaths.siteDynamic}}user/list">Пользователи</a>
-				</li>
-				<li class="{=cls 'listItem'}">
-					<a href="{{vpaths.siteDynamic}}right/rule/list">Правила доступа</a>
-				</li>
-			</ul>
-		</div>
-		*}
-	}
-
-}
-<!doctype html>
-<html>
-
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>Маршрутно-квалификационная комиссия Ярославской области</title>
-	<link rel="stylesheet" href="{{vpaths.sitePublic}}bootstrap/scss/app.css">
-	<link rel="stylesheet" href="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.min.css">
-	<link rel="stylesheet" href="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css">
-	<link rel="stylesheet" href="{{vpaths.sitePublic}}mkk/GeneralTemplate/GeneralTemplate.css">
-	<link rel="shortcut icon" href="{{vpaths.siteImg}}znak.png" type="image/png">
-
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery-2.2.4.min.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery.cookie-1.4.1.min.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/popper-1.12.5.min.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}bootstrap/dist/js/bootstrap.min.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ext/require.js" defer></script>
-	<script type="text/javascript">
-		window.userRightData = {=to_json_str userRightData};
-
-		// Список webpack-библиотек, где искать модули
-		window.webpackLibs = [
-			'{{webpackLib}}', // Сборка для текущей страницы
-			'mkk/app', // Конфигурация приложения МКК
-			// Другие библиотеки...
-			'fir',
-			'ivy'
-		];
-	</script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}fir_globals.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/run_globals.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}ivy.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}fir.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}{{webpackLib}}.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/run_app.js" defer></script>
-</head>
-
-<body>
-	<div id="page" data-fir-module="mkk/GeneralTemplate/GeneralTemplate">
+expr {=
+from fir.controls.utils import cls;
+from mkk.GeneralTemplate.MainMenu import MainMenu;
+from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
+from fir.controls.utils import cls, hasRight;
+def UsefulLinksMenu {=
+	def.kv
+		cssBaseClass: 'mkk-UsefulLinksMenu'
+		instanceName: 'usefulLinksMenu';
+	def.body {*
+	<div class="{=cls 'block'}">
+		<h4>Полезные ссылки:</h4>
+		<ul class="{=cls 'linkList'}">
+			<li class="{=cls 'listItem'}">
+				<a href="http://tssr.ru">Туристско-спортивный союз России</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="http://tkirbis.ru">Турклуб "Ирбис"</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="http://tkrassvet.ru">Турклуб "Рассвет"</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="http://turclub-kostroma.ru">Костромская областная федерация туризма</a>
+			</li>
+		</ul>
+		<h5>Эл. почта МКК:</h5>
+		<div style="margin-left: 0.5rem">mkk-yar@mail.ru</div>
+	</div>
+	*}
+};
+def AdminSideMenu {=
+	def.kv
+		cssBaseClass: 'mkk-AdminSideMenu'
+		instanceName: 'adminSideMenu';
+	def.body {*
+	<div class="{=cls 'block'}">
+		<h4>Администрирование:</h4>
+		<ul class="{=cls 'cls'}">
+			<li class="{=cls 'listItem'}">
+				<a href="{{vpaths.siteDynamic}}right/object/list">Объекты доступа</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="{{vpaths.siteDynamic}}right/role/list">Роли пользователей</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="{{vpaths.siteDynamic}}user/list">Пользователи</a>
+			</li>
+			<li class="{=cls 'listItem'}">
+				<a href="{{vpaths.siteDynamic}}right/rule/list">Правила доступа</a>
+			</li>
+		</ul>
+	</div>
+	*}
+};
+def GeneralTemplate {=
+	def.kv
+		instanceName: 'generalTemplate'
+		cssBaseClass: 'mkk-GeneralTemplate'
+		moduleName: 'mkk/GeneralTemplate/GeneralTemplate'
+		pohodFilterFields: null
+		pohodFilterSections: null
+		content: null
+		webpackLib: null
+		authRedirectURI: null;
+	def.body {*
+	<div id="page" data-fir-module="{{moduleName}}">
 		<div id="page_bg"></div>
 		<div id="top">
 			<div id="header">
 				<div id="pic_frame_left"></div>
 				<div id="pic_frame_right"></div>
 				<div id="header_pics">
-					<img src="{{vpaths.siteImg}}pic/1.jpg">
-					<img src="{{vpaths.siteImg}}pic/2.png">
-					<img src="{{vpaths.siteImg}}pic/3.jpg">
-					<img src="{{vpaths.siteImg}}pic/4.jpg">
-					<img src="{{vpaths.siteImg}}pic/5.jpg">
-					<img src="{{vpaths.siteImg}}pic/6.jpg">
-					<img src="{{vpaths.siteImg}}pic/7.jpg">
-					<img src="{{vpaths.siteImg}}pic/8.jpg">
-					<img src="{{vpaths.siteImg}}pic/9.jpg">
-					<img src="{{vpaths.siteImg}}pic/10.jpg">
-					<img src="{{vpaths.siteImg}}pic/11.jpg">
+					<span class="{=cls 'headerImg'} e-headerImgTSSR"></span>
+					{=repeat num in {=range 1 32} {*
+						<span class="{=cls 'headerImg'} e-headerImg{{num}}"></span>
+					*}}
 				</div>
 				<div id="pic_frame_bottom"></div>
 				<div id="site_title">
@@ -133,7 +93,6 @@ expr {*
 				{=PohodFilterMenu
 					pohodFilterFields: pohodFilterFields
 					pohodFilterSections: pohodFilterSections
-					vpaths: vpaths
 				}
 				{=if {=hasRight obj: 'right.object.list' kind: 'read'}
 					{=AdminSideMenu}
@@ -161,7 +120,78 @@ expr {*
 		</div>
 	</div>
 	<!-- #footer_framing -->
-</body>
+	*}
+};
+def GeneralTemplateWrapper {=
+	def.kv
+		requestURI: "/api/generalTemplate/params"
+		pohodFilterFields: null
+		pohodFilterSections: null
+		content: null
+		webpackLib: null
+		authRedirectURI: null
+		userRightData: null;
+	def.body {*
+	<!doctype html>
+	<html>
 
-</html>
-*};
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>Маршрутно-квалификационная комиссия Ярославской области</title>
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}bootstrap/scss/app.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.min.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}mkk/GeneralTemplate/GeneralTemplate.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}fir.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}mkk/app.css">
+		<link rel="stylesheet" href="{{vpaths.sitePublic}}{{webpackLib}}.css">
+		<link rel="shortcut icon" href="{{vpaths.siteImg}}znak.png" type="image/png">
+
+		<script type="text/javascript">
+			window.userRightData = {=to_json_str userRightData};
+
+			// Список webpack-библиотек, где искать модули
+			window.webpackLibs = [
+				'{{webpackLib}}', // Сборка для текущей страницы
+				'mkk/app', // Конфигурация приложения МКК
+				// Другие библиотеки...
+				'fir',
+				'ivy'
+			];
+			function runFirGlobals() {
+				window.fir_globals('./fir/common/globals.js');
+			}
+			function runMKKApp() {
+				window.MKKApp = new (window['mkk/app']('./mkk/app.js'))();
+			}
+		</script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery-2.2.4.min.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery.cookie-1.4.1.min.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ext/popper-1.12.5.min.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}bootstrap/dist/js/bootstrap.min.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ext/jquery-ui-1.12.1.custom/jquery-ui.min.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ext/require.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}fir_globals.js" defer></script>
+		<script type="text/javascript" src="data:text/javascript;charset=utf-8,runFirGlobals();" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}ivy.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}fir.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}{{webpackLib}}.js" defer></script>
+		<script type="text/javascript" src="{{vpaths.sitePublic}}mkk/app.js" defer></script>
+		<script type="text/javascript" src="data:text/javascript;charset=utf-8,runMKKApp();" defer></script>
+	</head>
+
+	<body>
+		{=GeneralTemplate
+			pohodFilterFields: pohodFilterFields
+			pohodFilterSections: pohodFilterSections
+			content: content
+			authRedirectURI: authRedirectURI
+		}
+	</body>
+
+	</html>
+	*}
+};
+};

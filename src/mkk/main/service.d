@@ -7,7 +7,7 @@ import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
 
 class MKKMainService: JSON_RPCService, IIvyServiceMixin
 {
-	import mkk.security.core.access_control: MKKMainAccessController;
+	import webtank.security.auth.core.controller: AuthCoreController;
 	import webtank.security.right.controller: AccessRightController;
 	import webtank.security.right.db_source: RightDatabaseSource;
 	import std.functional: toDelegate;
@@ -22,14 +22,14 @@ class MKKMainService: JSON_RPCService, IIvyServiceMixin
 		_initTemplateCache();
 
 		_rights = new AccessRightController(
-				new IvyAccessRuleFactory(this.ivyEngine),
-				new RightDatabaseSource(toDelegate(&getAuthDB)));
-		_accessController = new MKKMainAccessController(toDelegate(&getAuthDB));
+			new IvyAccessRuleFactory(this.ivyEngine),
+			new RightDatabaseSource(toDelegate(&getAuthDB)));
+		_accessController = new AuthCoreController(toDelegate(&getAuthDB));
 	}
 
-	override MKKMainAccessController accessController() @property
+	override AuthCoreController accessController() @property
 	{
-		auto controller = cast(MKKMainAccessController) _accessController;
+		auto controller = cast(AuthCoreController) _accessController;
 		assert(controller, `MKK access controller is null`);
 		return controller;
 	}

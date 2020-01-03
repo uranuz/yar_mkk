@@ -129,9 +129,7 @@ def PohodListTable {=
 					<td class="{=cls 'showPartyBtn'}"
 						data-pohod-num="{{rec.num}}"
 						title="Щелкните для просмотра списка участников">
-						<img class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"
-							src="{{vpaths.siteImg}}icons/list_icon.png"
-						/>
+						<span class="{=cls 'showPartyBtnIcon'} { {auth_state_cls} }"></span>
 						<span class="{=cls 'showPartyBtnText'}" title="Количество участников">
 							{{rec.partySize}}
 						</span>

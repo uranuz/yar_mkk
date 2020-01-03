@@ -25,8 +25,11 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	import std.conv: text, ConvException;
 	import std.json: JSONValue;
 	import mkk.main.enums;
+	import webtank.security.right.access_exception: AccessException;
 
-	enforce(ctx.rights.hasRight(`pohod.item`, `edit`), `Недостаточно прав для редактирования похода!`);
+	enforce!AccessException(
+		ctx.rights.hasRight(`pohod.item`, `edit`),
+		`Недостаточно прав для редактирования похода!`);
 	checkStructEditRights(record, ctx); // Проверка прав на изменение полей
 
 	alias PohodEnums = AliasSeq!(
@@ -217,7 +220,11 @@ select * from inserted
 /++ Простой, но опасный метод, который удаляет поход по ключу. Требует прав админа! +/
 void pohodDelete(HTTPContext ctx, size_t num)
 {
-	enforce(ctx.rights.hasRight(`pohod.item`, `delete`), `Недостаточно прав для удаления похода!`);
+	import webtank.security.right.access_exception: AccessException;
+
+	enforce!AccessException(
+		ctx.rights.hasRight(`pohod.item`, `delete`),
+		`Недостаточно прав для удаления похода!`);
 
 	HistoryRecordData historyData = {
 		tableName: `pohod`,

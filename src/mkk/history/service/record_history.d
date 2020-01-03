@@ -32,6 +32,7 @@ static immutable historyRecFormat = RecordFormat!(
 import std.json: JSONValue, parseJSON, JSONType;
 JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigation nav)
 {
+	import webtank.security.right.access_exception: AccessException;
 	import webtank.datctrl.record_set;
 	import std.conv: to, text;
 	import std.string: join;
@@ -39,9 +40,9 @@ JSONValue getRecordHistory(HTTPContext ctx, RecordHistoryFilter filter, Navigati
 	import std.exception: enforce;
 
 	enforce([`pohod`, `tourist`].canFind(filter.objectName), `Просмотр истории пока доступен только для походов или туристов`);
-	enforce(ctx.rights.hasRight(filter.objectName ~ `.history`, `read`),
-		`Недостаточно прав для просмотра истории изменений!`
-	);
+	enforce!AccessException(
+		ctx.rights.hasRight(filter.objectName ~ `.history`, `read`),
+		`Недостаточно прав для просмотра истории изменений!`);
 
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10); // Задаем параметры по умолчанию
 	auto history_rs = getHistoryDB().query(`

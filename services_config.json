@@ -8,7 +8,10 @@
 				"siteJSON_RPC": "jsonrpc/",
 				"siteWebFormAPI": "api/"
 			},
-			"historyService": "yarMKKHistory",
+			"serviceDeps": {
+				"historyService": "yarMKKHistory",
+				"authService": "yarMKKMain"
+			},
 			"databases": {
 				"commonDB": {
 					"host": "127.0.0.1",
@@ -42,7 +45,10 @@
 
 				"siteAuthPage": "dyn/auth"
 			},
-			"backendService": "yarMKKMain",
+			"serviceDeps": {
+				"backendService": "yarMKKMain",
+				"authService": "yarMKKMain"
+			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk/",
 				"siteLogs": "logs/",
@@ -50,6 +56,8 @@
 
 				"siteIvyTemplates": "res/templates/"
 			},
+			"generalTemplateModule": "mkk.GeneralTemplate",
+			"generalTemplateMethod": "GeneralTemplateWrapper",
 			"pageRouting": [
 				{
 					"pageURI": "/dyn/index",
@@ -150,6 +158,10 @@
 					"ivyModule": "mkk.User.Settings",
 					"ivyMethod": "UserSettings"
 				}, {
+					"pageURI": "/dyn/auth",
+					"ivyModule": "mkk.User.Auth",
+					"ivyMethod": "Auth"
+				}, {
 					"pageURI": "/dyn/right/edit",
 					"ivyModule": "mkk.Right.Edit",
 					"ivyMethod": "RightEdit"
@@ -201,6 +213,9 @@
 				"siteRoot": "/",
 				"siteJSON_RPC": "history/jsonrpc/",
 				"siteWebFormAPI": "history/api/"
+			},
+			"serviceDeps": {
+				"authService": "yarMKKMain"
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk/",

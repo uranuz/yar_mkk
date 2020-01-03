@@ -26,7 +26,7 @@ define('mkk/app', [
 	ControlManager,
 	IvyRuleFactory,
 	GlobalVarSource,
-	AccessController,
+	AuthController,
 	UserIdentity,
 	UserRights,
 	ModuleLoader
@@ -41,7 +41,7 @@ return FirClass(
 		this._ivyEngine = new IvyEngine(ivyConfig, ivyModuleLoader);
 		this._ivyEngine.getByModuleName('mkk.AccessRules');
 
-		this._accessController = new AccessController(
+		this._accessController = new AuthController(
 			new IvyRuleFactory(this._ivyEngine), new GlobalVarSource());
 		this._userIdentity = new UserIdentity(window.userRightData.user);
 		this._userRights = new UserRights(this._userIdentity, this._accessController);

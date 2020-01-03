@@ -102,8 +102,8 @@ void installNodeJS()
 
 	aptUpdate();
 	_waitProc(
-		spawnShell(`sudo npm install -g grunt-cli`),
-		`Устанавка Grunt command line interface`);
+		spawnShell(`sudo npm install -g gulp-cli`),
+		`Устанавка gulp command line interface`);
 }
 
 void installPostgres()
