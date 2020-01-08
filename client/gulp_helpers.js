@@ -26,10 +26,15 @@ var
 				"mkk/AboutSite/AboutSite",
 				"mkk/RecordHistory/RecordHistory",
 				"mkk/Right/List/List",
+				"mkk/Right/Role/List/List",
 				"mkk/Right/Object/List/List",
 				"mkk/User/Reg/Reg",
 				"mkk/User/Reg/Card/Card",
 				"mkk/User/Auth/Auth",
+				"mkk/User/List/List",
+				"mkk/Right/Rule/List/List",
+				"mkk/Right/Object/Edit/Edit",
+				"mkk/Right/Role/RightList/RightList",
 				"mkk/app"
 			]
 		},
