@@ -29,8 +29,6 @@ import mkk.main.user.list;
 
 import mkk.main.init_history_data;
 
-
-
 void main(string[] progArgs)
 {
 	WorkerOpts opts;

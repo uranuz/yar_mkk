@@ -1,51 +1,12 @@
 module mkk.main.service;
 
-import webtank.net.service.json_rpc_service: JSON_RPCService;
 import mkk.common.service;
-import webtank.ivy.service_mixin: IvyServiceMixin, IIvyServiceMixin;
-import webtank.ivy.access_rule_factory: IvyAccessRuleFactory;
-
-class MKKMainService: JSON_RPCService, IIvyServiceMixin
-{
-	import webtank.security.auth.core.controller: AuthCoreController;
-	import webtank.security.right.controller: AccessRightController;
-	import webtank.security.right.db_source: RightDatabaseSource;
-	import std.functional: toDelegate;
-
-	mixin IvyServiceMixin;
-
-	this(string serviceName)
-	{
-		super(serviceName);
-
-		_startIvyLogging();
-		_initTemplateCache();
-
-		_rights = new AccessRightController(
-			new IvyAccessRuleFactory(this.ivyEngine),
-			new RightDatabaseSource(toDelegate(&getAuthDB)));
-		_accessController = new AuthCoreController(toDelegate(&getAuthDB));
-	}
-
-	override AuthCoreController accessController() @property
-	{
-		auto controller = cast(AuthCoreController) _accessController;
-		assert(controller, `MKK access controller is null`);
-		return controller;
-	}
-
-	override AccessRightController rightController() @property
-	{
-		auto controller = cast(AccessRightController) _rights;
-		assert(controller, `MKK right controller is null`);
-		return controller;
-	}
-}
+import webtank.ivy.main_service: IvyMainService;
 
 // Возвращает ссылку на глобальный экземпляр основного сервиса MKK
-MKKMainService MainService() @property
+IvyMainService MainService() @property
 {
-	MKKMainService srv = cast(MKKMainService) Service();
+	IvyMainService srv = cast(IvyMainService) Service();
 	assert( srv, `View service is null` );
 	return srv;
 }
@@ -66,13 +27,8 @@ IDatabase getAuthDB() @property
 
 shared static this()
 {
-	Service(new MKKMainService("yarMKKMain"));
-
-	import webtank.security.right.source_method: getAccessRightList;
-	// Добавляем метод получения прав доступа в состав основного сервиса
-	MainService.JSON_RPCRouter.join!( () =>
-		getAccessRightList(MainService.rightController.rightSource)
-	)(`accessRight.list`);
+	import std.functional: toDelegate;
+	Service(new IvyMainService("yarMKKMain", toDelegate(&getAuthDB)));
 }
 
 import webtank.db.database: IDatabase;
