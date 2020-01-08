@@ -150,6 +150,6 @@ void renderPohodCsv(HTTPContext ctx, PohodFilter filter)
 {
 	import std.conv: to;
 
-	ctx.response.headers["Content-Type"] = `text/csv; charset="utf-8`;
+	ctx.response.headers[HTTPHeader.ContentType] = `text/csv; charset="utf-8`;
 	ctx.response.write(pohodCsv(ctx, filter).to!string);
 }

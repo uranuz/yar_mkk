@@ -23,6 +23,8 @@ public import
 	webtank.db.datctrl_joint,
 	webtank.db.write_utils,
 	webtank.net.http.context,
+	webtank.net.http.consts,
+	webtank.net.http.headers.consts,
 	webtank.net.http.handler,
 	webtank.net.utils,
 	webtank.net.uri,
