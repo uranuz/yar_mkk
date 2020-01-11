@@ -1,6 +1,8 @@
 define('mkk/Pohod/Stat/Stat', [
 	// Подключение зависимостей: библиотек, стилей и т.п.
 	'fir/controls/FirControl',
+	'flot/jquery.flot.js',
+	'flot/jquery.flot.time.js',
 	'mkk/Pohod/Stat/Stat.scss'
 ],
 function (FirControl, Flot, FlotTime) {

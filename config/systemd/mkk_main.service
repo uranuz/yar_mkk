@@ -3,6 +3,9 @@ Description=MKK site main service
 After=network.target
 After=nginx.target
 After=postgresql-11.target
+# StartLimitIntervalSec in recent systemd versions
+StartLimitInterval=0
+StartLimitIntervalSec=0
 
 [Service]
 WorkingDirectory=/home/yar_mkk/sites/mkk/
@@ -17,6 +20,8 @@ Type=simple
 TimeoutSec=300
 Restart=always
 OOMScoreAdjust=-100
+
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target

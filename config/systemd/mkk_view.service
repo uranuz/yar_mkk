@@ -2,6 +2,9 @@
 Description=MKK site view service
 After=network.target
 After=nginx.target
+# StartLimitIntervalSec in recent systemd versions
+StartLimitInterval=0
+StartLimitIntervalSec=0
 
 [Service]
 WorkingDirectory=/home/yar_mkk/sites/mkk/
@@ -16,6 +19,8 @@ Type=simple
 TimeoutSec=300
 Restart=always
 OOMScoreAdjust=-100
+
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target

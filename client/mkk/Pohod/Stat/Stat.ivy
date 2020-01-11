@@ -10,9 +10,6 @@ def Stat {=
 		data: null
 		select: null;
 	def.body {*
-	<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.js" defer></script>
-	<script type="text/javascript" src="{{vpaths.sitePublic}}flot/jquery.flot.time.js" defer></script>
-
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
 			'data', 'select'
