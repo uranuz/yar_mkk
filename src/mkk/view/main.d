@@ -14,6 +14,7 @@ void main(string[] progArgs)
 	WorkerOpts opts;
 	opts.port = 8082;
 	parseWorkerOptsFromCmd(progArgs, opts);
+	opts.threadCount = 1;
 	opts.service = Service();
 	runServer(opts);
 }

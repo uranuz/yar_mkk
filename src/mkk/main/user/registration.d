@@ -11,7 +11,8 @@ import mkk.main.user.consts: NEW_USER_ROLE, USER_ROLE;
 import mkk.main.tourist.read: readTourist;
 
 import webtank.security.auth.core.register_user: registerUser, addUserRoles, RegUserResult;
-import webtank.security.auth.core.controller: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
+import webtank.security.auth.core.consts: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
+import webtank.ivy.main_service: MainServiceContext;
 
 shared static this()
 {
@@ -80,9 +81,13 @@ Tuple!(
 	size_t, `touristNum`,
 	size_t, `userNum`
 )
-regUser(HTTPContext ctx, TouristDataToWrite touristData, UserRegData userData)
+regUser(MainServiceContext ctx, TouristDataToWrite touristData, UserRegData userData)
 {
 	import webtank.db.transaction: makeTransaction;
+	import webtank.security.auth.core.by_password: authenticateByPassword;
+	import webtank.db.iface.factory: IDatabaseFactory;
+
+
 	import std.array: join;
 	import std.range: empty;
 
@@ -162,7 +167,7 @@ where tourist.num = $1::integer`,
 		addUserRoles!(getAuthDB)(regUserRes.userNum, [NEW_USER_ROLE]);
 	}
 
-	MainService.accessController.authenticateByPassword(ctx, userData.login, userData.password);
+	authenticateByPassword(ctx, userData.login, userData.password);
 	enforce(ctx.user.isAuthenticated, `Не удалось создать временную сессию для регистрации пользователя!`);
 
 	size_t touristNum;

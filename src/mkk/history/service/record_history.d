@@ -19,7 +19,7 @@ shared static this()
 
 import webtank.datctrl.record_format;
 import webtank.datctrl.iface.data_field;
-import webtank.db.datctrl_joint;
+import webtank.db.datctrl;
 
 import std.datetime: DateTime;
 static immutable historyRecFormat = RecordFormat!(

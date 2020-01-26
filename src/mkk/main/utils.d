@@ -2,7 +2,7 @@ module mkk.main.utils;
 
 import webtank.common.optional_date: OptionalDate;
 
-import mkk.main.enums: месяцы;
+import mkk.main.enums: months;
 
 string dateRusFormatLetter(OptionalDate date)
 {
@@ -17,7 +17,7 @@ string dateRusFormatLetter(OptionalDate date)
 		if( fieldName != `month` )
 			dateRu ~= (dtPart.isNull? `__`: dtPart.value.text) ~ " ";
 		else
-			dateRu ~= (dtPart.isNull? `__`: месяцы[dtPart.value]) ~ " ";
+			dateRu ~= (dtPart.isNull? `__`: months[dtPart.value]) ~ " ";
 	}
 
 	return dateRu;
@@ -37,7 +37,7 @@ string dateRusFormatNumber(OptionalDate date)
 		if( fieldName != `year` )
 			dateRu ~= (dtPart.isNull? `__`: dtPart.value.text) ~ ".";
 		else
-			dateRu ~= (dtPart.isNull? `__`:месяцы[dtPart.value]);
+			dateRu ~= (dtPart.isNull? `__`:months[dtPart.value]);
 	}
 
 	return dateRu;

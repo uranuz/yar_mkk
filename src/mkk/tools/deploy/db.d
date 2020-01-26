@@ -5,7 +5,7 @@ import std.stdio: writeln;
 import std.exception: enforce;
 
 import mkk.tools.auth_db: getAuthDB, getCommonDB;
-import webtank.db.datctrl_joint: getScalar;
+import webtank.db.datctrl: getScalar;
 
 void main(string[] args)
 {

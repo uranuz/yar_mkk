@@ -17,6 +17,7 @@
 			],
 			"sourcePaths": [
 				"src/mkk/common",
+				"src/mkk/backend",
 				"src/mkk/main",
 				"src/mkk/history/common",
 				"src/mkk/history/client"
@@ -67,6 +68,7 @@
 			],
 			"sourcePaths": [
 				"src/mkk/common",
+				"src/mkk/backend",
 				"src/mkk/history/common",
 				"src/mkk/history/service"
 			],

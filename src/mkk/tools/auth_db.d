@@ -1,6 +1,6 @@
 module mkk.tools.auth_db;
 
-import webtank.db.database: IDatabase;
+import webtank.db: IDatabase;
 
 private IDatabase _authDB;
 private IDatabase _commonDB;

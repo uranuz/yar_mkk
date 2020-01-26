@@ -19,8 +19,9 @@ public import
 	webtank.datctrl.typed_record,
 	webtank.datctrl.typed_record_set,
 	webtank.datctrl.navigation,
-	webtank.db.database,
-	webtank.db.datctrl_joint,
+	webtank.db,
+	webtank.db.datctrl,
+	webtank.db.utils,
 	webtank.db.write_utils,
 	webtank.net.http.context,
 	webtank.net.http.consts,
@@ -30,12 +31,13 @@ public import
 	webtank.net.uri,
 	webtank.security.right.common;
 
-public import webtank.db.postgresql: toPGString;
+public import webtank.db.postgresql.serialize: toPGString;
 
 //Импорт модулей сайта
 public import
 	mkk.main.service,
-	mkk.common.utils;
+	mkk.common.utils,
+	mkk.backend.database;
 
 // Очень частые импорты
 public import std.typecons: tuple, Tuple;

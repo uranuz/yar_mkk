@@ -264,7 +264,7 @@ size_t getPohodCount(PohodFilter filter)
 	return getCommonDB().query(query).get(0, 0, "0").to!size_t;
 }
 //-----------------------------------------------------------------
-IDBQueryResult PohodList(PohodFilter filter, Navigation nav)
+auto PohodList(PohodFilter filter, Navigation nav)
 {
 	import std.conv: text;
 

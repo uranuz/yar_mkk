@@ -57,7 +57,7 @@ auto pohodCsv(HTTPContext context, PohodFilter filter)
 	Navigation nav;
 	nav.offset.getOrSet(0); nav.pageSize.getOrSet(10000);
 
-	IDBQueryResult rs = PohodList(filter, nav);
+	auto rs = PohodList(filter, nav);
 
 	string[][] for_all; //обобщённый массив данных 
 	for_all.length = rs.recordCount+1; //строк втаблице

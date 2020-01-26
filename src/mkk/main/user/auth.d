@@ -3,8 +3,8 @@ module mkk.main.user.auth;
 import mkk.main.devkit;
 
 import mkk.main.service;
-import webtank.security.auth.common.exception: AuthException;
 import webtank.security.auth.common.user_identity: CoreUserIdentity;
+import webtank.ivy.main_service: MainServiceContext;
 
 shared static this()
 {
@@ -28,44 +28,40 @@ Tuple!(
 	string, `accessRoles`,
 	Optional!size_t, `touristNum`
 )
-baseUserInfo(HTTPContext context)
+baseUserInfo(HTTPContext ctx)
 {
+	import webtank.security.auth.common.anonymous_user: AnonymousUser;
+
 	import std.json: JSONValue;
 	import std.conv: to, ConvException;
-	auto userIdentity = MainService.accessController.authenticate(context);
+	import std.exception: ifThrown;
 
-	typeof(return) res;
-	res.login = userIdentity.id;
-	res.name = userIdentity.name;
-
-	if( userIdentity.data.get(`userNum`, null).length > 0 )
-	{
-		try {
-			res.userNum = userIdentity.data[`userNum`].to!size_t;
-		} catch(ConvException ex) {}
+	ctx.user = ifThrown(ctx.service.accessController.authenticate(ctx.request), null);
+	if( ctx.user is null ) {
+		ctx.user = new AnonymousUser;
 	}
 
-	res.accessRoles = userIdentity.data.get(`accessRoles`, null);
+	typeof(return) res;
+	res.login = ctx.user.id;
+	res.name = ctx.user.name;
+	res.userNum = ifThrown!ConvException(
+		Optional!size_t(ctx.user.data.get(`userNum`, null).to!size_t), Optional!size_t());
+	res.accessRoles = ctx.user.data.get(`accessRoles`, null);
 	// TODO: Добавить получение идентификатора туриста для пользователя
 
 	return res;
 }
 
-string authByPassword(HTTPContext context, string login, string password)
+string authByPassword(MainServiceContext ctx, string login, string password)
 {
-	import std.exception: enforce;
-	auto userIdentity = cast(CoreUserIdentity) MainService.accessController.authenticateByPassword(context, login, password);
-
-	enforce!AuthException(
-		userIdentity !is null && userIdentity.isAuthenticated,
-		`Failed to authenticate user by login and password`);
-
-	return context.response.cookies.get(`__sid__`);
+	import webtank.security.auth.core.by_password: authenticateByPassword;
+	
+	authenticateByPassword(ctx, login, password);
+	return ctx.response.cookies.get(CookieName.SessionId);
 }
 
-void logout(HTTPContext context)
-{
-	MainService.accessController.logout(context.user);
+void logout(MainServiceContext ctx) {
+	ctx.service.accessController.logout(ctx.user);
 }
 
 import std.typecons: Tuple;
@@ -75,7 +71,7 @@ Tuple!(
 	bool, `isAuthFailed`,
 	bool, `isAuthenticated`
 )
-authHandler(HTTPContext ctx, string userLogin = null, string userPassword = null, string redirectTo = null)
+authHandler(MainServiceContext ctx, string userLogin = null, string userPassword = null, string redirectTo = null)
 {
 	import std.range: empty;
 
@@ -103,10 +99,7 @@ authHandler(HTTPContext ctx, string userLogin = null, string userPassword = null
 	//Если пришёл логин и пароль, то значит выполняем аутентификацию
 	if( !userLogin.empty && !userPassword.empty )
 	{
-		string sid;
-		//try {
-			sid = authByPassword(ctx, userLogin, userPassword);
-		//} catch(Exception) {}
+		string sid = authByPassword(ctx, userLogin, userPassword);
 
 		if( sid.empty )
 		{
@@ -128,6 +121,6 @@ authHandler(HTTPContext ctx, string userLogin = null, string userPassword = null
 	return typeof(return)(
 		userLogin,
 		isAuthFailed,
-		(!isAuthFailed && ( ctx.user.isAuthenticated || "__sid__" in resp.cookies ))
+		(!isAuthFailed && ( ctx.user.isAuthenticated || CookieName.SessionId in resp.cookies ))
 	);
 }

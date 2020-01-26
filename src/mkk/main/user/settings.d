@@ -1,8 +1,9 @@
 module mkk.main.user.settings;
 
 import mkk.main.devkit;
-import webtank.security.auth.core.controller: changeUserPassword;
-import webtank.security.auth.common.exception: AuthException;
+import webtank.security.auth.core.change_password: changeUserPassword;
+import webtank.ivy.main_service: MainServiceContext;
+
 
 shared static this()
 {
@@ -11,12 +12,15 @@ shared static this()
 	MainService.pageRouter.joinWebFormAPI!(renderUserSettings)("/api/user/settings");
 }
 
+
 void changePassword(
-	HTTPContext ctx,
+	MainServiceContext ctx,
 	string oldPassword,
 	string newPassword,
 	string repeatPassword
 ) {
+	import webtank.security.auth.common.exception: AuthException;
+	
 	enforce!AuthException(
 		ctx.user.isAuthenticated,
 		`Изменение пароля пользователя требует аутентификации на сайте!`
@@ -32,7 +36,7 @@ void changePassword(
 	import std.functional: toDelegate;
 	enforce!AuthException(
 		// Здесь, естественно, необходимо проверять старый пароль перед тем как его сменить, иначе будет пичально...
-		changeUserPassword!(/*doPwCheck=*/true)(toDelegate(&getAuthDB), ctx.user.id, oldPassword, newPassword),
+		changeUserPassword!(/*doPwCheck=*/true)(ctx.service, ctx.user.id, oldPassword, newPassword),
 		`Произошла ошибка при попытке смены пароля! Возможно, введен неверный старый пароль`
 	);
 }
@@ -43,7 +47,7 @@ Tuple!(
 	string, `pwChangeMessage`
 )
 renderUserSettings(
-	HTTPContext ctx,
+	MainServiceContext ctx,
 	string oldPassword,
 	string newPassword,
 	string repeatPassword

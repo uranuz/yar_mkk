@@ -5,8 +5,8 @@ import mkk.common.utils;
 import mkk.history.common;
 
 import webtank.db.transaction: makeTransaction;
-import webtank.db.database: queryParams;
-import webtank.net.utils: PGEscapeStr;
+import webtank.db: queryParams;
+import webtank.db.utils: PGEscapeStr;
 import webtank.net.http.context: HTTPContext;
 import webtank.common.optional: Optional;
 

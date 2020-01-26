@@ -250,9 +250,8 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	//-----конец -запроса--"по КС"
 
 	auto dbase = getCommonDB(); //Подключение к базе
-	IDBQueryResult rs;
-	 
-	rs = dbase.query(запрос_статистика);//.getRecordSet(statRecFormatVid);
+	auto rs = dbase.query(запрос_статистика);
+
 	                  //************************
 	bool parity;
 	// --формируем исходные матрицы------//
