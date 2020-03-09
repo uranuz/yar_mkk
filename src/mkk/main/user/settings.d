@@ -33,7 +33,6 @@ void changePassword(
 		newPassword == repeatPassword,
 		`Смена пароля не произведена. Новый пароль и подтверждение пароля не совпадают!`
 	);
-	import std.functional: toDelegate;
 	enforce!AuthException(
 		// Здесь, естественно, необходимо проверять старый пароль перед тем как его сменить, иначе будет пичально...
 		changeUserPassword!(/*doPwCheck=*/true)(ctx.service, ctx.user.id, oldPassword, newPassword),

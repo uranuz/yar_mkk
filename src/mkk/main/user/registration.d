@@ -84,20 +84,11 @@ Tuple!(
 regUser(MainServiceContext ctx, TouristDataToWrite touristData, UserRegData userData)
 {
 	import webtank.db.transaction: makeTransaction;
-	import webtank.security.auth.core.by_password: authenticateByPassword;
+	import webtank.security.auth.core.by_password: authByPassword;
 	import webtank.db.iface.factory: IDatabaseFactory;
-
 
 	import std.array: join;
 	import std.range: empty;
-
-	static immutable touristRegRecFormat = RecordFormat!(
-		PrimaryKey!(size_t, "num"),
-		string, "familyName",
-		string, "givenName",
-		string, "patronymic",
-		string, "email"
-	)();
 
 	string[] nameParts; // Собираем сюда полное имя пользователя
 	string userEmail;
@@ -116,7 +107,13 @@ regUser(MainServiceContext ctx, TouristDataToWrite touristData, UserRegData user
 	email
 from tourist
 where tourist.num = $1::integer`,
-		touristData.num).getRecord(touristRegRecFormat);
+		touristData.num).getRecord(RecordFormat!(
+			PrimaryKey!(size_t, "num"),
+			string, "familyName",
+			string, "givenName",
+			string, "patronymic",
+			string, "email"
+		)());
 		enforce(
 			touristDBRec !is null,
 			`Не удалось прочитать информацию о туристе из БД`);
@@ -167,7 +164,7 @@ where tourist.num = $1::integer`,
 		addUserRoles!(getAuthDB)(regUserRes.userNum, [NEW_USER_ROLE]);
 	}
 
-	authenticateByPassword(ctx, userData.login, userData.password);
+	authByPassword(ctx, userData.login, userData.password);
 	enforce(ctx.user.isAuthenticated, `Не удалось создать временную сессию для регистрации пользователя!`);
 
 	size_t touristNum;
