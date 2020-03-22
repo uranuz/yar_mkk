@@ -2,8 +2,8 @@ module mkk.main.user.registration;
 
 import mkk.main.devkit;
 
-import mkk.history.client;
-import mkk.history.common;
+import webtank.history.client;
+import webtank.history.common;
 
 import mkk.main.tourist.model;
 import mkk.main.tourist.edit: editTourist, requireFieldsForReg;

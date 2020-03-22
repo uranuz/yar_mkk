@@ -3,7 +3,8 @@ module mkk.main.user.auth;
 import mkk.main.devkit;
 
 import mkk.main.service;
-import webtank.security.auth.common.user_identity: CoreUserIdentity;
+
+import webtank.security.auth.core.by_password: authByPassword;
 import webtank.ivy.main_service: MainServiceContext;
 
 shared static this()
@@ -13,7 +14,8 @@ shared static this()
 		.join!(authByPassword)(`auth.authByPassword`)
 		.join!(logout)(`auth.logout`);
 
-	MainService.pageRouter.joinWebFormAPI!(authHandler)("/api/auth");
+	MainService.pageRouter.joinWebFormAPI!(authByPassword)("/api/auth");
+	MainService.pageRouter.joinWebFormAPI!(logout)("/api/logout");
 }
 
 //import mkk.security.core.access_control;
@@ -52,75 +54,10 @@ baseUserInfo(HTTPContext ctx)
 	return res;
 }
 
-string authByPassword(MainServiceContext ctx, string login, string password)
+void logout(MainServiceContext ctx, string redirectTo = null)
 {
-	import webtank.security.auth.core.by_password: authenticateByPassword;
-	
-	authenticateByPassword(ctx, login, password);
-	return ctx.response.cookies.get(CookieName.SessionId);
-}
+	import webtank.net.http.headers.consts: HTTPHeader;
+	import webtank.net.uri: URI;
 
-void logout(MainServiceContext ctx) {
 	ctx.service.accessController.logout(ctx.user);
-}
-
-import std.typecons: Tuple;
-
-Tuple!(
-	string, `userLogin`,
-	bool, `isAuthFailed`,
-	bool, `isAuthenticated`
-)
-authHandler(MainServiceContext ctx, string userLogin = null, string userPassword = null, string redirectTo = null)
-{
-	import std.range: empty;
-
-	auto resp = ctx.response;
-
-	/+
-	if( "logout" in req.queryForm )
-	{
-		logout(ctx); // Делаем "разаутентификацию"
-
-		// Если есть куда перенаправлять - перенаправляем...
-		/*
-		if( redirectTo.length > 0 ) {
-			resp.redirect(redirectTo);
-		} else {
-			resp.redirect(ctx.service.virtualPaths.get(`siteAuthPage`, null));
-		}
-		*/
-		return typeof(return)();
-	}
-	+/
-
-	bool isAuthFailed = false;
-
-	//Если пришёл логин и пароль, то значит выполняем аутентификацию
-	if( !userLogin.empty && !userPassword.empty )
-	{
-		string sid = authByPassword(ctx, userLogin, userPassword);
-
-		if( sid.empty )
-		{
-			isAuthFailed = true;
-		}
-		else
-		{
-			// Если есть куда перенаправлять - перенаправляем...
-			/*
-			if( redirectTo.length > 0 ) {
-				resp.redirect(redirectTo);
-			} else {
-				resp.redirect(ctx.service.virtualPaths.get(`siteAuthPage`, null));
-			}
-			*/
-		}
-	}
-
-	return typeof(return)(
-		userLogin,
-		isAuthFailed,
-		(!isAuthFailed && ( ctx.user.isAuthenticated || CookieName.SessionId in resp.cookies ))
-	);
 }

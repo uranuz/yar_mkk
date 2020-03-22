@@ -2,7 +2,7 @@ module mkk.backend.database;
 
 import webtank.db.iface.factory: IDatabaseFactory;
 import webtank.db.iface.database: IDatabase;
-import webtank.db.consts: AUTH_DB;
+import webtank.db.consts: DBRole;
 
 import mkk.common.service: Service;
 
@@ -19,8 +19,8 @@ IDatabaseFactory _getDBFactory()
 enum DBID: string
 {
 	common = `commonDB`,
-	auth = AUTH_DB,
-	history = `historyDB`
+	auth = DBRole.auth,
+	history = DBRole.history
 }
 
 // Метод для получения экземпляра объекта подключения к основной БД сервиса МКК
@@ -31,9 +31,4 @@ IDatabase getCommonDB() @property {
 // Метод для получения экземпляра объекта подключения к БД аутентификации сервиса МКК
 IDatabase getAuthDB() @property {
 	return _getDBFactory().getDB(DBID.auth);
-}
-
-// Метод для получения экземпляра объекта подключения к БД истории сервиса МКК
-IDatabase getHistoryDB() @property {
-	return _getDBFactory().getDB(DBID.history);
 }

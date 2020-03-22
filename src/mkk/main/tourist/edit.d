@@ -4,8 +4,8 @@ import mkk.main.devkit;
 
 import mkk.main.tourist.model;
 
-import mkk.history.client;
-import mkk.history.common;
+import webtank.history.client;
+import webtank.history.common;
 
 shared static this()
 {

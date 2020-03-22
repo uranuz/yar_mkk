@@ -18,9 +18,7 @@
 			"sourcePaths": [
 				"src/mkk/common",
 				"src/mkk/backend",
-				"src/mkk/main",
-				"src/mkk/history/common",
-				"src/mkk/history/client"
+				"src/mkk/main"
 			],
 			"dependencies": {
 				"webtank": ">=0.0.0"
@@ -46,11 +44,11 @@
 				"webtank": ">=0.0.0"
 			},
 			"sourcePaths": [
-				"src/mkk/common",
-				"src/mkk/view",
-				"src/mkk/history/common"
+				"src/mkk/common"
 			],
-			"sourceFiles": [],
+			"sourceFiles": [
+				"src/mkk/view.d"
+			],
 			"buildRequirements": [
 				"allowWarnings"
 			],
@@ -67,10 +65,10 @@
 				"pq"
 			],
 			"sourcePaths": [
-				"src/mkk/common",
-				"src/mkk/backend",
-				"src/mkk/history/common",
-				"src/mkk/history/service"
+				"src/mkk/common"
+			],
+			"sourceFiles": [
+				"src/mkk/history.d"
 			],
 			"dependencies": {
 				"webtank": ">=0.0.0"

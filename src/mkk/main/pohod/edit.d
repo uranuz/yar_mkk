@@ -3,8 +3,8 @@ module mkk.main.pohod.edit;
 import mkk.main.devkit;
 
 import mkk.main.pohod.model;
-import mkk.history.client;
-import mkk.history.common;
+import webtank.history.client;
+import webtank.history.common;
 
 import mkk.main.pohod.read: pohodRead;
 import mkk.main.pohod.file_links.edit: writePohodFileLinks;

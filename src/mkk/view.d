@@ -1,4 +1,4 @@
-module mkk.view.main;
+module mkk.view;
 
 import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
 import webtank.ivy.view_service: IvyViewService;

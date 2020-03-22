@@ -8,9 +8,9 @@
 				"siteJSON_RPC": "jsonrpc/",
 				"siteWebFormAPI": "api/"
 			},
-			"serviceDeps": {
-				"historyService": "yarMKKHistory",
-				"authService": "yarMKKMain"
+			"serviceRoles": {
+				"history": "yarMKKHistory",
+				"auth": "yarMKKMain"
 			},
 			"databases": {
 				"commonDB": {
@@ -45,9 +45,9 @@
 
 				"siteAuthPage": "dyn/auth"
 			},
-			"serviceDeps": {
-				"backendService": "yarMKKMain",
-				"authService": "yarMKKMain"
+			"serviceRoles": {
+				"backend": "yarMKKMain",
+				"auth": "yarMKKMain"
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk/",
@@ -214,8 +214,8 @@
 				"siteJSON_RPC": "history/jsonrpc/",
 				"siteWebFormAPI": "history/api/"
 			},
-			"serviceDeps": {
-				"authService": "yarMKKMain"
+			"serviceRoles": {
+				"auth": "yarMKKMain"
 			},
 			"fileSystemPaths": {
 				"siteRoot": "~/sites/mkk/",
