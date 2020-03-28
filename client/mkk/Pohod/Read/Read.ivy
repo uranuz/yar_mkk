@@ -48,7 +48,7 @@ def PohodRead {=
 				value: pohod.tourismKind.name;
 			EntityProperty
 				title: 'Категория сложности'
-				value: {*{{pohod.complexity.name}} {{pohod.complexityElems.name}}*};
+				value: {*{{pohod.complexity.name}} {{pohod.complexityElem.name}}*};
 			EntityProperty
 				title: 'Район похода'
 				value: pohod.pohodRegion;

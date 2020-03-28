@@ -15,20 +15,20 @@ shared static this()
 static immutable pohodInfoQueryBase =
 `select
 	pohod.num,
-	kod_mkk "mkkCode",
-	nomer_knigi "bookNum",
+	mkk_code "mkkCode",
+	book_num "bookNum",
 	organization,
-	region_group "partyRegion",
+	party_region "partyRegion",
 	begin_date "beginDate",
 	finish_date "finishDate",
-	vid "tourismKind",
-	ks "complexity",
-	elem "complexityElems",
-	region_pohod "pohodRegion",
-	marchrut "route",
-	pohod.unit "partySize",
-	chef_grupp "chiefNum",
-	alt_chef "altChiefNum",
+	tourism_kind "tourismKind",
+	complexity "complexity",
+	complexity_elem "complexityElem",
+	pohod_region "pohodRegion",
+	route "route",
+	pohod.party_size "partySize",
+	chief_num "chiefNum",
+	alt_chief_num "altChiefNum",
 	case
 		when
 			chief_rec.family_name is null
@@ -55,15 +55,15 @@ static immutable pohodInfoQueryBase =
 			|| coalesce(' ' || alt_chief_rec.patronymic,'')
 			|| coalesce(' ' || alt_chief_rec.birth_year::text,'')
 	end "altChiefName",
-	prepar "progress",
-	stat "claimState",
-	chef_coment "chiefComment",
-	"MKK_coment" "mkkComment"
+	progress "progress",
+	claim_state "claimState",
+	chief_comment "chiefComment",
+	"mkk_comment" "mkkComment"
 from pohod
 left outer join tourist chief_rec
-	on pohod.chef_grupp = chief_rec.num
+	on pohod.chief_num = chief_rec.num
 left outer join tourist alt_chief_rec
-	on pohod.alt_chef = alt_chief_rec.num
+	on pohod.alt_chief_num = alt_chief_rec.num
 `;
 
 import std.typecons: tuple;
@@ -79,7 +79,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	Date, "finishDate",
 	typeof(tourismKind), "tourismKind",
 	typeof(complexity), "complexity",
-	typeof(complexityElems), "complexityElems",
+	typeof(complexityElem), "complexityElem",
 	string, "pohodRegion",
 	string, "route",
 	size_t, "partySize",
@@ -96,7 +96,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	tuple(
 		tourismKind,
 		complexity,
-		complexityElems,
+		complexityElem,
 		progress,
 		claimState
 	)

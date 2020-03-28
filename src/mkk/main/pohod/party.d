@@ -84,9 +84,9 @@ partyInfo(Optional!size_t num)
 	auto pohodInfo = getCommonDB().queryParams(`
 select
 	pohod.num as num,
-	pohod.kod_mkk as "mkkCode",
-	pohod.nomer_knigi as "bookNum",
-	pohod.region_pohod as "pohodRegion"
+	pohod.mkk_code as "mkkCode",
+	pohod.book_num as "bookNum",
+	pohod.pohod_region as "pohodRegion"
 from pohod where pohod.num = $1
 	`, num).getRecordSet(briefPohodInfoRecFormat);
 

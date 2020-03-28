@@ -52,7 +52,7 @@ editTourist(
 	import std.meta: AliasSeq, staticMap;
 	import std.algorithm: canFind, countUntil;
 	import std.conv: text, ConvException;
-	import mkk.main.enums: sportsCategory, refereeCategory;
+	import mkk.main.enums: sportCategory, refereeCategory;
 	import std.json: JSONValue;
 	import webtank.security.right.access_exception: AccessException;
 
@@ -93,7 +93,7 @@ select exists(
 	string[] fieldValues; // значения полей для записи
 
 	alias TouristEnums = AliasSeq!(
-		tuple("sportsCategory", sportsCategory),
+		tuple("sportCategory", sportCategory),
 		tuple("refereeCategory", refereeCategory)
 	);
 	enum string GetFieldName(alias E) = E[0];

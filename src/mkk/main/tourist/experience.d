@@ -22,7 +22,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	Date, "finishDate",
 	typeof(tourismKind), "tourismKind",
 	typeof(complexity), "complexity",
-	typeof(complexityElems), "complexityElems",
+	typeof(complexityElem), "complexityElem",
 	size_t, "chiefNum",
 	string, "partyRegion",
 	string, "organization",
@@ -35,7 +35,7 @@ static immutable pohodRecFormat = RecordFormat!(
 	tuple(
 		tourismKind,
 		complexity,
-		complexityElems,
+		complexityElem,
 		progress,
 		claimState
 	)
@@ -72,20 +72,20 @@ getExperience(
 	auto pohodList = getCommonDB().queryParams(
 `select
 	ph.num,
-	ph.kod_mkk "mkkCode",
-	ph.nomer_knigi "bookNum",
+	ph.mkk_code "mkkCode",
+	ph.book_num "bookNum",
 	ph.begin_date "beginDate",
 	ph.finish_date "finishDate",
-	ph.vid as "tourismKind",
-	ph.ks as "complexity",
-	ph.elem as "complexityElems",
-	ph.chef_grupp "chiefNum",
-	ph.region_group "partyRegion",
+	ph.tourism_kind as "tourismKind",
+	ph.complexity as "complexity",
+	ph.complexity_elem as "complexityElem",
+	ph.chief_num "chiefNum",
+	ph.party_region "partyRegion",
 	ph.organization,
-	ph.region_pohod "pohodRegion",
-	ph.marchrut "route",
-	ph.prepar "progress",
-	ph.stat "claimState"
+	ph.pohod_region "pohodRegion",
+	ph.route "route",
+	ph.progress "progress",
+	ph.claim_state "claimState"
 from pohod_party php
 join pohod ph
 	on ph.num = php.pohod_num

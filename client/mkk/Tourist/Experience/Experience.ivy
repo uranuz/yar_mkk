@@ -44,7 +44,7 @@ def Experience {=
 					value: tourist.experience;
 				EntityProperty
 					title: 'Спортивный разряд'
-					value: tourist.sportsCategory.name;
+					value: tourist.sportCategory.name;
 				EntityProperty
 					title: 'Судейская категория'
 					value: tourist.refereeCategory.name;
@@ -119,7 +119,7 @@ def TouristPohodsList {=
 			</td>
 			<td>
 				<div>{{rec.tourismKind.name}}</div>
-				<div>{{rec.complexity.name}} {{rec.complexityElems.name}}</div>
+				<div>{{rec.complexity.name}} {{rec.complexityElem.name}}</div>
 			</td>
 			<td>{{rec.pohodRegion}}</td>
 			<td>{=if rec.chiefNum == tourist.num "Руков." else "Участ."}</td>

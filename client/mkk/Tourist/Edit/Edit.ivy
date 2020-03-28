@@ -193,7 +193,7 @@ def TouristEdit {=
 			{%
 				ListBoxRow
 					caption: 'Спортивный разряд'
-					field: 'sportsCategory';
+					field: 'sportCategory';
 				ListBoxRow
 					caption: 'Судейская категория'
 					field: 'refereeCategory';

@@ -233,6 +233,31 @@
 					"password": "postgres"
 				}
 			}
+		},
+		"yarMKKScript": {
+			"databases": {
+				"commonDB": {
+					"host": "127.0.0.1",
+					"port": 5432,
+					"dbname": "baza_MKK",
+					"user": "postgres",
+					"password": "postgres"
+				},
+				"authDB": {
+					"host": "127.0.0.1",
+					"port": 5432,
+					"dbname": "MKK_site_base",
+					"user": "postgres",
+					"password": "postgres"
+				},
+				"historyDB": {
+					"host": "127.0.0.1",
+					"port": 5432,
+					"dbname": "mkk_history",
+					"user": "postgres",
+					"password": "postgres"
+				}
+			}
 		}
 	}
 }

@@ -26,10 +26,10 @@ struct TouristDataToWrite
 		@DBField("show_phone") Undefable!bool showPhone; // отображать телефон
 		@DBField("email") Undefable!string email; // email
 		@DBField("show_email") Undefable!bool showEmail; // отображать email
-		@DBField("exp") Undefable!string experience; // туристский опыт
+		@DBField("experience") Undefable!string experience; // туристский опыт
 		@DBField("comment") Undefable!string comment; // коментарий
-		@DBField("razr") Undefable!int sportsCategory; // спортивный разряд
-		@DBField("sud") Undefable!int refereeCategory; // судейская категория
+		@DBField("sport_category") Undefable!int sportCategory; // спортивный разряд
+		@DBField("referee_category") Undefable!int refereeCategory; // судейская категория
 	}
 }
 	bool dbSerializeMode = false; // При переводе в JSON названия полей берем для БД (при true) или из названий переменных
@@ -50,10 +50,10 @@ alias TouristFullFormatBase = AliasSeq!(
 	bool, "show_phone",
 	string, "email",
 	bool, "show_email",
-	string, "exp",
+	string, "experience",
 	string, "comment",
-	size_t, "razr",
-	size_t, "sud",
+	size_t, "sport_category",
+	size_t, "referee_category",
 	DateTime, "reg_timestamp",
 	DateTime, "last_edit_timestamp",
 	size_t, "last_editor_num",

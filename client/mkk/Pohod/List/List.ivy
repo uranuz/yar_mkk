@@ -117,7 +117,7 @@ def PohodListTable {=
 					</td>
 					<td>
 						<div>{{rec.tourismKind.name}}</div>
-						<div>{{rec.complexity.name}} {{rec.complexityElems.name}}</div>
+						<div>{{rec.complexity.name}} {{rec.complexityElem.name}}</div>
 					</td>
 					<td width="8%">{{rec.pohodRegion}}</td>
 					<td>

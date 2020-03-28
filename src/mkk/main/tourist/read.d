@@ -21,7 +21,7 @@ static immutable touristRecFormat = RecordFormat!(
 	ubyte, "birthDay",
 	string, "address",
 	string, "experience",
-	typeof(sportsCategory), "sportsCategory",
+	typeof(sportCategory), "sportCategory",
 	typeof(refereeCategory), "refereeCategory",
 	string, "phone",
 	bool, "showPhone",
@@ -31,7 +31,7 @@ static immutable touristRecFormat = RecordFormat!(
 )(
 	null,
 	tuple(
-		sportsCategory,
+		sportCategory,
 		refereeCategory
 	)
 );
@@ -58,9 +58,9 @@ readTourist(HTTPContext ctx, Optional!size_t num)
 		(select (regexp_matches("birth_date", '(\d*)[.,](\d+)'))[2])::integer "birthMonth",
 		(select (regexp_matches("birth_date", '(\d+)[.,](\d*)'))[1])::integer "birthDay",
 		` ~ (ctx.rights.hasRight(`tourist.item.address`, `edit`)? `address`: `null::text`) ~ `,
-		exp "experience",
-		razr "sportsCategory",
-		sud "refereeCategory",
+		experience "experience",
+		sport_category "sportCategory",
+		referee_category "refereeCategory",
 		case when ` ~ (ctx.rights.hasRight(`tourist.item.phone`, `edit`)? `true`: `show_phone`) ~ `
 			then phone else null end "phone",
 		show_phone "showPhone",

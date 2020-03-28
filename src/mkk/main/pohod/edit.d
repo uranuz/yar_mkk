@@ -36,7 +36,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 		tuple("claimState", claimState),
 		tuple("tourismKind", tourismKind),
 		tuple("complexity", complexity),
-		tuple("complexityElems", complexityElems),
+		tuple("complexityElem", complexityElem),
 		tuple("progress", progress)
 	);
 	enum string GetFieldName(alias E) = E[0];

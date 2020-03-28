@@ -167,12 +167,12 @@ def PohodEdit {=
 				}
 				{=PlainListBox
 					instanceName: 'complexityElemsField'
-					formField: 'complexityElems'
+					formField: 'complexityElem'
 					keyField: 'value'
 					displayField: 'name'
-					items: {=enumFormatWithNull pohod.complexityElems.format 'не задано'}
-					selectedKey: pohod.complexityElems.value
-					disabled: not{=hasRight subobj: 'pohod.complexityElems' kind: 'edit'}
+					items: {=enumFormatWithNull pohod.complexityElem.format 'не задано'}
+					selectedKey: pohod.complexityElem.value
+					disabled: not{=hasRight subobj: 'pohod.complexityElem' kind: 'edit'}
 				}
 			</td>
 		</tr>

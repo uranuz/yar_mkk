@@ -29,7 +29,7 @@ alias BasePohodFields = AliasSeq!(
 	Date, "finishDate",
 	typeof(tourismKind), "tourismKind",
 	typeof(complexity), "complexity",
-	typeof(complexityElems), "complexityElems",
+	typeof(complexityElem), "complexityElem",
 	string, "pohodRegion",
 	size_t, "chiefNum",
 	string, "chiefFamilyName",
@@ -50,37 +50,37 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	tuple(
 		tourismKind,
 		complexity,
-		complexityElems
+		complexityElem
 	)
 );
 
 static immutable basePohodFieldSubquery =`
 	poh.num "num",
-	kod_mkk "mkkCode",
-	nomer_knigi "bookNum",
+	mkk_code "mkkCode",
+	book_num "bookNum",
 	begin_date "beginDate",
 	finish_date "finishDate",
-	vid "tourismKind",
-	ks "complexity",
-	elem "complexityElems",
-	region_pohod "pohodRegion",
+	tourism_kind "tourismKind",
+	complexity "complexity",
+	complexity_elem "complexityElem",
+	pohod_region "pohodRegion",
 	chief.num "chiefNum",
 	chief.family_name "chiefFamilyName",
 	chief.given_name "chiefGivenName",
 	chief.patronymic "chiefPatronymic",
 	chief.birth_year "chiefBirthYear",
-	unit "partySize",
+	party_size "partySize",
 	organization,
-	region_group "partyRegion",
-	marchrut "route",
+	party_region "partyRegion",
+	route "route",
 `;
 
 static immutable recentPohodQuery =
 `select ` ~ basePohodFieldSubquery ~ `
-	chef_coment "chiefComment"
+	chief_comment "chiefComment"
 from pohod poh
 left join tourist chief
-	on chief.num = poh.chef_grupp
+	on chief.num = poh.chief_num
 where poh.reg_timestamp is not null
 order by poh.reg_timestamp desc nulls last
 limit 10
@@ -99,28 +99,28 @@ alias DCTuple = Tuple!(string, `cond`, string, `descr`);
 
 private static immutable pohodDataCheckFilters = [
 	DCTuple(
-		`finish_date < current_date and prepar < 6`,
+		`finish_date < current_date and progress < 6`,
 		`Сроки истекли, но не указан статус завершения похода`
 	),
 	DCTuple(
-		`nullif(nomer_knigi, '') is null and stat < 4`,
+		`nullif(book_num, '') is null and claim_state < 4`,
 		`Присвоен номер книги, но не указано, что заявка принята`
 	),
 	DCTuple(
 		`begin_date < current_date
-			and finish_date > current_date and prepar != 5`,
+			and finish_date > current_date and progress != 5`,
 		`Не установлен статус, что группа на маршруте`
 	),
 	DCTuple(
-		`nullif(region_pohod, '') is null`,
+		`nullif(pohod_region, '') is null`,
 		`Не указан район похода`
 	),
 	DCTuple(
-		`nullif(marchrut, '') is null`,
+		`nullif(route, '') is null`,
 		`Не указана нитка маршрута`
 	),
 	DCTuple(
-		`vid is null`,
+		`tourism_kind is null`,
 		`Не указан вид туризма`
 	),
 	DCTuple(
@@ -132,11 +132,11 @@ private static immutable pohodDataCheckFilters = [
 		`Не указана дата окончания похода`
 	),
 	DCTuple(
-		`unit is null`,
+		`party_size is null`,
 		`Не указано число участников`
 	),
 	DCTuple(
-		`ks is null`,
+		`complexity is null`,
 		`Не указана категория сложности`
 	)
 ];
@@ -162,10 +162,10 @@ private static immutable string pohodListDataCheckSubquery =
 // 1: формат перечислимого типа для этого параметра
 // 2: соответствующее название поля в структуре ФильтрПоходов
 static immutable PohodEnumFields = [
-	tuple("tourismKind", "vid", "вид туризма"),
-	tuple("complexity", "ks", "категория cложности"),
-	tuple("progress", "prepar", "готовность похода"),
-	tuple("claimState", "stat", "статус заявки")
+	tuple("tourismKind", "tourism_kind", "вид туризма"),
+	tuple("complexity", "complexity", "категория cложности"),
+	tuple("progress", "progress", "готовность похода"),
+	tuple("claimState", "claim_state", "статус заявки")
 ];
 
 //Формирует часть запроса по фильтрации походов (для SQL-секции where)
@@ -215,9 +215,9 @@ string getPohodFilterQueryPart(ref PohodFilter filter)
 	{
 		filters ~= `exists(
 			select 1 from(
-				select region_pohod
+				select pohod_region
 				union all
-				select marchrut
+				select route
 			) srch(field)
 			where srch.field ilike '%` ~ PGEscapeStr(filter.pohodRegion) ~ `%'
 		)`;
@@ -239,18 +239,18 @@ static immutable pohodRecFormat = RecordFormat!(
 	tuple(
 		tourismKind,
 		complexity,
-		complexityElems,
+		complexityElem,
 		progress,
 		claimState
 	)
 );
 
 private static immutable pohodListFromQueryPart =
-`	prepar "progress",
-	stat "claimState"
+`	progress "progress",
+	claim_state "claimState"
 	from pohod poh
 	left join tourist chief
-		on chief.num = poh.chef_grupp
+		on chief.num = poh.chief_num
 `;
 
 size_t getPohodCount(PohodFilter filter)

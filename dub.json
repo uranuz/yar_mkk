@@ -97,12 +97,13 @@
 				"src/mkk/common"
 			],
 			"sourceFiles": [
-				"src/mkk/tools/auth_db",
+				"src/mkk/backend/database",
 				"src/mkk/tools/add_user"
 			],
 			"buildRequirements": [
 				"allowWarnings"
-			]
+			],
+			"versions": ["mkk_script"]
 		},
 		{
 			"name": "set_user_password",
@@ -123,12 +124,13 @@
 				"src/mkk/common"
 			],
 			"sourceFiles": [
-				"src/mkk/tools/auth_db",
+				"src/mkk/backend/database",
 				"src/mkk/tools/set_user_password"
 			],
 			"buildRequirements": [
 				"allowWarnings"
-			]
+			],
+			"versions": ["mkk_script"]
 		},
 		{
 			"name": "gen_pw_hash",
@@ -215,9 +217,10 @@
 				"pq"
 			],
 			"sourceFiles": [
-				"src/mkk/tools/auth_db",
+				"src/mkk/backend/database",
 				"src/mkk/tools/deploy/db.d"
-			]
+			],
+			"versions": ["mkk_script"]
 		}
 	]
 }

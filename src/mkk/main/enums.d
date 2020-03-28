@@ -44,7 +44,7 @@ static immutable complexity = enumFormat([
 	t(9, "ПВД")
 ]);
 
-static immutable complexityElems = enumFormat([
+static immutable complexityElem = enumFormat([
 	t(1, "с эл. 1"),
 	t(2, "с эл. 2"),
 	t(3, "с эл. 3"), 
@@ -74,7 +74,7 @@ static immutable claimState = enumFormat([
 	t(7,"не засчитан")
 ]);
 
-static immutable sportsCategory = enumFormat([
+static immutable sportCategory = enumFormat([
 	t(900, "без разряда"),
 	t(603, "третий юн."),
 	t(602, "второй юн."),

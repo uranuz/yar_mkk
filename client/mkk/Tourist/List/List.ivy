@@ -115,7 +115,7 @@ def TouristListTable {=
 						>{{it.experience or "???"}}</a>
 				</td>
 				<td>
-					<div>{{it.sportsCategory.name}}</div>
+					<div>{{it.sportCategory.name}}</div>
 					<div>{{it.refereeCategory.name}}</div>
 				</td>
 				<td>{{it.comment}}</td>

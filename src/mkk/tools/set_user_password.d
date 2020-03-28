@@ -8,7 +8,7 @@ import std.conv: to;
 import std.algorithm: endsWith;
 
 import mkk.security.core.access_control;
-import mkk.tools.auth_db: getAuthDB;
+import mkk.backend.database: getAuthDB;
 
 void main(string[] progAgs)
 {

@@ -63,12 +63,12 @@ static immutable touristListRecFormat = RecordFormat!(
 	string, "experience",
 	string, "phone",
 	string, "email",
-	typeof(sportsCategory), "sportsCategory",
+	typeof(sportCategory), "sportCategory",
 	typeof(refereeCategory), "refereeCategory",
 	string, "comment"
 )(
 	null,
-	tuple(sportsCategory, refereeCategory)
+	tuple(sportCategory, refereeCategory)
 );
 
 /// Возвращает список туристов в подробном варианте
@@ -87,11 +87,11 @@ touristList(TouristListFilter filter, Navigation nav)
 		given_name,
 		patronymic,
 		birth_year,
-		exp,
+		experience,
 		case when show_phone then phone else null end,
 		case when show_email then email else null end,
-		razr "sportsCategory",
-		sud "refereeCategory",
+		sport_category "sportCategory",
+		referee_category "refereeCategory",
 		comment`,
 		`family_name, given_name, patronymic`);
 	

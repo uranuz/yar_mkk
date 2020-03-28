@@ -95,13 +95,13 @@ auto first_reading(HTTPContext context,StatSelect select)
 	if( select.conduct == 0 )
 	{
 		запрос_статистика =
-			` WITH stat AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,vid,ks,CAST (unit AS integer)  AS unit  FROM pohod 
-			WHERE begin_date is not null and vid is not null and ks is not null and unit is not null `;
+			` WITH claim_state AS (select  CAST ((date_part('YEAR', begin_date)) AS integer) AS year,tourism_kind,complexity,CAST (party_size AS integer)  AS party_size  FROM pohod 
+			WHERE begin_date is not null and tourism_kind is not null and complexity is not null and party_size is not null `;
 		if( b_kod || b_org ||  b_terr )
 			запрос_статистика ~= ` AND `;
 		if( b_kod )
 		{
-			запрос_статистика ~= ` kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%'`;
+			запрос_статистика ~= ` mkk_code ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%'`;
 			if( b_org || b_terr )
 				запрос_статистика ~= ` AND `;
 		}
@@ -114,7 +114,7 @@ auto first_reading(HTTPContext context,StatSelect select)
 		}
 
 		if( b_terr )
-			запрос_статистика ~= ` region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
+			запрос_статистика ~= ` party_region ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ORDER BY year ),`;
 
@@ -122,15 +122,15 @@ auto first_reading(HTTPContext context,StatSelect select)
 		{
 			запрос_статистика ~= `
 			 st` ~ i.to!string
-				~ ` AS ( SELECT year, count(unit) AS gr_` ~ i.to!string
-				~ `,   sum (unit)    AS un_` ~i.to!string
-				~ `  FROM stat  WHERE  vid=` ~i.to!string
+				~ ` AS ( SELECT year, count(party_size) AS gr_` ~ i.to!string
+				~ `,   sum (party_size)    AS un_` ~i.to!string
+				~ `  FROM claim_state  WHERE  tourism_kind=` ~i.to!string
 				~ ` GROUP BY year ORDER BY year  ),`;
 		}
 
 				запрос_статистика ~= `
-				всего AS ( SELECT year, count(unit) AS gr_всего ,  sum (unit)  AS un_всего
-								FROM stat GROUP BY year ORDER BY year ),
+				всего AS ( SELECT year, count(party_size) AS gr_всего ,  sum (party_size)  AS un_всего
+								FROM claim_state GROUP BY year ORDER BY year ),
 
 				st AS (SELECT
 				всего.year,`; 
@@ -151,7 +151,7 @@ auto first_reading(HTTPContext context,StatSelect select)
 ),
 
 st100 AS ( 
-	SELECT null::integer AS vid, `;
+	SELECT null::integer AS tourism_kind, `;
 
 	 foreach(size_t n; 1.. 11)
 	 запрос_статистика ~= `	    
@@ -174,17 +174,17 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 	{
 		запрос_статистика = `
 		WITH stat_by_year AS (
-		SELECT CAST(unit AS integer) AS unit,vid,ks
+		SELECT CAST(party_size AS integer) AS party_size,tourism_kind,complexity
 		FROM pohod
 		WHERE
-		   unit is not null AND 
-         vid is not null AND
+		   party_size is not null AND 
+         tourism_kind is not null AND
 			(date_part('YEAR', begin_date)>=` ~ PGEscapeStr(select.beginYear)
 		~` AND
 			date_part('YEAR', begin_date)<=` ~ PGEscapeStr(select.endYear) ~`)`;
 		if( b_kod )
 			запрос_статистика ~= `
-			 AND  kod_mkk ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%' `;
+			 AND  mkk_code ILIKE '%` ~ PGEscapeStr(select.kodMKK) ~ `%' `;
 
 		if( b_org )
 			запрос_статистика ~= `
@@ -192,27 +192,27 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 		if( b_terr )
 			запрос_статистика ~= `
-			  AND  region_group ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
+			  AND  party_region ILIKE '%` ~ PGEscapeStr(select.territory) ~ `%'`;
 
 		запрос_статистика ~= ` ) ,`;
 
 		запрос_статистика ~= `
-			  ks0 AS ( SELECT vid,count(unit) AS gr_0,  sum (unit)  
-			      AS un_0   FROM stat_by_year  WHERE  (ks=0 OR ks=9 )GROUP BY vid ORDER BY vid  ),`;
+			  ks0 AS ( SELECT tourism_kind,count(party_size) AS gr_0,  sum (party_size)  
+			      AS un_0   FROM stat_by_year  WHERE  (complexity=0 OR complexity=9 )GROUP BY tourism_kind ORDER BY tourism_kind  ),`;
 			foreach(size_t n; 1.. 7) 
 				запрос_статистика ~= `
-					ks`~n.to!string~` AS ( SELECT vid,count(unit) AS gr_`
-										~ n.to!string~`,  sum (unit)  AS un_`
-										~ n.to!string~`  FROM stat_by_year  WHERE  ks=`
-										~ n.to!string~`  GROUP BY vid ORDER BY vid  ),`;
+					complexity`~n.to!string~` AS ( SELECT tourism_kind,count(party_size) AS gr_`
+										~ n.to!string~`,  sum (party_size)  AS un_`
+										~ n.to!string~`  FROM stat_by_year  WHERE  complexity=`
+										~ n.to!string~`  GROUP BY tourism_kind ORDER BY tourism_kind  ),`;
 			запрос_статистика ~= `
-			put AS ( SELECT vid,count(unit) AS gr_7,  sum (unit)  AS un_7
-			      FROM stat_by_year  WHERE  (ks=7 OR ks is NULL)  GROUP BY vid ORDER BY vid  ),
-			всего AS ( SELECT vid,count(unit) AS gr_всего,sum (unit)  AS un_всего
-			FROM stat_by_year  WHERE vid is not null GROUP BY vid ORDER BY vid ),
+			put AS ( SELECT tourism_kind,count(party_size) AS gr_7,  sum (party_size)  AS un_7
+			      FROM stat_by_year  WHERE  (complexity=7 OR complexity is NULL)  GROUP BY tourism_kind ORDER BY tourism_kind  ),
+			всего AS ( SELECT tourism_kind,count(party_size) AS gr_всего,sum (party_size)  AS un_всего
+			FROM stat_by_year  WHERE tourism_kind is not null GROUP BY tourism_kind ORDER BY tourism_kind ),
 			st AS (
 			SELECT
-			всего.vid,`; 
+			всего.tourism_kind,`; 
 			foreach(size_t n; 0.. 8)
 				запрос_статистика ~= `	
 				gr_`~n.to!string~`, un_`~ n.to!string~`,`;
@@ -223,13 +223,13 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 
 			foreach(size_t n; 0.. 7)
 				запрос_статистика ~= `	 
-				LEFT JOIN ks`~n.to!string~` ON всего.vid   = ks`~ n.to!string~`.vid `;
+				LEFT JOIN complexity`~n.to!string~` ON всего.tourism_kind   = complexity`~ n.to!string~`.tourism_kind `;
 
 				запрос_статистика ~= `
-			LEFT JOIN put ON всего.vid   = put.vid
+			LEFT JOIN put ON всего.tourism_kind   = put.tourism_kind
 			),
 			st1 AS ( 
-				SELECT 11 AS vid,`;
+				SELECT 11 AS tourism_kind,`;
 				запрос_статистика ~= `
 				`;
 				foreach(size_t n; 0.. 7)
@@ -244,7 +244,7 @@ SELECT*FROM st200 ORDER BY year nulls last			`;
 				FROM st ),
 
 			st2 AS ( SELECT*FROM st UNION  SELECT*FROM st1 )
-			SELECT*FROM st2 ORDER BY vid
+			SELECT*FROM st2 ORDER BY tourism_kind
 			`;
 	}
 	//-----конец -запроса--"по КС"

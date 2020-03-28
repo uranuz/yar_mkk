@@ -14,7 +14,7 @@ def RecentPohodList {=
 					<a class="{=cls 'titleLink'}" href="{{vpaths.siteDynamic}}pohod/read?num={{pohod.num}}">
 						{{pohod.tourismKind.name}}
 						{{pohod.complexity.name}}
-						{{pohod.complexityElems.name}} к.с.
+						{{pohod.complexityElem.name}} к.с.
 						в районе {{pohod.pohodRegion}}
 					</a>
 					<div class="{=cls 'itemDetails'}">
