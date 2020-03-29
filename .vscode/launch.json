@@ -1,0 +1,42 @@
+{
+	// Используйте IntelliSense, чтобы узнать о возможных атрибутах.
+	// Наведите указатель мыши, чтобы просмотреть описания существующих атрибутов.
+	// Для получения дополнительной информации посетите: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug View",
+			"type": "gdb",
+			"request": "launch",
+			"target": "./bin/mkk_view_service",
+			"cwd": "${workspaceRoot}",
+			"autorun": [
+				"handle SIGUSR1 noprint",
+				"handle SIGUSR2 noprint",
+				"dir /usr/include/dmd/druntime/import/",
+				"dir /usr/include/dmd/phobos/",
+				"dir /home/uranuz/sources/webtank/src/",
+				"dir /home/uranuz/sources/ivy/src/",
+				"dir ${workspaceRoot}/src/"
+			],
+			"arguments": "--DRT-trapExceptions=0 --DRT-gcopt=parallel:1 --serverType=plain"
+		},
+		{
+			"name": "Debug Main",
+			"type": "gdb",
+			"request": "launch",
+			"target": "./bin/mkk_main_service",
+			"cwd": "${workspaceRoot}",
+			"autorun": [
+				"handle SIGUSR1 noprint",
+				"handle SIGUSR2 noprint",
+				"dir /usr/include/dmd/druntime/import/",
+				"dir /usr/include/dmd/phobos/",
+				"dir /home/uranuz/sources/webtank/src/",
+				"dir /home/uranuz/sources/ivy/src/",
+				"dir ${workspaceRoot}/src/"
+			],
+			"arguments": "--DRT-trapExceptions=0 --DRT-gcopt=parallel:1"
+		}
+	]
+}
