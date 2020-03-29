@@ -8,10 +8,11 @@ import std.conv;
 import std.algorithm: endsWith;
 import std.uuid: randomUUID;
 
-import mkk.security.core.access_control: minLoginLength, minPasswordLength;
-import mkk.backend.database: getAuthDB;
+import webtank.security.auth.core.consts: minLoginLength, minPasswordLength;
+import webtank.security.auth.core.register_user: registerUser;
 import webtank.common.conv: fromPGTimestamp;
-import mkk.security.core.register_user: registerUser;
+
+import mkk.backend.database: getAuthDB;
 
 void showHelp()
 {

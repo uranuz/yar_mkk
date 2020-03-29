@@ -6,7 +6,8 @@ import webtank.db.consts: DBRole;
 
 version(mkk_script)
 {
-	__gshared IDatabaseFactory _mkk_script_db_factory;
+	private __gshared IDatabaseFactory _mkk_script_db_factory;
+
 	shared static this()
 	{
 		import webtank.net.service.config: readServiceConfigFile, getServiceDatabases;
@@ -20,7 +21,7 @@ version(mkk_script)
 }
 
 // Получить фабрику баз данных по текущему сервису
-IDatabaseFactory _getDBFactory()
+IDatabaseFactory DBFactory() @property
 {
 	version(mkk_script) {
 		return _mkk_script_db_factory; // Фабрика баз для исполнения скриптов без создания сервиса
@@ -46,15 +47,15 @@ enum DBID: string
 
 // Метод для получения экземпляра объекта подключения к основной БД сервиса МКК
 IDatabase getCommonDB() @property {
-	return _getDBFactory().getDB(DBID.common);
+	return DBFactory().getDB(DBID.common);
 }
 
 // Метод для получения экземпляра объекта подключения к БД аутентификации сервиса МКК
 IDatabase getAuthDB() @property {
-	return _getDBFactory().getDB(DBID.auth);
+	return DBFactory().getDB(DBID.auth);
 }
 
 // Метод для получения экземпляра объекта подключения к БД аутентификации сервиса МКК
 IDatabase getHistoryDB() @property {
-	return _getDBFactory().getDB(DBID.history);
+	return DBFactory().getDB(DBID.history);
 }

@@ -7,8 +7,9 @@ import std.getopt: getopt;
 import std.conv: to;
 import std.algorithm: endsWith;
 
-import mkk.security.core.access_control;
-import mkk.backend.database: getAuthDB;
+import webtank.security.auth.core.consts: minLoginLength, minPasswordLength;
+import webtank.security.auth.core.change_password: changeUserPassword;
+import mkk.backend.database: DBFactory, getAuthDB;
 
 void main(string[] progAgs)
 {
@@ -71,8 +72,8 @@ void main(string[] progAgs)
 	}
 
 	import std.functional: toDelegate;
-	// Поскольку это у нас админский инструмент, то старый пароль не проверяем
-	if( changeUserPassword!(/*doPwCheck=*/false)(toDelegate(&getAuthDB), login, null, password, useScr) ) {
+	// Поскольку это у нас админский инструмент, то старый пароль здесь не проверяем
+	if( changeUserPassword!(/*doPwCheck=*/false)(DBFactory, login, null, password, useScr) ) {
 		writeln(`Установлен новый пароль для пользователя с логином "`, login, `"!`);
 	} else {
 		writeln(`При запросе на установку пароля пользователя произошла ошибка!`);

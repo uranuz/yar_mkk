@@ -18,7 +18,6 @@ shared static this()
 	MainService.pageRouter.joinWebFormAPI!(logout)("/api/logout");
 }
 
-//import mkk.security.core.access_control;
 import std.typecons: Tuple;
 import webtank.common.optional: Optional;
 
