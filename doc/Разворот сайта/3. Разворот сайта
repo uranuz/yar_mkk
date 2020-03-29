@@ -3,6 +3,9 @@ III. РАЗВОРОТ САЙТА
 		cd ~/sources
 
 		И выполнить..
+		Репозиторий со всякими утилитами
+			git clone https://github.com/uranuz/trifle.git
+
 		Репозиторий библиотеки интерфейсных компонентов (fir):
 			git clone https://github.com/uranuz/ivy.git
 		Репозиторий шаблонизатора (ivy):
