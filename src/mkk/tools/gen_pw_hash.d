@@ -6,7 +6,7 @@ import std.stdio: writeln;
 import std.getopt: getopt;
 import std.datetime: Clock;
 
-import mkk.security.core.crypto: makePasswordHashCompat;
+import webtank.security.auth.core.crypto: makePasswordHashCompat;
 
 void main(string[] progAgs)
 {
