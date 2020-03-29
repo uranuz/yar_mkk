@@ -270,10 +270,11 @@ void runNpmGulp()
 			`Установка/ обновление npm пакетов для: ` ~ folder);
 	}
 
-	string mainFolderPath = buildNormalizedPath(sourcesDir, `yar_mkk`);
+	string mainFolder = `yar_mkk`;
+	string mainFolderPath = buildNormalizedPath(sourcesDir, mainFolder);
 	_waitProc(
 		spawnShell(`gulp`, null, Config.none, mainFolderPath),
-		`Запуск задач gulp для: ` ~ folder);
+		`Запуск задач gulp для: ` ~ mainFolder);
 }
 
 static immutable string[] MKK_SERVICES = [`main`, `view`, `history`];
