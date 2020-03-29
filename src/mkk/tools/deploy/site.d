@@ -62,6 +62,8 @@ void main(string[] args)
 /++ Развертывание сайта +/
 void deploySite(string userName, string siteName)
 {
+	import std.algorithm: canFind;
+
 	compileAll(); // Собираем все бинарники проекта
 
 	string siteRoot = buildNormalizedPath("/home/", userName, "sites/mkk/");
@@ -116,7 +118,10 @@ void deploySite(string userName, string siteName)
 	addSiteToNginx(siteName);
 	runNpmGulp();
 	installSystemdUnits();
-	enableCertbot(siteName);
+	// Кастыль: создавай сертификат, если только нормальный сайт, а не локалхвост
+	if( siteName.length > 0 && ![`localhost`, `127.0.0.1`].canFind(siteName) ) {
+		enableCertbot(siteName);
+	}
 }
 
 /// Компиляция всех нужных бинарей сайта
