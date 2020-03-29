@@ -77,8 +77,8 @@ void installBasicUtils()
 		spawnShell(`sudo apt install -y htop mc curl wget unar nano`),
 		`Установка основных утилиты Linux`);
 	_waitProc(
-		spawnShell(`sudo apt install -y git mercurial`),
-		`Установка систем контроля версий`);
+		spawnShell(`sudo apt install -y git`),
+		`Установка системы контроля версий`);
 	_waitProc(
 		spawnShell(`sudo apt install -y python3`),
 		`Установка интерпретатора python3`);

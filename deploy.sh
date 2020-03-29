@@ -5,15 +5,15 @@ sudo apt -y update
 sudo apt -y upgrade
 
 # Устанавливаем программы работы с репозиториями
-sudo apt -y install git mercurial
+sudo apt -y install git
 
 # Создаем каталог исходников
 mkdir -p ~/sources
 cd ~/sources
 
 # Выкачиваем все наши репозитории
-hg clone https://bitbucket.org/uranuz/yar_mkk
-hg clone https://bitbucket.org/uranuz/webtank
+git clone https://github.com/uranuz/yar_mkk.git
+git clone https://github.com/uranuz/webtank.git
 git clone https://github.com/uranuz/trifle.git
 git clone https://github.com/uranuz/ivy.git
 git clone https://github.com/uranuz/fir.git
@@ -21,12 +21,12 @@ git clone https://github.com/uranuz/fir.git
 # Переводим все репозитории на нужную ветку
 # Это репозитории Mercurial (hg)
 cd ~/sources/yar_mkk
-hg checkout default
-hg pull -u
+git checkout master
+git pull
 
 cd ~/sources/webtank
-hg checkout default
-hg pull -u
+git checkout master
+git pull
 
 # Это репозитории git
 cd ~/sources/trifle
@@ -47,7 +47,7 @@ cd ~/packages
 
 # Скачиваем компилятор языка D
 wget http://downloads.dlang.org/releases/2.x/2.091.0/dmd_2.091.0-0_amd64.deb
-sudo dpkg -i -y dmd_2.091.0-0_amd64.deb
+sudo dpkg -i dmd_2.091.0-0_amd64.deb
 # Чиним зависимости после установки пакета
 sudo apt -fy install
 

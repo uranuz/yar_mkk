@@ -270,8 +270,9 @@ void runNpmGulp()
 			`Установка/ обновление npm пакетов для: ` ~ folder);
 	}
 
+	string mainFolderPath = buildNormalizedPath(sourcesDir, `yar_mkk`);
 	_waitProc(
-		spawnShell(`gulp dist`, null, Config.none, folderPath),
+		spawnShell(`gulp`, null, Config.none, mainFolderPath),
 		`Запуск задач gulp для: ` ~ folder);
 }
 

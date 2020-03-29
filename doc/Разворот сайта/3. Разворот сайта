@@ -5,22 +5,18 @@ III. РАЗВОРОТ САЙТА
 		И выполнить..
 		Репозиторий со всякими утилитами
 			git clone https://github.com/uranuz/trifle.git
-
 		Репозиторий библиотеки интерфейсных компонентов (fir):
 			git clone https://github.com/uranuz/ivy.git
 		Репозиторий шаблонизатора (ivy):
 			git clone https://github.com/uranuz/fir.git
 		Репозиторий серверной библиотеки (webtank):
-			hg clone https://bitbucket.org/uranuz/webtank
+			git clone https://github.com/uranuz/webtank.git
 		
 		Замечание. Репозиторий сайта МКК уже был скачан ранее на этапе (II):
-			https://bitbucket.org/uranuz/yar_mkk
+			https://github.com/uranuz/yar_mkk
 	2. Нужно зайти в папку каждого из репозиториев и выполнить (в зависимости от типа репозитория):
 		git checkout <имя ветки>
 		git pull
-		или
-		hg checkout <имя ветки>
-		hg pull -u
 
 		Имя ветки определяется тем, на какую версию обновляется сайт, например, "v0.5"
 	3. Заходим в папку репозитория yar_mkk, и запускаем скрипт развертывания:
