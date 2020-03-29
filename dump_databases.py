@@ -6,7 +6,27 @@ import os
 from http.client import HTTPSConnection
 from urllib.parse import urlencode
 
-headers = {'Authorization': 'AQAAAAAA2w5-AACypr_jUDYpFkZgrU4UYOeANSA'}
+headers = {
+	'Authorization':
+	read_yandex_disc_token()
+}
+
+
+def read_yandex_disc_token():
+	"""Читаем токен Яндекс.Дискеты из файла"""
+	creds_path = os.path.expanduser('~/sites/mkk/creds.json')
+	if not os.path.exists(creds_path):
+		raise Exception('Нету файла с паролями. Запись дампов невозможна!!!')
+	with open(creds_path, 'r') as ff:
+		raw_content = ff.read()
+		cont = json.loads(raw_content)
+		if not isinstance(cont, dict):
+			raise Exception('Ожидается JSON-объект в файле с паролями!')
+		ya_tok = cont.get('yandex_disk_token')
+		if not isinstance(ya_tok, str) or not ya_tok:
+			raise Exception('Ожидается строка токена для доступа к Яндекс.Диску в поле "yandex_disk_token"')
+		return ya_tok
+
 
 class ConnWrapper:
 	def __init__(self, conn):
