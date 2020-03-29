@@ -125,7 +125,7 @@ void compileAll()
 	buildTarsnap();
 	
 	string workDir = getcwd();
-	foreach( folder; [`ivy`, `webtank`, `yar_mkk`] )
+	foreach( folder; [`ivy`, `webtank`, `yar_mkk`, `trifle`] )
 	{
 		immutable string sourceFolder = buildNormalizedPath(workDir, `..`, folder);
 		_waitProc(
