@@ -6,10 +6,12 @@ import os
 from http.client import HTTPSConnection
 from urllib.parse import urlencode
 
-headers = {
-	'Authorization':
-	read_yandex_disc_token()
-}
+def get_common_headers():
+	"""Получение базовых заголовков для запросов к Яндекс.Диску"""
+	return {
+		'Authorization':
+		read_yandex_disc_token()
+	}
 
 
 def read_yandex_disc_token():
@@ -66,7 +68,7 @@ def create_remote_path(dest_path):
 			'path': parent
 		})
 		with get_api_conn() as conn:
-			conn.request("PUT", request_uri, headers=headers)
+			conn.request("PUT", request_uri, headers=get_common_headers())
 			assure_http_code(conn.getresponse(), 'Не удалось создать папку на Яндекс.Диске', codes=(FOLDER_CREATED, FOLDER_EXISTS))
 
 
@@ -81,7 +83,7 @@ def get_upload_link(dest_file_name, overwrite):
 	})
 	resp_str = None
 	with get_api_conn() as conn:
-		conn.request("GET", request_uri, headers=headers)
+		conn.request("GET", request_uri, headers=get_common_headers())
 		resp = conn.getresponse()
 		assure_http_code(resp, 'Не удалось получить ссылку для загрузки файла на Яндекс.Диск')
 		resp_str = resp.read().decode('utf-8')
@@ -124,7 +126,7 @@ def get_nested_files_list(dir_name):
 	})
 	resp_str = None
 	with get_api_conn() as conn:
-		conn.request("GET", request_uri, headers=headers)
+		conn.request("GET", request_uri, headers=get_common_headers())
 
 		resp = conn.getresponse()
 		assure_http_code(resp, 'Не удалось получить список файлов в папке с Яндекс.Диска')
@@ -147,7 +149,7 @@ def delete_file(file_path):
 		'permanently': False
 	})
 	with get_api_conn() as conn:
-		conn.request("DELETE", request_uri, headers=headers)
+		conn.request("DELETE", request_uri, headers=get_common_headers())
 		assure_http_code(conn.getresponse(), 'Не вышло удалить файлы с Яндекс.Диска')
 
 
