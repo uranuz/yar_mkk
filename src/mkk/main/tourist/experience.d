@@ -31,7 +31,6 @@ static immutable pohodRecFormat = RecordFormat!(
 	typeof(progress), "progress",
 	typeof(claimState), "claimState"
 )(
-	null,
 	tuple(
 		tourismKind,
 		complexity,

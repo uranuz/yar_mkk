@@ -29,7 +29,6 @@ static immutable touristRecFormat = RecordFormat!(
 	bool, "showEmail",
 	string, "comment"
 )(
-	null,
 	tuple(
 		sportCategory,
 		refereeCategory

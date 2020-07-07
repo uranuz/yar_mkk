@@ -92,7 +92,6 @@ static immutable pohodRecFormat = RecordFormat!(
 	string, "chiefComment",
 	string, "mkkComment"
 )(
-	null,
 	tuple(
 		tourismKind,
 		complexity,

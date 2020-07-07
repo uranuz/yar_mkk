@@ -50,8 +50,8 @@ auto first_reading(HTTPContext context,StatSelect select)
 		staticMap!(FieldPairFormat, aliasSeqOf!(iota(count)))
 	);
 	//-- формальные шаблоны данных
-	static immutable statRecFormatVid = GeneralFormat!(11, "Год")( null, tuple() );
-	static immutable statRecFormatKC = GeneralFormat!(9, "Вид/КС")( null, tuple() );
+	static immutable statRecFormatVid = GeneralFormat!(11, "Год")();
+	static immutable statRecFormatKC = GeneralFormat!(9, "Вид/КС")();
 	//#############################################
 
 	if( !select.beginYear.length )

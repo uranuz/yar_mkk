@@ -67,7 +67,6 @@ static immutable touristListRecFormat = RecordFormat!(
 	typeof(refereeCategory), "refereeCategory",
 	string, "comment"
 )(
-	null,
 	tuple(sportCategory, refereeCategory)
 );
 

@@ -46,7 +46,6 @@ static immutable recentPohodRecFormat = RecordFormat!(
 	BasePohodFields,
 	string, "chiefComment"
 )(
-	null,
 	tuple(
 		tourismKind,
 		complexity,
@@ -235,7 +234,6 @@ static immutable pohodRecFormat = RecordFormat!(
 	typeof(progress), "progress",
 	typeof(claimState), "claimState"
 )(
-	null,
 	tuple(
 		tourismKind,
 		complexity,
