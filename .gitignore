@@ -12,3 +12,5 @@ mkk-test-*
 *.o
 *.obj
 *.lst
+node_modules
+bin/
