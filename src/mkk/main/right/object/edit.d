@@ -41,9 +41,9 @@ readObject(HTTPContext ctx, RightObjData record)
 		return res;
 	}
 
-	MainService.loger.info("Формирование и выполнение запроса к БД", "Изменение объекта доступа");
+	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение объекта доступа");
 	res.num = getCommonDB().insertOrUpdateTableByNum(`access_object`, fieldNames, fieldValues, record.num);
-	MainService.loger.info("Выполнение запроса к БД завершено", "Изменение объекта доступа");
+	MainService.log.info("Выполнение запроса к БД завершено", "Изменение объекта доступа");
 
 	return res;
 }
