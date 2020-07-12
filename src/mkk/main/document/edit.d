@@ -33,9 +33,9 @@ writeDocument(HTTPContext ctx, DocumentDataToWrite record)
 		return res;
 	}
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Изменение ссылки на документ");
 	res.documentNum = getCommonDB().insertOrUpdateTableByNum(`file_link`, fieldNames, fieldValues, record.num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Изменение ссылки на документ");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Изменение ссылки на документ");
 
 	return res;
 }

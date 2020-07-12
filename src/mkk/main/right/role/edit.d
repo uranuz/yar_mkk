@@ -40,9 +40,9 @@ editRule(HTTPContext ctx, RightRoleData record)
 		return res;
 	}
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение роли доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Изменение роли доступа");
 	res.num = getAuthDB().insertOrUpdateTableByNum(`access_role`, fieldNames, fieldValues, record.num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Изменение роли доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Изменение роли доступа");
 
 	return res;
 }
@@ -51,7 +51,7 @@ void deleteRule(HTTPContext ctx, size_t num)
 {
 	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Удаление роли доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Удаление роли доступа");
 	getAuthDB().queryParams(`delete from access_role a_role where a_role.num = $1::integer`, num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Удаление роли доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Удаление роли доступа");
 }

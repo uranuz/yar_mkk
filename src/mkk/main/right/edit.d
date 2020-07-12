@@ -50,9 +50,9 @@ editRight(HTTPContext ctx, RightRuleData record)
 		return res;
 	}
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение права доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Изменение права доступа");
 	res.num = getAuthDB().insertOrUpdateTableByNum(`access_right`, fieldNames, fieldValues, record.num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Изменение права доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Изменение права доступа");
 
 	return res;
 }
@@ -62,7 +62,7 @@ void deleteRight(HTTPContext ctx, size_t num)
 {
 	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Удаление права доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Удаление права доступа");
 	getAuthDB().queryParams(`delete from access_right a_right where a_right.num = $1::integer`, num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Удаление права доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Удаление права доступа");
 }

@@ -49,7 +49,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	string[] fieldNames;
 	string[] fieldValues;
 
-	MainService.log.info("Формируем набор строковых полей и значений", "Изменение данных похода");
+	ctx.service.log.info("Формируем набор строковых полей и значений", "Изменение данных похода");
 	mixin(WalkFields!(`record`, q{
 		// Поля, которые не хранятся в самой записи похода, а поэтому записываются отдельно
 		enum bool externField = ["extraFileLinks", "partyNums"].canFind(fieldName);
@@ -82,7 +82,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 		return res;
 	}
 
-	MainService.log.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
+	ctx.service.log.info( "Запись автора последних изменений и даты этих изменений", "Изменение данных похода" );
 	enforce("userNum" in ctx.user.data, "Не удаётся определить идентификатор пользователя");
 
 	fieldNames ~= "last_editor_num";
@@ -108,7 +108,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 	scope(failure) trans.rollback();
 	scope(success) trans.commit();
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Изменение данных похода");
 	// Собственно запрос на запись данных в БД
 	res.pohodNum = getCommonDB().insertOrUpdateTableByNum(`pohod`,
 		fieldNames, fieldValues, record.num, safeFieldNames, safeFieldValues);
@@ -138,7 +138,7 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 
 	writePohodFileLinks(record.extraFileLinks, res.pohodNum.value);
 
-	MainService.log.info("Выполнение запроса к БД завершено", "Изменение данных похода");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Изменение данных похода");
 	return res;
 }
 

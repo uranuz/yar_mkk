@@ -39,9 +39,9 @@ editRule(HTTPContext ctx, RightRuleData record)
 		return res;
 	}
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Изменение правила доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Изменение правила доступа");
 	res.num = getAuthDB().insertOrUpdateTableByNum(`access_rule`, fieldNames, fieldValues, record.num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Изменение правила доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Изменение правила доступа");
 
 	return res;
 }
@@ -50,7 +50,7 @@ void deleteRule(HTTPContext ctx, size_t num)
 {
 	enforce(ctx.user.isInRole(`admin`), `Нет разрешения на выполнение операции`);
 
-	MainService.log.info("Формирование и выполнение запроса к БД", "Удаление правила доступа");
+	ctx.service.log.info("Формирование и выполнение запроса к БД", "Удаление правила доступа");
 	getAuthDB().queryParams(`delete from access_rule a_rule where a_rule.num = $1::integer`, num);
-	MainService.log.info("Выполнение запроса к БД завершено", "Удаление правила доступа");
+	ctx.service.log.info("Выполнение запроса к БД завершено", "Удаление правила доступа");
 }
