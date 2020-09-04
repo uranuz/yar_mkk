@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ivy"
+		},
+		{
+			"path": "../trifle"
+		},
+		{
+			"path": "../webtank"
+		}
+	],
+	"settings": {
+		"d.projectImportPaths": [
+			"~/projects/ivy/src/",
+			"~/projects/yar_mkk/src/",
+			"~/projects/webtank/src/",
+			"~/projects/trifle/src/"
+		]
+	}
+}
