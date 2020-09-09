@@ -1,8 +1,7 @@
 expr {=
-from fir.controls.utils import cls;
+from fir.controls.utils import cls, hasRight;
 from mkk.GeneralTemplate.MainMenu import MainMenu;
 from mkk.GeneralTemplate.FilterMenu import PohodFilterMenu;
-from fir.controls.utils import cls, hasRight;
 def UsefulLinksMenu {=
 	def.kv
 		cssBaseClass: 'mkk-UsefulLinksMenu'
