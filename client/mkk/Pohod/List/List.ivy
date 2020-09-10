@@ -90,7 +90,6 @@ def PohodListTable {=
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		pohodList
-		pohodNav
 		filter
 		isForPrint: false;
 	def.body {*
