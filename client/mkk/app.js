@@ -1,6 +1,6 @@
 define('mkk/app', [
-	'ivy/Engine',
-	'ivy/EngineConfig',
+	'ivy/engine',
+	'ivy/engine_config',
 	'fir/ivy/RemoteModuleLoader',
 	"fir/controls/Loader/Manager",
 	"fir/controls/Loader/IvyServerFactory",
