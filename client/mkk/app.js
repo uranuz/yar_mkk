@@ -5,7 +5,7 @@ define('mkk/app', [
 	"fir/controls/Loader/Manager",
 	"fir/controls/Loader/IvyServerFactory",
 	"fir/controls/Loader/IvyServerRender",
-	'fir/ivy/directive/StandardFactory',
+	'fir/ivy/directive/standard_factory',
 	"fir/controls/ControlManager",
 	"fir/security/right/IvyRuleFactory",
 	"fir/security/right/GlobalVarSource",
