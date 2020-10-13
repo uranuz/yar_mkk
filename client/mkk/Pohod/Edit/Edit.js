@@ -148,7 +148,7 @@ return FirClass(
 				finishDateEmpty = !finishDay.length && !finishMonth.length && !finishYear.length,
 				countInput = self._elems("partySizeField"),
 				inputCount = parseInt(countInput.val(), 10),
-				listCount = this._partyList.getLength();
+				listCount = this._partyList.length;
 
 			if( !beginDateEmpty && (!beginDay.length || !beginMonth.length || !beginYear.length) ) {
 				self.showErrorDialog('Нужно заполнить все поля даты начала, либо оставить их все пустыми');
@@ -258,7 +258,7 @@ return FirClass(
 		// Функция корректировки значения количества участников для поля ввода
 		getNewPartySizeForInput: function() {
 			var
-				rsCount = this._partyList? this._partyList.getLength(): 0,
+				rsCount = this._partyList? this._partyList.length: 0,
 				inpCount = this.getPartySizeFromInput(),
 				newRSCount = rsCount,
 				newInpCount = inpCount;

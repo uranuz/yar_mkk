@@ -78,7 +78,7 @@ return FirClass(
 			this._touristForm.submit();
 		},
 		processSimilarTourists: function(ev, rs, nav) {
-			if (rs && rs.getLength()) {
+			if (rs && rs.length) {
 				this._similarsDlg.dialog({title: "Добавление туриста", modal: true, width: 450});
 			} else {
 				this._forcedSubmitForm();
@@ -161,7 +161,7 @@ return FirClass(
 		/** Загрузка списка похожих туристов. Список может быть и пустой. То значит, что похожих нет... */
 		_onSimilarTourists_load: function(rawData) {
 			var data = IvyDeserializer.deserialize(rawData);
-			if( data.touristList.getLength() ) {
+			if( data.touristList.length ) {
 				this._touristSimilarDlg.open({
 					RPCMethod: null, // Не зови метод
 					viewParams: data

@@ -42,7 +42,7 @@ return FirClass(
 		},
 
 		_onDialog_resize: function() {
-			if( this._touristList && this._touristList.getLength() ) {
+			if( this._touristList && this._touristList.length ) {
 				if( this._getContainer().innerWidth() < 999 ) {
 					this._panelsArea.css("display", "block");
 					this._searchPanel.css("display", "block");
