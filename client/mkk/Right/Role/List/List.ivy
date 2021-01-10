@@ -8,7 +8,7 @@ var
 	RPCMethod: 'right.role.list'
 	fieldsToSend: ['roleList', 'nav', 'isSelect'];
 def RightRoleList {=
-	def.kv
+	var
 		moduleName: "mkk/Right/Role/List/List"
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
@@ -17,7 +17,7 @@ def RightRoleList {=
 		roleList: null
 		nav: null
 		isSelect: false;
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			<h2>Роли доступа</h2>
@@ -83,14 +83,14 @@ def RightRoleList {=
 	*}
 };
 def RightRoleListView {=
-	def.kv
+	var
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
 		RPCMethod: RPCMethod
 		roleList: null
 		nav: null
 		isSelect: false;
-	def.body {*
+	do {*
 		<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			<div class="{=cls 'roleList'}">

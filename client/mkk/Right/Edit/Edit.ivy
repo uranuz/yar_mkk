@@ -5,11 +5,11 @@ from fir.controls.LazyArea import LazyArea;
 from fir.controls.Validation.Controller import ValidationController;
 
 def fullObjectNameTmpl {=
-	def.kv
+	var
 		record
 		displayField
 		emptyText;
-	def.body noscope {*
+	do noscope {*
 	<a href="#!"
 		class="{=cls 'selectBtn'}"
 		>{=if record.folderName and record.name {*{{record.folderName}}.{{record.name}}*}
@@ -20,7 +20,7 @@ def fullObjectNameTmpl {=
 };
 
 def RightEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Right/Edit/Edit'
 		instanceName: 'rightEdit'
 		cssBaseClass: 'mkk-RightEdit'
@@ -31,7 +31,7 @@ def RightEdit {=
 		role: null
 		rule: null
 		bindParam: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['right']}"/>
 		<div class="{=cls 'editForm'}">

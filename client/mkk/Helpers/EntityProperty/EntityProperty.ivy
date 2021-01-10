@@ -2,14 +2,14 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 var mega_counter: 2000;
 def EntityProperty {=
-	def.kv
+	var
 		instanceName: 'entityProperty'
 		moduleName: 'mkk/Helpers/EntityProperty/EntityProperty'
 		cssBaseClass: 'mkk-EntityProperty'
 		title: null
 		value: null
 		isWide: false;
-	def.body {=
+	do {=
 		if instanceName == 'entityProperty' {=
 			set instanceName: instanceName ~ '-' ~ {=str mega_counter};
 			set mega_counter: mega_counter + 1;

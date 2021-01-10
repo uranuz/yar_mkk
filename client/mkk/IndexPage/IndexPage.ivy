@@ -2,11 +2,11 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Helpers import DateRangePrinter;
 def RecentPohodList {=
-	def.kv
+	var
 		cssBaseClass: "mkk-RecentPohodList"
 		instanceName: 'recentPohodList'
 		pohodList: null;
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}">
 			<h4 class="{=cls 'blockTitle'}">Недавно добавленные походы</h4>
 			{=repeat pohod in pohodList {*
@@ -56,13 +56,13 @@ def RecentPohodList {=
 };
 from mkk.AboutSite import AboutSite;
 def IndexPage {=
-	def.kv
+	var
 		moduleName: "mkk/IndexPage/IndexPage"
 		cssBaseClass: "mkk-IndexPage"
 		instanceName: 'indexPage'
 		requestURI: '/api/index'
 		pohodList: null;
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			{=AboutSite shortInfoOnly: true}

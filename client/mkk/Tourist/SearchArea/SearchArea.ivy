@@ -3,8 +3,8 @@ from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Paging import Paging;
 from mkk.Tourist.NavList import TouristNavList;
 def LabeledInput {=
-	def.kv caption field placeholder;
-	def.body noscope {*
+	var caption field placeholder;
+	do noscope {*
 	<label class="{=cls 'addrElementItem'} form-group row">
 		<span class="{=cls 'addrElementLabel'} col-sm-2 col-md-3 col-form-label">{{caption}}</span>
 		<div class="col-sm-10 col-md-9">
@@ -17,12 +17,12 @@ def LabeledInput {=
 	*}
 };
 def TouristSearchArea {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/SearchArea/SearchArea'
 		instanceName: 'touristSearchArea'
 		cssBaseClass: 'mkk-TouristSearchArea'
 		addrFiltersCollapsed: true;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['addrFiltersCollapsed']}"/>
 		<label class="{=cls 'filterItem'} form-group row form-inline">

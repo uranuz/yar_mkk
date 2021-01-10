@@ -2,14 +2,14 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.OpenDialog import OpenDialog;
 def RightList {=
-	def.kv
+	var
 		moduleName: 'mkk/Right/List/List'
 		instanceName: 'RightList'
 		cssBaseClass: 'mkk-RightList'
 		requestURI: "/api/right/list"
 		rightList: null
 		objectNum: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectNum']}"/>
 		<h2>Права доступа к объекту</h2>

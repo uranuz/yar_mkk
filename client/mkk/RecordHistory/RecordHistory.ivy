@@ -2,13 +2,13 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Helpers.EntityProperty import EntityProperty;
 def RecordHistory {=
-	def.kv
+	var
 		moduleName: 'mkk/RecordHistory/RecordHistory'
 		instanceName: 'recordHistory'
 		cssBaseClass: 'mkk-RecordHistory'
 		history: null
 		objectName: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>История изменений данных {=if objectName objectName ~ 'а'}</h2>

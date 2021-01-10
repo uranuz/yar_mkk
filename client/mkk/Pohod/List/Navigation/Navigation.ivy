@@ -4,7 +4,7 @@ from fir.controls.PlainDatePicker import PlainDatePicker;
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.Paging import Paging;
 def PohodListNavigation {=
-	def.kv
+	var
 		moduleName: "mkk/Pohod/List/Navigation/Navigation"
 		cssBaseClass: "mkk-PohodListNavigation"
 		instanceName: 'pohodListNavigation'
@@ -19,7 +19,7 @@ def PohodListNavigation {=
 			{num: 'progress', title: 'Прохождение'},
 			{num: 'claimState', title: 'Заявка'}
 		];
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['enumFields']}"/>
 			{=if false {*

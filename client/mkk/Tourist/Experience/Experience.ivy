@@ -9,7 +9,7 @@ var
 	cssBaseClass: "mkk-Experience"
 	fieldsToSend: ['tourist', 'pohodList', 'nav'];
 def Experience {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/Experience/Experience'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -18,7 +18,7 @@ def Experience {=
 		tourist: null
 		pohodList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<div class="{=cls 'topButtons'}">
@@ -94,13 +94,13 @@ def Experience {=
 	*};
 };
 def TouristPohodsList {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		tourist: null
 		pohodList: null
 		nav;
-	def.body {*
+	do {*
 	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 	<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 	{=repeat rec in pohodList {*

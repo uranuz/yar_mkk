@@ -1,9 +1,9 @@
 expr {=
 def UserRegResult {=
-	def.kv
+	var
 		touristNum: null
 		errorMsg: null;
-	def.body {%
+	do {%
 		if {=empty errorMsg} {*
 			<h3>Подтвердите адрес электронной почты</h3>
 			<div>

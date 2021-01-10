@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def EditResults {=
-	def.kv
+	var
 		moduleName: 'fir/controls/FirControl'
 		instanceName
 		cssBaseClass
@@ -11,7 +11,7 @@ def EditResults {=
 		errorMsg: null
 		num
 		recordNum;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 	{%
@@ -40,13 +40,13 @@ def EditResults {=
 	*}
 };
 def YouCan {=
-	def.kv
+	var
 		whatObject
 		listLink: null
 		editLink: null
 		errorMsg: null
 		num;
-	def.body {*
+	do {*
 	<div>
 		{=if editLink or listLink {*
 		<div>{=if {=empty errorMsg} {*Вы можете*} else {*Однако вы можете*} }:</div>

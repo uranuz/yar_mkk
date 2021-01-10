@@ -2,7 +2,7 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc, treeMetaInfo;
 
 def RightObjectList {=
-	def.kv
+	var
 		moduleName: 'mkk/Right/Object/List/List'
 		instanceName: 'rightObjectList'
 		cssBaseClass: 'mkk-RightObjectList'
@@ -10,7 +10,7 @@ def RightObjectList {=
 		RPCMethod: 'right.object.list'
 		objectList: null
 		isSelect: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['objectList']}"/>
 		<h2>Объекты доступа</h2>
@@ -35,13 +35,13 @@ def RightObjectList {=
 };
 
 def renderObject {=
-	def.kv
+	var
 		objKey: null
 		idxByKey: {}
 		objectList: null
 		level: 0
 		isSelect: null;
-	def.body noscope {*
+	do noscope {*
 		{=
 			var item: {=at idxByKey objKey};
 			var obj: {=at objectList item.idx};

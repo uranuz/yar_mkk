@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def TouristPlainList {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/PlainList/PlainList'
 		instanceName: 'touristPlainList'
 		cssBaseClass: 'mkk-TouristPlainList'
@@ -9,7 +9,7 @@ def TouristPlainList {=
 		itemTextTag: 'div'
 		itemIcon: null
 		mode: null;
-	def.body {*
+	do {*
 		{=if mode == 'add' {=
 				set
 					itemTextTag: 'a'

@@ -2,14 +2,14 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from fir.controls.LazyArea import LazyArea;
 def RightRoleEdit {=
-	def.kv
+	var
 		cssBaseClass: 'mkk-RightRoleEdit'
 		instanceName: 'rightRoleEdit'
 		moduleName: "mkk/Right/Role/Edit/Edit"
 		RPCMethod: 'right.role.read'
 		requestURI: "/api/right/role/read"
 		role: null;
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			<div class="{=cls 'editForm'}">

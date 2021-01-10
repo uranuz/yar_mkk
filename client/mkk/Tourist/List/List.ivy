@@ -6,7 +6,7 @@ var
 	cssBaseClass: 'mkk-TouristList'
 	fieldsToSend: ['touristList', 'nav'];
 def TouristList {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -15,7 +15,7 @@ def TouristList {=
 		touristList: null
 		nav: null
 		filter: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Туристы</h2>
@@ -95,12 +95,12 @@ def TouristList {=
 };
 
 def TouristListTable {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		touristList
 		nav;
-	def.body {*
+	do {*
 	<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{%

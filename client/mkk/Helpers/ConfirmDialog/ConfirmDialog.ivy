@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def ConfirmDialog {=
-	def.kv
+	var
 		moduleName: 'mkk/Helpers/ConfirmDialog/ConfirmDialog'
 		instanceName: 'confirmDialog'
 		cssBaseClass: 'mkk-ConfirmDialog'
@@ -12,7 +12,7 @@ def ConfirmDialog {=
 		yesButtonText: 'Да'
 		noButtonText: 'Нет'
 		cancelButtonText: 'Отмена';
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['deleteWhat', 'confirmWord']}"/>
 		<div class="{=cls 'text'}">{{text}}</div>

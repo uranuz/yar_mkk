@@ -8,7 +8,7 @@ var
 	cssBaseClass: "mkk-PohodList"
 	fieldsToSend: ['pohodList', 'pohodNav'];
 def PohodList {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -19,7 +19,7 @@ def PohodList {=
 		pohodList: null
 		pohodNav: null
 		isForPrint: false;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Походы</h2>
@@ -86,13 +86,13 @@ def PohodList {=
 };
 
 def PohodListTable {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		pohodList
 		filter
 		isForPrint: false;
-	def.body {*
+	do {*
 		<tbody class="{=cls 'tableContentBody'} mkk-Table" data-ivy-method="{{_ivyMethod}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			{=repeat rec in pohodList {*

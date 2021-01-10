@@ -1,14 +1,14 @@
 expr {=
 from fir.controls.utils import cls;
 def LinkItems {=
-	def.kv
+	var
 		instanceName: null
 		cssBaseClass: 'mkk-ExtraFileLinks'
 		linkList: null
 		portionSize: 5
 		minBlockCount: 1
 		disabled: null;
-	def.body {*
+	do {*
 		{=var
 				linkCount: {=if linkList {=len linkList} else 0}
 				remainder: linkCount % portionSize

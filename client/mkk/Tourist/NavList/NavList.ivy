@@ -3,7 +3,7 @@ from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 from fir.controls.Paging import Paging;
 def TouristNavList {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/NavList/NavList'
 		instanceName: 'touristNavList'
 		cssBaseClass: 'mkk-TouristNavList'
@@ -14,7 +14,7 @@ def TouristNavList {=
 		itemTextTag: 'div'
 		itemIcon: null
 		mode: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc
 				fields: ['touristList', 'nav', 'mode']

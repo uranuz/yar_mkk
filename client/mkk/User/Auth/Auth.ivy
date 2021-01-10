@@ -1,14 +1,14 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def Auth {=
-	def.kv
+	var
 		moduleName: 'mkk/User/Auth/Auth'
 		instanceName: 'auth'
 		cssBaseClass: 'mkk-Auth'
 		requestURI: '/api/auth'
 		isAuthenticated: null
 		isAuthFailed: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}">
 		<h2>Вход под пользователем</h2>
 		<div class="{=cls 'authStatus'}">

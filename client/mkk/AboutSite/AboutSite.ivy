@@ -1,12 +1,12 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def AboutSite {=
-	def.kv
+	var
 		moduleName: 'mkk/AboutSite/AboutSite'
 		instanceName: 'aboutSite'
 		cssBaseClass: 'mkk-AboutSite'
 		shortInfoOnly: false;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Добро пожаловать на сайт!</h2>

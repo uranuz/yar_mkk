@@ -2,14 +2,14 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 
 def DocumentEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Document/Edit/Edit'
 		instanceName: 'documentEdit'
 		cssBaseClass: "mkk-DocumentEdit"
 		RPCMethod: 'document.read'
 		requestURI: "/api/document/read"
 		document: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'} container-fluid" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<form class="{=cls 'docForm'}">

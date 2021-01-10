@@ -1,7 +1,7 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def UserSettings {=
-	def.kv
+	var
 		moduleName: 'mkk/User/Settings/Settings'
 		instanceName: 'userSettings'
 		cssBaseClass: 'mkk-UserSettings'
@@ -9,7 +9,7 @@ def UserSettings {=
 		userFullName: null
 		userLogin: null
 		pwChangeMessage: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Персональные настройки</h2>

@@ -9,7 +9,7 @@ var
 	RPCMethod: 'document.list'
 	requestURI: "/api/document/list";
 def DocumentList {=
-	def.kv
+	var
 		moduleName: 'mkk/Document/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -17,7 +17,7 @@ def DocumentList {=
 		requestURI: requestURI
 		documentList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h2>Статьи и документы</h2>
@@ -60,13 +60,13 @@ def DocumentList {=
 };
 
 def DocumentLinkList {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: RPCMethod
 		documentList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'linkList'}" data-ivy-method="{{_ivyMethod}}">
 	{=
 		var i: 0;

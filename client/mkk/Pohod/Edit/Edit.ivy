@@ -6,7 +6,7 @@ from fir.controls.OpenDialog import OpenDialog;
 from mkk.Tourist.NavList import TouristNavList;
 from mkk.Pohod.Edit.ExtraFileLinks import ExtraFileLinks;
 def PohodEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/Edit/Edit'
 		instanceName: 'pohodEdit'
 		cssBaseClass: 'mkk-PohodEdit'
@@ -17,7 +17,7 @@ def PohodEdit {=
 		partyNav: null
 		extraFileLinks: null
 		authRedirectURI: null;
-	def.body {*
+	do {*
 		{=if not {=hasRight obj: 'pohod.item' kind: 'edit'} {=
 			return {*
 				<h4>

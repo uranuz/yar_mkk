@@ -1,13 +1,13 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def EmailConfirm {=
-	def.kv
+	var
 		moduleName: 'mkk/User/Reg/EmailConfirm/EmailConfirm'
 		instanceName: 'userEmailConfirm'
 		cssBaseClass: 'mkk-UserEmailCOnfirm'
 		userNum: null
 		errorMsg: null;
-	def.body {*
+	do {*
 		<div data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 			<h2>Подтверждение электронной почты</h2>

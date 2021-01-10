@@ -2,14 +2,14 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Right.List import RightList;
 def RightObjectEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Right/Object/Edit/Edit'
 		instanceName: 'rightObjectEdit'
 		cssBaseClass: 'mkk-RightObjectEdit'
 		requestURI: "/api/right/object/readWithRights"
 		rightObj: null
 		rightList: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<input type="hidden" value="{{rightObj.num}}"/>

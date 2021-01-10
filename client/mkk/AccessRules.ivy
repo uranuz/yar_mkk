@@ -1,19 +1,19 @@
 expr {=
 def Allow {=
-	def.kv identity data;
-	def.body {=
+	var identity data;
+	do {=
 		return true;
 	}
 };
 def CheckNewUser {=
-	def.kv identity data;
-	def.body {=
+	var identity data;
+	do {=
 		return {=has identity.data 'touristNum'} and {=empty identity.data.touristNum};
 	}
 };
 def EditOwnPohod {=
-	def.kv identity data;
-	def.body {=
+	var identity data;
+	do {=
 		return
 			{=bool
 				identity.data.touristNum

@@ -8,8 +8,8 @@ from fir.controls.OpenDialog import OpenDialog;
 from fir.controls.Validation.Controller import ValidationController;
 
 def LabeledInput {=
-	def.kv caption field appendix: null forceNoCheck: null;
-	def.body noscope {*
+	var caption field appendix: null forceNoCheck: null;
+	do noscope {*
 	<div class="form-group row align-items-center">
 		<label class="col-md-3 col-form-label" for="{{field ~ 'Field'}}">{{caption}}</label>
 		<div class="col-md-6">
@@ -26,10 +26,10 @@ def LabeledInput {=
 };
 
 def ShowCheckBox {=
-	def.kv
+	var
 		caption: 'Показать всем'
 		field;
-	def.body noscope{*
+	do noscope{*
 		<div class="form-check">
 			<input type="checkbox"
 				name="{{field}}"
@@ -44,8 +44,8 @@ def ShowCheckBox {=
 };
 
 def ListBoxRow {=
-	def.kv caption field;
-	def.body noscope {*
+	var caption field;
+	do noscope {*
 		{=var
 			enum: {=at tourist field}
 		}
@@ -67,7 +67,7 @@ def ListBoxRow {=
 };
 
 def TouristEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Tourist/Edit/Edit'
 		instanceName: 'touristEdit'
 		cssBaseClass: 'mkk-TouristEdit'
@@ -75,7 +75,7 @@ def TouristEdit {=
 		accessObject: 'tourist.item'
 		tourist: null
 		isEditDialog: true;
-	def.body {*
+	do {*
 		{=if isEditDialog {=
 			if not userIdentity.isAuthenticated {=
 				return {*

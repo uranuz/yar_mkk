@@ -3,14 +3,14 @@ from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.SearchArea import TouristSearchArea;
 from mkk.Tourist.NavList import TouristNavList;
 def PartyEdit {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/Edit/Party/Party'
 		instanceName: 'partyEdit'
 		cssBaseClass: 'mkk-PartyEdit'
 		RPCMethod: 'tourist.plainList'
 		touristList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<!--Диалог редактирования участников похода-->
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [

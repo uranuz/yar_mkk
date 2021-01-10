@@ -2,7 +2,7 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 def PartyInfo {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/PartyInfo/PartyInfo'
 		cssBaseClass: "mkk-PartyInfo"
 		instanceName: "partyInfo"
@@ -10,7 +10,7 @@ def PartyInfo {=
 		requestURI: '/api/pohod/partyInfo'
 		pohodInfo: null
 		partyList: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div>

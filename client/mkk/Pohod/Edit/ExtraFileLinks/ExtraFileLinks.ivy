@@ -2,7 +2,7 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Pohod.Edit.ExtraFileLinks.LinkItems import LinkItems;
 def ExtraFileLinks {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/Edit/ExtraFileLinks/ExtraFileLinks'
 		instanceName: 'extraFileLinksEdit'
 		cssBaseClass: 'mkk-ExtraFileLinks'
@@ -10,7 +10,7 @@ def ExtraFileLinks {=
 		linkList: null,
 		portionSize: 5
 		disabled: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<h4>Ссылки на доп. материалы</h4>

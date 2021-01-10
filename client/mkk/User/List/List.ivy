@@ -10,7 +10,7 @@ var
 	requestURI: "/api/user/list"
 	fieldsToSend: ['userList', 'nav'];
 def UserList {=
-	def.kv
+	var
 		moduleName: 'mkk/User/List/List'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -18,7 +18,7 @@ def UserList {=
 		requestURI: requestURI
 		userList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Пользователи сайта</h2>
@@ -77,14 +77,14 @@ def UserList {=
 };
 
 def UserListView {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		RPCMethod: RPCMethod
 		requestURI: requestURI
 		userList: null
 		nav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{=var showEmail: {=hasRight obj: 'user.item.email' kind: 'read'} }

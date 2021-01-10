@@ -12,7 +12,7 @@ var
 	AccessRight: 3;
 
 def RoleRightList {=
-	def.kv
+	var
 		moduleName: 'mkk/Right/Role/RightList/RightList'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
@@ -20,7 +20,7 @@ def RoleRightList {=
 		RPCMethod: RPCMethod
 		rightList: null
 		role: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		<h2>Права доступа для роли</h2>
@@ -85,13 +85,13 @@ def RoleRightList {=
 };
 
 def RoleRightListView {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		requestURI: requestURI
 		RPCMethod: RPCMethod
 		rightList: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 		{=

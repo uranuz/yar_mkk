@@ -4,7 +4,7 @@ from mkk.Tourist.SearchArea import TouristSearchArea;
 from mkk.Tourist.Edit import TouristEdit;
 from fir.controls.Validation.Controller import ValidationController;
 def UserRegCard {=
-	def.kv
+	var
 		moduleName: "mkk/User/Reg/Card/Card"
 		instanceName: 'userRegCard'
 		cssBaseClass: 'mkk-UserRegCard'
@@ -13,7 +13,7 @@ def UserRegCard {=
 		tourist: null
 		settings: {}
 		isConfirmedUser: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: [
 			'tourist', 'settings', 'isConfirmedUser'

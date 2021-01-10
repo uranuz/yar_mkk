@@ -1,12 +1,12 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def ChiefAddToParty {=
-	def.kv
+	var
 		moduleName: 'mkk/Pohod/Edit/Chief/AddToParty/AddToParty'
 		instanceName: 'chiefAddToParty'
 		cssBaseClass: 'mkk-ChiefAddToParty'
 		touristCount: null as 'int';
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<!-- Диалог подтверждения добавления руководителя и зама в список участников -->
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>

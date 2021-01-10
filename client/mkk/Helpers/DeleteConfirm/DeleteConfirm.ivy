@@ -5,13 +5,13 @@ var
 	cssBaseClass: 'mkk-DeleteConfirm'
 	deleteWhat: 'объекта';
 def DeleteConfirm {=
-	def.kv
+	var
 		moduleName: 'mkk/Helpers/DeleteConfirm/DeleteConfirm'
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		deleteWhat: deleteWhat
 		confirmWord: 'удалить';
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['deleteWhat', 'confirmWord']}"/>
 		<div class="{=cls 'confirmForm'}">
@@ -29,11 +29,11 @@ def DeleteConfirm {=
 	*}
 };
 def ConfirmFail {=
-	def.kv
+	var
 		instanceName: instanceName
 		cssBaseClass: cssBaseClass
 		deleteWhat: deleteWhat;
-	def.body {*
+	do {*
 	<div class="{=cls 'Results'}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div>Удаление {{deleteWhat}} не подтверждено!</div>

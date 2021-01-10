@@ -2,12 +2,12 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.PlainList import TouristPlainList;
 def TouristSimilar {=
-	def.kv
+	var
 		instanceName: 'touristSimilar'
 		cssBaseClass: 'mkk-TouristSimilar'
 		moduleName: 'mkk/Tourist/Similar/Similar'
 		touristList: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'similarsDlg'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc}"/>
 		<div class="{=cls 'similarsMsg'}">

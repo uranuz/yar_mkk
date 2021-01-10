@@ -1,6 +1,6 @@
 expr {=
 def DateRangePrinter {=
-	def.kv
+	var
 		begin: null
 		end: null
 		monthNames: [
@@ -11,7 +11,7 @@ def DateRangePrinter {=
 		toStr: ' по '
 		yearSuffix: ' г.'
 		partSep: ' ';
-	def.body {%
+	do {%
 		if not {=empty begin} {%
 			str fromStr; expr begin.day;
 			if {=empty end} or begin.month != end.month {%
@@ -37,9 +37,9 @@ def DateRangePrinter {=
 	}
 };
 def RusDateFormat {=
-	def.pos
+	var
 		date;
-	def.body {=
+	do {=
 		if not {=empty date} {*{{date.day}}.{{date.month}}.{{date.year}}*};
 	}
 };

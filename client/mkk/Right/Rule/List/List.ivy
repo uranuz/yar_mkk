@@ -8,7 +8,7 @@ var
 	RPCMethod: 'right.rule.list'
 	fieldsToSend: ['ruleList', 'nav', 'isSelect'];
 def RightRuleList {=
-	def.kv
+	var
 		moduleName: "mkk/Right/Rule/List/List"
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
@@ -17,7 +17,7 @@ def RightRuleList {=
 		ruleList: null
 		nav: null
 		isSelect: false;
-	def.body {*
+	do {*
 		<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			<h2>Правила доступа</h2>
@@ -77,14 +77,14 @@ def RightRuleList {=
 	*}
 };
 def RightRuleListView {=
-	def.kv
+	var
 		cssBaseClass: cssBaseClass
 		instanceName: instanceName
 		RPCMethod: RPCMethod
 		ruleList: null
 		nav: null
 		isSelect: false;
-	def.body {*
+	do {*
 		<div class="{=cls 'listView'}" data-ivy-method="{{_ivyMethod}}">
 			<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: fieldsToSend}"/>
 			<div class="{=cls 'ruleList'}">

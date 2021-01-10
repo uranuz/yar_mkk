@@ -2,11 +2,11 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.Tourist.SearchArea import TouristSearchArea;
 def UserReg {=
-	def.kv
+	var
 		moduleName: "mkk/User/Reg/Reg"
 		instanceName: 'userReg'
 		cssBaseClass: 'mkk-UserReg';
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: []}"/>
 		<h2>Регистрация пользователя</h2>

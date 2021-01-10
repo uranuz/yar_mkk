@@ -1,12 +1,12 @@
 expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 def UserMenuBtn {=
-	def.kv
+	var
 		moduleName: 'mkk/GeneralTemplate/MainMenu/UserMenuBtn/UserMenuBtn'
 		instanceName: 'userMenuBtn'
 		cssBaseClass: 'mkk-UserMenuBtn'
 		authRedirectURI: null;
-	def.body {*
+	do {*
 	{=var
 		authStateCls: {=if userIdentity.isAuthenticated 'm-with_auth' else 'm-without_auth'}
 	}

@@ -4,7 +4,7 @@ from mkk.Helpers import DateRangePrinter;
 from mkk.Helpers.EntityProperty import EntityProperty;
 from mkk.Tourist.NavList import TouristNavList;
 def PohodRead {=
-	def.kv
+	var
 		moduleName: "mkk/Pohod/Read/Read"
 		instanceName: 'pohodRead'
 		cssBaseClass: 'mkk-PohodRead'
@@ -13,7 +13,7 @@ def PohodRead {=
 		extraFileLinks: null
 		partyList: null
 		partyNav: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}" data-fir-module="{{moduleName}}">
 		<input type="hidden" data-fir-opts="{=firScopeOptsEnc fields: ['partyList']}"/>
 		<h2>Данные похода</h2>

@@ -2,12 +2,12 @@ expr {=
 from fir.controls.utils import cls, firScopeOptsEnc;
 from mkk.GeneralTemplate.MainMenu.UserMenuBtn import UserMenuBtn;
 def MainMenu {=
-	def.kv 
+	var 
 		moduleName: 'mkk/GeneralTemplate/MainMenu/MainMenu'
 		instanceName: 'siteMainMenu'
 		cssBaseClass: 'mkk-MainMenu'
 		authRedirectURI: null;
-	def.body {*
+	do {*
 	<div class="{=cls 'block'}">
 		<div class="{=cls 'menuBar'}">
 			<div class="{=cls 'bgLeft'}"></div>
