@@ -1,16 +1,12 @@
 module mkk.main.index;
 import mkk.main.devkit;
 
-shared static this() {
-	MainService.pageRouter.joinWebFormAPI!(getIndex)("/api/index");
-	MainService.pageRouter.joinWebFormAPI!(generalTemplateParams)("/api/generalTemplate/params");
-}
-
-import std.typecons: Tuple;
-Tuple!(IBaseRecordSet, `pohodList`) getIndex()
+shared static this()
 {
-	import mkk.main.pohod.list: recentPohodList;
-	return typeof(return)(recentPohodList());
+	MainService.JSON_RPCRouter
+		.join!(generalTemplateParams)(`generalTemplate.params`);
+
+	MainService.pageRouter.joinWebFormAPI!(generalTemplateParams)("/api/generalTemplate/params");
 }
 
 import std.json: JSONValue;

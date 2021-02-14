@@ -1,6 +1,5 @@
 module mkk.main.main;
 
-import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
 import mkk.common.service: Service;
 
 // Подключение разделов сервиса
@@ -31,6 +30,8 @@ import mkk.main.init_history_data;
 
 void main(string[] progArgs)
 {
+	import webtank.net.server.worker: parseWorkerOptsFromCmd, WorkerOpts, runServer;
+
 	WorkerOpts opts;
 	opts.port = 8083;
 	parseWorkerOptsFromCmd(progArgs, opts);

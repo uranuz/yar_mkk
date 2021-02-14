@@ -5,7 +5,7 @@ import mkk.main.devkit;
 import mkk.main.service;
 
 import webtank.security.auth.core.by_password: authByPassword;
-import webtank.ivy.main_service: MainServiceContext;
+import webtank.ivy.service.main: MainServiceContext;
 
 shared static this()
 {

@@ -1,11 +1,10 @@
 module mkk.main.service;
 
-import webtank.ivy.main_service: IvyMainService;
+import webtank.ivy.service.main: IvyMainService;
 import mkk.common.service: Service;
 
 shared static this()
 {
-	import webtank.ivy.main_service: IvyMainService;
 	Service(new IvyMainService("yarMKKMain"));
 }
 

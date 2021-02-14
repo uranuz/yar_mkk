@@ -2,7 +2,7 @@ module mkk.main.user.settings;
 
 import mkk.main.devkit;
 import webtank.security.auth.core.change_password: changeUserPassword;
-import webtank.ivy.main_service: MainServiceContext;
+import webtank.ivy.service.main: MainServiceContext;
 
 
 shared static this()

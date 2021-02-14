@@ -12,7 +12,7 @@ import mkk.main.tourist.read: readTourist;
 
 import webtank.security.auth.core.register_user: registerUser, addUserRoles, RegUserResult;
 import webtank.security.auth.core.consts: emailConfirmDaysLimit, minLoginLength, minPasswordLength;
-import webtank.ivy.main_service: MainServiceContext;
+import webtank.ivy.service.main: MainServiceContext;
 
 shared static this()
 {
