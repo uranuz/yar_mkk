@@ -193,9 +193,9 @@ del_parts as(
 	left join inp
 		on
 			inp.num = php.tourist_num
-			and
-			php.pohod_num = $2::integer
 	where
+		php.pohod_num = $2::integer
+		and
 		inp.num is null -- Записи для удаления, которых нет во вводе, но есть в базе
 ),
 deleted as(
