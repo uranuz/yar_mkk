@@ -15,8 +15,8 @@
 				"handle SIGUSR2 noprint",
 				"dir /usr/include/dmd/druntime/import/",
 				"dir /usr/include/dmd/phobos/",
-				"dir /home/uranuz/sources/webtank/src/",
-				"dir /home/uranuz/sources/ivy/src/",
+				"dir /home/uranuz/projects/yar_mkk/webtank/src/",
+				"dir /home/uranuz/projects/yar_mkk/ivy/src/",
 				"dir ${workspaceRoot}/src/"
 			],
 			"arguments": "--DRT-trapExceptions=0 --DRT-gcopt=parallel:1 --serverType=plain"
@@ -32,8 +32,8 @@
 				"handle SIGUSR2 noprint",
 				"dir /usr/include/dmd/druntime/import/",
 				"dir /usr/include/dmd/phobos/",
-				"dir /home/uranuz/sources/webtank/src/",
-				"dir /home/uranuz/sources/ivy/src/",
+				"dir /home/uranuz/projects/yar_mkk/webtank/src/",
+				"dir /home/uranuz/projects/yar_mkk/ivy/src/",
 				"dir ${workspaceRoot}/src/"
 			],
 			"arguments": "--DRT-trapExceptions=0 --DRT-gcopt=parallel:1"

@@ -2,12 +2,12 @@ II. УСТАНОВКА СИСТЕМНЫХ ТРЕБОВАНИЙ
 	1. Скрипт установки системных требований лежит в самом репозитории МКК.
 		Для его скачивания установим систему контроля версий mercurual (hg). Заодно и гит поставим тоже...
 		sudo apt -y install mercurial git
-	2. Скачиваем репозиторий МКК в папку ~/sources/yar_mkk
-		cd ~ && mkdir sources && cd sources
+	2. Скачиваем репозиторий МКК в папку ~/projects/yar_mkk/yar_mkk
+		cd ~ && mkdir projects/yar_mkk && cd projects/yar_mkk
 
 		hg clone https://bitbucket.org/uranuz/yar_mkk
 	3. Нужно переключиться на ветку той версии, которую разворачиваем
-		cd ~/sources/yar_mkk
+		cd ~/projects/yar_mkk/yar_mkk
 
 		git checkout v0.5
 	4. Поскольку скрипт написан на языке D, то нужен компилятор языка. Можно скачать последнюю версию пакета.
@@ -26,7 +26,7 @@ II. УСТАНОВКА СИСТЕМНЫХ ТРЕБОВАНИЙ
 		Здесь `f` - это `fix`, а `y` - `yes`, чтобы не спрашивал подтверждения
 	5. Запускаем скрипт установки остальных зависимостей
 		Переходим в папку репозитория mkk (важно):
-		cd ~/sources/yar_mkk
+		cd ~/projects/yar_mkk/yar_mkk
 
 		Запускаем через dub компиляцию и запуск конфигурации сборки deploy_sys_req
 		dub run :deploy_sys_req

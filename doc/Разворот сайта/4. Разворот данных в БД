@@ -41,7 +41,7 @@ IV. РАЗВОРОТ ДАННЫХ В БД
 		Если забыли делайте сейчас ;-)
 		Вот...
 		Заходим в папку репозитория:
-		cd ~/sources/yar_mkk
+		cd ~/projects/yar_mkk/yar_mkk
 
 		Врубаем этот скрипт
 		dub run :deploy_db
