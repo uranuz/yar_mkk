@@ -49,8 +49,9 @@ editTourist(
 	HTTPContext ctx,
 	TouristDataToWrite record
 ) {
-	import std.meta: AliasSeq, staticMap;
-	import std.algorithm: canFind, countUntil;
+	import std.meta: AliasSeq;
+	import std.algorithm: canFind, countUntil, map;
+	import std.array: array;
 	import std.conv: text, ConvException;
 	import mkk.main.enums: sportCategory, refereeCategory;
 	import std.json: JSONValue;
@@ -92,18 +93,17 @@ select exists(
 	string[] fieldNames; // имена полей для записи
 	string[] fieldValues; // значения полей для записи
 
-	alias TouristEnums = AliasSeq!(
+	static immutable touristEnums = [
 		tuple("sportCategory", sportCategory),
 		tuple("refereeCategory", refereeCategory)
-	);
-	enum string GetFieldName(alias E) = E[0];
-	enum enumFieldNames = [staticMap!(GetFieldName, TouristEnums)];
+	];
+	static immutable string[] touristEnumNames = touristEnums.map!((it) => it[0]).array;
 
 	mixin(WalkFields!(`record`, q{
 		// Проверка данных
-		static if( enumFieldNames.canFind(fieldName) )
+		static if( touristEnumNames.canFind(fieldName) )
 		{
-			auto enumFormat = TouristEnums[enumFieldNames.countUntil(fieldName)][1];
+			auto enumFormat = touristEnums[touristEnumNames.countUntil(fieldName)][1];
 			enforce!ConvException(
 				!field.isSet || field.value in enumFormat,
 				`Выражение "` ~ field.value.text ~ `" не является значением типа "` ~ fieldName ~ `"!!!`);

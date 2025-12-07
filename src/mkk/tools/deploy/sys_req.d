@@ -12,7 +12,7 @@ import std.exception: enforce;
 import mkk.tools.deploy.common: _waitProc;
 
 static immutable PG_VERSION = `11`; // Используемая версия PostgreSQL
-static immutable NODE_JS_VERSION = `13.x`; // Используемая версия NodeJS
+static immutable NODE_JS_VERSION = `24.x`; // Используемая версия NodeJS
 
 // Путь к файлу со списком источников пакетов для PostgreSQL
 static immutable PG_SOURCES_LIST_PATH = `/etc/apt/sources.list.d/pgdg.list`;
@@ -98,7 +98,6 @@ void installNodeJS()
 	_waitProc(
 		spawnShell(`sudo apt install -y nodejs`),
 		`Собственно устанавка nodejs`);
-
 
 	aptUpdate();
 	_waitProc(

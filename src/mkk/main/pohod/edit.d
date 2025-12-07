@@ -20,8 +20,8 @@ shared static this()
 Tuple!(Optional!size_t, `pohodNum`)
 editPohod(HTTPContext ctx, PohodDataToWrite record)
 {
-	import std.meta: AliasSeq, staticMap;
-	import std.algorithm: canFind, countUntil;
+	import std.algorithm: canFind, countUntil, map;
+	import std.array: array;
 	import std.conv: text, ConvException;
 	import std.json: JSONValue;
 	import mkk.main.enums;
@@ -32,15 +32,14 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 		`Недостаточно прав для редактирования похода!`);
 	checkStructEditRights(record, ctx); // Проверка прав на изменение полей
 
-	alias PohodEnums = AliasSeq!(
+	static immutable pohodEnums = [
 		tuple("claimState", claimState),
 		tuple("tourismKind", tourismKind),
 		tuple("complexity", complexity),
 		tuple("complexityElem", complexityElem),
 		tuple("progress", progress)
-	);
-	enum string GetFieldName(alias E) = E[0];
-	enum enumFieldNames = [staticMap!(GetFieldName, PohodEnums)];
+	];
+	static immutable string[] pohodEnumNames = pohodEnums.map!((it) => it[0]).array;
 
 	enforce(
 		!record.beginDate.isSet || !record.finishDate.isSet || record.beginDate.value <= record.finishDate.value,
@@ -55,9 +54,9 @@ editPohod(HTTPContext ctx, PohodDataToWrite record)
 		enum bool externField = ["extraFileLinks", "partyNums"].canFind(fieldName);
 
 		// Проверка данных на здравый смысл
-		static if( enumFieldNames.canFind(fieldName) )
+		static if( pohodEnumNames.canFind(fieldName) )
 		{
-			auto enumFormat = PohodEnums[enumFieldNames.countUntil(fieldName)][1];
+			auto enumFormat = pohodEnums[pohodEnumNames.countUntil(fieldName)][1];
 			enforce!ConvException(
 				!field.isSet || field.value in enumFormat,
 				`Выражение "` ~ field.value.text ~ `" не является значением типа "` ~ fieldName ~ `"!`);
